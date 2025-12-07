@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
+import { translateCountry } from '../utils/countryTranslations';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -106,7 +107,7 @@ export default function LandCoverPage() {
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
-          name: String(item['area'] || ''),
+          name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
           share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]

@@ -7,6 +7,7 @@ import {
   LineChart
 } from 'recharts';
 import { fetchQuery } from '../services/api';
+import { translateCountry } from '../utils/countryTranslations';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -86,7 +87,7 @@ export default function PopulationPage() {
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
-          name: String(item['area'] || ''),
+          name: translateCountry(String(item['area'] || '')),
           total: Number(item['toplam']) || 0,
           rural: Number(item['kirsal']) || 0,
           urban: Number(item['sehir']) || 0,

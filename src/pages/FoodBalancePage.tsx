@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
+import { translateCountry } from '../utils/countryTranslations';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -92,11 +93,12 @@ export default function FoodBalancePage() {
         WHERE b.yil='${selectedYear}' AND b.urun IN (${itemList})
         GROUP BY b.urun ORDER BY uretim DESC`;
       
-      // Ülke bazlı veri - ulke kodları ile area tablosu yok, direkt toplam
-      const countryQuery = `SELECT b.ulke, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam 
+      // Ülke bazlı veri - fao_nufus ile JOIN yaparak ülke isimlerini al
+      const countryQuery = `SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam 
         FROM fao_balans b
+        LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode
         WHERE b.yil='${selectedYear}' AND b.urun IN (${itemList})
-        GROUP BY b.ulke ORDER BY toplam DESC LIMIT 20`;
+        GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 20`;
 
       const yearlyQuery = `SELECT yil as year, 
         SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim,
@@ -131,12 +133,15 @@ export default function FoodBalancePage() {
 
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
-        const mapped = countryRes.data.map((item, index: number) => ({
-          name: `Ülke ${item['ulke']}`,
-          value: Number(item['toplam']) || 0,
-          share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
-          fill: COLORS[index % COLORS.length]
-        } as CountryDataItem));
+        const mapped = countryRes.data.map((item, index: number) => {
+          const areaName = String(item['area'] || '');
+          return {
+            name: translateCountry(areaName) || `Ülke ${item['ulke']}`,
+            value: Number(item['toplam']) || 0,
+            share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
+            fill: COLORS[index % COLORS.length]
+          } as CountryDataItem;
+        });
         setCountryData(mapped);
       }
 

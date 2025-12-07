@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
+import { translateCountry } from '../utils/countryTranslations';
 
 const COLORS = ['#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#06b6d4', '#eab308'];
 
@@ -113,7 +114,7 @@ export default function OtherAnimalProductsPage() {
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
-          name: String(item['area'] || ''),
+          name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
           share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]
