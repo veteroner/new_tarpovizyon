@@ -49,13 +49,16 @@ export default function AgriculturalEmploymentPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const countryQuery = `SELECT area, 
-        SUM(CAST(total_v AS DECIMAL(20,2))) as toplam,
-        SUM(CAST(male_v AS DECIMAL(20,2))) as erkek,
-        SUM(CAST(female_v AS DECIMAL(20,2))) as kadin
-        FROM fao_tarim_istihdam 
-        WHERE year='${selectedYear}'
-        GROUP BY area ORDER BY toplam DESC LIMIT 25`;
+      // fao_tarim_istihdam tablosunda area yok, sadece areacode var
+      // fao_nufus tablosundan area isimlerini JOIN ile alıyoruz
+      const countryQuery = `SELECT n.area, 
+        SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam,
+        SUM(CAST(e.male_v AS DECIMAL(20,2))) as erkek,
+        SUM(CAST(e.female_v AS DECIMAL(20,2))) as kadin
+        FROM fao_tarim_istihdam e
+        INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode
+        WHERE e.year='${selectedYear}'
+        GROUP BY n.area ORDER BY toplam DESC LIMIT 25`;
 
       const yearlyQuery = `SELECT year, 
         SUM(CAST(total_v AS DECIMAL(20,2))) as toplam,

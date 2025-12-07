@@ -27,14 +27,15 @@ interface CountryDataItem {
 }
 
 const LAND_USE_ITEMS = [
-  { id: 'Agricultural land', name: 'Agricultural land', nameTR: 'Tarım Arazisi' },
-  { id: 'Arable land', name: 'Arable land', nameTR: 'İşlenebilir Arazi' },
-  { id: 'Cropland', name: 'Cropland', nameTR: 'Ekili Alan' },
-  { id: 'Permanent crops', name: 'Permanent crops', nameTR: 'Çok Yıllık Ürün Alanı' },
-  { id: 'Permanent meadows and pastures', name: 'Permanent meadows and pastures', nameTR: 'Çayır-Mera' },
-  { id: 'Forest land', name: 'Forest land', nameTR: 'Ormanlık Alan' },
-  { id: 'Temporary fallow', name: 'Temporary fallow', nameTR: 'Nadas Alanı' },
-  { id: 'Land area equipped for irrigation', name: 'Land area equipped for irrigation', nameTR: 'Sulama Altyapılı Alan' },
+  { id: 'Tarım arazisi', name: 'Agricultural land', nameTR: 'Tarım Arazisi' },
+  { id: 'İşlenebilir arazi', name: 'Arable land', nameTR: 'İşlenebilir Arazi' },
+  { id: 'Ekili alan', name: 'Cropland', nameTR: 'Ekili Alan' },
+  { id: 'Çok yıllık ürün alanı', name: 'Permanent crops', nameTR: 'Çok Yıllık Ürün' },
+  { id: 'Çayır-Mera', name: 'Meadows', nameTR: 'Çayır-Mera' },
+  { id: 'Ormanlık alan', name: 'Forest land', nameTR: 'Ormanlık Alan' },
+  { id: 'Nadas alanı', name: 'Fallow', nameTR: 'Nadas Alanı' },
+  { id: 'Sulama altyapısına sahip kara alanı', name: 'Irrigation', nameTR: 'Sulama Altyapılı' },
+  { id: 'Tarım', name: 'Agriculture', nameTR: 'Tarım' },
 ];
 
 function formatArea(value: number): string {
@@ -51,9 +52,9 @@ function formatAreaShort(value: number): string {
 
 export default function LandUsePage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([
-    'Agricultural land',
-    'Forest land',
-    'Permanent meadows and pastures'
+    'Tarım arazisi',
+    'Ormanlık alan',
+    'Çayır-Mera'
   ]);
   const [selectedYear, setSelectedYear] = useState('2021');
   const [loading, setLoading] = useState(true);
