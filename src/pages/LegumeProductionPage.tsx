@@ -100,6 +100,7 @@ export default function LegumeProductionPage() {
           FROM fao_uretim f
           LEFT JOIN fao_nufus n ON f.ulkekod = n.areacode
           WHERE f.urunkod = ${selectedProduct} AND f.yilkod = ${selectedYear}
+          AND f.ulkekod NOT IN ('5000', '5100', '5200', '5300', '5400', '5500')
           GROUP BY f.ulkekod, n.area
           ORDER BY toplam DESC
           LIMIT 15
