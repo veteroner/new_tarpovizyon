@@ -67,7 +67,7 @@ export default function FiberCropPage() {
   const scatterData = productData.map((item, index) => ({ x: index + 1, y: item.value / 1000000, z: item.value / 1000000, name: item.name }));
 
   return (
-    <div className="main-content">
+    <div>
       <div className="page-header">
         <h1 className="page-title">🧵 Lifli Bitki Üretimi</h1>
         <p className="page-subtitle">Dünya lifli bitki üretim değerleri ve istatistikleri (2021)</p>
