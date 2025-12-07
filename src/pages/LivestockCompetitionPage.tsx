@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Beef, Globe, Scale, Target } from 'lucide-react';
+import { translateCountry } from '../utils/countryTranslations';
 import {
   BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -202,7 +203,7 @@ export function LivestockCompetitionPage() {
           yumurta: parseFloat(String(d.yumurta ?? 0)) || 0,
         })),
         topCompetitors: (topCompetitorsRes.data || []).map((d: Record<string, string | number>) => ({
-          ulke: String(d.ulke || 'Bilinmiyor'),
+          ulke: translateCountry(String(d.ulke || 'Bilinmiyor')),
           total: parseFloat(String(d.total ?? 0)) || 0
         })),
         turkeyShare,

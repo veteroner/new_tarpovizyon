@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { TrendingDown, FileText, Calculator } from 'lucide-react';
+import { translateCountry } from '../utils/countryTranslations';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -96,7 +97,7 @@ export function ImportPage() {
           <h3 className="chart-title">En Çok İthalat Yapılan Ülkeler</h3>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data?.topCountries.map(c => ({
-              name: c.ulke?.substring(0, 12) || 'Bilinmiyor',
+              name: translateCountry(c.ulke || '').substring(0, 15) || 'Bilinmiyor',
               value: parseFloat(String(c.toplam)) / 1e9,
             }))}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -117,7 +118,7 @@ export function ImportPage() {
             <PieChart>
               <Pie
                 data={data?.topCountries.slice(0, 6).map(c => ({
-                  name: c.ulke?.substring(0, 10) || 'Diğer',
+                  name: translateCountry(c.ulke || '').substring(0, 12) || 'Diğer',
                   value: parseFloat(String(c.toplam)),
                 }))}
                 cx="50%"
@@ -148,7 +149,7 @@ export function ImportPage() {
           <div key={index} className="table-row">
             <div className="table-rank orange">{index + 1}</div>
             <div className="table-info">
-              <div className="table-name">{country.ulke}</div>
+              <div className="table-name">{translateCountry(country.ulke || '')}</div>
               <div className="table-subtext">{formatNumber(country.cnt)} işlem</div>
             </div>
             <div className="table-value orange">{formatMoney(parseFloat(String(country.toplam)))}</div>
