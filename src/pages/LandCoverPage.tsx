@@ -197,7 +197,7 @@ export default function LandCoverPage() {
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">ÜLKE SAYISI</span><div className="kpi-icon purple">🌍</div></div>
               <div className="kpi-value">{countryData.length}</div>
-              <div className="kpi-subtitle">Top ülkeler</div>
+              <div className="kpi-subtitle">İlk 15 ülke</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">EN BÜYÜK</span><div className="kpi-icon orange">🏆</div></div>

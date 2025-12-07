@@ -236,7 +236,7 @@ export default function MilkProductionPage() {
                 <div className="kpi-icon purple">🌍</div>
               </div>
               <div className="kpi-value">{countryCount}</div>
-              <div className="kpi-subtitle">Top ülkeler</div>
+              <div className="kpi-subtitle">İlk 15 ülke</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">

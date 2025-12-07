@@ -132,7 +132,7 @@ export function OverviewPage() {
       {/* Charts */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">İhracat vs İthalat</h3>
+          <h3 className="chart-title">İhracat - İthalat</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={[
               { name: 'İhracat', value: (data?.totalExport || 0) / 1e9 },

@@ -323,7 +323,7 @@ export function LivestockCompetitionPage() {
 
         {/* Radar Comparison */}
         <div className="chart-card">
-          <h3 className="chart-title">📈 Türkiye vs Dünya Ortalaması</h3>
+          <h3 className="chart-title">📈 Türkiye - Dünya Ortalaması</h3>
           <ResponsiveContainer width="100%" height={400}>
             <RadarChart data={data?.radarData}>
               <PolarGrid stroke="rgba(255,255,255,0.1)" />
