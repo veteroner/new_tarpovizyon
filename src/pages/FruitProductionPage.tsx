@@ -87,7 +87,7 @@ export default function FruitProductionPage() {
         const sql = `SELECT DISTINCT yilkod FROM fao_uretim WHERE urunkod IN (${productIds}) ORDER BY yilkod DESC`
         const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
         const data = await response.json()
-        if (data.success && data.data) {
+        if (data.data) {
           const yearList = data.data.map((row: { yilkod: number }) => row.yilkod.toString())
           setYears(yearList)
           if (yearList.length > 0) {
@@ -118,7 +118,7 @@ export default function FruitProductionPage() {
         const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
         const data = await response.json()
         
-        if (data.success && data.data) {
+        if (data.data) {
           const formattedData = data.data.map((row: { country_name: string; ulkekod: number; toplam: string }) => ({
             country: translateCountry(row.country_name || `Ülke ${row.ulkekod}`),
             production: parseFloat(row.toplam) || 0,
@@ -151,7 +151,7 @@ export default function FruitProductionPage() {
         const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
         const data = await response.json()
         
-        if (data.success && data.data) {
+        if (data.data) {
           const formattedData = data.data.map((row: { yilkod: number; toplam: string }) => ({
             year: parseInt(row.yilkod.toString()),
             production: parseFloat(row.toplam) || 0
@@ -180,7 +180,7 @@ export default function FruitProductionPage() {
         const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
         const data = await response.json()
         
-        if (data.success && data.data) {
+        if (data.data) {
           const formattedData = data.data.map((row: { urunkod: number; toplam: string }) => {
             const product = PRODUCTS.find(p => p.id === row.urunkod.toString())
             return {
