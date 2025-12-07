@@ -31,18 +31,18 @@ interface CountryDataItem {
 }
 
 const FOOD_ITEMS = [
-  { id: 'Buğday ve ürünleri', name: 'Wheat', nameTR: 'Buğday' },
-  { id: 'Pirinç ve ürünleri', name: 'Rice', nameTR: 'Pirinç' },
-  { id: 'Mısır ve ürünleri', name: 'Corn', nameTR: 'Mısır' },
-  { id: 'Şeker (ham eşdeğeri)', name: 'Sugar', nameTR: 'Şeker' },
-  { id: 'Sığır Eti', name: 'Beef', nameTR: 'Sığır Eti' },
-  { id: 'Domuz eti', name: 'Pork', nameTR: 'Domuz Eti' },
-  { id: 'Kümes hayvanları eti', name: 'Poultry', nameTR: 'Kümes Hayvanı' },
-  { id: 'Süt - İnek sütü hariç', name: 'Milk', nameTR: 'Süt' },
-  { id: 'Yumurta', name: 'Eggs', nameTR: 'Yumurta' },
-  { id: 'Balık, Deniz Ürünleri', name: 'Seafood', nameTR: 'Deniz Ürünleri' },
-  { id: 'Sebzeler', name: 'Vegetables', nameTR: 'Sebzeler' },
-  { id: 'Meyveler - Şarap hariç', name: 'Fruits', nameTR: 'Meyveler' },
+  { id: '2511', name: 'Wheat', nameTR: 'Buğday' },
+  { id: '2514', name: 'Maize', nameTR: 'Mısır' },
+  { id: '2515', name: 'Rice', nameTR: 'Pirinç' },
+  { id: '2513', name: 'Barley', nameTR: 'Arpa' },
+  { id: '2536', name: 'Sugar cane', nameTR: 'Şeker Kamışı' },
+  { id: '2537', name: 'Sugar beet', nameTR: 'Şeker Pancarı' },
+  { id: '2731', name: 'Bovine Meat', nameTR: 'Sığır Eti' },
+  { id: '2733', name: 'Pigmeat', nameTR: 'Domuz Eti' },
+  { id: '2734', name: 'Poultry Meat', nameTR: 'Kümes Hayvanı' },
+  { id: '2848', name: 'Milk', nameTR: 'Süt' },
+  { id: '2744', name: 'Eggs', nameTR: 'Yumurta' },
+  { id: '2532', name: 'Cassava', nameTR: 'Manyok' },
 ];
 
 function formatTon(value: number): string {
@@ -60,8 +60,8 @@ function formatShort(value: number): string {
 }
 
 export default function FoodBalancePage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>(['Buğday ve ürünleri', 'Pirinç ve ürünleri', 'Mısır ve ürünleri']);
-  const [selectedYear, setSelectedYear] = useState('2021');
+  const [selectedItems, setSelectedItems] = useState<string[]>(['2511', '2514', '2515']);
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
   const [foodData, setFoodData] = useState<DataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
@@ -79,30 +79,33 @@ export default function FoodBalancePage() {
     
     setLoading(true);
     try {
-      const itemList = selectedItems.map(p => `'${p}'`).join(',');
+      const itemList = selectedItems.join(',');
       
-      const foodQuery = `SELECT item_tr, 
-        SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim,
-        SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat,
-        SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat,
-        SUM(CAST(gida_v AS DECIMAL(20,2))) as gida,
-        AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as kalori
-        FROM fao_balans 
-        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
-        GROUP BY item_tr ORDER BY uretim DESC`;
+      // Ürün bazlı veri - urun kodları ile
+      const foodQuery = `SELECT b.urun, i.item as item_name,
+        SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as uretim,
+        SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat,
+        SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat,
+        SUM(CAST(b.gida_v AS DECIMAL(20,2))) as gida,
+        AVG(CAST(b.kbgtcal_v AS DECIMAL(10,2))) as kalori
+        FROM fao_balans b
+        LEFT JOIN item_all i ON b.urun = i.itemcode AND i.domain_code='FBS'
+        WHERE b.yil='${selectedYear}' AND b.urun IN (${itemList})
+        GROUP BY b.urun, i.item ORDER BY uretim DESC`;
       
-      const countryQuery = `SELECT area, SUM(CAST(uretim_v AS DECIMAL(20,2))) as toplam 
-        FROM fao_balans 
-        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
-        GROUP BY area ORDER BY toplam DESC LIMIT 20`;
+      // Ülke bazlı veri - ulke kodları ile area tablosu yok, direkt toplam
+      const countryQuery = `SELECT b.ulke, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam 
+        FROM fao_balans b
+        WHERE b.yil='${selectedYear}' AND b.urun IN (${itemList})
+        GROUP BY b.ulke ORDER BY toplam DESC LIMIT 20`;
 
-      const yearlyQuery = `SELECT year, 
+      const yearlyQuery = `SELECT yil as year, 
         SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim,
         SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat,
         SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat
         FROM fao_balans 
-        WHERE item_tr IN (${itemList})
-        GROUP BY year ORDER BY year`;
+        WHERE urun IN (${itemList})
+        GROUP BY yil ORDER BY yil`;
 
       const [foodRes, countryRes, yearlyRes] = await Promise.all([
         fetchQuery(foodQuery),
@@ -111,22 +114,26 @@ export default function FoodBalancePage() {
       ]);
 
       if (foodRes.data) {
-        const mapped = foodRes.data.map((item, index: number) => ({
-          name: String(item['item_tr'] || ''),
-          production: Number(item['uretim']) || 0,
-          imports: Number(item['ithalat']) || 0,
-          exports: Number(item['ihracat']) || 0,
-          food: Number(item['gida']) || 0,
-          calories: Number(item['kalori']) || 0,
-          fill: COLORS[index % COLORS.length]
-        } as DataItem));
+        const mapped = foodRes.data.map((item, index: number) => {
+          const urunKod = String(item['urun'] || '');
+          const product = FOOD_ITEMS.find(p => p.id === urunKod);
+          return {
+            name: product?.nameTR || String(item['item_name'] || urunKod),
+            production: Number(item['uretim']) || 0,
+            imports: Number(item['ithalat']) || 0,
+            exports: Number(item['ihracat']) || 0,
+            food: Number(item['gida']) || 0,
+            calories: Number(item['kalori']) || 0,
+            fill: COLORS[index % COLORS.length]
+          } as DataItem;
+        });
         setFoodData(mapped);
       }
 
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
-          name: String(item['area'] || ''),
+          name: `Ülke ${item['ulke']}`,
           value: Number(item['toplam']) || 0,
           share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]
@@ -200,11 +207,11 @@ export default function FoodBalancePage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+            <option value="2022">2022</option>
             <option value="2021">2021</option>
             <option value="2020">2020</option>
             <option value="2019">2019</option>
             <option value="2018">2018</option>
-            <option value="2017">2017</option>
           </select>
         </div>
       </div>

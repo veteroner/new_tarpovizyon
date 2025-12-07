@@ -28,14 +28,14 @@ interface CountryDataItem {
 
 const LAND_COVER_ITEMS = [
   { id: 'Ağaç örtülü alanlar', name: 'Tree Cover', nameTR: 'Ağaç Örtülü' },
-  { id: 'Çayırlar', name: 'Grasslands', nameTR: 'Çayırlar' },
-  { id: 'Çıplak alanlar', name: 'Barren', nameTR: 'Çıplak Alanlar' },
-  { id: 'Ekim alanları', name: 'Cropland', nameTR: 'Ekim Alanları' },
-  { id: 'Çalılıklar', name: 'Shrubs', nameTR: 'Çalılıklar' },
-  { id: 'Kentsel alanlar', name: 'Urban', nameTR: 'Kentsel' },
-  { id: 'Herbaceous wetlands', name: 'Wetlands', nameTR: 'Sulak Alanlar' },
-  { id: 'Sparse vegetation', name: 'Sparse Veg', nameTR: 'Seyrek Bitki' },
-  { id: 'Mangroves', name: 'Mangroves', nameTR: 'Mangrovlar' },
+  { id: 'Çayır', name: 'Grasslands', nameTR: 'Çayır' },
+  { id: 'Karasal çorak arazi', name: 'Barren', nameTR: 'Çorak Arazi' },
+  { id: 'Otsu bitkiler', name: 'Herbaceous', nameTR: 'Otsu Bitkiler' },
+  { id: 'Çalılarla kaplı alanlar', name: 'Shrubs', nameTR: 'Çalılıklar' },
+  { id: 'Yapay yüzeyler (kentsel ve ilgili alanlar dahil)', name: 'Urban', nameTR: 'Kentsel' },
+  { id: 'Seyrek doğal bitki örtüsü alanları', name: 'Sparse Veg', nameTR: 'Seyrek Bitki' },
+  { id: 'Mangrovlar', name: 'Mangroves', nameTR: 'Mangrovlar' },
+  { id: 'Odunsu bitkiler', name: 'Woody', nameTR: 'Odunsu Bitkiler' },
 ];
 
 function formatArea(value: number): string {
@@ -52,7 +52,7 @@ function formatShort(value: number): string {
 }
 
 export default function LandCoverPage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>(['Ağaç örtülü alanlar', 'Çayırlar', 'Ekim alanları', 'Kentsel alanlar']);
+  const [selectedItems, setSelectedItems] = useState<string[]>(['Ağaç örtülü alanlar', 'Çayır', 'Otsu bitkiler', 'Yapay yüzeyler (kentsel ve ilgili alanlar dahil)']);
   const [selectedYear, setSelectedYear] = useState('2020');
   const [loading, setLoading] = useState(true);
   const [coverData, setCoverData] = useState<DataItem[]>([]);

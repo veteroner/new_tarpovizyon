@@ -27,13 +27,11 @@ interface CountryDataItem {
 }
 
 const PESTICIDE_ITEMS = [
-  { id: 'Pestisitler (toplam)', name: 'Total', nameTR: 'Pestisitler (toplam)' },
+  { id: 'Pestisitler', name: 'Total', nameTR: 'Pestisitler' },
   { id: 'Herbisitler', name: 'Herbicides', nameTR: 'Herbisitler' },
   { id: 'İnsektisitler', name: 'Insecticides', nameTR: 'İnsektisitler' },
-  { id: 'Fungisitler ve bakterisitler', name: 'Fungicides', nameTR: 'Fungisitler' },
+  { id: 'Fungisitler ve Bakterisitler', name: 'Fungicides', nameTR: 'Fungisitler' },
   { id: 'Rodentisitler', name: 'Rodenticides', nameTR: 'Rodentisitler' },
-  { id: 'Dezenfektanlar', name: 'Disinfectants', nameTR: 'Dezenfektanlar' },
-  { id: 'Diğer pestisitler', name: 'Other', nameTR: 'Diğer Pestisitler' },
 ];
 
 const ELEMENT_OPTIONS = [
@@ -62,7 +60,7 @@ function getUnit(element: string): string {
 }
 
 export default function PesticidePage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>(['Pestisitler (toplam)', 'Herbisitler', 'İnsektisitler']);
+  const [selectedItems, setSelectedItems] = useState<string[]>(['Pestisitler', 'Herbisitler', 'İnsektisitler']);
   const [selectedYear, setSelectedYear] = useState('2021');
   const [selectedElement, setSelectedElement] = useState('Tarımsal Kullanım');
   const [loading, setLoading] = useState(true);
