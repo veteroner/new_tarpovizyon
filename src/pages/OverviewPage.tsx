@@ -40,10 +40,10 @@ export function OverviewPage() {
           fetchQuery(queries.monthlyTrend),
         ]);
 
-        const total = parseFloat(totalRes.data?.[0]?.toplam) || 0;
-        const exp = parseFloat(exportRes.data?.[0]?.toplam) || 0;
-        const imp = parseFloat(importRes.data?.[0]?.toplam) || 0;
-        const count = parseInt(totalRes.data?.[0]?.cnt) || 0;
+        const total = parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0;
+        const exp = parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0;
+        const imp = parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0;
+        const count = parseInt(String(totalRes.data?.[0]?.cnt ?? 0)) || 0;
 
         setData({
           totalTrade: total,
@@ -51,14 +51,14 @@ export function OverviewPage() {
           totalImport: imp,
           balance: exp - imp,
           transactionCount: count,
-          flowDistribution: (flowRes.data || []).map((d: { flowCode: string; toplam: string }) => ({
-            name: FLOW_NAMES[d.flowCode] || d.flowCode,
-            value: parseFloat(d.toplam) || 0,
+          flowDistribution: (flowRes.data || []).map((d) => ({
+            name: FLOW_NAMES[String(d.flowCode)] || String(d.flowCode),
+            value: parseFloat(String(d.toplam)) || 0,
           })),
-          monthlyTrend: (monthlyRes.data || []).map((d: { ay: string; ihracat: string; ithalat: string }) => ({
-            ay: MONTHS[parseInt(d.ay) - 1] || d.ay,
-            ihracat: parseFloat(d.ihracat) / 1e9 || 0,
-            ithalat: parseFloat(d.ithalat) / 1e9 || 0,
+          monthlyTrend: (monthlyRes.data || []).map((d) => ({
+            ay: MONTHS[parseInt(String(d.ay)) - 1] || String(d.ay),
+            ihracat: parseFloat(String(d.ihracat)) / 1e9 || 0,
+            ithalat: parseFloat(String(d.ithalat)) / 1e9 || 0,
           })),
         });
       } catch (error) {

@@ -5,7 +5,7 @@ const API_KEY = 'REDACTED_DASHBOARD_KEY';
 
 export interface QueryResult {
   success?: boolean;
-  data?: any[];
+  data?: Record<string, string | number>[];
   error?: string;
 }
 

@@ -34,8 +34,8 @@ export function TransportPage() {
     async function loadData() {
       try {
         const transportRes = await fetchQuery(queries.transportModes);
-        const modes = transportRes.data || [];
-        const total = modes.reduce((sum: number, m: { toplam: string }) => sum + (parseFloat(m.toplam) || 0), 0);
+        const modes = (transportRes.data || []) as { tasimaSekli: string; toplam: number; cnt: number }[];
+        const total = modes.reduce((sum, m) => sum + (parseFloat(String(m.toplam)) || 0), 0);
 
         setData({
           transportModes: modes,
