@@ -206,9 +206,27 @@ body {
 /* Professional KPI Cards */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-bottom: 32px;
+}
+
+@media (max-width: 1400px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kpi-card.large {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .kpi-card.large {
+    grid-column: span 1;
+  }
 }
 
 .kpi-card {
@@ -228,7 +246,6 @@ body {
 
 .kpi-card.large {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  grid-column: span 2;
   color: white;
   border: none;
   box-shadow: var(--shadow-lg), 0 4px 20px rgba(59, 130, 246, 0.3);
@@ -318,6 +335,12 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 32px;
+}
+
+@media (max-width: 1200px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-card {
