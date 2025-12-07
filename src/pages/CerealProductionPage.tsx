@@ -12,6 +12,22 @@ import ProductSelector from '../components/ProductSelector';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
 
+interface ProductDataItem {
+  [key: string]: string | number;
+  name: string;
+  nameEN: string;
+  value: number;
+  fill: string;
+}
+
+interface CountryDataItem {
+  [key: string]: string | number;
+  name: string;
+  value: number;
+  share: string;
+  fill: string;
+}
+
 const CEREAL_PRODUCTS = [
   { id: 'Rice', name: 'Rice', nameTR: 'Pirinç' },
   { id: 'Wheat', name: 'Wheat', nameTR: 'Buğday' },
@@ -28,8 +44,8 @@ export default function CerealProductionPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>(['Rice', 'Wheat', 'Maize (corn)']);
   const [unit, setUnit] = useState('1000 USD');
   const [loading, setLoading] = useState(true);
-  const [productData, setProductData] = useState<any[]>([]);
-  const [countryData, setCountryData] = useState<any[]>([]);
+  const [productData, setProductData] = useState<ProductDataItem[]>([]);
+  const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
   const [sortBy, setSortBy] = useState<'value' | 'name'>('value');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -60,26 +76,27 @@ export default function CerealProductionPage() {
       ]);
 
       if (productRes.data) {
-        const mapped = productRes.data.map((item: any, index: number) => {
-          const product = CEREAL_PRODUCTS.find(p => p.id === item.ürün);
+        const mapped = productRes.data.map((item, index: number) => {
+          const urun = String(item['ürün'] || '');
+          const product = CEREAL_PRODUCTS.find(p => p.id === urun);
           return {
-            name: product?.nameTR || item.ürün,
-            nameEN: item.ürün,
-            value: Number(item.toplam) || 0,
+            name: product?.nameTR || urun,
+            nameEN: urun,
+            value: Number(item['toplam']) || 0,
             fill: COLORS[index % COLORS.length]
-          };
+          } as ProductDataItem;
         });
         setProductData(mapped);
       }
 
       if (countryRes.data) {
-        const total = countryRes.data.reduce((sum: number, item: any) => sum + (Number(item.toplam) || 0), 0);
-        const mapped = countryRes.data.map((item: any, index: number) => ({
-          name: item.ülke,
-          value: Number(item.toplam) || 0,
-          share: ((Number(item.toplam) || 0) / total * 100).toFixed(1),
+        const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
+        const mapped = countryRes.data.map((item, index: number) => ({
+          name: String(item['ülke'] || ''),
+          value: Number(item['toplam']) || 0,
+          share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]
-        }));
+        } as CountryDataItem));
         setCountryData(mapped);
       }
     } catch (error) {
@@ -174,7 +191,6 @@ export default function CerealProductionPage() {
           <div className="kpi-grid">
             <div className="kpi-card large">
               <div className="kpi-header">
-                <div className="kpi-icon blue">💰</div>
                 <span className="kpi-title">TOPLAM DEĞER</span>
               </div>
               <div className="kpi-value">{formatMoney(totalValue * 1000)}</div>
@@ -182,24 +198,24 @@ export default function CerealProductionPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <div className="kpi-icon green">📊</div>
                 <span className="kpi-title">ÜRÜN SAYISI</span>
+                <div className="kpi-icon green">📊</div>
               </div>
               <div className="kpi-value">{productData.length}</div>
               <div className="kpi-subtitle">Aktif ürün</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <div className="kpi-icon purple">🌍</div>
                 <span className="kpi-title">ÜRETİCİ ÜLKE</span>
+                <div className="kpi-icon purple">🌍</div>
               </div>
               <div className="kpi-value">{countryCount}</div>
               <div className="kpi-subtitle">Top ülkeler</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <div className="kpi-icon orange">🏆</div>
                 <span className="kpi-title">LİDER ÜLKE</span>
+                <div className="kpi-icon orange">🏆</div>
               </div>
               <div className="kpi-value" style={{fontSize: '1.2rem'}}>{topCountry}</div>
               <div className="kpi-subtitle">En yüksek üretim</div>
@@ -261,7 +277,7 @@ export default function CerealProductionPage() {
                   dataKey="value"
                   aspectRatio={4/3}
                   stroke="var(--bg-card)"
-                  content={({ x, y, width, height, name, value }: any) => (
+                  content={({ x, y, width, height, name, value }: { x: number; y: number; width: number; height: number; name: string; value: number }) => (
                     <g>
                       <rect
                         x={x}

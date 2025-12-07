@@ -89,10 +89,10 @@ export default function FiberCropPage() {
       {loading ? (<div className="loading"><div className="loading-spinner"></div><p>Veriler yükleniyor...</p></div>) : (
         <>
           <div className="kpi-grid">
-            <div className="kpi-card large"><div className="kpi-header"><div className="kpi-icon" style={{background: 'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)'}}>💰</div><span className="kpi-title">TOPLAM DEĞER</span></div><div className="kpi-value">{formatMoney(totalValue * 1000)}</div><div className="kpi-subtitle">{selectedProducts.length} ürün seçili</div></div>
-            <div className="kpi-card"><div className="kpi-header"><div className="kpi-icon green">📊</div><span className="kpi-title">ÜRÜN SAYISI</span></div><div className="kpi-value">{productData.length}</div><div className="kpi-subtitle">Aktif ürün</div></div>
-            <div className="kpi-card"><div className="kpi-header"><div className="kpi-icon blue">🌍</div><span className="kpi-title">ÜRETİCİ ÜLKE</span></div><div className="kpi-value">{countryData.length}</div><div className="kpi-subtitle">Top ülkeler</div></div>
-            <div className="kpi-card"><div className="kpi-header"><div className="kpi-icon purple">🏆</div><span className="kpi-title">LİDER ÜLKE</span></div><div className="kpi-value" style={{fontSize: '1.2rem'}}>{topCountry}</div><div className="kpi-subtitle">En yüksek üretim</div></div>
+            <div className="kpi-card large"><div className="kpi-header"><span className="kpi-title">TOPLAM DEĞER</span></div><div className="kpi-value">{formatMoney(totalValue * 1000)}</div><div className="kpi-subtitle">{selectedProducts.length} ürün seçili</div></div>
+            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">ÜRÜN SAYISI</span><div className="kpi-icon green">📊</div></div><div className="kpi-value">{productData.length}</div><div className="kpi-subtitle">Aktif ürün</div></div>
+            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">ÜRETİCİ ÜLKE</span><div className="kpi-icon blue">🌍</div></div><div className="kpi-value">{countryData.length}</div><div className="kpi-subtitle">Top ülkeler</div></div>
+            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon orange">🏆</div></div><div className="kpi-value" style={{fontSize: '1.2rem'}}>{topCountry}</div><div className="kpi-subtitle">En yüksek üretim</div></div>
           </div>
 
           <div className="chart-grid">
