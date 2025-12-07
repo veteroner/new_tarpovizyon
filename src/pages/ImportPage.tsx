@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { TrendingDown, FileText, Calculator } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatMoney, formatNumber, queries } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatMoney, formatNumber, queries, addYearFilter, TRADE_YEARS } from '../services/api';
 
 const COLORS = ['#f59e0b', '#fbbf24', '#fcd34d', '#d97706', '#b45309', '#ea580c'];
 
@@ -19,29 +20,31 @@ interface ImportData {
 export function ImportPage() {
   const [data, setData] = useState<ImportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [importRes, countriesRes] = await Promise.all([
+        fetchQuery(addYearFilter(queries.totalImport, selectedYear)),
+        fetchQuery(addYearFilter(queries.topImportCountries, selectedYear)),
+      ]);
+
+      setData({
+        totalImport: parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0,
+        importCount: parseInt(String(importRes.data?.[0]?.cnt ?? 0)) || 0,
+        topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
+      });
+    } catch (error) {
+      console.error('Error loading import data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [importRes, countriesRes] = await Promise.all([
-          fetchQuery(queries.totalImport),
-          fetchQuery(queries.topImportCountries),
-        ]);
-
-        setData({
-          totalImport: parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0,
-          importCount: parseInt(String(importRes.data?.[0]?.cnt ?? 0)) || 0,
-          topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
-        });
-      } catch (error) {
-        console.error('Error loading import data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -53,6 +56,13 @@ export function ImportPage() {
         <h1 className="page-title">İthalat Analizi</h1>
         <p className="page-subtitle">İthalat verileri ve trendler</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={TRADE_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">

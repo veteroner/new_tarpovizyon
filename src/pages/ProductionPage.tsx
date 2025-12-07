@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Leaf, Grid, BarChart3 } from 'lucide-react';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatNumber, queries } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatNumber, queries, addYearFilter, PRODUCTION_YEARS } from '../services/api';
 
 const COLORS = ['#14b8a6', '#10b981', '#34d399', '#6ee7b7', '#059669', '#047857'];
 
@@ -26,35 +27,37 @@ function formatProduction(value: number): string {
 export function ProductionPage() {
   const [data, setData] = useState<ProductionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [statsRes, productsRes, yearlyRes] = await Promise.all([
+        fetchQuery(addYearFilter(queries.productionStats, selectedYear, 'production')),
+        fetchQuery(addYearFilter(queries.topProducts, selectedYear, 'production')),
+        fetchQuery(queries.yearlyProduction), // This one doesn't need year filter - it shows all years
+      ]);
+
+      const statsData = statsRes.data?.[0];
+      
+      setData({
+        stats: {
+          toplamUrun: parseInt(String(statsData?.toplamUrun ?? 0)) || 0,
+          toplamUretim: parseFloat(String(statsData?.toplamUretim ?? 0)) || 0,
+        },
+        topProducts: (productsRes.data || []) as { ad: string; miktar: number; birim: string }[],
+        yearlyProduction: (yearlyRes.data || []) as { yil: string; toplam: number }[],
+      });
+    } catch (error) {
+      console.error('Error loading production data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [statsRes, productsRes, yearlyRes] = await Promise.all([
-          fetchQuery(queries.productionStats),
-          fetchQuery(queries.topProducts),
-          fetchQuery(queries.yearlyProduction),
-        ]);
-
-        const statsData = statsRes.data?.[0];
-        
-        setData({
-          stats: {
-            toplamUrun: parseInt(String(statsData?.toplamUrun ?? 0)) || 0,
-            toplamUretim: parseFloat(String(statsData?.toplamUretim ?? 0)) || 0,
-          },
-          topProducts: (productsRes.data || []) as { ad: string; miktar: number; birim: string }[],
-          yearlyProduction: (yearlyRes.data || []) as { yil: string; toplam: number }[],
-        });
-      } catch (error) {
-        console.error('Error loading production data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -66,6 +69,13 @@ export function ProductionPage() {
         <h1 className="page-title">Tarımsal Üretim</h1>
         <p className="page-subtitle">Üretim verileri ve trendler</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={PRODUCTION_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">

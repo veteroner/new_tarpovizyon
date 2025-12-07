@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Beef, Globe, TrendingUp, BarChart3 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatNumber } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatNumber, PRODUCTION_YEARS } from '../services/api';
 
 const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#6366f1'];
 
@@ -35,98 +36,119 @@ function formatTon(value: number): string {
   return value.toFixed(0);
 }
 
+// Helper to add year filter to production queries
+function addProductionYearFilter(sql: string, year: string): string {
+  if (year === 'all') return sql;
+  const hasWhere = sql.toLowerCase().includes('where');
+  const yearCondition = `yil = '${year}'`;
+  
+  if (hasWhere) {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, `AND ${yearCondition} GROUP BY`);
+    }
+    return sql + ` AND ${yearCondition}`;
+  } else {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, `WHERE ${yearCondition} GROUP BY`);
+    }
+    return sql + ` WHERE ${yearCondition}`;
+  }
+}
+
 export function MeatProductionPage() {
   const [data, setData] = useState<MeatData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMeat] = useState('cattle');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   
   // Use variables to suppress lint warnings
   void selectedMeat;
   void formatNumber;
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Total meat production
-        const totalRes = await fetchQuery(`
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Total meat production
+      const totalRes = await fetchQuery(addProductionYearFilter(`
+        SELECT SUM(deger) as toplam 
+        FROM üretimindex 
+        WHERE (ürün LIKE '%Meat%' AND ürün NOT LIKE '%Game meat%')
+      `, selectedYear));
+
+      // Meat type distribution
+      const meatTypePromises = MEAT_TYPES.map(async (type) => {
+        const res = await fetchQuery(addProductionYearFilter(`
           SELECT SUM(deger) as toplam 
           FROM üretimindex 
-          WHERE (ürün LIKE '%Meat%' AND ürün NOT LIKE '%Game meat%')
-        `);
+          WHERE ${type.query}
+        `, selectedYear));
+        return {
+          name: type.name,
+          value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
+        };
+      });
+      const meatTypes = await Promise.all(meatTypePromises);
 
-        // Meat type distribution
-        const meatTypePromises = MEAT_TYPES.map(async (type) => {
-          const res = await fetchQuery(`
-            SELECT SUM(deger) as toplam 
-            FROM üretimindex 
-            WHERE ${type.query}
-          `);
-          return {
-            name: type.name,
-            value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
-          };
-        });
-        const meatTypes = await Promise.all(meatTypePromises);
+      // Top producing countries for selected meat
+      const topCountriesRes = await fetchQuery(addProductionYearFilter(`
+        SELECT ülke as ulke, SUM(deger) as toplam 
+        FROM üretimindex 
+        WHERE ürün LIKE '%Meat of cattle%'
+        GROUP BY ülke 
+        ORDER BY toplam DESC 
+        LIMIT 10
+      `, selectedYear));
 
-        // Top producing countries for selected meat
-        const topCountriesRes = await fetchQuery(`
-          SELECT ülke as ulke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Meat of cattle%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC 
-          LIMIT 10
-        `);
+      // Yearly trend - don't filter by year, shows all years
+      const yearlyRes = await fetchQuery(`
+        SELECT yil, SUM(deger) as toplam 
+        FROM üretimindex 
+        WHERE (ürün LIKE '%Meat%' AND ürün NOT LIKE '%Game meat%')
+        GROUP BY yil 
+        ORDER BY yil
+      `);
 
-        // Yearly trend
-        const yearlyRes = await fetchQuery(`
-          SELECT yil, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE (ürün LIKE '%Meat%' AND ürün NOT LIKE '%Game meat%')
-          GROUP BY yil 
-          ORDER BY yil
-        `);
+      // Turkey's rank
+      const turkeyRes = await fetchQuery(addProductionYearFilter(`
+        SELECT ülke, SUM(deger) as toplam 
+        FROM üretimindex 
+        WHERE ürün LIKE '%Meat of cattle%'
+        GROUP BY ülke 
+        ORDER BY toplam DESC
+      `, selectedYear));
+      
+      const turkeyData = turkeyRes.data || [];
+      const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
+        String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
+      );
 
-        // Turkey's rank
-        const turkeyRes = await fetchQuery(`
-          SELECT ülke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Meat of cattle%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC
-        `);
-        
-        const turkeyData = turkeyRes.data || [];
-        const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
-          String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
-        );
-
-        setData({
-          totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
-          meatTypeDistribution: meatTypes.filter(m => m.value > 0),
-          topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
-            ulke: String(d.ulke || 'Bilinmiyor'),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
-            yil: String(d.yil || ''),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          turkeyRank: {
-            rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
-            total: turkeyData.length,
-            value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
-          }
-        });
-      } catch (error) {
-        console.error('Error loading meat data:', error);
-      } finally {
-        setLoading(false);
-      }
+      setData({
+        totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
+        meatTypeDistribution: meatTypes.filter(m => m.value > 0),
+        topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
+          ulke: String(d.ulke || 'Bilinmiyor'),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
+          yil: String(d.yil || ''),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        turkeyRank: {
+          rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
+          total: turkeyData.length,
+          value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
+        }
+      });
+    } catch (error) {
+      console.error('Error loading meat data:', error);
+    } finally {
+      setLoading(false);
     }
+  }, [selectedYear]);
 
+  useEffect(() => {
     loadData();
-  }, [selectedMeat]);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -136,6 +158,13 @@ export function MeatProductionPage() {
         <h1 className="page-title">🥩 Et Üretimi</h1>
         <p className="page-subtitle">Dünya et üretimi verileri ve analizler</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={PRODUCTION_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">
