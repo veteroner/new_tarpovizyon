@@ -175,7 +175,7 @@ export default function PopulationPage() {
             <div className="kpi-card large">
               <div className="kpi-header"><span className="kpi-title">TOPLAM NÜFUS</span></div>
               <div className="kpi-value">{formatPop(totalPop)}</div>
-              <div className="kpi-subtitle">Top 25 ülke</div>
+              <div className="kpi-subtitle">İlk 25 ülke</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">ERKEK</span><div className="kpi-icon blue">👨</div></div>
@@ -208,7 +208,7 @@ export default function PopulationPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🏙️ Kırsal vs Kentsel</h3>
+              <h3 className="chart-title">🏙️ Kırsal - Kentsel</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={ruralUrbanData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}>
@@ -222,7 +222,7 @@ export default function PopulationPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Top 15 Ülke Nüfusu</h3>
+              <h3 className="chart-title">📊 İlk 15 Ülke Nüfusu</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={countryData.slice(0, 15)} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -236,7 +236,7 @@ export default function PopulationPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">📈 Kırsal vs Kentsel (Top 10)</h3>
+              <h3 className="chart-title">📈 Kırsal - Kentsel (İlk 10)</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -272,7 +272,7 @@ export default function PopulationPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{gridColumn: 'span 2'}}>
-              <h3 className="chart-title">👨👩 Cinsiyet Dağılımı (Top 10)</h3>
+              <h3 className="chart-title">👨👩 Cinsiyet Dağılımı (İlk 10)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

@@ -278,7 +278,7 @@ export default function FoodBalancePage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📈 Üretim vs İthalat vs İhracat</h3>
+              <h3 className="chart-title">📈 Üretim - İthalat - İhracat</h3>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={tradeBalance}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

@@ -197,7 +197,7 @@ export default function AgriculturalEmploymentPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">📊 Top 15 Ülke İstihdamı</h3>
+              <h3 className="chart-title">📊 İlk 15 Ülke İstihdamı</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={countryData.slice(0, 15)} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -212,7 +212,7 @@ export default function AgriculturalEmploymentPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📈 Erkek vs Kadın (Top 10)</h3>
+              <h3 className="chart-title">📈 Erkek - Kadın (İlk 10)</h3>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -228,7 +228,7 @@ export default function AgriculturalEmploymentPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">👨👩 Cinsiyet Dağılımı (Top 10)</h3>
+              <h3 className="chart-title">👨👩 Cinsiyet Dağılımı (İlk 10)</h3>
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
