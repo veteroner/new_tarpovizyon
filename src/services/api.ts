@@ -36,31 +36,35 @@ export function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-// Predefined SQL queries
+// Predefined SQL queries - yct_20 kolonları: primaryValue, fobvalue, cifvalue, flowCode, partnerCode, motDesc, qty, netWgt
+// üretimindex kolonları: ürün, deger, birim, yil, ülke, grup
 export const queries = {
-  // Trade queries
-  totalTrade: `SELECT SUM(Value) as toplam, COUNT(*) as cnt FROM yct_20`,
-  totalExport: `SELECT SUM(Value) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('X', 'DX', 'RX')`,
-  totalImport: `SELECT SUM(Value) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('M', 'FM', 'RM')`,
+  // Trade queries - primaryValue kullanıyoruz (ana değer)
+  totalTrade: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20`,
+  totalExport: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('X', 'DX', 'RX')`,
+  totalImport: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('M', 'FM', 'RM')`,
   
-  flowDistribution: `SELECT flowCode, SUM(Value) as toplam FROM yct_20 GROUP BY flowCode ORDER BY toplam DESC`,
-  monthlyTrend: `SELECT MONTH(refDate) as ay, 
-    SUM(CASE WHEN flowCode IN ('X','DX','RX') THEN Value ELSE 0 END) as ihracat,
-    SUM(CASE WHEN flowCode IN ('M','FM','RM') THEN Value ELSE 0 END) as ithalat
-    FROM yct_20 GROUP BY MONTH(refDate) ORDER BY ay`,
+  flowDistribution: `SELECT flowCode, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam FROM yct_20 GROUP BY flowCode ORDER BY toplam DESC`,
+  monthlyTrend: `SELECT ay, 
+    SUM(CASE WHEN flowCode IN ('X','DX','RX') THEN CAST(primaryValue AS DECIMAL(20,2)) ELSE 0 END) as ihracat,
+    SUM(CASE WHEN flowCode IN ('M','FM','RM') THEN CAST(primaryValue AS DECIMAL(20,2)) ELSE 0 END) as ithalat
+    FROM yct_20 GROUP BY ay ORDER BY ay`,
   
-  topExportCountries: `SELECT countryName as ulke, SUM(Value) as toplam, COUNT(*) as cnt 
+  // partnerCode yerine motDesc veya başka alanlar kullanabiliriz
+  topExportCountries: `SELECT partnerCode as ulke, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
     FROM yct_20 WHERE flowCode IN ('X','DX','RX') 
-    GROUP BY countryName ORDER BY toplam DESC LIMIT 10`,
-  topImportCountries: `SELECT countryName as ulke, SUM(Value) as toplam, COUNT(*) as cnt 
+    GROUP BY partnerCode ORDER BY toplam DESC LIMIT 10`,
+  topImportCountries: `SELECT partnerCode as ulke, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
     FROM yct_20 WHERE flowCode IN ('M','FM','RM') 
-    GROUP BY countryName ORDER BY toplam DESC LIMIT 10`,
+    GROUP BY partnerCode ORDER BY toplam DESC LIMIT 10`,
   
-  transportModes: `SELECT tasimaSekli, SUM(Value) as toplam, COUNT(*) as cnt 
-    FROM yct_20 GROUP BY tasimaSekli ORDER BY toplam DESC`,
+  // motDesc = Mode of Transport Description
+  transportModes: `SELECT motDesc as tasimaSekli, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
+    FROM yct_20 WHERE motDesc IS NOT NULL AND motDesc != '' 
+    GROUP BY motDesc ORDER BY toplam DESC`,
   
-  // Production queries
-  productionStats: `SELECT COUNT(DISTINCT ad) as toplamUrun, SUM(miktar) as toplamUretim FROM üretimindex`,
-  topProducts: `SELECT ad, SUM(miktar) as miktar, birim FROM üretimindex GROUP BY ad, birim ORDER BY miktar DESC LIMIT 10`,
-  yearlyProduction: `SELECT yil, SUM(miktar) as toplam FROM üretimindex GROUP BY yil ORDER BY yil`,
+  // Production queries - üretimindex tablosu (birim filtresi kaldırıldı)
+  productionStats: `SELECT SUM(deger) as toplamUretim, COUNT(DISTINCT ürün) as toplamUrun FROM üretimindex`,
+  topProducts: `SELECT ürün as ad, SUM(deger) as miktar, birim FROM üretimindex GROUP BY ürün, birim ORDER BY miktar DESC LIMIT 10`,
+  yearlyProduction: `SELECT yil, SUM(deger) as toplam FROM üretimindex GROUP BY yil ORDER BY yil`,
 };
