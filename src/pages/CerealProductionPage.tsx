@@ -7,8 +7,9 @@ import {
   ComposedChart, Line,
   ScatterChart, Scatter, ZAxis
 } from 'recharts';
-import { fetchQuery, formatNumber, formatMoney } from '../services/api';
+import { fetchQuery, formatNumber } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
+import { translateCountry } from '../utils/countryTranslations';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
 
@@ -28,21 +29,29 @@ interface CountryDataItem {
   fill: string;
 }
 
+// FAO ürün kodları ile tahıllar
 const CEREAL_PRODUCTS = [
-  { id: 'Rice', name: 'Rice', nameTR: 'Pirinç' },
-  { id: 'Wheat', name: 'Wheat', nameTR: 'Buğday' },
-  { id: 'Maize (corn)', name: 'Maize (corn)', nameTR: 'Mısır' },
-  { id: 'Barley', name: 'Barley', nameTR: 'Arpa' },
-  { id: 'Oats', name: 'Oats', nameTR: 'Yulaf' },
-  { id: 'Rye', name: 'Rye', nameTR: 'Çavdar' },
-  { id: 'Sorghum', name: 'Sorghum', nameTR: 'Sorgum' },
-  { id: 'Buckwheat', name: 'Buckwheat', nameTR: 'Karabuğday' },
-  { id: 'Millet', name: 'Millet', nameTR: 'Darı' },
+  { id: '27', name: 'Rice', nameTR: 'Pirinç' },
+  { id: '15', name: 'Wheat', nameTR: 'Buğday' },
+  { id: '56', name: 'Maize (corn)', nameTR: 'Mısır' },
+  { id: '44', name: 'Barley', nameTR: 'Arpa' },
+  { id: '75', name: 'Oats', nameTR: 'Yulaf' },
+  { id: '71', name: 'Rye', nameTR: 'Çavdar' },
+  { id: '83', name: 'Sorghum', nameTR: 'Sorgum' },
+  { id: '89', name: 'Buckwheat', nameTR: 'Karabuğday' },
+  { id: '79', name: 'Millet', nameTR: 'Darı' },
 ];
 
+function formatTon(value: number): string {
+  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar t';
+  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon t';
+  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin t';
+  return value.toFixed(0) + ' t';
+}
+
 export default function CerealProductionPage() {
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Rice', 'Wheat', 'Maize (corn)']);
-  const [unit, setUnit] = useState('1000 USD');
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(['27', '15', '56']);
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
   const [productData, setProductData] = useState<ProductDataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
@@ -58,17 +67,21 @@ export default function CerealProductionPage() {
     
     setLoading(true);
     try {
-      const productList = selectedProducts.map(p => `'${p}'`).join(',');
+      const productList = selectedProducts.join(',');
       
-      // Ürün bazlı veri
-      const productQuery = `SELECT ürün, SUM(deger) as toplam FROM üretimindex 
-        WHERE birim='${unit}' AND yil='2021' AND ürün IN (${productList})
-        GROUP BY ürün ORDER BY toplam DESC`;
+      // FAO üretim verisi - ürün bazlı (ton cinsinden)
+      const productQuery = `SELECT u.urunkod, SUM(CAST(u.uretim_deger AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim u
+        WHERE u.yilkod='${selectedYear}' AND u.urunkod IN (${productList}) AND u.ulkekod='5000'
+        GROUP BY u.urunkod ORDER BY toplam DESC`;
       
-      // Ülke bazlı veri
-      const countryQuery = `SELECT ülke, SUM(deger) as toplam FROM üretimindex 
-        WHERE birim='${unit}' AND yil='2021' AND ürün IN (${productList})
-        GROUP BY ülke ORDER BY toplam DESC LIMIT 20`;
+      // FAO üretim verisi - ülke bazlı (ton cinsinden)
+      const countryQuery = `SELECT u.ulkekod, n.area, SUM(CAST(u.uretim_deger AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim u
+        LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON u.ulkekod = n.areacode
+        WHERE u.yilkod='${selectedYear}' AND u.urunkod IN (${productList}) 
+        AND u.ulkekod NOT IN ('5000', '5100', '5200', '5300', '5400', '5500')
+        GROUP BY u.ulkekod, n.area ORDER BY toplam DESC LIMIT 20`;
 
       const [productRes, countryRes] = await Promise.all([
         fetchQuery(productQuery),
@@ -77,11 +90,11 @@ export default function CerealProductionPage() {
 
       if (productRes.data) {
         const mapped = productRes.data.map((item, index: number) => {
-          const urun = String(item['ürün'] || '');
-          const product = CEREAL_PRODUCTS.find(p => p.id === urun);
+          const urunKod = String(item['urunkod'] || '');
+          const product = CEREAL_PRODUCTS.find(p => p.id === urunKod);
           return {
-            name: product?.nameTR || urun,
-            nameEN: urun,
+            name: product?.nameTR || urunKod,
+            nameEN: product?.name || urunKod,
             value: Number(item['toplam']) || 0,
             fill: COLORS[index % COLORS.length]
           } as ProductDataItem;
@@ -92,7 +105,7 @@ export default function CerealProductionPage() {
       if (countryRes.data) {
         const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
-          name: String(item['ülke'] || ''),
+          name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
           share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]
@@ -104,7 +117,7 @@ export default function CerealProductionPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedProducts, unit]);
+  }, [selectedProducts, selectedYear]);
 
   useEffect(() => {
     loadData();
@@ -140,7 +153,7 @@ export default function CerealProductionPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">🌾 Tahıl Üretimi</h1>
-        <p className="page-subtitle">Dünya tahıl üretim değerleri ve istatistikleri (2021)</p>
+        <p className="page-subtitle">Dünya tahıl üretim miktarları - FAO {selectedYear} (Ton)</p>
       </div>
 
       {/* Filtreler */}
@@ -166,16 +179,18 @@ export default function CerealProductionPage() {
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 6v6l4 2"/>
             </svg>
-            Birim
+            Yıl
           </label>
           <select 
             className="filter-select" 
-            value={unit} 
-            onChange={(e) => setUnit(e.target.value)}
+            value={selectedYear} 
+            onChange={(e) => setSelectedYear(e.target.value)}
           >
-            <option value="1000 USD">1000 USD</option>
-            <option value="1000 SLC">1000 SLC</option>
-            <option value="1000 Int$">1000 Int$</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
           </select>
         </div>
       </div>
@@ -191,9 +206,9 @@ export default function CerealProductionPage() {
           <div className="kpi-grid">
             <div className="kpi-card large">
               <div className="kpi-header">
-                <span className="kpi-title">TOPLAM DEĞER</span>
+                <span className="kpi-title">TOPLAM ÜRETİM</span>
               </div>
-              <div className="kpi-value">{formatMoney(totalValue * 1000)}</div>
+              <div className="kpi-value">{formatTon(totalValue)}</div>
               <div className="kpi-subtitle">{selectedProducts.length} ürün seçili</div>
             </div>
             <div className="kpi-card">
@@ -232,7 +247,7 @@ export default function CerealProductionPage() {
                   <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} />
                   <Tooltip 
-                    formatter={(value: number) => [formatMoney(value * 1000), 'Değer']}
+                    formatter={(value: number) => [formatTon(value), 'Değer']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                   />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -261,7 +276,7 @@ export default function CerealProductionPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => [formatMoney(value * 1000), 'Değer']} />
+                  <Tooltip formatter={(value: number) => [formatTon(value), 'Değer']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -327,7 +342,7 @@ export default function CerealProductionPage() {
                   <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
                   <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatMoney(value * 1000) : `${value}%`, name === 'value' ? 'Değer' : 'Pay']} />
+                  <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatTon(value) : `${value}%`, name === 'value' ? 'Değer' : 'Pay']} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="value" name="Değer" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
@@ -417,7 +432,7 @@ export default function CerealProductionPage() {
                   <div className="table-name">{country.name}</div>
                   <div className="table-subtext">Pay: %{country.share}</div>
                 </div>
-                <div className="table-value green">{formatMoney(country.value * 1000)}</div>
+                <div className="table-value green">{formatTon(country.value)}</div>
               </div>
             ))}
           </div>
