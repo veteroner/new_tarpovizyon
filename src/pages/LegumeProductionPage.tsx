@@ -1,159 +1,381 @@
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, Treemap, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ComposedChart, Line, ScatterChart, Scatter, ZAxis
-} from 'recharts';
-import { fetchQuery, formatNumber, formatMoney } from '../services/api';
-import ProductSelector from '../components/ProductSelector';
+import { useState, useEffect } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts'
+import { translateCountry } from '../utils/countryTranslations'
 
-const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
+// Baklagil ürün kodları - FAO
+const PRODUCTS = [
+  { id: '176', nameTR: 'Fasulye (Kuru)' },
+  { id: '187', nameTR: 'Bezelye (Kuru)' },
+  { id: '191', nameTR: 'Nohut' },
+  { id: '201', nameTR: 'Mercimek' },
+  { id: '181', nameTR: 'Bakla (Kuru)' },
+  { id: '195', nameTR: 'Börülce' },
+  { id: '197', nameTR: 'Bamya' },
+  { id: '211', nameTR: 'Baklagil (Diğer)' },
+]
 
-const LEGUME_PRODUCTS = [
-  { id: 'Soya beans', name: 'Soya beans', nameTR: 'Soya Fasulyesi' },
-  { id: 'Beans, dry', name: 'Beans, dry', nameTR: 'Kuru Fasulye' },
-  { id: 'Lentils, dry', name: 'Lentils, dry', nameTR: 'Mercimek' },
-  { id: 'Chickpeas, dry', name: 'Chickpeas, dry', nameTR: 'Nohut' },
-  { id: 'Peas, dry', name: 'Peas, dry', nameTR: 'Kuru Bezelye' },
-  { id: 'Broad beans and horse beans, dry', name: 'Broad beans', nameTR: 'Bakla' },
-  { id: 'Cow peas, dry', name: 'Cow peas', nameTR: 'Börülce' },
-  { id: 'Pigeon peas, dry', name: 'Pigeon peas', nameTR: 'Güvercin Bezelyesi' },
-];
+const COLORS = ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F5DEB3', '#D2B48C', '#BC8F8F', '#F4A460']
 
-interface DataItem { name: string; nameEN: string; value: number; fill: string; [key: string]: string | number; }
-interface CountryItem { name: string; value: number; share: string; fill: string; [key: string]: string | number; }
+// API config
+const API_BASE = 'https://dersbende.com/api.php'
+const API_KEY = 'REDACTED_DASHBOARD_KEY'
+
+interface ProductionData {
+  country: string
+  production: number
+  year: number
+  [key: string]: string | number
+}
+
+interface TrendData {
+  year: number
+  production: number
+}
+
+interface ComparisonData {
+  name: string
+  value: number
+}
+
+const formatTon = (value: number): string => {
+  if (value >= 1000000000) {
+    return `${(value / 1000000000).toFixed(2)} Milyar ton`
+  } else if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(2)} Milyon ton`
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(2)} Bin ton`
+  }
+  return `${value.toFixed(0)} ton`
+}
+
+const formatTonShort = (value: number): string => {
+  if (value >= 1000000000) {
+    return `${(value / 1000000000).toFixed(1)}B`
+  } else if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}K`
+  }
+  return value.toFixed(0)
+}
 
 export default function LegumeProductionPage() {
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Soya beans', 'Beans, dry', 'Lentils, dry', 'Chickpeas, dry']);
-  const [unit, setUnit] = useState('1000 USD');
-  const [loading, setLoading] = useState(true);
-  const [productData, setProductData] = useState<DataItem[]>([]);
-  const [countryData, setCountryData] = useState<CountryItem[]>([]);
-  const [sortBy, setSortBy] = useState<'value' | 'name'>('value');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedProduct, setSelectedProduct] = useState(PRODUCTS[0].id)
+  const [selectedYear, setSelectedYear] = useState('2022')
+  const [productionData, setProductionData] = useState<ProductionData[]>([])
+  const [trendData, setTrendData] = useState<TrendData[]>([])
+  const [comparisonData, setComparisonData] = useState<ComparisonData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [years, setYears] = useState<string[]>([])
 
-  const loadData = useCallback(async () => {
-    if (selectedProducts.length === 0) { setProductData([]); setCountryData([]); return; }
-    setLoading(true);
-    try {
-      const productList = selectedProducts.map(p => `'${p}'`).join(',');
-      const productQuery = `SELECT ürün, SUM(deger) as toplam FROM üretimindex WHERE birim='${unit}' AND yil='2021' AND ürün IN (${productList}) GROUP BY ürün ORDER BY toplam DESC`;
-      const countryQuery = `SELECT ülke, SUM(deger) as toplam FROM üretimindex WHERE birim='${unit}' AND yil='2021' AND ürün IN (${productList}) GROUP BY ülke ORDER BY toplam DESC LIMIT 20`;
-      const [productRes, countryRes] = await Promise.all([fetchQuery(productQuery), fetchQuery(countryQuery)]);
-      if (productRes.data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mapped = productRes.data.map((item: any, index: number) => {
-          const product = LEGUME_PRODUCTS.find(p => p.id === item.ürün);
-          return { name: product?.nameTR || item.ürün, nameEN: item.ürün, value: Number(item.toplam) || 0, fill: COLORS[index % COLORS.length] };
-        });
-        setProductData(mapped);
+  // Yılları getir
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const productIds = PRODUCTS.map(p => p.id).join(',')
+        const sql = `SELECT DISTINCT yilkod FROM fao_uretim WHERE urunkod IN (${productIds}) ORDER BY yilkod DESC`
+        const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
+        const data = await response.json()
+        if (data.success && data.data) {
+          const yearList = data.data.map((row: { yilkod: number }) => row.yilkod.toString())
+          setYears(yearList)
+          if (yearList.length > 0) {
+            setSelectedYear(yearList[0])
+          }
+        }
+      } catch (error) {
+        console.error('Yıl verisi hatası:', error)
       }
-      if (countryRes.data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const total = countryRes.data.reduce((sum: number, item: any) => sum + (Number(item.toplam) || 0), 0);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mapped = countryRes.data.map((item: any, index: number) => ({ name: item.ülke, value: Number(item.toplam) || 0, share: ((Number(item.toplam) || 0) / total * 100).toFixed(1), fill: COLORS[index % COLORS.length] }));
-        setCountryData(mapped);
+    }
+    fetchYears()
+  }, [])
+
+  // Ülke bazlı üretim verilerini getir
+  useEffect(() => {
+    const fetchProductionData = async () => {
+      setLoading(true)
+      try {
+        const sql = `
+          SELECT f.ulkekod, n.area as country_name, SUM(f.uretim_deger) as toplam
+          FROM fao_uretim f
+          LEFT JOIN fao_nufus n ON f.ulkekod = n.areacode
+          WHERE f.urunkod = ${selectedProduct} AND f.yilkod = ${selectedYear}
+          GROUP BY f.ulkekod, n.area
+          ORDER BY toplam DESC
+          LIMIT 15
+        `
+        const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
+        const data = await response.json()
+        
+        if (data.success && data.data) {
+          const formattedData = data.data.map((row: { country_name: string; ulkekod: number; toplam: string }) => ({
+            country: translateCountry(row.country_name || `Ülke ${row.ulkekod}`),
+            production: parseFloat(row.toplam) || 0,
+            year: parseInt(selectedYear)
+          }))
+          setProductionData(formattedData)
+        }
+      } catch (error) {
+        console.error('Üretim verisi hatası:', error)
       }
-    } catch (error) { console.error('Veri yüklenirken hata:', error); } finally { setLoading(false); }
-  }, [selectedProducts, unit]);
+      setLoading(false)
+    }
+    
+    if (selectedYear) {
+      fetchProductionData()
+    }
+  }, [selectedProduct, selectedYear])
 
-  useEffect(() => { loadData(); }, [loadData]);
+  // Trend verilerini getir
+  useEffect(() => {
+    const fetchTrendData = async () => {
+      try {
+        const sql = `
+          SELECT yilkod, SUM(uretim_deger) as toplam
+          FROM fao_uretim
+          WHERE urunkod = ${selectedProduct}
+          GROUP BY yilkod
+          ORDER BY yilkod
+        `
+        const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
+        const data = await response.json()
+        
+        if (data.success && data.data) {
+          const formattedData = data.data.map((row: { yilkod: number; toplam: string }) => ({
+            year: parseInt(row.yilkod.toString()),
+            production: parseFloat(row.toplam) || 0
+          }))
+          setTrendData(formattedData)
+        }
+      } catch (error) {
+        console.error('Trend verisi hatası:', error)
+      }
+    }
+    fetchTrendData()
+  }, [selectedProduct])
 
-  const totalValue = productData.reduce((sum, item) => sum + item.value, 0);
-  const topCountry = countryData[0]?.name || '-';
-  const sortedCountryData = [...countryData].sort((a, b) => sortBy === 'value' ? (sortOrder === 'desc' ? b.value - a.value : a.value - b.value) : (sortOrder === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name)));
-  const radarData = countryData.slice(0, 6).map(item => ({ country: item.name?.substring(0, 15) || 'Unknown', value: item.value / 1000000, fullMark: countryData[0]?.value / 1000000 || 100 }));
-  const scatterData = productData.map((item, index) => ({ x: index + 1, y: item.value / 1000000, z: item.value / 1000000, name: item.name }));
+  // Ürün karşılaştırma verilerini getir
+  useEffect(() => {
+    const fetchComparisonData = async () => {
+      try {
+        const productIds = PRODUCTS.map(p => p.id).join(',')
+        const sql = `
+          SELECT urunkod, SUM(uretim_deger) as toplam
+          FROM fao_uretim
+          WHERE urunkod IN (${productIds}) AND yilkod = ${selectedYear}
+          GROUP BY urunkod
+          ORDER BY toplam DESC
+        `
+        const response = await fetch(`${API_BASE}?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`)
+        const data = await response.json()
+        
+        if (data.success && data.data) {
+          const formattedData = data.data.map((row: { urunkod: number; toplam: string }) => {
+            const product = PRODUCTS.find(p => p.id === row.urunkod.toString())
+            return {
+              name: product?.nameTR || `Ürün ${row.urunkod}`,
+              value: parseFloat(row.toplam) || 0
+            }
+          })
+          setComparisonData(formattedData)
+        }
+      } catch (error) {
+        console.error('Karşılaştırma verisi hatası:', error)
+      }
+    }
+    
+    if (selectedYear) {
+      fetchComparisonData()
+    }
+  }, [selectedYear])
+
+  const selectedProductName = PRODUCTS.find(p => p.id === selectedProduct)?.nameTR || ''
+  const totalProduction = productionData.reduce((sum, item) => sum + item.production, 0)
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">🫘 Baklagil Üretimi</h1>
-        <p className="page-subtitle">Dünya baklagil üretim değerleri ve istatistikleri (2021)</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-amber-600 to-yellow-700 rounded-xl shadow-lg p-6 text-white">
+        <h1 className="text-3xl font-bold mb-2">🫘 Baklagil Üretimi</h1>
+        <p className="opacity-90">FAO verileriyle dünya baklagil üretim istatistikleri (Ton)</p>
       </div>
 
-      <div className="date-filter">
-        <div className="filter-group">
-          <label className="filter-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Ürün Seçimi</label>
-          <ProductSelector products={LEGUME_PRODUCTS} selectedProducts={selectedProducts} onSelectionChange={setSelectedProducts} placeholder="Baklagil seçin..." />
-        </div>
-        <div className="filter-group">
-          <label className="filter-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Birim</label>
-          <select className="filter-select" value={unit} onChange={(e) => setUnit(e.target.value)}>
-            <option value="1000 USD">1000 USD</option><option value="1000 SLC">1000 SLC</option><option value="1000 Int$">1000 Int$</option>
-          </select>
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Ürün Seçin</label>
+            <select
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+            >
+              {PRODUCTS.map(product => (
+                <option key={product.id} value={product.id}>{product.nameTR}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Yıl Seçin</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+            >
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {loading ? (<div className="loading"><div className="loading-spinner"></div><p>Veriler yükleniyor...</p></div>) : (
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="text-amber-600 text-2xl mb-2">🫘</div>
+          <div className="text-sm text-gray-500">Seçili Ürün</div>
+          <div className="text-xl font-bold text-gray-800">{selectedProductName}</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="text-green-500 text-2xl mb-2">🌍</div>
+          <div className="text-sm text-gray-500">Toplam Üretim</div>
+          <div className="text-xl font-bold text-gray-800">{formatTon(totalProduction)}</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="text-blue-500 text-2xl mb-2">🏆</div>
+          <div className="text-sm text-gray-500">En Büyük Üretici</div>
+          <div className="text-xl font-bold text-gray-800">{productionData[0]?.country || '-'}</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="text-purple-500 text-2xl mb-2">📅</div>
+          <div className="text-sm text-gray-500">Seçili Yıl</div>
+          <div className="text-xl font-bold text-gray-800">{selectedYear}</div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+        </div>
+      ) : (
         <>
-          <div className="kpi-grid">
-            <div className="kpi-card large"><div className="kpi-header"><span className="kpi-title">TOPLAM DEĞER</span></div><div className="kpi-value">{formatMoney(totalValue * 1000)}</div><div className="kpi-subtitle">{selectedProducts.length} ürün seçili</div></div>
-            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">ÜRÜN SAYISI</span><div className="kpi-icon green">📊</div></div><div className="kpi-value">{productData.length}</div><div className="kpi-subtitle">Aktif ürün</div></div>
-            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">ÜRETİCİ ÜLKE</span><div className="kpi-icon blue">🌍</div></div><div className="kpi-value">{countryData.length}</div><div className="kpi-subtitle">Top ülkeler</div></div>
-            <div className="kpi-card"><div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon orange">🏆</div></div><div className="kpi-value" style={{fontSize: '1.2rem'}}>{topCountry}</div><div className="kpi-subtitle">En yüksek üretim</div></div>
-          </div>
+          {/* Charts Row 1 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                🏆 {selectedProductName} - En Büyük Üreticiler ({selectedYear})
+              </h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={productionData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tickFormatter={formatTonShort} />
+                  <YAxis dataKey="country" type="category" width={100} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => formatTon(value)} />
+                  <Bar dataKey="production" fill="#D2691E" name="Üretim" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
-          <div className="chart-grid">
-            <div className="chart-card">
-              <h3 className="chart-title">📊 Ürün Karşılaştırması</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={productData}><CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /><XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} /><YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} /><Tooltip formatter={(value: number) => [formatMoney(value * 1000), 'Değer']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} /><Bar dataKey="value" radius={[4, 4, 0, 0]}>{productData.map((_e, i) => (<Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />))}</Bar></BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <h3 className="chart-title">🥧 Ürün Dağılımı</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart><Pie data={productData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>{productData.map((_e, i) => (<Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />))}</Pie><Tooltip formatter={(value: number) => [formatMoney(value * 1000), 'Değer']} /></PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="chart-grid">
-            <div className="chart-card">
-              <h3 className="chart-title">🗺️ Ülke Değer Dağılımı (Treemap)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <Treemap data={countryData.slice(0, 12)} dataKey="value" aspectRatio={4/3} stroke="var(--bg-card)" content={({ x, y, width, height, name, value }: { x: number; y: number; width: number; height: number; name: string; value: number }) => (<g><rect x={x} y={y} width={width} height={height} style={{ fill: COLORS[countryData.findIndex(c => c.name === name) % COLORS.length], stroke: 'var(--bg-card)', strokeWidth: 2 }} />{width > 60 && height > 30 && (<><text x={x + width / 2} y={y + height / 2 - 8} textAnchor="middle" fill="#fff" fontSize={11} fontWeight="bold">{name?.substring(0, 12)}</text><text x={x + width / 2} y={y + height / 2 + 10} textAnchor="middle" fill="#fff" fontSize={10}>{formatNumber(value * 1000)}</text></>)}</g>)} />
-              </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <h3 className="chart-title">📈 Değer ve Sıralama</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={countryData.slice(0, 10)}><CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /><XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} /><YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} /><YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} /><Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatMoney(value * 1000) : `${value}%`, name === 'value' ? 'Değer' : 'Pay']} /><Legend /><Bar yAxisId="left" dataKey="value" name="Değer" fill="#8b5cf6" radius={[4, 4, 0, 0]} /><Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} /></ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="chart-grid">
-            <div className="chart-card">
-              <h3 className="chart-title">🎯 Top 6 Ülke (Radar)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={radarData}><PolarGrid stroke="var(--border)" /><PolarAngleAxis dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} /><PolarRadiusAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} /><Radar name="Üretim (M)" dataKey="value" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.5} /><Tooltip formatter={(value: number) => [`${value.toFixed(1)}M`, 'Değer']} /></RadarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <h3 className="chart-title">🔵 Ürün Scatter</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <ScatterChart><CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /><XAxis type="number" dataKey="x" name="Sıra" tick={{ fill: 'var(--text-secondary)' }} /><YAxis type="number" dataKey="y" name="Değer (M)" tick={{ fill: 'var(--text-secondary)' }} tickFormatter={(v) => `${v.toFixed(0)}M`} /><ZAxis type="number" dataKey="z" range={[100, 1000]} /><Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value: number, name: string) => [name === 'y' ? `${value.toFixed(1)}M` : value, name === 'y' ? 'Değer' : 'Sıra']} /><Scatter name="Ürünler" data={scatterData} fill="#8b5cf6">{scatterData.map((_e, i) => (<Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />))}</Scatter></ScatterChart>
+            {/* Pie Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                📊 {selectedProductName} - Üretim Dağılımı
+              </h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                  <Pie
+                    data={productionData.slice(0, 8)}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={130}
+                    fill="#8884d8"
+                    dataKey="production"
+                    nameKey="country"
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
+                  >
+                    {productionData.slice(0, 8).map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => formatTon(value)} />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="data-table">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 className="data-table-title" style={{ margin: 0 }}>📋 Ülke Sıralaması</h3>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => { setSortBy('value'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: sortBy === 'value' ? 'var(--primary)' : 'var(--bg-primary)', color: sortBy === 'value' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>Değere Göre {sortBy === 'value' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}</button>
-                <button onClick={() => { setSortBy('name'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: sortBy === 'name' ? 'var(--primary)' : 'var(--bg-primary)', color: sortBy === 'name' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>İsme Göre {sortBy === 'name' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}</button>
-              </div>
+          {/* Charts Row 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Trend Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                📈 {selectedProductName} - Dünya Üretim Trendi
+              </h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis tickFormatter={formatTonShort} />
+                  <Tooltip formatter={(value: number) => formatTon(value)} />
+                  <Area type="monotone" dataKey="production" stroke="#D2691E" fill="#F5DEB3" name="Üretim" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            {sortedCountryData.map((country, index) => (
-              <div className="table-row" key={country.name}><div className={`table-rank ${index < 3 ? 'purple' : ''}`}>{index + 1}</div><div className="table-info"><div className="table-name">{country.name}</div><div className="table-subtext">Pay: %{country.share}</div></div><div className="table-value purple">{formatMoney(country.value * 1000)}</div></div>
-            ))}
+
+            {/* Product Comparison */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                🫘 Baklagil Türleri Karşılaştırması ({selectedYear})
+              </h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={comparisonData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                  <YAxis tickFormatter={formatTonShort} />
+                  <Tooltip formatter={(value: number) => formatTon(value)} />
+                  <Bar dataKey="value" name="Üretim" radius={[4, 4, 0, 0]}>
+                    {comparisonData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Data Table */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              📋 {selectedProductName} - Detaylı Üretim Verileri ({selectedYear})
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-amber-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sıra</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ülke</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Üretim (Ton)</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Dünya Payı</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {productionData.map((item, index) => (
+                    <tr key={index} className="hover:bg-amber-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.country}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{formatTon(item.production)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
+                        {totalProduction > 0 ? ((item.production / totalProduction) * 100).toFixed(2) : 0}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
     </div>
-  );
+  )
 }
