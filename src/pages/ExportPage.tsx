@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { TrendingUp, FileText, Calculator } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatMoney, formatNumber, queries } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatMoney, formatNumber, queries, addYearFilter, TRADE_YEARS } from '../services/api';
 
 const COLORS = ['#10b981', '#34d399', '#6ee7b7', '#059669', '#047857', '#14b8a6'];
 
@@ -19,29 +20,31 @@ interface ExportData {
 export function ExportPage() {
   const [data, setData] = useState<ExportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [exportRes, countriesRes] = await Promise.all([
+        fetchQuery(addYearFilter(queries.totalExport, selectedYear)),
+        fetchQuery(addYearFilter(queries.topExportCountries, selectedYear)),
+      ]);
+
+      setData({
+        totalExport: parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0,
+        exportCount: parseInt(String(exportRes.data?.[0]?.cnt ?? 0)) || 0,
+        topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
+      });
+    } catch (error) {
+      console.error('Error loading export data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [exportRes, countriesRes] = await Promise.all([
-          fetchQuery(queries.totalExport),
-          fetchQuery(queries.topExportCountries),
-        ]);
-
-        setData({
-          totalExport: parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0,
-          exportCount: parseInt(String(exportRes.data?.[0]?.cnt ?? 0)) || 0,
-          topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
-        });
-      } catch (error) {
-        console.error('Error loading export data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -53,6 +56,13 @@ export function ExportPage() {
         <h1 className="page-title">İhracat Analizi</h1>
         <p className="page-subtitle">İhracat verileri ve trendler</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={TRADE_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">

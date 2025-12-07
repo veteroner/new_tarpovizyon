@@ -398,3 +398,63 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Date Filter */
+.date-filter {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-select {
+  padding: 10px 36px 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  min-width: 160px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: var(--primary);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.filter-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 8px;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Milk, Globe, TrendingUp, BarChart3 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatNumber } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatNumber, PRODUCTION_YEARS } from '../services/api';
 
 const COLORS = ['#3b82f6', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#eab308'];
 
@@ -26,101 +27,103 @@ function formatTon(value: number): string {
   return value.toFixed(0);
 }
 
+function addProductionYearFilter(sql: string, year: string): string {
+  if (year === 'all') return sql;
+  const hasWhere = sql.toLowerCase().includes('where');
+  const yearCondition = "yil = '" + year + "'";
+  
+  if (hasWhere) {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, 'AND ' + yearCondition + ' GROUP BY');
+    }
+    return sql + ' AND ' + yearCondition;
+  } else {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, 'WHERE ' + yearCondition + ' GROUP BY');
+    }
+    return sql + ' WHERE ' + yearCondition;
+  }
+}
+
 export function DairyProductionPage() {
   const [data, setData] = useState<DairyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const totalRes = await fetchQuery(addProductionYearFilter(
+        "SELECT SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%milk%'",
+        selectedYear
+      ));
+
+      const milkTypes = [
+        { name: 'İnek Sütü', query: "ürün LIKE '%milk of cattle%'" },
+        { name: 'Koyun Sütü', query: "ürün LIKE '%milk of sheep%'" },
+        { name: 'Keçi Sütü', query: "ürün LIKE '%milk of goat%'" },
+        { name: 'Bufalo Sütü', query: "ürün LIKE '%milk of buffalo%'" },
+        { name: 'Deve Sütü', query: "ürün LIKE '%milk of camel%'" },
+      ];
+
+      const milkTypePromises = milkTypes.map(async (type) => {
+        const res = await fetchQuery(addProductionYearFilter(
+          "SELECT SUM(deger) as toplam FROM üretimindex WHERE " + type.query,
+          selectedYear
+        ));
+        return {
+          name: type.name,
+          value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
+        };
+      });
+      const milkDistribution = await Promise.all(milkTypePromises);
+
+      const topCountriesRes = await fetchQuery(addProductionYearFilter(
+        "SELECT ülke as ulke, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%Raw milk of cattle%' GROUP BY ülke ORDER BY toplam DESC LIMIT 10",
+        selectedYear
+      ));
+
+      const yearlyRes = await fetchQuery(
+        "SELECT yil, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%milk%' GROUP BY yil ORDER BY yil"
+      );
+
+      const turkeyRes = await fetchQuery(addProductionYearFilter(
+        "SELECT ülke, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%Raw milk of cattle%' GROUP BY ülke ORDER BY toplam DESC",
+        selectedYear
+      ));
+      
+      const turkeyData = turkeyRes.data || [];
+      const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
+        String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
+      );
+
+      setData({
+        totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
+        milkTypeDistribution: milkDistribution.filter(m => m.value > 0),
+        topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
+          ulke: String(d.ulke || 'Bilinmiyor'),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
+          yil: String(d.yil || ''),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        turkeyRank: {
+          rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
+          total: turkeyData.length,
+          value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
+        }
+      });
+    } catch (error) {
+      console.error('Error loading dairy data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        // Total milk production
-        const totalRes = await fetchQuery(`
-          SELECT SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%milk%'
-        `);
-
-        // Milk type distribution
-        const milkTypes = [
-          { name: 'İnek Sütü', query: "ürün LIKE '%milk of cattle%'" },
-          { name: 'Koyun Sütü', query: "ürün LIKE '%milk of sheep%'" },
-          { name: 'Keçi Sütü', query: "ürün LIKE '%milk of goat%'" },
-          { name: 'Bufalo Sütü', query: "ürün LIKE '%milk of buffalo%'" },
-          { name: 'Deve Sütü', query: "ürün LIKE '%milk of camel%'" },
-        ];
-
-        const milkTypePromises = milkTypes.map(async (type) => {
-          const res = await fetchQuery(`
-            SELECT SUM(deger) as toplam 
-            FROM üretimindex 
-            WHERE ${type.query}
-          `);
-          return {
-            name: type.name,
-            value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
-          };
-        });
-        const milkDistribution = await Promise.all(milkTypePromises);
-
-        // Top producing countries for cow milk
-        const topCountriesRes = await fetchQuery(`
-          SELECT ülke as ulke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Raw milk of cattle%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC 
-          LIMIT 10
-        `);
-
-        // Yearly trend
-        const yearlyRes = await fetchQuery(`
-          SELECT yil, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%milk%'
-          GROUP BY yil 
-          ORDER BY yil
-        `);
-
-        // Turkey's rank
-        const turkeyRes = await fetchQuery(`
-          SELECT ülke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Raw milk of cattle%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC
-        `);
-        
-        const turkeyData = turkeyRes.data || [];
-        const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
-          String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
-        );
-
-        setData({
-          totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
-          milkTypeDistribution: milkDistribution.filter(m => m.value > 0),
-          topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
-            ulke: String(d.ulke || 'Bilinmiyor'),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
-            yil: String(d.yil || ''),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          turkeyRank: {
-            rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
-            total: turkeyData.length,
-            value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
-          }
-        });
-      } catch (error) {
-        console.error('Error loading dairy data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -131,7 +134,12 @@ export function DairyProductionPage() {
         <p className="page-subtitle">Dünya süt üretimi verileri ve analizler</p>
       </div>
 
-      {/* KPI Cards */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={PRODUCTION_YEARS}
+      />
+
       <div className="kpi-grid">
         <KPICard
           title="Toplam Süt Üretimi"
@@ -164,7 +172,6 @@ export function DairyProductionPage() {
         />
       </div>
 
-      {/* Charts */}
       <div className="chart-grid">
         <div className="chart-card">
           <h3 className="chart-title">🌍 En Çok İnek Sütü Üreten Ülkeler</h3>
@@ -214,7 +221,6 @@ export function DairyProductionPage() {
         </div>
       </div>
 
-      {/* Yearly Trend */}
       <div className="chart-card" style={{ marginTop: '1.5rem' }}>
         <h3 className="chart-title">📈 Yıllık Süt Üretim Trendi</h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -231,7 +237,6 @@ export function DairyProductionPage() {
         </ResponsiveContainer>
       </div>
 
-      {/* Country Rankings Table */}
       <div className="data-table" style={{ marginTop: '1.5rem' }}>
         <h3 className="data-table-title">🏆 İnek Sütü Üretim Sıralaması</h3>
         {data?.topCountries.map((country, index) => (

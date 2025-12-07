@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Globe, TrendingUp, TrendingDown, ArrowLeftRight, FileText } from 'lucide-react';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatMoney, formatNumber, queries } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatMoney, formatNumber, queries, addYearFilter, TRADE_YEARS } from '../services/api';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6'];
 const MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
@@ -28,48 +29,50 @@ interface OverviewData {
 export function OverviewPage() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [totalRes, exportRes, importRes, flowRes, monthlyRes] = await Promise.all([
+        fetchQuery(addYearFilter(queries.totalTrade, selectedYear)),
+        fetchQuery(addYearFilter(queries.totalExport, selectedYear)),
+        fetchQuery(addYearFilter(queries.totalImport, selectedYear)),
+        fetchQuery(addYearFilter(queries.flowDistribution, selectedYear)),
+        fetchQuery(addYearFilter(queries.monthlyTrend, selectedYear)),
+      ]);
+
+      const total = parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0;
+      const exp = parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0;
+      const imp = parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0;
+      const count = parseInt(String(totalRes.data?.[0]?.cnt ?? 0)) || 0;
+
+      setData({
+        totalTrade: total,
+        totalExport: exp,
+        totalImport: imp,
+        balance: exp - imp,
+        transactionCount: count,
+        flowDistribution: (flowRes.data || []).map((d) => ({
+          name: FLOW_NAMES[String(d.flowCode)] || String(d.flowCode),
+          value: parseFloat(String(d.toplam)) || 0,
+        })),
+        monthlyTrend: (monthlyRes.data || []).map((d) => ({
+          ay: MONTHS[parseInt(String(d.ay)) - 1] || String(d.ay),
+          ihracat: parseFloat(String(d.ihracat)) / 1e9 || 0,
+          ithalat: parseFloat(String(d.ithalat)) / 1e9 || 0,
+        })),
+      });
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [totalRes, exportRes, importRes, flowRes, monthlyRes] = await Promise.all([
-          fetchQuery(queries.totalTrade),
-          fetchQuery(queries.totalExport),
-          fetchQuery(queries.totalImport),
-          fetchQuery(queries.flowDistribution),
-          fetchQuery(queries.monthlyTrend),
-        ]);
-
-        const total = parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0;
-        const exp = parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0;
-        const imp = parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0;
-        const count = parseInt(String(totalRes.data?.[0]?.cnt ?? 0)) || 0;
-
-        setData({
-          totalTrade: total,
-          totalExport: exp,
-          totalImport: imp,
-          balance: exp - imp,
-          transactionCount: count,
-          flowDistribution: (flowRes.data || []).map((d) => ({
-            name: FLOW_NAMES[String(d.flowCode)] || String(d.flowCode),
-            value: parseFloat(String(d.toplam)) || 0,
-          })),
-          monthlyTrend: (monthlyRes.data || []).map((d) => ({
-            ay: MONTHS[parseInt(String(d.ay)) - 1] || String(d.ay),
-            ihracat: parseFloat(String(d.ihracat)) / 1e9 || 0,
-            ithalat: parseFloat(String(d.ithalat)) / 1e9 || 0,
-          })),
-        });
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -79,6 +82,13 @@ export function OverviewPage() {
         <h1 className="page-title">Genel Bakış</h1>
         <p className="page-subtitle">Ticaret verilerine genel bakış</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={TRADE_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">

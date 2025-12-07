@@ -20,6 +20,32 @@ export async function fetchQuery(sql: string): Promise<QueryResult> {
   }
 }
 
+// Year filter helper - adds WHERE or AND clause
+export function addYearFilter(sql: string, year: string, table: 'trade' | 'production' = 'trade'): string {
+  if (year === 'all') return sql;
+  
+  const yearColumn = table === 'trade' ? 'yil' : 'yil';
+  const hasWhere = sql.toLowerCase().includes('where');
+  const yearCondition = `${yearColumn} = '${year}'`;
+  
+  if (hasWhere) {
+    // Add AND before GROUP BY if exists, otherwise at the end
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, `AND ${yearCondition} GROUP BY`);
+    }
+    return sql + ` AND ${yearCondition}`;
+  } else {
+    // Add WHERE before GROUP BY if exists
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, `WHERE ${yearCondition} GROUP BY`);
+    }
+    if (sql.toLowerCase().includes('order by')) {
+      return sql.replace(/order by/i, `WHERE ${yearCondition} ORDER BY`);
+    }
+    return sql + ` WHERE ${yearCondition}`;
+  }
+}
+
 // Format helpers
 export function formatMoney(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
@@ -35,6 +61,10 @@ export function formatNumber(num: number): string {
   if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
   return num.toLocaleString();
 }
+
+// Available years for filters
+export const TRADE_YEARS = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011'];
+export const PRODUCTION_YEARS = ['2021'];
 
 // Predefined SQL queries - yct_20 kolonları: primaryValue, fobvalue, cifvalue, flowCode, partnerCode, motDesc, qty, netWgt
 // üretimindex kolonları: ürün, deger, birim, yil, ülke, grup

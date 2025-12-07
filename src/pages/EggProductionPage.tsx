@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Egg, Globe, TrendingUp, BarChart3 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatNumber } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatNumber, PRODUCTION_YEARS } from '../services/api';
 
 const COLORS = ['#f59e0b', '#fbbf24', '#fcd34d', '#d97706', '#b45309', '#ea580c'];
 
@@ -26,98 +27,100 @@ function formatTon(value: number): string {
   return value.toFixed(0);
 }
 
+function addProductionYearFilter(sql: string, year: string): string {
+  if (year === 'all') return sql;
+  const hasWhere = sql.toLowerCase().includes('where');
+  const yearCondition = "yil = '" + year + "'";
+  
+  if (hasWhere) {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, 'AND ' + yearCondition + ' GROUP BY');
+    }
+    return sql + ' AND ' + yearCondition;
+  } else {
+    if (sql.toLowerCase().includes('group by')) {
+      return sql.replace(/group by/i, 'WHERE ' + yearCondition + ' GROUP BY');
+    }
+    return sql + ' WHERE ' + yearCondition;
+  }
+}
+
 export function EggProductionPage() {
   const [data, setData] = useState<EggData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const totalRes = await fetchQuery(addProductionYearFilter(
+        "SELECT SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%egg%' AND ürün NOT LIKE '%Eggplant%'",
+        selectedYear
+      ));
+
+      const eggTypes = [
+        { name: 'Tavuk Yumurtası', query: "ürün LIKE '%Hen eggs%'" },
+        { name: 'Diğer Kuş Yumurtaları', query: "ürün LIKE '%Eggs from other birds%'" },
+      ];
+
+      const eggTypePromises = eggTypes.map(async (type) => {
+        const res = await fetchQuery(addProductionYearFilter(
+          "SELECT SUM(deger) as toplam FROM üretimindex WHERE " + type.query,
+          selectedYear
+        ));
+        return {
+          name: type.name,
+          value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
+        };
+      });
+      const eggDistribution = await Promise.all(eggTypePromises);
+
+      const topCountriesRes = await fetchQuery(addProductionYearFilter(
+        "SELECT ülke as ulke, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%Hen eggs%' GROUP BY ülke ORDER BY toplam DESC LIMIT 10",
+        selectedYear
+      ));
+
+      const yearlyRes = await fetchQuery(
+        "SELECT yil, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%egg%' AND ürün NOT LIKE '%Eggplant%' GROUP BY yil ORDER BY yil"
+      );
+
+      const turkeyRes = await fetchQuery(addProductionYearFilter(
+        "SELECT ülke, SUM(deger) as toplam FROM üretimindex WHERE ürün LIKE '%Hen eggs%' GROUP BY ülke ORDER BY toplam DESC",
+        selectedYear
+      ));
+      
+      const turkeyData = turkeyRes.data || [];
+      const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
+        String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
+      );
+
+      setData({
+        totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
+        eggTypeDistribution: eggDistribution.filter(m => m.value > 0),
+        topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
+          ulke: String(d.ulke || 'Bilinmiyor'),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
+          yil: String(d.yil || ''),
+          toplam: parseFloat(String(d.toplam ?? 0)) || 0
+        })),
+        turkeyRank: {
+          rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
+          total: turkeyData.length,
+          value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
+        }
+      });
+    } catch (error) {
+      console.error('Error loading egg data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        // Total egg production
-        const totalRes = await fetchQuery(`
-          SELECT SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%egg%' AND ürün NOT LIKE '%Eggplant%'
-        `);
-
-        // Egg type distribution
-        const eggTypes = [
-          { name: 'Tavuk Yumurtası', query: "ürün LIKE '%Hen eggs%'" },
-          { name: 'Diğer Kuş Yumurtaları', query: "ürün LIKE '%Eggs from other birds%'" },
-        ];
-
-        const eggTypePromises = eggTypes.map(async (type) => {
-          const res = await fetchQuery(`
-            SELECT SUM(deger) as toplam 
-            FROM üretimindex 
-            WHERE ${type.query}
-          `);
-          return {
-            name: type.name,
-            value: parseFloat(String(res.data?.[0]?.toplam ?? 0)) || 0
-          };
-        });
-        const eggDistribution = await Promise.all(eggTypePromises);
-
-        // Top producing countries
-        const topCountriesRes = await fetchQuery(`
-          SELECT ülke as ulke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Hen eggs%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC 
-          LIMIT 10
-        `);
-
-        // Yearly trend
-        const yearlyRes = await fetchQuery(`
-          SELECT yil, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%egg%' AND ürün NOT LIKE '%Eggplant%'
-          GROUP BY yil 
-          ORDER BY yil
-        `);
-
-        // Turkey's rank
-        const turkeyRes = await fetchQuery(`
-          SELECT ülke, SUM(deger) as toplam 
-          FROM üretimindex 
-          WHERE ürün LIKE '%Hen eggs%'
-          GROUP BY ülke 
-          ORDER BY toplam DESC
-        `);
-        
-        const turkeyData = turkeyRes.data || [];
-        const turkeyIndex = turkeyData.findIndex((d: Record<string, string | number>) => 
-          String(d.ulke).toLowerCase().includes('turkey') || String(d.ulke).toLowerCase().includes('türk')
-        );
-
-        setData({
-          totalProduction: parseFloat(String(totalRes.data?.[0]?.toplam ?? 0)) || 0,
-          eggTypeDistribution: eggDistribution.filter(e => e.value > 0),
-          topCountries: (topCountriesRes.data || []).map((d: Record<string, string | number>) => ({
-            ulke: String(d.ulke || 'Bilinmiyor'),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          yearlyTrend: (yearlyRes.data || []).map((d: Record<string, string | number>) => ({
-            yil: String(d.yil || ''),
-            toplam: parseFloat(String(d.toplam ?? 0)) || 0
-          })),
-          turkeyRank: {
-            rank: turkeyIndex >= 0 ? turkeyIndex + 1 : 0,
-            total: turkeyData.length,
-            value: turkeyIndex >= 0 ? parseFloat(String(turkeyData[turkeyIndex]?.toplam ?? 0)) : 0
-          }
-        });
-      } catch (error) {
-        console.error('Error loading egg data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -128,7 +131,12 @@ export function EggProductionPage() {
         <p className="page-subtitle">Dünya yumurta üretimi verileri ve analizler</p>
       </div>
 
-      {/* KPI Cards */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={PRODUCTION_YEARS}
+      />
+
       <div className="kpi-grid">
         <KPICard
           title="Toplam Yumurta Üretimi"
@@ -143,7 +151,7 @@ export function EggProductionPage() {
           value={formatNumber(data?.topCountries.length || 0) + '+'}
           subtitle="Yumurta üreten ülke sayısı"
           icon={Globe}
-          color="blue"
+          color="teal"
         />
         <KPICard
           title="Türkiye Sıralaması"
@@ -161,10 +169,9 @@ export function EggProductionPage() {
         />
       </div>
 
-      {/* Charts */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🌍 En Çok Tavuk Yumurtası Üreten Ülkeler</h3>
+          <h3 className="chart-title">🌍 En Çok Yumurta Üreten Ülkeler</h3>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data?.topCountries.map(c => ({
               name: c.ulke.substring(0, 15),
@@ -211,7 +218,6 @@ export function EggProductionPage() {
         </div>
       </div>
 
-      {/* Yearly Trend */}
       <div className="chart-card" style={{ marginTop: '1.5rem' }}>
         <h3 className="chart-title">📈 Yıllık Yumurta Üretim Trendi</h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -228,9 +234,8 @@ export function EggProductionPage() {
         </ResponsiveContainer>
       </div>
 
-      {/* Country Rankings Table */}
       <div className="data-table" style={{ marginTop: '1.5rem' }}>
-        <h3 className="data-table-title">🏆 Tavuk Yumurtası Üretim Sıralaması</h3>
+        <h3 className="data-table-title">🏆 Yumurta Üretim Sıralaması</h3>
         {data?.topCountries.map((country, index) => (
           <div key={index} className="table-row">
             <div className="table-rank" style={{ background: index < 3 ? '#f59e0b' : '#374151' }}>

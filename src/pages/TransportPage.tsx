@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Truck, Ship, Plane, Train } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
-import { fetchQuery, formatMoney, formatNumber, queries } from '../services/api';
+import { DateFilter } from '../components/DateFilter';
+import { fetchQuery, formatMoney, formatNumber, queries, addYearFilter, TRADE_YEARS } from '../services/api';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6', '#ec4899', '#3b82f6'];
 
@@ -29,27 +30,29 @@ interface TransportData {
 export function TransportPage() {
   const [data, setData] = useState<TransportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const transportRes = await fetchQuery(addYearFilter(queries.transportModes, selectedYear));
+      const modes = (transportRes.data || []) as { tasimaSekli: string; toplam: number; cnt: number }[];
+      const total = modes.reduce((sum, m) => sum + (parseFloat(String(m.toplam)) || 0), 0);
+
+      setData({
+        transportModes: modes,
+        totalTransport: total,
+      });
+    } catch (error) {
+      console.error('Error loading transport data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const transportRes = await fetchQuery(queries.transportModes);
-        const modes = (transportRes.data || []) as { tasimaSekli: string; toplam: number; cnt: number }[];
-        const total = modes.reduce((sum, m) => sum + (parseFloat(String(m.toplam)) || 0), 0);
-
-        setData({
-          transportModes: modes,
-          totalTransport: total,
-        });
-      } catch (error) {
-        console.error('Error loading transport data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   if (loading) return <Loading />;
 
@@ -59,6 +62,13 @@ export function TransportPage() {
         <h1 className="page-title">Taşıma Modları</h1>
         <p className="page-subtitle">Lojistik ve taşıma analizi</p>
       </div>
+
+      {/* Date Filter */}
+      <DateFilter
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        availableYears={TRADE_YEARS}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid">
