@@ -7,6 +7,10 @@ import { ExportPage } from './pages/ExportPage';
 import { ImportPage } from './pages/ImportPage';
 import { TransportPage } from './pages/TransportPage';
 import { ProductionPage } from './pages/ProductionPage';
+import { MeatProductionPage } from './pages/MeatProductionPage';
+import { DairyProductionPage } from './pages/DairyProductionPage';
+import { EggProductionPage } from './pages/EggProductionPage';
+import { LivestockCompetitionPage } from './pages/LivestockCompetitionPage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
@@ -33,6 +37,10 @@ function App() {
             <Route path="/import" element={<ImportPage />} />
             <Route path="/transport" element={<TransportPage />} />
             <Route path="/production" element={<ProductionPage />} />
+            <Route path="/meat" element={<MeatProductionPage />} />
+            <Route path="/dairy" element={<DairyProductionPage />} />
+            <Route path="/eggs" element={<EggProductionPage />} />
+            <Route path="/competition" element={<LivestockCompetitionPage />} />
           </Routes>
         </main>
       </BrowserRouter>

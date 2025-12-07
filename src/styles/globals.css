@@ -113,6 +113,16 @@ body {
   color: white;
 }
 
+.nav-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 20px 24px 8px;
+  margin-top: 8px;
+}
+
 .nav-item svg {
   width: 20px;
   height: 20px;
