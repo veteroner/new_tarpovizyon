@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Milk, Egg, Trophy } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Milk, Egg, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -19,6 +19,18 @@ export function Sidebar({ apiConnected }: SidebarProps) {
     { path: '/dairy', icon: Milk, label: 'Süt Üretimi' },
     { path: '/eggs', icon: Egg, label: 'Yumurta' },
     { path: '/competition', icon: Trophy, label: 'Rekabet Analizi' },
+  ];
+
+  const plantProductionItems = [
+    { path: '/cereals', icon: Wheat, label: 'Tahıl' },
+    { path: '/vegetables', icon: Carrot, label: 'Sebze' },
+    { path: '/fruits', icon: Apple, label: 'Meyve' },
+    { path: '/legumes', icon: Bean, label: 'Baklagil' },
+    { path: '/oilseeds', icon: Flower2, label: 'Yağlı Tohum' },
+    { path: '/sugar-crops', icon: Candy, label: 'Şekerli Bitki' },
+    { path: '/nuts', icon: Nut, label: 'Sert Kabuklu' },
+    { path: '/beverages', icon: Coffee, label: 'İçecek Bitkileri' },
+    { path: '/fiber-crops', icon: Ribbon, label: 'Lifli Bitki' },
   ];
 
   return (
@@ -43,9 +55,22 @@ export function Sidebar({ apiConnected }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">Hayvansal Üretim</div>
+        <div className="nav-section-title">🐄 Hayvansal Üretim</div>
         
         {animalProductionItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          >
+            <item.icon size={20} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        <div className="nav-section-title">🌱 Bitkisel Üretim</div>
+        
+        {plantProductionItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
