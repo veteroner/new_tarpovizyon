@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -33,6 +33,17 @@ export function Sidebar({ apiConnected }: SidebarProps) {
     { path: '/nuts', icon: Nut, label: 'Sert Kabuklu' },
     { path: '/beverages', icon: Coffee, label: 'İçecek Bitkileri' },
     { path: '/fiber-crops', icon: Ribbon, label: 'Lifli Bitki' },
+  ];
+
+  const faoDataItems = [
+    { path: '/land-use', icon: MapPin, label: 'Arazi Kullanımı' },
+    { path: '/livestock-stocks', icon: PawPrint, label: 'Hayvan Stokları' },
+    { path: '/employment', icon: Users, label: 'Tarım İstihdamı' },
+    { path: '/fertilizer', icon: Beaker, label: 'Gübre' },
+    { path: '/pesticide', icon: Bug, label: 'Pestisit' },
+    { path: '/population', icon: Globe, label: 'Nüfus' },
+    { path: '/land-cover', icon: TreePine, label: 'Arazi Örtüsü' },
+    { path: '/food-balance', icon: Scale, label: 'Gıda Dengesi' },
   ];
 
   return (
@@ -73,6 +84,19 @@ export function Sidebar({ apiConnected }: SidebarProps) {
         <div className="nav-section-title">🌱 Bitkisel Üretim</div>
         
         {plantProductionItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          >
+            <item.icon size={20} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        <div className="nav-section-title">📊 FAO Verileri</div>
+        
+        {faoDataItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

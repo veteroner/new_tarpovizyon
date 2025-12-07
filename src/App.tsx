@@ -24,6 +24,15 @@ import SugarCropProductionPage from './pages/SugarCropProductionPage';
 import NutProductionPage from './pages/NutProductionPage';
 import BeverageCropPage from './pages/BeverageCropPage';
 import FiberCropPage from './pages/FiberCropPage';
+// FAO Verileri Sayfaları
+import LandUsePage from './pages/LandUsePage';
+import LivestockStocksPage from './pages/LivestockStocksPage';
+import AgriculturalEmploymentPage from './pages/AgriculturalEmploymentPage';
+import FertilizerPage from './pages/FertilizerPage';
+import PesticidePage from './pages/PesticidePage';
+import PopulationPage from './pages/PopulationPage';
+import LandCoverPage from './pages/LandCoverPage';
+import FoodBalancePage from './pages/FoodBalancePage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
@@ -67,6 +76,15 @@ function App() {
             <Route path="/nuts" element={<NutProductionPage />} />
             <Route path="/beverages" element={<BeverageCropPage />} />
             <Route path="/fiber-crops" element={<FiberCropPage />} />
+            {/* FAO Verileri Routes */}
+            <Route path="/land-use" element={<LandUsePage />} />
+            <Route path="/livestock-stocks" element={<LivestockStocksPage />} />
+            <Route path="/employment" element={<AgriculturalEmploymentPage />} />
+            <Route path="/fertilizer" element={<FertilizerPage />} />
+            <Route path="/pesticide" element={<PesticidePage />} />
+            <Route path="/population" element={<PopulationPage />} />
+            <Route path="/land-cover" element={<LandCoverPage />} />
+            <Route path="/food-balance" element={<FoodBalancePage />} />
           </Routes>
         </main>
       </BrowserRouter>
