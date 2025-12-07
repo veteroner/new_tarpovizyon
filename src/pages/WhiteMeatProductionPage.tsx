@@ -10,7 +10,7 @@ import {
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
 
-const COLORS = ['#f59e0b', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#06b6d4'];
+const COLORS = ['#f59e0b', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6'];
 
 interface ProductDataItem {
   [key: string]: string | number;
@@ -28,9 +28,12 @@ interface CountryDataItem {
   fill: string;
 }
 
-const EGG_PRODUCTS = [
-  { id: 'Hen eggs in shell, fresh', name: 'Hen Eggs', nameTR: 'Tavuk Yumurtası' },
-  { id: 'Eggs from other birds in shell, fresh, n.e.c.', name: 'Other Bird Eggs', nameTR: 'Diğer Kuş Yumurtaları' },
+const WHITE_MEAT_PRODUCTS = [
+  { id: 'Meat of chickens, fresh or chilled', name: 'Chicken', nameTR: 'Tavuk Eti' },
+  { id: 'Meat of ducks, fresh or chilled', name: 'Duck', nameTR: 'Ördek Eti' },
+  { id: 'Meat of geese, fresh or chilled', name: 'Geese', nameTR: 'Kaz Eti' },
+  { id: 'Meat of turkeys, fresh or chilled', name: 'Turkey', nameTR: 'Hindi Eti' },
+  { id: 'Meat of pigeons and other birds n.e.c., fresh, chilled or frozen', name: 'Pigeon', nameTR: 'Güvercin Eti' },
 ];
 
 function formatTon(value: number): string {
@@ -47,10 +50,11 @@ function formatTonShort(value: number): string {
   return value.toFixed(0);
 }
 
-export default function EggProductionPage() {
+export default function WhiteMeatProductionPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([
-    'Hen eggs in shell, fresh',
-    'Eggs from other birds in shell, fresh, n.e.c.'
+    'Meat of chickens, fresh or chilled',
+    'Meat of ducks, fresh or chilled',
+    'Meat of turkeys, fresh or chilled'
   ]);
   const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
@@ -96,7 +100,7 @@ export default function EggProductionPage() {
       if (productRes.data) {
         const mapped = productRes.data.map((item, index: number) => {
           const itemName = String(item['item'] || '');
-          const product = EGG_PRODUCTS.find(p => p.id === itemName);
+          const product = WHITE_MEAT_PRODUCTS.find(p => p.id === itemName);
           return {
             name: product?.nameTR || itemName,
             nameEN: itemName,
@@ -156,8 +160,8 @@ export default function EggProductionPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🥚 Yumurta Üretimi</h1>
-        <p className="page-subtitle">Dünya yumurta üretimi verileri - Ton bazında ({selectedYear})</p>
+        <h1 className="page-title">🍗 Beyaz Et Üretimi</h1>
+        <p className="page-subtitle">Dünya kanatlı hayvan eti üretimi verileri - Ton bazında ({selectedYear})</p>
       </div>
 
       {/* Filtreler */}
@@ -171,10 +175,10 @@ export default function EggProductionPage() {
             Ürün Seçimi
           </label>
           <ProductSelector
-            products={EGG_PRODUCTS}
+            products={WHITE_MEAT_PRODUCTS}
             selectedProducts={selectedProducts}
             onSelectionChange={setSelectedProducts}
-            placeholder="Yumurta türü seçin..."
+            placeholder="Beyaz et türü seçin..."
           />
         </div>
         <div className="filter-group">
@@ -220,7 +224,7 @@ export default function EggProductionPage() {
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">ÜRÜN SAYISI</span>
-                <div className="kpi-icon green">🥚</div>
+                <div className="kpi-icon green">🍗</div>
               </div>
               <div className="kpi-value">{productData.length}</div>
               <div className="kpi-subtitle">Aktif ürün</div>
@@ -246,12 +250,12 @@ export default function EggProductionPage() {
           {/* Grafikler - Satır 1 */}
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Yumurta Türü Karşılaştırması</h3>
+              <h3 className="chart-title">📊 Kanatlı Et Karşılaştırması</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={120} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
                   <Tooltip 
                     formatter={(value: number) => [formatTon(value), 'Üretim']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -266,7 +270,7 @@ export default function EggProductionPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🥧 Yumurta Türü Dağılımı</h3>
+              <h3 className="chart-title">🥧 Kanatlı Et Dağılımı</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie

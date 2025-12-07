@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Milk, Egg, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -15,10 +15,12 @@ export function Sidebar({ apiConnected }: SidebarProps) {
   ];
 
   const animalProductionItems = [
-    { path: '/meat', icon: Beef, label: 'Et Üretimi' },
-    { path: '/dairy', icon: Milk, label: 'Süt Üretimi' },
+    { path: '/red-meat', icon: Beef, label: 'Kırmızı Et' },
+    { path: '/white-meat', icon: Drumstick, label: 'Beyaz Et' },
+    { path: '/milk', icon: Milk, label: 'Süt Üretimi' },
     { path: '/eggs', icon: Egg, label: 'Yumurta' },
-    { path: '/competition', icon: Trophy, label: 'Rekabet Analizi' },
+    { path: '/other-animal', icon: Package, label: 'Diğer Ürünler' },
+    { path: '/livestock-competition', icon: Trophy, label: 'Rekabet Analizi' },
   ];
 
   const plantProductionItems = [
