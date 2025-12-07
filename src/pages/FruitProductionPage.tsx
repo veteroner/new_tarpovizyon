@@ -141,7 +141,7 @@ export default function FruitProductionPage() {
   }));
 
   return (
-    <div className="main-content">
+    <div>
       <div className="page-header">
         <h1 className="page-title">🍎 Meyve Üretimi</h1>
         <p className="page-subtitle">Dünya meyve üretim değerleri ve istatistikleri (2021)</p>
