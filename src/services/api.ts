@@ -5,7 +5,7 @@ const API_KEY = 'dashboard_secret_key_2024';
 
 export interface QueryResult {
   success?: boolean;
-  data?: any[];
+  data?: Record<string, string | number>[];
   error?: string;
 }
 

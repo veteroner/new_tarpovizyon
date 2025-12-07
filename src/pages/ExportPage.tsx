@@ -29,9 +29,9 @@ export function ExportPage() {
         ]);
 
         setData({
-          totalExport: parseFloat(exportRes.data?.[0]?.toplam) || 0,
-          exportCount: parseInt(exportRes.data?.[0]?.cnt) || 0,
-          topCountries: countriesRes.data || [],
+          totalExport: parseFloat(String(exportRes.data?.[0]?.toplam ?? 0)) || 0,
+          exportCount: parseInt(String(exportRes.data?.[0]?.cnt ?? 0)) || 0,
+          topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
         });
       } catch (error) {
         console.error('Error loading export data:', error);

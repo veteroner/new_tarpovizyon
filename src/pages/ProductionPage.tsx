@@ -40,11 +40,11 @@ export function ProductionPage() {
         
         setData({
           stats: {
-            toplamUrun: parseInt(statsData?.toplamUrun) || 0,
-            toplamUretim: parseFloat(statsData?.toplamUretim) || 0,
+            toplamUrun: parseInt(String(statsData?.toplamUrun ?? 0)) || 0,
+            toplamUretim: parseFloat(String(statsData?.toplamUretim ?? 0)) || 0,
           },
-          topProducts: productsRes.data || [],
-          yearlyProduction: yearlyRes.data || [],
+          topProducts: (productsRes.data || []) as { ad: string; miktar: number; birim: string }[],
+          yearlyProduction: (yearlyRes.data || []) as { yil: string; toplam: number }[],
         });
       } catch (error) {
         console.error('Error loading production data:', error);

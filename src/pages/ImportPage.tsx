@@ -29,9 +29,9 @@ export function ImportPage() {
         ]);
 
         setData({
-          totalImport: parseFloat(importRes.data?.[0]?.toplam) || 0,
-          importCount: parseInt(importRes.data?.[0]?.cnt) || 0,
-          topCountries: countriesRes.data || [],
+          totalImport: parseFloat(String(importRes.data?.[0]?.toplam ?? 0)) || 0,
+          importCount: parseInt(String(importRes.data?.[0]?.cnt ?? 0)) || 0,
+          topCountries: (countriesRes.data || []) as { ulke: string; toplam: number; cnt: number }[],
         });
       } catch (error) {
         console.error('Error loading import data:', error);
