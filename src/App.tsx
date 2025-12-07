@@ -7,10 +7,13 @@ import { ExportPage } from './pages/ExportPage';
 import { ImportPage } from './pages/ImportPage';
 import { TransportPage } from './pages/TransportPage';
 import { ProductionPage } from './pages/ProductionPage';
-import { MeatProductionPage } from './pages/MeatProductionPage';
-import { DairyProductionPage } from './pages/DairyProductionPage';
-import { EggProductionPage } from './pages/EggProductionPage';
 import { LivestockCompetitionPage } from './pages/LivestockCompetitionPage';
+// Hayvansal Üretim Sayfaları (TON bazlı)
+import RedMeatProductionPage from './pages/RedMeatProductionPage';
+import WhiteMeatProductionPage from './pages/WhiteMeatProductionPage';
+import MilkProductionPage from './pages/MilkProductionPage';
+import EggProductionPage from './pages/EggProductionPage';
+import OtherAnimalProductsPage from './pages/OtherAnimalProductsPage';
 // Bitkisel Üretim Sayfaları
 import CerealProductionPage from './pages/CerealProductionPage';
 import VegetableProductionPage from './pages/VegetableProductionPage';
@@ -47,10 +50,13 @@ function App() {
             <Route path="/import" element={<ImportPage />} />
             <Route path="/transport" element={<TransportPage />} />
             <Route path="/production" element={<ProductionPage />} />
-            <Route path="/meat" element={<MeatProductionPage />} />
-            <Route path="/dairy" element={<DairyProductionPage />} />
+            {/* Hayvansal Üretim Routes */}
+            <Route path="/red-meat" element={<RedMeatProductionPage />} />
+            <Route path="/white-meat" element={<WhiteMeatProductionPage />} />
+            <Route path="/milk" element={<MilkProductionPage />} />
             <Route path="/eggs" element={<EggProductionPage />} />
-            <Route path="/competition" element={<LivestockCompetitionPage />} />
+            <Route path="/other-animal" element={<OtherAnimalProductsPage />} />
+            <Route path="/livestock-competition" element={<LivestockCompetitionPage />} />
             {/* Bitkisel Üretim Routes */}
             <Route path="/cereals" element={<CerealProductionPage />} />
             <Route path="/vegetables" element={<VegetableProductionPage />} />

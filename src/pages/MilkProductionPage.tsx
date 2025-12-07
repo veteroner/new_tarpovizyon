@@ -10,7 +10,7 @@ import {
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
 
-const COLORS = ['#f59e0b', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#06b6d4'];
+const COLORS = ['#3b82f6', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#eab308', '#f59e0b', '#ef4444'];
 
 interface ProductDataItem {
   [key: string]: string | number;
@@ -28,9 +28,12 @@ interface CountryDataItem {
   fill: string;
 }
 
-const EGG_PRODUCTS = [
-  { id: 'Hen eggs in shell, fresh', name: 'Hen Eggs', nameTR: 'Tavuk Yumurtası' },
-  { id: 'Eggs from other birds in shell, fresh, n.e.c.', name: 'Other Bird Eggs', nameTR: 'Diğer Kuş Yumurtaları' },
+const MILK_PRODUCTS = [
+  { id: 'Raw milk of cattle', name: 'Cattle Milk', nameTR: 'İnek Sütü' },
+  { id: 'Raw milk of buffalo', name: 'Buffalo Milk', nameTR: 'Manda Sütü' },
+  { id: 'Raw milk of goats', name: 'Goat Milk', nameTR: 'Keçi Sütü' },
+  { id: 'Raw milk of sheep', name: 'Sheep Milk', nameTR: 'Koyun Sütü' },
+  { id: 'Raw milk of camel', name: 'Camel Milk', nameTR: 'Deve Sütü' },
 ];
 
 function formatTon(value: number): string {
@@ -47,10 +50,11 @@ function formatTonShort(value: number): string {
   return value.toFixed(0);
 }
 
-export default function EggProductionPage() {
+export default function MilkProductionPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([
-    'Hen eggs in shell, fresh',
-    'Eggs from other birds in shell, fresh, n.e.c.'
+    'Raw milk of cattle',
+    'Raw milk of buffalo',
+    'Raw milk of goats'
   ]);
   const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
@@ -96,7 +100,7 @@ export default function EggProductionPage() {
       if (productRes.data) {
         const mapped = productRes.data.map((item, index: number) => {
           const itemName = String(item['item'] || '');
-          const product = EGG_PRODUCTS.find(p => p.id === itemName);
+          const product = MILK_PRODUCTS.find(p => p.id === itemName);
           return {
             name: product?.nameTR || itemName,
             nameEN: itemName,
@@ -156,8 +160,8 @@ export default function EggProductionPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🥚 Yumurta Üretimi</h1>
-        <p className="page-subtitle">Dünya yumurta üretimi verileri - Ton bazında ({selectedYear})</p>
+        <h1 className="page-title">🥛 Süt Üretimi</h1>
+        <p className="page-subtitle">Dünya süt üretimi verileri - Ton bazında ({selectedYear})</p>
       </div>
 
       {/* Filtreler */}
@@ -171,10 +175,10 @@ export default function EggProductionPage() {
             Ürün Seçimi
           </label>
           <ProductSelector
-            products={EGG_PRODUCTS}
+            products={MILK_PRODUCTS}
             selectedProducts={selectedProducts}
             onSelectionChange={setSelectedProducts}
-            placeholder="Yumurta türü seçin..."
+            placeholder="Süt türü seçin..."
           />
         </div>
         <div className="filter-group">
@@ -220,7 +224,7 @@ export default function EggProductionPage() {
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">ÜRÜN SAYISI</span>
-                <div className="kpi-icon green">🥚</div>
+                <div className="kpi-icon green">🥛</div>
               </div>
               <div className="kpi-value">{productData.length}</div>
               <div className="kpi-subtitle">Aktif ürün</div>
@@ -246,12 +250,12 @@ export default function EggProductionPage() {
           {/* Grafikler - Satır 1 */}
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Yumurta Türü Karşılaştırması</h3>
+              <h3 className="chart-title">📊 Süt Türü Karşılaştırması</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={120} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
                   <Tooltip 
                     formatter={(value: number) => [formatTon(value), 'Üretim']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -266,7 +270,7 @@ export default function EggProductionPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🥧 Yumurta Türü Dağılımı</h3>
+              <h3 className="chart-title">🥧 Süt Türü Dağılımı</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -337,7 +341,7 @@ export default function EggProductionPage() {
                   <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatTon(value) : `%${value}`, name === 'value' ? 'Üretim' : 'Pay']} />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="value" name="Üretim" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="value" name="Üretim" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -353,7 +357,7 @@ export default function EggProductionPage() {
                   <PolarGrid stroke="var(--border)" />
                   <PolarAngleAxis dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
                   <PolarRadiusAxis tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
-                  <Radar name="Üretim (M ton)" dataKey="value" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.5} />
+                  <Radar name="Üretim (M ton)" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
                   <Tooltip formatter={(value: number) => [`${value.toFixed(2)}M ton`, 'Üretim']} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -367,7 +371,7 @@ export default function EggProductionPage() {
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
                   <Tooltip formatter={(value: number) => [formatTon(value), 'Üretim']} />
-                  <Area type="monotone" dataKey="value" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
+                  <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
