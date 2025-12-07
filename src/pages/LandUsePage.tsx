@@ -38,6 +38,8 @@ const LAND_USE_ITEMS = [
   { id: 'Tarım', name: 'Agriculture', nameTR: 'Tarım' },
 ];
 
+// Not: item_tr kullanıyor
+
 function formatArea(value: number): string {
   if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyar ha';
   if (value >= 1e3) return (value / 1e3).toFixed(2) + ' Milyon ha';
@@ -76,19 +78,19 @@ export default function LandUsePage() {
     try {
       const itemList = selectedItems.map(p => `'${p}'`).join(',');
       
-      const landQuery = `SELECT item, item_tr, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
+      const landQuery = `SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
         FROM fao_land_use 
-        WHERE year='${selectedYear}' AND item IN (${itemList})
-        GROUP BY item, item_tr ORDER BY toplam DESC`;
+        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
+        GROUP BY item_tr ORDER BY toplam DESC`;
       
       const countryQuery = `SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
         FROM fao_land_use 
-        WHERE year='${selectedYear}' AND item IN (${itemList})
+        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
         GROUP BY area ORDER BY toplam DESC LIMIT 20`;
 
       const yearlyQuery = `SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
         FROM fao_land_use 
-        WHERE item IN (${itemList})
+        WHERE item_tr IN (${itemList})
         GROUP BY year ORDER BY year`;
 
       const [landRes, countryRes, yearlyRes] = await Promise.all([

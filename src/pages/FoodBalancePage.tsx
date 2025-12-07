@@ -82,16 +82,15 @@ export default function FoodBalancePage() {
       const itemList = selectedItems.join(',');
       
       // Ürün bazlı veri - urun kodları ile
-      const foodQuery = `SELECT b.urun, i.item as item_name,
+      const foodQuery = `SELECT b.urun,
         SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as uretim,
         SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat,
         SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat,
         SUM(CAST(b.gida_v AS DECIMAL(20,2))) as gida,
         AVG(CAST(b.kbgtcal_v AS DECIMAL(10,2))) as kalori
         FROM fao_balans b
-        LEFT JOIN item_all i ON b.urun = i.itemcode AND i.domain_code='FBS'
         WHERE b.yil='${selectedYear}' AND b.urun IN (${itemList})
-        GROUP BY b.urun, i.item ORDER BY uretim DESC`;
+        GROUP BY b.urun ORDER BY uretim DESC`;
       
       // Ülke bazlı veri - ulke kodları ile area tablosu yok, direkt toplam
       const countryQuery = `SELECT b.ulke, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam 
