@@ -666,3 +666,237 @@ body {
   border-radius: 8px !important;
   box-shadow: var(--shadow-lg) !important;
 }
+
+/* ==================== */
+/* iOS Wheel Picker     */
+/* ==================== */
+.wheel-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.wheel-picker-container {
+  width: 100%;
+  max-width: 400px;
+  background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+  border-radius: 24px 24px 0 0;
+  padding: 0;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+.wheel-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: white;
+}
+
+.wheel-picker-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.wheel-picker-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wheel-picker-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.wheel-picker-content {
+  position: relative;
+  height: 350px;
+  overflow: hidden;
+  background: linear-gradient(180deg, 
+    rgba(255,255,255,0.9) 0%, 
+    rgba(255,255,255,0.95) 50%, 
+    rgba(255,255,255,0.9) 100%
+  );
+}
+
+.wheel-picker-wheel {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.wheel-picker-wheel:active {
+  cursor: grabbing;
+}
+
+.wheel-picker-highlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 50px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+  border-radius: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wheel-picker-gradient-top,
+.wheel-picker-gradient-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 120px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.wheel-picker-gradient-top {
+  top: 0;
+  background: linear-gradient(to bottom, 
+    rgba(248, 250, 252, 1) 0%, 
+    rgba(248, 250, 252, 0.8) 50%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.wheel-picker-gradient-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, 
+    rgba(248, 250, 252, 1) 0%, 
+    rgba(248, 250, 252, 0.8) 50%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.wheel-picker-items {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transition: transform 0.1s ease-out;
+  transform-style: preserve-3d;
+}
+
+.wheel-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.wheel-picker-item.selected {
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.wheel-picker-item.category {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: default;
+}
+
+.wheel-picker-item:not(.category):hover {
+  color: #3b82f6;
+}
+
+.wheel-item-icon {
+  font-size: 22px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.wheel-item-label {
+  flex: 1;
+  text-align: left;
+}
+
+.wheel-item-category {
+  text-align: center;
+  width: 100%;
+}
+
+.wheel-picker-select-btn {
+  width: calc(100% - 32px);
+  margin: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.wheel-picker-select-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+.wheel-picker-select-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.wheel-picker-select-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Desktop'ta wheel picker gizle */
+@media (min-width: 769px) {
+  .wheel-picker-overlay {
+    display: none;
+  }
+}
+
