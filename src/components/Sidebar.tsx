@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale, LineChart, DollarSign, Building, Tractor } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -45,6 +45,13 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
     { path: '/population', icon: Globe, label: 'Nüfus' },
     { path: '/land-cover', icon: TreePine, label: 'Arazi Örtüsü' },
     { path: '/food-balance', icon: Scale, label: 'Gıda Dengesi' },
+    { path: '/price-index', icon: LineChart, label: 'Fiyat Endeksleri' },
+    { path: '/macro-economic', icon: DollarSign, label: 'Makroekonomi' },
+  ];
+
+  const tuikDataItems = [
+    { path: '/tuik-plant', icon: Tractor, label: 'TÜİK Bitkisel' },
+    { path: '/tuik-livestock', icon: Building, label: 'TÜİK Hayvancılık' },
   ];
 
   return (
@@ -98,6 +105,19 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
         <div className="nav-section-title">📊 FAO Verileri</div>
         
         {faoDataItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          >
+            <item.icon size={20} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        <div className="nav-section-title">🇹🇷 TÜİK Türkiye</div>
+        
+        {tuikDataItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
