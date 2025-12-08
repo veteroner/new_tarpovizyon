@@ -35,6 +35,11 @@ import PesticidePage from './pages/PesticidePage';
 import PopulationPage from './pages/PopulationPage';
 import LandCoverPage from './pages/LandCoverPage';
 import FoodBalancePage from './pages/FoodBalancePage';
+// Yeni Sayfalar
+import PriceIndexPage from './pages/PriceIndexPage';
+import MacroEconomicPage from './pages/MacroEconomicPage';
+import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
+import TuikLivestockPage from './pages/TuikLivestockPage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
@@ -99,6 +104,11 @@ function AppContent({ apiConnected }: { apiConnected: boolean }) {
           <Route path="/population" element={<PopulationPage />} />
           <Route path="/land-cover" element={<LandCoverPage />} />
           <Route path="/food-balance" element={<FoodBalancePage />} />
+          {/* Yeni Sayfalar */}
+          <Route path="/price-index" element={<PriceIndexPage />} />
+          <Route path="/macro-economic" element={<MacroEconomicPage />} />
+          <Route path="/tuik-plant" element={<TuikPlantProductionPage />} />
+          <Route path="/tuik-livestock" element={<TuikLivestockPage />} />
         </Routes>
       </main>
     </>

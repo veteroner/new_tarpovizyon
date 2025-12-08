@@ -45,6 +45,12 @@ const menuItems: MenuItem[] = [
   { path: '/population', label: 'Nüfus', icon: '🌍' },
   { path: '/land-cover', label: 'Arazi Örtüsü', icon: '🌲' },
   { path: '/food-balance', label: 'Gıda Dengesi', icon: '⚖️' },
+  { path: '/price-index', label: 'Fiyat Endeksleri', icon: '📈' },
+  { path: '/macro-economic', label: 'Makroekonomi', icon: '💰' },
+  // TÜİK Türkiye
+  { path: '', label: '🇹🇷 TÜİK Türkiye', icon: '', isCategory: true },
+  { path: '/tuik-plant', label: 'TÜİK Bitkisel', icon: '🚜' },
+  { path: '/tuik-livestock', label: 'TÜİK Hayvancılık', icon: '🏠' },
 ];
 
 interface WheelPickerProps {
