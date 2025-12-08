@@ -698,10 +698,10 @@ body {
 .wheel-picker-container {
   width: 100%;
   max-width: 400px;
-  background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   border-radius: 24px 24px 0 0;
   padding: 0;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease;
   overflow: hidden;
 }
@@ -743,11 +743,7 @@ body {
   position: relative;
   height: 350px;
   overflow: hidden;
-  background: linear-gradient(180deg, 
-    rgba(255,255,255,0.9) 0%, 
-    rgba(255,255,255,0.95) 50%, 
-    rgba(255,255,255,0.9) 100%
-  );
+  background: transparent;
 }
 
 .wheel-picker-wheel {
@@ -767,13 +763,16 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 90%;
-  height: 50px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
-  border-radius: 12px;
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  width: 92%;
+  height: 54px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+  border-radius: 16px;
+  border: none;
   pointer-events: none;
   z-index: 1;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(59, 130, 246, 0.2);
 }
 
 .wheel-picker-gradient-top,
@@ -788,19 +787,21 @@ body {
 
 .wheel-picker-gradient-top {
   top: 0;
+  height: 130px;
   background: linear-gradient(to bottom, 
-    rgba(248, 250, 252, 1) 0%, 
-    rgba(248, 250, 252, 0.8) 50%,
-    rgba(248, 250, 252, 0) 100%
+    rgba(15, 23, 42, 1) 0%, 
+    rgba(15, 23, 42, 0.9) 40%,
+    rgba(15, 23, 42, 0) 100%
   );
 }
 
 .wheel-picker-gradient-bottom {
   bottom: 0;
+  height: 130px;
   background: linear-gradient(to top, 
-    rgba(248, 250, 252, 1) 0%, 
-    rgba(248, 250, 252, 0.8) 50%,
-    rgba(248, 250, 252, 0) 100%
+    rgba(15, 23, 42, 1) 0%, 
+    rgba(15, 23, 42, 0.9) 40%,
+    rgba(15, 23, 42, 0) 100%
   );
 }
 
@@ -816,35 +817,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 0 20px;
-  font-size: 16px;
+  gap: 14px;
+  padding: 0 24px;
+  font-size: 15px;
   font-weight: 500;
-  color: #475569;
-  transition: all 0.15s ease;
+  color: rgba(148, 163, 184, 0.7);
+  transition: all 0.2s ease;
   cursor: pointer;
   user-select: none;
   transform-style: preserve-3d;
   backface-visibility: hidden;
+  will-change: transform, opacity, filter;
 }
 
 .wheel-picker-item.selected {
-  color: #1e40af;
+  color: #ffffff;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 19px;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
 }
 
 .wheel-picker-item.category {
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 600;
+  color: rgba(99, 102, 241, 0.6);
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   cursor: default;
 }
 
 .wheel-picker-item:not(.category):hover {
-  color: #3b82f6;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .wheel-item-icon {
@@ -867,7 +870,7 @@ body {
   width: calc(100% - 32px);
   margin: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   color: white;
   border: none;
   border-radius: 14px;
@@ -875,7 +878,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.2);
 }
 
 .wheel-picker-select-btn:hover:not(:disabled) {
