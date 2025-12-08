@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Sidebar } from './components/Sidebar';
-import { Menu, X } from 'lucide-react';
+import WheelPicker from './components/WheelPicker';
+import { Menu } from 'lucide-react';
 import { OverviewPage } from './pages/OverviewPage';
 import { ExportPage } from './pages/ExportPage';
 import { ImportPage } from './pages/ImportPage';
@@ -40,32 +41,30 @@ const queryClient = new QueryClient();
 
 function AppContent({ apiConnected }: { apiConnected: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [wheelPickerOpen, setWheelPickerOpen] = useState(false);
   const location = useLocation();
 
-  // Sayfa değiştiğinde menüyü kapat
+  // Sayfa değiştiğinde menüleri kapat
   useEffect(() => {
     setSidebarOpen(false);
+    setWheelPickerOpen(false);
   }, [location.pathname]);
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button - Wheel Picker için */}
       <button 
         className="mobile-menu-btn"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label="Menüyü aç/kapat"
+        onClick={() => setWheelPickerOpen(true)}
+        aria-label="Menüyü aç"
       >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        <Menu size={24} />
       </button>
       
-      {/* Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* iOS Style Wheel Picker - Mobil */}
+      <WheelPicker isOpen={wheelPickerOpen} onClose={() => setWheelPickerOpen(false)} />
       
+      {/* Desktop Sidebar */}
       <Sidebar apiConnected={apiConnected} isOpen={sidebarOpen} />
       <main className="main-content">
         <Routes>
