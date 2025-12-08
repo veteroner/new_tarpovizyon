@@ -164,19 +164,21 @@ export default function WheelPicker({ isOpen, onClose }: WheelPickerProps) {
             >
               {menuItems.map((item, index) => {
                 const distance = Math.abs(index - selectedIndex);
-                const rotateX = (index - selectedIndex) * 20;
-                const scale = Math.max(0.7, 1 - distance * 0.1);
-                const opacity = Math.max(0.3, 1 - distance * 0.25);
-                const translateZ = -Math.abs(index - selectedIndex) * 30;
+                const rotateX = (index - selectedIndex) * 35; // Daha agresif 3D açı
+                const scale = index === selectedIndex ? 1.15 : Math.max(0.6, 1 - distance * 0.15);
+                const opacity = index === selectedIndex ? 1 : Math.max(0.2, 1 - distance * 0.35);
+                const translateZ = -Math.abs(index - selectedIndex) * 50;
+                const blur = index === selectedIndex ? 0 : Math.min(distance * 1.5, 4);
                 
                 return (
                   <div
                     key={index}
                     className={`wheel-picker-item ${index === selectedIndex ? 'selected' : ''} ${item.isCategory ? 'category' : ''}`}
                     style={{
-                      transform: `perspective(1000px) rotateX(${rotateX}deg) scale(${scale}) translateZ(${translateZ}px)`,
+                      transform: `perspective(800px) rotateX(${rotateX}deg) scale(${scale}) translateZ(${translateZ}px)`,
                       opacity,
                       height: itemHeight,
+                      filter: blur > 0 ? `blur(${blur}px)` : 'none',
                     }}
                     onClick={() => handleItemClick(index)}
                   >
