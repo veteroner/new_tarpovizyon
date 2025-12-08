@@ -40,7 +40,10 @@ export default function ProductSelector({
 
   const toggleProduct = (productId: string) => {
     if (selectedProducts.includes(productId)) {
-      onSelectionChange(selectedProducts.filter(id => id !== productId));
+      // En az 1 ürün seçili kalmalı
+      if (selectedProducts.length > 1) {
+        onSelectionChange(selectedProducts.filter(id => id !== productId));
+      }
     } else {
       onSelectionChange([...selectedProducts, productId]);
     }
@@ -51,7 +54,10 @@ export default function ProductSelector({
   };
 
   const clearAll = () => {
-    onSelectionChange([]);
+    // En az ilk ürünü seçili bırak
+    if (products.length > 0) {
+      onSelectionChange([products[0].id]);
+    }
   };
 
   const getSelectedNames = () => {
