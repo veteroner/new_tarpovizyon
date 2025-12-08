@@ -3,9 +3,10 @@ import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef,
 
 interface SidebarProps {
   apiConnected: boolean;
+  isOpen?: boolean;
 }
 
-export function Sidebar({ apiConnected }: SidebarProps) {
+export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
   const mainNavItems = [
     { path: '/', icon: LayoutDashboard, label: 'Genel Bakış' },
     { path: '/export', icon: TrendingUp, label: 'İhracat' },
@@ -47,7 +48,7 @@ export function Sidebar({ apiConnected }: SidebarProps) {
   ];
 
   return (
-    <nav className="sidebar">
+    <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <Activity size={24} color="white" />

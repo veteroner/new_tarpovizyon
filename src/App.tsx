@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Sidebar } from './components/Sidebar';
+import { Menu, X } from 'lucide-react';
 import { OverviewPage } from './pages/OverviewPage';
 import { ExportPage } from './pages/ExportPage';
 import { ImportPage } from './pages/ImportPage';
@@ -37,6 +38,74 @@ import './styles/globals.css';
 
 const queryClient = new QueryClient();
 
+function AppContent({ apiConnected }: { apiConnected: boolean }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Sayfa değiştiğinde menüyü kapat
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button 
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Menüyü aç/kapat"
+      >
+        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+      
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      <Sidebar apiConnected={apiConnected} isOpen={sidebarOpen} />
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<OverviewPage />} />
+          <Route path="/export" element={<ExportPage />} />
+          <Route path="/import" element={<ImportPage />} />
+          <Route path="/transport" element={<TransportPage />} />
+          <Route path="/production" element={<ProductionPage />} />
+          {/* Hayvansal Üretim Routes */}
+          <Route path="/red-meat" element={<RedMeatProductionPage />} />
+          <Route path="/white-meat" element={<WhiteMeatProductionPage />} />
+          <Route path="/milk" element={<MilkProductionPage />} />
+          <Route path="/eggs" element={<EggProductionPage />} />
+          <Route path="/other-animal" element={<OtherAnimalProductsPage />} />
+          <Route path="/livestock-competition" element={<LivestockCompetitionPage />} />
+          {/* Bitkisel Üretim Routes */}
+          <Route path="/cereals" element={<CerealProductionPage />} />
+          <Route path="/vegetables" element={<VegetableProductionPage />} />
+          <Route path="/fruits" element={<FruitProductionPage />} />
+          <Route path="/legumes" element={<LegumeProductionPage />} />
+          <Route path="/oilseeds" element={<OilseedProductionPage />} />
+          <Route path="/sugar-crops" element={<SugarCropProductionPage />} />
+          <Route path="/nuts" element={<NutProductionPage />} />
+          <Route path="/beverages" element={<BeverageCropPage />} />
+          <Route path="/fiber-crops" element={<FiberCropPage />} />
+          {/* FAO Verileri Routes */}
+          <Route path="/land-use" element={<LandUsePage />} />
+          <Route path="/livestock-stocks" element={<LivestockStocksPage />} />
+          <Route path="/employment" element={<AgriculturalEmploymentPage />} />
+          <Route path="/fertilizer" element={<FertilizerPage />} />
+          <Route path="/pesticide" element={<PesticidePage />} />
+          <Route path="/population" element={<PopulationPage />} />
+          <Route path="/land-cover" element={<LandCoverPage />} />
+          <Route path="/food-balance" element={<FoodBalancePage />} />
+        </Routes>
+      </main>
+    </>
+  );
+}
+
 function App() {
   const [apiConnected, setApiConnected] = useState(false);
 
@@ -51,42 +120,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Sidebar apiConnected={apiConnected} />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<OverviewPage />} />
-            <Route path="/export" element={<ExportPage />} />
-            <Route path="/import" element={<ImportPage />} />
-            <Route path="/transport" element={<TransportPage />} />
-            <Route path="/production" element={<ProductionPage />} />
-            {/* Hayvansal Üretim Routes */}
-            <Route path="/red-meat" element={<RedMeatProductionPage />} />
-            <Route path="/white-meat" element={<WhiteMeatProductionPage />} />
-            <Route path="/milk" element={<MilkProductionPage />} />
-            <Route path="/eggs" element={<EggProductionPage />} />
-            <Route path="/other-animal" element={<OtherAnimalProductsPage />} />
-            <Route path="/livestock-competition" element={<LivestockCompetitionPage />} />
-            {/* Bitkisel Üretim Routes */}
-            <Route path="/cereals" element={<CerealProductionPage />} />
-            <Route path="/vegetables" element={<VegetableProductionPage />} />
-            <Route path="/fruits" element={<FruitProductionPage />} />
-            <Route path="/legumes" element={<LegumeProductionPage />} />
-            <Route path="/oilseeds" element={<OilseedProductionPage />} />
-            <Route path="/sugar-crops" element={<SugarCropProductionPage />} />
-            <Route path="/nuts" element={<NutProductionPage />} />
-            <Route path="/beverages" element={<BeverageCropPage />} />
-            <Route path="/fiber-crops" element={<FiberCropPage />} />
-            {/* FAO Verileri Routes */}
-            <Route path="/land-use" element={<LandUsePage />} />
-            <Route path="/livestock-stocks" element={<LivestockStocksPage />} />
-            <Route path="/employment" element={<AgriculturalEmploymentPage />} />
-            <Route path="/fertilizer" element={<FertilizerPage />} />
-            <Route path="/pesticide" element={<PesticidePage />} />
-            <Route path="/population" element={<PopulationPage />} />
-            <Route path="/land-cover" element={<LandCoverPage />} />
-            <Route path="/food-balance" element={<FoodBalancePage />} />
-          </Routes>
-        </main>
+        <AppContent apiConnected={apiConnected} />
       </BrowserRouter>
     </QueryClientProvider>
   );
