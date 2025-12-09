@@ -39,7 +39,7 @@ function formatShort(value: number): string {
 }
 
 export default function AgriculturalEmploymentPage() {
-  const [selectedYear, setSelectedYear] = useState('2021');
+  const [selectedYear, setSelectedYear] = useState('2023');
   const [loading, setLoading] = useState(true);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<{year: string; total: number; male: number; female: number}[]>([]);
@@ -145,13 +145,9 @@ export default function AgriculturalEmploymentPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
-            <option value="2017">2017</option>
-            <option value="2015">2015</option>
-            <option value="2010">2010</option>
+            {Array.from({ length: 77 }, (_, i) => 2023 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>

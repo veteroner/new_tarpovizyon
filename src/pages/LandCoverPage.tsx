@@ -54,7 +54,7 @@ function formatShort(value: number): string {
 
 export default function LandCoverPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>(['Ağaç örtülü alanlar', 'Çayır', 'Otsu bitkiler', 'Yapay yüzeyler (kentsel ve ilgili alanlar dahil)']);
-  const [selectedYear, setSelectedYear] = useState('2020');
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
   const [coverData, setCoverData] = useState<DataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
@@ -169,12 +169,9 @@ export default function LandCoverPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
-            <option value="2017">2017</option>
-            <option value="2016">2016</option>
-            <option value="2015">2015</option>
+            {Array.from({ length: 31 }, (_, i) => 2022 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>
