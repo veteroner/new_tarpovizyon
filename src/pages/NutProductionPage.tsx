@@ -69,12 +69,12 @@ export default function NutProductionPage() {
       const productList = selectedProducts.join(',');
       
       const productQuery = `SELECT u.urunkod, SUM(CAST(u.uretim_deger AS DECIMAL(20,2))) as toplam 
-        FROM fao_uretim u
+        FROM fao_uretim_son u
         WHERE u.yilkod='${selectedYear}' AND u.urunkod IN (${productList}) AND u.ulkekod='5000'
         GROUP BY u.urunkod ORDER BY toplam DESC`;
       
       const countryQuery = `SELECT u.ulkekod, n.area, SUM(CAST(u.uretim_deger AS DECIMAL(20,2))) as toplam 
-        FROM fao_uretim u
+        FROM fao_uretim_son u
         LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON u.ulkekod = n.areacode
         WHERE u.yilkod='${selectedYear}' AND u.urunkod IN (${productList}) 
         AND u.ulkekod NOT IN ('5000', '5100', '5200', '5300', '5400', '5500')
