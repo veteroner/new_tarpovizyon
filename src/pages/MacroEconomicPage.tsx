@@ -44,7 +44,7 @@ function formatShort(value: number): string {
 }
 
 export default function MacroEconomicPage() {
-  const [selectedYear, setSelectedYear] = useState('2022');
+  const [selectedYear, setSelectedYear] = useState('2023');
   const [selectedIndicator, setSelectedIndicator] = useState('Gross Domestic Product');
   const [loading, setLoading] = useState(true);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
@@ -137,7 +137,7 @@ export default function MacroEconomicPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 53 }, (_, i) => 1970 + i).reverse().map(year => (
+            {Array.from({ length: 54 }, (_, i) => 2023 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
