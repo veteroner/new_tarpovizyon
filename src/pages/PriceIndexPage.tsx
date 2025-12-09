@@ -38,7 +38,7 @@ function formatIndex(value: number): string {
 }
 
 export default function PriceIndexPage() {
-  const [selectedYear, setSelectedYear] = useState('2023');
+  const [selectedYear, setSelectedYear] = useState('2024');
   const [loading, setLoading] = useState(true);
   const [monthlyData, setMonthlyData] = useState<MonthlyDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
@@ -128,7 +128,7 @@ export default function PriceIndexPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 24 }, (_, i) => 2000 + i).reverse().map(year => (
+            {Array.from({ length: 25 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>

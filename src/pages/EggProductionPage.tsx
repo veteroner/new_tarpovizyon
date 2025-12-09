@@ -53,7 +53,7 @@ export default function EggProductionPage() {
     'Hen eggs in shell, fresh',
     'Eggs from other birds in shell, fresh, n.e.c.'
   ]);
-  const [selectedYear, setSelectedYear] = useState('2022');
+  const [selectedYear, setSelectedYear] = useState('2023');
   const [loading, setLoading] = useState(true);
   const [productData, setProductData] = useState<ProductDataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
@@ -193,11 +193,9 @@ export default function EggProductionPage() {
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
           >
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
+            {Array.from({ length: 19 }, (_, i) => 2023 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>
