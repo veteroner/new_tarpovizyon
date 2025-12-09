@@ -61,6 +61,12 @@ export default function TuikLivestockPage() {
 
       // Yıllık trend (Türkiye toplamı)
       const yearlyQuery = `SELECT 
+        SUM(CAST(y2004 AS DECIMAL(20,2))) as v2004,
+        SUM(CAST(y2005 AS DECIMAL(20,2))) as v2005,
+        SUM(CAST(y2006 AS DECIMAL(20,2))) as v2006,
+        SUM(CAST(y2007 AS DECIMAL(20,2))) as v2007,
+        SUM(CAST(y2008 AS DECIMAL(20,2))) as v2008,
+        SUM(CAST(y2009 AS DECIMAL(20,2))) as v2009,
         SUM(CAST(y2010 AS DECIMAL(20,2))) as v2010,
         SUM(CAST(y2011 AS DECIMAL(20,2))) as v2011,
         SUM(CAST(y2012 AS DECIMAL(20,2))) as v2012,
@@ -99,7 +105,7 @@ export default function TuikLivestockPage() {
       if (yearlyRes.data && yearlyRes.data[0]) {
         const row = yearlyRes.data[0];
         const mapped = [];
-        for (let y = 2010; y <= 2024; y++) {
+        for (let y = 2004; y <= 2024; y++) {
           mapped.push({
             year: String(y),
             value: Number(row[`v${y}`]) || 0
@@ -149,7 +155,7 @@ export default function TuikLivestockPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 15 }, (_, i) => 2010 + i).reverse().map(year => (
+            {Array.from({ length: 21 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={`y${year}`}>{year}</option>
             ))}
           </select>
@@ -185,7 +191,7 @@ export default function TuikLivestockPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık {selectedAnimal} Sayısı Trendi (2010-2024)</h3>
+              <h3 className="chart-title">📅 Yıllık {selectedAnimal} Sayısı Trendi (2004-2024)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
