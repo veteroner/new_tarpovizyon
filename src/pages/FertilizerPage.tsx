@@ -54,7 +54,7 @@ function formatShort(value: number): string {
 
 export default function FertilizerPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>(['Üre', 'Diamonyum fosfat (DAP)', 'NPK gübreleri']);
-  const [selectedYear, setSelectedYear] = useState('2021');
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [selectedElement, setSelectedElement] = useState('İthalat Miktarı');
   const [loading, setLoading] = useState(true);
   const [fertilizerData, setFertilizerData] = useState<DataItem[]>([]);
@@ -179,10 +179,9 @@ export default function FertilizerPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
+            {Array.from({ length: 62 }, (_, i) => 2022 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>

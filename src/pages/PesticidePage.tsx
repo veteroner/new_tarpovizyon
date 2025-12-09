@@ -62,7 +62,7 @@ function getUnit(element: string): string {
 
 export default function PesticidePage() {
   const [selectedItems, setSelectedItems] = useState<string[]>(['Pestisitler', 'Herbisitler', 'İnsektisitler']);
-  const [selectedYear, setSelectedYear] = useState('2021');
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [selectedElement, setSelectedElement] = useState('Tarımsal Kullanım');
   const [loading, setLoading] = useState(true);
   const [pesticideData, setPesticideData] = useState<DataItem[]>([]);
@@ -188,10 +188,9 @@ export default function PesticidePage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
+            {Array.from({ length: 33 }, (_, i) => 2022 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>

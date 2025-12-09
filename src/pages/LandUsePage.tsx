@@ -59,7 +59,7 @@ export default function LandUsePage() {
     'Ormanlık alan',
     'Çayır-Mera'
   ]);
-  const [selectedYear, setSelectedYear] = useState('2021');
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [loading, setLoading] = useState(true);
   const [landData, setLandData] = useState<LandDataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
@@ -177,11 +177,9 @@ export default function LandUsePage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
-            <option value="2017">2017</option>
+            {Array.from({ length: 62 }, (_, i) => 2022 - i).map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>
