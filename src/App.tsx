@@ -40,6 +40,8 @@ import PriceIndexPage from './pages/PriceIndexPage';
 import MacroEconomicPage from './pages/MacroEconomicPage';
 import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
 import TuikLivestockPage from './pages/TuikLivestockPage';
+// Excel Verileri Sayfaları
+import ProductivityAnalysisPage from './pages/ProductivityAnalysisPage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
@@ -109,6 +111,8 @@ function AppContent({ apiConnected }: { apiConnected: boolean }) {
           <Route path="/macro-economic" element={<MacroEconomicPage />} />
           <Route path="/tuik-plant" element={<TuikPlantProductionPage />} />
           <Route path="/tuik-livestock" element={<TuikLivestockPage />} />
+          {/* Excel Verileri Routes */}
+          <Route path="/productivity" element={<ProductivityAnalysisPage />} />
         </Routes>
       </main>
     </>
