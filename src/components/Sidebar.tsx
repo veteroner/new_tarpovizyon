@@ -131,13 +131,13 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">📈 Excel Verileri</div>
+        <div className="nav-section-title">🔍 Detaylı Analiz</div>
         
         {excelDataItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => `nav-item \${isActive ? 'active' : ''}`}
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
             <item.icon size={20} />
             <span>{item.label}</span>
