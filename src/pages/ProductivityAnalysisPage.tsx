@@ -89,7 +89,7 @@ export default function ProductivityAnalysisPage() {
         if (yieldRes.data) {
           const productMap = new Map<string, YieldComparisonData>();
           
-          yieldRes.data.forEach((item: ProductData) => {
+          yieldRes.data.forEach((item: any) => {
             const urun = String(item.urun);
             if (!productMap.has(urun)) {
               productMap.set(urun, {
@@ -129,7 +129,7 @@ export default function ProductivityAnalysisPage() {
         }
 
         if (efficiencyRes.data) {
-          const mapped = efficiencyRes.data.map((item: EfficiencyData) => ({
+          const mapped = efficiencyRes.data.map((item: any) => ({
             urun: String(item.urun),
             alan: Number(item.ekilen_alan) || 0,
             uretim: Number(item.uretim) || 0,
@@ -139,7 +139,7 @@ export default function ProductivityAnalysisPage() {
         }
 
         if (trendRes.data) {
-          const mapped = trendRes.data.map((item: {yil: number; ortalamaVerim: number}) => ({
+          const mapped = trendRes.data.map((item: any) => ({
             yil: Number(item.yil),
             ortalamaVerim: Number(item.ortalamaVerim) || 0
           }));
