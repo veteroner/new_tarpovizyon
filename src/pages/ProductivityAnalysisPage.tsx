@@ -7,15 +7,6 @@ import { fetchQuery } from '../services/api';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
-interface ProductData {
-  urun: string;
-  yil: number;
-  ekilen_alan: number;
-  uretim: number;
-  verim: number;
-  ic_tuketim: number;
-}
-
 interface YieldComparisonData {
   urun: string;
   verim2020: number;
