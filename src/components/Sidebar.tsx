@@ -57,6 +57,11 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
     { path: '/productivity', icon: BarChart3, label: 'Verimlilik Analizi' },
   ];
 
+  const tuikTradeItems = [
+    { path: '/tuik-plant-trade', icon: Leaf, label: 'Bitkisel Dış Ticaret' },
+    { path: '/tuik-animal-trade', icon: Beef, label: 'Hayvansal Dış Ticaret' },
+  ];
+
   return (
     <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -134,6 +139,19 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
         <div className="nav-section-title">🔍 Detaylı Analiz</div>
         
         {excelDataItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          >
+            <item.icon size={20} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        <div className="nav-section-title">📦 TÜİK Dış Ticaret</div>
+        
+        {tuikTradeItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

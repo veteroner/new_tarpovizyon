@@ -82,11 +82,11 @@ export default function ProductivityAnalysisPage() {
         ]);
 
         if (productRes.data) {
-          const products = productRes.data.map((item: any) => String(item.urun));
+          const products = productRes.data.map((item: Record<string, string | number>) => String(item.urun));
           setProductList(products);
         }
         if (yearRes.data) {
-          const years = yearRes.data.map((item: any) => String(item.yil));
+          const years = yearRes.data.map((item: Record<string, string | number>) => String(item.yil));
           setYearOptions(years);
         }
       } catch (error) {
@@ -149,7 +149,7 @@ export default function ProductivityAnalysisPage() {
       ]);
 
       if (dataRes.data) {
-        const mapped = dataRes.data.map((item: any) => ({
+        const mapped = dataRes.data.map((item: Record<string, string | number>) => ({
           id: String(item.id),
           urun: String(item.urun),
           yil: String(item.yil),
@@ -167,7 +167,7 @@ export default function ProductivityAnalysisPage() {
       }
 
       if (trendRes.data) {
-        const mapped = trendRes.data.map((item: any) => ({
+        const mapped = trendRes.data.map((item: Record<string, string | number>) => ({
           yil: String(item.yil),
           toplamUretim: Number(item.toplamUretim) || 0,
           toplamAlan: Number(item.toplamAlan) || 0,
@@ -179,7 +179,7 @@ export default function ProductivityAnalysisPage() {
       }
 
       if (summaryRes.data) {
-        const mapped = summaryRes.data.map((item: any) => ({
+        const mapped = summaryRes.data.map((item: Record<string, string | number>) => ({
           urun: String(item.urun),
           toplamUretim: Number(item.toplamUretim) || 0,
           toplamAlan: Number(item.toplamAlan) || 0,
@@ -235,7 +235,7 @@ export default function ProductivityAnalysisPage() {
   const getProductTrendData = () => {
     const years = [...new Set(allData.map(d => d.yil))].sort();
     return years.map(yil => {
-      const yearData: any = { yil };
+      const yearData: Record<string, string | number> = { yil };
       selectedProducts.forEach(urun => {
         const productData = allData.find(d => d.yil === yil && d.urun === urun);
         if (viewMode === 'uretim') {
@@ -286,7 +286,7 @@ export default function ProductivityAnalysisPage() {
           <select 
             className="filter-select" 
             value={viewMode} 
-            onChange={(e) => setViewMode(e.target.value as any)}
+            onChange={(e) => setViewMode(e.target.value as 'uretim' | 'ticaret' | 'verim')}
           >
             <option value="uretim">Üretim Analizi</option>
             <option value="verim">Verim Analizi</option>
