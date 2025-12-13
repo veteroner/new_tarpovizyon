@@ -42,6 +42,9 @@ import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
 import TuikLivestockPage from './pages/TuikLivestockPage';
 // Excel Verileri Sayfaları
 import ProductivityAnalysisPage from './pages/ProductivityAnalysisPage';
+// TÜİK Dış Ticaret Sayfaları
+import TuikPlantTradePage from './pages/TuikPlantTradePage';
+import TuikAnimalTradePage from './pages/TuikAnimalTradePage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
@@ -113,6 +116,9 @@ function AppContent({ apiConnected }: { apiConnected: boolean }) {
           <Route path="/tuik-livestock" element={<TuikLivestockPage />} />
           {/* Excel Verileri Routes */}
           <Route path="/productivity" element={<ProductivityAnalysisPage />} />
+          {/* TÜİK Dış Ticaret Routes */}
+          <Route path="/tuik-plant-trade" element={<TuikPlantTradePage />} />
+          <Route path="/tuik-animal-trade" element={<TuikAnimalTradePage />} />
         </Routes>
       </main>
     </>
