@@ -474,7 +474,7 @@ export default function TuikAnimalTradePage() {
             <div className="chart-card">
               <h3 className="chart-title">📥 İthalat Karşılaştırması</h3>
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={comparisonData} layout="horizontal">
+                <BarChart data={comparisonData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="urun" tick={{ fontSize: 9 }} width={120} />
