@@ -233,6 +233,7 @@ export default function TuikPlantTradePage() {
   };
 
   const exportCountries = countrySummary.filter(c => c.ihracat > c.ithalat).slice(0, 10);
+  const importCountries = countrySummary.filter(c => c.ithalat > c.ihracat).slice(0, 10);
 
   return (
     <div>
@@ -384,7 +385,7 @@ export default function TuikPlantTradePage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Ülke Karşılaştırma */}
+            {/* İhracat Ülkeleri */}
             <div className="chart-card">
               <h3 className="chart-title">🌍 Top 10 İhracat Ülkeleri</h3>
               <ResponsiveContainer width="100%" height={300}>
@@ -394,6 +395,20 @@ export default function TuikPlantTradePage() {
                   <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
                   <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
                   <Bar dataKey="ihracat" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* İthalat Ülkeleri */}
+            <div className="chart-card">
+              <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={importCountries} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Bar dataKey="ithalat" fill="#ef4444" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

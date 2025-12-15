@@ -68,7 +68,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
         <div className="sidebar-logo">
           <Activity size={24} color="white" />
         </div>
-        <span className="sidebar-title">IST Dashboard</span>
+        <span className="sidebar-title">TarpoVizyon</span>
       </div>
 
       <div className="nav-menu">
