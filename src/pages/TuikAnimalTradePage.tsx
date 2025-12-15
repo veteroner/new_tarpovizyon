@@ -53,6 +53,9 @@ export default function TuikAnimalTradePage() {
   const [productList, setProductList] = useState<string[]>([]);
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   
+  // Karşılaştırma modu
+  const [comparisonMode, setComparisonMode] = useState(true);
+  
   // Dönem seçimi
   const [period1Start, setPeriod1Start] = useState('2010');
   const [period1End, setPeriod1End] = useState('2015');
@@ -226,16 +229,34 @@ export default function TuikAnimalTradePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🥩 TÜİK Hayvansal Dış Ticaret - Dönemsel Karşılaştırma</h1>
+        <h1 className="page-title">🥩 TÜİK Hayvansal Dış Ticaret Analizi</h1>
         <p className="page-subtitle">
-          Dinamik Dönem Analizi • Et & Süt Ürünleri • Canlı Hayvan • TÜİK Resmi Verileri
+          {comparisonMode ? 'Dinamik Dönem Karşılaştırma' : 'Tek Dönem Analizi'} • Et & Süt Ürünleri • Canlı Hayvan • TÜİK Resmi Verileri
         </p>
+      </div>
+
+      {/* Karşılaştırma Modu Toggle */}
+      <div className="date-filter" style={{ marginBottom: '20px' }}>
+        <div className="filter-group">
+          <label className="filter-label">Analiz Modu</label>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={comparisonMode}
+                onChange={(e) => setComparisonMode(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '14px' }}>Dönem Karşılaştırması Yap</span>
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Dönem Seçim Paneli */}
       <div className="chart-card" style={{ marginBottom: '20px' }}>
-        <h3 className="chart-title">📅 Dönem Seçimi</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <h3 className="chart-title">📅 {comparisonMode ? 'Dönem Seçimi' : 'Tek Dönem Seçimi'}</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: comparisonMode ? '1fr 1fr' : '1fr', gap: '20px' }}>
           {/* Dönem 1 */}
           <div style={{ padding: '15px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
             <h4 style={{ margin: '0 0 12px 0', color: '#22c55e', fontSize: '16px' }}>🟢 Dönem 1</h4>
@@ -270,7 +291,8 @@ export default function TuikAnimalTradePage() {
             </div>
           </div>
 
-          {/* Dönem 2 */}
+          {/* Dönem 2 - Only in comparison mode */}
+          {comparisonMode && (
           <div style={{ padding: '15px', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
             <h4 style={{ margin: '0 0 12px 0', color: '#3b82f6', fontSize: '16px' }}>🔵 Dönem 2</h4>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -303,6 +325,7 @@ export default function TuikAnimalTradePage() {
               Süre: {parseInt(period2End) - parseInt(period2Start) + 1} yıl
             </div>
           </div>
+          )}
         </div>
       </div>
 
@@ -330,8 +353,10 @@ export default function TuikAnimalTradePage() {
         </div>
       ) : (
         <>
-          {/* Karşılaştırma KPI'ları */}
+          {/* KPI'lar */}
           <div className="kpi-grid">
+            {comparisonMode ? (
+            <>
             <div className="kpi-card large">
               <div className="kpi-header">
                 <span className="kpi-title">İHRACAT DEĞİŞİMİ</span>
@@ -385,9 +410,49 @@ export default function TuikAnimalTradePage() {
               <div className="kpi-value">{period1Data.length}</div>
               <div className="kpi-subtitle">Analiz edilen</div>
             </div>
+            </>
+            ) : (
+            <>
+            <div className="kpi-card large">
+              <div className="kpi-header">
+                <span className="kpi-title">TOPLAM İHRACAT</span>
+                <div className="kpi-icon green">🚢</div>
+              </div>
+              <div className="kpi-value">{formatMoney(p1TotalExportValue)}</div>
+              <div className="kpi-subtitle">{formatNumber(p1TotalExport)} KG</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header">
+                <span className="kpi-title">TOPLAM İTHALAT</span>
+                <div className="kpi-icon red">📦</div>
+              </div>
+              <div className="kpi-value">{formatMoney(p1TotalImportValue)}</div>
+              <div className="kpi-subtitle">{formatNumber(p1TotalImport)} KG</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header">
+                <span className="kpi-title">TİCARET DENGESİ</span>
+                <div className={`kpi-icon ${p1Balance >= 0 ? 'green' : 'red'}`}>{p1Balance >= 0 ? '📈' : '📉'}</div>
+              </div>
+              <div className="kpi-value" style={{ color: p1Balance >= 0 ? '#22c55e' : '#ef4444' }}>
+                {p1Balance >= 0 ? '+' : ''}{formatMoney(p1Balance)}
+              </div>
+              <div className="kpi-subtitle">{p1Balance >= 0 ? 'Fazla' : 'Açık'}</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header">
+                <span className="kpi-title">ÜRÜN SAYISI</span>
+                <div className="kpi-icon blue">🏷️</div>
+              </div>
+              <div className="kpi-value">{period1Data.length}</div>
+              <div className="kpi-subtitle">Analiz edilen</div>
+            </div>
+            </>
+            )}
           </div>
 
-          {/* Yan Yana Dönem KPI'ları */}
+          {/* Dönem Detay Panelleri */}
+          {comparisonMode ? (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             {/* Dönem 1 KPI */}
             <div className="chart-card" style={{ background: 'rgba(34, 197, 94, 0.03)' }}>
@@ -435,9 +500,34 @@ export default function TuikAnimalTradePage() {
               </div>
             </div>
           </div>
+          ) : (
+          <div className="chart-card" style={{ marginBottom: '20px' }}>
+            <h3 className="chart-title">🟢 Dönem ({period1Start}-{period1End})</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İhracat</div>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#22c55e' }}>{formatMoney(p1TotalExportValue)}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalExport)} KG</div>
+              </div>
+              <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İthalat</div>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#ef4444' }}>{formatMoney(p1TotalImportValue)}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalImport)} KG</div>
+              </div>
+            </div>
+            <div style={{ marginTop: '10px', padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Ticaret Dengesi</div>
+              <div style={{ fontSize: '20px', fontWeight: '600', color: p1Balance >= 0 ? '#22c55e' : '#ef4444' }}>
+                {p1Balance >= 0 ? '+' : ''}{formatMoney(p1Balance)}
+              </div>
+            </div>
+          </div>
+          )}
 
           {/* Grafikler */}
           <div className="chart-grid">
+            {comparisonMode ? (
+            <>
             {/* Ürün Karşılaştırma */}
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
               <h3 className="chart-title">📊 Dönemler Arası Ürün Karşılaştırması (İhracat)</h3>
@@ -485,12 +575,33 @@ export default function TuikAnimalTradePage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            </>
+            ) : (
+            <>
+            {/* Ürün Dağılımı */}
+            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
+              <h3 className="chart-title">📊 Ürün Bazlı Dış Ticaret ({period1Start}-{period1End})</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={period1Data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={120} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => formatMoney(value)} />
+                  <Legend />
+                  <Bar dataKey="ihracatDeger" name="İhracat" fill="#22c55e" />
+                  <Bar dataKey="ithalatDeger" name="İthalat" fill="#ef4444" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            </>
+            )}
           </div>
 
-          {/* Detaylı Karşılaştırma Tablosu */}
+          {/* Detaylı Tablo */}
           <div className="chart-card">
-            <h3 className="chart-title">📋 Detaylı Dönemsel Karşılaştırma Tablosu</h3>
+            <h3 className="chart-title">📋 {comparisonMode ? 'Detaylı Dönemsel Karşılaştırma Tablosu' : `Detaylı Ürün Tablosu (${period1Start}-${period1End})`}</h3>
             <div style={{ overflowX: 'auto' }}>
+              {comparisonMode ? (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
@@ -525,14 +636,36 @@ export default function TuikAnimalTradePage() {
                     );
                   })}
                 </tbody>
+              </table>              ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {period1Data.map((row, index) => (
+                    <tr key={row.urun} style={{ borderBottom: '1px solid var(--border)', background: index % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
+                      <td style={{ padding: '10px 8px', fontWeight: '500' }}>{row.urun}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatMoney(row.ihracatDeger)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatMoney(row.ithalatDeger)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', color: row.denge >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
+                        {row.denge >= 0 ? '+' : ''}{formatMoney(row.denge)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
-            </div>
+              )}            </div>
           </div>
 
           {/* Özetler */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: comparisonMode ? '1fr 1fr' : '1fr', gap: '20px' }}>
             <div className="data-table">
-              <h3 className="data-table-title">🏆 Dönem 1 - En Çok İhracat</h3>
+              <h3 className="data-table-title">🏆 {comparisonMode ? `Dönem 1 (${period1Start}-${period1End})` : `En Çok İhracat (${period1Start}-${period1End})`}</h3>
               {period1Data.slice(0, 5).map((product, index) => (
                 <div className="table-row" key={product.urun}>
                   <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
@@ -545,8 +678,9 @@ export default function TuikAnimalTradePage() {
               ))}
             </div>
 
+            {comparisonMode && (
             <div className="data-table">
-              <h3 className="data-table-title">🏆 Dönem 2 - En Çok İhracat</h3>
+              <h3 className="data-table-title">🏆 Dönem 2 ({period2Start}-{period2End})</h3>
               {period2Data.slice(0, 5).map((product, index) => (
                 <div className="table-row" key={product.urun}>
                   <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
@@ -558,6 +692,7 @@ export default function TuikAnimalTradePage() {
                 </div>
               ))}
             </div>
+            )}
           </div>
         </>
       )}
