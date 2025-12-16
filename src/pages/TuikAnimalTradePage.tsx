@@ -30,6 +30,16 @@ function getUnitLabel(selectedProducts: string[]): string {
   }
 }
 
+// Convert KG to appropriate unit (Ton for products, keep as is for live animals)
+function convertToDisplayUnit(value: number, productName: string): number {
+  // If it's a live animal, keep the value as is (already in head count)
+  if (LIVE_ANIMALS.includes(productName)) {
+    return value;
+  }
+  // For products, convert KG to Ton
+  return value / 1000;
+}
+
 interface TradeData {
   id: string;
   ana_urun: string;
@@ -77,11 +87,12 @@ function formatNumber(value: number, unit?: string): string {
 }
 
 function formatNumberWithUnit(value: number, productName: string): string {
+  const convertedValue = convertToDisplayUnit(value, productName);
   const unit = getUnit(productName);
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ' + unit;
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ' + unit;
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ' + unit;
-  return value.toLocaleString('tr-TR') + ' ' + unit;
+  if (convertedValue >= 1e9) return (convertedValue / 1e9).toFixed(2) + ' Milyar ' + unit;
+  if (convertedValue >= 1e6) return (convertedValue / 1e6).toFixed(2) + ' Milyon ' + unit;
+  if (convertedValue >= 1e3) return (convertedValue / 1e3).toFixed(1) + ' Bin ' + unit;
+  return convertedValue.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + ' ' + unit;
 }
 
 function formatShort(value: number): string {
@@ -171,16 +182,26 @@ export default function TuikAnimalTradePage() {
         ORDER BY ihracatDeger DESC
       `;
 
-      const countrySummaryQuery = `
+      const exportCountriesQuery = `
         SELECT ulke,
-          SUM(ihracat_mik) as ihracat,
-          SUM(ithalat_mik) as ithalat
+          SUM(ihracat_mik) as ihracat
         FROM tuik_ticarethayvansal
         WHERE ana_urun IN (${productFilter}) AND yil IN (${yearFilter})
         ${monthFilter ? `AND ay IN (${monthFilter})` : ''}
         GROUP BY ulke
         ORDER BY ihracat DESC
-        LIMIT 15
+        LIMIT 10
+      `;
+
+      const importCountriesQuery = `
+        SELECT ulke,
+          SUM(ithalat_mik) as ithalat
+        FROM tuik_ticarethayvansal
+        WHERE ana_urun IN (${productFilter}) AND yil IN (${yearFilter})
+        ${monthFilter ? `AND ay IN (${monthFilter})` : ''}
+        GROUP BY ulke
+        ORDER BY ithalat DESC
+        LIMIT 10
       `;
 
       const trendQuery = `
@@ -193,10 +214,11 @@ export default function TuikAnimalTradePage() {
         ORDER BY yil
       `;
 
-      const [dataRes, productRes, countryRes, trendRes] = await Promise.all([
+      const [dataRes, productRes, exportCountriesRes, importCountriesRes, trendRes] = await Promise.all([
         fetchQuery(dataQuery),
         fetchQuery(productSummaryQuery),
-        fetchQuery(countrySummaryQuery),
+        fetchQuery(exportCountriesQuery),
+        fetchQuery(importCountriesQuery),
         fetchQuery(trendQuery)
       ]);
 
@@ -217,33 +239,64 @@ export default function TuikAnimalTradePage() {
       }
 
       if (productRes.data) {
-        const mapped = productRes.data.map((item: Record<string, string | number>) => ({
-          urun: String(item.urun),
-          toplamIhracat: Number(item.toplamIhracat) || 0,
-          toplamIthalat: Number(item.toplamIthalat) || 0,
-          ihracatDeger: Number(item.ihracatDeger) || 0,
-          ithalatDeger: Number(item.ithalatDeger) || 0,
-          denge: (Number(item.ihracatDeger) || 0) - (Number(item.ithalatDeger) || 0)
-        }));
+        const mapped = productRes.data.map((item: Record<string, string | number>) => {
+          const productName = String(item.urun);
+          const rawExport = Number(item.toplamIhracat) || 0;
+          const rawImport = Number(item.toplamIthalat) || 0;
+          return {
+            urun: productName,
+            toplamIhracat: convertToDisplayUnit(rawExport, productName),
+            toplamIthalat: convertToDisplayUnit(rawImport, productName),
+            ihracatDeger: Number(item.ihracatDeger) || 0,
+            ithalatDeger: Number(item.ithalatDeger) || 0,
+            denge: (Number(item.ihracatDeger) || 0) - (Number(item.ithalatDeger) || 0)
+          };
+        });
         setProductSummary(mapped);
       }
 
-      if (countryRes.data) {
-        const mapped = countryRes.data.map((item: Record<string, string | number>) => ({
-          ulke: String(item.ulke),
-          ihracat: Number(item.ihracat) || 0,
-          ithalat: Number(item.ithalat) || 0,
-          denge: (Number(item.ihracat) || 0) - (Number(item.ithalat) || 0)
-        }));
-        setCountrySummary(mapped);
-      }
+      // Process export countries
+      const exportCountries = exportCountriesRes.data ? exportCountriesRes.data.map((item: Record<string, string | number>) => ({
+        ulke: String(item.ulke),
+        ihracat: Number(item.ihracat) || 0
+      })) : [];
+
+      // Process import countries
+      const importCountries = importCountriesRes.data ? importCountriesRes.data.map((item: Record<string, string | number>) => ({
+        ulke: String(item.ulke),
+        ithalat: Number(item.ithalat) || 0
+      })) : [];
+
+      // Merge for compatibility
+      const allCountries = new Map<string, CountrySummary>();
+      exportCountries.forEach(c => {
+        allCountries.set(c.ulke, { ulke: c.ulke, ihracat: c.ihracat, ithalat: 0, denge: c.ihracat });
+      });
+      importCountries.forEach(c => {
+        const existing = allCountries.get(c.ulke);
+        if (existing) {
+          existing.ithalat = c.ithalat;
+          existing.denge = existing.ihracat - c.ithalat;
+        } else {
+          allCountries.set(c.ulke, { ulke: c.ulke, ihracat: 0, ithalat: c.ithalat, denge: -c.ithalat });
+        }
+      });
+      setCountrySummary(Array.from(allCountries.values()));
 
       if (trendRes.data) {
-        const mapped = trendRes.data.map((item: Record<string, string | number>) => ({
-          yil: String(item.yil),
-          ihracat: Number(item.ihracat) || 0,
-          ithalat: Number(item.ithalat) || 0
-        }));
+        const mapped = trendRes.data.map((item: Record<string, string | number>) => {
+          const rawExport = Number(item.ihracat) || 0;
+          const rawImport = Number(item.ithalat) || 0;
+          // For trend, use average conversion if mixed products
+          const hasAnimals = selectedProducts.some(p => LIVE_ANIMALS.includes(p));
+          const hasProducts = selectedProducts.some(p => !LIVE_ANIMALS.includes(p));
+          const divider = (!hasAnimals && hasProducts) ? 1000 : 1; // Only divide by 1000 if purely products
+          return {
+            yil: String(item.yil),
+            ihracat: rawExport / divider,
+            ithalat: rawImport / divider
+          };
+        });
         setYearlyTrend(mapped);
       }
 
@@ -268,8 +321,30 @@ export default function TuikAnimalTradePage() {
   const tradeBal = totalExportValue - totalImportValue;
   const countryCount = new Set(allData.map(d => d.ulke)).size;
 
-  const exportCountries = countrySummary.filter(c => c.ihracat > c.ithalat).slice(0, 10);
-  const importCountries = countrySummary.filter(c => c.ithalat > c.ihracat).slice(0, 10);
+  // Get top export and import countries (sorted separately)
+  const exportCountries = countrySummary
+    .filter(c => c.ihracat > 0)
+    .sort((a, b) => b.ihracat - a.ihracat)
+    .slice(0, 10)
+    .map(c => {
+      // Convert to display units based on selected products
+      const hasAnimals = selectedProducts.some(p => LIVE_ANIMALS.includes(p));
+      const hasProducts = selectedProducts.some(p => !LIVE_ANIMALS.includes(p));
+      const divider = (!hasAnimals && hasProducts) ? 1000 : 1;
+      return { ...c, ihracat: c.ihracat / divider };
+    });
+  
+  const importCountries = countrySummary
+    .filter(c => c.ithalat > 0)
+    .sort((a, b) => b.ithalat - a.ithalat)
+    .slice(0, 10)
+    .map(c => {
+      // Convert to display units based on selected products
+      const hasAnimals = selectedProducts.some(p => LIVE_ANIMALS.includes(p));
+      const hasProducts = selectedProducts.some(p => !LIVE_ANIMALS.includes(p));
+      const divider = (!hasAnimals && hasProducts) ? 1000 : 1;
+      return { ...c, ithalat: c.ithalat / divider };
+    });
 
   return (
     <div>
@@ -530,7 +605,7 @@ export default function TuikAnimalTradePage() {
                   <span className="kpi-title">TOPLAM İHRACAT</span>
                   <div className="kpi-icon green">🚢</div>
                 </div>
-                <div className="kpi-value">{formatNumber(totalExport)}</div>
+                <div className="kpi-value">{formatNumber(totalExport)} {getUnitLabel(selectedProducts)}</div>
                 <div className="kpi-subtitle">{formatMoney(totalExportValue)}</div>
               </div>
             )}
@@ -540,7 +615,7 @@ export default function TuikAnimalTradePage() {
                   <span className="kpi-title">TOPLAM İTHALAT</span>
                   <div className="kpi-icon red">📦</div>
                 </div>
-                <div className="kpi-value">{formatNumber(totalImport)}</div>
+                <div className="kpi-value">{formatNumber(totalImport)} {getUnitLabel(selectedProducts)}</div>
                 <div className="kpi-subtitle">{formatMoney(totalImportValue)}</div>
               </div>
             )}
@@ -576,7 +651,7 @@ export default function TuikAnimalTradePage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => formatNumber(value)} />
+                  <Tooltip formatter={(value: number) => `${formatNumber(value)} ${getUnitLabel(selectedProducts)}`} />
                   <Legend />
                   {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="ihracat" name="İhracat" fill="#22c55e" />}
                   {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="ithalat" name="İthalat" fill="#ef4444" />}
@@ -634,7 +709,7 @@ export default function TuikAnimalTradePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                      <Tooltip formatter={(value: number) => formatNumber(value)} />
+                      <Tooltip formatter={(value: number) => `${formatNumber(value)} ${getUnitLabel(selectedProducts)}`} />
                     <Bar dataKey="ihracat" fill="#22c55e" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -650,7 +725,7 @@ export default function TuikAnimalTradePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                    <Tooltip formatter={(value: number) => formatNumber(value)} />
+                    <Tooltip formatter={(value: number) => `${formatNumber(value)} ${getUnitLabel(selectedProducts)}`} />
                     <Bar dataKey="ithalat" fill="#ef4444" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -668,7 +743,8 @@ export default function TuikAnimalTradePage() {
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(value: number, _name: string, props: any) => {
                   const productName = props.payload?.urun || '';
-                  return formatNumberWithUnit(value, productName);
+                  const unit = getUnit(productName);
+                  return `${formatNumber(value)} ${unit}`;
                 }} />
                 <Legend />
                 {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />}
