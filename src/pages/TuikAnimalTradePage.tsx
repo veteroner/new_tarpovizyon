@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, ComposedChart, Line
+  PieChart, Pie, ComposedChart
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 
@@ -296,7 +296,8 @@ export default function TuikAnimalTradePage() {
               marginTop: '4px',
               maxHeight: '300px',
               overflowY: 'auto',
-              background: 'var(--surface)',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -368,7 +369,8 @@ export default function TuikAnimalTradePage() {
               marginTop: '4px',
               maxHeight: '300px',
               overflowY: 'auto',
-              background: 'var(--surface)',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -440,7 +442,8 @@ export default function TuikAnimalTradePage() {
               marginTop: '4px',
               maxHeight: '300px',
               overflowY: 'auto',
-              background: 'var(--surface)',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -563,7 +566,6 @@ export default function TuikAnimalTradePage() {
                   <Legend />
                   {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="ihracat" name="İhracat" fill="#22c55e" />}
                   {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="ithalat" name="İthalat" fill="#ef4444" />}
-                  <Line type="monotone" dataKey="ihracat" stroke="#22c55e" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
