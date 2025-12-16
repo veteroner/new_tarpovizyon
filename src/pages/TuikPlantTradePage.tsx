@@ -56,11 +56,19 @@ interface YearlyTrend {
   ithalat: number;
 }
 
-function formatNumber(value: number): string {
+function formatNumber(value: number, unit?: string): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
   if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
   if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toLocaleString('tr-TR');
+  return value.toLocaleString('tr-TR') + (unit ? ' ' + unit : '');
+}
+
+function formatNumberWithUnit(value: number): string {
+  const unit = 'Ton';
+  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ' + unit;
+  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ' + unit;
+  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ' + unit;
+  return value.toLocaleString('tr-TR') + ' ' + unit;
 }
 
 function formatShort(value: number): string {
@@ -395,7 +403,7 @@ export default function TuikPlantTradePage() {
                 <div className="kpi-icon green">🚢</div>
               </div>
               <div className="kpi-value">{formatNumber(totalExport)}</div>
-              <div className="kpi-subtitle">KG • {formatMoney(totalExportValue)}</div>
+              <div className="kpi-subtitle">{formatMoney(totalExportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
@@ -403,7 +411,7 @@ export default function TuikPlantTradePage() {
                 <div className="kpi-icon red">📦</div>
               </div>
               <div className="kpi-value">{formatNumber(totalImport)}</div>
-              <div className="kpi-subtitle">KG • {formatMoney(totalImportValue)}</div>
+              <div className="kpi-subtitle">{formatMoney(totalImportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
@@ -435,7 +443,7 @@ export default function TuikPlantTradePage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                   <Legend />
                   {(viewMode === 'both' || viewMode === 'export') && (
                     <Line type="monotone" dataKey="ihracat" stroke="#22c55e" name="İhracat" strokeWidth={2} />
@@ -467,7 +475,7 @@ export default function TuikPlantTradePage() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -493,7 +501,7 @@ export default function TuikPlantTradePage() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -508,7 +516,7 @@ export default function TuikPlantTradePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                     <Bar dataKey="ihracat" fill="#22c55e" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -524,7 +532,7 @@ export default function TuikPlantTradePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                     <Bar dataKey="ithalat" fill="#ef4444" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -540,7 +548,7 @@ export default function TuikPlantTradePage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={100} />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                <Tooltip formatter={(value: number) => formatNumberWithUnit(value)} />
                 <Legend />
                 {(viewMode === 'both' || viewMode === 'export') && (
                   <Bar dataKey="toplamIhracat" fill="#22c55e" name="İhracat" />

@@ -7,6 +7,15 @@ import { fetchQuery } from '../services/api';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
+// Canlı hayvanlar - baş olarak gösterilecek
+const LIVE_ANIMALS = [
+  'Büyükbaş Kasaplık',
+  'Küçükbaş Kasaplık',
+  'Besilik Büyükbaş',
+  'Damızlık Büyükbaş',
+  'Damızlık Küçükbaş'
+];
+
 interface TradeData {
   id: string;
   ana_urun: string;
@@ -42,11 +51,23 @@ interface YearlyTrend {
   ithalat: number;
 }
 
-function formatNumber(value: number): string {
+function getUnit(productName: string): string {
+  return LIVE_ANIMALS.includes(productName) ? 'Baş' : 'Ton';
+}
+
+function formatNumber(value: number, unit?: string): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
   if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
   if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toLocaleString('tr-TR');
+  return value.toLocaleString('tr-TR') + (unit ? ' ' + unit : '');
+}
+
+function formatNumberWithUnit(value: number, productName: string): string {
+  const unit = getUnit(productName);
+  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ' + unit;
+  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ' + unit;
+  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ' + unit;
+  return value.toLocaleString('tr-TR') + ' ' + unit;
 }
 
 function formatShort(value: number): string {
@@ -361,7 +382,7 @@ export default function TuikAnimalTradePage() {
                 <div className="kpi-icon green">🚢</div>
               </div>
               <div className="kpi-value">{formatNumber(totalExport)}</div>
-              <div className="kpi-subtitle">KG • {formatMoney(totalExportValue)}</div>
+              <div className="kpi-subtitle">{formatMoney(totalExportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
@@ -369,7 +390,7 @@ export default function TuikAnimalTradePage() {
                 <div className="kpi-icon red">📦</div>
               </div>
               <div className="kpi-value">{formatNumber(totalImport)}</div>
-              <div className="kpi-subtitle">KG • {formatMoney(totalImportValue)}</div>
+              <div className="kpi-subtitle">{formatMoney(totalImportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
@@ -401,7 +422,7 @@ export default function TuikAnimalTradePage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Tooltip formatter={(value: number) => formatNumber(value)} />
                   <Legend />
                   {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="ihracat" name="İhracat" fill="#22c55e" />}
                   {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="ithalat" name="İthalat" fill="#ef4444" />}
@@ -424,7 +445,7 @@ export default function TuikAnimalTradePage() {
                     dataKey="value"
                     label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                   />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Tooltip formatter={(value: number, name: string) => formatNumberWithUnit(value, name)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -437,7 +458,7 @@ export default function TuikAnimalTradePage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Tooltip formatter={(value: number) => formatNumber(value)} />
                   <Bar dataKey="ihracat" fill="#22c55e" />
                 </BarChart>
               </ResponsiveContainer>
@@ -451,7 +472,7 @@ export default function TuikAnimalTradePage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Tooltip formatter={(value: number) => formatNumber(value)} />
                   <Bar dataKey="ithalat" fill="#ef4444" />
                 </BarChart>
               </ResponsiveContainer>
@@ -466,7 +487,10 @@ export default function TuikAnimalTradePage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={100} />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                <Tooltip formatter={(value: number, _name: string, props: any) => {
+                  const productName = props.payload?.urun || '';
+                  return formatNumberWithUnit(value, productName);
+                }} />
                 <Legend />
                 <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />
                 <Bar dataKey="toplamIthalat" name="İthalat" fill="#ef4444" />
