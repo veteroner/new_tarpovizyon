@@ -91,6 +91,9 @@ export default function TuikAnimalTradePage() {
   const [selectedYears, setSelectedYears] = useState<string[]>(['2024']);
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [yearOptions, setYearOptions] = useState<string[]>([]);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [allData, setAllData] = useState<TradeData[]>([]);
   const [productSummary, setProductSummary] = useState<ProductSummary[]>([]);
   const [countrySummary, setCountrySummary] = useState<CountrySummary[]>([]);
@@ -265,68 +268,221 @@ export default function TuikAnimalTradePage() {
 
       {/* Filtreler */}
       <div className="date-filter" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-        <div className="filter-group">
-          <label className="filter-label">Ürün Seçimi (Çoklu)</label>
-          <select 
-            multiple
-            className="filter-select" 
-            value={selectedProducts}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
-              setSelectedProducts(selected);
+        <div className="filter-group" style={{ position: 'relative' }}>
+          <label className="filter-label">Ürün Seçimi ({selectedProducts.length} seçili)</label>
+          <div 
+            onClick={() => setShowProductDropdown(!showProductDropdown)}
+            style={{ 
+              padding: '8px',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              background: 'var(--surface)',
+              cursor: 'pointer',
+              minHeight: '38px',
+              display: 'flex',
+              alignItems: 'center'
             }}
-            style={{ minHeight: '120px' }}
           >
-            {productList.map(product => (
-              <option key={product} value={product}>{product}</option>
-            ))}
-          </select>
-          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Ctrl/Cmd ile çoklu seçim</small>
+            <span style={{ fontSize: '13px', color: selectedProducts.length > 0 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+              {selectedProducts.length > 0 ? `${selectedProducts.length} ürün seçildi` : 'Ürün seçin...'}
+            </span>
+          </div>
+          {showProductDropdown && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: '4px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              zIndex: 1000,
+              padding: '8px'
+            }}>
+              <div style={{ marginBottom: '8px', display: 'flex', gap: '8px' }}>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedProducts(productList); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Tümü</button>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedProducts([]); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Temizle</button>
+              </div>
+              {productList.map(product => (
+                <label 
+                  key={product}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <input 
+                    type="checkbox"
+                    checked={selectedProducts.includes(product)}
+                    onChange={() => {
+                      setSelectedProducts(prev => 
+                        prev.includes(product) 
+                          ? prev.filter(p => p !== product)
+                          : [...prev, product]
+                      );
+                    }}
+                    style={{ marginRight: '8px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{product}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="filter-group">
-          <label className="filter-label">Yıl Seçimi (Çoklu)</label>
-          <select 
-            multiple
-            className="filter-select" 
-            value={selectedYears}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
-              setSelectedYears(selected);
+        <div className="filter-group" style={{ position: 'relative' }}>
+          <label className="filter-label">Yıl Seçimi ({selectedYears.length} seçili)</label>
+          <div 
+            onClick={() => setShowYearDropdown(!showYearDropdown)}
+            style={{ 
+              padding: '8px',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              background: 'var(--surface)',
+              cursor: 'pointer',
+              minHeight: '38px',
+              display: 'flex',
+              alignItems: 'center'
             }}
-            style={{ minHeight: '120px' }}
           >
-            {yearOptions.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Ctrl/Cmd ile çoklu seçim</small>
+            <span style={{ fontSize: '13px', color: selectedYears.length > 0 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+              {selectedYears.length > 0 ? selectedYears.join(', ') : 'Yıl seçin...'}
+            </span>
+          </div>
+          {showYearDropdown && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: '4px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              zIndex: 1000,
+              padding: '8px'
+            }}>
+              <div style={{ marginBottom: '8px', display: 'flex', gap: '8px' }}>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedYears(yearOptions); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Tümü</button>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedYears([]); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Temizle</button>
+              </div>
+              {yearOptions.map(year => (
+                <label 
+                  key={year}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <input 
+                    type="checkbox"
+                    checked={selectedYears.includes(year)}
+                    onChange={() => {
+                      setSelectedYears(prev => 
+                        prev.includes(year) 
+                          ? prev.filter(y => y !== year)
+                          : [...prev, year]
+                      );
+                    }}
+                    style={{ marginRight: '8px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{year}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="filter-group">
-          <label className="filter-label">Ay Seçimi (Çoklu - Opsiyonel)</label>
-          <select 
-            multiple
-            className="filter-select" 
-            value={selectedMonths}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
-              setSelectedMonths(selected);
+        <div className="filter-group" style={{ position: 'relative' }}>
+          <label className="filter-label">Ay Seçimi ({selectedMonths.length > 0 ? selectedMonths.length : 'Tüm'} ay)</label>
+          <div 
+            onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+            style={{ 
+              padding: '8px',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              background: 'var(--surface)',
+              cursor: 'pointer',
+              minHeight: '38px',
+              display: 'flex',
+              alignItems: 'center'
             }}
-            style={{ minHeight: '120px' }}
           >
-            <option value="01">Ocak</option>
-            <option value="02">Şubat</option>
-            <option value="03">Mart</option>
-            <option value="04">Nisan</option>
-            <option value="05">Mayıs</option>
-            <option value="06">Haziran</option>
-            <option value="07">Temmuz</option>
-            <option value="08">Ağustos</option>
-            <option value="09">Eylül</option>
-            <option value="10">Ekim</option>
-            <option value="11">Kasım</option>
-            <option value="12">Aralık</option>
-          </select>
-          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Boş = Tüm aylar</small>
+            <span style={{ fontSize: '13px', color: selectedMonths.length > 0 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+              {selectedMonths.length > 0 ? `${selectedMonths.length} ay seçildi` : 'Tüm aylar'}
+            </span>
+          </div>
+          {showMonthDropdown && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: '4px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              zIndex: 1000,
+              padding: '8px'
+            }}>
+              <div style={{ marginBottom: '8px', display: 'flex', gap: '8px' }}>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedMonths(['01','02','03','04','05','06','07','08','09','10','11','12']); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Tümü</button>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedMonths([]); }} style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', background: 'var(--border)', border: 'none', cursor: 'pointer' }}>Temizle</button>
+              </div>
+              {[{v:'01',n:'Ocak'},{v:'02',n:'Şubat'},{v:'03',n:'Mart'},{v:'04',n:'Nisan'},{v:'05',n:'Mayıs'},{v:'06',n:'Haziran'},{v:'07',n:'Temmuz'},{v:'08',n:'Ağustos'},{v:'09',n:'Eylül'},{v:'10',n:'Ekim'},{v:'11',n:'Kasım'},{v:'12',n:'Aralık'}].map(month => (
+                <label 
+                  key={month.v}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <input 
+                    type="checkbox"
+                    checked={selectedMonths.includes(month.v)}
+                    onChange={() => {
+                      setSelectedMonths(prev => 
+                        prev.includes(month.v) 
+                          ? prev.filter(m => m !== month.v)
+                          : [...prev, month.v]
+                      );
+                    }}
+                    style={{ marginRight: '8px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{month.n}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
         <div className="filter-group">
           <label className="filter-label">Görünüm Modu</label>
@@ -351,32 +507,38 @@ export default function TuikAnimalTradePage() {
         <>
           {/* KPI Cards */}
           <div className="kpi-grid">
-            <div className="kpi-card large">
-              <div className="kpi-header">
-                <span className="kpi-title">TOPLAM İHRACAT</span>
-                <div className="kpi-icon green">🚢</div>
+            {(viewMode === 'both' || viewMode === 'export') && (
+              <div className="kpi-card large">
+                <div className="kpi-header">
+                  <span className="kpi-title">TOPLAM İHRACAT</span>
+                  <div className="kpi-icon green">🚢</div>
+                </div>
+                <div className="kpi-value">{formatNumber(totalExport)}</div>
+                <div className="kpi-subtitle">{formatMoney(totalExportValue)}</div>
               </div>
-              <div className="kpi-value">{formatNumber(totalExport)}</div>
-              <div className="kpi-subtitle">{formatMoney(totalExportValue)}</div>
-            </div>
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <span className="kpi-title">TOPLAM İTHALAT</span>
-                <div className="kpi-icon red">📦</div>
+            )}
+            {(viewMode === 'both' || viewMode === 'import') && (
+              <div className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">TOPLAM İTHALAT</span>
+                  <div className="kpi-icon red">📦</div>
+                </div>
+                <div className="kpi-value">{formatNumber(totalImport)}</div>
+                <div className="kpi-subtitle">{formatMoney(totalImportValue)}</div>
               </div>
-              <div className="kpi-value">{formatNumber(totalImport)}</div>
-              <div className="kpi-subtitle">{formatMoney(totalImportValue)}</div>
-            </div>
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <span className="kpi-title">TİCARET DENGESİ</span>
-                <div className={`kpi-icon ${tradeBal >= 0 ? 'green' : 'red'}`}>{tradeBal >= 0 ? '📈' : '📉'}</div>
+            )}
+            {viewMode === 'both' && (
+              <div className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">TİCARET DENGESİ</span>
+                  <div className={`kpi-icon ${tradeBal >= 0 ? 'green' : 'red'}`}>{tradeBal >= 0 ? '📈' : '📉'}</div>
+                </div>
+                <div className="kpi-value" style={{ color: tradeBal >= 0 ? '#22c55e' : '#ef4444' }}>
+                  {tradeBal >= 0 ? '+' : ''}{formatMoney(tradeBal)}
+                </div>
+                <div className="kpi-subtitle">{tradeBal >= 0 ? 'Fazla' : 'Açık'}</div>
               </div>
-              <div className="kpi-value" style={{ color: tradeBal >= 0 ? '#22c55e' : '#ef4444' }}>
-                {tradeBal >= 0 ? '+' : ''}{formatMoney(tradeBal)}
-              </div>
-              <div className="kpi-subtitle">{tradeBal >= 0 ? 'Fazla' : 'Açık'}</div>
-            </div>
+            )}
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">ÜLKE SAYISI</span>
@@ -407,51 +569,77 @@ export default function TuikAnimalTradePage() {
             </div>
 
             {/* Ürün Dağılımı */}
-            <div className="chart-card">
-                <h3 className="chart-title">📤 İhracat Dağılımı ({selectedYears.join(', ')})</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={productSummary.map((item, i) => ({ name: item.urun, value: item.toplamIhracat, fill: COLORS[i % COLORS.length] }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                  />
-                  <Tooltip formatter={(value: number, name: string) => formatNumberWithUnit(value, name)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {(viewMode === 'both' || viewMode === 'export') && (
+              <div className="chart-card">
+                  <h3 className="chart-title">📤 İhracat Dağılımı ({selectedYears.join(', ')})</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={productSummary.map((item, i) => ({ name: item.urun, value: item.toplamIhracat, fill: COLORS[i % COLORS.length] }))}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    />
+                    <Tooltip formatter={(value: number, name: string) => formatNumberWithUnit(value, name)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {(viewMode === 'both' || viewMode === 'import') && (
+              <div className="chart-card">
+                <h3 className="chart-title">📥 İthalat Dağılımı ({selectedYears.join(', ')})</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={productSummary.map((item, i) => ({ name: item.urun, value: item.toplamIthalat, fill: COLORS[i % COLORS.length] }))}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    />
+                    <Tooltip formatter={(value: number, name: string) => formatNumberWithUnit(value, name)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             {/* İhracat Ülkeleri */}
-            <div className="chart-card">
-              <h3 className="chart-title">🌍 Top 10 İhracat Ülkeleri</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={exportCountries} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                    <Tooltip formatter={(value: number) => formatNumber(value)} />
-                  <Bar dataKey="ihracat" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {(viewMode === 'both' || viewMode === 'export') && (
+              <div className="chart-card">
+                <h3 className="chart-title">🌍 Top 10 İhracat Ülkeleri</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={exportCountries} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                    <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                      <Tooltip formatter={(value: number) => formatNumber(value)} />
+                    <Bar dataKey="ihracat" fill="#22c55e" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             {/* İthalat Ülkeleri */}
-            <div className="chart-card">
-              <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={importCountries} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => formatNumber(value)} />
-                  <Bar dataKey="ithalat" fill="#ef4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {(viewMode === 'both' || viewMode === 'import') && (
+              <div className="chart-card">
+                <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={importCountries} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                    <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                    <Tooltip formatter={(value: number) => formatNumber(value)} />
+                    <Bar dataKey="ithalat" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
 
           {/* Ürün Karşılaştırma */}
@@ -467,8 +655,8 @@ export default function TuikAnimalTradePage() {
                   return formatNumberWithUnit(value, productName);
                 }} />
                 <Legend />
-                <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />
-                <Bar dataKey="toplamIthalat" name="İthalat" fill="#ef4444" />
+                {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />}
+                {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="toplamIthalat" name="İthalat" fill="#ef4444" />}
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -481,24 +669,26 @@ export default function TuikAnimalTradePage() {
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
                     <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat (KG)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat (KG)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>
+                    {(viewMode === 'both' || viewMode === 'export') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat (KG)</th>}
+                    {(viewMode === 'both' || viewMode === 'import') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat (KG)</th>}
+                    {(viewMode === 'both' || viewMode === 'export') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>}
+                    {(viewMode === 'both' || viewMode === 'import') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>}
+                    {viewMode === 'both' && <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {productSummary.map((row, index) => (
                     <tr key={row.urun} style={{ borderBottom: '1px solid var(--border)', background: index % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
                       <td style={{ padding: '10px 8px', fontWeight: '500' }}>{row.urun}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatNumber(row.toplamIhracat)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatNumber(row.toplamIthalat)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ihracatDeger)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ithalatDeger)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: row.denge >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
-                        {row.denge >= 0 ? '+' : ''}{formatMoney(row.denge)}
-                      </td>
+                      {(viewMode === 'both' || viewMode === 'export') && <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatNumber(row.toplamIhracat)}</td>}
+                      {(viewMode === 'both' || viewMode === 'import') && <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatNumber(row.toplamIthalat)}</td>}
+                      {(viewMode === 'both' || viewMode === 'export') && <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ihracatDeger)}</td>}
+                      {(viewMode === 'both' || viewMode === 'import') && <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ithalatDeger)}</td>}
+                      {viewMode === 'both' && (
+                        <td style={{ textAlign: 'right', padding: '10px 8px', color: row.denge >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
+                          {row.denge >= 0 ? '+' : ''}{formatMoney(row.denge)}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
