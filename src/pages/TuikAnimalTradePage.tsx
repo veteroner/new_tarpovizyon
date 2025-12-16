@@ -88,7 +88,8 @@ export default function TuikAnimalTradePage() {
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>(['Büyükbaş (sığır) Eti', 'Piliç Eti']);
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYears, setSelectedYears] = useState<string[]>(['2024']);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [allData, setAllData] = useState<TradeData[]>([]);
   const [productSummary, setProductSummary] = useState<ProductSummary[]>([]);
@@ -130,10 +131,13 @@ export default function TuikAnimalTradePage() {
     setLoading(true);
     try {
       const productFilter = selectedProducts.map(p => `'${p}'`).join(',');
+      const yearFilter = selectedYears.map(y => `'${y}'`).join(',');
+      const monthFilter = selectedMonths.length > 0 ? selectedMonths.map(m => `'${m}'`).join(',') : null;
       
       const dataQuery = `
         SELECT * FROM tuik_ticarethayvansal 
-        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
+        WHERE ana_urun IN (${productFilter}) AND yil IN (${yearFilter})
+        ${monthFilter ? `AND ay IN (${monthFilter})` : ''}
         ORDER BY ana_urun, ulke
       `;
 
@@ -144,7 +148,8 @@ export default function TuikAnimalTradePage() {
           SUM(ihracat_deger) as ihracatDeger,
           SUM(ithalat_deger) as ithalatDeger
         FROM tuik_ticarethayvansal
-        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
+        WHERE ana_urun IN (${productFilter}) AND yil IN (${yearFilter})
+        ${monthFilter ? `AND ay IN (${monthFilter})` : ''}
         GROUP BY ana_urun
         ORDER BY ihracatDeger DESC
       `;
@@ -154,7 +159,8 @@ export default function TuikAnimalTradePage() {
           SUM(ihracat_mik) as ihracat,
           SUM(ithalat_mik) as ithalat
         FROM tuik_ticarethayvansal
-        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
+        WHERE ana_urun IN (${productFilter}) AND yil IN (${yearFilter})
+        ${monthFilter ? `AND ay IN (${monthFilter})` : ''}
         GROUP BY ulke
         ORDER BY ihracat DESC
         LIMIT 15
@@ -229,10 +235,12 @@ export default function TuikAnimalTradePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedProducts, selectedYear]);
+  }, [selectedProducts, selectedYears, selectedMonths]);
 
   useEffect(() => {
-    loadData();
+    if (selectedProducts.length > 0 && selectedYears.length > 0) {
+      loadData();
+    }
   }, [loadData]);
 
   // Hesaplamalar
@@ -242,16 +250,6 @@ export default function TuikAnimalTradePage() {
   const totalImportValue = productSummary.reduce((sum, p) => sum + p.ithalatDeger, 0);
   const tradeBal = totalExportValue - totalImportValue;
   const countryCount = new Set(allData.map(d => d.ulke)).size;
-
-  const handleProductToggle = (product: string) => {
-    setSelectedProducts(prev => {
-      if (prev.includes(product)) {
-        return prev.filter(p => p !== product);
-      } else {
-        return [...prev, product];
-      }
-    });
-  };
 
   const exportCountries = countrySummary.filter(c => c.ihracat > c.ithalat).slice(0, 10);
   const importCountries = countrySummary.filter(c => c.ithalat > c.ihracat).slice(0, 10);
@@ -266,21 +264,72 @@ export default function TuikAnimalTradePage() {
       </div>
 
       {/* Filtreler */}
-      <div className="date-filter" style={{ flexWrap: 'wrap', gap: '12px' }}>
+      <div className="date-filter" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '20px' }}>
         <div className="filter-group">
-          <label className="filter-label">Yıl Seçimi</label>
+          <label className="filter-label">Ürün Seçimi (Çoklu)</label>
           <select 
+            multiple
             className="filter-select" 
-            value={selectedYear} 
-            onChange={(e) => setSelectedYear(e.target.value)}
+            value={selectedProducts}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
+              setSelectedProducts(selected);
+            }}
+            style={{ minHeight: '120px' }}
+          >
+            {productList.map(product => (
+              <option key={product} value={product}>{product}</option>
+            ))}
+          </select>
+          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Ctrl/Cmd ile çoklu seçim</small>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">Yıl Seçimi (Çoklu)</label>
+          <select 
+            multiple
+            className="filter-select" 
+            value={selectedYears}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
+              setSelectedYears(selected);
+            }}
+            style={{ minHeight: '120px' }}
           >
             {yearOptions.map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
+          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Ctrl/Cmd ile çoklu seçim</small>
         </div>
         <div className="filter-group">
-          <label className="filter-label">Görünüm</label>
+          <label className="filter-label">Ay Seçimi (Çoklu - Opsiyonel)</label>
+          <select 
+            multiple
+            className="filter-select" 
+            value={selectedMonths}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions, opt => opt.value);
+              setSelectedMonths(selected);
+            }}
+            style={{ minHeight: '120px' }}
+          >
+            <option value="01">Ocak</option>
+            <option value="02">Şubat</option>
+            <option value="03">Mart</option>
+            <option value="04">Nisan</option>
+            <option value="05">Mayıs</option>
+            <option value="06">Haziran</option>
+            <option value="07">Temmuz</option>
+            <option value="08">Ağustos</option>
+            <option value="09">Eylül</option>
+            <option value="10">Ekim</option>
+            <option value="11">Kasım</option>
+            <option value="12">Aralık</option>
+          </select>
+          <small style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Boş = Tüm aylar</small>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">Görünüm Modu</label>
           <select 
             className="filter-select" 
             value={viewMode} 
@@ -290,80 +339,6 @@ export default function TuikAnimalTradePage() {
             <option value="export">Sadece İhracat</option>
             <option value="import">Sadece İthalat</option>
           </select>
-        </div>
-      </div>
-
-      {/* Ürün Seçici - Checkbox */}
-      <div className="chart-card" style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Ürün Seçimi ({selectedProducts.length} seçili)</h3>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              onClick={() => setSelectedProducts(productList)} 
-              style={{ 
-                padding: '4px 12px', 
-                fontSize: '12px', 
-                borderRadius: '8px', 
-                background: 'var(--surface)', 
-                border: '1px solid var(--border)', 
-                cursor: 'pointer',
-                color: 'var(--text-primary)'
-              }}
-            >
-              Tümü
-            </button>
-            <button 
-              onClick={() => setSelectedProducts([])} 
-              style={{ 
-                padding: '4px 12px', 
-                fontSize: '12px', 
-                borderRadius: '8px', 
-                background: 'var(--surface)', 
-                border: '1px solid var(--border)', 
-                cursor: 'pointer',
-                color: 'var(--text-primary)'
-              }}
-            >
-              Temizle
-            </button>
-          </div>
-        </div>
-        <div style={{ 
-          maxHeight: '250px', 
-          overflowY: 'auto', 
-          border: '1px solid var(--border)', 
-          borderRadius: '8px', 
-          padding: '8px',
-          background: 'var(--surface)'
-        }}>
-          {productList.map(product => (
-            <label 
-              key={product} 
-              style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 10px', 
-                cursor: 'pointer', 
-                borderRadius: '6px',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              <input 
-                type="checkbox" 
-                checked={selectedProducts.includes(product)}
-                onChange={() => handleProductToggle(product)}
-                style={{ 
-                  marginRight: '10px',
-                  width: '16px',
-                  height: '16px',
-                  cursor: 'pointer'
-                }}
-              />
-              <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{product}</span>
-            </label>
-          ))}
         </div>
       </div>
 
@@ -416,7 +391,7 @@ export default function TuikAnimalTradePage() {
           <div className="chart-grid">
             {/* Yıllık Trend */}
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık Dış Ticaret Trendi</h3>
+              <h3 className="chart-title">📅 Dış Ticaret Trendi ({selectedYears.join(', ')})</h3>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={yearlyTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -433,7 +408,7 @@ export default function TuikAnimalTradePage() {
 
             {/* Ürün Dağılımı */}
             <div className="chart-card">
-              <h3 className="chart-title">🥧 İhracat Dağılımı ({selectedYear})</h3>
+                <h3 className="chart-title">📤 İhracat Dağılımı ({selectedYears.join(', ')})</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -481,7 +456,7 @@ export default function TuikAnimalTradePage() {
 
           {/* Ürün Karşılaştırma */}
           <div className="chart-card">
-            <h3 className="chart-title">📊 Ürün Bazlı Dış Ticaret ({selectedYear})</h3>
+            <h3 className="chart-title">📊 Ürün Bazlı Dış Ticaret ({selectedYears.join(', ')})</h3>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={productSummary}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -500,7 +475,7 @@ export default function TuikAnimalTradePage() {
 
           {/* Detaylı Tablo */}
           <div className="chart-card">
-            <h3 className="chart-title">📋 Detaylı Ürün Tablosu ({selectedYear})</h3>
+            <h3 className="chart-title">📋 Detaylı Ürün Tablosu ({selectedYears.join(', ')})</h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
