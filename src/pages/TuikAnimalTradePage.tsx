@@ -16,6 +16,20 @@ const LIVE_ANIMALS = [
   'Damızlık Küçükbaş'
 ];
 
+// Helper function to get unit label based on selected products
+function getUnitLabel(selectedProducts: string[]): string {
+  const hasAnimals = selectedProducts.some(p => LIVE_ANIMALS.includes(p));
+  const hasProducts = selectedProducts.some(p => !LIVE_ANIMALS.includes(p));
+  
+  if (hasAnimals && hasProducts) {
+    return 'Ton/Baş';
+  } else if (hasAnimals) {
+    return 'Baş';
+  } else {
+    return 'Ton';
+  }
+}
+
 interface TradeData {
   id: string;
   ana_urun: string;
@@ -671,8 +685,8 @@ export default function TuikAnimalTradePage() {
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
                     <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
-                    {(viewMode === 'both' || viewMode === 'export') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat (KG)</th>}
-                    {(viewMode === 'both' || viewMode === 'import') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat (KG)</th>}
+                    {(viewMode === 'both' || viewMode === 'export') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ({getUnitLabel(selectedProducts)})</th>}
+                    {(viewMode === 'both' || viewMode === 'import') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ({getUnitLabel(selectedProducts)})</th>}
                     {(viewMode === 'both' || viewMode === 'export') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>}
                     {(viewMode === 'both' || viewMode === 'import') && <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>}
                     {viewMode === 'both' && <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>}
@@ -699,19 +713,21 @@ export default function TuikAnimalTradePage() {
           </div>
 
           {/* İstatistik Özeti */}
-          <div className="data-table">
-            <h3 className="data-table-title">🏆 En Fazla İhracat Yapılan Ürünler</h3>
-            {productSummary.slice(0, 8).map((product, index) => (
-              <div className="table-row" key={product.urun}>
-                <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
-                <div className="table-info">
-                  <div className="table-name">{product.urun}</div>
-                  <div className="table-subtext">Denge: {product.denge >= 0 ? '+' : ''}{formatMoney(product.denge)}</div>
+          {(viewMode === 'both' || viewMode === 'export') && (
+            <div className="data-table">
+              <h3 className="data-table-title">🏆 En Fazla İhracat Yapılan Ürünler</h3>
+              {productSummary.slice(0, 8).map((product, index) => (
+                <div className="table-row" key={product.urun}>
+                  <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
+                  <div className="table-info">
+                    <div className="table-name">{product.urun}</div>
+                    <div className="table-subtext">Denge: {product.denge >= 0 ? '+' : ''}{formatMoney(product.denge)}</div>
+                  </div>
+                  <div className="table-value green">{formatNumberWithUnit(product.toplamIhracat, product.urun)}</div>
                 </div>
-                <div className="table-value green">{formatNumber(product.toplamIhracat)} KG</div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>
