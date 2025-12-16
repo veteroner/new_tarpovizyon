@@ -1,31 +1,46 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+  PieChart, Pie, ComposedChart, Line
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 
-interface PeriodSummary {
+const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+
+interface TradeData {
+  id: string;
+  ana_urun: string;
+  yil: string;
+  ay: string;
+  alt_urun: string;
+  ulke: string;
+  ihracat_mik: number;
+  ithalat_mik: number;
+  ihracat_deger: number;
+  ithalat_deger: number;
+}
+
+interface ProductSummary {
   urun: string;
-  ihracat: number;
-  ithalat: number;
+  toplamIhracat: number;
+  toplamIthalat: number;
   ihracatDeger: number;
   ithalatDeger: number;
   denge: number;
 }
 
-interface CategoryData {
-  name: string;
-  products: string[];
+interface CountrySummary {
+  ulke: string;
+  ihracat: number;
+  ithalat: number;
+  denge: number;
 }
 
-const CATEGORIES: CategoryData[] = [
-  { name: 'Kırmızı Et', products: ['Büyükbaş (sığır) Eti', 'Küçükbas Eti'] },
-  { name: 'Kasaplık Hayvan', products: ['Büyükbaş Kasaplık', 'Küçükbaş Kasaplık'] },
-  { name: 'Besilik Hayvan', products: ['Besilik Büyükbaş'] },
-  { name: 'Damızlık Hayvan', products: ['Damızlık Büyükbaş', 'Damızlık Küçükbaş'] },
-  { name: 'Diğer', products: ['Hindi Eti', 'Piliç Eti', 'Konsantre Süt'] }
-];
+interface YearlyTrend {
+  yil: string;
+  ihracat: number;
+  ithalat: number;
+}
 
 function formatNumber(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
@@ -51,23 +66,14 @@ function formatMoney(value: number): string {
 export default function TuikAnimalTradePage() {
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Büyükbaş (sığır) Eti', 'Piliç Eti']);
+  const [selectedYear, setSelectedYear] = useState('2024');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
-  
-  // Karşılaştırma modu
-  const [comparisonMode, setComparisonMode] = useState(true);
-  
-  // Dönem seçimi
-  const [period1Start, setPeriod1Start] = useState('2010');
-  const [period1End, setPeriod1End] = useState('2015');
-  const [period2Start, setPeriod2Start] = useState('2016');
-  const [period2End, setPeriod2End] = useState('2024');
-  
-  // Kategori seçimi
-  const [selectedCategory, setSelectedCategory] = useState<string>('Tümü');
-  
-  // Veri durumu
-  const [period1Data, setPeriod1Data] = useState<PeriodSummary[]>([]);
-  const [period2Data, setPeriod2Data] = useState<PeriodSummary[]>([]);
+  const [allData, setAllData] = useState<TradeData[]>([]);
+  const [productSummary, setProductSummary] = useState<ProductSummary[]>([]);
+  const [countrySummary, setCountrySummary] = useState<CountrySummary[]>([]);
+  const [yearlyTrend, setYearlyTrend] = useState<YearlyTrend[]>([]);
+  const [viewMode, setViewMode] = useState<'export' | 'import' | 'both'>('both');
 
   // Meta veri yükleme
   useEffect(() => {
@@ -75,7 +81,7 @@ export default function TuikAnimalTradePage() {
       try {
         const [productRes, yearRes] = await Promise.all([
           fetchQuery('SELECT DISTINCT ana_urun FROM tuik_ticarethayvansal ORDER BY ana_urun'),
-          fetchQuery('SELECT DISTINCT yil FROM tuik_ticarethayvansal ORDER BY yil')
+          fetchQuery('SELECT DISTINCT yil FROM tuik_ticarethayvansal ORDER BY yil DESC')
         ]);
 
         if (productRes.data) {
@@ -84,7 +90,7 @@ export default function TuikAnimalTradePage() {
         }
         if (yearRes.data) {
           const years = yearRes.data.map((item: Record<string, string | number>) => String(item.yil));
-          setYearOptions(years.sort());
+          setYearOptions(years);
         }
       } catch (error) {
         console.error('Meta veri yüklenirken hata:', error);
@@ -95,81 +101,106 @@ export default function TuikAnimalTradePage() {
 
   // Ana veri yükleme
   const loadData = useCallback(async () => {
+    if (selectedProducts.length === 0) {
+      setAllData([]);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Kategori filtresi
-      let productFilter = productList;
-      if (selectedCategory !== 'Tümü') {
-        const category = CATEGORIES.find(c => c.name === selectedCategory);
-        productFilter = category ? category.products : productList;
-      }
+      const productFilter = selectedProducts.map(p => `'${p}'`).join(',');
+      
+      const dataQuery = `
+        SELECT * FROM tuik_ticarethayvansal 
+        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
+        ORDER BY ana_urun, ulke
+      `;
 
-      if (productFilter.length === 0) {
-        setPeriod1Data([]);
-        setPeriod2Data([]);
-        setLoading(false);
-        return;
-      }
-
-      const productFilterStr = productFilter.map(p => `'${p}'`).join(',');
-
-      // Dönem 1 verisi
-      const period1Query = `
+      const productSummaryQuery = `
         SELECT ana_urun as urun,
-          SUM(ihracat_mik) as ihracat,
-          SUM(ithalat_mik) as ithalat,
+          SUM(ihracat_mik) as toplamIhracat,
+          SUM(ithalat_mik) as toplamIthalat,
           SUM(ihracat_deger) as ihracatDeger,
           SUM(ithalat_deger) as ithalatDeger
         FROM tuik_ticarethayvansal
-        WHERE ana_urun IN (${productFilterStr}) 
-          AND CAST(yil AS UNSIGNED) >= ${period1Start} 
-          AND CAST(yil AS UNSIGNED) <= ${period1End}
+        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
         GROUP BY ana_urun
         ORDER BY ihracatDeger DESC
       `;
 
-      // Dönem 2 verisi
-      const period2Query = `
-        SELECT ana_urun as urun,
+      const countrySummaryQuery = `
+        SELECT ulke,
           SUM(ihracat_mik) as ihracat,
-          SUM(ithalat_mik) as ithalat,
-          SUM(ihracat_deger) as ihracatDeger,
-          SUM(ithalat_deger) as ithalatDeger
+          SUM(ithalat_mik) as ithalat
         FROM tuik_ticarethayvansal
-        WHERE ana_urun IN (${productFilterStr}) 
-          AND CAST(yil AS UNSIGNED) >= ${period2Start} 
-          AND CAST(yil AS UNSIGNED) <= ${period2End}
-        GROUP BY ana_urun
-        ORDER BY ihracatDeger DESC
+        WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
+        GROUP BY ulke
+        ORDER BY ihracat DESC
+        LIMIT 15
       `;
 
-      const [p1Res, p2Res] = await Promise.all([
-        fetchQuery(period1Query),
-        fetchQuery(period2Query)
+      const trendQuery = `
+        SELECT yil,
+          SUM(ihracat_mik) as ihracat,
+          SUM(ithalat_mik) as ithalat
+        FROM tuik_ticarethayvansal
+        WHERE ana_urun IN (${productFilter})
+        GROUP BY yil
+        ORDER BY yil
+      `;
+
+      const [dataRes, productRes, countryRes, trendRes] = await Promise.all([
+        fetchQuery(dataQuery),
+        fetchQuery(productSummaryQuery),
+        fetchQuery(countrySummaryQuery),
+        fetchQuery(trendQuery)
       ]);
 
-      if (p1Res.data) {
-        const mapped = p1Res.data.map((item: Record<string, string | number>) => ({
-          urun: String(item.urun),
-          ihracat: Number(item.ihracat) || 0,
-          ithalat: Number(item.ithalat) || 0,
-          ihracatDeger: Number(item.ihracatDeger) || 0,
-          ithalatDeger: Number(item.ithalatDeger) || 0,
-          denge: (Number(item.ihracatDeger) || 0) - (Number(item.ithalatDeger) || 0)
+      if (dataRes.data) {
+        const mapped = dataRes.data.map((item: Record<string, string | number>) => ({
+          id: String(item.id || Math.random()),
+          ana_urun: String(item.ana_urun),
+          yil: String(item.yil),
+          ay: String(item.ay),
+          alt_urun: String(item.alt_urun),
+          ulke: String(item.ulke),
+          ihracat_mik: Number(item.ihracat_mik) || 0,
+          ithalat_mik: Number(item.ithalat_mik) || 0,
+          ihracat_deger: Number(item.ihracat_deger) || 0,
+          ithalat_deger: Number(item.ithalat_deger) || 0
         }));
-        setPeriod1Data(mapped);
+        setAllData(mapped);
       }
 
-      if (p2Res.data) {
-        const mapped = p2Res.data.map((item: Record<string, string | number>) => ({
+      if (productRes.data) {
+        const mapped = productRes.data.map((item: Record<string, string | number>) => ({
           urun: String(item.urun),
-          ihracat: Number(item.ihracat) || 0,
-          ithalat: Number(item.ithalat) || 0,
+          toplamIhracat: Number(item.toplamIhracat) || 0,
+          toplamIthalat: Number(item.toplamIthalat) || 0,
           ihracatDeger: Number(item.ihracatDeger) || 0,
           ithalatDeger: Number(item.ithalatDeger) || 0,
           denge: (Number(item.ihracatDeger) || 0) - (Number(item.ithalatDeger) || 0)
         }));
-        setPeriod2Data(mapped);
+        setProductSummary(mapped);
+      }
+
+      if (countryRes.data) {
+        const mapped = countryRes.data.map((item: Record<string, string | number>) => ({
+          ulke: String(item.ulke),
+          ihracat: Number(item.ihracat) || 0,
+          ithalat: Number(item.ithalat) || 0,
+          denge: (Number(item.ihracat) || 0) - (Number(item.ithalat) || 0)
+        }));
+        setCountrySummary(mapped);
+      }
+
+      if (trendRes.data) {
+        const mapped = trendRes.data.map((item: Record<string, string | number>) => ({
+          yil: String(item.yil),
+          ihracat: Number(item.ihracat) || 0,
+          ithalat: Number(item.ithalat) || 0
+        }));
+        setYearlyTrend(mapped);
       }
 
     } catch (error) {
@@ -177,172 +208,141 @@ export default function TuikAnimalTradePage() {
     } finally {
       setLoading(false);
     }
-  }, [productList, selectedCategory, period1Start, period1End, period2Start, period2End]);
+  }, [selectedProducts, selectedYear]);
 
   useEffect(() => {
-    if (productList.length > 0) {
-      loadData();
-    }
-  }, [loadData, productList]);
+    loadData();
+  }, [loadData]);
 
-  // Hesaplamalar - Dönem 1
-  const p1TotalExport = period1Data.reduce((sum, p) => sum + p.ihracat, 0);
-  const p1TotalImport = period1Data.reduce((sum, p) => sum + p.ithalat, 0);
-  const p1TotalExportValue = period1Data.reduce((sum, p) => sum + p.ihracatDeger, 0);
-  const p1TotalImportValue = period1Data.reduce((sum, p) => sum + p.ithalatDeger, 0);
-  const p1Balance = p1TotalExportValue - p1TotalImportValue;
+  // Hesaplamalar
+  const totalExport = productSummary.reduce((sum, p) => sum + p.toplamIhracat, 0);
+  const totalImport = productSummary.reduce((sum, p) => sum + p.toplamIthalat, 0);
+  const totalExportValue = productSummary.reduce((sum, p) => sum + p.ihracatDeger, 0);
+  const totalImportValue = productSummary.reduce((sum, p) => sum + p.ithalatDeger, 0);
+  const tradeBal = totalExportValue - totalImportValue;
+  const countryCount = new Set(allData.map(d => d.ulke)).size;
 
-  // Hesaplamalar - Dönem 2
-  const p2TotalExport = period2Data.reduce((sum, p) => sum + p.ihracat, 0);
-  const p2TotalImport = period2Data.reduce((sum, p) => sum + p.ithalat, 0);
-  const p2TotalExportValue = period2Data.reduce((sum, p) => sum + p.ihracatDeger, 0);
-  const p2TotalImportValue = period2Data.reduce((sum, p) => sum + p.ithalatDeger, 0);
-  const p2Balance = p2TotalExportValue - p2TotalImportValue;
+  const handleProductToggle = (product: string) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(product)) {
+        return prev.filter(p => p !== product);
+      } else {
+        return [...prev, product];
+      }
+    });
+  };
 
-  // Değişim oranları
-  const exportChange = p1TotalExportValue !== 0 ? ((p2TotalExportValue - p1TotalExportValue) / p1TotalExportValue * 100) : 0;
-  const importChange = p1TotalImportValue !== 0 ? ((p2TotalImportValue - p1TotalImportValue) / p1TotalImportValue * 100) : 0;
-  const balanceChange = p1Balance !== 0 ? ((p2Balance - p1Balance) / Math.abs(p1Balance) * 100) : 0;
-
-  // Karşılaştırma verisi
-  const comparisonData = period1Data.map(p1 => {
-    const p2 = period2Data.find(p => p.urun === p1.urun);
-    return {
-      urun: p1.urun,
-      donem1Ihracat: p1.ihracatDeger,
-      donem2Ihracat: p2?.ihracatDeger || 0,
-      donem1Ithalat: p1.ithalatDeger,
-      donem2Ithalat: p2?.ithalatDeger || 0
-    };
-  });
-
-  // Radar chart verisi
-  const radarData = period1Data.slice(0, 6).map(p1 => {
-    const p2 = period2Data.find(p => p.urun === p1.urun);
-    return {
-      product: p1.urun.substring(0, 15),
-      'Dönem 1': p1.ihracatDeger,
-      'Dönem 2': p2?.ihracatDeger || 0
-    };
-  });
+  const exportCountries = countrySummary.filter(c => c.ihracat > c.ithalat).slice(0, 10);
+  const importCountries = countrySummary.filter(c => c.ithalat > c.ihracat).slice(0, 10);
 
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">🥩 TÜİK Hayvansal Dış Ticaret Analizi</h1>
         <p className="page-subtitle">
-          {comparisonMode ? 'Dinamik Dönem Karşılaştırma' : 'Tek Dönem Analizi'} • Et & Süt Ürünleri • Canlı Hayvan • TÜİK Resmi Verileri
+          TÜİK Resmi Verileri • Ülke Bazlı • Aylık Detay • İhracat & İthalat
         </p>
       </div>
 
-      {/* Karşılaştırma Modu Toggle */}
-      <div className="date-filter" style={{ marginBottom: '20px' }}>
+      {/* Filtreler */}
+      <div className="date-filter" style={{ flexWrap: 'wrap', gap: '12px' }}>
         <div className="filter-group">
-          <label className="filter-label">Analiz Modu</label>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={comparisonMode}
-                onChange={(e) => setComparisonMode(e.target.checked)}
-                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-              />
-              <span style={{ fontSize: '14px' }}>Dönem Karşılaştırması Yap</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Dönem Seçim Paneli */}
-      <div className="chart-card" style={{ marginBottom: '20px' }}>
-        <h3 className="chart-title">📅 {comparisonMode ? 'Dönem Seçimi' : 'Tek Dönem Seçimi'}</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: comparisonMode ? '1fr 1fr' : '1fr', gap: '20px' }}>
-          {/* Dönem 1 */}
-          <div style={{ padding: '15px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-            <h4 style={{ margin: '0 0 12px 0', color: '#22c55e', fontSize: '16px' }}>🟢 Dönem 1</h4>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px', color: 'var(--text-secondary)' }}>Başlangıç</label>
-                <select 
-                  className="filter-select" 
-                  value={period1Start} 
-                  onChange={(e) => setPeriod1Start(e.target.value)}
-                >
-                  {yearOptions.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px', color: 'var(--text-secondary)' }}>Bitiş</label>
-                <select 
-                  className="filter-select" 
-                  value={period1End} 
-                  onChange={(e) => setPeriod1End(e.target.value)}
-                >
-                  {yearOptions.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Süre: {parseInt(period1End) - parseInt(period1Start) + 1} yıl
-            </div>
-          </div>
-
-          {/* Dönem 2 - Only in comparison mode */}
-          {comparisonMode && (
-          <div style={{ padding: '15px', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-            <h4 style={{ margin: '0 0 12px 0', color: '#3b82f6', fontSize: '16px' }}>🔵 Dönem 2</h4>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px', color: 'var(--text-secondary)' }}>Başlangıç</label>
-                <select 
-                  className="filter-select" 
-                  value={period2Start} 
-                  onChange={(e) => setPeriod2Start(e.target.value)}
-                >
-                  {yearOptions.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px', color: 'var(--text-secondary)' }}>Bitiş</label>
-                <select 
-                  className="filter-select" 
-                  value={period2End} 
-                  onChange={(e) => setPeriod2End(e.target.value)}
-                >
-                  {yearOptions.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Süre: {parseInt(period2End) - parseInt(period2Start) + 1} yıl
-            </div>
-          </div>
-          )}
-        </div>
-      </div>
-
-      {/* Kategori Filtresi */}
-      <div className="date-filter" style={{ marginBottom: '20px' }}>
-        <div className="filter-group">
-          <label className="filter-label">Kategori Filtresi</label>
+          <label className="filter-label">Yıl Seçimi</label>
           <select 
             className="filter-select" 
-            value={selectedCategory} 
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            value={selectedYear} 
+            onChange={(e) => setSelectedYear(e.target.value)}
           >
-            <option value="Tümü">Tümü</option>
-            {CATEGORIES.map(cat => (
-              <option key={cat.name} value={cat.name}>{cat.name}</option>
+            {yearOptions.map(year => (
+              <option key={year} value={year}>{year}</option>
             ))}
           </select>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">Görünüm</label>
+          <select 
+            className="filter-select" 
+            value={viewMode} 
+            onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+          >
+            <option value="both">İhracat & İthalat</option>
+            <option value="export">Sadece İhracat</option>
+            <option value="import">Sadece İthalat</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Ürün Seçici - Checkbox */}
+      <div className="chart-card" style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Ürün Seçimi ({selectedProducts.length} seçili)</h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => setSelectedProducts(productList)} 
+              style={{ 
+                padding: '4px 12px', 
+                fontSize: '12px', 
+                borderRadius: '8px', 
+                background: 'var(--surface)', 
+                border: '1px solid var(--border)', 
+                cursor: 'pointer',
+                color: 'var(--text-primary)'
+              }}
+            >
+              Tümü
+            </button>
+            <button 
+              onClick={() => setSelectedProducts([])} 
+              style={{ 
+                padding: '4px 12px', 
+                fontSize: '12px', 
+                borderRadius: '8px', 
+                background: 'var(--surface)', 
+                border: '1px solid var(--border)', 
+                cursor: 'pointer',
+                color: 'var(--text-primary)'
+              }}
+            >
+              Temizle
+            </button>
+          </div>
+        </div>
+        <div style={{ 
+          maxHeight: '250px', 
+          overflowY: 'auto', 
+          border: '1px solid var(--border)', 
+          borderRadius: '8px', 
+          padding: '8px',
+          background: 'var(--surface)'
+        }}>
+          {productList.map(product => (
+            <label 
+              key={product} 
+              style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                padding: '8px 10px', 
+                cursor: 'pointer', 
+                borderRadius: '6px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <input 
+                type="checkbox" 
+                checked={selectedProducts.includes(product)}
+                onChange={() => handleProductToggle(product)}
+                style={{ 
+                  marginRight: '10px',
+                  width: '16px',
+                  height: '16px',
+                  cursor: 'pointer'
+                }}
+              />
+              <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{product}</span>
+            </label>
+          ))}
         </div>
       </div>
 
@@ -353,305 +353,150 @@ export default function TuikAnimalTradePage() {
         </div>
       ) : (
         <>
-          {/* KPI'lar */}
+          {/* KPI Cards */}
           <div className="kpi-grid">
-            {comparisonMode ? (
-            <>
-            <div className="kpi-card large">
-              <div className="kpi-header">
-                <span className="kpi-title">İHRACAT DEĞİŞİMİ</span>
-                <div className={`kpi-icon ${exportChange >= 0 ? 'green' : 'red'}`}>
-                  {exportChange >= 0 ? '📈' : '📉'}
-                </div>
-              </div>
-              <div className="kpi-value" style={{ color: exportChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                {exportChange >= 0 ? '+' : ''}{exportChange.toFixed(1)}%
-              </div>
-              <div className="kpi-subtitle">
-                {formatMoney(p1TotalExportValue)} → {formatMoney(p2TotalExportValue)}
-              </div>
-            </div>
-            
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <span className="kpi-title">İTHALAT DEĞİŞİMİ</span>
-                <div className={`kpi-icon ${importChange >= 0 ? 'red' : 'green'}`}>
-                  {importChange >= 0 ? '📉' : '📈'}
-                </div>
-              </div>
-              <div className="kpi-value" style={{ color: importChange >= 0 ? '#ef4444' : '#22c55e' }}>
-                {importChange >= 0 ? '+' : ''}{importChange.toFixed(1)}%
-              </div>
-              <div className="kpi-subtitle">
-                {formatMoney(p1TotalImportValue)} → {formatMoney(p2TotalImportValue)}
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <span className="kpi-title">DENGE DEĞİŞİMİ</span>
-                <div className={`kpi-icon ${balanceChange >= 0 ? 'green' : 'red'}`}>
-                  {balanceChange >= 0 ? '✅' : '⚠️'}
-                </div>
-              </div>
-              <div className="kpi-value" style={{ color: balanceChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                {balanceChange >= 0 ? '+' : ''}{balanceChange.toFixed(1)}%
-              </div>
-              <div className="kpi-subtitle">
-                {formatMoney(p1Balance)} → {formatMoney(p2Balance)}
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <span className="kpi-title">ÜRÜN SAYISI</span>
-                <div className="kpi-icon blue">🏷️</div>
-              </div>
-              <div className="kpi-value">{period1Data.length}</div>
-              <div className="kpi-subtitle">Analiz edilen</div>
-            </div>
-            </>
-            ) : (
-            <>
             <div className="kpi-card large">
               <div className="kpi-header">
                 <span className="kpi-title">TOPLAM İHRACAT</span>
                 <div className="kpi-icon green">🚢</div>
               </div>
-              <div className="kpi-value">{formatMoney(p1TotalExportValue)}</div>
-              <div className="kpi-subtitle">{formatNumber(p1TotalExport)} KG</div>
+              <div className="kpi-value">{formatNumber(totalExport)}</div>
+              <div className="kpi-subtitle">KG • {formatMoney(totalExportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">TOPLAM İTHALAT</span>
                 <div className="kpi-icon red">📦</div>
               </div>
-              <div className="kpi-value">{formatMoney(p1TotalImportValue)}</div>
-              <div className="kpi-subtitle">{formatNumber(p1TotalImport)} KG</div>
+              <div className="kpi-value">{formatNumber(totalImport)}</div>
+              <div className="kpi-subtitle">KG • {formatMoney(totalImportValue)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">TİCARET DENGESİ</span>
-                <div className={`kpi-icon ${p1Balance >= 0 ? 'green' : 'red'}`}>{p1Balance >= 0 ? '📈' : '📉'}</div>
+                <div className={`kpi-icon ${tradeBal >= 0 ? 'green' : 'red'}`}>{tradeBal >= 0 ? '📈' : '📉'}</div>
               </div>
-              <div className="kpi-value" style={{ color: p1Balance >= 0 ? '#22c55e' : '#ef4444' }}>
-                {p1Balance >= 0 ? '+' : ''}{formatMoney(p1Balance)}
+              <div className="kpi-value" style={{ color: tradeBal >= 0 ? '#22c55e' : '#ef4444' }}>
+                {tradeBal >= 0 ? '+' : ''}{formatMoney(tradeBal)}
               </div>
-              <div className="kpi-subtitle">{p1Balance >= 0 ? 'Fazla' : 'Açık'}</div>
+              <div className="kpi-subtitle">{tradeBal >= 0 ? 'Fazla' : 'Açık'}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <span className="kpi-title">ÜRÜN SAYISI</span>
-                <div className="kpi-icon blue">🏷️</div>
+                <span className="kpi-title">ÜLKE SAYISI</span>
+                <div className="kpi-icon blue">🌍</div>
               </div>
-              <div className="kpi-value">{period1Data.length}</div>
-              <div className="kpi-subtitle">Analiz edilen</div>
-            </div>
-            </>
-            )}
-          </div>
-
-          {/* Dönem Detay Panelleri */}
-          {comparisonMode ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            {/* Dönem 1 KPI */}
-            <div className="chart-card" style={{ background: 'rgba(34, 197, 94, 0.03)' }}>
-              <h3 className="chart-title">🟢 Dönem 1 ({period1Start}-{period1End})</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İhracat</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#22c55e' }}>{formatMoney(p1TotalExportValue)}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalExport)} KG</div>
-                </div>
-                <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İthalat</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#ef4444' }}>{formatMoney(p1TotalImportValue)}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalImport)} KG</div>
-                </div>
-              </div>
-              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Ticaret Dengesi</div>
-                <div style={{ fontSize: '20px', fontWeight: '600', color: p1Balance >= 0 ? '#22c55e' : '#ef4444' }}>
-                  {p1Balance >= 0 ? '+' : ''}{formatMoney(p1Balance)}
-                </div>
-              </div>
-            </div>
-
-            {/* Dönem 2 KPI */}
-            <div className="chart-card" style={{ background: 'rgba(59, 130, 246, 0.03)' }}>
-              <h3 className="chart-title">🔵 Dönem 2 ({period2Start}-{period2End})</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İhracat</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#22c55e' }}>{formatMoney(p2TotalExportValue)}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p2TotalExport)} KG</div>
-                </div>
-                <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İthalat</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#ef4444' }}>{formatMoney(p2TotalImportValue)}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p2TotalImport)} KG</div>
-                </div>
-              </div>
-              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Ticaret Dengesi</div>
-                <div style={{ fontSize: '20px', fontWeight: '600', color: p2Balance >= 0 ? '#22c55e' : '#ef4444' }}>
-                  {p2Balance >= 0 ? '+' : ''}{formatMoney(p2Balance)}
-                </div>
-              </div>
+              <div className="kpi-value">{countryCount}</div>
+              <div className="kpi-subtitle">Ticaret yapılan</div>
             </div>
           </div>
-          ) : (
-          <div className="chart-card" style={{ marginBottom: '20px' }}>
-            <h3 className="chart-title">🟢 Dönem ({period1Start}-{period1End})</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İhracat</div>
-                <div style={{ fontSize: '18px', fontWeight: '600', color: '#22c55e' }}>{formatMoney(p1TotalExportValue)}</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalExport)} KG</div>
-              </div>
-              <div style={{ padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>İthalat</div>
-                <div style={{ fontSize: '18px', fontWeight: '600', color: '#ef4444' }}>{formatMoney(p1TotalImportValue)}</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{formatNumber(p1TotalImport)} KG</div>
-              </div>
-            </div>
-            <div style={{ marginTop: '10px', padding: '10px', background: 'var(--surface)', borderRadius: '8px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Ticaret Dengesi</div>
-              <div style={{ fontSize: '20px', fontWeight: '600', color: p1Balance >= 0 ? '#22c55e' : '#ef4444' }}>
-                {p1Balance >= 0 ? '+' : ''}{formatMoney(p1Balance)}
-              </div>
-            </div>
-          </div>
-          )}
 
           {/* Grafikler */}
           <div className="chart-grid">
-            {comparisonMode ? (
-            <>
-            {/* Ürün Karşılaştırma */}
+            {/* Yıllık Trend */}
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📊 Dönemler Arası Ürün Karşılaştırması (İhracat)</h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={comparisonData}>
+              <h3 className="chart-title">📅 Yıllık Dış Ticaret Trendi</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <ComposedChart data={yearlyTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={120} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => formatMoney(value)} />
+                  <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
                   <Legend />
-                  <Bar dataKey="donem1Ihracat" name={`Dönem 1 (${period1Start}-${period1End})`} fill="#22c55e" />
-                  <Bar dataKey="donem2Ihracat" name={`Dönem 2 (${period2Start}-${period2End})`} fill="#3b82f6" />
-                </BarChart>
+                  {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="ihracat" name="İhracat" fill="#22c55e" />}
+                  {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="ithalat" name="İthalat" fill="#ef4444" />}
+                  <Line type="monotone" dataKey="ihracat" stroke="#22c55e" strokeWidth={2} dot={false} />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Radar Chart */}
+            {/* Ürün Dağılımı */}
             <div className="chart-card">
-              <h3 className="chart-title">🎯 Ürün Performans Radyosu</h3>
-              <ResponsiveContainer width="100%" height={350}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="var(--border)" />
-                  <PolarAngleAxis dataKey="product" tick={{ fontSize: 10 }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 'auto']} tick={{ fontSize: 10 }} />
-                  <Radar name={`Dönem 1`} dataKey="Dönem 1" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
-                  <Radar name={`Dönem 2`} dataKey="Dönem 2" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
-                  <Legend />
-                  <Tooltip formatter={(value: number) => formatMoney(value)} />
-                </RadarChart>
+              <h3 className="chart-title">🥧 İhracat Dağılımı ({selectedYear})</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={productSummary.map((item, i) => ({ name: item.urun, value: item.toplamIhracat, fill: COLORS[i % COLORS.length] }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                  />
+                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                </PieChart>
               </ResponsiveContainer>
             </div>
 
-            {/* İthalat Karşılaştırma */}
+            {/* İhracat Ülkeleri */}
             <div className="chart-card">
-              <h3 className="chart-title">📥 İthalat Karşılaştırması</h3>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={comparisonData} layout="vertical">
+              <h3 className="chart-title">🌍 Top 10 İhracat Ülkeleri</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={exportCountries} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="urun" tick={{ fontSize: 9 }} width={120} />
-                  <Tooltip formatter={(value: number) => formatMoney(value)} />
-                  <Legend />
-                  <Bar dataKey="donem1Ithalat" name={`Dönem 1`} fill="#ef4444" opacity={0.7} />
-                  <Bar dataKey="donem2Ithalat" name={`Dönem 2`} fill="#f97316" />
+                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Bar dataKey="ihracat" fill="#22c55e" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            </>
-            ) : (
-            <>
-            {/* Ürün Dağılımı */}
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📊 Ürün Bazlı Dış Ticaret ({period1Start}-{period1End})</h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={period1Data}>
+
+            {/* İthalat Ülkeleri */}
+            <div className="chart-card">
+              <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={importCountries} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={120} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => formatMoney(value)} />
-                  <Legend />
-                  <Bar dataKey="ihracatDeger" name="İhracat" fill="#22c55e" />
-                  <Bar dataKey="ithalatDeger" name="İthalat" fill="#ef4444" />
+                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  <Bar dataKey="ithalat" fill="#ef4444" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            </>
-            )}
+          </div>
+
+          {/* Ürün Karşılaştırma */}
+          <div className="chart-card">
+            <h3 className="chart-title">📊 Ürün Bazlı Dış Ticaret ({selectedYear})</h3>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={productSummary}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="urun" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={100} />
+                <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                <Legend />
+                <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />
+                <Bar dataKey="toplamIthalat" name="İthalat" fill="#ef4444" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
           {/* Detaylı Tablo */}
           <div className="chart-card">
-            <h3 className="chart-title">📋 {comparisonMode ? 'Detaylı Dönemsel Karşılaştırma Tablosu' : `Detaylı Ürün Tablosu (${period1Start}-${period1End})`}</h3>
+            <h3 className="chart-title">📋 Detaylı Ürün Tablosu ({selectedYear})</h3>
             <div style={{ overflowX: 'auto' }}>
-              {comparisonMode ? (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
                     <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>D1 İhracat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>D2 İhracat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>Değişim</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>D1 İthalat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>D2 İthalat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>Değişim</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisonData.map((row, index) => {
-                    const exportChange = row.donem1Ihracat !== 0 ? ((row.donem2Ihracat - row.donem1Ihracat) / row.donem1Ihracat * 100) : 0;
-                    const importChange = row.donem1Ithalat !== 0 ? ((row.donem2Ithalat - row.donem1Ithalat) / row.donem1Ithalat * 100) : 0;
-                    
-                    return (
-                      <tr key={row.urun} style={{ borderBottom: '1px solid var(--border)', background: index % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
-                        <td style={{ padding: '10px 8px', fontWeight: '500' }}>{row.urun}</td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatMoney(row.donem1Ihracat)}</td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: '#3b82f6' }}>{formatMoney(row.donem2Ihracat)}</td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: exportChange >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
-                          {exportChange >= 0 ? '+' : ''}{exportChange.toFixed(1)}%
-                        </td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444', opacity: 0.7 }}>{formatMoney(row.donem1Ithalat)}</td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: '#f97316' }}>{formatMoney(row.donem2Ithalat)}</td>
-                        <td style={{ textAlign: 'right', padding: '10px 8px', color: importChange >= 0 ? '#ef4444' : '#22c55e', fontWeight: '600' }}>
-                          {importChange >= 0 ? '+' : ''}{importChange.toFixed(1)}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>              ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat (KG)</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat (KG)</th>
                     <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>
                     <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>
                     <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {period1Data.map((row, index) => (
+                  {productSummary.map((row, index) => (
                     <tr key={row.urun} style={{ borderBottom: '1px solid var(--border)', background: index % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
                       <td style={{ padding: '10px 8px', fontWeight: '500' }}>{row.urun}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatMoney(row.ihracatDeger)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatMoney(row.ithalatDeger)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatNumber(row.toplamIhracat)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatNumber(row.toplamIthalat)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ihracatDeger)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ithalatDeger)}</td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', color: row.denge >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
                         {row.denge >= 0 ? '+' : ''}{formatMoney(row.denge)}
                       </td>
@@ -659,40 +504,22 @@ export default function TuikAnimalTradePage() {
                   ))}
                 </tbody>
               </table>
-              )}            </div>
+            </div>
           </div>
 
-          {/* Özetler */}
-          <div style={{ display: 'grid', gridTemplateColumns: comparisonMode ? '1fr 1fr' : '1fr', gap: '20px' }}>
-            <div className="data-table">
-              <h3 className="data-table-title">🏆 {comparisonMode ? `Dönem 1 (${period1Start}-${period1End})` : `En Çok İhracat (${period1Start}-${period1End})`}</h3>
-              {period1Data.slice(0, 5).map((product, index) => (
-                <div className="table-row" key={product.urun}>
-                  <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
-                  <div className="table-info">
-                    <div className="table-name">{product.urun}</div>
-                    <div className="table-subtext">Denge: {formatMoney(product.denge)}</div>
-                  </div>
-                  <div className="table-value green">{formatMoney(product.ihracatDeger)}</div>
+          {/* İstatistik Özeti */}
+          <div className="data-table">
+            <h3 className="data-table-title">🏆 En Fazla İhracat Yapılan Ürünler</h3>
+            {productSummary.slice(0, 8).map((product, index) => (
+              <div className="table-row" key={product.urun}>
+                <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
+                <div className="table-info">
+                  <div className="table-name">{product.urun}</div>
+                  <div className="table-subtext">Denge: {product.denge >= 0 ? '+' : ''}{formatMoney(product.denge)}</div>
                 </div>
-              ))}
-            </div>
-
-            {comparisonMode && (
-            <div className="data-table">
-              <h3 className="data-table-title">🏆 Dönem 2 ({period2Start}-{period2End})</h3>
-              {period2Data.slice(0, 5).map((product, index) => (
-                <div className="table-row" key={product.urun}>
-                  <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
-                  <div className="table-info">
-                    <div className="table-name">{product.urun}</div>
-                    <div className="table-subtext">Denge: {formatMoney(product.denge)}</div>
-                  </div>
-                  <div className="table-value green">{formatMoney(product.ihracatDeger)}</div>
-                </div>
-              ))}
-            </div>
-            )}
+                <div className="table-value green">{formatNumber(product.toplamIhracat)} KG</div>
+              </div>
+            ))}
           </div>
         </>
       )}

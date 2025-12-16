@@ -1,11 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  Line, PieChart, Pie, ComposedChart
+  PieChart, Pie, Cell, ComposedChart, Line
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+
+// Hayvansal ürün listesi - bunları filtreleyip bitkisel sayfada göstermiyoruz
+const ANIMAL_PRODUCTS = [
+  'Büyükbaş (sığır) Eti',
+  'Küçükbaş Eti',
+  'Piliç Eti',
+  'Hindi Eti',
+  'Konsantre Süt',
+  'Büyükbaş Kasaplık',
+  'Küçükbaş Kasaplık',
+  'Besilik Büyükbaş',
+  'Damızlık Büyükbaş',
+  'Damızlık Küçükbaş'
+];
 
 interface TradeData {
   id: string;
@@ -66,7 +80,7 @@ function formatMoney(value: number): string {
 export default function TuikPlantTradePage() {
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState<string[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Domates', 'Buğday']);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState('2024');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [allData, setAllData] = useState<TradeData[]>([]);
@@ -75,18 +89,24 @@ export default function TuikPlantTradePage() {
   const [yearlyTrend, setYearlyTrend] = useState<YearlyTrend[]>([]);
   const [viewMode, setViewMode] = useState<'export' | 'import' | 'both'>('both');
 
-  // Meta veri yükleme
+  // Meta veri yükleme - hayvansal ürünleri filtrele
   useEffect(() => {
     const loadMeta = async () => {
       try {
+        const animalFilter = ANIMAL_PRODUCTS.map(p => `'${p}'`).join(',');
+        
         const [productRes, yearRes] = await Promise.all([
-          fetchQuery('SELECT DISTINCT ana_urun FROM tuik_ticaret ORDER BY ana_urun'),
+          fetchQuery(`SELECT DISTINCT ana_urun FROM tuik_ticaret WHERE ana_urun NOT IN (${animalFilter}) ORDER BY ana_urun`),
           fetchQuery('SELECT DISTINCT yil FROM tuik_ticaret ORDER BY yil DESC')
         ]);
 
         if (productRes.data) {
           const products = productRes.data.map((item: Record<string, string | number>) => String(item.ana_urun));
           setProductList(products);
+          // İlk 2 ürünü varsayılan olarak seç
+          if (products.length > 0) {
+            setSelectedProducts(products.slice(0, 2));
+          }
         }
         if (yearRes.data) {
           const years = yearRes.data.map((item: Record<string, string | number>) => String(item.yil));
@@ -99,7 +119,7 @@ export default function TuikPlantTradePage() {
     loadMeta();
   }, []);
 
-  // Ana veri yükleme
+  // Veri yükleme
   const loadData = useCallback(async () => {
     if (selectedProducts.length === 0) {
       setAllData([]);
@@ -125,7 +145,6 @@ export default function TuikPlantTradePage() {
         FROM tuik_ticaret
         WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
         GROUP BY ana_urun
-        ORDER BY toplamIhracat DESC
       `;
 
       const countrySummaryQuery = `
@@ -135,11 +154,11 @@ export default function TuikPlantTradePage() {
         FROM tuik_ticaret
         WHERE ana_urun IN (${productFilter}) AND yil = '${selectedYear}'
         GROUP BY ulke
-        ORDER BY ihracat DESC
-        LIMIT 15
+        ORDER BY (SUM(ihracat_mik) + SUM(ithalat_mik)) DESC
+        LIMIT 20
       `;
 
-      const trendQuery = `
+      const yearlyTrendQuery = `
         SELECT yil,
           SUM(ihracat_mik) as ihracat,
           SUM(ithalat_mik) as ithalat
@@ -153,7 +172,7 @@ export default function TuikPlantTradePage() {
         fetchQuery(dataQuery),
         fetchQuery(productSummaryQuery),
         fetchQuery(countrySummaryQuery),
-        fetchQuery(trendQuery)
+        fetchQuery(yearlyTrendQuery)
       ]);
 
       if (dataRes.data) {
@@ -203,15 +222,17 @@ export default function TuikPlantTradePage() {
         setYearlyTrend(mapped);
       }
 
+      setLoading(false);
     } catch (error) {
       console.error('Veri yüklenirken hata:', error);
-    } finally {
       setLoading(false);
     }
   }, [selectedProducts, selectedYear]);
 
   useEffect(() => {
-    loadData();
+    if (selectedProducts.length > 0 && selectedYear) {
+      loadData();
+    }
   }, [loadData]);
 
   // Hesaplamalar
@@ -232,6 +253,19 @@ export default function TuikPlantTradePage() {
     });
   };
 
+  // İhracat için PieChart verisi
+  const exportPieData = productSummary
+    .filter(p => p.toplamIhracat > 0)
+    .map(p => ({ name: p.urun, value: p.toplamIhracat }))
+    .slice(0, 10);
+
+  // İthalat için PieChart verisi
+  const importPieData = productSummary
+    .filter(p => p.toplamIthalat > 0)
+    .map(p => ({ name: p.urun, value: p.toplamIthalat }))
+    .slice(0, 10);
+
+  // Ülke bazlı veriler
   const exportCountries = countrySummary.filter(c => c.ihracat > c.ithalat).slice(0, 10);
   const importCountries = countrySummary.filter(c => c.ithalat > c.ihracat).slice(0, 10);
 
@@ -272,33 +306,77 @@ export default function TuikPlantTradePage() {
         </div>
       </div>
 
-      {/* Ürün Seçici */}
+      {/* Ürün Seçici - Checkbox */}
       <div className="chart-card" style={{ marginBottom: '20px' }}>
-        <h3 className="chart-title">🎯 Ürün Seçimi ({selectedProducts.length} seçili)</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '150px', overflowY: 'auto', padding: '8px 0' }}>
-          {productList.map(product => (
-            <button
-              key={product}
-              onClick={() => handleProductToggle(product)}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '16px',
-                border: selectedProducts.includes(product) ? '2px solid #22c55e' : '1px solid var(--border)',
-                background: selectedProducts.includes(product) ? 'rgba(34, 197, 94, 0.1)' : 'var(--surface)',
-                color: selectedProducts.includes(product) ? '#22c55e' : 'var(--text-secondary)',
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Ürün Seçimi ({selectedProducts.length} seçili)</h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => setSelectedProducts(productList)} 
+              style={{ 
+                padding: '4px 12px', 
+                fontSize: '12px', 
+                borderRadius: '8px', 
+                background: 'var(--surface)', 
+                border: '1px solid var(--border)', 
                 cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: selectedProducts.includes(product) ? '600' : '400'
+                color: 'var(--text-primary)'
               }}
             >
-              {product}
+              Tümü
             </button>
-          ))}
+            <button 
+              onClick={() => setSelectedProducts([])} 
+              style={{ 
+                padding: '4px 12px', 
+                fontSize: '12px', 
+                borderRadius: '8px', 
+                background: 'var(--surface)', 
+                border: '1px solid var(--border)', 
+                cursor: 'pointer',
+                color: 'var(--text-primary)'
+              }}
+            >
+              Temizle
+            </button>
+          </div>
         </div>
-        <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
-          <button onClick={() => setSelectedProducts(productList.slice(0, 5))} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer' }}>İlk 5</button>
-          <button onClick={() => setSelectedProducts(productList)} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer' }}>Tümü</button>
-          <button onClick={() => setSelectedProducts([])} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer' }}>Temizle</button>
+        <div style={{ 
+          maxHeight: '250px', 
+          overflowY: 'auto', 
+          border: '1px solid var(--border)', 
+          borderRadius: '8px', 
+          padding: '8px',
+          background: 'var(--surface)'
+        }}>
+          {productList.map(product => (
+            <label 
+              key={product} 
+              style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                padding: '8px 10px', 
+                cursor: 'pointer', 
+                borderRadius: '6px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <input 
+                type="checkbox" 
+                checked={selectedProducts.includes(product)}
+                onChange={() => handleProductToggle(product)}
+                style={{ 
+                  marginRight: '10px',
+                  width: '16px',
+                  height: '16px',
+                  cursor: 'pointer'
+                }}
+              />
+              <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{product}</span>
+            </label>
+          ))}
         </div>
       </div>
 
@@ -352,66 +430,106 @@ export default function TuikPlantTradePage() {
             {/* Yıllık Trend */}
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
               <h3 className="chart-title">📅 Yıllık Dış Ticaret Trendi</h3>
-              <ResponsiveContainer width="100%" height={350}>
+              <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
                   <Legend />
-                  {(viewMode === 'both' || viewMode === 'export') && <Bar dataKey="ihracat" name="İhracat" fill="#22c55e" />}
-                  {(viewMode === 'both' || viewMode === 'import') && <Bar dataKey="ithalat" name="İthalat" fill="#ef4444" />}
-                  <Line type="monotone" dataKey="ihracat" stroke="#22c55e" strokeWidth={2} dot={false} />
+                  {(viewMode === 'both' || viewMode === 'export') && (
+                    <Line type="monotone" dataKey="ihracat" stroke="#22c55e" name="İhracat" strokeWidth={2} />
+                  )}
+                  {(viewMode === 'both' || viewMode === 'import') && (
+                    <Line type="monotone" dataKey="ithalat" stroke="#ef4444" name="İthalat" strokeWidth={2} />
+                  )}
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Ürün Dağılımı */}
-            <div className="chart-card">
-              <h3 className="chart-title">🥧 İhracat Dağılımı ({selectedYear})</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={productSummary.map((item, i) => ({ name: item.urun, value: item.toplamIhracat, fill: COLORS[i % COLORS.length] }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                  />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {/* İhracat Dağılımı */}
+            {(viewMode === 'both' || viewMode === 'export') && (
+              <div className="chart-card">
+                <h3 className="chart-title">📤 İhracat Dağılımı ({selectedYear})</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={exportPieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => entry.name}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {exportPieData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* İthalat Dağılımı */}
+            {(viewMode === 'both' || viewMode === 'import') && (
+              <div className="chart-card">
+                <h3 className="chart-title">📥 İthalat Dağılımı ({selectedYear})</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={importPieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => entry.name}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {importPieData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             {/* İhracat Ülkeleri */}
-            <div className="chart-card">
-              <h3 className="chart-title">🌍 Top 10 İhracat Ülkeleri</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={exportCountries} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
-                  <Bar dataKey="ihracat" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {(viewMode === 'both' || viewMode === 'export') && exportCountries.length > 0 && (
+              <div className="chart-card">
+                <h3 className="chart-title">📤 Top 10 İhracat Ülkeleri</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={exportCountries} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                    <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Bar dataKey="ihracat" fill="#22c55e" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             {/* İthalat Ülkeleri */}
-            <div className="chart-card">
-              <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={importCountries} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
-                  <Bar dataKey="ithalat" fill="#ef4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {(viewMode === 'both' || viewMode === 'import') && importCountries.length > 0 && (
+              <div className="chart-card">
+                <h3 className="chart-title">📥 Top 10 İthalat Ülkeleri</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={importCountries} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
+                    <YAxis type="category" dataKey="ulke" tick={{ fontSize: 10 }} width={100} />
+                    <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
+                    <Bar dataKey="ithalat" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
 
           {/* Ürün Karşılaştırma */}
@@ -424,58 +542,14 @@ export default function TuikPlantTradePage() {
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(value: number) => formatNumber(value) + ' KG'} />
                 <Legend />
-                <Bar dataKey="toplamIhracat" name="İhracat" fill="#22c55e" />
-                <Bar dataKey="toplamIthalat" name="İthalat" fill="#ef4444" />
+                {(viewMode === 'both' || viewMode === 'export') && (
+                  <Bar dataKey="toplamIhracat" fill="#22c55e" name="İhracat" />
+                )}
+                {(viewMode === 'both' || viewMode === 'import') && (
+                  <Bar dataKey="toplamIthalat" fill="#ef4444" name="İthalat" />
+                )}
               </BarChart>
             </ResponsiveContainer>
-          </div>
-
-          {/* Detaylı Tablo */}
-          <div className="chart-card">
-            <h3 className="chart-title">📋 Detaylı Ürün Tablosu ({selectedYear})</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ textAlign: 'left', padding: '12px 8px' }}>Ürün</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat (KG)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat (KG)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İhracat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>İthalat ($)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 8px' }}>Denge</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productSummary.map((row, index) => (
-                    <tr key={row.urun} style={{ borderBottom: '1px solid var(--border)', background: index % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
-                      <td style={{ padding: '10px 8px', fontWeight: '500' }}>{row.urun}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#22c55e' }}>{formatNumber(row.toplamIhracat)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: '#ef4444' }}>{formatNumber(row.toplamIthalat)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ihracatDeger)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px' }}>{formatMoney(row.ithalatDeger)}</td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', color: row.denge >= 0 ? '#22c55e' : '#ef4444', fontWeight: '600' }}>
-                        {row.denge >= 0 ? '+' : ''}{formatMoney(row.denge)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* İstatistik Özeti */}
-          <div className="data-table">
-            <h3 className="data-table-title">🏆 En Fazla İhracat Yapılan Ürünler</h3>
-            {productSummary.slice(0, 8).map((product, index) => (
-              <div className="table-row" key={product.urun}>
-                <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
-                <div className="table-info">
-                  <div className="table-name">{product.urun}</div>
-                  <div className="table-subtext">Denge: {product.denge >= 0 ? '+' : ''}{formatMoney(product.denge)}</div>
-                </div>
-                <div className="table-value green">{formatNumber(product.toplamIhracat)} KG</div>
-              </div>
-            ))}
           </div>
         </>
       )}
