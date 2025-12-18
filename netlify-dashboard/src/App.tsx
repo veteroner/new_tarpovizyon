@@ -1,0 +1,148 @@
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Sidebar } from './components/Sidebar';
+import WheelPicker from './components/WheelPicker';
+import { Menu } from 'lucide-react';
+import { OverviewPage } from './pages/OverviewPage';
+import { ExportPage } from './pages/ExportPage';
+import { ImportPage } from './pages/ImportPage';
+import { TransportPage } from './pages/TransportPage';
+import { ProductionPage } from './pages/ProductionPage';
+import { LivestockCompetitionPage } from './pages/LivestockCompetitionPage';
+// Hayvansal Üretim Sayfaları (TON bazlı)
+import RedMeatProductionPage from './pages/RedMeatProductionPage';
+import WhiteMeatProductionPage from './pages/WhiteMeatProductionPage';
+import MilkProductionPage from './pages/MilkProductionPage';
+import EggProductionPage from './pages/EggProductionPage';
+import OtherAnimalProductsPage from './pages/OtherAnimalProductsPage';
+// Bitkisel Üretim Sayfaları
+import CerealProductionPage from './pages/CerealProductionPage';
+import VegetableProductionPage from './pages/VegetableProductionPage';
+import FruitProductionPage from './pages/FruitProductionPage';
+import LegumeProductionPage from './pages/LegumeProductionPage';
+import OilseedProductionPage from './pages/OilseedProductionPage';
+import SugarCropProductionPage from './pages/SugarCropProductionPage';
+import NutProductionPage from './pages/NutProductionPage';
+import BeverageCropPage from './pages/BeverageCropPage';
+import FiberCropPage from './pages/FiberCropPage';
+// FAO Verileri Sayfaları
+import LandUsePage from './pages/LandUsePage';
+import LivestockStocksPage from './pages/LivestockStocksPage';
+import AgriculturalEmploymentPage from './pages/AgriculturalEmploymentPage';
+import FertilizerPage from './pages/FertilizerPage';
+import PesticidePage from './pages/PesticidePage';
+import PopulationPage from './pages/PopulationPage';
+import LandCoverPage from './pages/LandCoverPage';
+import FoodBalancePage from './pages/FoodBalancePage';
+// Yeni Sayfalar
+import PriceIndexPage from './pages/PriceIndexPage';
+import MacroEconomicPage from './pages/MacroEconomicPage';
+import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
+import TuikLivestockPage from './pages/TuikLivestockPage';
+// TÜİK Dış Ticaret Sayfaları
+import TuikPlantTradePage from './pages/TuikPlantTradePage';
+import TuikAnimalTradePage from './pages/TuikAnimalTradePage';
+// Yatırımcı Analizi
+import CountryInvestmentAnalysisPage from './pages/CountryInvestmentAnalysisPage';
+import './styles/globals.css';
+
+const queryClient = new QueryClient();
+
+function AppContent({ apiConnected }: { apiConnected: boolean }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [wheelPickerOpen, setWheelPickerOpen] = useState(false);
+  const location = useLocation();
+
+  // Sayfa değiştiğinde menüleri kapat
+  useEffect(() => {
+    setSidebarOpen(false);
+    setWheelPickerOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <>
+      {/* Mobile Menu Button - Wheel Picker için */}
+      <button 
+        className="mobile-menu-btn"
+        onClick={() => setWheelPickerOpen(true)}
+        aria-label="Menüyü aç"
+      >
+        <Menu size={24} />
+      </button>
+      
+      {/* iOS Style Wheel Picker - Mobil */}
+      <WheelPicker isOpen={wheelPickerOpen} onClose={() => setWheelPickerOpen(false)} />
+      
+      {/* Desktop Sidebar */}
+      <Sidebar apiConnected={apiConnected} isOpen={sidebarOpen} />
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<OverviewPage />} />
+          <Route path="/export" element={<ExportPage />} />
+          <Route path="/import" element={<ImportPage />} />
+          <Route path="/transport" element={<TransportPage />} />
+          <Route path="/production" element={<ProductionPage />} />
+          {/* Hayvansal Üretim Routes */}
+          <Route path="/red-meat" element={<RedMeatProductionPage />} />
+          <Route path="/white-meat" element={<WhiteMeatProductionPage />} />
+          <Route path="/milk" element={<MilkProductionPage />} />
+          <Route path="/eggs" element={<EggProductionPage />} />
+          <Route path="/other-animal" element={<OtherAnimalProductsPage />} />
+          <Route path="/livestock-competition" element={<LivestockCompetitionPage />} />
+          {/* Bitkisel Üretim Routes */}
+          <Route path="/cereals" element={<CerealProductionPage />} />
+          <Route path="/vegetables" element={<VegetableProductionPage />} />
+          <Route path="/fruits" element={<FruitProductionPage />} />
+          <Route path="/legumes" element={<LegumeProductionPage />} />
+          <Route path="/oilseeds" element={<OilseedProductionPage />} />
+          <Route path="/sugar-crops" element={<SugarCropProductionPage />} />
+          <Route path="/nuts" element={<NutProductionPage />} />
+          <Route path="/beverages" element={<BeverageCropPage />} />
+          <Route path="/fiber-crops" element={<FiberCropPage />} />
+          {/* FAO Verileri Routes */}
+          <Route path="/land-use" element={<LandUsePage />} />
+          <Route path="/livestock-stocks" element={<LivestockStocksPage />} />
+          <Route path="/employment" element={<AgriculturalEmploymentPage />} />
+          <Route path="/fertilizer" element={<FertilizerPage />} />
+          <Route path="/pesticide" element={<PesticidePage />} />
+          <Route path="/population" element={<PopulationPage />} />
+          <Route path="/land-cover" element={<LandCoverPage />} />
+          <Route path="/food-balance" element={<FoodBalancePage />} />
+          {/* Yeni Sayfalar */}
+          <Route path="/price-index" element={<PriceIndexPage />} />
+          <Route path="/macro-economic" element={<MacroEconomicPage />} />
+          <Route path="/tuik-plant" element={<TuikPlantProductionPage />} />
+          <Route path="/tuik-livestock" element={<TuikLivestockPage />} />
+          {/* TÜİK Dış Ticaret Routes */}
+          <Route path="/tuik-plant-trade" element={<TuikPlantTradePage />} />
+          <Route path="/tuik-animal-trade" element={<TuikAnimalTradePage />} />
+          {/* Yatırımcı Analizi Routes */}
+          <Route path="/investment-analysis" element={<CountryInvestmentAnalysisPage />} />
+        </Routes>
+      </main>
+    </>
+  );
+}
+
+function App() {
+  const [apiConnected, setApiConnected] = useState(false);
+
+  useEffect(() => {
+    // Test API connection
+    fetch('https://dersbende.com/api.php?action=tables&api_key=REDACTED_DASHBOARD_KEY')
+      .then(res => res.json())
+      .then(() => setApiConnected(true))
+      .catch(() => setApiConnected(false));
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppContent apiConnected={apiConnected} />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
