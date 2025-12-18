@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ComposedChart, Area
+  LineChart, Line,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import { translateCountry } from '../utils/countryTranslations';
@@ -108,8 +107,7 @@ export default function CountryInvestmentAnalysisPage() {
   const [loading, setLoading] = useState(true);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [yearlyTrend, setYearlyTrend] = useState<TrendData[]>([]);
-  const [selectedYear, setSelectedYear] = useState('2022');
-  const [sectorFilter, setSectorFilter] = useState<'all' | 'livestock' | 'crop'>('all');
+  const [selectedYear] = useState('2022');
 
   // Ülke listesini yükle
   useEffect(() => {
@@ -341,14 +339,8 @@ export default function CountryInvestmentAnalysisPage() {
     'Yumurta (K ton)': stat.eggProduction / 1000,
   }));
 
-  // Sektör dağılımı
-  const sectorData = countryStats.map(stat => [
-    { name: 'Hayvancılık', value: stat.totalProduction, fill: COLORS[0] },
-    { name: 'Bitkisel', value: stat.cropProduction, fill: COLORS[1] }
-  ]);
-
   // Radar chart verisi
-  const radarData = ['Büyüme', 'Stok', 'Üretim', 'Nüfus', 'Arazi'].map((metric, idx) => {
+  const radarData = ['Büyüme', 'Stok', 'Üretim', 'Nüfus', 'Arazi'].map((metric) => {
     const data: any = { metric };
     countryStats.forEach(stat => {
       const country = translateCountry(stat.country);

@@ -1,6 +1,6 @@
 [build]
   base = "netlify-dashboard"
-  publish = "netlify-dashboard/dist"
+  publish = "dist"
   command = "npm run build"
 
 [[redirects]]
