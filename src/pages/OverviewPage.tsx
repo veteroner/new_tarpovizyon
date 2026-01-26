@@ -53,7 +53,9 @@ interface OverviewData {
   gdp: number;
   gdpPerCapita: number;
   agriculturalGDP: number;
+  agriculturalGDPShare: number;
   agriculturalEmployment: number;
+  agriculturalEmploymentShare: number;
   totalEmployment: number;
   
   // Arazi
@@ -131,6 +133,10 @@ export function OverviewPage() {
         eggTotalRes,
         eggBreakdownRes,
         eggYearlyRes,
+          agriGdpRes,
+          agriGdpShareRes,
+          agriEmpRes,
+          agriEmpShareRes,
         
         // Hayvan varlığı
         livestockStocksRes
@@ -146,6 +152,12 @@ export function OverviewPage() {
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' GROUP BY item ORDER BY total DESC`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
+          // Tarımsal katma değer (Tarım+Orman+Balıkçılık)
+          fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Value' AND elementcode=6225 AND unit='million' LIMIT 1`),
+          fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Share' AND unit='%' LIMIT 1`),
+          // Tarım istihdamı (Toplam 15+)
+          fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Employment in agriculture by age, total (15+)' AND Sex='Total' LIMIT 1`),
+          fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Share of employment in agriculture in total employment' AND Sex='Total' LIMIT 1`),
         // ET ÜRÜNLERİ - Kırmızı Et Detaylı
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled', 'Meat of buffalo, fresh or chilled') GROUP BY item`),
         // ET ÜRÜNLERİ - Beyaz Et Detaylı
@@ -172,6 +184,17 @@ export function OverviewPage() {
       // kişi başı = elementcode 6185, unit=USD
       const gdp = (Number(gdpRes.data?.[0]?.value) || 0) * 1e6;
       const gdpPerCapita = Number(gdpPerCapitaRes.data?.[0]?.value) || 0;
+
+      // Tarımsal katma değer
+      const agriculturalGDP = (Number(agriGdpRes.data?.[0]?.value) || 0) * 1e6;
+      const agriculturalGDPShare = Number(agriGdpShareRes.data?.[0]?.value) || 0;
+
+      // Tarım istihdamı
+      const agriculturalEmployment = (Number(agriEmpRes.data?.[0]?.value) || 0) * 1000;
+      const agriculturalEmploymentShare = Number(agriEmpShareRes.data?.[0]?.value) || 0;
+      const totalEmployment = agriculturalEmploymentShare > 0
+        ? agriculturalEmployment / (agriculturalEmploymentShare / 100)
+        : 0;
 
       // Arazi
       const landMap: Record<string, number> = {};
@@ -280,9 +303,11 @@ export function OverviewPage() {
         urbanPopulation,
         gdp,
         gdpPerCapita,
-        agriculturalGDP: 0, // TODO: Eklenecek
-        agriculturalEmployment: 0, // TODO: Eklenecek
-        totalEmployment: 0,
+        agriculturalGDP,
+        agriculturalGDPShare,
+        agriculturalEmployment,
+        agriculturalEmploymentShare,
+        totalEmployment,
         agriculturalLand,
         totalLand,
         landUseData,
@@ -402,18 +427,41 @@ export function OverviewPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">GSYİH</span><div className="kpi-icon green">💰</div></div>
-              <div className="kpi-value">${formatNumber(data?.gdp || 0)}</div>
+              <div className="kpi-value">{data?.gdp ? `$${formatNumber(data.gdp)}` : '—'}</div>
               <div className="kpi-subtitle">USD (2023)</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI GSYİH</span><div className="kpi-icon blue">📊</div></div>
-              <div className="kpi-value">${formatNumber(data?.gdpPerCapita || 0)}</div>
+              <div className="kpi-value">{data?.gdpPerCapita ? `$${formatNumber(data.gdpPerCapita)}` : '—'}</div>
               <div className="kpi-subtitle">USD/kişi</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">TARIM ARAZİSİ</span><div className="kpi-icon green">🌾</div></div>
               <div className="kpi-value">{formatNumber(data?.agriculturalLand || 0)} ha</div>
               <div className="kpi-subtitle">Toplam alanın %{agriLandPercent}'i</div>
+            </div>
+          </div>
+
+          <div className="kpi-grid" style={{ marginTop: '1rem' }}>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">TARIMSAL KATMA DEĞER</span><div className="kpi-icon green">🌱</div></div>
+              <div className="kpi-value">{data?.agriculturalGDP ? `$${formatNumber(data.agriculturalGDP)}` : '—'}</div>
+              <div className="kpi-subtitle">Tarım+Orman+Balıkçılık (2023)</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">TARIM PAYI (GSYİH)</span><div className="kpi-icon blue">📌</div></div>
+              <div className="kpi-value">{data?.agriculturalGDPShare ? `%${data.agriculturalGDPShare.toFixed(1)}` : '—'}</div>
+              <div className="kpi-subtitle">GSYİH içindeki pay</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">TARIM İSTİHDAMI</span><div className="kpi-icon orange">👨‍🌾</div></div>
+              <div className="kpi-value">{data?.agriculturalEmployment ? formatNumber(data.agriculturalEmployment) : '—'}</div>
+              <div className="kpi-subtitle">Kişi (15+), 2023</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">TARIM PAYI (İSTİHDAM)</span><div className="kpi-icon pink">%</div></div>
+              <div className="kpi-value">{data?.agriculturalEmploymentShare ? `%${data.agriculturalEmploymentShare.toFixed(1)}` : '—'}</div>
+              <div className="kpi-subtitle">Toplam istihdam içindeki pay</div>
             </div>
           </div>
 
