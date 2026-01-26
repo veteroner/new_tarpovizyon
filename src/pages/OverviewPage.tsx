@@ -1,11 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  ComposedChart, Line
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 
-const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+// Kategori bazlı renk paletleri
+const COLORS = {
+  milk: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+  meat: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'],
+  egg: ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a'],
+  grain: ['#eab308', '#fde047', '#fef08a', '#fef9c3'],
+  fruit: ['#22c55e', '#4ade80', '#86efac', '#bbf7d0'],
+  economy: ['#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe'],
+  land: ['#14b8a6', '#2dd4bf', '#5eead4', '#99f6e4'],
+  general: ['#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb']
+};
 
 function formatNumber(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
@@ -21,31 +32,69 @@ function formatShort(value: number): string {
   return value.toFixed(0);
 }
 
-interface LivestockItem {
+interface DataItem {
   name: string;
   value: number;
   fill: string;
-  [key: string]: string | number;
+  unit?: string;
 }
 
 interface YearlyData {
   year: string;
-  value: number;
   [key: string]: string | number;
 }
 
 interface OverviewData {
+  // Genel Bilgiler
   population: number;
   ruralPopulation: number;
   urbanPopulation: number;
   gdp: number;
   gdpPerCapita: number;
+  agriculturalGDP: number;
+  agriculturalEmployment: number;
+  totalEmployment: number;
+  
+  // Arazi
   agriculturalLand: number;
   totalLand: number;
-  livestockProduction: number;
-  topLivestockProducts: LivestockItem[];
-  livestockYearlyTrend: YearlyData[];
-  landUseData: { name: string; value: number; fill: string }[];
+  landUseData: DataItem[];
+  
+  // Hayvansal Üretim - Kategorik
+  milkProduction: {
+    total: number;
+    cattle: number;
+    sheep: number;
+    goat: number;
+    buffalo: number;
+    breakdown: DataItem[];
+    yearly: YearlyData[];
+  };
+  
+  meatProduction: {
+    total: number;
+    redMeat: number;
+    whiteMeat: number;
+    breakdown: DataItem[];
+    yearly: YearlyData[];
+  };
+  
+  eggProduction: {
+    total: number;
+    chicken: number;
+    other: number;
+    breakdown: DataItem[];
+    yearly: YearlyData[];
+  };
+  
+  // Hayvan Varlığı
+  livestockStocks: {
+    cattle: number;
+    sheep: number;
+    goat: number;
+    poultry: number;
+    breakdown: DataItem[];
+  };
 }
 
 export function OverviewPage() {
@@ -55,42 +104,55 @@ export function OverviewPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Paralel sorgular
       const [
         populationRes,
         gdpRes,
         gdpPerCapitaRes,
         landRes,
-        livestockTotalRes,
-        livestockProductsRes,
-        livestockTrendRes
+        
+        // Süt ürünleri
+        milkTotalRes,
+        milkBreakdownRes,
+        milkYearlyRes,
+        
+        // Et ürünleri
+        redMeatRes,
+        whiteMeatRes,
+        meatBreakdownRes,
+        meatYearlyRes,
+        
+        // Yumurta
+        eggTotalRes,
+        eggBreakdownRes,
+        eggYearlyRes,
+        
+        // Hayvan varlığı
+        livestockStocksRes
       ] = await Promise.all([
-        // Nüfus (2023)
+        // Genel veriler
         fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
-        // GSYİH (2023) - million USD
         fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND item='Gross Domestic Product' AND unit='million' AND elementcode='6225' LIMIT 1`),
-        // Kişi başı GSYİH
         fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND item='Gross Domestic Product' AND unit='USD' LIMIT 1`),
-        // Arazi kullanımı (2022)
         fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye' AND item IN ('Country area', 'Land area', 'Agriculture', 'Arable land', 'Permanent meadows and pastures', 'Forest land')`),
-        // Toplam hayvansal üretim (2023) - sadece ton bazında ürünler
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t'`),
-        // En çok üretilen hayvansal ürünler (yumurta için 1000 No birimi, diğerleri ton)
-        fetchQuery(`
-          SELECT item, 
-            CASE 
-              WHEN item LIKE '%egg%' THEN SUM(CASE WHEN unit='1000 No' THEN REPLACE(value,',','.') * 1000 ELSE 0 END)
-              ELSE SUM(CASE WHEN unit='t' THEN REPLACE(value,',','.') * 1 ELSE 0 END)
-            END as total 
-          FROM fao_livestock_primary 
-          WHERE year=2023 AND area='Türkiye' AND element='Production' 
-          GROUP BY item 
-          HAVING total > 0
-          ORDER BY total DESC 
-          LIMIT 8
-        `),
-        // Hayvansal üretim yıllık trend (ton bazında)
-        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND year >= 2010 GROUP BY year ORDER BY year`)
+        
+        // SÜT ÜRÜNLERİ
+        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%'`),
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' GROUP BY item ORDER BY total DESC`),
+        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' AND year >= 2010 GROUP BY year ORDER BY year`),
+        
+        // ET ÜRÜNLERİ
+        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled')`),
+        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled')`),
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%meat%' GROUP BY item ORDER BY total DESC LIMIT 8`),
+        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%meat%' AND year >= 2010 GROUP BY year ORDER BY year`),
+        
+        // YUMURTA
+        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%'`),
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' GROUP BY item`),
+        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
+        
+        // HAYVAN VARLIĞI
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_stocks WHERE year=2023 AND area='Türkiye' AND element='Stocks' GROUP BY item ORDER BY total DESC LIMIT 10`)
       ]);
 
       // Nüfus
@@ -106,38 +168,70 @@ export function OverviewPage() {
       // Arazi
       const landMap: Record<string, number> = {};
       landRes.data?.forEach(item => {
-        landMap[String(item.item_tr)] = Number(item.value) * 1000 || 0; // 1000 ha -> ha
+        landMap[String(item.item_tr)] = Number(item.value) * 1000 || 0;
       });
 
       const agriculturalLand = landMap['Tarım'] || 0;
       const totalLand = landMap['Ülke yüzölçümü'] || 0;
 
-      // Arazi kullanım dağılımı
-      const landUseData = [
-        { name: 'Tarım Arazisi', value: landMap['Tarım'] || 0, fill: '#22c55e' },
-        { name: 'Orman', value: landMap['Orman arazisi'] || 0, fill: '#14b8a6' },
-        { name: 'Ekilebilir Arazi', value: landMap['Ekilebilir arazi'] || 0, fill: '#3b82f6' },
-        { name: 'Çayır-Mera', value: landMap['Daimi çayır ve meralar'] || 0, fill: '#f59e0b' },
+      const landUseData: DataItem[] = [
+        { name: 'Tarım Arazisi', value: landMap['Tarım'] || 0, fill: COLORS.land[0] },
+        { name: 'Orman', value: landMap['Orman arazisi'] || 0, fill: COLORS.land[1] },
+        { name: 'Ekilebilir Arazi', value: landMap['Ekilebilir arazi'] || 0, fill: COLORS.land[2] },
+        { name: 'Çayır-Mera', value: landMap['Daimi çayır ve meralar'] || 0, fill: COLORS.land[3] },
       ].filter(item => item.value > 0);
 
-      // Hayvansal üretim
-      const livestockProduction = Number(livestockTotalRes.data?.[0]?.total) || 0;
-
-      // Ürün bazında - yumurta için özel birim kontrolü
-      const topLivestockProducts: LivestockItem[] = (livestockProductsRes.data || []).map((item, idx) => {
-        const itemName = String(item.item);
-        return {
-          name: translateLivestockItem(itemName),
-          value: Number(item.total) || 0,
-          fill: COLORS[idx % COLORS.length],
-          unit: itemName.includes('egg') ? 'adet' : 'ton'
-        };
-      });
-
-      // Yıllık trend
-      const livestockYearlyTrend: YearlyData[] = (livestockTrendRes.data || []).map(item => ({
+      // SÜT ÜRETİMİ
+      const milkTotal = Number(milkTotalRes.data?.[0]?.total) || 0;
+      const milkBreakdown: DataItem[] = (milkBreakdownRes.data || []).map((item, idx) => ({
+        name: translateMilkItem(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.milk[idx % COLORS.milk.length],
+        unit: 'ton'
+      }));
+      const milkYearly: YearlyData[] = (milkYearlyRes.data || []).map(item => ({
         year: String(item.year),
-        value: Number(item.total) || 0
+        milk: Number(item.total) || 0
+      }));
+
+      // ET ÜRETİMİ
+      const redMeat = Number(redMeatRes.data?.[0]?.total) || 0;
+      const whiteMeat = Number(whiteMeatRes.data?.[0]?.total) || 0;
+      const meatTotal = redMeat + whiteMeat;
+      const meatBreakdown: DataItem[] = [
+        { name: 'Kırmızı Et', value: redMeat, fill: COLORS.meat[0], unit: 'ton' },
+        { name: 'Beyaz Et', value: whiteMeat, fill: COLORS.meat[1], unit: 'ton' }
+      ];
+      const meatDetailedBreakdown: DataItem[] = (meatBreakdownRes.data || []).map((item, idx) => ({
+        name: translateMeatItem(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.meat[idx % COLORS.meat.length],
+        unit: 'ton'
+      }));
+      const meatYearly: YearlyData[] = (meatYearlyRes.data || []).map(item => ({
+        year: String(item.year),
+        meat: Number(item.total) || 0
+      }));
+
+      // YUMURTA
+      const eggTotal = Number(eggTotalRes.data?.[0]?.total) || 0;
+      const eggBreakdown: DataItem[] = (eggBreakdownRes.data || []).map((item, idx) => ({
+        name: translateEggItem(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.egg[idx % COLORS.egg.length],
+        unit: 'adet'
+      }));
+      const eggYearly: YearlyData[] = (eggYearlyRes.data || []).map(item => ({
+        year: String(item.year),
+        egg: Number(item.total) || 0
+      }));
+
+      // HAYVAN VARLIĞI
+      const livestockStocksBreakdown: DataItem[] = (livestockStocksRes.data || []).map((item, idx) => ({
+        name: translateLivestockStock(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.general[idx % COLORS.general.length],
+        unit: 'baş'
       }));
 
       setData({
@@ -146,12 +240,46 @@ export function OverviewPage() {
         urbanPopulation,
         gdp,
         gdpPerCapita,
+        agriculturalGDP: 0, // TODO: Eklenecek
+        agriculturalEmployment: 0, // TODO: Eklenecek
+        totalEmployment: 0,
         agriculturalLand,
         totalLand,
-        livestockProduction,
-        topLivestockProducts,
-        livestockYearlyTrend,
-        landUseData
+        landUseData,
+        
+        milkProduction: {
+          total: milkTotal,
+          cattle: milkBreakdown.find(m => m.name.includes('İnek'))?.value || 0,
+          sheep: milkBreakdown.find(m => m.name.includes('Koyun'))?.value || 0,
+          goat: milkBreakdown.find(m => m.name.includes('Keçi'))?.value || 0,
+          buffalo: milkBreakdown.find(m => m.name.includes('Manda'))?.value || 0,
+          breakdown: milkBreakdown,
+          yearly: milkYearly
+        },
+        
+        meatProduction: {
+          total: meatTotal,
+          redMeat,
+          whiteMeat,
+          breakdown: meatBreakdown,
+          yearly: meatYearly
+        },
+        
+        eggProduction: {
+          total: eggTotal,
+          chicken: eggBreakdown[0]?.value || 0,
+          other: eggBreakdown[1]?.value || 0,
+          breakdown: eggBreakdown,
+          yearly: eggYearly
+        },
+        
+        livestockStocks: {
+          cattle: livestockStocksBreakdown.find(l => l.name.includes('Sığır'))?.value || 0,
+          sheep: livestockStocksBreakdown.find(l => l.name.includes('Koyun'))?.value || 0,
+          goat: livestockStocksBreakdown.find(l => l.name.includes('Keçi'))?.value || 0,
+          poultry: livestockStocksBreakdown.find(l => l.name.includes('Tavuk') || l.name.includes('Kanatlı'))?.value || 0,
+          breakdown: livestockStocksBreakdown
+        }
       });
     } catch (error) {
       console.error('Error loading data:', error);
@@ -164,21 +292,51 @@ export function OverviewPage() {
     loadData();
   }, [loadData]);
 
-  // Hayvansal ürün isimlerini Türkçeleştir
-  function translateLivestockItem(item: string): string {
+  // Çeviri fonksiyonları
+  function translateMilkItem(item: string): string {
     const translations: Record<string, string> = {
-      'Hen eggs in shell, fresh': 'Tavuk Yumurtası',
       'Raw milk of cattle': 'İnek Sütü',
-      'Meat of chickens, fresh or chilled': 'Tavuk Eti',
-      'Meat of cattle with the bone, fresh or chilled': 'Sığır Eti',
-      'Raw milk of sheep': 'Koyun Sütü',
-      'Meat of sheep, fresh or chilled': 'Koyun Eti',
+      'Raw milk of buffalo': 'Manda Sütü',
       'Raw milk of goats': 'Keçi Sütü',
-      'Raw hides and skins of cattle': 'Sığır Derisi',
-      'Edible offal of cattle, fresh, chilled or frozen': 'Sığır Sakatat',
-      'Meat of goat, fresh or chilled': 'Keçi Eti'
+      'Raw milk of sheep': 'Koyun Sütü',
+      'Raw milk of camel': 'Deve Sütü'
     };
     return translations[item] || item.split(',')[0];
+  }
+
+  function translateMeatItem(item: string): string {
+    const translations: Record<string, string> = {
+      'Meat of cattle with the bone, fresh or chilled': 'Sığır Eti',
+      'Meat of sheep, fresh or chilled': 'Koyun Eti',
+      'Meat of goat, fresh or chilled': 'Keçi Eti',
+      'Meat of chickens, fresh or chilled': 'Tavuk Eti',
+      'Meat of turkeys, fresh or chilled': 'Hindi Eti'
+    };
+    return translations[item] || item.split(',')[0];
+  }
+
+  function translateEggItem(item: string): string {
+    const translations: Record<string, string> = {
+      'Hen eggs in shell, fresh': 'Tavuk Yumurtası',
+      'Eggs from other birds in shell, fresh, n.e.c.': 'Diğer Kuş Yumurtaları'
+    };
+    return translations[item] || item;
+  }
+
+  function translateLivestockStock(item: string): string {
+    const translations: Record<string, string> = {
+      'Cattle': 'Sığır',
+      'Sheep': 'Koyun',
+      'Goats': 'Keçi',
+      'Chickens': 'Tavuk',
+      'Turkeys': 'Hindi',
+      'Horses': 'At',
+      'Asses': 'Eşek',
+      'Mules': 'Katır',
+      'Buffaloes': 'Manda',
+      'Camels': 'Deve'
+    };
+    return translations[item] || item;
   }
 
   const ruralPercent = data ? ((data.ruralPopulation / data.population) * 100).toFixed(1) : '0';
@@ -196,7 +354,11 @@ export function OverviewPage() {
         <div className="loading"><div className="loading-spinner"></div><p>Veriler yükleniyor...</p></div>
       ) : (
         <>
-          {/* Ana KPI'lar */}
+          {/* ==================== GENEL BAKIŞ ==================== */}
+          <div className="section-header" style={{marginTop: '2rem', marginBottom: '1rem'}}>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)'}}>📊 Genel Göstergeler</h2>
+          </div>
+
           <div className="kpi-grid">
             <div className="kpi-card large">
               <div className="kpi-header"><span className="kpi-title">NÜFUS</span><div className="kpi-icon blue">👥</div></div>
@@ -218,14 +380,8 @@ export function OverviewPage() {
               <div className="kpi-value">{formatNumber(data?.agriculturalLand || 0)} ha</div>
               <div className="kpi-subtitle">Toplam alanın %{agriLandPercent}'i</div>
             </div>
-            <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">HAYVANSAL ÜRETİM</span><div className="kpi-icon orange">🐄</div></div>
-              <div className="kpi-value">{formatNumber(data?.livestockProduction || 0)} ton</div>
-              <div className="kpi-subtitle">2023 Yılı Toplam</div>
-            </div>
           </div>
 
-          {/* Nüfus Dağılımı */}
           <div className="chart-grid">
             <div className="chart-card">
               <h3 className="chart-title">👥 Nüfus Dağılımı (2023)</h3>
@@ -233,8 +389,8 @@ export function OverviewPage() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: `Kentsel (%${urbanPercent})`, value: data?.urbanPopulation || 0, fill: '#3b82f6' },
-                      { name: `Kırsal (%${ruralPercent})`, value: data?.ruralPopulation || 0, fill: '#22c55e' }
+                      { name: `Kentsel`, value: data?.urbanPopulation || 0, fill: COLORS.economy[0], label: `%${urbanPercent}` },
+                      { name: `Kırsal`, value: data?.ruralPopulation || 0, fill: COLORS.economy[2], label: `%${ruralPercent}` }
                     ]}
                     cx="50%"
                     cy="50%"
@@ -242,7 +398,7 @@ export function OverviewPage() {
                     outerRadius={100}
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name }) => name}
+                    label={({ name, label }) => `${name} ${label}`}
                   />
                   <Tooltip formatter={(value: number) => [formatNumber(value) + ' kişi', '']} />
                 </PieChart>
@@ -267,36 +423,110 @@ export function OverviewPage() {
             </div>
           </div>
 
-          {/* Hayvansal Üretim */}
-          <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📈 Hayvansal Üretim Trendi (2010-2023)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={data?.livestockYearlyTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
-                  <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
-                </AreaChart>
-              </ResponsiveContainer>
+          {/* ==================== SÜT ÜRETİMİ ==================== */}
+          <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#3b82f6'}}>🥛 Süt Üretimi</h2>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card large" style={{borderLeft: '4px solid #3b82f6'}}>
+              <div className="kpi-header"><span className="kpi-title">TOPLAM SÜT</span><div className="kpi-icon" style={{background: '#dbeafe', color: '#3b82f6'}}>🥛</div></div>
+              <div className="kpi-value" style={{color: '#3b82f6'}}>{formatNumber(data?.milkProduction.total || 0)} ton</div>
+              <div className="kpi-subtitle">2023 Yılı Toplam</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">İNEK SÜTÜ</span></div>
+              <div className="kpi-value">{formatNumber(data?.milkProduction.cattle || 0)} ton</div>
+              <div className="kpi-subtitle">Toplam süt üretiminin %{((data?.milkProduction.cattle || 0) / (data?.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KOYUN SÜTÜ</span></div>
+              <div className="kpi-value">{formatNumber(data?.milkProduction.sheep || 0)} ton</div>
+              <div className="kpi-subtitle">Toplam süt üretiminin %{((data?.milkProduction.sheep || 0) / (data?.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KEÇİ SÜTÜ</span></div>
+              <div className="kpi-value">{formatNumber(data?.milkProduction.goat || 0)} ton</div>
+              <div className="kpi-subtitle">Toplam süt üretiminin %{((data?.milkProduction.goat || 0) / (data?.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
             </div>
           </div>
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">🥩 Hayvansal Ürün Dağılımı (2023)</h3>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data?.topLivestockProducts} layout="vertical">
+              <h3 className="chart-title">🥧 Süt Türlerine Göre Dağılım (2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={data?.milkProduction.breakdown}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {data?.milkProduction.breakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3 className="chart-title">📈 Süt Üretim Trendi (2010-2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data?.milkProduction.yearly}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number, name: string, props: any) => {
-                    const unit = props?.payload?.unit || 'ton';
-                    return [formatNumber(value) + ' ' + unit, ''];
-                  }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {data?.topLivestockProducts.map((entry, index) => (
+                  <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
+                  <Area type="monotone" dataKey="milk" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* ==================== ET ÜRETİMİ ==================== */}
+          <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#ef4444'}}>🥩 Et Üretimi</h2>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card large" style={{borderLeft: '4px solid #ef4444'}}>
+              <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{background: '#fee2e2', color: '#ef4444'}}>🥩</div></div>
+              <div className="kpi-value" style={{color: '#ef4444'}}>{formatNumber(data?.meatProduction.total || 0)} ton</div>
+              <div className="kpi-subtitle">2023 Yılı Toplam</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KIRMIZI ET</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.redMeat || 0)} ton</div>
+              <div className="kpi-subtitle">Sığır, Koyun, Keçi</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">BEYAZ ET</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.whiteMeat || 0)} ton</div>
+              <div className="kpi-subtitle">Tavuk, Hindi</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">BEYAZ/KIRMIZI</span></div>
+              <div className="kpi-value">{((data?.meatProduction.whiteMeat || 0) / (data?.meatProduction.redMeat || 1)).toFixed(2)}</div>
+              <div className="kpi-subtitle">Oran</div>
+            </div>
+          </div>
+
+          <div className="chart-grid">
+            <div className="chart-card">
+              <h3 className="chart-title">🥩 Kırmızı vs Beyaz Et (2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data?.meatProduction.breakdown} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {data?.meatProduction.breakdown.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
@@ -305,46 +535,128 @@ export function OverviewPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🥧 Üretim Payları</h3>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={data?.topLivestockProducts.slice(0, 6)}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={120}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name?.substring(0, 10)} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {data?.topLivestockProducts.slice(0, 6).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number, name: string, props: any) => {
-                    const unit = props?.payload?.unit || 'ton';
-                    return [formatNumber(value) + ' ' + unit, ''];
-                  }} />
-                </PieChart>
+              <h3 className="chart-title">📈 Et Üretim Trendi (2010-2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data?.meatProduction.yearly}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
+                  <Area type="monotone" dataKey="meat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Veri Tablosu */}
-          <div className="data-table">
-            <h3 className="data-table-title">📋 Hayvansal Ürün Sıralaması (2023)</h3>
-            {data?.topLivestockProducts.map((product, index) => (
-              <div className="table-row" key={product.name}>
-                <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
-                <div className="table-info">
-                  <div className="table-name">{product.name}</div>
-                  <div className="table-subtext">
-                    Pay: %{((product.value / (data?.livestockProduction || 1)) * 100).toFixed(1)}
-                  </div>
-                </div>
-                <div className="table-value green">{formatNumber(product.value)} {product.unit || 'ton'}</div>
-              </div>
-            ))}
+          {/* ==================== YUMURTA ÜRETİMİ ==================== */}
+          <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#f59e0b'}}>🥚 Yumurta Üretimi</h2>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card large" style={{borderLeft: '4px solid #f59e0b'}}>
+              <div className="kpi-header"><span className="kpi-title">TOPLAM YUMURTA</span><div className="kpi-icon" style={{background: '#fef3c7', color: '#f59e0b'}}>🥚</div></div>
+              <div className="kpi-value" style={{color: '#f59e0b'}}>{formatNumber(data?.eggProduction.total || 0)} adet</div>
+              <div className="kpi-subtitle">2023 Yılı Toplam</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">TAVUK YUMURTASI</span></div>
+              <div className="kpi-value">{formatNumber(data?.eggProduction.chicken || 0)} adet</div>
+              <div className="kpi-subtitle">Toplam üretimin %{((data?.eggProduction.chicken || 0) / (data?.eggProduction.total || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
+              <div className="kpi-value">{Math.round((data?.eggProduction.total || 0) / (data?.population || 1))}</div>
+              <div className="kpi-subtitle">Adet/yıl</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">DİĞER YUMURTA</span></div>
+              <div className="kpi-value">{formatNumber(data?.eggProduction.other || 0)} adet</div>
+              <div className="kpi-subtitle">Diğer kuş yumurtaları</div>
+            </div>
+          </div>
+
+          <div className="chart-grid">
+            <div className="chart-card">
+              <h3 className="chart-title">🥧 Yumurta Türleri (2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={data?.eggProduction.breakdown}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                  >
+                    {data?.eggProduction.breakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' adet', '']} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3 className="chart-title">📈 Yumurta Üretim Trendi (2010-2023)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data?.eggProduction.yearly}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' adet', 'Üretim']} />
+                  <Area type="monotone" dataKey="egg" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* ==================== HAYVAN VARLIĞI ==================== */}
+          <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#6b7280'}}>🐄 Hayvan Varlığı (2023)</h2>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">SIĞIR</span><div className="kpi-icon">🐄</div></div>
+              <div className="kpi-value">{formatNumber(data?.livestockStocks.cattle || 0)}</div>
+              <div className="kpi-subtitle">Baş</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KOYUN</span><div className="kpi-icon">🐑</div></div>
+              <div className="kpi-value">{formatNumber(data?.livestockStocks.sheep || 0)}</div>
+              <div className="kpi-subtitle">Baş</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KEÇİ</span><div className="kpi-icon">🐐</div></div>
+              <div className="kpi-value">{formatNumber(data?.livestockStocks.goat || 0)}</div>
+              <div className="kpi-subtitle">Baş</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KANATLI</span><div className="kpi-icon">🐔</div></div>
+              <div className="kpi-value">{formatNumber(data?.livestockStocks.poultry || 0)}</div>
+              <div className="kpi-subtitle">Baş</div>
+            </div>
+          </div>
+
+          <div className="chart-grid">
+            <div className="chart-card" style={{gridColumn: 'span 2'}}>
+              <h3 className="chart-title">📊 Hayvan Varlığı Dağılımı (2023)</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={data?.livestockStocks.breakdown} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                    {data?.livestockStocks.breakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </>
       )}
