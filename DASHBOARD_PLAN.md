@@ -208,28 +208,40 @@ Türkiye tarım ve hayvancılık sektörünü kategorik, anlamlı ve zengin gör
 
 ## 📊 Veri Kaynağından Eklenebilecek Ek Bilgiler
 
-### Mevcut Tablolar:
-1. ✅ **fao_livestock_primary** - Hayvansal üretim
-2. ✅ **fao_nufus** - Nüfus verileri
-3. ✅ **fao_makro_1** - Makroekonomik veriler
-4. ✅ **fao_land_use** - Arazi kullanımı
-5. **fao_trade** - Dış ticaret (ihracat/ithalat)
-6. **tufe**, **ufe**, **gfe** - Enflasyon endeksleri
-7. **fao_gida_endeksi** - FAO gıda fiyat endeksi
-8. **fao_livestock_stocks** - Hayvan varlığı
-9. **fao_fertilizers** - Gübre kullanımı
-10. **fao_pesticides** - İlaç kullanımı
-11. **fao_crops** - Bitkisel ürünler
-12. **tuik_** tablolardan ek detaylar
+### Veri Kaynağı Haritası (DB keşfi sonucuna göre)
 
-### Eklenecek Yeni Metrikler:
-- ✅ Tarımsal istihdam verileri
-- ✅ Hayvan varlığı (livestock stocks)
-- ✅ Gübre ve ilaç kullanımı
-- ✅ Dış ticaret dengesi
-- ✅ Bölgesel üretim dağılımları
-- ✅ Verimlilik metrikleri (kg/ha, litre/hayvan)
-- ✅ Yıllık büyüme oranları
+#### ✅ Zaten kullanılıyor / doğrulandı
+1. ✅ **fao_livestock_primary** - Hayvansal üretim (süt/et/yumurta) + yıllık trend
+2. ✅ **fao_nufus** - Nüfus (toplam/kırsal/kentsel)
+3. ✅ **fao_land_use** - Arazi kullanımı (Tarım/Orman/Kara alanı vb.)
+4. ✅ **fao_makro_1** - Makroekonomi (GSYİH ve kişi başı GSYİH)
+  - Not: Bu tabloda doğru filtreleme `item + elementcode + unit` ile yapılmalı.
+5. ✅ **tuik_hayvansayisi** - Hayvan varlığı (ülke/bölge/il/ilçe düzeyi, yıllara göre sütunlar: `y2004..y2024`)
+
+#### 🧩 Eklenmeye hazır (DB’de mevcut)
+6. **fao_trade_YYYY** - FAO dış ticaret tabloları (yıla göre ayrı tablolar)
+7. **tuik_trade_YYYY** - TÜİK dış ticaret tabloları (son yıllar)
+8. **tuik_bitkisel_uretim** - Bitkisel üretim (detaylı ürün kırılımları)
+9. **tuik_hayvansal_uretim** - Hayvansal üretim (TÜİK alternatif/karşılaştırma)
+10. **excel_tufe / excel_ufe / excel_gfe** - Enflasyon endeksleri (import edilen seriler)
+11. **excel_fao_gida_endeksi** - FAO gıda fiyat endeksi (import edilen seri)
+12. (Opsiyonel) **fao_makro_2**, **tr_makro** - Makro göstergelerde alternatif kaynak / fallback
+
+### Eklenecek / Geliştirilecek Yeni Metrikler (Net hedefler)
+- ✅ Hayvan varlığı (TÜİK ülke düzeyi, 2023)
+- ✅ Et üretimi detay kırılım (kırmızı: sığır/koyun/keçi/manda; beyaz: tavuk/hindi)
+- ✅ Arazi kullanımında “Diğer” (tarım + orman dışı)
+- ✅ Yıllık büyüme oranları (temel üretim metrikleri)
+- ⏳ Tarımsal istihdam (FAO/TÜİK tablo eşlemesi + trend)
+- ⏳ Dış ticaret dengesi (FAO/TÜİK trade tabloları ile)
+- ⏳ Fiyat endeksleri (TÜFE/ÜFE/GFE) + FAO endeksi
+- ⏳ Bölgesel hayvan varlığı/üretim haritaları (bölge/il)
+- ⏳ Verimlilik metrikleri (kg/ha, litre/hayvan) — veri uygunluğuna göre
+
+### Sağlamlık / Fallback Stratejisi
+- Makro: Önce **fao_makro_1** (doğru `elementcode/unit` ile), boş gelirse **tr_makro** fallback.
+- Hayvan varlığı: **tuik_hayvansayisi** (FAO’da stok tablosu yok/eksikse TÜİK kullan).
+- “0 gösterme” koruması: sorgu boşsa kartlarda `—` veya “Veri yok” yaklaşımı.
 
 ---
 
@@ -275,6 +287,11 @@ Türkiye tarım ve hayvancılık sektörünü kategorik, anlamlı ve zengin gör
 - [ ] İnteraktif filtreler
 - [ ] Responsive tasarım optimizasyonu
 - [ ] Animasyonlar ve geçişler
+
+### Faz 3.1: Veri Kaynağı Sağlamlaştırma (Kritik)
+- [ ] Makro (GSYİH) fallback + tutarlı etiketleme (nominal / reel)
+- [ ] Hayvan varlığı bölgesel kırılımlar (bölge/il) + seçici filtre
+- [ ] “Veri yok” durumlarını UI’da standartlaştır (placeholder)
 
 ### Faz 4: İleri Seviye Analizler
 - [ ] Karşılaştırmalı analizler - genişlet

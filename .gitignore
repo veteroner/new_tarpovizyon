@@ -19,6 +19,9 @@ netlify-dashboard/build/
 
 # OS
 .DS_Store
+._*
+.AppleDouble/
+.LSOverride
 Thumbs.db
 
 # Logs

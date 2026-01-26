@@ -137,8 +137,8 @@ export function OverviewPage() {
       ] = await Promise.all([
         // Genel veriler
         fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND element='Gross Domestic Product (constant 2015 US$)' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND element='Gross Domestic Product per capita (constant 2015 US$)' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6225 AND unit='million' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6185 AND unit='USD' LIMIT 1`),
         fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye'`), 
         
         // SÜT ÜRÜNLERİ
@@ -157,8 +157,8 @@ export function OverviewPage() {
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' GROUP BY item`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
-        // HAYVAN VARLIĞI (2022 - 2023 verisi henüz yok)
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_stocks WHERE year=2022 AND area='Türkiye' AND element='Stocks' GROUP BY item ORDER BY total DESC LIMIT 10`)
+        // HAYVAN VARLIĞI (TÜİK - ülke düzeyi)
+        fetchQuery(`SELECT grup, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`)
       ]);
 
       // Nüfus
@@ -167,8 +167,10 @@ export function OverviewPage() {
       const ruralPopulation = Number(popData?.kirsal_v) * 1000 || 0;
       const urbanPopulation = Number(popData?.sehir_v) * 1000 || 0;
 
-      // GSYİH (2015 sabit fiyatlarıyla USD)
-      const gdp = Number(gdpRes.data?.[0]?.value) || 0;
+      // GSYİH
+      // fao_makro_1: GDP = elementcode 6225, unit=million (milyon USD)
+      // kişi başı = elementcode 6185, unit=USD
+      const gdp = (Number(gdpRes.data?.[0]?.value) || 0) * 1e6;
       const gdpPerCapita = Number(gdpPerCapitaRes.data?.[0]?.value) || 0;
 
       // Arazi
@@ -258,13 +260,19 @@ export function OverviewPage() {
         egg: Number(item.total) || 0
       }));
 
-      // HAYVAN VARLIĞI
-      const livestockStocksBreakdown: DataItem[] = (livestockStocksRes.data || []).map((item, idx) => ({
-        name: translateLivestockStock(String(item.item)),
-        value: Number(item.total) || 0,
+      // HAYVAN VARLIĞI (TÜİK)
+      const livestockStocksBreakdown: DataItem[] = (livestockStocksRes.data || []).map((row, idx) => ({
+        name: translateLivestockStock(String((row as any).grup ?? '')),
+        value: Number((row as any).total) || 0,
         fill: COLORS.general[idx % COLORS.general.length],
         unit: 'baş'
       }));
+
+      const livestockCattle = livestockStocksBreakdown.find(l => l.name.includes('Sığır'))?.value || 0;
+      const livestockSheep = livestockStocksBreakdown.find(l => l.name.includes('Koyun'))?.value || 0;
+      const livestockGoat = livestockStocksBreakdown.find(l => l.name.includes('Keçi'))?.value || 0;
+      const livestockPoultry = (livestockStocksBreakdown.find(l => l.name.includes('Tavuk'))?.value || 0)
+        + (livestockStocksBreakdown.find(l => l.name.includes('Hindi'))?.value || 0);
 
       setData({
         population,
@@ -312,10 +320,10 @@ export function OverviewPage() {
         },
         
         livestockStocks: {
-          cattle: livestockStocksBreakdown.find(l => l.name.includes('Sığır'))?.value || 0,
-          sheep: livestockStocksBreakdown.find(l => l.name.includes('Koyun'))?.value || 0,
-          goat: livestockStocksBreakdown.find(l => l.name.includes('Keçi'))?.value || 0,
-          poultry: livestockStocksBreakdown.find(l => l.name.includes('Tavuk') || l.name.includes('Kanatlı'))?.value || 0,
+          cattle: livestockCattle,
+          sheep: livestockSheep,
+          goat: livestockGoat,
+          poultry: livestockPoultry,
           breakdown: livestockStocksBreakdown
         }
       });
@@ -687,7 +695,7 @@ export function OverviewPage() {
 
           {/* ==================== HAYVAN VARLIĞI ==================== */}
           <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
-            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#6b7280'}}>🐄 Hayvan Varlığı (2022)</h2>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#6b7280'}}>🐄 Hayvan Varlığı (2023)</h2>
           </div>
 
           <div className="kpi-grid">
