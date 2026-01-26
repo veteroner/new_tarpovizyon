@@ -73,12 +73,24 @@ export function OverviewPage() {
         fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND item='Gross Domestic Product' AND unit='USD' LIMIT 1`),
         // Arazi kullanımı (2022)
         fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye' AND item IN ('Country area', 'Land area', 'Agriculture', 'Arable land', 'Permanent meadows and pastures', 'Forest land')`),
-        // Toplam hayvansal üretim (2023)
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production'`),
-        // En çok üretilen hayvansal ürünler
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' GROUP BY item ORDER BY total DESC LIMIT 8`),
-        // Hayvansal üretim yıllık trend
-        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND year >= 2010 GROUP BY year ORDER BY year`)
+        // Toplam hayvansal üretim (2023) - sadece ton bazında ürünler
+        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t'`),
+        // En çok üretilen hayvansal ürünler (yumurta için 1000 No birimi, diğerleri ton)
+        fetchQuery(`
+          SELECT item, 
+            CASE 
+              WHEN item LIKE '%egg%' THEN SUM(CASE WHEN unit='1000 No' THEN REPLACE(value,',','.') * 1000 ELSE 0 END)
+              ELSE SUM(CASE WHEN unit='t' THEN REPLACE(value,',','.') * 1 ELSE 0 END)
+            END as total 
+          FROM fao_livestock_primary 
+          WHERE year=2023 AND area='Türkiye' AND element='Production' 
+          GROUP BY item 
+          HAVING total > 0
+          ORDER BY total DESC 
+          LIMIT 8
+        `),
+        // Hayvansal üretim yıllık trend (ton bazında)
+        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND year >= 2010 GROUP BY year ORDER BY year`)
       ]);
 
       // Nüfus
@@ -111,12 +123,16 @@ export function OverviewPage() {
       // Hayvansal üretim
       const livestockProduction = Number(livestockTotalRes.data?.[0]?.total) || 0;
 
-      // Ürün bazında
-      const topLivestockProducts: LivestockItem[] = (livestockProductsRes.data || []).map((item, idx) => ({
-        name: translateLivestockItem(String(item.item)),
-        value: Number(item.total) || 0,
-        fill: COLORS[idx % COLORS.length]
-      }));
+      // Ürün bazında - yumurta için özel birim kontrolü
+      const topLivestockProducts: LivestockItem[] = (livestockProductsRes.data || []).map((item, idx) => {
+        const itemName = String(item.item);
+        return {
+          name: translateLivestockItem(itemName),
+          value: Number(item.total) || 0,
+          fill: COLORS[idx % COLORS.length],
+          unit: itemName.includes('egg') ? 'adet' : 'ton'
+        };
+      });
 
       // Yıllık trend
       const livestockYearlyTrend: YearlyData[] = (livestockTrendRes.data || []).map(item => ({
@@ -151,7 +167,7 @@ export function OverviewPage() {
   // Hayvansal ürün isimlerini Türkçeleştir
   function translateLivestockItem(item: string): string {
     const translations: Record<string, string> = {
-      'Hen eggs in shell, fresh': 'Yumurta',
+      'Hen eggs in shell, fresh': 'Tavuk Yumurtası',
       'Raw milk of cattle': 'İnek Sütü',
       'Meat of chickens, fresh or chilled': 'Tavuk Eti',
       'Meat of cattle with the bone, fresh or chilled': 'Sığır Eti',
@@ -275,7 +291,10 @@ export function OverviewPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
+                  <Tooltip formatter={(value: number, name: string, props: any) => {
+                    const unit = props?.payload?.unit || 'ton';
+                    return [formatNumber(value) + ' ' + unit, ''];
+                  }} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {data?.topLivestockProducts.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -302,7 +321,10 @@ export function OverviewPage() {
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
+                  <Tooltip formatter={(value: number, name: string, props: any) => {
+                    const unit = props?.payload?.unit || 'ton';
+                    return [formatNumber(value) + ' ' + unit, ''];
+                  }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -320,7 +342,7 @@ export function OverviewPage() {
                     Pay: %{((product.value / (data?.livestockProduction || 1)) * 100).toFixed(1)}
                   </div>
                 </div>
-                <div className="table-value green">{formatNumber(product.value)} ton</div>
+                <div className="table-value green">{formatNumber(product.value)} {product.unit || 'ton'}</div>
               </div>
             ))}
           </div>

@@ -34,14 +34,14 @@ const EGG_PRODUCTS = [
   { id: 'Eggs from other birds in shell, fresh, n.e.c.', name: 'Other Bird Eggs', nameTR: 'Diğer Kuş Yumurtaları' },
 ];
 
-function formatTon(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ton';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ton';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ton';
-  return value.toFixed(0) + ' ton';
+function formatEggs(value: number): string {
+  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar adet';
+  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon adet';
+  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin adet';
+  return value.toFixed(0) + ' adet';
 }
 
-function formatTonShort(value: number): string {
+function formatEggsShort(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
   if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
   if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
@@ -73,19 +73,19 @@ export default function EggProductionPage() {
     try {
       const productList = selectedProducts.map(p => `'${p}'`).join(',');
       
-      const productQuery = `SELECT item, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
+      const productQuery = `SELECT item, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) * 1000 as toplam 
         FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
+        WHERE year='${selectedYear}' AND element='Production' AND unit='1000 No' AND item IN (${productList})
         GROUP BY item ORDER BY toplam DESC`;
       
-      const countryQuery = `SELECT area, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
+      const countryQuery = `SELECT area, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) * 1000 as toplam 
         FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
+        WHERE year='${selectedYear}' AND element='Production' AND unit='1000 No' AND item IN (${productList})
         GROUP BY area ORDER BY toplam DESC LIMIT 20`;
 
-      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
+      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) * 1000 as toplam 
         FROM fao_livestock_primary 
-        WHERE element='Production' AND unit='t' AND item IN (${productList})
+        WHERE element='Production' AND unit='1000 No' AND item IN (${productList})
         GROUP BY year ORDER BY year`;
 
       const [productRes, countryRes, yearlyRes] = await Promise.all([
@@ -158,7 +158,7 @@ export default function EggProductionPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">🥚 Yumurta Üretimi</h1>
-        <p className="page-subtitle">Dünya yumurta üretimi verileri - Ton bazında ({selectedYear})</p>
+        <p className="page-subtitle">Dünya yumurta üretimi verileri - Adet bazlı ({selectedYear})</p>
       </div>
 
       {/* Filtreler */}
@@ -213,7 +213,7 @@ export default function EggProductionPage() {
               <div className="kpi-header">
                 <span className="kpi-title">TOPLAM ÜRETİM</span>
               </div>
-              <div className="kpi-value">{formatTon(totalValue)}</div>
+              <div className="kpi-value">{formatEggs(totalValue)}</div>
               <div className="kpi-subtitle">{selectedProducts.length} ürün seçili</div>
             </div>
             <div className="kpi-card">
@@ -249,10 +249,10 @@ export default function EggProductionPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatEggsShort(v)} />
                   <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={120} />
                   <Tooltip 
-                    formatter={(value: number) => [formatTon(value), 'Üretim']}
+                    formatter={(value: number) => [formatEggs(value), 'Üretim']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
@@ -281,7 +281,7 @@ export default function EggProductionPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => [formatTon(value), 'Üretim']} />
+                  <Tooltip formatter={(value: number) => [formatEggs(value), 'Üretim']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -316,7 +316,7 @@ export default function EggProductionPage() {
                             {name?.substring(0, 10)}
                           </text>
                           <text x={x + width / 2} y={y + height / 2 + 10} textAnchor="middle" fill="#fff" fontSize={9}>
-                            {formatTonShort(value)}
+                            {formatEggsShort(value)}
                           </text>
                         </>
                       )}
@@ -332,9 +332,9 @@ export default function EggProductionPage() {
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} />
-                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
+                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatEggsShort(v)} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatTon(value) : `%${value}`, name === 'value' ? 'Üretim' : 'Pay']} />
+                  <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatEggs(value) : `%${value}`, name === 'value' ? 'Üretim' : 'Pay']} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="value" name="Üretim" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                   <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} />
@@ -364,8 +364,8 @@ export default function EggProductionPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatTonShort(v)} />
-                  <Tooltip formatter={(value: number) => [formatTon(value), 'Üretim']} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatEggsShort(v)} />
+                  <Tooltip formatter={(value: number) => [formatEggs(value), 'Üretim']} />
                   <Area type="monotone" dataKey="value" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -408,7 +408,7 @@ export default function EggProductionPage() {
                   <div className="table-name">{country.name}</div>
                   <div className="table-subtext">Pay: %{country.share}</div>
                 </div>
-                <div className="table-value green">{formatTon(country.value)}</div>
+                <div className="table-value green">{formatEggs(country.value)}</div>
               </div>
             ))}
           </div>
