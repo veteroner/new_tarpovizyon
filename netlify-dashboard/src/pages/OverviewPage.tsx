@@ -76,6 +76,12 @@ interface OverviewData {
     total: number;
     redMeat: number;
     whiteMeat: number;
+    cattle: number;
+    sheep: number;
+    goat: number;
+    buffalo: number;
+    chicken: number;
+    turkey: number;
     breakdown: DataItem[];
     yearly: YearlyData[];
   };
@@ -117,8 +123,8 @@ export function OverviewPage() {
         milkYearlyRes,
         
         // Et ürünleri
-        redMeatRes,
-        whiteMeatRes,
+        redMeatBreakdownRes,
+        whiteMeatBreakdownRes,
         meatYearlyRes,
         
         // Yumurta
@@ -131,18 +137,19 @@ export function OverviewPage() {
       ] = await Promise.all([
         // Genel veriler
         fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND item='Gross Domestic Product' AND unit='million' AND elementcode='6225' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND item='Gross Domestic Product' AND unit='USD' LIMIT 1`),
-        fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye' AND item IN ('Country area', 'Land area', 'Agriculture', 'Arable land', 'Permanent meadows and pastures', 'Forest land')`),
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND element='Gross Domestic Product (constant 2015 US$)' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year=2023 AND area='Türkiye' AND element='Gross Domestic Product per capita (constant 2015 US$)' LIMIT 1`),
+        fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye'`), 
         
         // SÜT ÜRÜNLERİ
         fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%'`),
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' GROUP BY item ORDER BY total DESC`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
-        // ET ÜRÜNLERİ
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled')`),
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled')`),
+        // ET ÜRÜNLERİ - Kırmızı Et Detaylı
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled', 'Meat of buffalo, fresh or chilled') GROUP BY item`),
+        // ET ÜRÜNLERİ - Beyaz Et Detaylı
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled') GROUP BY item`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%meat%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
         // YUMURTA
@@ -150,8 +157,8 @@ export function OverviewPage() {
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' GROUP BY item`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
-        // HAYVAN VARLIĞI
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_stocks WHERE year=2023 AND area='Türkiye' AND element='Stocks' GROUP BY item ORDER BY total DESC LIMIT 10`)
+        // HAYVAN VARLIĞI (2022 - 2023 verisi henüz yok)
+        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_stocks WHERE year=2022 AND area='Türkiye' AND element='Stocks' GROUP BY item ORDER BY total DESC LIMIT 10`)
       ]);
 
       // Nüfus
@@ -160,8 +167,8 @@ export function OverviewPage() {
       const ruralPopulation = Number(popData?.kirsal_v) * 1000 || 0;
       const urbanPopulation = Number(popData?.sehir_v) * 1000 || 0;
 
-      // GSYİH
-      const gdp = Number(gdpRes.data?.[0]?.value) * 1e6 || 0;
+      // GSYİH (2015 sabit fiyatlarıyla USD)
+      const gdp = Number(gdpRes.data?.[0]?.value) || 0;
       const gdpPerCapita = Number(gdpPerCapitaRes.data?.[0]?.value) || 0;
 
       // Arazi
@@ -171,13 +178,14 @@ export function OverviewPage() {
       });
 
       const agriculturalLand = landMap['Tarım'] || 0;
-      const totalLand = landMap['Ülke yüzölçümü'] || 0;
+      const totalLand = landMap['Kara alanı'] || landMap['Ülke yüzölçümü'] || 0;
+      const forestLand = landMap['Orman arazisi'] || 0;
+      const otherLand = totalLand - agriculturalLand - forestLand;
 
       const landUseData: DataItem[] = [
-        { name: 'Tarım Arazisi', value: landMap['Tarım'] || 0, fill: COLORS.land[0] },
-        { name: 'Orman', value: landMap['Orman arazisi'] || 0, fill: COLORS.land[1] },
-        { name: 'Ekilebilir Arazi', value: landMap['Ekilebilir arazi'] || 0, fill: COLORS.land[2] },
-        { name: 'Çayır-Mera', value: landMap['Daimi çayır ve meralar'] || 0, fill: COLORS.land[3] },
+        { name: 'Tarım Arazisi', value: agriculturalLand, fill: COLORS.land[0] },
+        { name: 'Orman', value: forestLand, fill: COLORS.land[1] },
+        { name: 'Diğer (Yerleşim, Çorak)', value: otherLand > 0 ? otherLand : 0, fill: COLORS.general[2] },
       ].filter(item => item.value > 0);
 
       // SÜT ÜRETİMİ
@@ -193,14 +201,45 @@ export function OverviewPage() {
         milk: Number(item.total) || 0
       }));
 
-      // ET ÜRETİMİ
-      const redMeat = Number(redMeatRes.data?.[0]?.total) || 0;
-      const whiteMeat = Number(whiteMeatRes.data?.[0]?.total) || 0;
+      // ET ÜRETİMİ - Detaylı
+      function translateMeatItem(item: string): string {
+        const translations: Record<string, string> = {
+          'Meat of cattle with the bone, fresh or chilled': 'Sığır Eti',
+          'Meat of sheep, fresh or chilled': 'Koyun Eti',
+          'Meat of goat, fresh or chilled': 'Keçi Eti',
+          'Meat of buffalo, fresh or chilled': 'Manda Eti',
+          'Meat of chickens, fresh or chilled': 'Piliç Eti',
+          'Meat of turkeys, fresh or chilled': 'Hindi Eti'
+        };
+        return translations[item] || item;
+      }
+
+      const redMeatBreakdown: DataItem[] = (redMeatBreakdownRes.data || []).map((item, idx) => ({
+        name: translateMeatItem(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.meat[idx % COLORS.meat.length],
+        unit: 'ton'
+      }));
+
+      const whiteMeatBreakdown: DataItem[] = (whiteMeatBreakdownRes.data || []).map((item, idx) => ({
+        name: translateMeatItem(String(item.item)),
+        value: Number(item.total) || 0,
+        fill: COLORS.meat[idx + 2 % COLORS.meat.length],
+        unit: 'ton'
+      }));
+
+      const cattle = redMeatBreakdown.find(m => m.name.includes('Sığır'))?.value || 0;
+      const sheep = redMeatBreakdown.find(m => m.name.includes('Koyun'))?.value || 0;
+      const goat = redMeatBreakdown.find(m => m.name.includes('Keçi'))?.value || 0;
+      const buffalo = redMeatBreakdown.find(m => m.name.includes('Manda'))?.value || 0;
+      const chicken = whiteMeatBreakdown.find(m => m.name.includes('Piliç'))?.value || 0;
+      const turkey = whiteMeatBreakdown.find(m => m.name.includes('Hindi'))?.value || 0;
+
+      const redMeat = cattle + sheep + goat + buffalo;
+      const whiteMeat = chicken + turkey;
       const meatTotal = redMeat + whiteMeat;
-      const meatBreakdown: DataItem[] = [
-        { name: 'Kırmızı Et', value: redMeat, fill: COLORS.meat[0], unit: 'ton' },
-        { name: 'Beyaz Et', value: whiteMeat, fill: COLORS.meat[1], unit: 'ton' }
-      ];
+
+      const meatBreakdown: DataItem[] = [...redMeatBreakdown, ...whiteMeatBreakdown];
       const meatYearly: YearlyData[] = (meatYearlyRes.data || []).map(item => ({
         year: String(item.year),
         meat: Number(item.total) || 0
@@ -254,6 +293,12 @@ export function OverviewPage() {
           total: meatTotal,
           redMeat,
           whiteMeat,
+          cattle,
+          sheep,
+          goat,
+          buffalo,
+          chicken,
+          turkey,
           breakdown: meatBreakdown,
           yearly: meatYearly
         },
@@ -484,12 +529,12 @@ export function OverviewPage() {
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">KIRMIZI ET</span></div>
               <div className="kpi-value">{formatNumber(data?.meatProduction.redMeat || 0)} ton</div>
-              <div className="kpi-subtitle">Sığır, Koyun, Keçi</div>
+              <div className="kpi-subtitle">Toplam etin %{((data?.meatProduction.redMeat || 0) / (data?.meatProduction.total || 1) * 100).toFixed(0)}'i</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">BEYAZ ET</span></div>
               <div className="kpi-value">{formatNumber(data?.meatProduction.whiteMeat || 0)} ton</div>
-              <div className="kpi-subtitle">Tavuk, Hindi</div>
+              <div className="kpi-subtitle">Toplam etin %{((data?.meatProduction.whiteMeat || 0) / (data?.meatProduction.total || 1) * 100).toFixed(0)}'i</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">BEYAZ/KIRMIZI</span></div>
@@ -498,9 +543,55 @@ export function OverviewPage() {
             </div>
           </div>
 
+          {/* KIRMIZI ET DETAY */}
+          <div className="section-header" style={{marginTop: '2rem', marginBottom: '1rem'}}>
+            <h3 style={{fontSize: '1.25rem', fontWeight: '600', color: '#dc2626'}}>🐄 Kırmızı Et Detayı</h3>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">SIĞIR ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.cattle || 0)} ton</div>
+              <div className="kpi-subtitle">Kırmızı etin %{((data?.meatProduction.cattle || 0) / (data?.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KOYUN ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.sheep || 0)} ton</div>
+              <div className="kpi-subtitle">Kırmızı etin %{((data?.meatProduction.sheep || 0) / (data?.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KEÇİ ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.goat || 0)} ton</div>
+              <div className="kpi-subtitle">Kırmızı etin %{((data?.meatProduction.goat || 0) / (data?.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">MANDA ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.buffalo || 0)} ton</div>
+              <div className="kpi-subtitle">Kırmızı etin %{((data?.meatProduction.buffalo || 0) / (data?.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+          </div>
+
+          {/* BEYAZ ET DETAY */}
+          <div className="section-header" style={{marginTop: '2rem', marginBottom: '1rem'}}>
+            <h3 style={{fontSize: '1.25rem', fontWeight: '600', color: '#fb923c'}}>🐔 Beyaz Et Detayı</h3>
+          </div>
+
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">PİLİÇ ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.chicken || 0)} ton</div>
+              <div className="kpi-subtitle">Beyaz etin %{((data?.meatProduction.chicken || 0) / (data?.meatProduction.whiteMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">HİNDİ ETİ</span></div>
+              <div className="kpi-value">{formatNumber(data?.meatProduction.turkey || 0)} ton</div>
+              <div className="kpi-subtitle">Beyaz etin %{((data?.meatProduction.turkey || 0) / (data?.meatProduction.whiteMeat || 1) * 100).toFixed(0)}'i</div>
+            </div>
+          </div>
+
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">🥩 Kırmızı vs Beyaz Et (2023)</h3>
+              <h3 className="chart-title">🥩 Et Türleri Dağılımı (2023)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data?.meatProduction.breakdown} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -596,7 +687,7 @@ export function OverviewPage() {
 
           {/* ==================== HAYVAN VARLIĞI ==================== */}
           <div className="section-header" style={{marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem'}}>
-            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#6b7280'}}>🐄 Hayvan Varlığı (2023)</h2>
+            <h2 style={{fontSize: '1.5rem', fontWeight: '600', color: '#6b7280'}}>🐄 Hayvan Varlığı (2022)</h2>
           </div>
 
           <div className="kpi-grid">
