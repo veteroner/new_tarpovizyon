@@ -291,7 +291,7 @@ export function OverviewPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
-                  <Tooltip formatter={(value: number, name: string, props: any) => {
+                  <Tooltip formatter={(value: number, _name: string, props: any) => {
                     const unit = props?.payload?.unit || 'ton';
                     return [formatNumber(value) + ' ' + unit, ''];
                   }} />
@@ -321,7 +321,7 @@ export function OverviewPage() {
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number, name: string, props: any) => {
+                  <Tooltip formatter={(value: number, _name: string, props: any) => {
                     const unit = props?.payload?.unit || 'ton';
                     return [formatNumber(value) + ' ' + unit, ''];
                   }} />
