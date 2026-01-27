@@ -12,6 +12,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   // Ana Menü
   { path: '/', label: 'Genel Bakış', icon: '📊' },
+  { path: '/trade', label: 'Dış Ticaret', icon: '🔁' },
   { path: '/export', label: 'İhracat', icon: '📤' },
   { path: '/import', label: 'İthalat', icon: '📥' },
   { path: '/transport', label: 'Taşıma', icon: '🚚' },

@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import WheelPicker from './components/WheelPicker';
 import { Menu } from 'lucide-react';
 import { OverviewPage } from './pages/OverviewPage';
+import { TradePage } from './pages/TradePage';
 import { ExportPage } from './pages/ExportPage';
 import { ImportPage } from './pages/ImportPage';
 import { TransportPage } from './pages/TransportPage';
@@ -77,6 +78,7 @@ function AppContent({ apiConnected }: { apiConnected: boolean }) {
       <main className="main-content">
         <Routes>
           <Route path="/" element={<OverviewPage />} />
+          <Route path="/trade" element={<TradePage />} />
           <Route path="/export" element={<ExportPage />} />
           <Route path="/import" element={<ImportPage />} />
           <Route path="/transport" element={<TransportPage />} />

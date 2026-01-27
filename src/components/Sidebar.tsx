@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale, LineChart, DollarSign, Building, Tractor, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale, LineChart, DollarSign, Building, Tractor, BarChart3, ArrowLeftRight } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -9,6 +9,7 @@ interface SidebarProps {
 export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
   const mainNavItems = [
     { path: '/', icon: LayoutDashboard, label: 'Genel Bakış' },
+    { path: '/trade', icon: ArrowLeftRight, label: 'Dış Ticaret' },
     { path: '/export', icon: TrendingUp, label: 'İhracat' },
     { path: '/import', icon: TrendingDown, label: 'İthalat' },
     { path: '/transport', icon: Truck, label: 'Taşıma' },
