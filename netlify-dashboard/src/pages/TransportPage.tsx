@@ -141,7 +141,7 @@ export function TransportPage() {
                 tickFormatter={(v) => `$${v.toFixed(1)}B`} 
               />
               <Tooltip 
-                formatter={(value: number) => [`$${value.toFixed(2)}B`, 'Hacim']}
+                formatter={(value: unknown) => [`$${(Number(value) || 0).toFixed(2)}B`, 'Hacim']}
               />
               <Legend />
               <Bar dataKey="Hacim" radius={[4, 4, 0, 0]}>
@@ -172,7 +172,7 @@ export function TransportPage() {
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} 
                 tickFormatter={(v) => formatNumber(v)}
               />
-              <Tooltip formatter={(value: number) => [formatNumber(value), 'İşlem Sayısı']} />
+              <Tooltip formatter={(value: unknown) => [formatNumber(Number(value) || 0), 'İşlem Sayısı']} />
               <Legend />
               <Line 
                 type="monotone" 
