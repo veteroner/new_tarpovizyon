@@ -128,7 +128,7 @@ export function TradePage() {
       GROUP BY yil
       ORDER BY CAST(yil AS UNSIGNED)`;
 
-      const countriesSql = `SELECT ulke as country,
+      const countriesSql = `SELECT ulke,
         SUM(ihracat_deger) as exportValue,
         SUM(ithalat_deger) as importValue
       FROM ${unionTradeSql('SELECT ulke, ihracat_deger, ithalat_deger', where)} t
@@ -178,7 +178,7 @@ export function TradePage() {
 
       setTopCountries(
         (countriesRes.data || []).map((row) => ({
-          country: translateCountry(String(row.country || '')),
+          country: translateCountry(String(row.ulke || '')),
           exportValue: Number(row.exportValue) || 0,
           importValue: Number(row.importValue) || 0,
         }))
