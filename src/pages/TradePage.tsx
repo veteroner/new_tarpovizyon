@@ -294,7 +294,7 @@ export function TradePage() {
               <XAxis dataKey="key" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-30} textAnchor="end" height={60} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`} />
               <Tooltip
-                formatter={(value: number, name: string) => [formatMoney(value), name === 'exportValue' ? 'İhracat' : 'İthalat']}
+                formatter={(value: unknown, name?: unknown) => [formatMoney(Number(value) || 0), String(name) === 'exportValue' ? 'İhracat' : 'İthalat']}
               />
               <Legend />
               <Area type="monotone" dataKey="exportValue" name="İhracat" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
@@ -311,7 +311,7 @@ export function TradePage() {
               <XAxis dataKey="key" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`} />
               <Tooltip
-                formatter={(value: number, name: string) => [formatMoney(value), name === 'exportValue' ? 'İhracat' : 'İthalat']}
+                formatter={(value: unknown, name?: unknown) => [formatMoney(Number(value) || 0), String(name) === 'exportValue' ? 'İhracat' : 'İthalat']}
               />
               <Legend />
               <Area type="monotone" dataKey="exportValue" name="İhracat" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
@@ -329,7 +329,7 @@ export function TradePage() {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-35} textAnchor="end" height={80} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <Tooltip formatter={(value: number, name: string) => [`$${value.toFixed(2)}M`, name === 'exportValue' ? 'İhracat' : 'İthalat']} />
+              <Tooltip formatter={(value: unknown, name?: unknown) => [`$${(Number(value) || 0).toFixed(2)}M`, String(name) === 'exportValue' ? 'İhracat' : 'İthalat']} />
               <Legend />
               <Bar dataKey="exportValue" name="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
               <Bar dataKey="importValue" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -344,7 +344,7 @@ export function TradePage() {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis type="category" dataKey="name" width={120} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
-              <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}M`, 'Hacim']} />
+              <Tooltip formatter={(value: unknown) => [`$${(Number(value) || 0).toFixed(2)}M`, 'Hacim']} />
               <Bar dataKey="value" fill="#6366f1" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
