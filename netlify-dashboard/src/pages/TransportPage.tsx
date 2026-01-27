@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Truck, Ship, Plane, Train, Package, TrendingUp } from 'lucide-react';
 import {
-  BarChart, Bar, LineChart, Line, Cell,
+  BarChart, Bar, Line, Cell, ComposedChart, PieChart, Pie,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { KPICard } from '../components/KPICard';
@@ -22,6 +22,43 @@ function getTransportIcon(mode: string): typeof Truck {
   return Truck;
 }
 
+function isTotalModeDesc(mode: string): boolean {
+  const s = mode.trim().toLowerCase();
+  if (!s) return true;
+  return (
+    s === 'total' ||
+    s.includes('total mot') ||
+    s.startsWith('total') ||
+    s.includes('all modes') ||
+    s.includes('all mode') ||
+    s.includes('total mode')
+  );
+}
+
+function translateTransportMode(mode: string): string {
+  const raw = mode.trim();
+  const lower = raw.toLowerCase();
+
+  if (isTotalModeDesc(raw)) return 'Toplam (tüm taşıma şekilleri)';
+
+  // Heuristic translations for common FAO/transport terms
+  if (lower.includes('sea')) return 'Deniz yolu';
+  if (lower.includes('air')) return 'Hava yolu';
+  if (lower.includes('rail')) return 'Demiryolu';
+  if (lower.includes('road')) return 'Karayolu';
+  if (lower.includes('postal') || lower.includes('post')) return 'Posta/Kargo';
+  if (lower.includes('pipeline')) return 'Boru hattı';
+  if (lower.includes('inland') || lower.includes('waterway') || lower.includes('river')) return 'İç su yolu';
+  if (lower.includes('other') || lower.includes('unknown')) return 'Diğer';
+
+  // Preserve already-Turkish values
+  if (lower.includes('deniz') || lower.includes('hava') || lower.includes('demiryolu') || lower.includes('karayolu')) {
+    return raw;
+  }
+
+  return raw;
+}
+
 interface TransportMode {
   tasimaSekli: string;
   toplam: number;
@@ -35,23 +72,35 @@ interface TransportData {
   topMode: TransportMode | null;
 }
 
+type SortKey = 'toplam' | 'cnt' | 'avg';
+
 export function TransportPage() {
   const [data, setData] = useState<TransportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('toplam');
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const transportRes = await fetchQuery(addYearFilter(queries.transportModes, selectedYear));
-      const modes = (transportRes.data || []) as unknown as TransportMode[];
-      
-      const total = modes.reduce((sum, m) => sum + (parseFloat(String(m.toplam)) || 0), 0);
-      const totalCount = modes.reduce((sum, m) => sum + (parseInt(String(m.cnt)) || 0), 0);
-      const topMode = modes.length > 0 ? modes[0] : null;
+      const rawModes = (transportRes.data || []) as unknown as TransportMode[];
+
+      const normalizedModes: TransportMode[] = rawModes
+        .map((m) => ({
+          tasimaSekli: translateTransportMode(String(m.tasimaSekli ?? '')),
+          toplam: parseFloat(String(m.toplam)) || 0,
+          cnt: parseInt(String(m.cnt)) || 0,
+        }))
+        .filter((m) => m.tasimaSekli && !isTotalModeDesc(m.tasimaSekli))
+        .sort((a, b) => b.toplam - a.toplam);
+
+      const total = normalizedModes.reduce((sum, m) => sum + (m.toplam || 0), 0);
+      const totalCount = normalizedModes.reduce((sum, m) => sum + (m.cnt || 0), 0);
+      const topMode = normalizedModes.length > 0 ? normalizedModes[0] : null;
 
       setData({
-        transportModes: modes,
+        transportModes: normalizedModes,
         totalTransport: total,
         totalCount,
         topMode,
@@ -67,16 +116,70 @@ export function TransportPage() {
     loadData();
   }, [loadData]);
 
-  if (loading) return <Loading />;
+  const totalTransport = data?.totalTransport || 0;
+  const totalCount = data?.totalCount || 0;
 
-  const topModes = data?.transportModes.slice(0, 6) || [];
-  const avgPerTransaction = data?.totalCount ? data.totalTransport / data.totalCount : 0;
+  const avgPerTransaction = totalCount ? totalTransport / totalCount : 0;
+
+  const topModes = useMemo(() => (data?.transportModes || []).slice(0, 8), [data?.transportModes]);
+
+  const modeChart = useMemo(() => {
+    const total = totalTransport || 0;
+    let cumulative = 0;
+    return topModes.map((m) => {
+      const share = total > 0 ? (m.toplam / total) * 100 : 0;
+      cumulative += share;
+      const avg = m.cnt > 0 ? m.toplam / m.cnt : 0;
+      return {
+        name: m.tasimaSekli,
+        valueB: m.toplam / 1e9,
+        share,
+        cumShare: cumulative,
+        cnt: m.cnt,
+        avgM: avg / 1e6,
+        rawValue: m.toplam,
+      };
+    });
+  }, [topModes, totalTransport]);
+
+  const donutData = useMemo(() => {
+    const top = (data?.transportModes || []).slice(0, 6);
+    const topSum = top.reduce((s, m) => s + (m.toplam || 0), 0);
+    const other = Math.max(0, totalTransport - topSum);
+    const items = top.map((m) => ({ name: m.tasimaSekli, value: m.toplam }));
+    if (other > 0) items.push({ name: 'Diğer', value: other });
+    return items;
+  }, [data?.transportModes, totalTransport]);
+
+  const tableRows = useMemo(() => {
+    const rows = (data?.transportModes || []).map((m) => {
+      const share = totalTransport > 0 ? (m.toplam / totalTransport) * 100 : 0;
+      const avg = m.cnt > 0 ? m.toplam / m.cnt : 0;
+      return { ...m, share, avg };
+    });
+
+    const sorters: Record<SortKey, (a: typeof rows[number], b: typeof rows[number]) => number> = {
+      toplam: (a, b) => b.toplam - a.toplam,
+      cnt: (a, b) => b.cnt - a.cnt,
+      avg: (a, b) => b.avg - a.avg,
+    };
+    return rows.sort(sorters[sortKey]);
+  }, [data?.transportModes, sortKey, totalTransport]);
+
+  const topModeShare = data?.topMode && totalTransport > 0 ? (data.topMode.toplam / totalTransport) * 100 : 0;
+  const top3Share = useMemo(() => {
+    const top3 = (data?.transportModes || []).slice(0, 3);
+    const sum = top3.reduce((s, m) => s + (m.toplam || 0), 0);
+    return totalTransport > 0 ? (sum / totalTransport) * 100 : 0;
+  }, [data?.transportModes, totalTransport]);
+
+  if (loading) return <Loading />;
 
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">Taşıma Şekilleri Analizi</h1>
-        <p className="page-subtitle">Uluslararası ticaret lojistik dağılımı (FAO)</p>
+        <p className="page-subtitle">Uluslararası ticaret lojistik dağılımı (FAO) — "Toplam" satırları analiz dışı bırakıldı.</p>
       </div>
 
       {/* Date Filter */}
@@ -90,30 +193,30 @@ export function TransportPage() {
       <div className="kpi-grid">
         <KPICard
           title="Toplam Ticaret Hacmi"
-          value={formatMoney(data?.totalTransport || 0)}
-          subtitle={`${formatNumber(data?.totalCount || 0)} işlem`}
+          value={formatMoney(totalTransport)}
+          subtitle={`${formatNumber(totalCount)} işlem`}
           icon={Package}
           color="blue"
           large
         />
         <KPICard
-          title="Taşıma Türü Sayısı"
+          title="Taşıma Şekli Sayısı"
           value={String(data?.transportModes.length || 0)}
-          subtitle="Farklı taşıma şekli"
+          subtitle="Analize giren mod"
           icon={Truck}
           color="purple"
         />
         <KPICard
-          title="En Çok Kullanılan"
-          value={data?.topMode?.tasimaSekli.substring(0, 20) || '—'}
-          subtitle={data?.topMode ? formatMoney(parseFloat(String(data.topMode.toplam))) : '—'}
+          title="En Yoğun Mod"
+          value={data?.topMode?.tasimaSekli || '—'}
+          subtitle={data?.topMode ? `${formatMoney(data.topMode.toplam)} • %${topModeShare.toFixed(1)} pay` : '—'}
           icon={getTransportIcon(data?.topMode?.tasimaSekli || '')}
           color="green"
         />
         <KPICard
-          title="İşlem Başına Ort."
+          title="İşlem Başına Ortalama"
           value={formatMoney(avgPerTransaction)}
-          subtitle="Ortalama değer"
+          subtitle={`Top 3 payı: %${top3Share.toFixed(1)}`}
           icon={TrendingUp}
           color="orange"
         />
@@ -122,44 +225,86 @@ export function TransportPage() {
       {/* Charts */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">Taşıma Şekillerine Göre Hacim (İlk 6)</h3>
+          <h3 className="chart-title">Taşıma Modları Pay Dağılımı (Top 6 + Diğer)</h3>
           <ResponsiveContainer width="100%" height={380}>
-            <BarChart data={topModes.map(mode => ({
-              name: mode.tasimaSekli.substring(0, 15),
-              Hacim: parseFloat(String(mode.toplam)) / 1e9,
-            }))}>
+            <PieChart>
+              <Tooltip
+                formatter={(value: unknown, name: unknown) => [formatMoney(Number(value) || 0), String(name)]}
+              />
+              <Legend />
+              <Pie
+                data={donutData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={130}
+                paddingAngle={2}
+              >
+                {donutData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3 className="chart-title">Hacim ve Kümülatif Pay (Pareto)</h3>
+          <ResponsiveContainer width="100%" height={380}>
+            <ComposedChart data={modeChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis 
-                dataKey="name" 
+                dataKey="name"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} 
                 angle={-30} 
                 textAnchor="end" 
                 height={100} 
               />
-              <YAxis 
+              <YAxis
+                yAxisId="left"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} 
-                tickFormatter={(v) => `$${v.toFixed(1)}B`} 
+                tickFormatter={(v: number) => `$${v.toFixed(1)}B`} 
               />
-              <Tooltip 
-                formatter={(value: unknown) => [`$${(Number(value) || 0).toFixed(2)}B`, 'Hacim']}
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                tickFormatter={(v: number) => `%${v.toFixed(0)}`}
+                domain={[0, 100]}
+              />
+              <Tooltip
+                formatter={(value: unknown, name: unknown) => {
+                  const n = String(name);
+                  if (n === 'valueB') return [`$${(Number(value) || 0).toFixed(2)}B`, 'Hacim'];
+                  if (n === 'cumShare') return [`%${(Number(value) || 0).toFixed(1)}`, 'Kümülatif Pay'];
+                  return [String(value), n];
+                }}
               />
               <Legend />
-              <Bar dataKey="Hacim" radius={[4, 4, 0, 0]}>
-                {topModes.map((_, index) => (
+              <Bar yAxisId="left" dataKey="valueB" name="Hacim (B$)" radius={[4, 4, 0, 0]}>
+                {modeChart.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
-            </BarChart>
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="cumShare"
+                name="Kümülatif Pay (%)"
+                stroke="#10b981"
+                strokeWidth={2}
+                dot={{ fill: '#10b981', r: 3 }}
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">İşlem Sayıları Karşılaştırma</h3>
+          <h3 className="chart-title">İşlem Başına Ortalama Değer (Top 8)</h3>
           <ResponsiveContainer width="100%" height={380}>
-            <LineChart data={topModes.map(mode => ({
-              name: mode.tasimaSekli.substring(0, 12),
-              İşlem: parseInt(String(mode.cnt)),
-            }))}>
+            <BarChart data={modeChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis 
                 dataKey="name" 
@@ -170,18 +315,18 @@ export function TransportPage() {
               />
               <YAxis 
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} 
-                tickFormatter={(v) => formatNumber(v)}
+                tickFormatter={(v: number) => `$${v.toFixed(1)}M`}
               />
-              <Tooltip formatter={(value: unknown) => [formatNumber(Number(value) || 0), 'İşlem Sayısı']} />
+              <Tooltip
+                formatter={(value: unknown) => [`$${(Number(value) || 0).toFixed(2)}M`, 'Ortalama']}
+              />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="İşlem" 
-                stroke="#10b981" 
-                strokeWidth={2} 
-                dot={{ fill: '#10b981', r: 4 }}
-              />
-            </LineChart>
+              <Bar dataKey="avgM" name="Ortalama (M$)" radius={[4, 4, 0, 0]}>
+                {modeChart.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -189,9 +334,35 @@ export function TransportPage() {
       {/* Transport List */}
       <div className="data-table">
         <h3 className="data-table-title">Detaylı Taşıma Şekilleri Listesi</h3>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', margin: '8px 0 12px 0' }}>
+          <button
+            type="button"
+            onClick={() => setSortKey('toplam')}
+            className="btn"
+            style={{ opacity: sortKey === 'toplam' ? 1 : 0.7 }}
+          >
+            Hacme Göre
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortKey('cnt')}
+            className="btn"
+            style={{ opacity: sortKey === 'cnt' ? 1 : 0.7 }}
+          >
+            İşleme Göre
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortKey('avg')}
+            className="btn"
+            style={{ opacity: sortKey === 'avg' ? 1 : 0.7 }}
+          >
+            Ortalama Değere Göre
+          </button>
+        </div>
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'auto 1fr auto auto auto', 
+          gridTemplateColumns: 'auto 1fr auto auto auto auto', 
           gap: '8px', 
           padding: '12px 16px', 
           background: 'var(--card-bg)',
@@ -206,16 +377,18 @@ export function TransportPage() {
           <div>Taşıma Şekli</div>
           <div style={{ textAlign: 'right' }}>İşlem Sayısı</div>
           <div style={{ textAlign: 'right' }}>Pay (%)</div>
+          <div style={{ textAlign: 'right' }}>Ort. (İşlem)</div>
           <div style={{ textAlign: 'right' }}>Toplam Değer</div>
         </div>
-        {data?.transportModes.map((mode, index) => {
-          const percentage = data.totalTransport ? ((parseFloat(String(mode.toplam)) / data.totalTransport) * 100).toFixed(1) : '0';
-          const value = parseFloat(String(mode.toplam));
+        {tableRows.map((mode, index) => {
+          const percentage = (mode.share || 0).toFixed(1);
+          const value = mode.toplam;
+          const avg = mode.avg;
           
           return (
             <div key={index} className="table-row" style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'auto 1fr auto auto auto', 
+              gridTemplateColumns: 'auto 1fr auto auto auto auto', 
               gap: '8px',
               alignItems: 'center'
             }}>
@@ -259,6 +432,14 @@ export function TransportPage() {
                 whiteSpace: 'nowrap'
               }}>
                 {percentage}%
+              </div>
+              <div style={{
+                textAlign: 'right',
+                fontSize: '13px',
+                color: 'var(--text-secondary)',
+                whiteSpace: 'nowrap'
+              }}>
+                {formatMoney(avg)}
               </div>
               <div className="table-value" style={{ 
                 color: COLORS[index % COLORS.length],
