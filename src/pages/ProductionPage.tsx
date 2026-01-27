@@ -7,7 +7,7 @@ import {
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
 import ProductSelector from '../components/ProductSelector';
-import { fetchQuery, formatNumber } from '../services/api';
+import { fetchQuery } from '../services/api';
 
 const COLORS = ['#14b8a6', '#10b981', '#34d399', '#6ee7b7', '#059669', '#047857', '#f59e0b', '#3b82f6'];
 
@@ -24,6 +24,7 @@ interface YearlyDataItem {
 }
 
 interface CityDataItem {
+  [key: string]: string | number;
   name: string;
   value: number;
   share: string;
@@ -199,8 +200,7 @@ export function ProductionPage() {
           <ProductSelector
             products={productList}
             selectedProducts={selectedProducts}
-            onProductsChange={setSelectedProducts}
-            label="Ürün Seçin (TÜİK)"
+            onSelectionChange={setSelectedProducts}
           />
         </div>
       </div>
@@ -280,7 +280,6 @@ export function ProductionPage() {
                 outerRadius={120}
                 paddingAngle={2}
                 dataKey="value"
-                label={(entry) => `${entry.name}: ${entry.share}`}
               >
                 {cityData.slice(0, 8).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />

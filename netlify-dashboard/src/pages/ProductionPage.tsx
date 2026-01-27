@@ -53,7 +53,7 @@ function formatShort(value: number): string {
 
 export function ProductionPage() {
   const [selectedYear, setSelectedYear] = useState('y2023');
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Buğday']);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [cityData, setCityData] = useState<CityDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
@@ -65,7 +65,13 @@ export function ProductionPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const query = `SELECT DISTINCT urun FROM tuik_bitkisel_uretim WHERE unsur='Üretim' ORDER BY urun LIMIT 100`;
+        // Get top products by total production in 2023
+        const query = `SELECT urun, SUM(CAST(y2023 AS DECIMAL(20,2))) as total 
+          FROM tuik_bitkisel_uretim 
+          WHERE unsur='Üretim' AND duzeykod='1' 
+          GROUP BY urun 
+          ORDER BY total DESC 
+          LIMIT 100`;
         const res = await fetchQuery(query);
         if (res.data) {
           const products = res.data.map((item) => ({
@@ -75,6 +81,12 @@ export function ProductionPage() {
           }));
           setProductList(products);
           setProductCount(products.length);
+          
+          // Auto-select top 3 products by default
+          if (products.length > 0 && selectedProducts.length === 0) {
+            const topProducts = products.slice(0, 3).map(p => p.name);
+            setSelectedProducts(topProducts);
+          }
         }
       } catch (error) {
         console.error('Ürün listesi yüklenirken hata:', error);
