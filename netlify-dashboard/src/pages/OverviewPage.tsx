@@ -103,12 +103,19 @@ interface OverviewData {
     goat: number;
     poultry: number;
     breakdown: DataItem[];
+    regional: {
+      cattle: DataItem[];
+      sheep: DataItem[];
+      goat: DataItem[];
+      poultry: DataItem[];
+    };
   };
 }
 
 export function OverviewPage() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regionalGroup, setRegionalGroup] = useState<'cattle' | 'sheep' | 'goat' | 'poultry'>('cattle');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -139,7 +146,11 @@ export function OverviewPage() {
           agriEmpShareRes,
         
         // Hayvan varlığı
-        livestockStocksRes
+        livestockStocksRes,
+        regionalCattleRes,
+        regionalSheepRes,
+        regionalGoatRes,
+        regionalPoultryRes
       ] = await Promise.all([
         // Genel veriler
         fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
@@ -170,7 +181,12 @@ export function OverviewPage() {
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
         
         // HAYVAN VARLIĞI (TÜİK - ülke düzeyi)
-        fetchQuery(`SELECT grup, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`)
+        fetchQuery(`SELECT grup, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
+        // HAYVAN VARLIĞI (TÜİK - bölge düzeyi) - Top 12
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Sığır' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Koyun' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Keçi' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(CASE WHEN grup='Tavuk' THEN COALESCE(y2023,0) WHEN grup='Hindi' THEN COALESCE(y2023,0) ELSE 0 END) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup IN ('Tavuk','Hindi') GROUP BY yer ORDER BY total DESC LIMIT 12`)
       ]);
 
       // Nüfus
@@ -297,6 +313,21 @@ export function OverviewPage() {
       const livestockPoultry = (livestockStocksBreakdown.find(l => l.name.includes('Tavuk'))?.value || 0)
         + (livestockStocksBreakdown.find(l => l.name.includes('Hindi'))?.value || 0);
 
+      const mapRegional = (res: any, palette: string[]): DataItem[] =>
+        (res?.data || []).map((row: Record<string, string | number>, idx: number) => ({
+          name: String(row.yer || ''),
+          value: Number(row.total) || 0,
+          fill: palette[idx % palette.length],
+          unit: 'baş'
+        }));
+
+      const livestockRegional = {
+        cattle: mapRegional(regionalCattleRes, COLORS.milk),
+        sheep: mapRegional(regionalSheepRes, COLORS.grain),
+        goat: mapRegional(regionalGoatRes, COLORS.fruit),
+        poultry: mapRegional(regionalPoultryRes, COLORS.egg),
+      };
+
       setData({
         population,
         ruralPopulation,
@@ -349,7 +380,8 @@ export function OverviewPage() {
           sheep: livestockSheep,
           goat: livestockGoat,
           poultry: livestockPoultry,
-          breakdown: livestockStocksBreakdown
+          breakdown: livestockStocksBreakdown,
+          regional: livestockRegional
         }
       });
     } catch (error) {
@@ -781,6 +813,43 @@ export function OverviewPage() {
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {data?.livestockStocks.breakdown.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card" style={{gridColumn: 'span 2'}}>
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem'}}>
+                <h3 className="chart-title" style={{marginBottom: 0}}>🗺️ Bölgesel Dağılım (Top 12)</h3>
+                <select
+                  value={regionalGroup}
+                  onChange={(e) => setRegionalGroup(e.target.value as any)}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.5rem',
+                    background: 'white',
+                    color: 'var(--text)',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  <option value="cattle">Sığır</option>
+                  <option value="sheep">Koyun</option>
+                  <option value="goat">Keçi</option>
+                  <option value="poultry">Kanatlı</option>
+                </select>
+              </div>
+
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={data?.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {data?.livestockStocks.regional[regionalGroup].map((entry, index) => (
+                      <Cell key={`cell-reg-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>

@@ -8,7 +8,7 @@ import {
 import { KPICard } from '../components/KPICard';
 import { Loading } from '../components/Loading';
 import { DateFilter } from '../components/DateFilter';
-import { fetchQuery, formatMoney, formatNumber, queries, addYearFilter, TRADE_YEARS } from '../services/api';
+import { fetchQuery, formatMoney, formatNumber, TRADE_YEARS } from '../services/api';
 
 const COLORS = ['#10b981', '#34d399', '#6ee7b7', '#059669', '#047857', '#14b8a6'];
 
@@ -23,12 +23,30 @@ export function ExportPage() {
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>('all');
 
+  const where = selectedYear === 'all' ? '' : `WHERE yil='${selectedYear}'`;
+
+  const unionTradeSql = (select: string) => `(
+    ${select} FROM tuik_ticaret ${where}
+    UNION ALL
+    ${select} FROM tuik_ticarethayvansal ${where}
+  )`;
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      const totalExportSql = `SELECT SUM(ihracat_deger) as toplam, COUNT(*) as cnt FROM ${unionTradeSql(
+        'SELECT ihracat_deger, ulke'
+      )} t`;
+
+      const topCountriesSql = `SELECT ulke, SUM(ihracat_deger) as toplam, COUNT(*) as cnt
+        FROM ${unionTradeSql('SELECT ulke, ihracat_deger')} t
+        GROUP BY ulke
+        ORDER BY toplam DESC
+        LIMIT 10`;
+
       const [exportRes, countriesRes] = await Promise.all([
-        fetchQuery(addYearFilter(queries.totalExport, selectedYear)),
-        fetchQuery(addYearFilter(queries.topExportCountries, selectedYear)),
+        fetchQuery(totalExportSql),
+        fetchQuery(topCountriesSql),
       ]);
 
       setData({

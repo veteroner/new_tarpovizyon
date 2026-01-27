@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line,
@@ -27,10 +27,27 @@ interface CountryDataItem {
   fill: string;
 }
 
+type DatasetId = 'FAO_TUFE' | 'EXCEL_TUFE' | 'EXCEL_UFE' | 'EXCEL_GFE' | 'EXCEL_FAO_FOOD';
+
 const MONTHS_TR: Record<string, string> = {
   'January': 'Ocak', 'February': 'Şubat', 'March': 'Mart', 'April': 'Nisan',
   'May': 'Mayıs', 'June': 'Haziran', 'July': 'Temmuz', 'August': 'Ağustos',
   'September': 'Eylül', 'October': 'Ekim', 'November': 'Kasım', 'December': 'Aralık'
+};
+
+const MONTHS_TR_NUM: Record<string, string> = {
+  '1': 'Ocak',
+  '2': 'Şubat',
+  '3': 'Mart',
+  '4': 'Nisan',
+  '5': 'Mayıs',
+  '6': 'Haziran',
+  '7': 'Temmuz',
+  '8': 'Ağustos',
+  '9': 'Eylül',
+  '10': 'Ekim',
+  '11': 'Kasım',
+  '12': 'Aralık'
 };
 
 function formatIndex(value: number): string {
@@ -38,75 +55,215 @@ function formatIndex(value: number): string {
 }
 
 export default function PriceIndexPage() {
+  const [dataset, setDataset] = useState<DatasetId>('EXCEL_TUFE');
+  const [seriesOptions, setSeriesOptions] = useState<string[]>([]);
+  const [selectedSeries, setSelectedSeries] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState('2024');
   const [loading, setLoading] = useState(true);
   const [monthlyData, setMonthlyData] = useState<MonthlyDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
 
+  const datasetTitle = useMemo(() => {
+    switch (dataset) {
+      case 'FAO_TUFE':
+        return '📈 Fiyat Endeksleri (FAO TÜFE - Gıda)';
+      case 'EXCEL_TUFE':
+        return '📈 Fiyat Endeksleri (TÜFE)';
+      case 'EXCEL_UFE':
+        return '📈 Fiyat Endeksleri (Tarım ÜFE)';
+      case 'EXCEL_GFE':
+        return '📈 Fiyat Endeksleri (GFE)';
+      case 'EXCEL_FAO_FOOD':
+        return '📈 FAO Gıda Fiyat Endeksi';
+      default:
+        return '📈 Fiyat Endeksleri';
+    }
+  }, [dataset]);
+
+  const datasetSubtitle = useMemo(() => {
+    if (dataset === 'FAO_TUFE') {
+      return `FAO TÜFE - Gıda (2015=100) - ${selectedYear}`;
+    }
+    if (dataset === 'EXCEL_FAO_FOOD') {
+      return `${selectedSeries || 'Endeks'} - ${selectedYear}`;
+    }
+    return `${selectedSeries || 'Endeks'} - ${selectedYear}`;
+  }, [dataset, selectedSeries, selectedYear]);
+
+  const supportsCountryCompare = dataset === 'FAO_TUFE';
+
+  const loadMeta = useCallback(async () => {
+    try {
+      let sql = '';
+      if (dataset === 'EXCEL_TUFE') sql = 'SELECT DISTINCT donem as s FROM excel_tufe ORDER BY donem';
+      if (dataset === 'EXCEL_UFE') sql = 'SELECT DISTINCT donem as s FROM excel_ufe ORDER BY donem';
+      if (dataset === 'EXCEL_GFE') sql = 'SELECT DISTINCT "GFE" as s';
+      if (dataset === 'EXCEL_FAO_FOOD') sql = 'SELECT DISTINCT endeks_turu as s FROM excel_fao_gida_endeksi ORDER BY endeks_turu';
+      if (dataset === 'FAO_TUFE') sql = 'SELECT DISTINCT "FAO TÜFE (Gıda)" as s';
+
+      const res = await fetchQuery(sql);
+      const options = (res.data || []).map((r) => String(r.s)).filter(Boolean);
+      setSeriesOptions(options);
+      if (options.length > 0 && !options.includes(selectedSeries)) {
+        setSelectedSeries(options[0]);
+      }
+      if (options.length === 0) {
+        setSelectedSeries('');
+      }
+    } catch (e) {
+      console.error('Meta yüklenirken hata:', e);
+      setSeriesOptions([]);
+      setSelectedSeries('');
+    }
+  }, [dataset, selectedSeries]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Aylık veriler - dünya ortalaması
-      const monthlyQuery = `SELECT Months, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
-        FROM FAO_tufe 
-        WHERE Year='${selectedYear}' AND AreaCodeFAO='5000'
-        GROUP BY Months, MonthsCode ORDER BY MonthsCode`;
-      
-      // Yıllık trend - dünya ortalaması
-      const yearlyQuery = `SELECT Year, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
-        FROM FAO_tufe 
-        WHERE AreaCodeFAO='5000'
-        GROUP BY Year ORDER BY Year`;
+      if (dataset === 'FAO_TUFE') {
+        const monthlyQuery = `SELECT Months, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
+          FROM FAO_tufe 
+          WHERE Year='${selectedYear}' AND AreaCodeFAO='5000'
+          GROUP BY Months, MonthsCode ORDER BY MonthsCode`;
+        
+        const yearlyQuery = `SELECT Year, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
+          FROM FAO_tufe 
+          WHERE AreaCodeFAO='5000'
+          GROUP BY Year ORDER BY Year`;
 
-      // Ülke bazında son yıl verileri (yıl ortalaması)
-      const countryQuery = `SELECT Area, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
-        FROM FAO_tufe 
-        WHERE Year='${selectedYear}' AND AreaCodeFAO NOT IN ('5000', '5100', '5200', '5300', '5400', '5500')
-        GROUP BY Area ORDER BY avg_value DESC LIMIT 20`;
+        const countryQuery = `SELECT Area, AVG(CAST(REPLACE(Value, ',', '.') AS DECIMAL(10,2))) as avg_value 
+          FROM FAO_tufe 
+          WHERE Year='${selectedYear}' AND AreaCodeFAO NOT IN ('5000', '5100', '5200', '5300', '5400', '5500')
+          GROUP BY Area ORDER BY avg_value DESC LIMIT 20`;
 
-      const [monthlyRes, yearlyRes, countryRes] = await Promise.all([
-        fetchQuery(monthlyQuery),
-        fetchQuery(yearlyQuery),
-        fetchQuery(countryQuery)
+        const [monthlyRes, yearlyRes, countryRes] = await Promise.all([
+          fetchQuery(monthlyQuery),
+          fetchQuery(yearlyQuery),
+          fetchQuery(countryQuery)
+        ]);
+
+        setMonthlyData(
+          (monthlyRes.data || []).map((item) => ({
+            month: MONTHS_TR[String(item['Months'])] || String(item['Months']),
+            value: Number(item['avg_value']) || 0
+          }))
+        );
+
+        setYearlyData(
+          (yearlyRes.data || []).map((item) => ({
+            year: String(item['Year']),
+            value: Number(item['avg_value']) || 0
+          }))
+        );
+
+        const total = (countryRes.data || []).reduce((sum: number, item) => sum + (Number(item['avg_value']) || 0), 0);
+        setCountryData(
+          (countryRes.data || []).map((item, index: number) => ({
+            name: translateCountry(String(item['Area'] || '')),
+            value: Number(item['avg_value']) || 0,
+            share: total > 0 ? ((Number(item['avg_value']) || 0) / total * 100).toFixed(1) : '0.0',
+            fill: COLORS[index % COLORS.length]
+          }))
+        );
+        return;
+      }
+
+      let monthlyQuery = '';
+      let yearlyQuery = '';
+
+      if (dataset === 'EXCEL_TUFE') {
+        monthlyQuery = `SELECT MONTH(kategori) as m, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_tufe
+          WHERE donem='${selectedSeries}' AND YEAR(kategori)='${selectedYear}'
+          GROUP BY MONTH(kategori)
+          ORDER BY MONTH(kategori)`;
+        yearlyQuery = `SELECT YEAR(kategori) as y, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_tufe
+          WHERE donem='${selectedSeries}'
+          GROUP BY YEAR(kategori)
+          ORDER BY YEAR(kategori)`;
+      }
+
+      if (dataset === 'EXCEL_UFE') {
+        monthlyQuery = `SELECT MONTH(kategori) as m, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_ufe
+          WHERE donem='${selectedSeries}' AND YEAR(kategori)='${selectedYear}'
+          GROUP BY MONTH(kategori)
+          ORDER BY MONTH(kategori)`;
+        yearlyQuery = `SELECT YEAR(kategori) as y, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_ufe
+          WHERE donem='${selectedSeries}'
+          GROUP BY YEAR(kategori)
+          ORDER BY YEAR(kategori)`;
+      }
+
+      if (dataset === 'EXCEL_GFE') {
+        monthlyQuery = `SELECT MONTH(kategori) as m, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_gfe
+          WHERE YEAR(kategori)='${selectedYear}'
+          GROUP BY MONTH(kategori)
+          ORDER BY MONTH(kategori)`;
+        yearlyQuery = `SELECT YEAR(kategori) as y, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_gfe
+          GROUP BY YEAR(kategori)
+          ORDER BY YEAR(kategori)`;
+      }
+
+      if (dataset === 'EXCEL_FAO_FOOD') {
+        monthlyQuery = `SELECT MONTH(tarih) as m, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_fao_gida_endeksi
+          WHERE endeks_turu='${selectedSeries}' AND YEAR(tarih)='${selectedYear}'
+          GROUP BY MONTH(tarih)
+          ORDER BY MONTH(tarih)`;
+        yearlyQuery = `SELECT YEAR(tarih) as y, AVG(CAST(deger AS DECIMAL(10,4))) as avg_value
+          FROM excel_fao_gida_endeksi
+          WHERE endeks_turu='${selectedSeries}'
+          GROUP BY YEAR(tarih)
+          ORDER BY YEAR(tarih)`;
+      }
+
+      const [monthlyRes, yearlyRes] = await Promise.all([
+        monthlyQuery ? fetchQuery(monthlyQuery) : Promise.resolve({ data: [] }),
+        yearlyQuery ? fetchQuery(yearlyQuery) : Promise.resolve({ data: [] }),
       ]);
 
-      if (monthlyRes.data) {
-        const mapped = monthlyRes.data.map((item) => ({
-          month: MONTHS_TR[String(item['Months'])] || String(item['Months']),
+      setMonthlyData(
+        (monthlyRes.data || []).map((item) => ({
+          month: MONTHS_TR_NUM[String(item['m'])] || String(item['m']),
           value: Number(item['avg_value']) || 0
-        }));
-        setMonthlyData(mapped);
-      }
+        }))
+      );
 
-      if (yearlyRes.data) {
-        const mapped = yearlyRes.data.map((item) => ({
-          year: String(item['Year']),
+      setYearlyData(
+        (yearlyRes.data || []).map((item) => ({
+          year: String(item['y']),
           value: Number(item['avg_value']) || 0
-        }));
-        setYearlyData(mapped);
-      }
+        }))
+      );
 
-      if (countryRes.data) {
-        const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['avg_value']) || 0), 0);
-        const mapped = countryRes.data.map((item, index: number) => ({
-          name: translateCountry(String(item['Area'] || '')),
-          value: Number(item['avg_value']) || 0,
-          share: ((Number(item['avg_value']) || 0) / total * 100).toFixed(1),
-          fill: COLORS[index % COLORS.length]
-        }));
-        setCountryData(mapped);
-      }
+      setCountryData([]);
     } catch (error) {
       console.error('Veri yüklenirken hata:', error);
     } finally {
       setLoading(false);
     }
-  }, [selectedYear]);
+  }, [dataset, selectedSeries, selectedYear]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadMeta();
+  }, [loadMeta]);
+
+  useEffect(() => {
+    if (dataset === 'FAO_TUFE') {
+      loadData();
+      return;
+    }
+
+    if (dataset === 'EXCEL_GFE' || selectedSeries) {
+      loadData();
+    }
+  }, [dataset, selectedSeries, loadData]);
 
   const avgIndex = monthlyData.length > 0 ? monthlyData.reduce((sum, m) => sum + m.value, 0) / monthlyData.length : 0;
   const maxMonth = monthlyData.reduce((max, m) => m.value > max.value ? m : max, { month: '-', value: 0 });
@@ -120,15 +277,37 @@ export default function PriceIndexPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">📈 Fiyat Endeksleri (TÜFE)</h1>
-        <p className="page-subtitle">Tüketici Fiyat Endeksi - Gıda (2015=100) - {selectedYear}</p>
+        <h1 className="page-title">{datasetTitle}</h1>
+        <p className="page-subtitle">{datasetSubtitle}</p>
       </div>
 
       <div className="date-filter">
         <div className="filter-group">
+          <label className="filter-label">Kaynak</label>
+          <select className="filter-select" value={dataset} onChange={(e) => setDataset(e.target.value as DatasetId)}>
+            <option value="EXCEL_TUFE">TÜFE (Excel/TR)</option>
+            <option value="EXCEL_UFE">Tarım ÜFE (Excel/TR)</option>
+            <option value="EXCEL_GFE">GFE (Excel/TR)</option>
+            <option value="EXCEL_FAO_FOOD">FAO Gıda Endeksi (Excel)</option>
+            <option value="FAO_TUFE">FAO TÜFE (Ülke karşılaştırma)</option>
+          </select>
+        </div>
+
+        {dataset !== 'EXCEL_GFE' && seriesOptions.length > 0 && (
+          <div className="filter-group">
+            <label className="filter-label">Seri</label>
+            <select className="filter-select" value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)}>
+              {seriesOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 25 }, (_, i) => 2024 - i).map(year => (
+            {Array.from({ length: 30 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
@@ -164,7 +343,7 @@ export default function PriceIndexPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Aylık TÜFE Değişimi ({selectedYear})</h3>
+              <h3 className="chart-title">📊 Aylık Endeks Değişimi ({selectedYear})</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -192,7 +371,7 @@ export default function PriceIndexPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık TÜFE Trendi (2000-2023)</h3>
+              <h3 className="chart-title">📅 Yıllık Endeks Trendi</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -205,35 +384,39 @@ export default function PriceIndexPage() {
             </div>
           </div>
 
-          <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">🌍 Ülke Bazında TÜFE Karşılaştırması ({selectedYear})</h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <ComposedChart data={countryData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} />
-                  <Tooltip formatter={(value: number) => [`${formatIndex(value)}`, 'Endeks']} />
-                  <Legend />
-                  <Bar dataKey="value" name="TÜFE Endeksi" fill="#ef4444" radius={[0, 4, 4, 0]} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="data-table">
-            <h3 className="data-table-title">📋 Ülke Sıralaması - En Yüksek Enflasyon</h3>
-            {countryData.map((country, index) => (
-              <div className="table-row" key={country.name}>
-                <div className={`table-rank ${index < 3 ? 'red' : ''}`}>{index + 1}</div>
-                <div className="table-info">
-                  <div className="table-name">{country.name}</div>
-                  <div className="table-subtext">2015=100 baz yılı</div>
+          {supportsCountryCompare && (
+            <>
+              <div className="chart-grid">
+                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
+                  <h3 className="chart-title">🌍 Ülke Bazında Karşılaştırma ({selectedYear})</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <ComposedChart data={countryData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} />
+                      <Tooltip formatter={(value: number) => [`${formatIndex(value)}`, 'Endeks']} />
+                      <Legend />
+                      <Bar dataKey="value" name="Endeks" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 </div>
-                <div className="table-value red">{formatIndex(country.value)}</div>
               </div>
-            ))}
-          </div>
+
+              <div className="data-table">
+                <h3 className="data-table-title">📋 Ülke Sıralaması</h3>
+                {countryData.map((country, index) => (
+                  <div className="table-row" key={country.name}>
+                    <div className={`table-rank ${index < 3 ? 'red' : ''}`}>{index + 1}</div>
+                    <div className="table-info">
+                      <div className="table-name">{country.name}</div>
+                      <div className="table-subtext">2015=100 baz yılı</div>
+                    </div>
+                    <div className="table-value red">{formatIndex(country.value)}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>
