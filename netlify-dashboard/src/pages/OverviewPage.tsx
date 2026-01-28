@@ -162,13 +162,7 @@ export function OverviewPage() {
         fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%'`),
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' GROUP BY item ORDER BY total DESC`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' AND year >= 2010 GROUP BY year ORDER BY year`),
-        
-          // Tarımsal katma değer (Tarım+Orman+Balıkçılık)
-          fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Value' AND elementcode=6225 AND unit='million' LIMIT 1`),
-          fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Share' AND unit='%' LIMIT 1`),
-          // Tarım istihdamı (Toplam 15+)
-          fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Employment in agriculture by age, total (15+)' AND Sex='Total' LIMIT 1`),
-          fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Share of employment in agriculture in total employment' AND Sex='Total' LIMIT 1`),
+
         // ET ÜRÜNLERİ - Kırmızı Et Detaylı
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled', 'Meat of buffalo, fresh or chilled') GROUP BY item`),
         // ET ÜRÜNLERİ - Beyaz Et Detaylı
@@ -179,6 +173,13 @@ export function OverviewPage() {
         fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%'`),
         fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' GROUP BY item`),
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
+
+        // Tarımsal katma değer (Tarım+Orman+Balıkçılık)
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Value' AND elementcode=6225 AND unit='million' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Share' AND unit='%' LIMIT 1`),
+        // Tarım istihdamı (Toplam 15+)
+        fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Employment in agriculture by age, total (15+)' AND Sex='Total' LIMIT 1`),
+        fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Share of employment in agriculture in total employment' AND Sex='Total' LIMIT 1`),
         
         // HAYVAN VARLIĞI (TÜİK - ülke düzeyi)
         fetchQuery(`SELECT grup, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
