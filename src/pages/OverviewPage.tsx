@@ -416,19 +416,8 @@ export function OverviewPage() {
   }
 
   function translateLivestockStock(item: string): string {
-    const translations: Record<string, string> = {
-      'Cattle': 'Sığır',
-      'Sheep': 'Koyun',
-      'Goats': 'Keçi',
-      'Chickens': 'Tavuk',
-      'Turkeys': 'Hindi',
-      'Horses': 'At',
-      'Asses': 'Eşek',
-      'Mules': 'Katır',
-      'Buffaloes': 'Manda',
-      'Camels': 'Deve'
-    };
-    return translations[item] || item;
+    // TÜİK verileri zaten Türkçe geliyor, direkt döndür
+    return item;
   }
 
   const ruralPercent = data ? ((data.ruralPopulation / data.population) * 100).toFixed(1) : '0';
