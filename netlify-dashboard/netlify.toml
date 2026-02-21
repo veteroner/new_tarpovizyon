@@ -3,6 +3,16 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[[redirects]]
+  from = "/api.php"
+  to = "https://dersbende.com/api.php"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
