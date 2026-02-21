@@ -1,0 +1,100 @@
+/* Back to Home Component Styles */
+.back-to-home-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.back-button,
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid var(--card-border, #e5e7eb);
+  border-radius: 8px;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.back-button:hover,
+.home-button:hover {
+  background: var(--card-hover, #f8fafc);
+  border-color: var(--primary, #0891b2);
+  color: var(--primary, #0891b2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-button:active,
+.home-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.home-button {
+  color: var(--primary, #0891b2);
+  border-color: var(--primary, #0891b2);
+  font-weight: 600;
+}
+
+.home-button:hover {
+  background: var(--primary, #0891b2);
+  color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .back-to-home-container {
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+  }
+
+  .back-button,
+  .home-button {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.85rem;
+  }
+
+  .back-button svg,
+  .home-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .back-button,
+  .home-button {
+    background: var(--card-bg, #1e293b);
+    border-color: var(--card-border, #334155);
+    color: var(--text-secondary, #94a3b8);
+  }
+
+  .back-button:hover,
+  .home-button:hover {
+    background: var(--card-hover, #334155);
+    border-color: var(--primary, #06b6d4);
+    color: var(--primary, #06b6d4);
+  }
+
+  .home-button {
+    color: var(--primary, #06b6d4);
+    border-color: var(--primary, #06b6d4);
+  }
+
+  .home-button:hover {
+    background: var(--primary, #06b6d4);
+    color: white;
+  }
+}
