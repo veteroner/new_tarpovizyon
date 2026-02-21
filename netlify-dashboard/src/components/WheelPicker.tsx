@@ -51,14 +51,19 @@ const menuItems: MenuItem[] = [
   // TÜİK Türkiye
   { path: '', label: '🇹🇷 TÜİK Türkiye', icon: '', isCategory: true },
   { path: '/tuik-plant', label: 'TÜİK Bitkisel', icon: '🚜' },
-  { path: '/tuik-livestock', label: 'TÜİK Hayvancılık', icon: '🏠' },
+  { path: '/tuik-livestock', label: 'Canlı Hayvan Envanteri', icon: '📊' },
   // TÜİK Dış Ticaret
   { path: '', label: '📦 TÜİK Dış Ticaret', icon: '', isCategory: true },
-  { path: '/tuik-plant-trade', label: 'Bitkisel Dış Ticaret', icon: '🌿' },
+  { path: '/tuik-plant-trade', label: 'Bitkisel Dış Ticaret', icon: '🌾' },
   { path: '/tuik-animal-trade', label: 'Hayvansal Dış Ticaret', icon: '🥩' },
-  // Yatırımcı Analizi
-  { path: '', label: '💼 Yatırımcı Analizi', icon: '', isCategory: true },
-  { path: '/investment-analysis', label: 'Ülke Yatırım Analizi', icon: '🎯' },
+  // Detaylı İhracat
+  { path: '', label: '📤 Detaylı İhracat', icon: '', isCategory: true },
+  { path: '/plant-export-detail', label: 'Bitkisel İhracat', icon: '🌾' },
+  { path: '/animal-export-detail', label: 'Hayvansal İhracat', icon: '🐄' },
+  // Detaylı İthalat
+  { path: '', label: '📥 Detaylı İthalat', icon: '', isCategory: true },
+  { path: '/plant-import-detail', label: 'Bitkisel İthalat', icon: '🌱' },
+  { path: '/animal-import-detail', label: 'Hayvansal İthalat', icon: '🥛' },
 ];
 
 interface WheelPickerProps {

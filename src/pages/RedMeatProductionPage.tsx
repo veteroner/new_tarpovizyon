@@ -5,7 +5,7 @@ import {
   Treemap,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ComposedChart, Line,
-  AreaChart, Area
+  AreaChart, Area,
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
@@ -68,6 +68,23 @@ export default function RedMeatProductionPage() {
   const [sortBy, setSortBy] = useState<'value' | 'name'>('value');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Pick latest available FAO year to avoid blank charts.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const res = await fetchQuery(
+        "SELECT MAX(year) as max_year FROM fao_uretim_hayvansal_birincil"
+      );
+      const maxYear = String(res.data?.[0]?.max_year ?? '').trim();
+      if (!cancelled && maxYear) setSelectedYear(maxYear);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const loadData = useCallback(async () => {
     if (selectedProducts.length === 0) {
       setProductData([]);
@@ -78,30 +95,37 @@ export default function RedMeatProductionPage() {
     
     setLoading(true);
     try {
+      const excludedAreas = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
       const productList = selectedProducts.map(p => `'${p}'`).join(',');
       
       // Ürün bazlı veri
-      const productQuery = `SELECT item, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
-        GROUP BY item ORDER BY toplam DESC`;
+      const productQuery = `SELECT urunad as item, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE year='${selectedYear}' AND urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
+        GROUP BY urunad ORDER BY toplam DESC`;
       
       // Ülke bazlı veri
-      const countryQuery = `SELECT area, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
-        GROUP BY area ORDER BY toplam DESC LIMIT 20`;
+      const countryQuery = `SELECT ulkead as area, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE year='${selectedYear}' AND urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
+        GROUP BY ulkead ORDER BY toplam DESC LIMIT 20`;
 
       // Yıllık trend
-      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE element='Production' AND unit='t' AND item IN (${productList})
+      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
         GROUP BY year ORDER BY year`;
 
       const [productRes, countryRes, yearlyRes] = await Promise.all([
         fetchQuery(productQuery),
         fetchQuery(countryQuery),
-        fetchQuery(yearlyQuery)
+        fetchQuery(yearlyQuery),
       ]);
 
       if (productRes.data) {
@@ -203,7 +227,7 @@ export default function RedMeatProductionPage() {
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
           >
-            {Array.from({ length: 19 }, (_, i) => 2023 - i).map(year => (
+            {Array.from({ length: 20 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>

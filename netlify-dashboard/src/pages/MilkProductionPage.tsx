@@ -65,6 +65,23 @@ export default function MilkProductionPage() {
   const [sortBy, setSortBy] = useState<'value' | 'name'>('value');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Some deployments have FAO data only up to a certain year; pick the latest year to avoid blank charts.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const res = await fetchQuery(
+        "SELECT MAX(year) as max_year FROM fao_uretim_hayvansal_birincil"
+      );
+      const maxYear = String(res.data?.[0]?.max_year ?? '').trim();
+      if (!cancelled && maxYear) setSelectedYear(maxYear);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const loadData = useCallback(async () => {
     if (selectedProducts.length === 0) {
       setProductData([]);
@@ -75,21 +92,28 @@ export default function MilkProductionPage() {
     
     setLoading(true);
     try {
+      const excludedAreas = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
       const productList = selectedProducts.map(p => `'${p}'`).join(',');
       
-      const productQuery = `SELECT item, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
-        GROUP BY item ORDER BY toplam DESC`;
+      const productQuery = `SELECT urunad as item, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE year='${selectedYear}' AND urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
+        GROUP BY urunad ORDER BY toplam DESC`;
       
-      const countryQuery = `SELECT area, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE year='${selectedYear}' AND element='Production' AND unit='t' AND item IN (${productList})
-        GROUP BY area ORDER BY toplam DESC LIMIT 20`;
+      const countryQuery = `SELECT ulkead as area, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE year='${selectedYear}' AND urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
+        GROUP BY ulkead ORDER BY toplam DESC LIMIT 20`;
 
-      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(value, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_livestock_primary 
-        WHERE element='Production' AND unit='t' AND item IN (${productList})
+      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
+        FROM fao_uretim_hayvansal_birincil 
+        WHERE urunad IN (${productList})
+          AND ulkead IS NOT NULL AND ulkead != ''
+          AND ulkead NOT IN ${excludedAreas}
         GROUP BY year ORDER BY year`;
 
       const [productRes, countryRes, yearlyRes] = await Promise.all([
@@ -197,7 +221,7 @@ export default function MilkProductionPage() {
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
           >
-            {Array.from({ length: 19 }, (_, i) => 2023 - i).map(year => (
+            {Array.from({ length: 20 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>

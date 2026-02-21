@@ -5,6 +5,7 @@ import {
   ComposedChart, Line
 } from 'recharts';
 import { fetchQuery } from '../services/api';
+import { TurkeyHeatMap } from '../components/TurkeyHeatMap';
 
 // Kategori bazlı renk paletleri
 const COLORS = {
@@ -116,6 +117,7 @@ export function OverviewPage() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [regionalGroup, setRegionalGroup] = useState<'cattle' | 'sheep' | 'goat' | 'poultry'>('cattle');
+  const [regionalView, setRegionalView] = useState<'map' | 'bar'>('map');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -182,12 +184,12 @@ export function OverviewPage() {
         fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Share of employment in agriculture in total employment' AND Sex='Total' LIMIT 1`),
         
         // HAYVAN VARLIĞI (TÜİK - ülke düzeyi)
-        fetchQuery(`SELECT grup, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
+        fetchQuery(`SELECT grup, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
         // HAYVAN VARLIĞI (TÜİK - bölge düzeyi) - Top 12
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Sığır' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Koyun' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2023,0)) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup='Keçi' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(CASE WHEN grup='Tavuk' THEN COALESCE(y2023,0) WHEN grup='Hindi' THEN COALESCE(y2023,0) ELSE 0 END) as total FROM tuik_hayvansayisi WHERE duzey IN ('bölge','bolge') AND grup IN ('Tavuk','Hindi') GROUP BY yer ORDER BY total DESC LIMIT 12`)
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Sığır' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Koyun' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Keçi' GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchQuery(`SELECT yer, SUM(CASE WHEN grup='Tavuk' THEN COALESCE(y2024,0) WHEN grup='Hindi' THEN COALESCE(y2024,0) ELSE 0 END) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup IN ('Tavuk','Hindi') GROUP BY yer ORDER BY total DESC LIMIT 12`)
       ]);
 
       // Nüfus
@@ -540,6 +542,11 @@ export function OverviewPage() {
               <div className="kpi-subtitle">2023 Yılı Toplam</div>
             </div>
             <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
+              <div className="kpi-value">{Math.round(((data?.milkProduction.total || 0) * 1000) / (data?.population || 1))}</div>
+              <div className="kpi-subtitle">kg/yıl</div>
+            </div>
+            <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">İNEK SÜTÜ</span></div>
               <div className="kpi-value">{formatNumber(data?.milkProduction.cattle || 0)} ton</div>
               <div className="kpi-subtitle">Toplam süt üretiminin %{((data?.milkProduction.cattle || 0) / (data?.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
@@ -603,6 +610,11 @@ export function OverviewPage() {
               <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{background: '#fee2e2', color: '#ef4444'}}>🥩</div></div>
               <div className="kpi-value" style={{color: '#ef4444'}}>{formatNumber(data?.meatProduction.total || 0)} ton</div>
               <div className="kpi-subtitle">2023 Yılı Toplam</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
+              <div className="kpi-value">{Math.round(((data?.meatProduction.total || 0) * 1000) / (data?.population || 1))}</div>
+              <div className="kpi-subtitle">kg/yıl</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">KIRMIZI ET</span></div>
@@ -812,38 +824,89 @@ export function OverviewPage() {
             <div className="chart-card" style={{gridColumn: 'span 2'}}>
               <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem'}}>
                 <h3 className="chart-title" style={{marginBottom: 0}}>🗺️ Bölgesel Dağılım (Top 12)</h3>
-                <select
-                  value={regionalGroup}
-                  onChange={(e) => setRegionalGroup(e.target.value as any)}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '0.5rem',
-                    background: 'white',
-                    color: 'var(--text)',
-                    fontSize: '0.875rem'
-                  }}
-                >
-                  <option value="cattle">Sığır</option>
-                  <option value="sheep">Koyun</option>
-                  <option value="goat">Keçi</option>
-                  <option value="poultry">Kanatlı</option>
-                </select>
+                <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <div
+                    role="tablist"
+                    aria-label="Bölgesel görünüm"
+                    style={{
+                      display: 'inline-flex',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.75rem',
+                      overflow: 'hidden',
+                      background: 'white'
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setRegionalView('map')}
+                      style={{
+                        padding: '0.45rem 0.7rem',
+                        fontSize: '0.85rem',
+                        border: 'none',
+                        background: regionalView === 'map' ? 'var(--primary)' : 'transparent',
+                        color: regionalView === 'map' ? 'white' : 'var(--text)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Harita
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRegionalView('bar')}
+                      style={{
+                        padding: '0.45rem 0.7rem',
+                        fontSize: '0.85rem',
+                        border: 'none',
+                        background: regionalView === 'bar' ? 'var(--primary)' : 'transparent',
+                        color: regionalView === 'bar' ? 'white' : 'var(--text)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Grafik
+                    </button>
+                  </div>
+
+                  <select
+                    value={regionalGroup}
+                    onChange={(e) => setRegionalGroup(e.target.value as any)}
+                    style={{
+                      padding: '0.5rem 0.75rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.5rem',
+                      background: 'white',
+                      color: 'var(--text)',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <option value="cattle">Sığır</option>
+                    <option value="sheep">Koyun</option>
+                    <option value="goat">Keçi</option>
+                    <option value="poultry">Kanatlı</option>
+                  </select>
+                </div>
               </div>
 
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data?.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {data?.livestockStocks.regional[regionalGroup].map((entry, index) => (
-                      <Cell key={`cell-reg-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {regionalView === 'map' ? (
+                <TurkeyHeatMap
+                  regionTotals={data?.livestockStocks.regional[regionalGroup] ?? []}
+                  unitLabel="baş"
+                  height={380}
+                />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={data?.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                      {data?.livestockStocks.regional[regionalGroup].map((entry, index) => (
+                        <Cell key={`cell-reg-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
@@ -914,8 +977,8 @@ export function OverviewPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart 
                   data={[
-                    { name: 'Süt', value: Math.round((data?.milkProduction.total || 0) / (data?.population || 1)), fill: COLORS.milk[0], unit: 'kg' },
-                    { name: 'Et', value: Math.round((data?.meatProduction.total || 0) / (data?.population || 1)), fill: COLORS.meat[0], unit: 'kg' },
+                    { name: 'Süt', value: Math.round(((data?.milkProduction.total || 0) * 1000) / (data?.population || 1)), fill: COLORS.milk[0], unit: 'kg' },
+                    { name: 'Et', value: Math.round(((data?.meatProduction.total || 0) * 1000) / (data?.population || 1)), fill: COLORS.meat[0], unit: 'kg' },
                     { name: 'Yumurta', value: Math.round((data?.eggProduction.total || 0) / (data?.population || 1)), fill: COLORS.egg[0], unit: 'adet' }
                   ]}
                 >
@@ -952,7 +1015,7 @@ export function OverviewPage() {
                 Süt Üretimi
               </div>
               <div className="table-info" style={{flex: 1}}>{formatNumber(data?.milkProduction.total || 0)} ton</div>
-              <div className="table-value" style={{width: '150px'}}>{Math.round((data?.milkProduction.total || 0) / (data?.population || 1))} kg</div>
+              <div className="table-value" style={{width: '150px'}}>{Math.round(((data?.milkProduction.total || 0) * 1000) / (data?.population || 1))} kg</div>
               <div className="table-value green" style={{width: '150px'}}>
                 {(data?.milkProduction.yearly?.length || 0) >= 2 ? 
                   ((((Number(data?.milkProduction.yearly[data.milkProduction.yearly.length - 1]?.milk) || 0) - 
@@ -967,7 +1030,7 @@ export function OverviewPage() {
                 Et Üretimi
               </div>
               <div className="table-info" style={{flex: 1}}>{formatNumber(data?.meatProduction.total || 0)} ton</div>
-              <div className="table-value" style={{width: '150px'}}>{Math.round((data?.meatProduction.total || 0) / (data?.population || 1))} kg</div>
+              <div className="table-value" style={{width: '150px'}}>{Math.round(((data?.meatProduction.total || 0) * 1000) / (data?.population || 1))} kg</div>
               <div className="table-value green" style={{width: '150px'}}>
                 {(data?.meatProduction.yearly?.length || 0) >= 2 ?
                   ((((Number(data?.meatProduction.yearly[data.meatProduction.yearly.length - 1]?.meat) || 0) -

@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import { translateCountry } from '../utils/countryTranslations';
+import { BackToHome } from '../components/BackToHome';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -120,6 +121,7 @@ export default function MacroEconomicPage() {
 
   return (
     <div>
+      <BackToHome />
       <div className="page-header">
         <h1 className="page-title">💰 Makroekonomik Göstergeler</h1>
         <p className="page-subtitle">{indicatorName} - {selectedYear}</p>

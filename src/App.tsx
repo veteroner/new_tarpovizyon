@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Sidebar } from './components/Sidebar';
-import WheelPicker from './components/WheelPicker';
-import { Menu } from 'lucide-react';
+import { Header } from './components/Header';
+import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
+import { SelectionPage } from './pages/SelectionPage';
+import { HomePage } from './pages/HomePage';
 import { OverviewPage } from './pages/OverviewPage';
 import { TradePage } from './pages/TradePage';
-import { ExportPage } from './pages/ExportPage';
-import { ImportPage } from './pages/ImportPage';
-import { TransportPage } from './pages/TransportPage';
 import { ProductionPage } from './pages/ProductionPage';
+import TurkeyAnimalProductionPage from './pages/TurkeyAnimalProductionPage';
 import { LivestockCompetitionPage } from './pages/LivestockCompetitionPage';
 // Hayvansal Üretim Sayfaları (TON bazlı)
 import RedMeatProductionPage from './pages/RedMeatProductionPage';
@@ -17,6 +15,12 @@ import WhiteMeatProductionPage from './pages/WhiteMeatProductionPage';
 import MilkProductionPage from './pages/MilkProductionPage';
 import EggProductionPage from './pages/EggProductionPage';
 import OtherAnimalProductsPage from './pages/OtherAnimalProductsPage';
+// TÜİK Hayvansal Üretim (Türkiye)
+import TurkeyRedMeatProductionPage from './pages/TurkeyRedMeatProductionPage';
+import TurkeyWhiteMeatProductionPage from './pages/TurkeyWhiteMeatProductionPage';
+import TurkeyMilkProductionPage from './pages/TurkeyMilkProductionPage';
+import TurkeyEggProductionPage from './pages/TurkeyEggProductionPage';
+import TurkeyBeekeepingPage from './pages/TurkeyBeekeepingPage';
 // Bitkisel Üretim Sayfaları
 import CerealProductionPage from './pages/CerealProductionPage';
 import VegetableProductionPage from './pages/VegetableProductionPage';
@@ -41,82 +45,133 @@ import PriceIndexPage from './pages/PriceIndexPage';
 import MacroEconomicPage from './pages/MacroEconomicPage';
 import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
 import TuikLivestockPage from './pages/TuikLivestockPage';
-// TÜİK Dış Ticaret Sayfaları
-import TuikPlantTradePage from './pages/TuikPlantTradePage';
-import TuikAnimalTradePage from './pages/TuikAnimalTradePage';
+import TurkeyProvincialLivestockPage from './pages/TurkeyProvincialLivestockPage';
+import TurkeyProvincialPlantPage from './pages/TurkeyProvincialPlantPage';
+import GeographicalIndicationsPage from './pages/GeographicalIndicationsPage';
+import BasinProductionPage from './pages/BasinProductionPage';
+import { RasyonApp } from './rasyon/RasyonApp';
+import { HasatTahminiPage } from './pages/HasatTahminiPage';
+import SulamaPlanPage from './pages/SulamaPlanPage';
+import GubreHesapPage from './pages/GubreHesapPage';
+import TarimTakvimPage from './pages/TarimTakvimPage';
+import ProductBalancePage from './pages/ProductBalancePage';
+import TurkeyMacroPage from './pages/TurkeyMacroPage';
+import CrossIntelligencePage from './pages/CrossIntelligencePage';
+
 import './styles/globals.css';
 
 const queryClient = new QueryClient();
 
-function AppContent({ apiConnected }: { apiConnected: boolean }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [wheelPickerOpen, setWheelPickerOpen] = useState(false);
+function AppContent() {
   const location = useLocation();
-
-  // Sayfa değiştiğinde menüleri kapat
-  useEffect(() => {
-    setSidebarOpen(false);
-    setWheelPickerOpen(false);
-  }, [location.pathname]);
+  
+  // Ana program seçimi, Tarpovizyon giriş ve Tarpovizyon ana sayfalarda header'ı gizle
+  const isProgramSelection = location.pathname === '/';
+  const isTarpovizyonSelection = location.pathname === '/tarpovizyon';
+  const isTarpovizyonHome = location.pathname === '/tarpovizyon/world' || location.pathname === '/tarpovizyon/turkey';
+  const isRasyonPage = location.pathname.startsWith('/rasyon');
+  const isHasatPage = location.pathname === '/hasat-tahmini';
+  const isSulamaPage = location.pathname === '/sulama-plan';
+  const isGubrePage = location.pathname === '/gubre-hesap';
+  const isTakvimPage = location.pathname === '/tarim-takvim';
+  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
 
   return (
     <>
-      {/* Mobile Menu Button - Wheel Picker için */}
-      <button 
-        className="mobile-menu-btn"
-        onClick={() => setWheelPickerOpen(true)}
-        aria-label="Menüyü aç"
-      >
-        <Menu size={24} />
-      </button>
+      {/* Header - Ana sayfa ve seçim sayfası dışında göster */}
+      {!hideHeader && <Header />}
       
-      {/* iOS Style Wheel Picker - Mobil */}
-      <WheelPicker isOpen={wheelPickerOpen} onClose={() => setWheelPickerOpen(false)} />
-      
-      {/* Desktop Sidebar */}
-      <Sidebar apiConnected={apiConnected} isOpen={sidebarOpen} />
-      <main className="main-content">
+      <main className={hideHeader ? '' : 'main-content with-header'}>
         <Routes>
-          <Route path="/" element={<OverviewPage />} />
-          <Route path="/trade" element={<TradePage />} />
-          <Route path="/export" element={<ExportPage />} />
-          <Route path="/import" element={<ImportPage />} />
-          <Route path="/transport" element={<TransportPage />} />
-          <Route path="/production" element={<ProductionPage />} />
-          {/* Hayvansal Üretim Routes */}
-          <Route path="/red-meat" element={<RedMeatProductionPage />} />
-          <Route path="/white-meat" element={<WhiteMeatProductionPage />} />
-          <Route path="/milk" element={<MilkProductionPage />} />
-          <Route path="/eggs" element={<EggProductionPage />} />
-          <Route path="/other-animal" element={<OtherAnimalProductsPage />} />
-          <Route path="/livestock-competition" element={<LivestockCompetitionPage />} />
-          {/* Bitkisel Üretim Routes */}
-          <Route path="/cereals" element={<CerealProductionPage />} />
-          <Route path="/vegetables" element={<VegetableProductionPage />} />
-          <Route path="/fruits" element={<FruitProductionPage />} />
-          <Route path="/legumes" element={<LegumeProductionPage />} />
-          <Route path="/oilseeds" element={<OilseedProductionPage />} />
-          <Route path="/sugar-crops" element={<SugarCropProductionPage />} />
-          <Route path="/nuts" element={<NutProductionPage />} />
-          <Route path="/beverages" element={<BeverageCropPage />} />
-          <Route path="/fiber-crops" element={<FiberCropPage />} />
-          {/* FAO Verileri Routes */}
-          <Route path="/land-use" element={<LandUsePage />} />
-          <Route path="/livestock-stocks" element={<LivestockStocksPage />} />
-          <Route path="/employment" element={<AgriculturalEmploymentPage />} />
-          <Route path="/fertilizer" element={<FertilizerPage />} />
-          <Route path="/pesticide" element={<PesticidePage />} />
-          <Route path="/population" element={<PopulationPage />} />
-          <Route path="/land-cover" element={<LandCoverPage />} />
-          <Route path="/food-balance" element={<FoodBalancePage />} />
-          {/* Yeni Sayfalar */}
-          <Route path="/price-index" element={<PriceIndexPage />} />
-          <Route path="/macro-economic" element={<MacroEconomicPage />} />
-          <Route path="/tuik-plant" element={<TuikPlantProductionPage />} />
-          <Route path="/tuik-livestock" element={<TuikLivestockPage />} />
-          {/* TÜİK Dış Ticaret Routes */}
-          <Route path="/tuik-plant-trade" element={<TuikPlantTradePage />} />
-          <Route path="/tuik-animal-trade" element={<TuikAnimalTradePage />} />
+          {/* Ana Program Seçimi */}
+          <Route path="/" element={<ProgramSelectionPage />} />
+          
+          {/* Hasat Tahmini */}
+          <Route path="/hasat-tahmini" element={<HasatTahminiPage />} />
+          
+          {/* Çiftçi Araçları */}
+          <Route path="/sulama-plan" element={<SulamaPlanPage />} />
+          <Route path="/gubre-hesap" element={<GubreHesapPage />} />
+          <Route path="/tarim-takvim" element={<TarimTakvimPage />} />
+          
+          {/* Teknova Rasyon (tam entegre) */}
+          <Route path="/rasyon/*" element={<RasyonApp />} />
+          
+          {/* TARPOVIZYON - Tarım İstihbarat Platformu */}
+          <Route path="/tarpovizyon" element={<SelectionPage />} />
+          <Route path="/tarpovizyon/world" element={<HomePage />} />
+          <Route path="/tarpovizyon/turkey" element={<HomePage />} />
+          <Route path="/tarpovizyon/overview" element={<OverviewPage />} />
+          
+          {/* DÜNYA (FAO) VERİLERİ */}
+          <Route path="/tarpovizyon/world/macro-economic" element={<MacroEconomicPage />} />
+          <Route path="/tarpovizyon/world/population" element={<PopulationPage />} />
+          
+          {/* Dünya Bitkisel Üretim */}
+          <Route path="/tarpovizyon/world/production" element={<ProductionPage />} />
+          <Route path="/tarpovizyon/world/cereals" element={<ProductionPage categoryFilter="CEREALS" categoryTitle="Tahıl Üretimi — Dünya" categoryIcon="🌾" />} />
+          <Route path="/tarpovizyon/world/vegetables" element={<ProductionPage categoryFilter="VEGETABLES" categoryTitle="Sebze Üretimi — Dünya" categoryIcon="🥬" />} />
+          <Route path="/tarpovizyon/world/fruits" element={<ProductionPage categoryFilter="FRUITS" categoryTitle="Meyve Üretimi — Dünya" categoryIcon="🍎" />} />
+          <Route path="/tarpovizyon/world/legumes" element={<ProductionPage categoryFilter="PULSES" categoryTitle="Bakliyat Üretimi — Dünya" categoryIcon="🫘" />} />
+          <Route path="/tarpovizyon/world/oilseeds" element={<ProductionPage categoryFilter="OILSEEDS" categoryTitle="Yağlı Tohum Üretimi — Dünya" categoryIcon="🌻" />} />
+          <Route path="/tarpovizyon/world/sugar-crops" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="Endüstriyel Bitkiler — Dünya" categoryIcon="🏭" />} />
+          <Route path="/tarpovizyon/world/nuts" element={<ProductionPage categoryFilter="NUTS" categoryTitle="Sert Kabuklu Üretimi — Dünya" categoryIcon="🥜" />} />
+          <Route path="/tarpovizyon/world/beverages" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="İçecek & Endüstriyel — Dünya" categoryIcon="☕" />} />
+          <Route path="/tarpovizyon/world/fiber-crops" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="Lif Bitkileri — Dünya" categoryIcon="🧵" />} />
+          
+          {/* Dünya Hayvansal Üretim */}
+          <Route path="/tarpovizyon/world/livestock" element={<LivestockStocksPage />} />
+          <Route path="/tarpovizyon/world/livestock-competition" element={<LivestockCompetitionPage />} />
+          <Route path="/tarpovizyon/world/red-meat" element={<RedMeatProductionPage />} />
+          <Route path="/tarpovizyon/world/white-meat" element={<WhiteMeatProductionPage />} />
+          <Route path="/tarpovizyon/world/milk" element={<MilkProductionPage />} />
+          <Route path="/tarpovizyon/world/eggs" element={<EggProductionPage />} />
+          <Route path="/tarpovizyon/world/other-animal" element={<OtherAnimalProductsPage />} />
+          
+          {/* Dünya Kaynak ve Çevre */}
+          <Route path="/tarpovizyon/world/resources" element={<LandUsePage />} />
+          <Route path="/tarpovizyon/world/land-use" element={<LandUsePage />} />
+          <Route path="/tarpovizyon/world/land-cover" element={<LandCoverPage />} />
+          <Route path="/tarpovizyon/world/fertilizer" element={<FertilizerPage />} />
+          <Route path="/tarpovizyon/world/pesticide" element={<PesticidePage />} />
+          <Route path="/tarpovizyon/world/employment" element={<AgriculturalEmploymentPage />} />
+          <Route path="/tarpovizyon/world/food-balance" element={<FoodBalancePage />} />
+          
+          {/* TÜRKİYE (TÜİK) VERİLERİ */}
+          <Route path="/tarpovizyon/turkey/price-index" element={<PriceIndexPage />} />
+          <Route path="/tarpovizyon/turkey/product-balance" element={<ProductBalancePage />} />
+          <Route path="/tarpovizyon/turkey/macro" element={<TurkeyMacroPage />} />
+          <Route path="/tarpovizyon/turkey/cross-intelligence" element={<CrossIntelligencePage />} />
+          
+          {/* Türkiye Bitkisel Üretim */}
+          <Route path="/tarpovizyon/turkey/plant-production" element={<ProductionPage />} />
+          <Route path="/tarpovizyon/turkey/cereals" element={<CerealProductionPage />} />
+          <Route path="/tarpovizyon/turkey/vegetables" element={<VegetableProductionPage />} />
+          <Route path="/tarpovizyon/turkey/fruits" element={<FruitProductionPage />} />
+          <Route path="/tarpovizyon/turkey/legumes" element={<LegumeProductionPage />} />
+          <Route path="/tarpovizyon/turkey/oilseeds" element={<OilseedProductionPage />} />
+          <Route path="/tarpovizyon/turkey/sugar-crops" element={<SugarCropProductionPage />} />
+          <Route path="/tarpovizyon/turkey/nuts" element={<NutProductionPage />} />
+          <Route path="/tarpovizyon/turkey/beverages" element={<BeverageCropPage />} />
+          <Route path="/tarpovizyon/turkey/fiber-crops" element={<FiberCropPage />} />
+          <Route path="/tarpovizyon/turkey/trade" element={<TradePage />} />
+          
+          {/* Türkiye Hayvansal Üretim */}
+          <Route path="/tarpovizyon/turkey/animal-production" element={<TurkeyAnimalProductionPage />} />
+          <Route path="/tarpovizyon/turkey/red-meat" element={<TurkeyRedMeatProductionPage />} />
+          <Route path="/tarpovizyon/turkey/white-meat" element={<TurkeyWhiteMeatProductionPage />} />
+          <Route path="/tarpovizyon/turkey/milk" element={<TurkeyMilkProductionPage />} />
+          <Route path="/tarpovizyon/turkey/eggs" element={<TurkeyEggProductionPage />} />
+          <Route path="/tarpovizyon/turkey/beekeeping" element={<TurkeyBeekeepingPage />} />
+          <Route path="/tarpovizyon/turkey/tuik-livestock" element={<TuikLivestockPage />} />
+
+          
+          {/* Türkiye İl Bazında Veriler */}
+          <Route path="/tarpovizyon/turkey/provincial" element={<TurkeyProvincialLivestockPage />} />
+          <Route path="/tarpovizyon/turkey/plant-provincial" element={<TurkeyProvincialPlantPage />} />
+          <Route path="/tarpovizyon/turkey/basin-production" element={<BasinProductionPage />} />
+          <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
+          <Route path="/tarpovizyon/turkey/tuik-plant" element={<TuikPlantProductionPage />} />
         </Routes>
       </main>
     </>
@@ -124,20 +179,10 @@ function AppContent({ apiConnected }: { apiConnected: boolean }) {
 }
 
 function App() {
-  const [apiConnected, setApiConnected] = useState(false);
-
-  useEffect(() => {
-    // Test API connection
-    fetch('https://dersbende.com/api.php?action=tables&api_key=dashboard_secret_key_2024')
-      .then(res => res.json())
-      .then(() => setApiConnected(true))
-      .catch(() => setApiConnected(false));
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppContent apiConnected={apiConnected} />
+        <AppContent />
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -81,6 +81,7 @@ export const countryTranslations: Record<string, string> = {
   'Czechia': 'Çekya',
   'Czech Republic': 'Çekya',
   "Côte d'Ivoire": 'Fildişi Sahili',
+  'Ivory Coast': 'Fildişi Sahili',
   'Democratic Republic of the Congo': 'Demokratik Kongo Cumhuriyeti',
   'Denmark': 'Danimarka',
   'Djibouti': 'Cibuti',

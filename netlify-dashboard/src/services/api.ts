@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)
-  ?? (import.meta.env.DEV ? '' : 'https://dersbende.com');
+  ?? (import.meta.env.DEV ? 'http://localhost:8000' : 'https://dersbende.com');
 const API_KEY = 'dashboard_secret_key_2024';
 
 export interface QueryResult {
@@ -14,7 +14,12 @@ export async function fetchQuery(sql: string): Promise<QueryResult> {
   try {
     const url = `${API_BASE}/api.php?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`;
     const response = await axios.get(url);
-    return response.data;
+    const payload = response.data as QueryResult;
+    if (payload?.error) {
+      console.error('API Query Error:', payload.error);
+      return { data: [], error: payload.error };
+    }
+    return payload;
   } catch (error) {
     console.error('API Error:', error);
     return { data: [], error: 'API bağlantı hatası' };
@@ -32,141 +37,34 @@ export interface EggPricesResult {
   error?: string;
 }
 
-function parseTrMoneyToNumber(value: string): number | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const normalized = trimmed.replace(/\./g, '').replace(',', '.');
-  const num = Number.parseFloat(normalized);
-  return Number.isFinite(num) ? num : null;
-}
-
-function stripHtmlToText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function parseEggPricesFromText(text: string): EggPricesResult {
-  const labels: Array<{ key: EggPriceKey; label: string }> = [
-    { key: 'double', label: 'Double' },
-    { key: 'eski_ana', label: 'Eski Ana' },
-    { key: 'yeni_ana', label: 'Yeni Ana' },
-    { key: 'yarka', label: 'Yarka' },
-    { key: 'pilic', label: 'Piliç' },
-    { key: 'kilavuz', label: 'Kılavuz' },
-  ];
-
-  const dateMatch = text.match(/\b(\d{2}-\d{2}-\d{4})\b/);
-  const date = dateMatch?.[1] ?? null;
-
-  const prices: Partial<Record<EggPriceKey, number>> = {};
-  for (const { key, label } of labels) {
-    const re = new RegExp(`${label}\\s*[:\u00A0 ]*\\s*([0-9.,]+)\\s*TL`, 'i');
-    const match = text.match(re);
-    const num = match?.[1] ? parseTrMoneyToNumber(match[1]) : null;
-    if (num != null) prices[key] = num;
-  }
-
-  return { success: true, source: 'basmakcitavukculuk.com', date, prices };
-}
-
 let eggPricesCache: EggPricesResult | null = null;
 let eggPricesCacheAt = 0;
 const EGG_PRICES_CACHE_MS = 5 * 60 * 1000;
 
-async function ocrEggPricesFromImage(imageUrl: string): Promise<EggPricesResult> {
-  try {
-    const img = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    let blob = new Blob([img.data], { type: 'image/png' });
-
-    if (typeof document !== 'undefined' && typeof createImageBitmap === 'function') {
-      try {
-        const bitmap = await createImageBitmap(blob);
-        const scale = 3;
-        const canvas = document.createElement('canvas');
-        canvas.width = bitmap.width * scale;
-        canvas.height = bitmap.height * scale;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.imageSmoothingEnabled = false;
-          ctx.filter = 'contrast(180%)';
-          ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-          const processed = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob(resolve, 'image/png')
-          );
-          if (processed) blob = processed;
-        }
-      } catch {
-        // ignore preprocessing failures
-      }
-    }
-
-    const tesseract = await import('tesseract.js');
-    const lang = 'tur';
-    const worker = await tesseract.createWorker(lang);
-
-    try {
-      await worker.load();
-      await worker.reinitialize(lang);
-
-      await worker.setParameters({
-        tessedit_pageseg_mode: tesseract.PSM.SINGLE_BLOCK,
-        preserve_interword_spaces: '1',
-        user_defined_dpi: '300',
-      });
-
-      const { data } = await worker.recognize(blob);
-      const text = String(data?.text ?? '').replace(/\s+/g, ' ').trim();
-      return parseEggPricesFromText(text);
-    } finally {
-      await worker.terminate();
-    }
-  } catch {
-    return { success: false, error: 'Egg prices OCR failed' };
-  }
-}
-
 export async function fetchEggPrices(): Promise<EggPricesResult> {
   try {
     const now = Date.now();
-    if (eggPricesCache && now - eggPricesCacheAt < EGG_PRICES_CACHE_MS) return eggPricesCache;
-
-    const url = `${API_BASE}/egg-prices`;
-    const response = await axios.get(url, { responseType: 'text' });
-    const data = response.data as unknown;
-
-    let parsed: EggPricesResult | null = null;
-
-    if (typeof data === 'string') {
-      const text = stripHtmlToText(data);
-      parsed = parseEggPricesFromText(text);
-    } else if (data && typeof data === 'object') {
-      parsed = data as EggPricesResult;
+    if (eggPricesCache && now - eggPricesCacheAt < EGG_PRICES_CACHE_MS) {
+      console.log('🥚 Using cached egg prices');
+      return eggPricesCache;
     }
 
-    if (parsed) {
-      const hasAnyPrice = Boolean(parsed.prices && Object.keys(parsed.prices).length > 0);
-      if (hasAnyPrice) {
-        eggPricesCache = parsed;
-        eggPricesCacheAt = now;
-        return parsed;
-      }
+    console.log('🥚 Fetching egg prices from Puppeteer endpoint...');
+    const url = `${API_BASE}/egg-prices-puppeteer`;
+    const response = await axios.get(url, { timeout: 60000 }); // 60s timeout for Puppeteer+OCR
+    const data = response.data as EggPricesResult;
 
-      const imageUrl = `${API_BASE}${parsed.imageUrl ?? '/egg-prices-image'}`;
-      const ocr = await ocrEggPricesFromImage(imageUrl);
-      eggPricesCache = ocr;
+    console.log('🥚 Received prices:', data);
+
+    if (data && data.success && data.prices && Object.keys(data.prices).length > 0) {
+      eggPricesCache = data;
       eggPricesCacheAt = now;
-      return ocr;
+      return data;
     }
 
-    return { success: false, error: 'Unexpected egg prices response' };
-  } catch (error) {
-    console.error('Egg prices API error:', error);
+    return { success: false, error: 'No prices returned from backend' };
+  } catch (err) {
+    console.error('🥚 Egg prices fetch failed:', err);
     return { success: false, error: 'Egg prices fetch failed' };
   }
 }
@@ -214,13 +112,19 @@ export function formatNumber(num: number): string {
 }
 
 // Available years for filters
-export const TRADE_YEARS = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011'];
+export const TRADE_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', '2006', '2005', '2004', '2003', '2002', '2001', '2000'];
 export const PRODUCTION_YEARS = ['2021'];
 
+// Correct table names
 export const TRADE_TABLES = {
   PLANT: 'tuik_ticaret_bitkisel',
   ANIMAL: 'tuik_ticaret_hayvansal',
 } as const;
+
+// Duzey filter helper — prevents data duplication
+export function duzeyFilter(level1: 'tüm' | 'ülke', level3: 'ay' | 'yil'): string {
+  return `duzey_1 = '${level1}' AND duzey_3 = '${level3}'`;
+}
 
 // Predefined SQL queries - yct_20 kolonları: primaryValue, fobvalue, cifvalue, flowCode, partnerCode, motDesc, qty, netWgt
 // üretimindex kolonları: ürün, deger, birim, yil, ülke, grup
@@ -265,8 +169,8 @@ export const queries = {
       miktar_birim as birim,
       COUNT(*) as islem_sayisi,
       (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
     GROUP BY ana_urun, ulke, yil, miktar_birim
     ORDER BY deger DESC
   `,
@@ -281,8 +185,8 @@ export const queries = {
       miktar_birim as birim,
       COUNT(*) as islem_sayisi,
       (SUM(ithalat_deger) / NULLIF(SUM(ithalat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret
-    WHERE ithalat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ithalat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
     GROUP BY ana_urun, ulke, yil, miktar_birim
     ORDER BY deger DESC
   `,
@@ -298,8 +202,8 @@ export const queries = {
       miktar_birim as birim,
       COUNT(*) as islem_sayisi,
       (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as birim_fiyat
-    FROM tuik_ticarethayvansal
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_hayvansal
+    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
     GROUP BY ana_urun, ulke, yil, miktar_birim
     ORDER BY deger DESC
   `,
@@ -314,8 +218,8 @@ export const queries = {
       miktar_birim as birim,
       COUNT(*) as islem_sayisi,
       (SUM(ithalat_deger) / NULLIF(SUM(ithalat_mik), 0)) as birim_fiyat
-    FROM tuik_ticarethayvansal
-    WHERE ithalat_deger > 0
+    FROM tuik_ticaret_hayvansal
+    WHERE ithalat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
     GROUP BY ana_urun, ulke, yil, miktar_birim
     ORDER BY deger DESC
   `,
@@ -328,8 +232,8 @@ export const queries = {
       COUNT(DISTINCT ana_urun) as urun_sayisi,
       COUNT(DISTINCT ulke) as ulke_sayisi,
       COUNT(*) as islem_sayisi
-    FROM tuik_ticaret
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
   `,
   
   animalExportSummary: `
@@ -339,8 +243,8 @@ export const queries = {
       COUNT(DISTINCT ana_urun) as urun_sayisi,
       COUNT(DISTINCT ulke) as ulke_sayisi,
       COUNT(*) as islem_sayisi
-    FROM tuik_ticarethayvansal
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_hayvansal
+    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
   `,
   
   // TOP PRODUCTS BY VALUE
@@ -351,8 +255,8 @@ export const queries = {
       SUM(ihracat_mik) as toplam_miktar,
       COUNT(DISTINCT ulke) as ulke_sayisi,
       (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticaret
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
     GROUP BY ana_urun
     ORDER BY toplam_deger DESC
     LIMIT 20
@@ -365,8 +269,8 @@ export const queries = {
       SUM(ihracat_mik) as toplam_miktar,
       COUNT(DISTINCT ulke) as ulke_sayisi,
       (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticarethayvansal
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_hayvansal
+    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
     GROUP BY ana_urun
     ORDER BY toplam_deger DESC
     LIMIT 20
@@ -380,8 +284,8 @@ export const queries = {
       SUM(ihracat_mik) as toplam_miktar,
       COUNT(DISTINCT ana_urun) as urun_sayisi,
       COUNT(DISTINCT ulke) as ulke_sayisi
-    FROM tuik_ticaret
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
     GROUP BY yil
     ORDER BY yil
   `,
@@ -394,8 +298,8 @@ export const queries = {
       SUM(ihracat_mik) as toplam_miktar,
       COUNT(DISTINCT ana_urun) as urun_sayisi,
       (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticaret
-    WHERE ihracat_deger > 0
+    FROM tuik_ticaret_bitkisel
+    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
     GROUP BY ulke
     ORDER BY toplam_deger DESC
     LIMIT 20
