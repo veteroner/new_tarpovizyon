@@ -1,4 +1,7 @@
 node_modules
+dist
+dist-ssr
+*.local
 
 # OS
 .DS_Store
