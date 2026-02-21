@@ -49,7 +49,7 @@ function formatShort(value: number): string {
 }
 
 export default function TuikPlantProductionPage() {
-  const [selectedYear, setSelectedYear] = useState('y2023');
+  const [selectedYear, setSelectedYear] = useState('y2024');
   const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
   const [selectedProducts, setSelectedProducts] = useState<string[]>(['Buğday']);
   const [loading, setLoading] = useState(true);
@@ -96,10 +96,10 @@ export default function TuikPlantProductionPage() {
       const yearCol = selectedYear;
 
       // İl bazında veriler
-      const cityQuery = `SELECT ili, SUM(CAST(${yearCol} AS DECIMAL(20,2))) as toplam 
+      const cityQuery = `SELECT yer, SUM(CAST(${yearCol} AS DECIMAL(20,2))) as toplam 
         FROM tuik_bitkisel_uretim 
         WHERE unsur='${selectedUnsur}' AND urun IN (${productList}) AND duzeykod='3'
-        GROUP BY ili ORDER BY toplam DESC LIMIT 20`;
+        GROUP BY yer ORDER BY toplam DESC LIMIT 20`;
 
       // Yıllık trend (Türkiye toplamı)
       const yearlyQuery = `SELECT 
@@ -136,7 +136,7 @@ export default function TuikPlantProductionPage() {
         const total = cityRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
         setTotalValue(total);
         const mapped = cityRes.data.map((item, index: number) => ({
-          name: String(item['ili'] || ''),
+          name: String(item['yer'] || ''),
           value: Number(item['toplam']) || 0,
           share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
           fill: COLORS[index % COLORS.length]

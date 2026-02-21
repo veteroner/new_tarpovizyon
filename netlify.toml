@@ -4,6 +4,24 @@
   command = "npm run build"
 
 [[redirects]]
+  from = "/api.php"
+  to = "https://dersbende.com/api.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/egg-prices"
+  to = "https://basmakcitavukculuk.com/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/egg-prices-image"
+  to = "https://basmakcitavukculuk.com/indexyumurta.php"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, TrendingDown, Truck, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale, LineChart, DollarSign, Building, Tractor, BarChart3, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Leaf, Activity, Beef, Drumstick, Milk, Egg, Package, Trophy, Wheat, Carrot, Apple, Bean, Flower2, Candy, Nut, Coffee, Ribbon, MapPin, PawPrint, Users, Beaker, Bug, Globe, TreePine, Scale, LineChart, DollarSign, Building, Tractor, BarChart3, ArrowLeftRight } from 'lucide-react';
 
 interface SidebarProps {
   apiConnected: boolean;
@@ -9,10 +9,7 @@ interface SidebarProps {
 export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
   const mainNavItems = [
     { path: '/', icon: LayoutDashboard, label: 'Genel Bakış' },
-    { path: '/trade', icon: ArrowLeftRight, label: 'Dış Ticaret' },
-    { path: '/export', icon: TrendingUp, label: 'İhracat' },
-    { path: '/import', icon: TrendingDown, label: 'İthalat' },
-    { path: '/transport', icon: Truck, label: 'Taşıma' },
+    { path: '/trade', icon: ArrowLeftRight, label: 'Dış Ticaret İstihbaratı' },
     { path: '/production', icon: Leaf, label: 'Üretim' },
   ];
 
@@ -52,16 +49,13 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
 
   const tuikDataItems = [
     { path: '/tuik-plant', icon: Tractor, label: 'TÜİK Bitkisel' },
-    { path: '/tuik-livestock', icon: Building, label: 'TÜİK Hayvancılık' },
+    { path: '/tuik-livestock', icon: Building, label: 'Canlı Hayvan Envanteri' },
   ];
   const excelDataItems = [
     { path: '/productivity', icon: BarChart3, label: 'Verimlilik Analizi' },
   ];
 
-  const tuikTradeItems = [
-    { path: '/tuik-plant-trade', icon: Leaf, label: 'Bitkisel Dış Ticaret' },
-    { path: '/tuik-animal-trade', icon: Beef, label: 'Hayvansal Dış Ticaret' },
-  ];
+
 
   return (
     <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -150,18 +144,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">📦 TÜİK Dış Ticaret</div>
-        
-        {tuikTradeItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-          >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+
       </div>
 
       <div className="sidebar-footer">

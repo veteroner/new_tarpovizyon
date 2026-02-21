@@ -17,11 +17,27 @@
 
     /* Linting */
     "strict": true,
+    "strictFunctionTypes": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@/*": ["./src/rasyon/*"],
+      "@capacitor/core": ["./src/rasyon/stubs/capacitor-core.ts"],
+      "@capacitor-community/admob": ["./src/rasyon/stubs/capacitor-admob.ts"],
+      "@capacitor/push-notifications": ["./src/rasyon/stubs/capacitor-push.ts"],
+      "@sentry/react": ["./src/rasyon/stubs/sentry.ts"],
+      "@sentry/aws-serverless": ["./src/rasyon/stubs/sentry.ts"]
+    }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/**/*.old.tsx",
+    "src/pages/**/*_OLD_*",
+    "src/pages/**/*OLD*",
+    "src/pages/**/*BACKUP*",
+    "src/rasyon/engine/__tests__/**"
+  ]
 }
