@@ -83,16 +83,14 @@ export default function PopulationPage() {
   const [intelligenceAlerts, setIntelligenceAlerts] = useState<IntelligenceAlert[]>([]);
   const [allInsights, setAllInsights] = useState<Insight[]>([]);
 
-  const excludeFilter = [...EXCLUDED_AREAS].map((a: string) => `'${a}'`).join(',');
-
   // ==================== OVERVIEW ====================
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
       const [countriesRes, trendRes, prevRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area ORDER BY toplam DESC LIMIT 25`),
-        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(TOPLAM AS DECIMAL(20,2))) as total FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter})`)
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY toplam DESC LIMIT 25`),
+        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT SUM(CAST(TOPLAM AS DECIMAL(20,2))) as total FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS}`)
       ]);
 
       const countries = (countriesRes.data || []).map((r: any, i: number) => {
@@ -125,15 +123,15 @@ export default function PopulationPage() {
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
     finally { setLoading(false); }
-  }, [excludeFilter]);
+  }, []);
 
   // ==================== URBANIZATION ====================
   const loadUrbanization = useCallback(async () => {
     setLoading(true);
     try {
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
       ]);
 
       const byCountry = (byCountryRes.data || []).map((r: any) => {
@@ -167,15 +165,15 @@ export default function PopulationPage() {
       setUrbanInsights(ins);
     } catch (e) { console.error('Urbanization hatasi:', e); }
     finally { setLoading(false); }
-  }, [excludeFilter]);
+  }, []);
 
   // ==================== DEMOGRAPHICS ====================
   const loadDemographics = useCallback(async () => {
     setLoading(true);
     try {
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT area, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
       ]);
 
       const byCountry = (byCountryRes.data || []).map((r: any) => {
@@ -208,7 +206,7 @@ export default function PopulationPage() {
       setDemoInsights(ins);
     } catch (e) { console.error('Demographics hatasi:', e); }
     finally { setLoading(false); }
-  }, [excludeFilter]);
+  }, []);
 
   // ==================== TURKEY ====================
   const loadTurkey = useCallback(async () => {
@@ -216,7 +214,7 @@ export default function PopulationPage() {
     try {
       const [turkeyNowRes, worldRankRes, turkeyTrendRes] = await Promise.all([
         fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir, CAST(\`erkek/T\` AS DECIMAL(20,2)) as erkek, CAST(\`kadın/T\` AS DECIMAL(20,2)) as kadin FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC`),
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC`),
         fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1960 ORDER BY year`)
       ]);
 
@@ -250,14 +248,14 @@ export default function PopulationPage() {
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
     finally { setLoading(false); }
-  }, [excludeFilter]);
+  }, []);
 
   // ==================== FORECAST ====================
   const loadForecast = useCallback(async () => {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
         fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1990 ORDER BY year`)
       ]);
 
@@ -291,7 +289,7 @@ export default function PopulationPage() {
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
-  }, [excludeFilter]);
+  }, []);
 
   // ==================== INTELLIGENCE ====================
   const loadAlerts = useCallback(async () => {
