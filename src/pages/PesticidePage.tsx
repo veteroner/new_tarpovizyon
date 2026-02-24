@@ -87,10 +87,10 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [byTypeRes, topCountriesRes, trendRes, prevYearRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Tarimsal Kullanim' AND item_tr IN ('Pestisitler','Herbisitler','Insektisitler','Fungisitler ve Bakterisitler','Rodentisitler') GROUP BY item_tr ORDER BY total DESC`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2020' AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS}`)
+        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') GROUP BY item_tr ORDER BY total DESC`),
+        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2020' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS}`)
       ]);
 
       const byType = (byTypeRes.data || []).map((r: any, i: number) => ({
@@ -139,9 +139,9 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [typeByCountryRes, typeTrendRes, intensityRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Tarimsal Kullanim' AND item_tr IN ('Herbisitler','Insektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} GROUP BY item_tr, area ORDER BY total DESC`),
-        fetchQuery(`SELECT year, item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarimsal Kullanim' AND item_tr IN ('Herbisitler','Insektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 2000 GROUP BY year, item_tr ORDER BY year`),
-        fetchQuery(`SELECT area, AVG(CAST(value AS DECIMAL(20,4))) as avg_intensity FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Ekim alani basina tarimsal kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY avg_intensity DESC LIMIT 20`)
+        fetchQuery(`SELECT item_tr, area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} GROUP BY item_tr, area ORDER BY total DESC`),
+        fetchQuery(`SELECT year, item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr IN ('Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 2000 GROUP BY year, item_tr ORDER BY year`),
+        fetchQuery(`SELECT area, AVG(CAST(value AS DECIMAL(20,4))) as avg_intensity FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY avg_intensity DESC LIMIT 20`)
       ]);
 
       // Top countries per pesticide type
@@ -193,7 +193,7 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [countryShareRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY total DESC LIMIT 50`)
+        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY total DESC LIMIT 50`)
       ]);
 
       const data = (countryShareRes.data || []).map((r: any, i: number) => {
@@ -226,10 +226,10 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [turkeyByTypeRes, turkeyTrendRes, turkeyIntensityRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, element_tr, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2021' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr IN ('Tarimsal Kullanim','Ekim alani basina tarimsal kullanim','Kisi basina tarimsal kullanim') AND item_tr IN ('Pestisitler','Herbisitler','Insektisitler','Fungisitler ve Bakterisitler','Rodentisitler')`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND CAST(year AS SIGNED) >= 2000 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2021' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Ekim alani basina tarimsal kullanim' AND item_tr='Pestisitler'`),
-        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2021' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND CAST(value AS DECIMAL(20,4)) > 0`)
+        fetchQuery(`SELECT item_tr, element_tr, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr IN ('Tarımsal Kullanım','Ekili alan başına kullanım','Kişi başına kullanım') AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler')`),
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(year AS SIGNED) >= 2000 GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)'`),
+        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(value AS DECIMAL(20,4)) > 0`)
       ]);
 
       const byType: Record<string, Record<string, number>> = {};
@@ -240,15 +240,15 @@ export default function PesticidePage() {
         byType[item][elem] = Number(r.val) || 0;
       });
 
-      const totalUsage = byType['Pestisitler']?.['Tarimsal Kullanim'] || 0;
+      const totalUsage = byType['Pestisitler (toplam)']?.['Tarımsal Kullanım'] || 0;
       const kgHa = Number(turkeyIntensityRes.data?.[0]?.val) || 0;
       const worldAvg = Number(worldAvgRes.data?.[0]?.avg_val) || 0;
 
-      const composition = Object.entries(byType).filter(([name]) => name !== 'Pestisitler').map(([name, vals]) => ({
-        name, tonaj: vals['Tarimsal Kullanim'] || 0,
-        kgHa: vals['Ekim alani basina tarimsal kullanim'] || 0,
-        kgKisi: vals['Kisi basina tarimsal kullanim'] || 0,
-        share: totalUsage > 0 ? ((vals['Tarimsal Kullanim'] || 0) / totalUsage * 100) : 0
+      const composition = Object.entries(byType).filter(([name]) => name !== 'Pestisitler (toplam)').map(([name, vals]) => ({
+        name, tonaj: vals['Tarımsal Kullanım'] || 0,
+        kgHa: vals['Ekili alan başına kullanım'] || 0,
+        kgKisi: vals['Kişi başına kullanım'] || 0,
+        share: totalUsage > 0 ? ((vals['Tarımsal Kullanım'] || 0) / totalUsage * 100) : 0
       })).sort((a, b) => b.tonaj - a.tonaj);
 
       const trendData = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
@@ -281,8 +281,8 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`)
       ]);
 
       const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
@@ -323,10 +323,10 @@ export default function PesticidePage() {
     setLoading(true);
     try {
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes, intensityRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2021' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarimsal Kullanim' AND item_tr IN ('Pestisitler','Herbisitler','Insektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2015' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarimsal Kullanim' AND item_tr IN ('Pestisitler','Herbisitler','Insektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
-        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2021' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarimsal Kullanim' AND item_tr='Pestisitler' AND CAST(value AS DECIMAL(20,4)) > 0`),
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2021' AND element_tr='Ekim alani basina tarimsal kullanim' AND item_tr='Pestisitler' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye')`)
+        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
+        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2015' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
+        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(value AS DECIMAL(20,4)) > 0`),
+        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye')`)
       ]);
 
       const now: Record<string, number> = {};
@@ -337,8 +337,8 @@ export default function PesticidePage() {
       const turkeyIntensity = Number(intensityRes.data?.[0]?.val) || 0;
 
       const alerts: IntelligenceAlert[] = [];
-      const totalNow = now['Pestisitler'] || 0;
-      const totalBefore = before['Pestisitler'] || 0;
+      const totalNow = now['Pestisitler (toplam)'] || 0;
+      const totalBefore = before['Pestisitler (toplam)'] || 0;
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
         alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'Pestisit Kullanim Degisimi (2015-2021)', message: `Toplam pestisit kullanimi %${change.toFixed(1)} ${change > 0 ? 'artti' : 'azaldi'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanim trendi', value: change });
@@ -351,7 +351,7 @@ export default function PesticidePage() {
         alerts.push({ id: 'int-intensity', severity: turkeyIntensity > 5 ? 'critical' : turkeyIntensity > 2 ? 'warning' : 'positive', title: 'Pestisit Yogunlugu', message: `Hektar basina ${formatKgHa(turkeyIntensity)} pestisit kullaniliyor${turkeyIntensity > 3 ? ' - AB surdurulebilirlik hedeflerinin uzerinde' : ''}`, metric: 'kg/ha', value: turkeyIntensity });
       }
       // Sub-type analysis
-      ['Herbisitler', 'Insektisitler', 'Fungisitler ve Bakterisitler'].forEach(type => {
+      ['Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'].forEach(type => {
         const n = now[type] || 0; const b = before[type] || 0;
         if (b > 0) {
           const ch = ((n - b) / b) * 100;
@@ -487,7 +487,7 @@ export default function PesticidePage() {
                         <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                         <Legend />
                         <Area type="monotone" dataKey="Herbisitler" name="Herbisitler" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
-                        <Area type="monotone" dataKey="Insektisitler" name="Insektisitler" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
+                        <Area type="monotone" dataKey="İnsektisitler" name="İnsektisitler" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
                         <Area type="monotone" dataKey="Fungisitler ve Bakterisitler" name="Fungisitler" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
                         <Area type="monotone" dataKey="Rodentisitler" name="Rodentisitler" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
                       </AreaChart>

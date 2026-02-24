@@ -88,9 +88,9 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [countriesRes, trendRes, prevRes] = await Promise.all([
-        fetchQuery(`SELECT n.area, SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam, SUM(CAST(e.male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female_v AS DECIMAL(20,2))) as kadin FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND n.area NOT IN (${excludeFilter}) GROUP BY n.area ORDER BY toplam DESC LIMIT 25`),
-        fetchQuery(`SELECT year, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam, SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin FROM fao_tarim_istihdam GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(total_v AS DECIMAL(20,2))) as total FROM fao_tarim_istihdam WHERE year='2021'`)
+        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam, SUM(CAST(e.male AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND e.area NOT IN (${excludeFilter}) GROUP BY e.area ORDER BY toplam DESC LIMIT 25`),
+        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam, SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim GROUP BY yearcode ORDER BY yearcode`),
+        fetchQuery(`SELECT SUM(CAST(total AS DECIMAL(20,2))) as total FROM fao_nufus_istihdam_tarim WHERE yearcode='2023' AND indicatorcode='21066'`)
       ]);
 
       const countries = (countriesRes.data || []).map((r: any, i: number) => {
@@ -130,8 +130,8 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT n.area, SUM(CAST(e.male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female_v AS DECIMAL(20,2))) as kadin, SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND n.area NOT IN (${excludeFilter}) GROUP BY n.area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin FROM fao_tarim_istihdam GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT e.area, SUM(CAST(e.male AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female AS DECIMAL(20,2))) as kadin, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND e.area NOT IN (${excludeFilter}) GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT yearcode as year, SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim GROUP BY yearcode ORDER BY yearcode`)
       ]);
 
       const byCountry = (byCountryRes.data || []).map((r: any) => {
@@ -173,8 +173,8 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [shareRes, historicRes] = await Promise.all([
-        fetchQuery(`SELECT n.area, SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND n.area NOT IN (${excludeFilter}) GROUP BY n.area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT e.year, n.area, SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE n.area NOT IN (${excludeFilter}) AND e.year IN ('2000','2005','2010','2015','2022') GROUP BY e.year, n.area HAVING toplam > 0`)
+        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND e.area NOT IN (${excludeFilter}) GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC`),
+        fetchQuery(`SELECT e.year, e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.indicatorcode='21066' AND e.area NOT IN (${excludeFilter}) AND e.yearcode IN ('2000','2005','2010','2015','2024') GROUP BY e.yearcode, e.area HAVING toplam > 0`)
       ]);
 
       const countries = (shareRes.data || []).map((r: any) => ({ name: translateCountry(String(r.area || '')), value: Number(r.toplam) || 0 }));
@@ -217,9 +217,9 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [turkeyNowRes, worldRankRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT e.year, CAST(e.total_v AS DECIMAL(20,2)) as toplam, CAST(e.male_v AS DECIMAL(20,2)) as erkek, CAST(e.female_v AS DECIMAL(20,2)) as kadin FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND (n.area LIKE '%T_rkiye%' OR n.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT n.area, SUM(CAST(e.total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND n.area NOT IN (${excludeFilter}) GROUP BY n.area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT e.year, CAST(e.total_v AS DECIMAL(20,2)) as toplam, CAST(e.male_v AS DECIMAL(20,2)) as erkek, CAST(e.female_v AS DECIMAL(20,2)) as kadin FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE (n.area LIKE '%T_rkiye%' OR n.area LIKE '%Turkey%') AND CAST(e.year AS SIGNED) >= 1990 ORDER BY e.year`)
+        fetchQuery(`SELECT e.year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND e.area NOT IN (${excludeFilter}) GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC`),
+        fetchQuery(`SELECT e.year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%') AND CAST(e.yearcode AS SIGNED) >= 1990 ORDER BY e.yearcode`)
       ]);
 
       const now = turkeyNowRes.data?.[0];
@@ -256,8 +256,8 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam WHERE CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT e.year, CAST(e.total_v AS DECIMAL(20,2)) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE (n.area LIKE '%T_rkiye%' OR n.area LIKE '%Turkey%') AND CAST(e.year AS SIGNED) >= 1990 ORDER BY e.year`)
+        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim WHERE indicatorcode='21066' AND CAST(yearcode AS SIGNED) >= 1990 GROUP BY yearcode ORDER BY yearcode`),
+        fetchQuery(`SELECT e.year, CAST(e.total AS DECIMAL(20,2)) as toplam FROM fao_nufus_istihdam_tarim e WHERE (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%') AND CAST(e.yearcode AS SIGNED) >= 1990 ORDER BY e.yearcode`)
       ]);
 
       const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
@@ -297,10 +297,10 @@ export default function AgriculturalEmploymentPage() {
     setLoading(true);
     try {
       const [turkeyNowRes, turkeyBeforeRes, worldGenderRes, worldTotalRes] = await Promise.all([
-        fetchQuery(`SELECT e.year, CAST(e.total_v AS DECIMAL(20,2)) as toplam, CAST(e.male_v AS DECIMAL(20,2)) as erkek, CAST(e.female_v AS DECIMAL(20,2)) as kadin FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2022' AND (n.area LIKE '%T_rkiye%' OR n.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT e.year, CAST(e.total_v AS DECIMAL(20,2)) as toplam FROM fao_tarim_istihdam e INNER JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON e.areacode = n.areacode WHERE e.year='2010' AND (n.area LIKE '%T_rkiye%' OR n.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin FROM fao_tarim_istihdam WHERE year='2022'`),
-        fetchQuery(`SELECT year, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_tarim_istihdam WHERE year IN ('2022','2010') GROUP BY year`)
+        fetchQuery(`SELECT e.year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2024' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT e.year, CAST(e.total AS DECIMAL(20,2)) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2010' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim WHERE yearcode='2024' AND indicatorcode='21066'`),
+        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim WHERE indicatorcode='21066' AND yearcode IN ('2024','2010') GROUP BY yearcode`)
       ]);
 
       const alerts: IntelligenceAlert[] = [];
