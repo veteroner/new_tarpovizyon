@@ -121,6 +121,10 @@ body {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .kpi-card:hover {
@@ -134,6 +138,7 @@ body {
   color: white;
   border: none;
   box-shadow: var(--shadow-lg), 0 4px 20px rgba(59, 130, 246, 0.3);
+  min-height: 160px;
 }
 
 .kpi-card.large:hover {
@@ -594,7 +599,12 @@ body {
   }
 
   .kpi-card {
-    padding: 16px;
+    padding: 18px;
+    min-height: 120px;
+  }
+
+  .kpi-card.large {
+    min-height: 140px;
   }
 
   .filter-bar {

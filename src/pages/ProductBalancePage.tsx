@@ -71,15 +71,17 @@ function KPI({ icon: Icon, title, value, sub, color, alert }: {
   icon: typeof Wheat; title: string; value: string; sub?: string; color: string; alert?: boolean;
 }) {
   return (
-    <div className={`rounded-xl shadow-md p-4 border-l-4 ${alert ? 'animate-pulse' : ''}`}
+    <div className={`rounded-xl shadow-md p-5 border-l-4 min-h-[140px] flex flex-col ${alert ? 'animate-pulse' : ''}`}
          style={{ background: 'var(--bg-card)', borderLeftColor: color }}>
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>{title}</p>
-          <p className="text-2xl font-bold mt-1" style={{ color }}>{value}</p>
-          {sub && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>{sub}</p>}
+      <div className="flex justify-between items-start mb-auto">
+        <div className="flex-1">
+          <p className="text-xs uppercase tracking-wide font-semibold" style={{ color: 'var(--text-secondary)' }}>{title}</p>
         </div>
-        <Icon size={20} style={{ color }} className="opacity-60" />
+        <Icon size={24} style={{ color }} className="opacity-70 flex-shrink-0" />
+      </div>
+      <div className="mt-2">
+        <p className="text-2xl font-bold mb-1" style={{ color }}>{value}</p>
+        {sub && <p className="text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>{sub}</p>}
       </div>
     </div>
   );
@@ -351,15 +353,15 @@ export default function ProductBalancePage() {
       {loading ? <Loading /> : detail['Üretim'] && (
         <>
           {/* ─── Food Security Score + KPIs ─── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Food Security Score (big) */}
-            <div className="col-span-2 md:col-span-1 rounded-xl shadow-md p-4 flex flex-col items-center justify-center border-2"
+            <div className="col-span-2 md:col-span-2 lg:col-span-1 rounded-xl shadow-md p-4 flex flex-col items-center justify-center border-2 min-h-[140px]"
                  style={{ background: 'var(--bg-card)', borderColor: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }}>
-              <Activity size={24} style={{ color: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }} />
-              <p className="text-3xl font-black mt-1" style={{ color: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }}>
+              <Activity size={28} style={{ color: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }} />
+              <p className="text-4xl font-black mt-2" style={{ color: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }}>
                 {foodSecurityScore}
               </p>
-              <p className="text-[10px] uppercase" style={{ color: 'var(--text-secondary)' }}>Gıda Güvenlik Skoru</p>
+              <p className="text-xs uppercase mt-1" style={{ color: 'var(--text-secondary)' }}>Gıda Güvenlik Skoru</p>
             </div>
             <KPI icon={Wheat} title="Üretim" value={fmt(production) + ' ' + getUnit('Üretim')}
                  sub={`YoY: ${prodYoY >= 0 ? '+' : ''}${prodYoY.toFixed(1)}%`} color={GREEN} />
@@ -370,6 +372,8 @@ export default function ProductBalancePage() {
                  alert={selfSufficiency < 70} />
             <KPI icon={Users} title="Kişi Başı" value={perCapita.toFixed(1) + ' ' + getUnit('Kişi başına tüketim')}
                  sub="Yıllık tüketim" color={BLUE} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <KPI icon={ArrowRightLeft} title="İthalat Bağımlılığı" value={pct(importDep)}
                  sub={fmt(imports) + ' Ton ithalat'} color={importDep > 30 ? RED : importDep > 15 ? ORANGE : GREEN}
                  alert={importDep > 50} />
