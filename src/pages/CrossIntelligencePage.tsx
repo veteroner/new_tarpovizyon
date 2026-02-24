@@ -319,28 +319,28 @@ export default function CrossIntelligencePage() {
 
       {/* KPI Cards */}
       {latestRow && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="rounded-xl border p-4 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Üretim (Son Yıl)</p>
-            <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{latestRow.production > 1e6 ? `${(latestRow.production / 1e6).toFixed(1)}M ton` : `${(latestRow.production / 1e3).toFixed(0)}K ton`}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>Üretim (Son Yıl)</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{latestRow.production > 1e6 ? `${(latestRow.production / 1e6).toFixed(1)}M ton` : `${(latestRow.production / 1e3).toFixed(0)}K ton`}</p>
           </div>
-          <div className="rounded-xl border p-4 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>İthalat</p>
-            <p className="text-xl font-bold text-red-600">{latestRow.imports > 1e6 ? `${(latestRow.imports / 1e6).toFixed(1)}M ton` : `${(latestRow.imports / 1e3).toFixed(0)}K ton`}</p>
+          <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>İthalat</p>
+            <p className="text-2xl font-bold text-red-600">{latestRow.imports > 1e6 ? `${(latestRow.imports / 1e6).toFixed(1)}M ton` : `${(latestRow.imports / 1e3).toFixed(0)}K ton`}</p>
           </div>
-          <div className="rounded-xl border p-4 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>İhracat</p>
-            <p className="text-xl font-bold text-green-600">{latestRow.exports > 1e6 ? `${(latestRow.exports / 1e6).toFixed(1)}M ton` : `${(latestRow.exports / 1e3).toFixed(0)}K ton`}</p>
+          <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>İhracat</p>
+            <p className="text-2xl font-bold text-green-600">{latestRow.exports > 1e6 ? `${(latestRow.exports / 1e6).toFixed(1)}M ton` : `${(latestRow.exports / 1e3).toFixed(0)}K ton`}</p>
           </div>
-          <div className="rounded-xl border p-4 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Yeterlilik</p>
-            <p className={`text-xl font-bold ${latestRow.sufficiency >= 100 ? 'text-green-600' : latestRow.sufficiency >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+          <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>Yeterlilik</p>
+            <p className={`text-2xl font-bold ${latestRow.sufficiency >= 100 ? 'text-green-600' : latestRow.sufficiency >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
               %{latestRow.sufficiency.toFixed(0)}
             </p>
           </div>
-          <div className="rounded-xl border p-4 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Fiyat Endeksi</p>
-            <p className="text-xl font-bold text-purple-600">{latestRow.priceIndex.toFixed(1)}</p>
+          <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>Fiyat Endeksi</p>
+            <p className="text-2xl font-bold text-purple-600">{latestRow.priceIndex.toFixed(1)}</p>
           </div>
         </div>
       )}
