@@ -31,8 +31,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
 
 const FERTILIZER_ITEMS = [
-  'Ure', 'Diamonyum fosfat (DAP)', 'NPK gubreleri', 'Amonyum nitrat (AN)',
-  'Amonyum sulfat', 'Potasyum klorur (MOP)', 'Monoamonyum fosfat (MAP)', 'Kalsiyum amonyum nitrat (CAN)'
+  'Üre', 'Diamonyum fosfat (DAP)', 'NPK gübreleri', 'Amonyum nitrat (AN)',
+  'Amonyum sülfat', 'Potasyum klorür (MOP)', 'Monoamonyum fosfat (MAP)', 'Kalsiyum amonyum nitrat (CAN)'
 ];
 
 function formatTon(value: number): string {
