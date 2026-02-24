@@ -90,9 +90,9 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [countriesRes, trendRes, prevRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal_v AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir_v AS DECIMAL(20,2))) as sehir, SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area ORDER BY toplam DESC LIMIT 25`),
-        fetchQuery(`SELECT year, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal_v AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir_v AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(total_v AS DECIMAL(20,2))) as total FROM fao_nufus WHERE year='2022' AND area NOT IN (${excludeFilter})`)
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area ORDER BY toplam DESC LIMIT 25`),
+        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT SUM(CAST(TOPLAM AS DECIMAL(20,2))) as total FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter})`)
       ]);
 
       const countries = (countriesRes.data || []).map((r: any, i: number) => {
@@ -132,8 +132,8 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal_v AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir_v AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(sehir_v AS DECIMAL(20,2))) as sehir, SUM(CAST(kirsal_v AS DECIMAL(20,2))) as kirsal, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
       ]);
 
       const byCountry = (byCountryRes.data || []).map((r: any) => {
@@ -174,8 +174,8 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(male_v AS DECIMAL(20,2))) as erkek, SUM(CAST(female_v AS DECIMAL(20,2))) as kadin, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT area, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) GROUP BY year ORDER BY year`)
       ]);
 
       const byCountry = (byCountryRes.data || []).map((r: any) => {
@@ -215,9 +215,9 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [turkeyNowRes, worldRankRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(total_v AS DECIMAL(20,2)) as toplam, CAST(kirsal_v AS DECIMAL(20,2)) as kirsal, CAST(sehir_v AS DECIMAL(20,2)) as sehir, CAST(male_v AS DECIMAL(20,2)) as erkek, CAST(female_v AS DECIMAL(20,2)) as kadin FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT area, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT year, CAST(total_v AS DECIMAL(20,2)) as toplam, CAST(kirsal_v AS DECIMAL(20,2)) as kirsal, CAST(sehir_v AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1960 ORDER BY year`)
+        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir, CAST(\`erkek/T\` AS DECIMAL(20,2)) as erkek, CAST(\`kadın/T\` AS DECIMAL(20,2)) as kadin FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN (${excludeFilter}) GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC`),
+        fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1960 ORDER BY year`)
       ]);
 
       const now = turkeyNowRes.data?.[0];
@@ -257,8 +257,8 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(total_v AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(total_v AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1990 ORDER BY year`)
+        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN (${excludeFilter}) AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1990 ORDER BY year`)
       ]);
 
       const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
@@ -298,9 +298,9 @@ export default function PopulationPage() {
     setLoading(true);
     try {
       const [turkeyNowRes, turkeyBeforeRes, urbanTrendRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(total_v AS DECIMAL(20,2)) as toplam, CAST(kirsal_v AS DECIMAL(20,2)) as kirsal, CAST(sehir_v AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT area, CAST(total_v AS DECIMAL(20,2)) as toplam, CAST(kirsal_v AS DECIMAL(20,2)) as kirsal FROM fao_nufus WHERE year='2000' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT year, CAST(sehir_v AS DECIMAL(20,2)) as sehir, CAST(total_v AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND year IN ('1960','1980','2000','2023') ORDER BY year`)
+        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal FROM fao_nufus WHERE year='2000' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
+        fetchQuery(`SELECT year, CAST(sehir AS DECIMAL(20,2)) as sehir, CAST(TOPLAM AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND year IN ('1960','1980','2000','2023') ORDER BY year`)
       ]);
 
       const alerts: IntelligenceAlert[] = [];

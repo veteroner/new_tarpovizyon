@@ -125,10 +125,10 @@ export default function FoodBalancePage() {
     setLoading(true);
     try {
       const [byProductRes, topCountriesRes, trendRes, prevYearRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as uretim, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat, AVG(CAST(b.kbgtcal_v AS DECIMAL(10,2))) as kalori FROM fao_balans b WHERE b.yil='2022' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY uretim DESC`),
-        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2022' AND b.urun IN (${itemList}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 20`),
+        fetchQuery(`SELECT b.urun, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as uretim, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat, AVG(CAST(b.kbgtcal_v AS DECIMAL(10,2))) as kalori FROM fao_balans b WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY uretim DESC`),
+        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 20`),
         fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim FROM fao_balans WHERE urun IN (${itemList}) GROUP BY yil ORDER BY yil`),
-        fetchQuery(`SELECT SUM(CAST(uretim_v AS DECIMAL(20,2))) as total FROM fao_balans WHERE yil='2021' AND urun IN (${itemList})`)
+        fetchQuery(`SELECT SUM(CAST(uretim_v AS DECIMAL(20,2))) as total FROM fao_balans WHERE yil='2022' AND urun IN (${itemList})`)
       ]);
 
       const byProduct = (byProductRes.data || []).map((r: any, i: number) => ({
@@ -175,8 +175,8 @@ export default function FoodBalancePage() {
     setLoading(true);
     try {
       const [turkeyBalanceRes, worldAvgCalRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2022' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${FOOD_ITEMS.map(f => f.id).join(',')})`),
-        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2022' AND kbgtcal_v > 0 AND urun='2511'`)
+        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${FOOD_ITEMS.map(f => f.id).join(',')})`),
+        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2023' AND kbgtcal_v > 0 AND urun='2511'`)
       ]);
 
       const products = (turkeyBalanceRes.data || []).map((r: any) => {
@@ -219,7 +219,7 @@ export default function FoodBalancePage() {
     setLoading(true);
     try {
       const [tradeByProductRes, tradeTrendRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat FROM fao_balans b WHERE b.yil='2022' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY ithalat DESC`),
+        fetchQuery(`SELECT b.urun, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat FROM fao_balans b WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY ithalat DESC`),
         fetchQuery(`SELECT yil, SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim FROM fao_balans WHERE urun IN (${itemList}) GROUP BY yil ORDER BY yil`)
       ]);
 
@@ -253,9 +253,9 @@ export default function FoodBalancePage() {
     try {
       const allItemIds = FOOD_ITEMS.map(f => f.id).join(',');
       const [turkeyRes, turkeyTrendRes, worldRankRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2022' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
+        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
         fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim, SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat, AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as kalori FROM fao_balans WHERE (ulke='223' OR ulke='351') AND urun IN (${allItemIds}) AND CAST(yil AS SIGNED) >= 2000 GROUP BY yil ORDER BY yil`),
-        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2022' AND b.urun IN (${allItemIds}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 30`)
+        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2023' AND b.urun IN (${allItemIds}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 30`)
       ]);
 
       const products = (turkeyRes.data || []).map((r: any) => {
@@ -348,9 +348,9 @@ export default function FoodBalancePage() {
     try {
       const allItemIds = FOOD_ITEMS.map(f => f.id).join(',');
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2022' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
+        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
         fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat FROM fao_balans b WHERE b.yil='2015' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
-        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2022' AND kbgtcal_v > 0 AND urun='2511'`)
+        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2023' AND kbgtcal_v > 0 AND urun='2511'`)
       ]);
 
       const now: Record<string, any> = {};

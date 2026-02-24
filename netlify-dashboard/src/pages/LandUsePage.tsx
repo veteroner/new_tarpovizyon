@@ -88,15 +88,15 @@ export default function LandUsePage() {
   const loadOverviewData = useCallback(async () => {
     setLoading(true);
     try {
-      const latestYear = '2022';
+      const latestYear = '2023';
       const prevYear = '2021';
 
       const [worldLandRes, turkeyLandRes, prevWorldRes, topCountriesRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Nadas alani','Sulama altyapisina sahip kara alani','Ekili alan','Cok yillik urun alani') GROUP BY item_tr ORDER BY total DESC`),
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='${latestYear}' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Nadas alani','Sulama altyapisina sahip kara alani','Ekili alan','Cok yillik urun alani')`),
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${prevYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarim arazisi' GROUP BY item_tr`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND item_tr='Tarim arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE item_tr='Tarim arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Geçici nadas alanı','Sulama altyapısı bulunan arazi','Ekili alan','Çok yıllık ürünler') GROUP BY item_tr ORDER BY total DESC`),
+        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='${latestYear}' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Geçici nadas alanı','Sulama altyapısı bulunan arazi','Ekili alan','Çok yıllık ürünler')`),
+        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${prevYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarım arazisi' GROUP BY item_tr`),
+        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
       ]);
 
       const landTypes = (worldLandRes.data || []).map((r: any, i: number) => ({
@@ -108,12 +108,12 @@ export default function LandUsePage() {
       const turkeyMap: Record<string, number> = {};
       (turkeyLandRes.data || []).forEach((r: any) => { turkeyMap[String(r.item_tr)] = Number(r.val) || 0; });
 
-      const worldAg = landTypes.find((l: any) => l.name === 'Tarim arazisi')?.value || 0;
+      const worldAg = landTypes.find((l: any) => l.name === 'Tarım arazisi')?.value || 0;
       const prevWorldAg = Number(prevWorldRes.data?.[0]?.total) || 0;
-      const turkeyAg = turkeyMap['Tarim arazisi'] || 0;
-      const turkeyArable = turkeyMap['Islenebilir arazi'] || 0;
-      const turkeyIrrigation = turkeyMap['Sulama altyapisina sahip kara alani'] || 0;
-      const turkeyFallow = turkeyMap['Nadas alani'] || 0;
+      const turkeyAg = turkeyMap['Tarım arazisi'] || 0;
+      const turkeyArable = turkeyMap['İşlenebilir arazi'] || 0;
+      const turkeyIrrigation = turkeyMap['Sulama altyapısı bulunan arazi'] || 0;
+      const turkeyFallow = turkeyMap['Geçici nadas alanı'] || 0;
 
       const worldYoY = calculateYoY(worldAg, prevWorldAg);
       const turkeyShare = worldAg > 0 ? (turkeyAg / worldAg) * 100 : 0;
@@ -160,7 +160,7 @@ export default function LandUsePage() {
     setLoading(true);
     try {
       const [turkeyTimeRes] = await Promise.all([
-        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Sulama altyapisina sahip kara alani','Nadas alani') AND CAST(year AS SIGNED) >= 2000 ORDER BY year`)
+        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı') AND CAST(year AS SIGNED) >= 2000 ORDER BY year`)
       ]);
 
       const turkeyByType: Record<string, YearValue[]> = {};
@@ -196,13 +196,13 @@ export default function LandUsePage() {
       setTransformData(multiLine);
 
       const ins: Insight[] = [];
-      const agChange = transformComp.find(t => t.name === 'Tarim arazisi');
+      const agChange = transformComp.find(t => t.name === 'Tarım arazisi');
       if (agChange && agChange.change < 0) ins.push({ id: 'tr1', type: 'decline', message: `Turkiye tarim arazisi ${agChange.startYear}-${agChange.endYear} doneminde ${formatArea(Math.abs(agChange.change))} azaldi (%${Math.abs(agChange.changePct).toFixed(1)} kayip)`, severity: 'high', category: 'Arazi Kaybi' });
-      const forestChange = transformComp.find(t => t.name === 'Ormanlik alan');
+      const forestChange = transformComp.find(t => t.name === 'Orman alanı');
       if (forestChange && forestChange.change > 0) ins.push({ id: 'tr2', type: 'growth', message: `Ormanlik alan ${forestChange.startYear}-${forestChange.endYear} doneminde ${formatArea(forestChange.change)} artti - agaclandirma basarisi`, severity: 'medium', category: 'Orman' });
       const irrigChange = transformComp.find(t => t.name.includes('Sulama'));
       if (irrigChange && irrigChange.change > 0) ins.push({ id: 'tr3', type: 'growth', message: `Sulama altyapisi %${irrigChange.changePct.toFixed(1)} buyudu - yillik CAGR %${irrigChange.cagr.toFixed(2)}`, severity: 'medium', category: 'Sulama' });
-      const pastureChange = transformComp.find(t => t.name === 'Cayir-Mera');
+      const pastureChange = transformComp.find(t => t.name === 'Sürekli çayırlar ve meralar');
       if (pastureChange && pastureChange.change < 0) ins.push({ id: 'tr4', type: 'warning', message: `Cayir-mera alani %${Math.abs(pastureChange.changePct).toFixed(1)} azaldi - hayvancilik kapasite riski`, severity: 'medium', category: 'Mera' });
       setTransformInsights(ins);
     } catch (error) { console.error('Transform veri hatasi:', error); }
@@ -214,7 +214,7 @@ export default function LandUsePage() {
     setLoading(true);
     try {
       const [agCountryRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2022' AND item_tr='Tarim arazisi' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 100 ORDER BY val DESC LIMIT 50`)
+        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 100 ORDER BY val DESC LIMIT 50`)
       ]);
 
       const agData = (agCountryRes.data || []).map((r: any, i: number) => {
@@ -245,10 +245,10 @@ export default function LandUsePage() {
     setLoading(true);
     try {
       const [turkeyAllRes, turkeyTrendRes, worldAvgRes, topIrrigRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye')`),
-        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Ormanlik alan','Sulama altyapisina sahip kara alani') AND CAST(year AS SIGNED) >= 2000 ORDER BY year`),
-        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Sulama altyapisina sahip kara alani','Nadas alani') AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY item_tr`),
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2022' AND item_tr='Sulama altyapisina sahip kara alani' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 ORDER BY val DESC LIMIT 20`)
+        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye')`),
+        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Orman alanı','Sulama altyapısı bulunan arazi') AND CAST(year AS SIGNED) >= 2000 ORDER BY year`),
+        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı') AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY item_tr`),
+        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND item_tr='Sulama altyapısı bulunan arazi' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 ORDER BY val DESC LIMIT 20`)
       ]);
 
       const turkeyData: Record<string, number> = {};
@@ -268,21 +268,21 @@ export default function LandUsePage() {
         isTurkey: String(r.area).includes('T\u00FCrkiye') || String(r.area).includes('Turkey')
       }));
 
-      const radarItems = ['Tarim arazisi', 'Islenebilir arazi', 'Cayir-Mera', 'Ormanlik alan', 'Sulama altyapisina sahip kara alani'];
+      const radarItems = ['Tarım arazisi', 'İşlenebilir arazi', 'Sürekli çayırlar ve meralar', 'Orman alanı', 'Sulama altyapısı bulunan arazi'];
       const radarData = radarItems.map(item => {
         const trVal = turkeyData[item] || 0;
         const wAvg = worldAvgs[item] || 1;
-        return { subject: item.replace('Sulama altyapisina sahip kara alani', 'Sulama').substring(0, 15), turkey: trVal, worldAvg: wAvg };
+        return { subject: item.replace('Sulama altyapısı bulunan arazi', 'Sulama').substring(0, 15), turkey: trVal, worldAvg: wAvg };
       });
       setTurkeyRadar(radarData);
 
       const irrigRank = irrigData.findIndex(d => d.isTurkey) + 1;
       setTurkeyProfile({
         ...turkeyData, worldAvgs, irrigationRank: irrigRank || 'N/A',
-        irrigationRate: turkeyData['Tarim arazisi'] > 0 ? (turkeyData['Sulama altyapisina sahip kara alani'] || 0) / turkeyData['Tarim arazisi'] * 100 : 0,
-        fallowRate: turkeyData['Islenebilir arazi'] > 0 ? (turkeyData['Nadas alani'] || 0) / turkeyData['Islenebilir arazi'] * 100 : 0,
-        arablePct: turkeyData['Tarim arazisi'] > 0 ? (turkeyData['Islenebilir arazi'] || 0) / turkeyData['Tarim arazisi'] * 100 : 0,
-        pasturePct: turkeyData['Tarim arazisi'] > 0 ? (turkeyData['Cayir-Mera'] || 0) / turkeyData['Tarim arazisi'] * 100 : 0,
+        irrigationRate: turkeyData['Tarım arazisi'] > 0 ? (turkeyData['Sulama altyapısı bulunan arazi'] || 0) / turkeyData['Tarım arazisi'] * 100 : 0,
+        fallowRate: turkeyData['İşlenebilir arazi'] > 0 ? (turkeyData['Geçici nadas alanı'] || 0) / turkeyData['İşlenebilir arazi'] * 100 : 0,
+        arablePct: turkeyData['Tarım arazisi'] > 0 ? (turkeyData['İşlenebilir arazi'] || 0) / turkeyData['Tarım arazisi'] * 100 : 0,
+        pasturePct: turkeyData['Tarım arazisi'] > 0 ? (turkeyData['Sürekli çayırlar ve meralar'] || 0) / turkeyData['Tarım arazisi'] * 100 : 0,
       });
 
       const yearSet = new Set<string>();
@@ -291,7 +291,7 @@ export default function LandUsePage() {
         const row: any = { year };
         for (const [type, values] of Object.entries(turkeyByType)) {
           const match = values.find(v => v.year === year);
-          const shortName = type.replace('Sulama altyapisina sahip kara alani', 'Sulama').replace('Islenebilir arazi', 'Islenebilir');
+          const shortName = type.replace('Sulama altyapısı bulunan arazi', 'Sulama').replace('İşlenebilir arazi', 'Islenebilir');
           row[shortName] = match?.value || null;
         }
         return row;
@@ -299,13 +299,13 @@ export default function LandUsePage() {
       setTurkeyTrends(trendLines);
 
       const ins: Insight[] = [];
-      const agCagr = calculateCAGR(turkeyByType['Tarim arazisi'] || []);
+      const agCagr = calculateCAGR(turkeyByType['Tarım arazisi'] || []);
       if (agCagr) ins.push({ id: 'tp1', type: agCagr.cagr > 0 ? 'growth' : 'decline', message: `Turkiye tarim arazisi 2000den bu yana yillik %${Math.abs(agCagr.cagr).toFixed(2)} CAGR ile ${agCagr.cagr > 0 ? 'buyudu' : 'kuculdu'}`, severity: 'high', category: 'Trend' });
-      const irrigCagr = calculateCAGR(turkeyByType['Sulama altyapisina sahip kara alani'] || []);
+      const irrigCagr = calculateCAGR(turkeyByType['Sulama altyapısı bulunan arazi'] || []);
       if (irrigCagr && irrigCagr.cagr > 0) ins.push({ id: 'tp2', type: 'growth', message: `Sulama altyapisi yillik %${irrigCagr.cagr.toFixed(2)} CAGR ile buyuyor${irrigRank > 0 ? ' - dunya ' + irrigRank + '. sirada' : ''}`, severity: 'medium', category: 'Sulama' });
-      if (turkeyData['Tarim arazisi'] && worldAvgs['Tarim arazisi']) {
-        const ratio = turkeyData['Tarim arazisi'] / worldAvgs['Tarim arazisi'];
-        ins.push({ id: 'tp3', type: ratio > 1 ? 'achievement' : 'info', message: `Turkiye tarim arazisi dunya ulke ortalamasinin ${ratio.toFixed(1)}x ${ratio > 1 ? 'uzerinde' : 'altinda'} (${formatArea(turkeyData['Tarim arazisi'])} vs ${formatArea(worldAvgs['Tarim arazisi'])})`, severity: 'medium', category: 'Benchmark' });
+      if (turkeyData['Tarım arazisi'] && worldAvgs['Tarım arazisi']) {
+        const ratio = turkeyData['Tarım arazisi'] / worldAvgs['Tarım arazisi'];
+        ins.push({ id: 'tp3', type: ratio > 1 ? 'achievement' : 'info', message: `Turkiye tarim arazisi dunya ulke ortalamasinin ${ratio.toFixed(1)}x ${ratio > 1 ? 'uzerinde' : 'altinda'} (${formatArea(turkeyData['Tarım arazisi'])} vs ${formatArea(worldAvgs['Tarım arazisi'])})`, severity: 'medium', category: 'Benchmark' });
       }
       setTurkeyInsights(ins);
     } catch (error) { console.error('Turkey veri hatasi:', error); }
@@ -317,8 +317,8 @@ export default function LandUsePage() {
     setLoading(true);
     try {
       const [turkeyForecastRes, worldForecastRes] = await Promise.all([
-        fetchQuery(`SELECT year, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr='Tarim arazisi' AND CAST(year AS SIGNED) >= 1990 ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as val FROM fao_land_use WHERE area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarim arazisi' AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`)
+        fetchQuery(`SELECT year, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr='Tarım arazisi' AND CAST(year AS SIGNED) >= 1990 ORDER BY year`),
+        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as val FROM fao_land_use WHERE area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarım arazisi' AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`)
       ]);
 
       const turkeyData: YearValue[] = (turkeyForecastRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.val) || 0 }));
@@ -363,9 +363,9 @@ export default function LandUsePage() {
     setLoading(true);
     try {
       const [turkeyLatestRes, turkeyOlderRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Sulama altyapisina sahip kara alani','Nadas alani','Ekili alan')`),
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2010' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Sulama altyapisina sahip kara alani','Nadas alani','Ekili alan')`),
-        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 AND item_tr IN ('Tarim arazisi','Islenebilir arazi','Cayir-Mera','Ormanlik alan','Sulama altyapisina sahip kara alani','Nadas alani') GROUP BY item_tr`)
+        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı','Ekili alan')`),
+        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2010' AND (area='Turkiye' OR area='Turkey' OR area='T\u00FCrkiye') AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı','Ekili alan')`),
+        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı') GROUP BY item_tr`)
       ]);
 
       const turkeyNow: Record<string, number> = {};
@@ -376,36 +376,36 @@ export default function LandUsePage() {
       (worldAvgRes.data || []).forEach((r: any) => worldAvg[String(r.item_tr)] = Number(r.avg_val) || 0);
 
       const alerts: IntelligenceAlert[] = [];
-      const agNow = turkeyNow['Tarim arazisi'] || 0;
-      const agBefore = turkeyBefore['Tarim arazisi'] || 0;
+      const agNow = turkeyNow['Tarım arazisi'] || 0;
+      const agBefore = turkeyBefore['Tarım arazisi'] || 0;
       if (agBefore > 0 && agNow < agBefore) {
         const loss = agBefore - agNow;
         const lossPct = (loss / agBefore) * 100;
         alerts.push({ id: 'int-ag-loss', severity: lossPct > 5 ? 'critical' : 'warning', title: 'Tarim Arazisi Kaybi', message: `2010-2022 doneminde ${formatArea(loss)} tarim arazisi kaybedildi (%${lossPct.toFixed(1)})`, metric: 'Arazi kaybi', value: loss });
       }
-      const irrigNow = turkeyNow['Sulama altyapisina sahip kara alani'] || 0;
-      const irrigBefore = turkeyBefore['Sulama altyapisina sahip kara alani'] || 0;
+      const irrigNow = turkeyNow['Sulama altyapısı bulunan arazi'] || 0;
+      const irrigBefore = turkeyBefore['Sulama altyapısı bulunan arazi'] || 0;
       if (irrigBefore > 0 && irrigNow > irrigBefore) {
         const growth = irrigNow - irrigBefore;
         const growthPct = (growth / irrigBefore) * 100;
         alerts.push({ id: 'int-irrig-growth', severity: 'positive', title: 'Sulama Altyapisi Buyumesi', message: `2010-2022 doneminde ${formatArea(growth)} yeni sulama alani (%${growthPct.toFixed(1)} artis)`, metric: 'Sulama artisi', value: growth });
       }
-      const fallowNow = turkeyNow['Nadas alani'] || 0;
-      const arableNow = turkeyNow['Islenebilir arazi'] || 0;
+      const fallowNow = turkeyNow['Geçici nadas alanı'] || 0;
+      const arableNow = turkeyNow['İşlenebilir arazi'] || 0;
       if (arableNow > 0) {
         const fallowRate = (fallowNow / arableNow) * 100;
         if (fallowRate > 15) alerts.push({ id: 'int-fallow-high', severity: 'warning', title: 'Yuksek Nadas Orani', message: `Islenebilir arazinin %${fallowRate.toFixed(1)} nadas - modern tarim yontemleriyle azaltilabilir`, metric: 'Nadas orani', value: fallowRate });
       }
-      const forestNow = turkeyNow['Ormanlik alan'] || 0;
-      const forestBefore = turkeyBefore['Ormanlik alan'] || 0;
+      const forestNow = turkeyNow['Orman alanı'] || 0;
+      const forestBefore = turkeyBefore['Orman alanı'] || 0;
       if (forestBefore > 0) {
         const forestChange = forestNow - forestBefore;
         const forestPct = (forestChange / forestBefore) * 100;
         alerts.push({ id: 'int-forest', severity: forestChange > 0 ? 'positive' : 'critical', title: forestChange > 0 ? 'Ormanlik Alan Artisi' : 'Ormansizlasma', message: `2010-2022: ${forestChange > 0 ? '+' : ''}${formatArea(forestChange)} (${forestPct > 0 ? '+' : ''}%${forestPct.toFixed(1)})`, metric: 'Orman degisimi', value: forestChange });
       }
-      if (agNow > 0 && worldAvg['Tarim arazisi'] > 0 && worldAvg['Sulama altyapisina sahip kara alani'] > 0) {
+      if (agNow > 0 && worldAvg['Tarım arazisi'] > 0 && worldAvg['Sulama altyapısı bulunan arazi'] > 0) {
         const trIrrigRate = irrigNow / agNow * 100;
-        const worldIrrigRate = worldAvg['Sulama altyapisina sahip kara alani'] / worldAvg['Tarim arazisi'] * 100;
+        const worldIrrigRate = worldAvg['Sulama altyapısı bulunan arazi'] / worldAvg['Tarım arazisi'] * 100;
         alerts.push({ id: 'int-irrig-bench', severity: trIrrigRate > worldIrrigRate ? 'positive' : 'info', title: 'Sulama Orani Karsilastirma', message: `Turkiye: %${trIrrigRate.toFixed(1)} vs Dunya ort.: %${worldIrrigRate.toFixed(1)}`, metric: 'Sulama orani', value: trIrrigRate });
       }
 
@@ -613,10 +613,10 @@ export default function LandUsePage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TARIM ARAZISI" value={formatArea(turkeyProfile['Tarim arazisi'] || 0)} subtitle={`Islenebilir: %${(turkeyProfile.arablePct || 0).toFixed(1)} | Mera: %${(turkeyProfile.pasturePct || 0).toFixed(1)}`} icon={Globe} color="green" large />
+                <KPICard title="TARIM ARAZISI" value={formatArea(turkeyProfile['Tarım arazisi'] || 0)} subtitle={`Islenebilir: %${(turkeyProfile.arablePct || 0).toFixed(1)} | Mera: %${(turkeyProfile.pasturePct || 0).toFixed(1)}`} icon={Globe} color="green" large />
                 <KPICard title="SULAMA ORANI" value={formatPercent(turkeyProfile.irrigationRate || 0)} subtitle={`Dunya sirasi: #${turkeyProfile.irrigationRank}`} icon={Target} color="blue" />
-                <KPICard title="NADAS ORANI" value={formatPercent(turkeyProfile.fallowRate || 0)} subtitle={`${formatArea(turkeyProfile['Nadas alani'] || 0)} nadas`} icon={AlertTriangle} color={turkeyProfile.fallowRate > 15 ? 'red' : 'green'} />
-                <KPICard title="ORMANLIK ALAN" value={formatArea(turkeyProfile['Ormanlik alan'] || 0)} subtitle="Agaclandirma trendi" icon={Layers} color="teal" />
+                <KPICard title="NADAS ORANI" value={formatPercent(turkeyProfile.fallowRate || 0)} subtitle={`${formatArea(turkeyProfile['Geçici nadas alanı'] || 0)} nadas`} icon={AlertTriangle} color={turkeyProfile.fallowRate > 15 ? 'red' : 'green'} />
+                <KPICard title="ORMANLIK ALAN" value={formatArea(turkeyProfile['Orman alanı'] || 0)} subtitle="Agaclandirma trendi" icon={Layers} color="teal" />
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
@@ -655,10 +655,10 @@ export default function LandUsePage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={[
-                        { name: 'Islenebilir Arazi', value: turkeyProfile['Islenebilir arazi'] || 0 },
-                        { name: 'Cayir-Mera', value: turkeyProfile['Cayir-Mera'] || 0 },
-                        { name: 'Cok Yillik', value: turkeyProfile['Cok yillik urun alani'] || 0 },
-                        { name: 'Nadas', value: turkeyProfile['Nadas alani'] || 0 },
+                        { name: 'Islenebilir Arazi', value: turkeyProfile['İşlenebilir arazi'] || 0 },
+                        { name: 'Sürekli çayırlar ve meralar', value: turkeyProfile['Sürekli çayırlar ve meralar'] || 0 },
+                        { name: 'Cok Yillik', value: turkeyProfile['Çok yıllık ürünler'] || 0 },
+                        { name: 'Nadas', value: turkeyProfile['Geçici nadas alanı'] || 0 },
                       ].filter(d => d.value > 0)} cx="50%" cy="50%" outerRadius={110} dataKey="value" label={({ name, percent }) => name + ' ' + ((percent || 0) * 100).toFixed(0) + '%'}>
                         {[0, 1, 2, 3].map(i => <Cell key={i} fill={CHART_COLORS[i]} />)}
                       </Pie>
