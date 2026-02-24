@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Dashboard Pro - Light Theme */
   --bg-primary: #f8fafc;
