@@ -2,17 +2,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Line,
-  LineChart, Scatter
+  AreaChart, Area, ComposedChart, Line,
+  Scatter
 } from 'recharts';
-import { Globe, TrendingUp, TrendingDown, Users, Award, AlertTriangle, Activity, Zap, MapPin, Target, BarChart2, Home, Building2 } from 'lucide-react';
+import { Globe, TrendingUp, TrendingDown, Users, Award, AlertTriangle, Activity, Zap, MapPin, BarChart2, Home, Building2 } from 'lucide-react';
 import { fetchQuery } from '../services/api';
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { Insight } from '../components/InsightCard';
 import { translateCountry } from '../utils/countryTranslations';
 import {
-  calculateCAGR, calculateHHI, calculateVolatility, forecastLinear, detectAnomalies, calculateYoY,
+  calculateCAGR, forecastLinear, detectAnomalies, calculateYoY,
   analyzeTrend, EXCLUDED_AREAS
 } from '../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../utils/intelligenceCalculations';
@@ -83,7 +83,7 @@ export default function PopulationPage() {
   const [intelligenceAlerts, setIntelligenceAlerts] = useState<IntelligenceAlert[]>([]);
   const [allInsights, setAllInsights] = useState<Insight[]>([]);
 
-  const excludeFilter = EXCLUDED_AREAS.map(a => `'${a}'`).join(',');
+  const excludeFilter = [...EXCLUDED_AREAS].map((a: string) => `'${a}'`).join(',');
 
   // ==================== OVERVIEW ====================
   const loadOverview = useCallback(async () => {

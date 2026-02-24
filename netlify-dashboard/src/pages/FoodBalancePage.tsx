@@ -2,18 +2,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Line,
-  LineChart, Scatter
+  Cell, AreaChart, Area, ComposedChart, Line,
+  Scatter
 } from 'recharts';
-import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Layers, BarChart2, Activity, Zap, Shield, Heart, Scale, Wheat } from 'lucide-react';
+import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Activity, Zap, Shield, Heart, Scale, Wheat } from 'lucide-react';
 import { fetchQuery } from '../services/api';
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { Insight } from '../components/InsightCard';
 import { translateCountry } from '../utils/countryTranslations';
 import {
-  calculateCAGR, calculateHHI, calculateVolatility, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS
+  calculateCAGR, forecastLinear, detectAnomalies, calculateYoY,
+  analyzeTrend
 } from '../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../utils/intelligenceCalculations';
 
