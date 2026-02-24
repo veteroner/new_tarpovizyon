@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Line,
-  LineChart, Scatter
+  Scatter
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, Users, Award, AlertTriangle, Activity, Zap, MapPin, Target, BarChart2, UserCheck } from 'lucide-react';
 import { fetchQuery } from '../services/api';
@@ -12,7 +12,7 @@ import { InsightCard } from '../components/InsightCard';
 import type { Insight } from '../components/InsightCard';
 import { translateCountry } from '../utils/countryTranslations';
 import {
-  calculateCAGR, calculateHHI, calculateVolatility, forecastLinear, detectAnomalies, calculateYoY,
+  calculateCAGR, calculateHHI, forecastLinear, detectAnomalies, calculateYoY,
   analyzeTrend, EXCLUDED_AREAS
 } from '../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../utils/intelligenceCalculations';
@@ -81,7 +81,7 @@ export default function AgriculturalEmploymentPage() {
   const [intelligenceAlerts, setIntelligenceAlerts] = useState<IntelligenceAlert[]>([]);
   const [allInsights, setAllInsights] = useState<Insight[]>([]);
 
-  const excludeFilter = EXCLUDED_AREAS.map(a => `'${a}'`).join(',');
+  const excludeFilter = [...EXCLUDED_AREAS].map(a => `'${a}'`).join(',');
 
   // ==================== OVERVIEW ====================
   const loadOverview = useCallback(async () => {
@@ -180,7 +180,8 @@ export default function AgriculturalEmploymentPage() {
       const countries = (shareRes.data || []).map((r: any) => ({ name: translateCountry(String(r.area || '')), value: Number(r.toplam) || 0 }));
       const worldTotal = countries.reduce((s: number, c: any) => s + c.value, 0);
       const shares = countries.map((c: any) => c.value / worldTotal);
-      const hhi = calculateHHI(shares);
+      const hhiResult = calculateHHI(shares);
+      const hhi = typeof hhiResult === 'number' ? hhiResult : (hhiResult as any).value ?? (hhiResult as any).hhi ?? 0;
       const top5Share = countries.slice(0, 5).reduce((s: number, c: any) => s + c.value, 0) / worldTotal * 100;
       const top10Share = countries.slice(0, 10).reduce((s: number, c: any) => s + c.value, 0) / worldTotal * 100;
 
@@ -307,7 +308,6 @@ export default function AgriculturalEmploymentPage() {
       const now = turkeyNowRes.data?.[0];
       const before = turkeyBeforeRes.data?.[0];
       const totalNow = Number(now?.toplam) || 0;
-      const maleNow = Number(now?.erkek) || 0;
       const femaleNow = Number(now?.kadin) || 0;
       const totalBefore = Number(before?.toplam) || 0;
 
@@ -488,7 +488,7 @@ export default function AgriculturalEmploymentPage() {
                   <h3 className="chart-title">Istihdam Pazar Payi Dagilimi</h3>
                   <ResponsiveContainer width="100%" height={350}>
                     <PieChart>
-                      <Pie data={concentrationData.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} dataKey="value" label={({ name, share }) => `${name} ${share}%`} labelLine={false}>
+                      <Pie data={concentrationData.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} dataKey="value" label={({ name, share }: any) => `${name} ${share}%`} labelLine={false}>
                         {concentrationData.pieData.map((d: any, i: number) => <Cell key={i} fill={d.fill} />)}
                       </Pie>
                       <Tooltip formatter={(v: number) => [formatPop(v), 'Istihdam']} />
