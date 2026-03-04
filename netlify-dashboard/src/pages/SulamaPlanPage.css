@@ -860,6 +860,121 @@
   color: var(--sp-text-primary);
 }
 
+/* ── Bölge Card (Step 1) ───────────────────────────────────────────────────── */
+
+.sp-bolge-card {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #bbf7d0;
+  border-radius: 0.75rem;
+  padding: 1.2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sp-bolge-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.sp-bolge-card__desc {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.sp-bolge-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #047857;
+}
+
+/* ── Chart Card ────────────────────────────────────────────────────────────── */
+
+.sp-chart-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sp-chart-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+}
+
+.sp-chart-desc {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  color: var(--sp-text-secondary);
+}
+
+/* ── Detail Table Card ─────────────────────────────────────────────────────── */
+
+.sp-table-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sp-table-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.sp-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sp-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.sp-detail-table th,
+.sp-detail-table td {
+  padding: 0.5rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.sp-detail-table th {
+  background: #f9fafb;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--sp-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.sp-detail-table td:first-child,
+.sp-detail-table th:first-child {
+  text-align: left;
+}
+
+.sp-row--critical {
+  background: #fef2f2;
+}
+
+.sp-row--total {
+  background: #f0f9ff;
+  font-weight: 700;
+}
+
+.sp-row--total td {
+  border-top: 2px solid var(--sp-primary);
+}
+
 /* ── Empty State ────────────────────────────────────────────────────────────── */
 
 .sp-empty {
@@ -877,7 +992,8 @@
   .sp-topbar, .sp-steps, .sp-btn-row { display: none !important; }
   .sp-content { max-width: 100%; padding: 0; }
   .sp-results { gap: 1rem; }
-  .sp-kpi-grid, .sp-cost-card, .sp-benefit-card, .sp-schedule-card, .sp-params-card {
+  .sp-kpi-grid, .sp-cost-card, .sp-benefit-card, .sp-schedule-card, .sp-params-card,
+  .sp-chart-card, .sp-table-card {
     break-inside: avoid;
     box-shadow: none;
     border: 1px solid #e5e7eb;

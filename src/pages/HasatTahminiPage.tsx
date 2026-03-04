@@ -1,10 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer,
+  Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, Area, ComposedChart,
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvinceRanking } from '../services/api';
+import { TurkeyHeatMap, type RegionTotal } from '../components/TurkeyHeatMap';
+import { getBolge, BOLGE_META, getETo, getYagis } from '../utils/climate-data';
+import WeatherWidget from '../components/WeatherWidget';
 import './HasatTahminiPage.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,6 +52,8 @@ interface WizardState {
   ilData: YearData | null;
   turkiyeData: YearData | null;
   compareData: { urun: string; ilceData: YearData | null; ilData: YearData | null; turkiyeData: YearData | null }[];
+  ilVerimler: RegionTotal[];       // all provinces' yield for map
+  ilRanking: { il: string; verim: number }[];
 }
 
 // ─── Sowing Calendar ──────────────────────────────────────────────────────────
@@ -206,6 +211,57 @@ function riskLabel(cv: number): { label: string; color: string; emoji: string } 
   return             { label: 'Yüksek Risk', color: '#ef4444', emoji: '🔴' };
 }
 
+// ─── Climate Risk Score ───────────────────────────────────────────────────────
+
+interface ClimateRisk {
+  skor: number;            // 0-100 (100 = very risky)
+  label: string;
+  color: string;
+  emoji: string;
+  faktorler: { ad: string; puan: number; aciklama: string }[];
+}
+
+function calcClimateRisk(il: string, urun: string): ClimateRisk | null {
+  const bolge = getBolge(il);
+  if (!bolge) return null;
+  const meta = BOLGE_META[bolge];
+  const faktorler: { ad: string; puan: number; aciklama: string }[] = [];
+
+  // 1. Summer heat stress (July ETo)
+  const etoJul = getETo(il, 7);
+  const heatPuan = etoJul > 7.5 ? 25 : etoJul > 6 ? 15 : etoJul > 4 ? 8 : 3;
+  faktorler.push({ ad: 'Sıcaklık Stresi', puan: heatPuan, aciklama: `Temmuz ETo: ${etoJul.toFixed(1)} mm/gün` });
+
+  // 2. Drought risk (summer rainfall sum Jun-Aug)
+  const yazYagis = [6, 7, 8].reduce((s, m) => s + getYagis(il, m), 0);
+  const droughtPuan = yazYagis < 30 ? 25 : yazYagis < 60 ? 18 : yazYagis < 100 ? 10 : 4;
+  faktorler.push({ ad: 'Kuraklık Riski', puan: droughtPuan, aciklama: `Yaz yağışı: ${yazYagis.toFixed(0)} mm` });
+
+  // 3. Spring frost risk (March avg temp proxy — lower ETo = colder)
+  const etoMar = getETo(il, 3);
+  const frostPuan = etoMar < 1.5 ? 25 : etoMar < 2.5 ? 15 : etoMar < 3.5 ? 8 : 3;
+  faktorler.push({ ad: 'Don Riski', puan: frostPuan, aciklama: `Mart ETo: ${etoMar.toFixed(1)} mm/gün` });
+
+  // 4. Annual rainfall sufficiency
+  const yillikYagis = Array.from({ length: 12 }, (_, i) => getYagis(il, i + 1)).reduce((a, b) => a + b, 0);
+  // Adjust threshold by crop type
+  const u = urun.toLocaleLowerCase('tr-TR');
+  const isWaterHungry = u.includes('pirinç') || u.includes('mısır') || u.includes('pamuk') || u.includes('şeker');
+  const threshold = isWaterHungry ? 700 : 450;
+  const rainPuan = yillikYagis < threshold * 0.5 ? 25 : yillikYagis < threshold * 0.75 ? 18 : yillikYagis < threshold ? 10 : 4;
+  faktorler.push({ ad: 'Yağış Yeterliliği', puan: rainPuan, aciklama: `Yıllık: ${yillikYagis.toFixed(0)} mm (eşik: ${threshold} mm)` });
+
+  const skor = faktorler.reduce((s, f) => s + f.puan, 0);
+  const label = skor >= 60 ? 'Yüksek İklim Riski' : skor >= 35 ? 'Orta İklim Riski' : 'Düşük İklim Riski';
+  const color = skor >= 60 ? '#ef4444' : skor >= 35 ? '#f59e0b' : '#22c55e';
+  const emoji = skor >= 60 ? '🔴' : skor >= 35 ? '🟡' : '🟢';
+
+  // Add bolge context
+  faktorler.push({ ad: 'İklim Bölgesi', puan: 0, aciklama: `${meta.emoji} ${meta.ad}` });
+
+  return { skor, label, color, emoji, faktorler };
+}
+
 interface CalcResult {
   avgVerim: number; adjVerim: number;
   projVerim: number;          // linear regression → 2025 projection
@@ -216,6 +272,7 @@ interface CalcResult {
   dataLevel: 'ilce' | 'il' | 'turkiye';
   perfVsIl: number | null;
   perfVsTR: number | null;
+  stdDev: number;              // for confidence interval
   // Optional economics
   brutGelir: number | null;        // ₺
   toplamMaliyet: number | null;     // ₺
@@ -265,7 +322,7 @@ function calculate(state: WizardState): CalcResult | null {
     minUretim: Math.max(0, ((adjVerim - margin) * state.alan) / 1000),
     maxUretim: ((adjVerim + margin) * state.alan) / 1000,
     trend: getTrend(src), cv, risk: riskLabel(cv), dataLevel: level,
-    perfVsIl, perfVsTR,
+    perfVsIl, perfVsTR, stdDev: sd,
     brutGelir, toplamMaliyet, netKar, karMarji,
   };
 }
@@ -326,10 +383,6 @@ function calcQuick(data: YearData | null, alan: number, sulama: boolean, toprak:
   };
 }
 
-function sqlEscape(value: string): string {
-  return value.replace(/'/g, "''");
-}
-
 function normalizeTR(value: string): string {
   return value
     .trim()
@@ -357,24 +410,57 @@ function findBestMatch(list: string[], candidate: string): string {
 
 // ─── GPS ──────────────────────────────────────────────────────────────────────
 
-async function reverseGeocode(lat: number, lon: number): Promise<{ il: string; ilce: string } | null> {
+// Simple localStorage cache for Nominatim results (avoids repeated API calls)
+const GEOCODE_CACHE_KEY = 'nominatim_cache';
+function getGeocodeCache(): Record<string, { il: string; ilce: string; ts: number }> {
   try {
-    // Note: Browsers disallow setting headers like User-Agent/Accept-Language.
-    // We rely on query params only.
+    return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY) || '{}');
+  } catch { return {}; }
+}
+function setGeocodeCache(key: string, value: { il: string; ilce: string }) {
+  try {
+    const cache = getGeocodeCache();
+    cache[key] = { ...value, ts: Date.now() };
+    // Keep max 50 entries
+    const keys = Object.keys(cache);
+    if (keys.length > 50) {
+      const sorted = keys.sort((a, b) => (cache[a].ts || 0) - (cache[b].ts || 0));
+      sorted.slice(0, keys.length - 50).forEach(k => delete cache[k]);
+    }
+    localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache));
+  } catch { /* localStorage full or unavailable */ }
+}
+
+async function reverseGeocode(lat: number, lon: number): Promise<{ il: string; ilce: string } | null> {
+  // Round coordinates to ~1km precision for cache key
+  const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+  const cached = getGeocodeCache()[cacheKey];
+  // Cache entries valid for 30 days
+  if (cached && (Date.now() - cached.ts) < 30 * 24 * 60 * 60 * 1000) {
+    return { il: cached.il, ilce: cached.ilce };
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=tr&zoom=10`,
+      { signal: controller.signal },
     );
+    clearTimeout(timeout);
     if (!res.ok) return null;
     const data = await res.json() as { address?: Record<string, string> };
     const addr = data?.address ?? {};
     if (!Object.keys(addr).length) return null;
     const clean = (s: string) => s.replace(/\s+İl(?:i|çe)?$/i, '').replace(/\s+Merkez$/i, '').trim();
-    return {
+    const result = {
       il:   clean(addr.province ?? addr.state ?? ''),
       ilce: clean(addr.county ?? addr.municipality ?? addr.district ?? ''),
     };
+    if (result.il) setGeocodeCache(cacheKey, result);
+    return result;
   } catch {
-    return null;
+    return null; // Network error / timeout — graceful degradation
   }
 }
 
@@ -408,6 +494,7 @@ const INITIAL: WizardState = {
   compareUrunler: [],
   ilceData: null, ilData: null, turkiyeData: null,
   compareData: [],
+  ilVerimler: [], ilRanking: [],
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -439,7 +526,7 @@ export function HasatTahminiPage(): React.ReactElement {
 
   // Load il list on mount
   useEffect(() => {
-    fetchQuery("SELECT DISTINCT ili FROM tuik_bitkisel_uretim WHERE duzey='ilçe' ORDER BY ili")
+    fetchProvinces()
       .then(r => {
         if (r.error) setError(r.error);
         if (r.data) setIlList(r.data.map(row => String(row.ili)));
@@ -449,10 +536,10 @@ export function HasatTahminiPage(): React.ReactElement {
   // Load ilçe list when il changes (no sync setState — reset happens in onChange)
   useEffect(() => {
     if (!state.il) return;
-    const il = sqlEscape(state.il);
-    const sql = `SELECT DISTINCT yer FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND ili='${il}' ORDER BY yer`;
-    fetchQuery(sql)
+    let stale = false;
+    fetchDistricts(state.il)
       .then(r => {
+        if (stale) return;
         setIlceLoad(false);
         if (r.error) setError(r.error);
         if (!r.data) return;
@@ -470,13 +557,12 @@ export function HasatTahminiPage(): React.ReactElement {
           }
         }
       });
+    return () => { stale = true; };
   }, [state.il]);
 
   const loadCrops = useCallback(async (il: string, ilce: string) => {
     setLoading(true);
-    const r = await fetchQuery(
-      `SELECT DISTINCT urun FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND ili='${sqlEscape(il)}' AND yer='${sqlEscape(ilce)}' AND unsur='Verim' AND birim='Kg/Dekar' AND (y2022+y2023+y2024) > 0 ORDER BY urun`,
-    );
+    const r = await fetchCrops(il, ilce);
     if (r.error) setError(r.error);
     if (r.data) setUrunList(r.data.map(row => String(row.urun)));
     setLoading(false);
@@ -507,15 +593,12 @@ export function HasatTahminiPage(): React.ReactElement {
   }, [ilList]);
 
   const fetchAndGoResults = useCallback(async () => {
-    const il = sqlEscape(state.il);
-    const ilce = sqlEscape(state.ilce);
-    const urun = sqlEscape(state.urun);
     setError('');
     setLoading(true);
     const [ilceRes, ilRes, trRes] = await Promise.all([
-      fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND ili='${il}' AND yer='${ilce}' AND urun='${urun}' AND unsur='Verim' AND birim='Kg/Dekar'`),
-      fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='il' AND ili='${il}' AND urun='${urun}' AND unsur='Verim' AND birim='Kg/Dekar'`),
-      fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='Turkey' AND urun='${urun}' AND unsur='Verim' AND birim='Kg/Dekar'`),
+      fetchYieldData(state.il, state.ilce, state.urun, 'ilçe'),
+      fetchYieldData(state.il, state.ilce, state.urun, 'il'),
+      fetchYieldData(state.il, state.ilce, state.urun, 'Turkey'),
     ]);
     if (ilceRes.error || ilRes.error || trRes.error) {
       setError(ilceRes.error ?? ilRes.error ?? trRes.error ?? 'Veri alınamadı');
@@ -525,14 +608,24 @@ export function HasatTahminiPage(): React.ReactElement {
     setState(s => ({ ...s, ilceData: toYD(ilceRes), ilData: toYD(ilRes), turkiyeData: toYD(trRes), step: 4 }));
     setLoading(false);
 
+    // Fetch all provinces' yield for the map + ranking (async, non-blocking)
+    fetchProvinceRanking(state.urun).then(mapRes => {
+      if (mapRes.data) {
+        const ranking = mapRes.data.map(r => ({ il: String(r.ili), verim: Number(r.y2024) || 0 }))
+          .filter(r => r.verim > 0)
+          .sort((a, b) => b.verim - a.verim);
+        const regionTotals: RegionTotal[] = ranking.map(r => ({ name: r.il, value: r.verim, unit: 'Kg/da' }));
+        setState(s => ({ ...s, ilVerimler: regionTotals, ilRanking: ranking }));
+      }
+    });
+
     // Also fetch comparison crops (if any selected)
     if (state.compareUrunler.length > 0) {
       const cmpPromises = state.compareUrunler.map(async (cu) => {
-        const cu_esc = sqlEscape(cu);
         const [cI, cIl, cTr] = await Promise.all([
-          fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND ili='${il}' AND yer='${ilce}' AND urun='${cu_esc}' AND unsur='Verim' AND birim='Kg/Dekar'`),
-          fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='il' AND ili='${il}' AND urun='${cu_esc}' AND unsur='Verim' AND birim='Kg/Dekar'`),
-          fetchQuery(`SELECT y2018,y2019,y2020,y2021,y2022,y2023,y2024 FROM tuik_bitkisel_uretim WHERE duzey='Turkey' AND urun='${cu_esc}' AND unsur='Verim' AND birim='Kg/Dekar'`),
+          fetchYieldData(state.il, state.ilce, cu, 'ilçe'),
+          fetchYieldData(state.il, state.ilce, cu, 'il'),
+          fetchYieldData(state.il, state.ilce, cu, 'Turkey'),
         ]);
         return { urun: cu, ilceData: toYD(cI), ilData: toYD(cIl), turkiyeData: toYD(cTr) };
       });
@@ -585,7 +678,7 @@ export function HasatTahminiPage(): React.ReactElement {
       setHistory(loadHistory());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.step]);
+  }, [state.step, calc]);
 
   const ydVal = (yd: YearData | null | undefined, yr: string): number | undefined => {
     if (!yd) return undefined;
@@ -593,10 +686,15 @@ export function HasatTahminiPage(): React.ReactElement {
     return yd[k] || undefined;
   };
 
-  // Build chart data for 7 historical years + 2 projection years
+  // Build chart data for 7 historical years + 2 projection years (with confidence bands)
   const regIlce = state.ilceData ? linearRegression(getYearsAll(state.ilceData)) : null;
   const regIl   = state.ilData   ? linearRegression(getYearsAll(state.ilData)) : null;
   const regTR   = state.turkiyeData ? linearRegression(getYearsAll(state.turkiyeData)) : null;
+
+  const sdBand = calc?.stdDev ?? 0;
+  const sf = state.sulama ? 1.25 : 1.0;
+  const tf = state.toprakKalite === 'iyi' ? 1.15 : state.toprakKalite === 'zayif' ? 0.85 : 1.0;
+  const combinedFactor = sf * tf;
 
   const chartData = [
     ...CHART_YEARS.map(yr => ({
@@ -604,14 +702,29 @@ export function HasatTahminiPage(): React.ReactElement {
       ilce:    ydVal(state.ilceData, yr),
       il:      ydVal(state.ilData, yr),
       turkiye: ydVal(state.turkiyeData, yr),
+      band: undefined as [number, number] | undefined,
     })),
-    ...PROJ_YEARS.map(yr => ({
-      yil: `${yr}*`,  // asterisk marks projection
-      ilce:    regIlce && regIlce.r2 >= 0.3 ? Math.max(0, regIlce.a + regIlce.b * Number(yr)) : undefined,
-      il:      regIl   && regIl.r2   >= 0.3 ? Math.max(0, regIl.a   + regIl.b   * Number(yr)) : undefined,
-      turkiye: regTR   && regTR.r2   >= 0.3 ? Math.max(0, regTR.a   + regTR.b   * Number(yr)) : undefined,
-    })),
+    ...PROJ_YEARS.map(yr => {
+      const projVal = regIlce && regIlce.r2 >= 0.3 ? Math.max(0, regIlce.a + regIlce.b * Number(yr))
+        : regIl && regIl.r2 >= 0.3 ? Math.max(0, regIl.a + regIl.b * Number(yr))
+        : undefined;
+      return {
+        yil: `${yr}*`,
+        ilce:    regIlce && regIlce.r2 >= 0.3 ? Math.max(0, regIlce.a + regIlce.b * Number(yr)) : undefined,
+        il:      regIl   && regIl.r2   >= 0.3 ? Math.max(0, regIl.a   + regIl.b   * Number(yr)) : undefined,
+        turkiye: regTR   && regTR.r2   >= 0.3 ? Math.max(0, regTR.a   + regTR.b   * Number(yr)) : undefined,
+        band: projVal !== undefined
+          ? [Math.max(0, (projVal - sdBand) * combinedFactor), (projVal + sdBand) * combinedFactor] as [number, number]
+          : undefined,
+      };
+    }),
   ];
+
+  // Climate risk
+  const climateRisk = state.il ? calcClimateRisk(state.il, state.urun) : null;
+
+  // Province ranking — find user's province rank
+  const userIlRank = state.ilRanking.findIndex(r => r.il === state.il) + 1;
 
   // Multi-crop comparison results
   const compareResults = state.compareData.map(cd => ({
@@ -692,6 +805,15 @@ export function HasatTahminiPage(): React.ReactElement {
                 </select>
               </div>
             </div>
+
+            {state.il && (
+              <>
+                <WeatherWidget il={state.il} />
+                <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#718096', textAlign: 'center' }}>
+                  Canlı hava verisi referans amaçlıdır; hesaplamalar uzun yıl iklim ortalamalarına dayanır.
+                </p>
+              </>
+            )}
 
             {state.il && state.ilce && (
               <div className="hz-location-badge">
@@ -1054,17 +1176,22 @@ export function HasatTahminiPage(): React.ReactElement {
               </div>
             </div>
 
-            {/* Trend chart — 7 yıl + projeksiyon */}
+            {/* Trend chart — 7 yıl + projeksiyon + güven aralığı */}
             <div className="hz-chart-card">
-              <h3>Verim Trendi ve Projeksiyon (Kg/da)</h3>
-              <p className="hz-chart-note">* 2025-2026 değerleri lineer regresyon projeksiyonudur</p>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <h3>Verim Trendi, Projeksiyon ve Güven Aralığı (Kg/da)</h3>
+              <p className="hz-chart-note">* 2025-2026 değerleri lineer regresyon projeksiyonudur. Renkli bant ±1σ güven aralığını gösterir.</p>
+              <ResponsiveContainer width="100%" height={350}>
+                <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="yil" />
                   <YAxis tickFormatter={(v: number) => v.toFixed(0)} />
-                  <Tooltip formatter={(v: number) => [`${v.toFixed(0)} Kg/da`]} />
+                  <Tooltip formatter={(v: number | number[]) => {
+                    if (Array.isArray(v)) return [`${v[0].toFixed(0)} – ${v[1].toFixed(0)} Kg/da`, 'Güven Aralığı'];
+                    return [`${v.toFixed(0)} Kg/da`];
+                  }} />
                   <Legend />
+                  <Area type="monotone" dataKey="band" name="±1σ Güven Aralığı"
+                    fill="#f59e0b" fillOpacity={0.15} stroke="none" connectNulls />
                   {state.ilceData && (
                     <Line type="monotone" dataKey="ilce" name={state.ilce}
                       stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 4 }} connectNulls />
@@ -1077,7 +1204,7 @@ export function HasatTahminiPage(): React.ReactElement {
                     <Line type="monotone" dataKey="turkiye" name="Türkiye Ort."
                       stroke="#9ca3af" strokeWidth={1.5} strokeDasharray="3 3" dot={false} connectNulls />
                   )}
-                </LineChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
 
@@ -1104,6 +1231,132 @@ export function HasatTahminiPage(): React.ReactElement {
                 </div>
               );
             })()}
+
+            {/* ── Turkey Yield HeatMap ── */}
+            {state.ilVerimler.length > 0 && (
+              <div className="hz-map-card">
+                <h3>🗺️ Türkiye Verim Haritası — {state.urun} (2024)</h3>
+                <p className="hz-chart-note">İller üzerinde gezinerek verim değerini görebilirsiniz. Koyu renk = yüksek verim.</p>
+                <TurkeyHeatMap
+                  regionTotals={state.ilVerimler}
+                  unitLabel="Kg/da"
+                  height={420}
+                  fillMode="heat"
+                />
+                {userIlRank > 0 && (
+                  <div className="hz-map-rank-badge">
+                    📍 <strong>{state.il}</strong> — Türkiye genelinde <strong>{userIlRank}.</strong> sırada
+                    ({state.ilRanking.length} il arasında)
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── İl Sıralaması Tablosu ── */}
+            {state.ilRanking.length > 0 && (
+              <div className="hz-ranking-card">
+                <h3>🏆 İl Verim Sıralaması — {state.urun} (2024, Kg/da)</h3>
+                <div className="hz-ranking-table-wrap">
+                  <table className="hz-ranking-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>İl</th>
+                        <th>Verim</th>
+                        <th>Grafik</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const topN = 10;
+                        const maxV = state.ilRanking[0]?.verim ?? 1;
+                        const userIdx = state.ilRanking.findIndex(r => r.il === state.il);
+                        const showRows = state.ilRanking.slice(0, topN);
+                        const userOutside = userIdx >= topN;
+                        return (
+                          <>
+                            {showRows.map((r, i) => (
+                              <tr key={r.il} className={r.il === state.il ? 'hz-ranking-row--highlight' : ''}>
+                                <td className="hz-ranking-rank">
+                                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                                </td>
+                                <td>{r.il} {r.il === state.il && '📍'}</td>
+                                <td className="hz-ranking-verim">{r.verim.toFixed(0)}</td>
+                                <td>
+                                  <div className="hz-ranking-bar">
+                                    <div style={{ width: `${(r.verim / maxV) * 100}%`, background: r.il === state.il ? '#f59e0b' : '#3b82f6' }} />
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                            {userOutside && (
+                              <>
+                                <tr className="hz-ranking-row--sep">
+                                  <td colSpan={4}>···</td>
+                                </tr>
+                                <tr className="hz-ranking-row--highlight">
+                                  <td className="hz-ranking-rank">{userIdx + 1}</td>
+                                  <td>{state.il} 📍</td>
+                                  <td className="hz-ranking-verim">{state.ilRanking[userIdx].verim.toFixed(0)}</td>
+                                  <td>
+                                    <div className="hz-ranking-bar">
+                                      <div style={{ width: `${(state.ilRanking[userIdx].verim / maxV) * 100}%`, background: '#f59e0b' }} />
+                                    </div>
+                                  </td>
+                                </tr>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="hz-chart-note">Toplam {state.ilRanking.length} il arasında {state.urun} verimi karşılaştırması</p>
+              </div>
+            )}
+
+            {/* ── İklim Risk Skoru ── */}
+            {climateRisk && (
+              <div className="hz-climate-card">
+                <h3>🌡️ İklim Risk Analizi — {state.il}</h3>
+                <div className="hz-climate-header">
+                  <div className="hz-climate-score" style={{ borderColor: climateRisk.color }}>
+                    <span className="hz-climate-score__val">{climateRisk.skor}</span>
+                    <span className="hz-climate-score__max">/100</span>
+                  </div>
+                  <div className="hz-climate-label" style={{ color: climateRisk.color }}>
+                    {climateRisk.emoji} {climateRisk.label}
+                  </div>
+                </div>
+                <div className="hz-climate-factors">
+                  {climateRisk.faktorler.filter(f => f.puan > 0).map(f => (
+                    <div key={f.ad} className="hz-climate-factor">
+                      <div className="hz-climate-factor__head">
+                        <span className="hz-climate-factor__name">{f.ad}</span>
+                        <span className="hz-climate-factor__puan" style={{
+                          color: f.puan >= 20 ? '#ef4444' : f.puan >= 12 ? '#f59e0b' : '#22c55e'
+                        }}>
+                          {f.puan}/25
+                        </span>
+                      </div>
+                      <div className="hz-climate-factor__bar">
+                        <div style={{
+                          width: `${(f.puan / 25) * 100}%`,
+                          background: f.puan >= 20 ? '#ef4444' : f.puan >= 12 ? '#f59e0b' : '#22c55e',
+                        }} />
+                      </div>
+                      <span className="hz-climate-factor__desc">{f.aciklama}</span>
+                    </div>
+                  ))}
+                  {climateRisk.faktorler.filter(f => f.puan === 0).map(f => (
+                    <div key={f.ad} className="hz-climate-factor hz-climate-factor--info">
+                      <span>{f.aciklama}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Multi-crop Comparison Matrix ── */}
             {compareResults.length > 0 && (
@@ -1227,6 +1480,18 @@ export function HasatTahminiPage(): React.ReactElement {
                 )}
               </div>
             )}
+
+            {/* ── Model Disclaimer ──────────────────────────────────────── */}
+            <div className="hz-card" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '2px solid #f59e0b' }}>
+              <h3 style={{ color: '#92400e', margin: '0 0 8px 0', fontSize: '1rem' }}>⚠️ Tahmin Uyarısı</h3>
+              <ul style={{ margin: 0, paddingLeft: 20, color: '#92400e', fontSize: '0.85rem', lineHeight: 1.8 }}>
+                <li>Bu sonuçlar <strong>istatistiksel bir tahmin modeline</strong> dayanmaktadır ve kesin verim garantisi değildir.</li>
+                <li>Model, TÜİK il bazlı yıllık üretim istatistiklerinden lineer regresyon ile hesaplanmıştır.</li>
+                <li>İklim düzeltmeleri il bazlı uzun yıl ortalamaları kullanılmıştır; canlı hava verileri yalnızca bilgi amaçlıdır.</li>
+                <li>Gerçek verim; hava koşulları, hastalık, sulama, gübreleme, tohum kalitesi gibi faktörlere bağlıdır.</li>
+                <li>Profesyonel tarımsal danışmanlık yerine geçmez — karar vermeden önce uzman görüşü alınız.</li>
+              </ul>
+            </div>
 
             <div className="hz-btn-row hz-btn-row--center">
               <button className="hz-btn hz-btn--secondary" onClick={() => setState(s => ({ ...s, step: 3 }))}>

@@ -923,3 +923,167 @@ body {
   }
 }
 
+/* ===================================================================
+   MOBILE APP STYLES - Capacitor / Native Mobile UI
+   =================================================================== */
+
+/* ===== MOBILE SAFE AREAS ===== */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ===== PAGE CONTAINER (MOBILE) ===== */
+.page-container {
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 80px; /* space for TabBar */
+}
+
+/* ===== MOBILE PAGE TRANSITIONS ===== */
+.page-enter {
+  animation: pageSlideIn 0.25s ease-out forwards;
+}
+
+.page-exit {
+  animation: pageSlideOut 0.2s ease-in forwards;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+/* ===== TAP / ACTIVE STATE ===== */
+.tap-active:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+  transition: all 0.1s ease;
+}
+
+/* ===== GLASS EFFECT (web) ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Mobile-app context: glass-card becomes a clean white card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.mobile-app .glass-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #d1fae5;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.07), 0 0 0 0 transparent;
+}
+
+/* ===== GRADIENT BACKGROUNDS ===== */
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.gradient-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.gradient-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* ===== MOBILE SCROLLBAR HIDE ===== */
+.scrollbar-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== MOBILE BODY (applied via .mobile-app class) ===== */
+.mobile-app {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-app body,
+.mobile-app #root {
+  height: 100%;
+  width: 100%;
+  background-color: #f0fdf4;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Disable text selection on mobile (when mobile-app class is present) */
+.mobile-app {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.mobile-app input,
+.mobile-app textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Mobile scrollbar hide */
+.mobile-app ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ===== OVERSCROLL ===== */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}

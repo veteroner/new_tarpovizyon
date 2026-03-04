@@ -45,7 +45,7 @@ function formatShort(value: number): string {
 }
 
 export default function MacroEconomicPage() {
-  const [selectedYear, setSelectedYear] = useState('2023');
+  const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedIndicator, setSelectedIndicator] = useState('Gross Domestic Product');
   const [loading, setLoading] = useState(true);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
@@ -57,14 +57,14 @@ export default function MacroEconomicPage() {
     try {
       // Dünya toplam GSYH yıllık trend
       const yearlyQuery = `SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total 
-        FROM fao_makro_1 
-        WHERE item='${selectedIndicator}' AND elementcode='6224' AND unit='million'
+        FROM fao_ME_indicator 
+        WHERE item='${selectedIndicator}' AND elementcode='6110' AND unit='million USD'
         GROUP BY year ORDER BY year`;
 
       // Ülke bazında GSYH (en büyük 20)
       const countryQuery = `SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total 
-        FROM fao_makro_1 
-        WHERE item='${selectedIndicator}' AND year='${selectedYear}' AND elementcode='6224' AND unit='million'
+        FROM fao_ME_indicator 
+        WHERE item='${selectedIndicator}' AND year='${selectedYear}' AND elementcode='6110' AND unit='million USD'
         GROUP BY area ORDER BY total DESC LIMIT 20`;
 
       const [yearlyRes, countryRes] = await Promise.all([
@@ -139,7 +139,7 @@ export default function MacroEconomicPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 54 }, (_, i) => 2023 - i).map(year => (
+            {Array.from({ length: 55 }, (_, i) => 2024 - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>

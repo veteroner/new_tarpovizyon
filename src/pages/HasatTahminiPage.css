@@ -25,6 +25,7 @@
   --hz-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   --hz-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --hz-radius-sm: 8px;
+  --hz-radius: 12px;
   --hz-radius-md: 12px;
   --hz-radius-lg: 16px;
   --hz-radius-xl: 20px;
@@ -1364,7 +1365,7 @@
   font-size: 0.82rem;
 }
 
-.hz-input {
+.hz-econ-fields .hz-input {
   width: 100%;
   padding: 0.7rem 0.9rem;
   border: 1.5px solid #d4d4d8;
@@ -1374,7 +1375,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.hz-input:focus {
+.hz-econ-fields .hz-input:focus {
   outline: none;
   border-color: var(--hz-primary);
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
@@ -1544,7 +1545,7 @@
 .hz-multicrop-table th {
   text-align: left;
   padding: 0.6rem 0.8rem;
-  background: var(--hz-bg-card);
+  background: var(--hz-card-bg);
   border-bottom: 2px solid #e5e7eb;
   font-weight: 700;
   color: var(--hz-text-secondary);
@@ -1696,6 +1697,222 @@
   .hz-history-item__stats { flex-wrap: wrap; }
 }
 
+/* ── Turkey HeatMap Card ────────────────────────────────────────────────────── */
+
+.hz-map-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.hz-map-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.hz-map-rank-badge {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  border-radius: 0.625rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* ── Ranking Table ─────────────────────────────────────────────────────────── */
+
+.hz-ranking-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.hz-ranking-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.hz-ranking-table-wrap {
+  overflow-x: auto;
+}
+
+.hz-ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hz-ranking-table th {
+  background: #f9fafb;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--hz-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid var(--hz-border);
+}
+
+.hz-ranking-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9rem;
+}
+
+.hz-ranking-rank {
+  font-weight: 800;
+  text-align: center;
+  min-width: 2.5rem;
+}
+
+.hz-ranking-verim {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hz-ranking-bar {
+  height: 14px;
+  background: #f3f4f6;
+  border-radius: 7px;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.hz-ranking-bar > div {
+  height: 100%;
+  border-radius: 7px;
+  min-width: 3px;
+  transition: width 0.4s ease;
+}
+
+.hz-ranking-row--highlight {
+  background: #fffbeb !important;
+}
+
+.hz-ranking-row--highlight td {
+  font-weight: 700;
+}
+
+.hz-ranking-row--sep td {
+  text-align: center;
+  color: var(--hz-text-secondary);
+  padding: 0.3rem;
+  font-size: 0.8rem;
+  border: none;
+}
+
+/* ── Climate Risk Card ─────────────────────────────────────────────────────── */
+
+.hz-climate-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.hz-climate-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.hz-climate-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hz-climate-score {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hz-climate-score__val {
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hz-climate-score__max {
+  font-size: 0.7rem;
+  color: var(--hz-text-secondary);
+}
+
+.hz-climate-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.hz-climate-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hz-climate-factor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hz-climate-factor__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hz-climate-factor__name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.hz-climate-factor__puan {
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.hz-climate-factor__bar {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hz-climate-factor__bar > div {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 3px;
+  transition: width 0.4s ease;
+}
+
+.hz-climate-factor__desc {
+  font-size: 0.78rem;
+  color: var(--hz-text-secondary);
+}
+
+.hz-climate-factor--info {
+  flex-direction: row;
+  padding: 0.4rem 0.6rem;
+  background: #f0f9ff;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  color: #1e40af;
+  font-weight: 600;
+}
+
 /* ── Print styles ──────────────────────────────────────────────────────────── */
 
 @media print {
@@ -1705,9 +1922,9 @@
   .hz-content { max-width: 100%; padding: 0; }
   .hz-results { gap: 1rem; }
   .hz-kpi-grid { break-inside: avoid; }
-  .hz-chart-card, .hz-compare-card, .hz-calendar-card, .hz-perf-card, .hz-econ-card, .hz-multicrop-card, .hz-history-card { break-inside: avoid; }
+  .hz-chart-card, .hz-compare-card, .hz-calendar-card, .hz-perf-card, .hz-econ-card, .hz-multicrop-card, .hz-history-card, .hz-map-card, .hz-ranking-card, .hz-climate-card { break-inside: avoid; }
   .hz-kpi { box-shadow: none; border: 1px solid #e5e7eb; }
-  .hz-chart-card, .hz-compare-card, .hz-params-card, .hz-perf-card, .hz-econ-card, .hz-multicrop-card { box-shadow: none; border: 1px solid #e5e7eb; }
+  .hz-chart-card, .hz-compare-card, .hz-params-card, .hz-perf-card, .hz-econ-card, .hz-multicrop-card, .hz-map-card, .hz-ranking-card, .hz-climate-card { box-shadow: none; border: 1px solid #e5e7eb; }
   .hz-error, .hz-warning { break-inside: avoid; }
 
   /* Print header */

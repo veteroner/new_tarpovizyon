@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)
-  ?? (import.meta.env.DEV ? 'http://localhost:8000' : 'https://dersbende.com');
+  ?? (import.meta.env.DEV ? '' : 'https://dersbende.com');
 const API_KEY = 'REDACTED_DASHBOARD_KEY';
+
+const IS_DEV = import.meta.env.DEV;
 
 export interface QueryResult {
   success?: boolean;
@@ -16,14 +18,90 @@ export async function fetchQuery(sql: string): Promise<QueryResult> {
     const response = await axios.get(url);
     const payload = response.data as QueryResult;
     if (payload?.error) {
-      console.error('API Query Error:', payload.error);
+      if (IS_DEV) console.error('API Query Error:', payload.error);
       return { data: [], error: payload.error };
     }
     return payload;
   } catch (error) {
-    console.error('API Error:', error);
+    if (IS_DEV) console.error('API Error:', error);
     return { data: [], error: 'API bağlantı hatası' };
   }
+}
+
+// ─── SQL Escaping (internal use only) ────────────────────────────────────────
+
+function _sqlEsc(value: string): string {
+  return value
+    .replace(/\\/g, '')
+    .replace(/"/g, '')
+    .replace(/;/g, '')
+    .replace(/-{2,}/g, '')
+    .replace(/'/g, "''");
+}
+
+// ─── Hasat Tahmini — Safe API Layer ──────────────────────────────────────────
+// SQL'ler burada izole edilmiştir; page bileşenleri asla doğrudan SQL oluşturmaz.
+
+const BITKISEL_TABLE = 'tuik_bitkisel_uretim';
+const YIELD_COLS = 'y2018,y2019,y2020,y2021,y2022,y2023,y2024';
+
+/** İl listesi (il bazlı kayıtlara sahip tüm iller) */
+export async function fetchProvinces(): Promise<QueryResult> {
+  return fetchQuery(
+    `SELECT DISTINCT ili FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' ORDER BY ili`
+  );
+}
+
+/** Belirli bir ilin ilçe listesi */
+export async function fetchDistricts(il: string): Promise<QueryResult> {
+  const safeIl = _sqlEsc(il);
+  return fetchQuery(
+    `SELECT DISTINCT yer FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' ORDER BY yer`
+  );
+}
+
+/** Belirli il/ilçe'de yetiştirilen ürünler (son 3 yılda verimi >0 olanlar) */
+export async function fetchCrops(il: string, ilce: string): Promise<QueryResult> {
+  const safeIl = _sqlEsc(il);
+  const safeIlce = _sqlEsc(ilce);
+  return fetchQuery(
+    `SELECT DISTINCT urun FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' AND yer='${safeIlce}' AND unsur='Verim' AND birim='Kg/Dekar' AND (y2022+y2023+y2024) > 0 ORDER BY urun`
+  );
+}
+
+/** Verim verisi (7 yıllık) — level: 'ilçe' | 'il' | 'Turkey' */
+export async function fetchYieldData(
+  il: string,
+  ilce: string,
+  urun: string,
+  level: 'ilçe' | 'il' | 'Turkey',
+): Promise<QueryResult> {
+  const safeIl = _sqlEsc(il);
+  const safeIlce = _sqlEsc(ilce);
+  const safeUrun = _sqlEsc(urun);
+
+  if (level === 'ilçe') {
+    return fetchQuery(
+      `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' AND yer='${safeIlce}' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
+    );
+  }
+  if (level === 'il') {
+    return fetchQuery(
+      `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='il' AND ili='${safeIl}' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
+    );
+  }
+  // Turkey
+  return fetchQuery(
+    `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='Turkey' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
+  );
+}
+
+/** İl bazlı verim sıralaması (en son yıl) */
+export async function fetchProvinceRanking(urun: string): Promise<QueryResult> {
+  const safeUrun = _sqlEsc(urun);
+  return fetchQuery(
+    `SELECT ili, y2024 FROM ${BITKISEL_TABLE} WHERE duzey='il' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar' AND y2024 > 0 ORDER BY y2024 DESC`
+  );
 }
 
 export type EggPriceKey = 'double' | 'eski_ana' | 'yeni_ana' | 'yarka' | 'pilic' | 'kilavuz';
@@ -45,16 +123,16 @@ export async function fetchEggPrices(): Promise<EggPricesResult> {
   try {
     const now = Date.now();
     if (eggPricesCache && now - eggPricesCacheAt < EGG_PRICES_CACHE_MS) {
-      console.log('🥚 Using cached egg prices');
+      if (IS_DEV) console.log('🥚 Using cached egg prices');
       return eggPricesCache;
     }
 
-    console.log('🥚 Fetching egg prices from Puppeteer endpoint...');
+    if (IS_DEV) console.log('🥚 Fetching egg prices from Puppeteer endpoint...');
     const url = `${API_BASE}/egg-prices-puppeteer`;
     const response = await axios.get(url, { timeout: 60000 }); // 60s timeout for Puppeteer+OCR
     const data = response.data as EggPricesResult;
 
-    console.log('🥚 Received prices:', data);
+    if (IS_DEV) console.log('🥚 Received prices:', data);
 
     if (data && data.success && data.prices && Object.keys(data.prices).length > 0) {
       eggPricesCache = data;
@@ -64,7 +142,7 @@ export async function fetchEggPrices(): Promise<EggPricesResult> {
 
     return { success: false, error: 'No prices returned from backend' };
   } catch (err) {
-    console.error('🥚 Egg prices fetch failed:', err);
+    if (IS_DEV) console.error('🥚 Egg prices fetch failed:', err);
     return { success: false, error: 'Egg prices fetch failed' };
   }
 }

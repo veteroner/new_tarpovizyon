@@ -156,8 +156,8 @@ export function OverviewPage() {
       ] = await Promise.all([
         // Genel veriler
         fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6225 AND unit='million' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6185 AND unit='USD' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6110 AND unit='million USD' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6119 AND unit='USD' LIMIT 1`),
         fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye'`), 
         
         // SÜT ÜRÜNLERİ
@@ -177,11 +177,11 @@ export function OverviewPage() {
         fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
 
         // Tarımsal katma değer (Tarım+Orman+Balıkçılık)
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Value' AND elementcode=6225 AND unit='million' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_makro_1 WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND element='Share' AND unit='%' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND elementcode=6110 AND unit='million USD' LIMIT 1`),
+        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND elementcode=6103 AND unit='%' LIMIT 1`),
         // Tarım istihdamı (Toplam 15+)
-        fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Employment in agriculture by age, total (15+)' AND Sex='Total' LIMIT 1`),
-        fetchQuery(`SELECT Value as value FROM fao_nufus_tarim_istihdam WHERE Area='Türkiye' AND Year='2023' AND Indicator='Share of employment in agriculture in total employment' AND Sex='Total' LIMIT 1`),
+        fetchQuery(`SELECT total as value FROM fao_nufus_istihdam_tarim WHERE area='Türkiye' AND yearcode='2023' AND indicator='Employment in agriculture by age, total (15+)' LIMIT 1`),
+        fetchQuery(`SELECT total as value FROM fao_nufus_istihdam_tarim WHERE area='Türkiye' AND yearcode='2023' AND indicator='Share of employment in agriculture in total employment' LIMIT 1`),
         
         // HAYVAN VARLIĞI (TÜİK - ülke düzeyi)
         fetchQuery(`SELECT grup, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
@@ -199,8 +199,8 @@ export function OverviewPage() {
       const urbanPopulation = Number(popData?.sehir_v) * 1000 || 0;
 
       // GSYİH
-      // fao_makro_1: GDP = elementcode 6225, unit=million (milyon USD)
-      // kişi başı = elementcode 6185, unit=USD
+      // fao_ME_indicator: GDP = elementcode 6110, unit='million USD' (milyon USD)
+      // kişi başı = elementcode 6119, unit=USD
       const gdp = (Number(gdpRes.data?.[0]?.value) || 0) * 1e6;
       const gdpPerCapita = Number(gdpPerCapitaRes.data?.[0]?.value) || 0;
 

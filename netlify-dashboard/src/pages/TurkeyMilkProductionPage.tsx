@@ -299,7 +299,7 @@ export default function TurkeyMilkProductionPage() {
 
       // Verimlilik Karşılaştırması
       try {
-        const compQuery = 'SELECT ulke, karkas_verimi FROM oner_verimlilik_karsilastirma ORDER BY karkas_verimi DESC';
+        const compQuery = 'SELECT `Ülke` as ulke, REPLACE(`Karkas Verimi (Kg)`, \',\', \'.\') * 1 as karkas_verimi FROM o_dunya_kaarkas_veri ORDER BY karkas_verimi DESC';
         const compRes = await fetchQuery(compQuery);
         if (compRes.data && compRes.data.length > 0) {
           const mapped = compRes.data

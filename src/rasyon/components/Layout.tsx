@@ -248,16 +248,7 @@ export default function Layout() {
             <Link to="/rasyon/terms" className="text-gray-500 hover:text-primary-600 hover:underline">
               Kullanım Şartları
             </Link>
-            {config.contact?.website && (
-              <a
-                href={config.contact.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-500 hover:text-primary-600 hover:underline"
-              >
-                Web Sitesi
-              </a>
-            )}
+
           </div>
         </footer>
       )}

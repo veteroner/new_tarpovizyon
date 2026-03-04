@@ -90,6 +90,80 @@
   font-size: 0.95rem;
 }
 
+/* ── Region Selection ───────────────────────────────────────────────────────── */
+
+.tt-region-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tt-il-select {
+  padding: 0.6rem 1.2rem;
+  border: 2px solid var(--tt-border);
+  border-radius: 0.75rem;
+  background: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  min-width: 220px;
+  transition: border-color 0.2s;
+}
+
+.tt-il-select:focus {
+  outline: none;
+  border-color: var(--tt-primary);
+}
+
+.tt-bolge-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 2px solid var(--tt-primary-light);
+  border-radius: 100px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.tt-bolge-offset {
+  font-size: 0.75rem;
+  color: var(--tt-primary-dark);
+  background: rgba(22, 163, 74, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  font-weight: 700;
+}
+
+.tt-bolge-uyari {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #92400e;
+}
+
+/* ── Crop Categories ────────────────────────────────────────────────────────── */
+
+.tt-crop-category {
+  margin-bottom: 1rem;
+}
+
+.tt-crop-category__label {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tt-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
 /* ── Crop Grid ──────────────────────────────────────────────────────────────── */
 
 .tt-crop-grid {
@@ -137,6 +211,129 @@
   text-align: center;
   padding: 4rem 2rem;
   color: var(--tt-text-secondary);
+}
+
+/* ── This Week Card ─────────────────────────────────────────────────────────── */
+
+.tt-thisweek {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%);
+  border: 2px solid var(--tt-primary);
+  border-radius: var(--tt-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.12);
+}
+
+.tt-thisweek__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 900;
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  color: var(--tt-primary-dark);
+}
+
+.tt-thisweek__il {
+  margin-left: auto;
+  font-size: 0.8rem;
+  background: var(--tt-primary);
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 100px;
+  font-weight: 700;
+}
+
+.tt-thisweek__empty {
+  text-align: center;
+  padding: 1rem;
+  color: var(--tt-primary-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.tt-thisweek__overdue {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #991b1b;
+}
+
+.tt-thisweek__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fff;
+  border-radius: 100px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tt-thisweek__tag--overdue {
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.tt-thisweek__more {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.tt-thisweek__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tt-thisweek__task {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  border-left: 4px solid var(--tt-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.tt-thisweek__task-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.tt-thisweek__task-note {
+  font-size: 0.8rem;
+  color: var(--tt-text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Print Button ──────────────────────────────────────────────────────────── */
+
+.tt-print-btn {
+  background: linear-gradient(135deg, var(--tt-primary), var(--tt-primary-dark));
+  color: #fff;
+  border: none;
+  padding: 0.65rem 2rem;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.tt-print-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.4);
 }
 
 /* ── Controls ───────────────────────────────────────────────────────────────── */
@@ -577,6 +774,25 @@
     width: 6px;
     height: 6px;
   }
+
+  .tt-region-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tt-il-select {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .tt-thisweek__header {
+    flex-wrap: wrap;
+    font-size: 1rem;
+  }
+
+  .tt-thisweek__il {
+    margin-left: 0;
+  }
 }
 
 /* ── Print ──────────────────────────────────────────────────────────────────── */
@@ -584,7 +800,7 @@
 @media print {
   body { background: #fff !important; }
   .tt-page { background: #fff !important; min-height: auto; }
-  .tt-topbar, .tt-controls { display: none !important; }
+  .tt-topbar, .tt-controls, .tt-print-btn { display: none !important; }
   .tt-content { max-width: 100%; padding: 0; }
   
   .tt-page::before {
@@ -596,6 +812,12 @@
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--tt-primary);
     margin-bottom: 1rem;
+  }
+
+  .tt-thisweek {
+    border: 2px solid #333;
+    box-shadow: none;
+    break-inside: avoid;
   }
 
   .tt-calendar, .tt-list, .tt-timeline, .tt-stats {

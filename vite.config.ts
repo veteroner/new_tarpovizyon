@@ -11,7 +11,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src/rasyon'),
-      '@capacitor/core': path.resolve(__dirname, './src/rasyon/stubs/capacitor-core.ts'),
       '@capacitor-community/admob': path.resolve(__dirname, './src/rasyon/stubs/capacitor-admob.ts'),
       '@capacitor/push-notifications': path.resolve(__dirname, './src/rasyon/stubs/capacitor-push.ts'),
       '@sentry/react': path.resolve(__dirname, './src/rasyon/stubs/sentry.ts'),
@@ -42,6 +41,12 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+      },
+      '/yahoo-proxy': {
+        target: 'https://query1.finance.yahoo.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/yahoo-proxy/, ''),
       },
     },
   },
