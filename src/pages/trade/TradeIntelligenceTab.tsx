@@ -184,8 +184,8 @@ export default function TradeIntelligenceTab() {
       /* ===== 4. BİRİM FİYAT TRENDİ (top 5 products) ===== */
       // Use animal data (has yearly granularity) — top products by volume
       const topProdsRes = await fetchQuery(`
-        SELECT ana_urun, SUM(ihracat_miktar) as vol
-        FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ihracat_miktar > 0
+        SELECT ana_urun, SUM(ihracat_mik) as vol
+        FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ihracat_mik > 0
         GROUP BY ana_urun ORDER BY vol DESC LIMIT 5
       `);
       const topProds = (topProdsRes.data || []).map(r => String(r.ana_urun));
@@ -194,8 +194,8 @@ export default function TradeIntelligenceTab() {
       for (const p of topProds) {
         const res = await fetchQuery(`
           SELECT yil, 
-            CASE WHEN SUM(ihracat_miktar) > 0 THEN SUM(ihracat_deger) / SUM(ihracat_miktar) ELSE 0 END as exp_up,
-            CASE WHEN SUM(ithalat_miktar) > 0 THEN SUM(ithalat_deger) / SUM(ithalat_miktar) ELSE 0 END as imp_up
+            CASE WHEN SUM(ihracat_mik) > 0 THEN SUM(ihracat_deger) / SUM(ihracat_mik) ELSE 0 END as exp_up,
+            CASE WHEN SUM(ithalat_mik) > 0 THEN SUM(ithalat_deger) / SUM(ithalat_mik) ELSE 0 END as imp_up
           FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ana_urun='${p}'
           GROUP BY yil ORDER BY yil
         `);

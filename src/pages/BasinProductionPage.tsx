@@ -989,8 +989,8 @@ export default function BasinProductionPage() {
   }, [allBasinData, basinSummary]);
 
   // Export fonksiyonu — henüz UI'a bağlanmadı
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const exportToExcel = () => {
+  // @ts-expect-error prepared for future UI integration
+  const _exportToExcel = () => {
     const exportData = filteredData.map((item, idx) => ({
       '#': idx + 1,
       'Havza': item.basinName,
@@ -1154,9 +1154,9 @@ export default function BasinProductionPage() {
                 dataKey="size"
                 stroke="rgba(255,255,255,0.2)"
                 fill="#8884d8"
-                content={(props: { x?: number; y?: number; width?: number; height?: number; name?: string; size?: number; fill?: string }) => {
+                content={((props: { x?: number; y?: number; width?: number; height?: number; name?: string; size?: number; fill?: string }) => {
                   const { x = 0, y = 0, width = 0, height = 0, name = '', size = 0, fill = '' } = props;
-                  if (width < 40 || height < 40) return null;
+                  if (width < 40 || height < 40) return (<g />);
                   return (
                     <g>
                       <rect
@@ -1192,7 +1192,7 @@ export default function BasinProductionPage() {
                       </text>
                     </g>
                   );
-                }}
+                }) as unknown as import('recharts').TreemapProps['content']}
               />
             </ResponsiveContainer>
             <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
@@ -1284,7 +1284,7 @@ export default function BasinProductionPage() {
                 <option value="">-- Ürün seçin --</option>
                 {topProducts.slice(0, 50).map((product) => (
                   <option key={product.urun} value={product.urun}>
-                    {product.urun} ({(product.toplam_ton / 1000000).toFixed(1)}M ton)
+                    {product.urun} ({(Number(product.toplam_ton) / 1000000).toFixed(1)}M ton)
                   </option>
                 ))}
               </select>
@@ -1405,7 +1405,7 @@ export default function BasinProductionPage() {
               >
                 {topProducts.slice(0, 30).map((product) => (
                   <option key={product.urun} value={product.urun} style={{ padding: '8px' }}>
-                    {product.urun} ({(product.toplam_ton / 1000000).toFixed(1)}M ton)
+                    {product.urun} ({(Number(product.toplam_ton) / 1000000).toFixed(1)}M ton)
                   </option>
                 ))}
               </select>
@@ -1549,7 +1549,7 @@ export default function BasinProductionPage() {
                   {stat.label}
                 </div>
                 <div style={{ fontSize: stat.isText ? '16px' : '28px', fontWeight: 700, color: stat.color, marginBottom: '4px' }}>
-                  {stat.isText ? stat.value : stat.suffix ? (stat.value / 1000000).toFixed(1) + stat.suffix : formatNumber(stat.value)}
+                  {stat.isText ? stat.value : stat.suffix ? (Number(stat.value) / 1000000).toFixed(1) + stat.suffix : formatNumber(Number(stat.value))}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                   {stat.desc}
@@ -1590,9 +1590,9 @@ export default function BasinProductionPage() {
                     dataKey="size"
                     stroke="rgba(255,255,255,0.2)"
                     fill="#8884d8"
-                    content={(props: { x?: number; y?: number; width?: number; height?: number; name?: string; size?: number; fill?: string }) => {
+                    content={((props: { x?: number; y?: number; width?: number; height?: number; name?: string; size?: number; fill?: string }) => {
                       const { x = 0, y = 0, width = 0, height = 0, name = '', size = 0, fill = '' } = props;
-                      if (width < 40 || height < 40) return null;
+                      if (width < 40 || height < 40) return (<g />);
                       const tonValue = (size / 1000000).toFixed(1);
                       return (
                         <g>
@@ -1629,7 +1629,7 @@ export default function BasinProductionPage() {
                           </text>
                         </g>
                       );
-                    }}
+                    }) as unknown as import('recharts').TreemapProps['content']}
                   />
                 </ResponsiveContainer>
                 <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
@@ -2108,7 +2108,7 @@ export default function BasinProductionPage() {
                   }))}
                   unitLabel="ton"
                   height={500}
-                  fillMode="gradient"
+                  fillMode="heat"
                 />
                 <div style={{ marginTop: '24px' }}>
                   <h4 style={{ color: 'var(--text-primary)', fontSize: '16px', marginBottom: '12px', fontWeight: 600 }}>

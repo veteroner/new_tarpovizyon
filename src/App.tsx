@@ -1,7 +1,16 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
+// Mobile imports
+import { isPlatform } from './mobile/utils/platform';
+import MobileLayout from './mobile/components/MobileLayout';
+import MobilePageHeader from './mobile/components/MobilePageHeader';
+import MobileHomePage from './mobile/pages/MobileHomePage';
+import MobileExplorePage from './mobile/pages/MobileExplorePage';
+import MobileMarketPage from './mobile/pages/MobileMarketPage';
+import MobileAIPage from './mobile/pages/MobileAIPage';
+import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
 import { SelectionPage } from './pages/SelectionPage';
 import { HomePage } from './pages/HomePage';
 import { OverviewPage } from './pages/OverviewPage';
@@ -57,6 +66,7 @@ import TarimTakvimPage from './pages/TarimTakvimPage';
 import ProductBalancePage from './pages/ProductBalancePage';
 import TurkeyMacroPage from './pages/TurkeyMacroPage';
 import CrossIntelligencePage from './pages/CrossIntelligencePage';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import './styles/globals.css';
 
@@ -74,25 +84,41 @@ function AppContent() {
   const isSulamaPage = location.pathname === '/sulama-plan';
   const isGubrePage = location.pathname === '/gubre-hesap';
   const isTakvimPage = location.pathname === '/tarim-takvim';
-  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
+  const isMobilePage = location.pathname.startsWith('/m');
+  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage;
+
+  // Show persistent back+home bar when running inside Capacitor on any non-mobile route
+  const showMobilePageHeader = isPlatform('capacitor') && !isMobilePage && !isProgramSelection;
 
   return (
     <>
+      {/* Mobile persistent nav — shown inside Capacitor on all non-mobile routes */}
+      {showMobilePageHeader && <MobilePageHeader />}
+
       {/* Header - Ana sayfa ve seçim sayfası dışında göster */}
       {!hideHeader && <Header />}
-      
-      <main className={hideHeader ? '' : 'main-content with-header'}>
+
+      <main className={`${hideHeader ? '' : 'main-content with-header'} ${showMobilePageHeader ? 'pt-12' : ''}`}>
         <Routes>
-          {/* Ana Program Seçimi */}
-          <Route path="/" element={<ProgramSelectionPage />} />
+          {/* Mobil Uygulama Rotaları */}
+          <Route path="/m" element={<MobileLayout />}>
+            <Route index element={<MobileHomePage />} />
+            <Route path="explore" element={<MobileExplorePage />} />
+            <Route path="market" element={<MobileMarketPage />} />
+            <Route path="ai" element={<MobileAIPage />} />
+            <Route path="settings" element={<MobileSettingsPage />} />
+          </Route>
+
+          {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}
+          <Route path="/" element={isPlatform('capacitor') ? <Navigate to="/m" replace /> : <ProgramSelectionPage />} />
           
           {/* Hasat Tahmini */}
-          <Route path="/hasat-tahmini" element={<HasatTahminiPage />} />
+          <Route path="/hasat-tahmini" element={<ErrorBoundary><HasatTahminiPage /></ErrorBoundary>} />
           
           {/* Çiftçi Araçları */}
-          <Route path="/sulama-plan" element={<SulamaPlanPage />} />
-          <Route path="/gubre-hesap" element={<GubreHesapPage />} />
-          <Route path="/tarim-takvim" element={<TarimTakvimPage />} />
+          <Route path="/sulama-plan" element={<ErrorBoundary><SulamaPlanPage /></ErrorBoundary>} />
+          <Route path="/gubre-hesap" element={<ErrorBoundary><GubreHesapPage /></ErrorBoundary>} />
+          <Route path="/tarim-takvim" element={<ErrorBoundary><TarimTakvimPage /></ErrorBoundary>} />
           
           {/* Teknova Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />

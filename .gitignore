@@ -39,3 +39,6 @@ coverage/
 # Embedded git repos
 tarpo_bitkisel_harita/
 teknova rasyon mobil/
+
+# Local Netlify folder
+.netlify

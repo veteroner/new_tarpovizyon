@@ -22,6 +22,12 @@
   force = true
 
 [[redirects]]
+  from = "/yahoo-proxy/*"
+  to = "https://query1.finance.yahoo.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

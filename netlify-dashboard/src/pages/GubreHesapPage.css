@@ -679,6 +679,151 @@
 .gh-schedule-table tr:nth-child(2) { background: #fff7ed; }
 .gh-schedule-table tr:nth-child(3) { background: #f0fdf4; }
 
+/* ── Bölge Hint ─────────────────────────────────────────────────────────────── */
+
+.gh-bolge-hint {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: #f0fdf4;
+  border-left: 3px solid #10b981;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: 0.85rem;
+  color: #065f46;
+}
+
+.gh-preset-btn--bolge {
+  background: #10b981 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+/* ── Select (il dropdown) ──────────────────────────────────────────────────── */
+
+.gh-select {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 2px solid var(--gh-border);
+  border-radius: 0.625rem;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--gh-text-primary);
+  transition: border-color 0.2s;
+  appearance: none;
+  cursor: pointer;
+}
+
+.gh-select:focus {
+  outline: none;
+  border-color: var(--gh-primary);
+}
+
+/* ── Nutrient Bars (Step 1 crop info) ──────────────────────────────────────── */
+
+.gh-nutrient-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.gh-nutrient-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gh-nutrient-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gh-nutrient-bar {
+  height: 16px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gh-nutrient-bar > div {
+  height: 100%;
+  border-radius: 8px;
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+
+.gh-nutrient-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ── Micro-nutrient Grid (Step 1) ──────────────────────────────────────────── */
+
+.gh-micro-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.gh-micro-grid > span {
+  background: #f5f3ff;
+  border: 1px solid #e0e7ff;
+  padding: 0.25rem 0.6rem;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4338ca;
+}
+
+/* ── Micro-nutrient Results (Step 4) ───────────────────────────────────────── */
+
+.gh-micro-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.gh-micro-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 0.625rem;
+}
+
+.gh-micro-icon {
+  font-size: 1.3rem;
+}
+
+.gh-micro-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.gh-micro-val {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #7c3aed;
+}
+
+.gh-micro-total {
+  font-size: 0.78rem;
+  color: var(--gh-text-secondary);
+}
+
+/* ── Summary hint ──────────────────────────────────────────────────────────── */
+
+.gh-summary-hint {
+  font-size: 0.75rem;
+  color: var(--gh-text-secondary);
+  margin-top: 0.3rem;
+}
+
 /* ── Print ──────────────────────────────────────────────────────────────────── */
 
 @media print {

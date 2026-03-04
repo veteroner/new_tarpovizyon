@@ -244,7 +244,7 @@ export default function TurkeyRedMeatProductionPage() {
 
       // 5. Verimlilik Karşılaştırma
       try {
-        const prodRes = await fetchQuery('SELECT * FROM oner_verimlilik_karsilastirma');
+        const prodRes = await fetchQuery('SELECT `Ülke` as ulke, REPLACE(`Karkas Verimi (Kg)`, \',\', \'.\') * 1 as karkas_verimi FROM o_dunya_kaarkas_veri ORDER BY karkas_verimi DESC');
         if (prodRes.data) {
           setProductivityComparison(prodRes.data
             .map((r: Record<string, string | number>) => ({
@@ -689,7 +689,7 @@ export default function TurkeyRedMeatProductionPage() {
       <div className="page-header">
         <h1 className="page-title">🥩 Türkiye Kırmızı Et Üretimi</h1>
         <p className="page-subtitle">
-          Kırmızı et üretimi (ton) — ONER Veritabanı
+          Kırmızı et üretimi (ton)
           {minYear && maxYear ? ` (${minYear}–${maxYear})` : ''}
         </p>
       </div>

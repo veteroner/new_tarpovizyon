@@ -57,6 +57,9 @@ import TarimTakvimPage from './pages/TarimTakvimPage';
 import ProductBalancePage from './pages/ProductBalancePage';
 import TurkeyMacroPage from './pages/TurkeyMacroPage';
 import CrossIntelligencePage from './pages/CrossIntelligencePage';
+import CommodityPricesPage from './pages/CommodityPricesPage';
+import AIAssistantPage from './pages/AIAssistantPage';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import './styles/globals.css';
 
@@ -74,6 +77,7 @@ function AppContent() {
   const isSulamaPage = location.pathname === '/sulama-plan';
   const isGubrePage = location.pathname === '/gubre-hesap';
   const isTakvimPage = location.pathname === '/tarim-takvim';
+  const isAIPage = location.pathname === '/tarpovizyon/ai-assistant';
   const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
 
   return (
@@ -87,12 +91,12 @@ function AppContent() {
           <Route path="/" element={<ProgramSelectionPage />} />
           
           {/* Hasat Tahmini */}
-          <Route path="/hasat-tahmini" element={<HasatTahminiPage />} />
+          <Route path="/hasat-tahmini" element={<ErrorBoundary><HasatTahminiPage /></ErrorBoundary>} />
           
           {/* Çiftçi Araçları */}
-          <Route path="/sulama-plan" element={<SulamaPlanPage />} />
-          <Route path="/gubre-hesap" element={<GubreHesapPage />} />
-          <Route path="/tarim-takvim" element={<TarimTakvimPage />} />
+          <Route path="/sulama-plan" element={<ErrorBoundary><SulamaPlanPage /></ErrorBoundary>} />
+          <Route path="/gubre-hesap" element={<ErrorBoundary><GubreHesapPage /></ErrorBoundary>} />
+          <Route path="/tarim-takvim" element={<ErrorBoundary><TarimTakvimPage /></ErrorBoundary>} />
           
           {/* Teknova Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />
@@ -102,6 +106,10 @@ function AppContent() {
           <Route path="/tarpovizyon/world" element={<HomePage />} />
           <Route path="/tarpovizyon/turkey" element={<HomePage />} />
           <Route path="/tarpovizyon/overview" element={<OverviewPage />} />
+          
+          {/* Emtia Fiyatları & AI */}
+          <Route path="/tarpovizyon/commodity-prices" element={<CommodityPricesPage />} />
+          <Route path="/tarpovizyon/ai-assistant" element={<AIAssistantPage />} />
           
           {/* DÜNYA (FAO) VERİLERİ */}
           <Route path="/tarpovizyon/world/macro-economic" element={<MacroEconomicPage />} />
