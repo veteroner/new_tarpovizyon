@@ -8,6 +8,8 @@ import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvin
 import { TurkeyHeatMap, type RegionTotal } from '../components/TurkeyHeatMap';
 import { getBolge, BOLGE_META, getETo, getYagis } from '../utils/climate-data';
 import WeatherWidget from '../components/WeatherWidget';
+import { ConfidenceBadge } from '../components/ConfidenceBadge';
+import { ModelWarningBox } from '../components/ModelWarningBox';
 import './HasatTahminiPage.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1055,12 +1057,53 @@ export function HasatTahminiPage(): React.ReactElement {
         {state.step === 4 && !loading && calc && (
           <div className="hz-results">
 
+            {/* ── Model Şeffaflık Kutusu ────────────────────────────────── */}
+            {(() => {
+              // Güven skoru hesabı
+              const dataYears = state.ilceData
+                ? Object.values(state.ilceData).filter(v => v > 0).length
+                : state.ilData
+                ? Object.values(state.ilData).filter(v => v > 0).length
+                : 0;
+              let conf = 10;
+              if (calc.regR2 >= 0.5) conf += 40;
+              else if (calc.regR2 >= 0.3) conf += 20;
+              if (calc.dataLevel === 'ilce') conf += 30;
+              else if (calc.dataLevel === 'il') conf += 15;
+              if (dataYears >= 5) conf += 20;
+              else if (dataYears >= 3) conf += 10;
+              conf = Math.min(100, conf);
+
+              const levelLabel =
+                calc.dataLevel === 'ilce' ? `${state.ilce} ilçesi (ilçe verisi)` :
+                calc.dataLevel === 'il'   ? `${state.il} ili ortalaması` :
+                                            'Türkiye ulusal ortalaması';
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <ConfidenceBadge score={conf} label="Tahmin Güveni" />
+                    {calc.dataLevel !== 'ilce' && (
+                      <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
+                        ⚠️ İlçe verisi yok — veri kaydırıldı
+                      </span>
+                    )}
+                  </div>
+                  <ModelWarningBox
+                    modelType={`Lineer Regresyon (trend bazlı) — R² = ${calc.regR2.toFixed(2)}`}
+                    dataLevel={levelLabel}
+                    message="Bu sonuç tarihsel ilçe/il verilerine dayalı istatistiksel bir tahmindir. Hava koşulları, hastalık ve fiyat dalgalanmalarını yansıtmaz. Kesin üretim kararları için uzman görüşü alınız."
+                  />
+                </div>
+              );
+            })()}
+
             {calc.dataLevel !== 'ilce' && (
               <div className="hz-warning">
                 ⚠️ {state.ilce} ilçesi için verim verisi bulunamadı —{' '}
                 {calc.dataLevel === 'il' ? `${state.il} ili` : 'Türkiye'} ortalaması kullanıldı.
               </div>
             )}
+
 
             {/* KPI cards */}
             <div className="hz-kpi-grid">

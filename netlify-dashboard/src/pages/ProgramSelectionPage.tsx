@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3, Calculator, Wheat, Droplets, FlaskConical, Calendar } from 'lucide-react';
 import './ProgramSelectionPage.css';
@@ -27,8 +28,8 @@ export function ProgramSelectionPage() {
     {
       id: 'hasat',
       title: 'Hasat Tahmini',
-      description: 'Verim Tahmin ve Hasat Planlama Sistemi',
-      subtitle: 'AI destekli hasat zamanı ve verim tahminleri',
+      description: 'Verim Projeksiyon ve Hasat Karar Desteği',
+      subtitle: 'TUİK verisi ve iklim ortalamalariyla verim projeksiyonu',
       icon: Wheat,
       color: '#f59e0b',
       path: '/hasat-tahmini',
@@ -36,8 +37,8 @@ export function ProgramSelectionPage() {
     {
       id: 'sulama',
       title: 'Sulama Planlayıcı',
-      description: 'Su İhtiyacı ve Sulama Programı Hesaplama',
-      subtitle: 'ETo/ETc hesaplamaları ile optimize sulama planlaması',
+      description: 'Su Ihtiyaci ve Sulama Karar Destegi',
+      subtitle: 'Iklim tablolari ve hava tahminiyle sulama plan taslagi',
       icon: Droplets,
       color: '#3b82f6',
       path: '/sulama-plan',
@@ -45,8 +46,8 @@ export function ProgramSelectionPage() {
     {
       id: 'gubre',
       title: 'Gübre Hesaplayıcı',
-      description: 'NPK ve Besin Dengesi Yönetimi',
-      subtitle: 'Toprak analizi bazlı gübre reçetesi ve maliyet optimizasyonu',
+      description: 'Besin Acigi ve Gubre Plan Taslagi',
+      subtitle: 'Toprak analizi girdisiyle taslak besleme ve maliyet plani',
       icon: FlaskConical,
       color: '#a855f7',
       path: '/gubre-hesap',
@@ -54,8 +55,8 @@ export function ProgramSelectionPage() {
     {
       id: 'takvim',
       title: 'Tarımsal Takvim',
-      description: 'Entegre Tarımsal Aktivite Planlayıcı',
-      subtitle: 'Ekim, sulama, gübreleme ve hasat takvimi yönetimi',
+      description: 'Bolgesel Tarimsal Operasyon Rehberi',
+      subtitle: 'Bolgesel sezon akisiyla gorev ve zamanlama rehberi',
       icon: Calendar,
       color: '#ec4899',
       path: '/tarim-takvim',
@@ -78,7 +79,7 @@ export function ProgramSelectionPage() {
                 key={program.id}
                 className="program-card"
                 onClick={() => navigate(program.path)}
-                style={{ '--accent-color': program.color } as React.CSSProperties}
+                style={{ '--accent-color': program.color } as CSSProperties}
               >
                 <div className="program-card__icon">
                   <Icon size={48} />

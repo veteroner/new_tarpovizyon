@@ -1,7 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ILLER, BOLGE_META, applyBolgeOffset, getBolge } from '../utils/climate-data';
+import {
+  ILLER, BOLGE_META, applyBolgeOffset, getBolge,
+  donRiskiVar, yogunYagisTahmini, getYagis, getETo,
+} from '../utils/climate-data';
 import type { IklimBolge } from '../utils/climate-data';
+import { ConfidenceBadge } from '../components/ConfidenceBadge';
 import WeatherWidget from '../components/WeatherWidget';
 import './TarimTakvimPage.css';
 

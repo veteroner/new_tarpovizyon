@@ -27,8 +27,8 @@ export function ProgramSelectionPage() {
     {
       id: 'hasat',
       title: 'Hasat Tahmini',
-      description: 'Verim Tahmin ve Hasat Planlama Sistemi',
-      subtitle: 'AI destekli hasat zamanı ve verim tahminleri',
+      description: 'Tarihsel veriye dayalı verim ve hasat karar desteği',
+      subtitle: 'Güven skorlu istatistiksel verim tahmini (ilçe/il/Türkiye verisi)',
       icon: Wheat,
       color: '#f59e0b',
       path: '/hasat-tahmini',
@@ -45,8 +45,8 @@ export function ProgramSelectionPage() {
     {
       id: 'gubre',
       title: 'Gübre Hesaplayıcı',
-      description: 'NPK ve Besin Dengesi Yönetimi',
-      subtitle: 'Toprak analizi bazlı gübre reçetesi ve maliyet optimizasyonu',
+      description: 'Ön reçete ve besin ihtiyacı planlama aracı',
+      subtitle: 'Toprak analizi bazlı NPK reçetesi — kimyasal & organik karşılaştırmalı',
       icon: FlaskConical,
       color: '#a855f7',
       path: '/gubre-hesap',
@@ -54,8 +54,8 @@ export function ProgramSelectionPage() {
     {
       id: 'takvim',
       title: 'Tarımsal Takvim',
-      description: 'Entegre Tarımsal Aktivite Planlayıcı',
-      subtitle: 'Ekim, sulama, gübreleme ve hasat takvimi yönetimi',
+      description: 'Bölgesel tarımsal görev ve sezon planlayıcı',
+      subtitle: 'Hava etkili uyarılar, ICS dışa aktarma, 7 iklim bölgesi desteği',
       icon: Calendar,
       color: '#ec4899',
       path: '/tarim-takvim',

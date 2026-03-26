@@ -4,6 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { ILLER, getBolge, BOLGE_META, BOLGE_TOPRAK_PROFILLERI } from '../utils/climate-data';
+import { ConfidenceBadge } from '../components/ConfidenceBadge';
+import { ModelWarningBox } from '../components/ModelWarningBox';
 import './GubreHesapPage.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -159,9 +161,17 @@ export default function GubreHesapPage() {
       k2o: crop.k2o * (state.hedef_verim * 10) * senaryoCarpan,
     };
 
-    // Subtract existing soil nutrients
+    // ── Organik Madde → N Mineralizasyonu ────────────────────────────────
+    // FAO referans: 1% organik madde ≈ 20 kg N/ha/yıl → 2 kg N/dekar/yıl
+    // Bu değer toprak N havuzuna eklenir (mineralize N olarak eksilir)
+    const omPct = state.toprak.organik_madde ?? 0;
+    const omMineralize_N_perDekar = omPct * 2.0; // kg/dekar — yaklaşık yıllık mineralizasyon
+    // Toprak + mineralize N = etkin N kaynağı
+    const etkinToprakN = state.toprak.n + omMineralize_N_perDekar;
+
+    // Subtract existing soil nutrients (organik madde katkısı dahil N için)
     const eksik = {
-      n: Math.max(0, ihtiyac.n - state.toprak.n),
+      n: Math.max(0, ihtiyac.n - etkinToprakN),
       p2o5: Math.max(0, ihtiyac.p2o5 - state.toprak.p2o5),
       k2o: Math.max(0, ihtiyac.k2o - state.toprak.k2o),
     };
@@ -236,6 +246,20 @@ export default function GubreHesapPage() {
       ph_uyari,
       chartData,
     };
+  };
+
+  // ── Confidence Score ─────────────────────────────────────────────────────────
+  // Toprak analizinin eksiksizliğine göre 0-100 arası güven skoru hesapla
+  const calcConfidenceScore = (): number => {
+    if (!state.toprak) return 15; // toprak verisi hiç girilmedi
+    const { n, p2o5, k2o, ph, organik_madde } = state.toprak;
+    let score = 40; // base: ürün + alan + hedef verim seçildi varsayımı
+    if (n > 0)           score += 12;
+    if (p2o5 > 0)        score += 12;
+    if (k2o > 0)         score += 12;
+    if (ph > 0)          score += 12;
+    if (organik_madde > 0) score += 12;
+    return Math.min(100, score);
   };
 
   const calculateFertilizerMix = (
@@ -724,6 +748,23 @@ export default function GubreHesapPage() {
         {/* STEP 4: Results */}
         {step === 4 && result && (
           <div className="gh-results">
+            {/* Confidence Score + Model Warning */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <ConfidenceBadge score={calcConfidenceScore()} label="Reçete Güveni" />
+                {calcConfidenceScore() < 60 && (
+                  <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
+                    ⚠️ Toprak analizini tam girerek güveni artırın
+                  </span>
+                )}
+              </div>
+              <ModelWarningBox
+                modelType="FAO besin ihtiyaç tabloları + greedy NPK optimizer"
+                dataLevel={state.il ? `${state.il} ili — bölgesel toprak profili` : 'Genel değerler'}
+                message="Bu çıktı bir ön reçete taslağıdır. Kesin gübreleme kararı için serbest toprak analizi yaptırınız ve yetkili ziraat mühendisiyle danışınız."
+              />
+            </div>
+
             {/* Scenario Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
               <span style={{
