@@ -2,6 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ILLER, BOLGE_META, applyBolgeOffset, getBolge } from '../utils/climate-data';
 import type { IklimBolge } from '../utils/climate-data';
+import { isWeatherConfigured, fetchForecast } from '../services/weather';
+import type { ForecastSummary } from '../services/weather';
+import ProductTrustPanel from '../components/ProductTrustPanel';
 import WeatherWidget from '../components/WeatherWidget';
 import './TarimTakvimPage.css';
 
@@ -26,6 +29,8 @@ interface Activity {
   hafta: number;
   notlar: string;
   oncelik: 'dusuk' | 'orta' | 'yuksek' | 'kritik';
+  /** Canlı hava tahminine dayalı don/yağmur uyarısı */
+  weatherWarning?: string;
 }
 
 interface CropProfile {
@@ -42,6 +47,54 @@ interface CropProfile {
   notlar_base: string;
   sicaklik_esik: string;
   don_riski: string;
+}
+
+// ─── Ürün don eşikleri (°C) — bu sıcaklığın altında don riski var ────────────
+const CROP_FROST_ESIGI: Record<string, number> = {
+  'Buğday': -8, 'Arpa': -6, 'Mısır': 2, 'Domates': 3, 'Biber': 3,
+  'Patates': -1, 'Soğan': -4, 'Pamuk': 5, 'Ayçiçeği': 0, 'Şeker Pancarı': -2,
+  'Salatalık': 3, 'Kavun': 5, 'Karpuz': 5, 'Üzüm (Sofralık)': -3,
+  'Elma': -3, 'Zeytin': -5, 'Çilek': -2, 'Nohut': -1, 'Mercimek': -2,
+};
+
+// ─── Hava tahmininden ekim/ilaçlama uyarıları ekle ────────────────────────────
+function applyForecastWarnings(
+  activities: Activity[],
+  forecast: ForecastSummary | null,
+  nowAy: number,
+  nowHafta: number,
+): Activity[] {
+  if (!forecast?.daily?.length) return activities;
+
+  const minTempNext5 = Math.min(...forecast.daily.map(d => d.tempMin));
+  const maxRainNext5 = Math.max(...forecast.daily.map(d => d.rainMm));
+
+  return activities.map(act => {
+    // Sadece önümüzdeki 2 haftadaki aktivitelere uyarı ekle
+    const weekDiff = (act.ay - nowAy) * 4 + (act.hafta - nowHafta);
+    if (weekDiff < 0 || weekDiff > 2) return act;
+
+    if (act.tip === 'ekim') {
+      const esik = CROP_FROST_ESIGI[act.urun] ?? 0;
+      if (minTempNext5 < esik) {
+        return {
+          ...act,
+          weatherWarning: `🌡️ Don riski! Min ${minTempNext5.toFixed(0)}°C (eşik ${esik}°C) — ekim ertelenebilir`,
+        };
+      }
+    }
+
+    if (act.tip === 'ilac') {
+      if (maxRainNext5 >= 3) {
+        return {
+          ...act,
+          weatherWarning: `🌧️ Yağış bekleniyor (${maxRainNext5.toFixed(0)} mm) — ilaçlama sonrası yağış etkinliği düşürür`,
+        };
+      }
+    }
+
+    return act;
+  });
 }
 
 // ─── Crop Profiles Database (Enriched) ────────────────────────────────────────
@@ -303,6 +356,43 @@ const CROP_PROFILES: Record<string, CropProfile> = {
   },
 };
 
+function getTrustTone(score: number): 'high' | 'medium' | 'low' {
+  if (score >= 75) return 'high';
+  if (score >= 50) return 'medium';
+  return 'low';
+}
+
+function buildCalendarTrust(selectedIl: string, selectedCrops: string[], activities: Activity[]) {
+  let score = 34;
+  if (selectedIl) score += 14;
+  if (selectedCrops.length >= 1) score += 8;
+  if (selectedCrops.length >= 3) score += 4;
+  if (activities.length >= 12) score += 4;
+
+  score = Math.max(16, Math.min(68, score));
+
+  return {
+    title: 'Takvim guven siniri',
+    score,
+    tone: getTrustTone(score),
+    summary: selectedIl
+      ? 'Takvim secilen ilin iklim bolgesine gore kaydiriliyor. Yine de bu modul bir operasyon rehberidir; o yilki meteoroloji ve yerel cesit farklarini tek basina yakalayamaz.'
+      : 'Takvim il secilmeden genel referans bolge mantigi ile uretiliyor. Bu haliyle sadece kaba sezon akisi icin kullanilmali, kesin tarih olarak alinmamalidir.',
+    badges: [
+      selectedIl ? `${selectedIl} secili` : 'Genel referans bolge',
+      `${selectedCrops.length} urun`,
+      `${activities.length} aktivite`,
+      'Bolgesel hafta offseti',
+    ],
+    bullets: [
+      'Ekim, gubreleme, ilaclama ve hasat tarihleri statik urun profillerinden uretilir.',
+      'Modul, o yila ait birikimli sicaklik, yagis veya fenolojik gozelim verisi kullanmaz.',
+      'Ilac ve gubre tarihleri rehber niteligindedir; ruhsatli urun ve uzman kontrolu gerekir.',
+    ],
+    sources: ['Statik urun profili', 'Bolgesel takvim offseti', 'Kural tabanli aktivite uretimi'],
+  };
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const AYLAR = [
@@ -343,14 +433,26 @@ function getCurrentWeekOfYear(): { ay: number; hafta: number } {
 function generateActivities(
   selectedCrops: string[],
   bolge: IklimBolge,
+  ekimOverrides: Record<string, { ay: number; hafta: number }> = {},
 ): Activity[] {
-  const offset = BOLGE_META[bolge].takvimOffset;
+  const regionOffset = BOLGE_META[bolge].takvimOffset;
   const acts: Activity[] = [];
   let id = 0;
 
   for (const cropKey of selectedCrops) {
     const crop = CROP_PROFILES[cropKey];
     if (!crop) continue;
+
+    // Compute per-crop additional offset from user-specified planting date
+    let extraOffset = 0;
+    const ekimOverride = ekimOverrides[cropKey];
+    if (ekimOverride && crop.ekim[0]) {
+      const baseEkim = applyBolgeOffset(crop.ekim[0].baseAy, crop.ekim[0].baseHafta, regionOffset);
+      const baseTW = (baseEkim.ay - 1) * 4 + baseEkim.hafta;
+      const overrideTW = (ekimOverride.ay - 1) * 4 + ekimOverride.hafta;
+      extraOffset = overrideTW - baseTW;
+    }
+    const offset = regionOffset + extraOffset;
 
     // Ekim/Dikim
     for (const e of crop.ekim) {
@@ -459,14 +561,16 @@ export default function TarimTakvimPage() {
   const saved = useMemo(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) as { il?: string; crops?: string[] } : null;
+      return raw ? JSON.parse(raw) as { il?: string; crops?: string[]; ekimTarihleri?: Record<string, { ay: number; hafta: number }> } : null;
     } catch { return null; }
   }, []);
 
   const [selectedIl, setSelectedIl] = useState(saved?.il ?? '');
   const [selectedCrops, setSelectedCrops] = useState<string[]>(saved?.crops ?? []);
+  const [ekimTarihleri, setEkimTarihleri] = useState<Record<string, { ay: number; hafta: number }>>(saved?.ekimTarihleri ?? {});
   const [viewMode, setViewMode] = useState<'takvim' | 'liste' | 'timeline'>('takvim');
   const [filterTip, setFilterTip] = useState<Activity['tip'] | 'hepsi'>('hepsi');
+  const [forecast, setForecast] = useState<ForecastSummary | null>(null);
 
   const bolge = selectedIl ? getBolge(selectedIl) : 'ic_anadolu';
   const bolgeMeta = BOLGE_META[bolge];
@@ -475,14 +579,30 @@ export default function TarimTakvimPage() {
   // Persist prefs
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ il: selectedIl, crops: selectedCrops }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ il: selectedIl, crops: selectedCrops, ekimTarihleri }));
     } catch { /* ignore */ }
-  }, [selectedIl, selectedCrops]);
+  }, [selectedIl, selectedCrops, ekimTarihleri]);
 
-  // Generate activities
+  // Hava tahminini çek (il seçiliyse)
+  useEffect(() => {
+    if (!selectedIl || !isWeatherConfigured()) {
+      setForecast(null);
+      return;
+    }
+    fetchForecast(selectedIl)
+      .then(setForecast)
+      .catch(() => setForecast(null));
+  }, [selectedIl]);
+
+  // Generate activities (+ hava uyarıları)
   const activities = useMemo(
-    () => generateActivities(selectedCrops, bolge),
-    [selectedCrops, bolge],
+    () => applyForecastWarnings(
+      generateActivities(selectedCrops, bolge, ekimTarihleri),
+      forecast,
+      now.ay,
+      now.hafta,
+    ),
+    [selectedCrops, bolge, ekimTarihleri, forecast, now.ay, now.hafta],
   );
 
   const filteredActivities = useMemo(
@@ -505,12 +625,39 @@ export default function TarimTakvimPage() {
     }).filter(a => a.tip === 'ekim' || a.tip === 'hasat'),
     [activities, now.ay, now.hafta],
   );
+  const calendarTrust = useMemo(
+    () => buildCalendarTrust(selectedIl, selectedCrops, activities),
+    [selectedIl, selectedCrops, activities],
+  );
 
   const getActivitiesForMonth = (ay: number) => filteredActivities.filter((a) => a.ay === ay);
 
   const toggleCrop = (key: string) => {
-    setSelectedCrops((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    setSelectedCrops((prev) => {
+      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
+      // Clean up ekim overrides for deselected crops
+      if (prev.includes(key)) {
+        setEkimTarihleri((em) => { const n = { ...em }; delete n[key]; return n; });
+      }
+      return next;
+    });
+  };
+
+  const setEkimAy = (cropKey: string, ay: number) => {
+    if (!ay) {
+      setEkimTarihleri((prev) => { const n = { ...prev }; delete n[cropKey]; return n; });
+    } else {
+      setEkimTarihleri((prev) => ({
+        ...prev,
+        [cropKey]: { ay, hafta: prev[cropKey]?.hafta ?? 1 },
+      }));
+    }
+  };
+
+  const setEkimHafta = (cropKey: string, hafta: number) => {
+    setEkimTarihleri((prev) => prev[cropKey]
+      ? { ...prev, [cropKey]: { ...prev[cropKey], hafta } }
+      : prev,
     );
   };
 
@@ -523,7 +670,7 @@ export default function TarimTakvimPage() {
         <button className="tt-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="tt-topbar__title">
           <span>📅</span>
-          <span>Tarımsal Takvim</span>
+          <span>Tarımsal Takvim Rehberi</span>
         </div>
         <div style={{ width: '100px' }} />
       </div>
@@ -624,6 +771,81 @@ export default function TarimTakvimPage() {
           </div>
         </div>
 
+        {/* ── Ekim Tarihi Ayarı ──────────────────────────────────────────── */}
+        {selectedCrops.some((k) => CROP_PROFILES[k]?.kategori !== 'cok_yillik') && (
+          <div className="tt-card">
+            <h2 className="tt-card__title">📅 Gerçek Ekim Tarihi <span className="tt-ekim-optional">(İsteğe Bağlı)</span></h2>
+            <p className="tt-card__desc">
+              Ekim standart tarihten farklı yapıldıysa tarihi girin — tüm takvim faaliyetleri (gübreleme, ilaçlama, hasat) otomatik kaydırılır.
+            </p>
+            <div className="tt-ekim-grid">
+              {selectedCrops
+                .filter((k) => CROP_PROFILES[k]?.kategori !== 'cok_yillik')
+                .map((cropKey) => {
+                  const crop = CROP_PROFILES[cropKey];
+                  const base = applyBolgeOffset(crop.ekim[0].baseAy, crop.ekim[0].baseHafta, BOLGE_META[bolge].takvimOffset);
+                  const override = ekimTarihleri[cropKey];
+                  return (
+                    <div key={cropKey} className={`tt-ekim-row ${override ? 'tt-ekim-row--active' : ''}`}>
+                      <div className="tt-ekim-crop-label">
+                        <span className="tt-ekim-emoji">{crop.emoji}</span>
+                        <span className="tt-ekim-name">{crop.ad}</span>
+                        <span className="tt-ekim-base">Standart: {AYLAR[base.ay - 1]} H{base.hafta}</span>
+                      </div>
+                      <div className="tt-ekim-controls">
+                        <select
+                          className="tt-ekim-select"
+                          value={override?.ay ?? ''}
+                          onChange={(e) => setEkimAy(cropKey, parseInt(e.target.value) || 0)}
+                        >
+                          <option value="">Ay seçin</option>
+                          {AYLAR.map((ad, i) => (
+                            <option key={i + 1} value={i + 1}>{ad}</option>
+                          ))}
+                        </select>
+                        {override?.ay && (
+                          <select
+                            className="tt-ekim-select"
+                            value={override.hafta}
+                            onChange={(e) => setEkimHafta(cropKey, parseInt(e.target.value))}
+                          >
+                            <option value={1}>1. Hafta</option>
+                            <option value={2}>2. Hafta</option>
+                            <option value={3}>3. Hafta</option>
+                            <option value={4}>4. Hafta</option>
+                          </select>
+                        )}
+                        {override && (
+                          <button
+                            className="tt-ekim-reset"
+                            onClick={() => setEkimTarihleri((prev) => { const n = { ...prev }; delete n[cropKey]; return n; })}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                      {override?.ay && (
+                        <div className="tt-ekim-delta">
+                          {(() => {
+                            const baseTW = (base.ay - 1) * 4 + base.hafta;
+                            const overrideTW = (override.ay - 1) * 4 + override.hafta;
+                            const delta = overrideTW - baseTW;
+                            if (delta === 0) return <span className="tt-ekim-delta--zero">Standart tarihe eşit</span>;
+                            return (
+                              <span className={delta > 0 ? 'tt-ekim-delta--late' : 'tt-ekim-delta--early'}>
+                                {delta > 0 ? `+${delta}` : delta} hafta {delta > 0 ? 'geç' : 'erken'} — tüm faaliyetler kaydırıldı
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {/* ── Empty State ────────────────────────────────────────────────── */}
         {selectedCrops.length === 0 && (
           <div className="tt-empty">
@@ -637,6 +859,16 @@ export default function TarimTakvimPage() {
 
         {selectedCrops.length > 0 && (
           <>
+            <ProductTrustPanel
+              title={calendarTrust.title}
+              summary={calendarTrust.summary}
+              score={calendarTrust.score}
+              tone={calendarTrust.tone}
+              badges={calendarTrust.badges}
+              bullets={calendarTrust.bullets}
+              sources={calendarTrust.sources}
+            />
+
             {/* ── This Week Card ───────────────────────────────────────────── */}
             <div className="tt-thisweek">
               <div className="tt-thisweek__header">
@@ -672,6 +904,9 @@ export default function TarimTakvimPage() {
                         </span>
                       </div>
                       <div className="tt-thisweek__task-note">{a.notlar}</div>
+                      {a.weatherWarning && (
+                        <div className="tt-activity__weather-warning">{a.weatherWarning}</div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -737,6 +972,9 @@ export default function TarimTakvimPage() {
                               <span className="tt-activity__week">Hafta {act.hafta}</span>
                             </div>
                             <div className="tt-activity__notes">{act.notlar}</div>
+                            {act.weatherWarning && (
+                              <div className="tt-activity__weather-warning">{act.weatherWarning}</div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -762,6 +1000,9 @@ export default function TarimTakvimPage() {
                           {act.baslik}
                         </div>
                         <div className="tt-list-item__notes">{act.notlar}</div>
+                        {act.weatherWarning && (
+                          <div className="tt-activity__weather-warning">{act.weatherWarning}</div>
+                        )}
                       </div>
                       <div className="tt-list-item__right">
                         <span className={`tt-list-item__badge tt-list-item__badge--${act.oncelik}`}>

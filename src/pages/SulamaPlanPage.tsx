@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { ILLER, getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall } from '../utils/climate-data';
+import {
+  ILLER, getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall,
+  calcEToByMetod, ETO_METOD_LISTESI, donRiskiVar,
+  type EToMetodId, type IklimBolge,
+} from '../utils/climate-data';
+import { ConfidenceBadge } from '../components/ConfidenceBadge';
+import { ModelWarningBox } from '../components/ModelWarningBox';
 import WeatherWidget from '../components/WeatherWidget';
+import { fetchForecast, fetchWeather, isWeatherConfigured, type ForecastSummary, type WeatherData } from '../services/weather';
 import './SulamaPlanPage.css';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Types & Interfaces
 // ═══════════════════════════════════════════════════════════════════════════════
+
+type IklimSenaryosuKey = 'normal' | 'kurak' | 'yagisli';
 
 interface CropWaterData {
   urun: string;
@@ -59,6 +68,25 @@ interface WizardState {
   mevcutSistem: boolean;     // Kurulu sistem var mı?
   gelismeDonemi: number;     // 0-3 arası indeks
   elektrikBirimFiyat: number; // ₺/m³ (varsayılan 0.15)
+
+  // ── Gelişmiş ayarlar (10 madde) ─────────────────────────────────────────
+  etoYontemi: EToMetodId;
+  iklimSenaryosu: IklimSenaryosuKey;
+  kcModeli: 'tek' | 'cift';
+  /** 0-100. 100: tam sulama, 0: sulamasız / defisit sulama */
+  sulamaKarsilamaPct: number;
+  /** m */
+  kokDerinligiM: number;
+  /** Toprak katman tablosunu göster */
+  katmanAnalizi: boolean;
+  /** Günlük plan + (kural tabanlı) akıllı öneri */
+  akilliPlan: boolean;
+  /** Fertigasyon planı */
+  fertigasyon: boolean;
+  fertN_kgDa: number;
+  fertP2O5_kgDa: number;
+  fertK2O_kgDa: number;
+  fertBolum: number;
 }
 
 interface CalcResult {
@@ -75,6 +103,36 @@ interface CalcResult {
   aylikDenge: MonthlyBalance[];   // Monthly water balance for chart
   sulamaYok: boolean;        // "Sulama Yok" seçildi mi?
   waterDeficit: number;      // mm/sezon — sulama olmadan su açığı
+
+  // ── Gelişmiş çıktılar ───────────────────────────────────────────────────
+  etoYontemiLabel: string;
+  iklimSenaryosuLabel: string;
+  kcModeliLabel: string;
+  /** 0-100 */
+  verimKaybiPct: number;
+  /** 0-1 */
+  sezonStresOrani: number;
+  /** Günlük plan (14 gün) */
+  gunlukPlan: Array<{
+    date: string;
+    label: string;
+    eto: number;
+    etc: number;
+    yagisTahmin: number;
+    sulamaNet: number;
+    sulamaBrut: number;
+    toprakAcigi: number;
+    not?: string;
+    fertN_kgDa?: number;
+    fertP2O5_kgDa?: number;
+    fertK2O_kgDa?: number;
+  }>;
+  /** İlk önerilen sulama */
+  ilkSulama?: { date: string; netMm: number; brutMm: number; reason: string };
+  /** Tahmini PAR (mol/m²/gün) — canlı hava varsa */
+  parMol?: number;
+  /** Toprak katman profili */
+  toprakKatmanlari?: Array<{ katman: string; derinlikCm: number; suTutmaMm: number }>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -132,6 +190,70 @@ const INITIAL: WizardState = {
   mevcutSistem: false,
   gelismeDonemi: 2,
   elektrikBirimFiyat: 0.15,
+
+  etoYontemi: 'tablo',
+  iklimSenaryosu: 'normal',
+  kcModeli: 'tek',
+  sulamaKarsilamaPct: 100,
+  kokDerinligiM: 0.6,
+  katmanAnalizi: false,
+  akilliPlan: true,
+  fertigasyon: false,
+  fertN_kgDa: 0,
+  fertP2O5_kgDa: 0,
+  fertK2O_kgDa: 0,
+  fertBolum: 6,
+};
+
+// ETO metodları artık ETO_METOD_LISTESI'nden (climate-data.ts) geliyor — gerçek formüller!
+// Sahte çarpan tablosu kaldırıldı.
+
+const IKLIM_SENARYOLARI: Record<IklimSenaryosuKey, { label: string; etoCarpan: number; yagisCarpan: number }> = {
+  normal:  { label: 'Normal (uzun yıl)', etoCarpan: 1.00, yagisCarpan: 1.00 },
+  kurak:   { label: 'Kurak yıl',        etoCarpan: 1.15, yagisCarpan: 0.80 },
+  yagisli: { label: 'Yağışlı yıl',      etoCarpan: 0.90, yagisCarpan: 1.20 },
+};
+
+const WET_FRACTION_BY_SYSTEM: Record<WizardState['sulamaSistemi'], number> = {
+  damla: 0.30,
+  yagmurlama: 0.85,
+  salma: 0.70,
+  yok: 0,
+};
+
+// Basit PAR (Photosynthetically Active Radiation) yaklaşımı: açık gökyüzü PAR (mol/m²/gün)
+// ay bazlı kaba referans; bulutluluk ile ölçeklenir.
+const PAR_CLEAR_SKY_BY_MONTH: number[] = [
+  18, 24, 32, 38, 44, 48, 50, 46, 38, 28, 20, 16,
+];
+
+function clamp(min: number, v: number, max: number): number {
+  return Math.max(min, Math.min(max, v));
+}
+
+function round1(v: number): number {
+  return Math.round(v * 10) / 10;
+}
+
+// Ky faktörleri (yaklaşık) — ürün ve dönem hassasiyetlerini göstermek için.
+// Not: Bunlar resmi değerler değildir; uygulama içi karar desteği amacıyla kullanılır.
+const KY_DB: Record<string, number[]> = {
+  'Buğday': [0.4, 0.7, 1.05, 1.05, 0.45],
+  'Arpa': [0.35, 0.6, 0.95, 0.95, 0.4],
+  'Mısır': [0.4, 0.7, 1.1, 1.25, 0.6],
+  'Domates': [0.5, 0.8, 1.1, 1.1, 0.7],
+  'Biber': [0.45, 0.9, 1.05, 1.0, 0.8],
+  'Patates': [0.5, 0.8, 1.05, 1.15, 0.75],
+  'Soğan': [0.5, 0.75, 1.0, 1.05, 0.8],
+  'Pamuk': [0.45, 0.8, 1.15, 1.1, 0.7],
+  'Ayçiçeği': [0.35, 0.7, 1.0, 1.05, 0.4],
+  'Şeker Pancarı': [0.45, 0.7, 0.95, 1.1, 0.9],
+  'Salatalık': [0.55, 0.85, 1.05, 1.0, 0.75],
+  'Kavun': [0.45, 0.75, 1.0, 0.85, 0.65],
+  'Karpuz': [0.4, 0.7, 0.95, 0.8, 0.65],
+  'Üzüm (Sofralık)': [0.3, 0.6, 0.85, 0.7, 0.45],
+  'Elma': [0.45, 0.6, 0.95, 0.95, 0.75],
+  'Zeytin': [0.5, 0.65, 0.65, 0.6, 0.5],
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -143,74 +265,106 @@ const AYLAR = [
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
 ];
 
-function calculate(state: WizardState): CalcResult | null {
+function calculate(
+  state: WizardState,
+  forecast: ForecastSummary | null,
+  weather: WeatherData | null,
+): CalcResult | null {
   const cropData = CROP_WATER_DB[state.urun];
   if (!cropData || !state.il) return null;
 
   const system = IRRIGATION_SYSTEMS[state.sulamaSistemi];
   const sulamaYok = state.sulamaSistemi === 'yok';
-  // For "yok" mode, use 1.0 efficiency to show NET water deficit (not brüt/net)
   const effi = sulamaYok ? 1.0 : (system.verimlilik / 100 || 0.5);
   const soil = SOIL_TYPES[state.toprakTipi];
+
+  const etoMetodInfo = ETO_METOD_LISTESI.find(m => m.id === state.etoYontemi) ?? ETO_METOD_LISTESI[0];
+  const senaryoMeta = IKLIM_SENARYOLARI[state.iklimSenaryosu];
+  const kcModeliLabel = state.kcModeli === 'cift' ? 'Çift Kc (Kcb+Ke, yaklaşık)' : 'Tek Kc';
+  const bolge = getBolge(state.il);
+
+  const coverage = sulamaYok ? 0 : clamp(0, state.sulamaKarsilamaPct, 100) / 100;
+  const wetFrac = WET_FRACTION_BY_SYSTEM[state.sulamaSistemi];
+
   const nStages = cropData.donemKc.length;
   const nMonths = cropData.sezonAylari.length;
 
-  // Monthly water balance
-  const aylikDenge: MonthlyBalance[] = cropData.sezonAylari.map((ayNo, idx) => {
-    // Map month index to growth stage (distribute evenly)
-    const stageIdx = Math.min(nStages - 1, Math.floor((idx / nMonths) * nStages));
-    const kc = cropData.donemKc[stageIdx];
+  const daysInMonthArr = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    // Real ETo and rainfall from climate-data (il-specific, monthly)
-    const etoDaily = getETo(state.il, ayNo);   // mm/day
-    const yagisMonthly = getYagis(state.il, ayNo); // mm/month
-    const efektifYagis = calcEffectiveRainfall(yagisMonthly); // mm/month
-    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][ayNo - 1];
+  let totalDemand = 0;
+  let totalDeficit = 0;
+  let weightedYieldLoss = 0;
+
+  const aylikDenge: MonthlyBalance[] = cropData.sezonAylari.map((ayNo, idx) => {
+    const stageIdx = Math.min(nStages - 1, Math.floor((idx / nMonths) * nStages));
+    const kcBase = cropData.donemKc[stageIdx];
+
+    // ── Gerçek ETo hesabı — seçilen metoda göre ─────────────────────────
+    const etoBaseDaily = calcEToByMetod(state.etoYontemi, state.il, bolge, ayNo);
+    const etoDaily = etoBaseDaily * senaryoMeta.etoCarpan;
+    const yagisMonthly = getYagis(state.il, ayNo) * senaryoMeta.yagisCarpan;
+    const efektifYagis = calcEffectiveRainfall(yagisMonthly);
+    const daysInMonth = daysInMonthArr[ayNo - 1];
+
+    let kcEff = kcBase;
+    if (state.kcModeli === 'cift') {
+      const kcb = kcBase * 0.9;
+      const keBase = kcBase * 0.1;
+      const keRainBoost = efektifYagis > 15 ? 0.04 : 0;
+      const ke = clamp(0, (keBase + keRainBoost) * (0.6 + 0.4 * wetFrac), 0.25);
+      kcEff = clamp(0.1, kcb + ke, 1.25);
+    }
 
     const etoMonthly = etoDaily * daysInMonth;
-    const etcMonthly = etoMonthly * kc;
+    const etcMonthly = etoMonthly * kcEff;
 
-    // Soil factor: sandy dries faster → +10% need; clay retains → -10%
     const soilFactor = soil.su_tutma < 100 ? 1.10 : soil.su_tutma > 170 ? 0.90 : 1.0;
-    const netSulama = Math.max(0, (etcMonthly - efektifYagis) * soilFactor);
-    const brutSulama = netSulama / effi;
+    const demand = etcMonthly * soilFactor;
+    const netRequired = Math.max(0, demand - efektifYagis);
+    const netApplied = sulamaYok ? 0 : netRequired * coverage;
+    const brutApplied = sulamaYok ? netRequired : (netApplied / effi);
+
+    const supply = efektifYagis + netApplied;
+    const deficit = Math.max(0, demand - supply);
+
+    // Ky bazlı verim kaybı (ağırlıklı)
+    const kyArr = KY_DB[state.urun] ?? new Array(nStages).fill(1.0);
+    const ky = kyArr[Math.min(kyArr.length - 1, stageIdx)] ?? 1.0;
+    const stress = demand > 0 ? deficit / demand : 0;
+
+    totalDemand += demand;
+    totalDeficit += deficit;
+    weightedYieldLoss += ky * stress * demand;
 
     return {
       ay: AYLAR[ayNo - 1],
       ayNo,
-      eto: +etoMonthly.toFixed(1),
-      etc: +etcMonthly.toFixed(1),
-      yagis: +yagisMonthly.toFixed(1),
-      efektifYagis: +efektifYagis.toFixed(1),
-      netSulama: +netSulama.toFixed(1),
-      brutSulama: +brutSulama.toFixed(1),
+      eto: round1(etoMonthly),
+      etc: round1(etcMonthly),
+      yagis: round1(yagisMonthly),
+      efektifYagis: round1(efektifYagis),
+      netSulama: round1(sulamaYok ? netRequired : netApplied),
+      brutSulama: round1(brutApplied),
     };
   });
 
-  // Totals
-  const sezonGun = cropData.sezonAylari.reduce((sum, ayNo) => {
-    return sum + [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][ayNo - 1];
-  }, 0);
-  const totalBrutMm = aylikDenge.reduce((s, m) => s + m.brutSulama, 0);
+  const sezonGun = cropData.sezonAylari.reduce((sum, ayNo) => sum + daysInMonthArr[ayNo - 1], 0);
+  const totalBrutMmForTotals = sulamaYok ? 0 : aylikDenge.reduce((s, m) => s + m.brutSulama, 0);
+  const sezonlukM3 = totalBrutMmForTotals * state.alan;
 
-  // 1 mm on 1 dekar = 1 m³ (1 dekar = 1000 m², 1 mm = 0.001 m³/m²)
-  const sezonlukM3 = totalBrutMm * state.alan; // mm × dekar = m³
+  const avgDailyMm = sezonGun > 0 ? totalBrutMmForTotals / sezonGun : 0;
+  const haftalikSu = avgDailyMm * 7 * state.alan;
+  const sulamaSayisi = sulamaYok ? 0 : Math.max(1, Math.ceil(sezonGun / cropData.sulamaSikligi));
+  const sulamaMiktar = sulamaYok ? 0 : (sezonlukM3 / sulamaSayisi);
 
-  const avgDailyMm = totalBrutMm / sezonGun;
-  const haftalikSu = avgDailyMm * 7 * state.alan; // m³/hafta
-  const sulamaSayisi = Math.ceil(sezonGun / cropData.sulamaSikligi);
-  const sulamaMiktar = sezonlukM3 / sulamaSayisi;
+  const pompaMaliyet = sulamaYok ? 0 : sezonlukM3 * state.elektrikBirimFiyat;
+  const sistemKurulum = sulamaYok ? 0 : (state.mevcutSistem ? 0 : system.maliyet_kurulum * state.alan);
+  const sistemIsletme = sulamaYok ? 0 : (system.maliyet_isletme * state.alan);
+  const toplamMaliyet = sulamaYok ? 0 : (pompaMaliyet + sistemIsletme + (sistemKurulum / 5));
 
-  // Cost
-  const pompaMaliyet = sezonlukM3 * state.elektrikBirimFiyat; // ₺/m³ electricity (user-adjustable)
-  const sistemKurulum = state.mevcutSistem ? 0 : system.maliyet_kurulum * state.alan;
-  const sistemIsletme = system.maliyet_isletme * state.alan;
-  const toplamMaliyet = pompaMaliyet + sistemIsletme + (sistemKurulum / 5);
-
-  // Savings
   const optimalSystem = IRRIGATION_SYSTEMS['damla'];
   const suTasarrufu = sulamaYok ? 100 : ((optimalSystem.verimlilik - system.verimlilik) / optimalSystem.verimlilik) * 100;
-  // Ürün bazlı verim artışı yüzdesi (sulama ile)
+
   const cropVerimEtkisi: Record<string, number> = {
     'Buğday': 20, 'Arpa': 15, 'Mısır': 35, 'Domates': 40, 'Biber': 35,
     'Patates': 30, 'Soğan': 25, 'Pamuk': 30, 'Ayçiçeği': 20,
@@ -218,25 +372,183 @@ function calculate(state: WizardState): CalcResult | null {
     'Üzüm (Sofralık)': 20, 'Elma': 25, 'Zeytin': 15,
   };
   const baseVerimArtisi = cropVerimEtkisi[state.urun] ?? 25;
-  const verimArtisi = sulamaYok ? baseVerimArtisi : suTasarrufu > 0 ? suTasarrufu * 0.5 : 0;
+  const verimArtisi = sulamaYok ? baseVerimArtisi : clamp(0, baseVerimArtisi * coverage, 80);
 
-  // Water deficit (total net water need, regardless of system)
-  const waterDeficit = aylikDenge.reduce((s, m) => s + m.netSulama, 0);
+  const sezonStresOrani = totalDemand > 0 ? clamp(0, totalDeficit / totalDemand, 1) : 0;
+  const verimKaybiPct = totalDemand > 0 ? clamp(0, (weightedYieldLoss / totalDemand) * 100, 100) : 0;
+
+  // Toprak katmanları (yaklaşık)
+  let toprakKatmanlari: Array<{ katman: string; derinlikCm: number; suTutmaMm: number }> | undefined;
+  if (state.katmanAnalizi) {
+    const rd = clamp(0.2, state.kokDerinligiM, 2.0);
+    const top = Math.min(0.2, rd);
+    const mid = Math.min(0.2, Math.max(0, rd - top));
+    const bot = Math.max(0, rd - top - mid);
+    const layers: Array<{ name: string; depth: number }> = [];
+    if (top > 0) layers.push({ name: '0-20 cm', depth: top });
+    if (mid > 0) layers.push({ name: '20-40 cm', depth: mid });
+    if (bot > 0) layers.push({ name: `40-${Math.round((top + mid + bot) * 100)} cm`, depth: bot });
+    toprakKatmanlari = layers.map(l => ({
+      katman: l.name,
+      derinlikCm: Math.round(l.depth * 100),
+      suTutmaMm: Math.round(soil.su_tutma * l.depth),
+    }));
+  }
+
+  // PAR tahmini (bugün) — canlı hava verisi varsa
+  let parMol: number | undefined;
+  if (weather) {
+    const month = new Date().getMonth();
+    const clear = PAR_CLEAR_SKY_BY_MONTH[month] ?? 30;
+    const cloud = clamp(0, weather.clouds ?? 50, 100);
+    parMol = round1(clear * (1 - cloud / 100));
+  }
+
+  // ── Günlük plan (14 gün) ───────────────────────────────────────────────
+  const forecastMap = new Map<string, number>();
+  if (forecast?.daily) {
+    for (const d of forecast.daily) {
+      forecastMap.set(d.date, d.rainMm);
+    }
+  }
+
+  const today = new Date();
+  const monthNo = today.getMonth() + 1;
+
+  // Günlük ETo/ETc için seçilen dönem Kc kullanılır
+  const stageKcBase = cropData.donemKc[state.gelismeDonemi] ?? cropData.katsayi;
+  let stageKcEff = stageKcBase;
+  if (state.kcModeli === 'cift') {
+    const kcb = stageKcBase * 0.9;
+    const ke = clamp(0, (stageKcBase * 0.1) * (0.6 + 0.4 * wetFrac), 0.25);
+    stageKcEff = clamp(0.1, kcb + ke, 1.25);
+  }
+
+  const etoDailyEff = calcEToByMetod(state.etoYontemi, state.il, bolge, monthNo) * senaryoMeta.etoCarpan;
+  const soilFactorDaily = soil.su_tutma < 100 ? 1.10 : soil.su_tutma > 170 ? 0.90 : 1.0;
+  const etcDailyEff = etoDailyEff * stageKcEff * soilFactorDaily;
+
+  const rootDepthM = clamp(0.2, state.kokDerinligiM, 2.0);
+  const taw = soil.su_tutma * rootDepthM; // mm
+  const p = clamp(0.30, 0.55 - 0.12 * (stageKcEff - 0.8), 0.65);
+  const raw = taw * p;
+
+  const fertSplits = Math.max(1, Math.round(state.fertBolum || 1));
+  const fertDoseN = state.fertigasyon ? (state.fertN_kgDa / fertSplits) : 0;
+  const fertDoseP = state.fertigasyon ? (state.fertP2O5_kgDa / fertSplits) : 0;
+  const fertDoseK = state.fertigasyon ? (state.fertK2O_kgDa / fertSplits) : 0;
+  let fertEventIdx = 0;
+
+  let depletion = 0; // mm
+  const gunlukPlan: CalcResult['gunlukPlan'] = [];
+  let ilkSulama: CalcResult['ilkSulama'] | undefined;
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const label = d.toLocaleDateString('tr-TR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+
+    const rainFc = forecastMap.get(dateKey) ?? 0;
+    const rainEff = rainFc * 0.8; // günlük efektif yağış için kaba yaklaşım
+
+    depletion = Math.max(0, depletion + etcDailyEff - rainEff);
+
+    let sulamaNet = 0;
+    let not: string | undefined;
+
+    if (!sulamaYok) {
+      if (state.akilliPlan) {
+        // yağış çok yüksekse sulamayı bir gün ertele
+        const tomorrow = new Date(d);
+        tomorrow.setDate(d.getDate() + 1);
+        const tKey = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+        const rainTomorrow = (forecastMap.get(tKey) ?? 0);
+
+        if (depletion >= raw) {
+          if (rainTomorrow >= 5) {
+            not = '🌧️ Yarın yağış bekleniyor, ertelenebilir';
+          } else {
+            sulamaNet = depletion * coverage;
+            depletion = Math.max(0, depletion - sulamaNet);
+            not = '💧 Toprak açığı (RAW) aşıldı';
+          }
+        }
+      } else {
+        // Sabit aralıklı sulama (ürün tabanlı)
+        const interval = Math.max(1, Math.round(cropData.sulamaSikligi));
+        if (i % interval === 0 && i !== 0) {
+          sulamaNet = etcDailyEff * interval * coverage;
+          depletion = Math.max(0, depletion - sulamaNet);
+          not = `⏱️ ${interval} gün aralık`; 
+        }
+      }
+    }
+
+    const sulamaBrut = sulamaYok ? 0 : (sulamaNet / effi);
+
+    let fertN: number | undefined;
+    let fertP: number | undefined;
+    let fertK: number | undefined;
+    if (!sulamaYok && state.fertigasyon && sulamaNet > 0 && fertEventIdx < fertSplits) {
+      fertN = round1(fertDoseN);
+      fertP = round1(fertDoseP);
+      fertK = round1(fertDoseK);
+      fertEventIdx += 1;
+    }
+
+    if (!ilkSulama && sulamaNet > 0) {
+      ilkSulama = {
+        date: dateKey,
+        netMm: round1(sulamaNet),
+        brutMm: round1(sulamaBrut),
+        reason: not || 'Plan',
+      };
+    }
+
+    gunlukPlan.push({
+      date: dateKey,
+      label,
+      eto: round1(etoDailyEff),
+      etc: round1(etcDailyEff),
+      yagisTahmin: round1(rainFc),
+      sulamaNet: round1(sulamaNet),
+      sulamaBrut: round1(sulamaBrut),
+      toprakAcigi: round1(depletion),
+      not,
+      fertN_kgDa: fertN,
+      fertP2O5_kgDa: fertP,
+      fertK2O_kgDa: fertK,
+    });
+  }
+
+  // Water deficit
+  const waterDeficit = sulamaYok ? aylikDenge.reduce((s, m) => s + m.netSulama, 0) : round1(totalDeficit);
 
   return {
     gunlukSu: sulamaYok ? 0 : avgDailyMm,
     haftalikSu: sulamaYok ? 0 : haftalikSu,
     sezonlukSu: sulamaYok ? 0 : sezonlukM3,
-    sulamaSayisi: sulamaYok ? 0 : sulamaSayisi,
-    sulamaMiktar: sulamaYok ? 0 : sulamaMiktar,
-    elektrikMaliyet: sulamaYok ? 0 : pompaMaliyet,
+    sulamaSayisi,
+    sulamaMiktar,
+    elektrikMaliyet: pompaMaliyet,
     sistemMaliyet: sulamaYok ? 0 : sistemIsletme + (sistemKurulum / 5),
-    toplamMaliyet: sulamaYok ? 0 : toplamMaliyet,
+    toplamMaliyet,
     suTasarrufu: Math.max(0, suTasarrufu),
     verimArtisi,
     aylikDenge,
     sulamaYok,
     waterDeficit,
+
+    etoYontemiLabel: etoMetodInfo.label,
+    iklimSenaryosuLabel: senaryoMeta.label,
+    kcModeliLabel,
+    verimKaybiPct: round1(verimKaybiPct),
+    sezonStresOrani: round1(sezonStresOrani),
+    gunlukPlan,
+    ilkSulama,
+    parMol,
+    toprakKatmanlari,
   };
 }
 
@@ -249,8 +561,15 @@ export default function SulamaPlanPage() {
   const [state, setState] = useState<WizardState>(INITIAL);
   const [error, setError] = useState('');
 
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastSummary | null>(null);
+  const [wxStatus, setWxStatus] = useState<'idle' | 'loading' | 'ready' | 'unavailable'>('idle');
+
   const cropData = state.urun ? CROP_WATER_DB[state.urun] : null;
-  const calc = state.step === 4 ? calculate(state) : null;
+  const calc = useMemo(
+    () => (state.step === 4 ? calculate(state, forecast, weather) : null),
+    [state, forecast, weather],
+  );
   const bolge = state.il ? getBolge(state.il) : null;
   const bolgeMeta = bolge ? BOLGE_META[bolge] : null;
 
@@ -270,6 +589,35 @@ export default function SulamaPlanPage() {
     setError(''); setState(s => ({ ...s, step: 4 }));
   };
   const reset = () => { setState(INITIAL); setError(''); };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function run() {
+      if (!state.il) {
+        setWeather(null);
+        setForecast(null);
+        setWxStatus('idle');
+        return;
+      }
+
+      if (!isWeatherConfigured()) {
+        setWeather(null);
+        setForecast(null);
+        setWxStatus('unavailable');
+        return;
+      }
+
+      setWxStatus('loading');
+      const [w, f] = await Promise.all([fetchWeather(state.il), fetchForecast(state.il)]);
+      if (cancelled) return;
+      setWeather(w);
+      setForecast(f);
+      setWxStatus('ready');
+    }
+
+    run();
+    return () => { cancelled = true; };
+  }, [state.il]);
 
   return (
     <div className="sp-wizard">
@@ -422,7 +770,15 @@ export default function SulamaPlanPage() {
                   return (
                     <label key={sys} className={`sp-system-card ${state.sulamaSistemi === sys ? 'sp-system-card--active' : ''}`}>
                       <input type="radio" name="sistem" value={sys} checked={state.sulamaSistemi === sys}
-                        onChange={e => setState(s => ({ ...s, sulamaSistemi: e.target.value as WizardState['sulamaSistemi'] }))} />
+                        onChange={e => {
+                          const v = e.target.value as WizardState['sulamaSistemi'];
+                          setState(s => ({
+                            ...s,
+                            sulamaSistemi: v,
+                            sulamaKarsilamaPct: v === 'yok' ? 0 : s.sulamaKarsilamaPct,
+                            fertigasyon: v === 'yok' ? false : s.fertigasyon,
+                          }));
+                        }} />
                       <div className="sp-system-card__emoji">{sysData.emoji}</div>
                       <div className="sp-system-card__name">{sysData.tip}</div>
                       <div className="sp-system-card__stats">
@@ -478,6 +834,190 @@ export default function SulamaPlanPage() {
               </div>
             )}
 
+            <hr style={{ margin: '18px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.05rem' }}>⚙️ Gelişmiş Ayarlar</h3>
+            <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: '#6b7280' }}>
+              Bu bölümdeki seçenekler, eldeki veri seti (uzun yıl ETo/yağış tablosu + opsiyonel OpenWeather tahmini) nedeniyle
+              <strong> yaklaşık / karar-destek</strong> amaçlı uygulanır.
+            </p>
+
+            <div className="sp-field">
+              <label className="sp-label" htmlFor="eto-yontem">Referans ETo Yöntemi</label>
+              <select
+                id="eto-yontem"
+                className="sp-select"
+                value={state.etoYontemi}
+                onChange={e => setState(s => ({ ...s, etoYontemi: e.target.value as EToMetodId }))}
+              >
+                {ETO_METOD_LISTESI.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.gercekFormul ? '✅ ' : '📊 '}{m.label}
+                  </option>
+                ))}
+              </select>
+              {(() => {
+                const secilen = ETO_METOD_LISTESI.find(m => m.id === state.etoYontemi);
+                return secilen ? (
+                  <div style={{ marginTop: 6, fontSize: '0.78rem', color: secilen.gercekFormul ? '#065f46' : '#6b7280',
+                    background: secilen.gercekFormul ? 'rgba(6,95,70,0.06)' : 'transparent',
+                    padding: secilen.gercekFormul ? '6px 10px' : '0', borderRadius: 6 }}>
+                    {secilen.gercekFormul && <strong>Gerçek formül: </strong>}{secilen.aciklama}
+                  </div>
+                ) : null;
+              })()}
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-label">İklim Senaryosu</label>
+              <div className="sp-toggle-row">
+                {(['normal', 'kurak', 'yagisli'] as const).map(k => (
+                  <button
+                    key={k}
+                    className={`sp-toggle-btn ${state.iklimSenaryosu === k ? 'sp-toggle-btn--active' : ''}`}
+                    onClick={() => setState(s => ({ ...s, iklimSenaryosu: k }))}
+                    type="button"
+                  >
+                    {IKLIM_SENARYOLARI[k].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-label">Kc Modeli</label>
+              <div className="sp-toggle-row">
+                {(['tek', 'cift'] as const).map(k => (
+                  <button
+                    key={k}
+                    className={`sp-toggle-btn ${state.kcModeli === k ? 'sp-toggle-btn--active' : ''}`}
+                    onClick={() => setState(s => ({ ...s, kcModeli: k }))}
+                    type="button"
+                  >
+                    {k === 'tek' ? 'Tek Kc' : 'Çift Kc (Kcb+Ke)'}
+                  </button>
+                ))}
+              </div>
+              <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+                Çift Kc: yağış/buharlaşma bileşenini (Ke) yaklaşık olarak ayırır.
+              </div>
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-label">Kök Derinliği (m)</label>
+              <input
+                type="number"
+                min={0.2}
+                max={2.0}
+                step={0.05}
+                value={state.kokDerinligiM}
+                onChange={e => setState(s => ({ ...s, kokDerinligiM: clamp(0.2, Number(e.target.value) || 0.6, 2.0) }))}
+                className="sp-select"
+              />
+              <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+                Toplam kullanılabilir su (TAW) ve kritik açığı (RAW) etkiler.
+              </div>
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-label">Sulama Karşılama Oranı (%)</label>
+              {state.sulamaSistemi === 'yok' ? (
+                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                  Sulama sistemi yok seçildiği için karşılama oranı 0% kabul edilir.
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={state.sulamaKarsilamaPct}
+                      onChange={e => setState(s => ({ ...s, sulamaKarsilamaPct: clamp(0, Number(e.target.value) || 0, 100) }))}
+                      className="sp-range"
+                    />
+                    <strong style={{ width: 52, textAlign: 'right' }}>%{state.sulamaKarsilamaPct}</strong>
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+                    %100: tam sulama, %60-80: defisit sulama senaryosu.
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-checkbox">
+                <input
+                  type="checkbox"
+                  checked={state.akilliPlan}
+                  onChange={e => setState(s => ({ ...s, akilliPlan: e.target.checked }))}
+                />
+                <span>Akıllı günlük plan (tahmini yağışa göre erteleme)</span>
+              </label>
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-checkbox">
+                <input
+                  type="checkbox"
+                  checked={state.katmanAnalizi}
+                  onChange={e => setState(s => ({ ...s, katmanAnalizi: e.target.checked }))}
+                />
+                <span>Toprak katman profili (0-20 / 20-40 / alt)</span>
+              </label>
+            </div>
+
+            <div className="sp-field">
+              <label className="sp-checkbox">
+                <input
+                  type="checkbox"
+                  checked={state.fertigasyon}
+                  onChange={e => setState(s => ({ ...s, fertigasyon: e.target.checked }))}
+                  disabled={state.sulamaSistemi === 'yok'}
+                />
+                <span>Fertigasyon planı (sulamaya böl)</span>
+              </label>
+              {state.sulamaSistemi === 'yok' && (
+                <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+                  Sulama yok iken fertigasyon uygulanamaz.
+                </div>
+              )}
+            </div>
+
+            {state.fertigasyon && state.sulamaSistemi !== 'yok' && (
+              <div className="sp-field" style={{ padding: '10px 12px', border: '1px solid #e5e7eb', borderRadius: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="sp-label">N (kg/da)</label>
+                    <input type="number" min={0} max={100} step={0.1} value={state.fertN_kgDa}
+                      onChange={e => setState(s => ({ ...s, fertN_kgDa: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      className="sp-select" />
+                  </div>
+                  <div>
+                    <label className="sp-label">P₂O₅ (kg/da)</label>
+                    <input type="number" min={0} max={100} step={0.1} value={state.fertP2O5_kgDa}
+                      onChange={e => setState(s => ({ ...s, fertP2O5_kgDa: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      className="sp-select" />
+                  </div>
+                  <div>
+                    <label className="sp-label">K₂O (kg/da)</label>
+                    <input type="number" min={0} max={100} step={0.1} value={state.fertK2O_kgDa}
+                      onChange={e => setState(s => ({ ...s, fertK2O_kgDa: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      className="sp-select" />
+                  </div>
+                  <div>
+                    <label className="sp-label">Bölüm Sayısı</label>
+                    <input type="number" min={1} max={12} step={1} value={state.fertBolum}
+                      onChange={e => setState(s => ({ ...s, fertBolum: clamp(1, parseInt(e.target.value, 10) || 6, 12) }))}
+                      className="sp-select" />
+                  </div>
+                </div>
+                <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+                  Günlük plan tablosunda sulama olan günlere eşit bölünmüş doz olarak yansır.
+                </div>
+              </div>
+            )}
+
             <div className="sp-btn-row">
               <button className="sp-btn sp-btn--secondary" onClick={() => setState(s => ({ ...s, step: 2 }))}>← Geri</button>
               <button className="sp-btn sp-btn--primary" onClick={goStep4}>📊 Sonuçları Hesapla →</button>
@@ -488,6 +1028,127 @@ export default function SulamaPlanPage() {
         {/* ── STEP 4: Sonuçlar ──────────────────────────────────────────── */}
         {state.step === 4 && calc && cropData && (
           <div className="sp-results">
+
+            {/* ── Model Şeffaflık ve Güven Skoru ─────────────────────────── */}
+            {(() => {
+              const etoMetod = ETO_METOD_LISTESI.find(m => m.id === state.etoYontemi);
+              let conf = 30;
+              if (etoMetod?.gercekFormul) conf += 30;  // gerçek ETo formülü
+              if (wxStatus === 'ready' && forecast) conf += 15;  // canlı hava tahmini
+              const donRisk = donRiskiVar(bolge ?? 'ic_anadolu', new Date().getMonth() + 1);
+              const bolgeLabel = BOLGE_META[bolge ?? 'ic_anadolu']?.ad ?? '';
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <ConfidenceBadge score={Math.min(100, conf)} label="Hesap Güveni" />
+                    {donRisk && (
+                      <span style={{ fontSize: '0.8rem', color: '#dc2626', background: 'rgba(220,38,38,0.08)', padding: '3px 10px', borderRadius: 999, border: '1px solid #fca5a5' }}>
+                        ❄️ Bu ay bölgede don riski var
+                      </span>
+                    )}
+                    {wxStatus !== 'ready' && (
+                      <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
+                        ⚠️ Hava tahmini yok — günlük plan statik
+                      </span>
+                    )}
+                  </div>
+                  <ModelWarningBox
+                    modelType={`Su dengesi modeli — ETo: ${etoMetod?.label ?? state.etoYontemi}`}
+                    dataLevel={`${state.il}, ${bolgeLabel} bölgesi — uzun yıl iklim ortalaması`}
+                    message="Hesaplamalar uzun yıl iklim tablosu ve seçilen ETo yöntemine dayanır. Gerçek toprak nem sensörü veya istasyon verisi kullanılmamaktadır. Kesin sulama kararları için tarla ölçümü alınız."
+                  />
+                </div>
+              );
+            })()}
+
+            <div className="sp-card">
+              <h3 style={{ margin: '0 0 10px 0' }}>⚙️ Gelişmiş Özet</h3>
+              <div className="sp-params">
+                <span>🧮 ETo: {calc.etoYontemiLabel}</span>
+                <span>🌤️ Senaryo: {calc.iklimSenaryosuLabel}</span>
+                <span>🌿 Kc: {calc.kcModeliLabel}</span>
+                <span>🎯 Karşılama: %{state.sulamaKarsilamaPct}</span>
+                <span>🌱 Kök: {state.kokDerinligiM.toFixed(2)} m</span>
+                <span>🌧️ Tahmin: {wxStatus === 'ready' && forecast ? 'Var' : wxStatus === 'unavailable' ? 'API anahtarı yok' : 'Yok'}</span>
+                {calc.parMol != null && <span>☀️ PAR: {calc.parMol.toFixed(1)} mol/m²/gün</span>}
+              </div>
+              {calc.ilkSulama && !calc.sulamaYok && (
+                <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f8fafc' }}>
+                  <strong>İlk sulama önerisi:</strong> {calc.ilkSulama.date} — Net {calc.ilkSulama.netMm.toFixed(1)} mm (Brüt {calc.ilkSulama.brutMm.toFixed(1)} mm)
+                  <span style={{ color: '#6b7280' }}> — {calc.ilkSulama.reason}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="sp-card">
+              <h3 style={{ margin: '0 0 10px 0' }}>🌾 Stres & Verim</h3>
+              <div className="sp-kpi-grid">
+                <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
+                  <div className="sp-kpi__label">Sezon Stres Oranı</div>
+                  <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>%{(calc.sezonStresOrani * 100).toFixed(0)}</div>
+                  <div className="sp-kpi__unit">(defisit / talep)</div>
+                </div>
+                <div className="sp-kpi" style={{ borderColor: '#e74c3c' }}>
+                  <div className="sp-kpi__label">Tahmini Verim Kaybı</div>
+                  <div className="sp-kpi__value" style={{ color: '#e74c3c' }}>-%{calc.verimKaybiPct.toFixed(0)}</div>
+                  <div className="sp-kpi__unit">Ky (yaklaşık)</div>
+                </div>
+                <div className="sp-kpi">
+                  <div className="sp-kpi__label">Su Açığı (mm)</div>
+                  <div className="sp-kpi__value">{calc.waterDeficit.toFixed(0)}</div>
+                  <div className="sp-kpi__unit">mm/sezon</div>
+                </div>
+              </div>
+              <p style={{ marginTop: 10, fontSize: '0.78rem', color: '#6b7280' }}>
+                Verim kaybı, dönem bazlı Ky çarpanları ile su stresi oranının ağırlıklı toplamından hesaplanır (resmî kalibrasyon değildir).
+              </p>
+            </div>
+
+            {forecast && (
+              <div className="sp-card">
+                <h3 style={{ margin: '0 0 10px 0' }}>🌧️ Yağış Tahmini (OpenWeather)</h3>
+                <div className="sp-kpi-grid">
+                  <div className="sp-kpi">
+                    <div className="sp-kpi__label">24 saat</div>
+                    <div className="sp-kpi__value">{forecast.next24hRainMm.toFixed(1)}</div>
+                    <div className="sp-kpi__unit">mm</div>
+                  </div>
+                  <div className="sp-kpi">
+                    <div className="sp-kpi__label">48 saat</div>
+                    <div className="sp-kpi__value">{forecast.next48hRainMm.toFixed(1)}</div>
+                    <div className="sp-kpi__unit">mm</div>
+                  </div>
+                  <div className="sp-kpi">
+                    <div className="sp-kpi__label">5 gün</div>
+                    <div className="sp-kpi__value">{forecast.next5dRainMm.toFixed(1)}</div>
+                    <div className="sp-kpi__unit">mm</div>
+                  </div>
+                </div>
+                <div className="sp-table-wrap" style={{ marginTop: 12 }}>
+                  <table className="sp-detail-table">
+                    <thead>
+                      <tr>
+                        <th>Tarih</th>
+                        <th>Yağış (mm)</th>
+                        <th>Min/Max (°C)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {forecast.daily.map(d => (
+                        <tr key={d.date}>
+                          <td><strong>{d.date}</strong></td>
+                          <td>{d.rainMm.toFixed(1)}</td>
+                          <td>{d.tempMin.toFixed(0)} / {d.tempMax.toFixed(0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{ marginTop: 10, fontSize: '0.78rem', color: '#6b7280' }}>
+                  Tahmin verisi, günlük plan ekranında yağışa göre sulama ertelemesi için kullanılır.
+                </p>
+              </div>
+            )}
 
             {/* Water Deficit Warning for "Sulama Yok" */}
             {calc.sulamaYok && (
@@ -510,13 +1171,13 @@ export default function SulamaPlanPage() {
                   </div>
                   <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
                     <div className="sp-kpi__label">Tahmini Verim Kaybı</div>
-                    <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>-%{calc.verimArtisi.toFixed(0)}</div>
+                    <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>-%{calc.verimKaybiPct.toFixed(0)}</div>
                     <div className="sp-kpi__unit">sulamasız</div>
                   </div>
                 </div>
                 <div style={{ marginTop: 16, padding: '12px 16px', background: '#fffbeb', borderRadius: 8, border: '1px solid #f59e0b' }}>
                   <strong>💡 Öneri:</strong> Bu ürün için en az <strong>damla sulama</strong> sistemi kurulması önerilir.
-                  Damla sulama ile su kullanımı %30-50 azalır ve verim %{calc.verimArtisi.toFixed(0)} artabilir.
+                  Damla sulama ile su kullanımı azalır ve verim artışı mümkün olabilir (ürün ve yönetim koşullarına bağlı).
                   Tahmini kurulum maliyeti: {(IRRIGATION_SYSTEMS['damla'].maliyet_kurulum * state.alan).toLocaleString('tr-TR')} ₺
                 </div>
               </div>
@@ -558,7 +1219,7 @@ export default function SulamaPlanPage() {
               <h3>📊 Aylık Su Dengesi — {state.il}</h3>
               <p className="sp-chart-desc">
                 {bolgeMeta && <span style={{ marginRight: 8 }}>{bolgeMeta.emoji} {bolgeMeta.ad}</span>}
-                İl bazlı uzun yıl iklim istatistikleriyle hesaplanmıştır (statik veri tablosu, canlı MGM verisi değildir).
+                İl bazlı uzun yıl iklim istatistikleriyle hesaplanmıştır (statik veri tablosu, canlı MGM verisi değildir). ETo: <strong>{calc.etoYontemiLabel}</strong>, Senaryo: <strong>{calc.iklimSenaryosuLabel}</strong>, Kc: <strong>{calc.kcModeliLabel}</strong>.
                 {calc.sulamaYok && <span style={{ color: '#e74c3c', fontWeight: 600, marginLeft: 8 }}>
                   (Sulama sistemi yok — Brüt Sulama kolonu karşılanamayan su açığını gösterir)
                 </span>}
@@ -651,7 +1312,7 @@ export default function SulamaPlanPage() {
             )}
 
             {/* Benefits */}
-            {calc.verimArtisi > 0 && (
+            {!calc.sulamaYok && calc.verimArtisi > 0 && (
               <div className="sp-benefit-card">
                 <h3>🌱 Potansiyel Faydalar</h3>
                 <div className="sp-benefit-item">
@@ -672,6 +1333,75 @@ export default function SulamaPlanPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            <div className="sp-table-card">
+              <h3>📅 Günlük Plan (14 gün)</h3>
+              <div className="sp-table-wrap">
+                <table className="sp-detail-table">
+                  <thead>
+                    <tr>
+                      <th>Gün</th>
+                      <th>ETo</th>
+                      <th>ETc</th>
+                      <th>Yağış</th>
+                      <th>Net</th>
+                      <th>Brüt</th>
+                      <th>Açık</th>
+                      {state.fertigasyon && <th>N/P/K</th>}
+                      <th>Not</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {calc.gunlukPlan.map(d => (
+                      <tr key={d.date}>
+                        <td><strong>{d.label}</strong></td>
+                        <td>{d.eto.toFixed(1)}</td>
+                        <td>{d.etc.toFixed(1)}</td>
+                        <td>{d.yagisTahmin.toFixed(1)}</td>
+                        <td>{d.sulamaNet.toFixed(1)}</td>
+                        <td>{d.sulamaBrut.toFixed(1)}</td>
+                        <td style={{ fontWeight: d.toprakAcigi >= 50 ? 700 : 400 }}>{d.toprakAcigi.toFixed(1)}</td>
+                        {state.fertigasyon && (
+                          <td>
+                            {d.fertN_kgDa != null ? `${d.fertN_kgDa.toFixed(1)}/${(d.fertP2O5_kgDa ?? 0).toFixed(1)}/${(d.fertK2O_kgDa ?? 0).toFixed(1)}` : '—'}
+                          </td>
+                        )}
+                        <td style={{ color: '#6b7280' }}>{d.not || ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ marginTop: 10, fontSize: '0.78rem', color: '#6b7280' }}>
+                Açık (mm), kök derinliği ve toprak tipine göre hesaplanan RAW eşiğine yaklaştıkça sulama önerilir.
+              </p>
+            </div>
+
+            {calc.toprakKatmanlari && (
+              <div className="sp-table-card">
+                <h3>🪨 Toprak Katman Profili (Yaklaşık)</h3>
+                <div className="sp-table-wrap">
+                  <table className="sp-detail-table">
+                    <thead>
+                      <tr>
+                        <th>Katman</th>
+                        <th>Derinlik</th>
+                        <th>Su Tutma</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {calc.toprakKatmanlari.map(k => (
+                        <tr key={k.katman}>
+                          <td><strong>{k.katman}</strong></td>
+                          <td>{k.derinlikCm} cm</td>
+                          <td>{k.suTutmaMm} mm</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
@@ -702,6 +1432,10 @@ export default function SulamaPlanPage() {
                 <span>🪨 Toprak: {SOIL_TYPES[state.toprakTipi].tip}</span>
                 <span>💧 Sistem: {IRRIGATION_SYSTEMS[state.sulamaSistemi].tip}</span>
                 <span>📊 Dönem: {cropData.donem[state.gelismeDonemi]}</span>
+                <span>🧮 ETo: {calc.etoYontemiLabel}</span>
+                <span>🌤️ Senaryo: {calc.iklimSenaryosuLabel}</span>
+                <span>🌿 Kc: {calc.kcModeliLabel}</span>
+                <span>🎯 Karşılama: %{state.sulamaKarsilamaPct}</span>
               </div>
             </div>
 

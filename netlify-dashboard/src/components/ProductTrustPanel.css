@@ -1,0 +1,138 @@
+.trust-panel {
+  border-radius: 18px;
+  border: 1px solid #d6d3d1;
+  padding: 18px;
+  background: linear-gradient(180deg, #fffdf7 0%, #fffaf0 100%);
+  box-shadow: 0 10px 30px rgba(41, 37, 36, 0.06);
+}
+
+.trust-panel--high {
+  border-color: #86efac;
+  background: linear-gradient(180deg, #f7fff7 0%, #ecfdf3 100%);
+}
+
+.trust-panel--medium {
+  border-color: #fcd34d;
+  background: linear-gradient(180deg, #fffdf5 0%, #fffbeb 100%);
+}
+
+.trust-panel--low {
+  border-color: #fca5a5;
+  background: linear-gradient(180deg, #fff8f8 0%, #fff1f2 100%);
+}
+
+.trust-panel__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.trust-panel__eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78716c;
+  font-weight: 700;
+}
+
+.trust-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #1c1917;
+}
+
+.trust-panel__scorebox {
+  min-width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.trust-panel__scorebox strong {
+  font-size: 1.15rem;
+  color: #1c1917;
+}
+
+.trust-panel__scorebox span {
+  font-size: 0.78rem;
+  color: #57534e;
+}
+
+.trust-panel__meter {
+  margin-top: 12px;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(120, 113, 108, 0.15);
+  overflow: hidden;
+}
+
+.trust-panel__meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%);
+}
+
+.trust-panel__summary {
+  margin: 12px 0 0;
+  color: #292524;
+  line-height: 1.55;
+}
+
+.trust-panel__badges {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trust-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(120, 113, 108, 0.18);
+  font-size: 0.8rem;
+  color: #44403c;
+  font-weight: 600;
+}
+
+.trust-panel__badge--source {
+  background: rgba(28, 25, 23, 0.04);
+}
+
+.trust-panel__list {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: #44403c;
+}
+
+.trust-panel__list li + li {
+  margin-top: 6px;
+}
+
+.trust-panel__sources {
+  margin-top: 14px;
+}
+
+.trust-panel__sources strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #292524;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .trust-panel__header {
+    flex-direction: column;
+  }
+
+  .trust-panel__scorebox {
+    align-items: flex-start;
+  }
+}

@@ -5,6 +5,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, Area, ComposedChart,
 } from 'recharts';
 import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvinceRanking } from '../services/api';
+import ProductTrustPanel from '../components/ProductTrustPanel';
 import { TurkeyHeatMap, type RegionTotal } from '../components/TurkeyHeatMap';
 import { getBolge, BOLGE_META, getETo, getYagis } from '../utils/climate-data';
 import WeatherWidget from '../components/WeatherWidget';
@@ -211,6 +212,44 @@ function riskLabel(cv: number): { label: string; color: string; emoji: string } 
   return             { label: 'Yüksek Risk', color: '#ef4444', emoji: '🔴' };
 }
 
+// ─── Crop-specific adjustment factors ────────────────────────────────────────
+// Sulama faydası: FAO-56 su üretkenliği ve Ky (verim tepki faktörü) kaynaklı tahminler
+// Uniform 1.25 yerine: ürünlere göre farklı sulama getirisi
+const CROP_IRRIGATION_SF: Record<string, number> = {
+  bugday: 1.20, arpa: 1.15, misir: 1.40, domates: 1.30, biber: 1.28,
+  patates: 1.35, sogan: 1.28, pamuk: 1.35, aycicegi: 1.22, seker_pancari: 1.30,
+  salatalik: 1.35, kavun: 1.25, karpuz: 1.20, uzum: 1.15, elma: 1.25,
+  zeytin: 1.10, nohut: 1.18, mercimek: 1.14, soya: 1.25, pirinc: 1.05,
+  kanola: 1.20, findik: 1.15, cay: 1.10, fasulye: 1.22,
+};
+const DEFAULT_IRRIGATION_SF = 1.20;
+
+// Toprak kalitesi: verim hassasiyeti ürüne göre değişir (kumlu-hafif toprak bağımlı bitkiler daha hassas)
+const CROP_SOIL_TF: Record<string, { iyi: number; zayif: number }> = {
+  bugday:        { iyi: 1.12, zayif: 0.88 },
+  arpa:          { iyi: 1.10, zayif: 0.90 },
+  misir:         { iyi: 1.18, zayif: 0.82 },
+  domates:       { iyi: 1.20, zayif: 0.80 },
+  biber:         { iyi: 1.18, zayif: 0.82 },
+  patates:       { iyi: 1.20, zayif: 0.80 },
+  sogan:         { iyi: 1.15, zayif: 0.85 },
+  pamuk:         { iyi: 1.15, zayif: 0.85 },
+  aycicegi:      { iyi: 1.10, zayif: 0.90 },
+  seker_pancari: { iyi: 1.15, zayif: 0.85 },
+  salatalik:     { iyi: 1.18, zayif: 0.82 },
+  kavun:         { iyi: 1.15, zayif: 0.85 },
+  karpuz:        { iyi: 1.12, zayif: 0.88 },
+  uzum:          { iyi: 1.12, zayif: 0.92 },
+  elma:          { iyi: 1.15, zayif: 0.88 },
+  zeytin:        { iyi: 1.08, zayif: 0.95 },
+  nohut:         { iyi: 1.12, zayif: 0.88 },
+  mercimek:      { iyi: 1.10, zayif: 0.90 },
+  soya:          { iyi: 1.15, zayif: 0.85 },
+  pirinc:        { iyi: 1.10, zayif: 0.92 },
+  kanola:        { iyi: 1.12, zayif: 0.88 },
+};
+const DEFAULT_SOIL_TF = { iyi: 1.12, zayif: 0.88 };
+
 // ─── Climate Risk Score ───────────────────────────────────────────────────────
 
 interface ClimateRisk {
@@ -237,10 +276,11 @@ function calcClimateRisk(il: string, urun: string): ClimateRisk | null {
   const droughtPuan = yazYagis < 30 ? 25 : yazYagis < 60 ? 18 : yazYagis < 100 ? 10 : 4;
   faktorler.push({ ad: 'Kuraklık Riski', puan: droughtPuan, aciklama: `Yaz yağışı: ${yazYagis.toFixed(0)} mm` });
 
-  // 3. Spring frost risk (March avg temp proxy — lower ETo = colder)
-  const etoMar = getETo(il, 3);
-  const frostPuan = etoMar < 1.5 ? 25 : etoMar < 2.5 ? 15 : etoMar < 3.5 ? 8 : 3;
-  faktorler.push({ ad: 'Don Riski', puan: frostPuan, aciklama: `Mart ETo: ${etoMar.toFixed(1)} mm/gün` });
+  // 3. Spring frost risk — Ocak ETo kış soğukluğunun daha iyi bir proxy'si
+  //    (Mart ETo bahar sezonu olduğu için yanlış; daha düşük Ocak ETo = daha soğuk kış = daha yüksek don riski)
+  const etoJan = getETo(il, 1);
+  const frostPuan = etoJan < 0.8 ? 25 : etoJan < 1.4 ? 15 : etoJan < 2.0 ? 8 : 3;
+  faktorler.push({ ad: 'Don Riski', puan: frostPuan, aciklama: `Ocak ETo: ${etoJan.toFixed(1)} mm/gün (düşük = soğuk kış)` });
 
   // 4. Annual rainfall sufficiency
   const yillikYagis = Array.from({ length: 12 }, (_, i) => getYagis(il, i + 1)).reduce((a, b) => a + b, 0);
@@ -297,8 +337,10 @@ function calculate(state: WizardState): CalcResult | null {
   // If R² < 0.3 or only 2 data points, fall back to average
   const projVerim = (reg.r2 >= 0.3 && pts.length >= 3) ? projRaw : avg;
   
-  const sf  = state.sulama ? 1.25 : 1.0;
-  const tf  = state.toprakKalite === 'iyi' ? 1.15 : state.toprakKalite === 'zayif' ? 0.85 : 1.0;
+  const sfEntry = CROP_IRRIGATION_SF[state.urun] ?? DEFAULT_IRRIGATION_SF;
+  const tfEntry = CROP_SOIL_TF[state.urun] ?? DEFAULT_SOIL_TF;
+  const sf  = state.sulama ? sfEntry : 1.0;
+  const tf  = state.toprakKalite === 'iyi' ? tfEntry.iyi : state.toprakKalite === 'zayif' ? tfEntry.zayif : 1.0;
   const adjVerim       = projVerim * sf * tf;
   const margin         = sd * sf * tf;
   const tahminiUretim  = (adjVerim * state.alan) / 1000;
@@ -360,9 +402,58 @@ function clearHistory(): void {
   localStorage.removeItem(HISTORY_KEY);
 }
 
+function getTrustTone(score: number): 'high' | 'medium' | 'low' {
+  if (score >= 75) return 'high';
+  if (score >= 50) return 'medium';
+  return 'low';
+}
+
+function buildHarvestTrust(state: WizardState, calc: CalcResult) {
+  const sourceData = state.ilceData ?? state.ilData ?? state.turkiyeData;
+  const pointCount = sourceData ? getYearsAll(sourceData).length : 0;
+  const climateRisk = state.il ? calcClimateRisk(state.il, state.urun) : null;
+
+  let score = 38;
+  if (calc.dataLevel === 'ilce') score += 22;
+  else if (calc.dataLevel === 'il') score += 10;
+  else score -= 4;
+
+  if (pointCount >= 7) score += 10;
+  else if (pointCount >= 5) score += 5;
+
+  if (calc.regR2 >= 0.65) score += 16;
+  else if (calc.regR2 >= 0.4) score += 8;
+  else if (calc.regR2 < 0.2) score -= 10;
+
+  if (climateRisk?.skor && climateRisk.skor >= 60) score -= 8;
+
+  score = Math.max(12, Math.min(92, score));
+
+  return {
+    title: 'Verim projeksiyonu guven siniri',
+    score,
+    tone: getTrustTone(score),
+    summary: calc.dataLevel === 'ilce'
+      ? 'Tahmin ilce veya il seviyesine en yakin veriyle kuruldu. Yine de bu ekran bir karar destek projeksiyonudur; parsel sensori veya anlik saha olcumu kullanmaz.'
+      : 'Tahmin ilce verisi bulunmadigi icin daha genis ortalamalara yaslaniyor. Yon gostermek icin kullanilabilir, kesin planlama icin tek basina yeterli degildir.',
+    badges: [
+      `${calc.dataLevel === 'ilce' ? 'Ilce' : calc.dataLevel === 'il' ? 'Il' : 'Turkiye'} verisi`,
+      `${pointCount} yillik seri`,
+      `Lineer regresyon R² ${calc.regR2.toFixed(2)}`,
+      `${state.sulama ? 'Sulamali' : 'Sulamasiz'} senaryo`,
+    ],
+    bullets: [
+      'Model, TUİK verim serisi uzerine lineer regresyon ve sabit katsayi duzeltmeleri uygular.',
+      'Sulama ve toprak kalitesi etkileri parcaya ozel olcum yerine kural tabanli katsayi olarak eklenir.',
+      climateRisk ? `Iklim riski: ${climateRisk.label}. Bu durum projeksiyon bandini genisletir.` : 'Iklim riski bolge ortalamalariyla hesaplanir.',
+    ],
+    sources: ['TUİK verim serisi', 'Uzun yil iklim ortalamalari', 'Kural tabanli arazi duzeltmesi'],
+  };
+}
+
 // ─── Multi-crop quick compare ─────────────────────────────────────────────────
 
-function calcQuick(data: YearData | null, alan: number, sulama: boolean, toprak: 'iyi' | 'orta' | 'zayif'): { verim: number; uretim: number; trend: number; risk: string } | null {
+function calcQuick(data: YearData | null, alan: number, sulama: boolean, toprak: 'iyi' | 'orta' | 'zayif', urun = ''): { verim: number; uretim: number; trend: number; risk: string } | null {
   if (!data) return null;
   const pts = getYearsAll(data);
   const vals = pts.map(p => p.value);
@@ -370,8 +461,10 @@ function calcQuick(data: YearData | null, alan: number, sulama: boolean, toprak:
   const avg = mean(vals);
   const reg = linearRegression(pts);
   const proj = (reg.r2 >= 0.3 && pts.length >= 3) ? Math.max(0, reg.a + reg.b * 2025) : avg;
-  const sf = sulama ? 1.25 : 1.0;
-  const tf = toprak === 'iyi' ? 1.15 : toprak === 'zayif' ? 0.85 : 1.0;
+  const sfEntry = CROP_IRRIGATION_SF[urun] ?? DEFAULT_IRRIGATION_SF;
+  const tfEntry = CROP_SOIL_TF[urun] ?? DEFAULT_SOIL_TF;
+  const sf = sulama ? sfEntry : 1.0;
+  const tf = toprak === 'iyi' ? tfEntry.iyi : toprak === 'zayif' ? tfEntry.zayif : 1.0;
   const adjV = proj * sf * tf;
   const sd = stddev(vals, avg);
   const cv = avg > 0 ? sd / avg : 0;
@@ -722,6 +815,7 @@ export function HasatTahminiPage(): React.ReactElement {
 
   // Climate risk
   const climateRisk = state.il ? calcClimateRisk(state.il, state.urun) : null;
+  const harvestTrust = calc ? buildHarvestTrust(state, calc) : null;
 
   // Province ranking — find user's province rank
   const userIlRank = state.ilRanking.findIndex(r => r.il === state.il) + 1;
@@ -729,7 +823,7 @@ export function HasatTahminiPage(): React.ReactElement {
   // Multi-crop comparison results
   const compareResults = state.compareData.map(cd => ({
     urun: cd.urun,
-    quick: calcQuick(cd.ilceData ?? cd.ilData ?? cd.turkiyeData, state.alan, state.sulama, state.toprakKalite),
+    quick: calcQuick(cd.ilceData ?? cd.ilData ?? cd.turkiyeData, state.alan, state.sulama, state.toprakKalite, cd.urun),
   }));
 
   const STEPS = [
@@ -747,7 +841,7 @@ export function HasatTahminiPage(): React.ReactElement {
         <button className="hz-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="hz-topbar__title">
           <span role="img" aria-label="hasat">🌾</span>
-          <span>Hasat Tahmincisi</span>
+          <span>Hasat Karar Destegi</span>
         </div>
         {state.step > 1 && (
           <button className="hz-topbar__reset" onClick={reset}>Yeniden Başla</button>
@@ -1054,6 +1148,18 @@ export function HasatTahminiPage(): React.ReactElement {
 
         {state.step === 4 && !loading && calc && (
           <div className="hz-results">
+
+            {harvestTrust && (
+              <ProductTrustPanel
+                title={harvestTrust.title}
+                summary={harvestTrust.summary}
+                score={harvestTrust.score}
+                tone={harvestTrust.tone}
+                badges={harvestTrust.badges}
+                bullets={harvestTrust.bullets}
+                sources={harvestTrust.sources}
+              />
+            )}
 
             {calc.dataLevel !== 'ilce' && (
               <div className="hz-warning">
@@ -1485,7 +1591,7 @@ export function HasatTahminiPage(): React.ReactElement {
             <div className="hz-card" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '2px solid #f59e0b' }}>
               <h3 style={{ color: '#92400e', margin: '0 0 8px 0', fontSize: '1rem' }}>⚠️ Tahmin Uyarısı</h3>
               <ul style={{ margin: 0, paddingLeft: 20, color: '#92400e', fontSize: '0.85rem', lineHeight: 1.8 }}>
-                <li>Bu sonuçlar <strong>istatistiksel bir tahmin modeline</strong> dayanmaktadır ve kesin verim garantisi değildir.</li>
+                <li>Bu sonuclar <strong>istatistiksel bir projeksiyona</strong> dayanir ve kesin verim garantisi vermez.</li>
                 <li>Model, TÜİK il bazlı yıllık üretim istatistiklerinden lineer regresyon ile hesaplanmıştır.</li>
                 <li>İklim düzeltmeleri il bazlı uzun yıl ortalamaları kullanılmıştır; canlı hava verileri yalnızca bilgi amaçlıdır.</li>
                 <li>Gerçek verim; hava koşulları, hastalık, sulama, gübreleme, tohum kalitesi gibi faktörlere bağlıdır.</li>

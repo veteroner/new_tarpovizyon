@@ -4,6 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { ILLER, getBolge, BOLGE_META, BOLGE_TOPRAK_PROFILLERI } from '../utils/climate-data';
+import ProductTrustPanel from '../components/ProductTrustPanel';
 import './GubreHesapPage.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -65,6 +66,8 @@ interface CalcResult {
   ihtiyac: { n: number; p2o5: number; k2o: number };
   eksik: { n: number; p2o5: number; k2o: number };
   mikroIhtiyac: { fe: number; zn: number; mn: number; b: number };
+  mikroOneriler: Array<{ urun: string; doz_kgDa: number; doz_toplam: number; maliyet: number; aciklama: string }>;
+  omMinN: number;              // OM mineralizasyonundan gelen N (kg/dekar/yıl)
   alan: number;                // dekar — for total field calculations
   oneriler: {
     kimyasal: Array<{ urun: string; miktar: number; fiyat: number }>;
@@ -81,6 +84,7 @@ interface CalcResult {
   toplam_maliyet_kimyasal: number;
   toplam_maliyet_organik: number;
   ph_uyari?: string;
+  phDoz?: string;              // Kireçleme/kükürt miktarı (kg/dekar)
   chartData: Array<{ name: string; ihtiyac: number; toprak: number; eksik: number }>;
 }
 
@@ -106,25 +110,72 @@ const CROP_NUTRIENT_DB: Record<string, CropNutrientData> = {
 };
 
 const FERTILIZER_PRODUCTS: FertilizerProduct[] = [
-  // Kimyasal
-  { ad: 'Üre (46-0-0)', tip: 'kimyasal', n: 46, p: 0, k: 0, fiyat_kg: 18, uygulama: 'Toprak' },
-  { ad: 'Amonyum Sülfat (21-0-0)', tip: 'kimyasal', n: 21, p: 0, k: 0, fiyat_kg: 12, uygulama: 'Toprak' },
-  { ad: 'Amonyum Nitrat (33-0-0)', tip: 'kimyasal', n: 33, p: 0, k: 0, fiyat_kg: 15, uygulama: 'Toprak' },
-  { ad: 'Diamonyum Fosfat (18-46-0)', tip: 'kimyasal', n: 18, p: 46, k: 0, fiyat_kg: 22, uygulama: 'Toprak' },
-  { ad: 'Triple Süper Fosfat (0-46-0)', tip: 'kimyasal', n: 0, p: 46, k: 0, fiyat_kg: 20, uygulama: 'Toprak' },
-  { ad: 'Potasyum Sülfat (0-0-50)', tip: 'kimyasal', n: 0, p: 0, k: 50, fiyat_kg: 25, uygulama: 'Toprak' },
-  { ad: 'Potasyum Klorür (0-0-60)', tip: 'kimyasal', n: 0, p: 0, k: 60, fiyat_kg: 22, uygulama: 'Toprak' },
-  { ad: 'NPK 15-15-15', tip: 'kimyasal', n: 15, p: 15, k: 15, fiyat_kg: 24, uygulama: 'Toprak' },
-  { ad: 'NPK 20-20-0', tip: 'kimyasal', n: 20, p: 20, k: 0, fiyat_kg: 22, uygulama: 'Toprak' },
+  // Kimyasal — Fiyatlar 2025 Türkiye piyasası (TL/kg)
+  { ad: 'Üre (46-0-0)', tip: 'kimyasal', n: 46, p: 0, k: 0, fiyat_kg: 40, uygulama: 'Toprak' },
+  { ad: 'Amonyum Sülfat (21-0-0)', tip: 'kimyasal', n: 21, p: 0, k: 0, fiyat_kg: 22, uygulama: 'Toprak' },
+  { ad: 'Amonyum Nitrat (33-0-0)', tip: 'kimyasal', n: 33, p: 0, k: 0, fiyat_kg: 28, uygulama: 'Toprak' },
+  { ad: 'Diamonyum Fosfat (18-46-0)', tip: 'kimyasal', n: 18, p: 46, k: 0, fiyat_kg: 46, uygulama: 'Toprak' },
+  { ad: 'Triple Süper Fosfat (0-46-0)', tip: 'kimyasal', n: 0, p: 46, k: 0, fiyat_kg: 38, uygulama: 'Toprak' },
+  { ad: 'Potasyum Sülfat (0-0-50)', tip: 'kimyasal', n: 0, p: 0, k: 50, fiyat_kg: 55, uygulama: 'Toprak' },
+  { ad: 'Potasyum Klorür (0-0-60)', tip: 'kimyasal', n: 0, p: 0, k: 60, fiyat_kg: 42, uygulama: 'Toprak' },
+  { ad: 'NPK 15-15-15', tip: 'kimyasal', n: 15, p: 15, k: 15, fiyat_kg: 46, uygulama: 'Toprak' },
+  { ad: 'NPK 20-20-0', tip: 'kimyasal', n: 20, p: 20, k: 0, fiyat_kg: 44, uygulama: 'Toprak' },
   
   // Organik
-  { ad: 'Ahır Gübresi', tip: 'organik', n: 0.5, p: 0.3, k: 0.5, fiyat_kg: 2, uygulama: 'Toprak altı' },
-  { ad: 'Tavuk Gübresi', tip: 'organik', n: 1.5, p: 1.0, k: 0.8, fiyat_kg: 4, uygulama: 'Toprak altı' },
-  { ad: 'Koyun Gübresi', tip: 'organik', n: 0.9, p: 0.5, k: 0.8, fiyat_kg: 3, uygulama: 'Toprak altı' },
-  { ad: 'Kompost', tip: 'organik', n: 1.0, p: 0.5, k: 1.0, fiyat_kg: 3, uygulama: 'Toprak karıştırma' },
-  { ad: 'Solucan Gübresi', tip: 'organik', n: 2.0, p: 1.0, k: 1.5, fiyat_kg: 8, uygulama: 'Toprak/Yaprak' },
-  { ad: 'Organik NPK (4-2-3)', tip: 'organik', n: 4, p: 2, k: 3, fiyat_kg: 12, uygulama: 'Toprak' },
+  { ad: 'Ahır Gübresi', tip: 'organik', n: 0.5, p: 0.3, k: 0.5, fiyat_kg: 3, uygulama: 'Toprak altı' },
+  { ad: 'Tavuk Gübresi', tip: 'organik', n: 1.5, p: 1.0, k: 0.8, fiyat_kg: 6, uygulama: 'Toprak altı' },
+  { ad: 'Koyun Gübresi', tip: 'organik', n: 0.9, p: 0.5, k: 0.8, fiyat_kg: 4, uygulama: 'Toprak altı' },
+  { ad: 'Kompost', tip: 'organik', n: 1.0, p: 0.5, k: 1.0, fiyat_kg: 4, uygulama: 'Toprak karıştırma' },
+  { ad: 'Solucan Gübresi', tip: 'organik', n: 2.0, p: 1.0, k: 1.5, fiyat_kg: 15, uygulama: 'Toprak/Yaprak' },
+  { ad: 'Organik NPK (4-2-3)', tip: 'organik', n: 4, p: 2, k: 3, fiyat_kg: 20, uygulama: 'Toprak' },
 ];
+
+// Mikro besin ürünleri — element % cinsinden, 2025 fiyatları
+interface MicroProduct { ad: string; element: 'fe' | 'zn' | 'mn' | 'b'; elementPct: number; fiyat_kg: number; uygulama: string; doz_kgDa: number; }
+const MICRO_PRODUCTS: MicroProduct[] = [
+  { ad: 'Demir Sülfat (FeSO₄·7H₂O) %19 Fe', element: 'fe', elementPct: 19, fiyat_kg: 16, uygulama: 'Toprak/Yaprak', doz_kgDa: 7 },
+  { ad: 'Şelat Demir (EDDHA %6 Fe)', element: 'fe', elementPct: 6, fiyat_kg: 85, uygulama: 'Toprak', doz_kgDa: 2 },
+  { ad: 'Çinko Sülfat (ZnSO₄·7H₂O) %22 Zn', element: 'zn', elementPct: 22, fiyat_kg: 26, uygulama: 'Toprak', doz_kgDa: 3 },
+  { ad: 'Mangan Sülfat (MnSO₄·H₂O) %32 Mn', element: 'mn', elementPct: 32, fiyat_kg: 22, uygulama: 'Toprak', doz_kgDa: 4 },
+  { ad: 'Boraks (%11 B)', element: 'b', elementPct: 11, fiyat_kg: 18, uygulama: 'Toprak', doz_kgDa: 1.5 },
+];
+
+function getTrustTone(score: number): 'high' | 'medium' | 'low' {
+  if (score >= 75) return 'high';
+  if (score >= 50) return 'medium';
+  return 'low';
+}
+
+function buildFertilizerTrust(state: WizardState, result: CalcResult, crop: CropNutrientData | null) {
+  let score = 46;
+
+  if (state.toprak) score += 18;
+  if (state.senaryo === 'standart') score += 5;
+  if (state.gubre_tipi === 'her_ikisi') score += 4;
+  if (crop && state.toprak && state.toprak.ph >= crop.ph_min && state.toprak.ph <= crop.ph_max) score += 6;
+  if (result.ph_uyari) score -= 6;
+
+  score = Math.max(18, Math.min(84, score));
+
+  return {
+    title: 'Gubre plani guven siniri',
+    score,
+    tone: getTrustTone(score),
+    summary: 'Bu cikti, elle girilen toprak analizi degerleri ve statik urun/veri tabani ile uretilen bir on recetedir. Satin alma ve uygulama karari oncesinde saha uzmani teyidi gerekir.',
+    badges: [
+      `${state.senaryo} senaryo`,
+      `${state.gubre_tipi === 'her_ikisi' ? 'Kimyasal + organik kiyas' : state.gubre_tipi}`,
+      `pH: ${state.toprak?.ph ?? '-'}${result.ph_uyari ? ' uyari var' : ''}`,
+      `${state.alan} da alan`,
+    ],
+    bullets: [
+      'Besin acigi, hedef verim ve urun basina sabit NPK katsayilariyla hesaplanir.',
+      'Gubre onerileri optimizasyon motoru degil, urun veri tabanina dayali kural tabanli bir karmadir.',
+      'Mikro besin ve fiyatlar piyasa teyidi olmadan kullanilmamalidir.',
+    ],
+    sources: ['Elle girilen toprak analizi', 'Statik urun besin veri tabani', 'Kural tabanli gubre karisimi'],
+  };
+}
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -159,9 +210,14 @@ export default function GubreHesapPage() {
       k2o: crop.k2o * (state.hedef_verim * 10) * senaryoCarpan,
     };
 
-    // Subtract existing soil nutrients
+    // Organik madde mineralizasyonu: yıllık yaklaşık 5 kg N / (% OM × dekar)
+    // Kaynak: 25 cm toprak derinliği, 1.3 g/cm³ özgül ağırlık, %5 N içeriği, %2 mineralizasyon oranı
+    // ≈ 1000 m²/da × 0.25 m × 1300 kg/m³ × (OM/100) × 0.05 × 0.02 = 3.25 × OM% ≈ pratik 5 kg N/da/yıl
+    const omMinN = +(state.toprak.organik_madde * 5).toFixed(1);
+
+    // Subtract existing soil nutrients + OM-available N
     const eksik = {
-      n: Math.max(0, ihtiyac.n - state.toprak.n),
+      n: Math.max(0, ihtiyac.n - state.toprak.n - omMinN),
       p2o5: Math.max(0, ihtiyac.p2o5 - state.toprak.p2o5),
       k2o: Math.max(0, ihtiyac.k2o - state.toprak.k2o),
     };
@@ -174,6 +230,37 @@ export default function GubreHesapPage() {
       mn: +(crop.mn * verimFaktor).toFixed(3),
       b: +(crop.b * verimFaktor).toFixed(3),
     };
+
+    // Mikro besin ürün önerileri: eksiklik eşikleri aşıldığında ürün dozajı hesapla
+    // Eşikler (kg/dekar): Fe>0.05, Zn>0.015, Mn>0.025, B>0.005
+    const mikroEsikler = { fe: 0.05, zn: 0.015, mn: 0.025, b: 0.005 };
+    const mikroAciklamalar: Record<string, string> = {
+      fe: 'Yüksek pH veya kireçli topraklarda demir klorozu riski. Toprak uygulaması veya yapraktan şelatlı demir.',
+      zn: 'Çinko eksikliği mısır ve meyve bahçelerinde yaygın. Toprak uygulaması veya yapraktan ZnSO₄.',
+      mn: 'Asit topraklarda fazla, alkali topraklarda az çözünür. Yapraktan uygulama daha etkili.',
+      b: 'Bor, çiçeklenme ve meyve tutumunda kritik. Aşırı uygulamadan kaçın (toksik eşik düşük).',
+    };
+    const mikroOneriler: CalcResult['mikroOneriler'] = [];
+    // Her element için ayrı değerlendir: ilk eşleşen ürünü öner
+    const seenElements = new Set<string>();
+    for (const mp of MICRO_PRODUCTS) {
+      if (seenElements.has(mp.element)) continue;
+      const deficit = mikroIhtiyac[mp.element];
+      const esik = mikroEsikler[mp.element];
+      if (deficit > esik) {
+        const dozHesap = deficit / (mp.elementPct / 100);
+        const doz = Math.min(mp.doz_kgDa, Math.max(0.5, +dozHesap.toFixed(1)));
+        const dozToplam = +(doz * state.alan).toFixed(1);
+        mikroOneriler.push({
+          urun: mp.ad,
+          doz_kgDa: doz,
+          doz_toplam: dozToplam,
+          maliyet: Math.round(dozToplam * mp.fiyat_kg),
+          aciklama: mikroAciklamalar[mp.element],
+        });
+        seenElements.add(mp.element);
+      }
+    }
 
     // Calculate optimal fertilizer combinations
     const oneriler = {
@@ -216,24 +303,38 @@ export default function GubreHesapPage() {
       },
     ];
 
-    // pH warning
+    // pH uyarısı + düzeltme dozajı
+    // Kireçleme: Her 0.1 pH birimi artış için yaklaşık 10-15 kg/dekar kireç (CaCO₃ %90)
+    // Kükürt: Her 0.1 pH birimi düşürme için yaklaşık 3-5 kg/dekar elementel kükürt
     let ph_uyari: string | undefined;
+    let phDoz: string | undefined;
     if (state.toprak.ph < crop.ph_min) {
+      const fark = +(crop.ph_min - state.toprak.ph).toFixed(1);
+      const kirecKgDa = Math.round(fark * 10 * 12);  // ~12 kg/dekar per 0.1 birim
+      const kirecToplam = kirecKgDa * state.alan;
       ph_uyari = `⚠️ Toprak pH değeri düşük (${state.toprak.ph}). Kireçleme önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
+      phDoz = `Tahmini kireç (CaCO₃ %90) ihtiyacı: ${kirecKgDa} kg/dekar → toplam ${kirecToplam.toLocaleString('tr-TR')} kg (${state.alan} dekar). Sonbaharda toprak işleme öncesi uygulayın, etki 6-12 ayda gerçekleşir.`;
     } else if (state.toprak.ph > crop.ph_max) {
+      const fark = +(state.toprak.ph - crop.ph_max).toFixed(1);
+      const kukurtKgDa = Math.round(fark * 10 * 4);  // ~4 kg/dekar per 0.1 birim
+      const kukurtToplam = kukurtKgDa * state.alan;
       ph_uyari = `⚠️ Toprak pH değeri yüksek (${state.toprak.ph}). Kükürt uygulaması önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
+      phDoz = `Tahmini elementel kükürt ihtiyacı: ${kukurtKgDa} kg/dekar → toplam ${kukurtToplam.toLocaleString('tr-TR')} kg (${state.alan} dekar). Sulama ile birlikte ince öğütülmüş kükürt uygulanmalıdır.`;
     }
 
     return {
       ihtiyac,
       eksik,
       mikroIhtiyac,
+      mikroOneriler,
+      omMinN,
       alan: state.alan,
       oneriler,
       uygulama_takvimi,
       toplam_maliyet_kimyasal: oneriler.kimyasal.reduce((sum, x) => sum + x.fiyat, 0) * state.alan,
       toplam_maliyet_organik: oneriler.organik.reduce((sum, x) => sum + x.fiyat, 0) * state.alan,
       ph_uyari,
+      phDoz,
       chartData,
     };
   };
@@ -348,6 +449,7 @@ export default function GubreHesapPage() {
   const bolgeMeta = bolge ? BOLGE_META[bolge] : null;
   const bolgeAd = bolgeMeta?.ad ?? '';
   const bolgeProfil = bolgeAd ? BOLGE_TOPRAK_PROFILLERI[bolgeAd] : null;
+  const fertilizerTrust = result ? buildFertilizerTrust(state, result, cropData) : null;
 
   return (
     <div className="gh-wizard">
@@ -356,7 +458,7 @@ export default function GubreHesapPage() {
         <button className="gh-topbar__back" onClick={() => navigate(-1)}>← Geri</button>
         <div className="gh-topbar__title">
           <span>🧪</span>
-          <span>Gübre Hesaplayıcı</span>
+          <span>Gubre Plan Taslagi</span>
         </div>
         {step > 1 && <button className="gh-topbar__reset" onClick={handleReset}>Yeniden Başlat</button>}
         {step === 1 && <div style={{ width: '140px' }} />}
@@ -724,6 +826,18 @@ export default function GubreHesapPage() {
         {/* STEP 4: Results */}
         {step === 4 && result && (
           <div className="gh-results">
+            {fertilizerTrust && (
+              <ProductTrustPanel
+                title={fertilizerTrust.title}
+                summary={fertilizerTrust.summary}
+                score={fertilizerTrust.score}
+                tone={fertilizerTrust.tone}
+                badges={fertilizerTrust.badges}
+                bullets={fertilizerTrust.bullets}
+                sources={fertilizerTrust.sources}
+              />
+            )}
+
             {/* Scenario Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
               <span style={{
@@ -738,9 +852,12 @@ export default function GubreHesapPage() {
               </span>
             </div>
 
-            {/* pH Warning */}
+            {/* pH Warning + düzeltme dozajı */}
             {result.ph_uyari && (
-              <div className="gh-ph-warning">{result.ph_uyari}</div>
+              <div className="gh-ph-warning">
+                <div>{result.ph_uyari}</div>
+                {result.phDoz && <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', opacity: 0.9 }}>📐 {result.phDoz}</div>}
+              </div>
             )}
 
             {/* NPK Chart */}
@@ -771,7 +888,7 @@ export default function GubreHesapPage() {
                   <div className="gh-summary-label">Azot (N)</div>
                   <div className="gh-summary-value">{result.eksik.n.toFixed(1)} <small>kg/da</small></div>
                   <div className="gh-summary-sub">Toplam: <strong>{(result.eksik.n * result.alan).toFixed(0)} kg</strong></div>
-                  <div className="gh-summary-hint">İhtiyaç: {result.ihtiyac.n.toFixed(1)} | Toprak: {(result.ihtiyac.n - result.eksik.n).toFixed(1)}</div>
+                  <div className="gh-summary-hint">İhtiyaç: {result.ihtiyac.n.toFixed(1)} | Toprak: {state.toprak?.n?.toFixed(1) ?? '-'} | OM mineralizasyonu: <strong>{result.omMinN.toFixed(1)} kg/da</strong> (×{state.toprak?.organik_madde}% OM)</div>
                 </div>
                 <div className="gh-summary-item">
                   <div className="gh-summary-label">Fosfor (P₂O₅)</div>
@@ -790,41 +907,36 @@ export default function GubreHesapPage() {
 
             {/* Micro-nutrients */}
             <div className="gh-card">
-              <h2 className="gh-card__title">🔬 Mikro Besin Elementleri (per dekar)</h2>
+              <h2 className="gh-card__title">🔬 Mikro Besin İhtiyacı ve Üürün Önerisi</h2>
               <div className="gh-micro-result-grid">
-                <div className="gh-micro-item">
-                  <span className="gh-micro-icon">🔩</span>
-                  <div>
-                    <div className="gh-micro-name">Demir (Fe)</div>
-                    <div className="gh-micro-val">{result.mikroIhtiyac.fe} kg/da</div>
-                    <div className="gh-micro-total">Toplam: {(result.mikroIhtiyac.fe * result.alan).toFixed(1)} kg</div>
+                {[{k:'fe',icon:'🔩',ad:'Demir (Fe)'},{k:'zn',icon:'⚡',ad:'Çinko (Zn)'},{k:'mn',icon:'🔧',ad:'Mangan (Mn)'},{k:'b',icon:'💎',ad:'Bor (B)'}].map(({k,icon,ad})=>(
+                  <div className="gh-micro-item" key={k}>
+                    <span className="gh-micro-icon">{icon}</span>
+                    <div>
+                      <div className="gh-micro-name">{ad}</div>
+                      <div className="gh-micro-val">{result.mikroIhtiyac[k as keyof typeof result.mikroIhtiyac]} kg/da</div>
+                      <div className="gh-micro-total">Toplam: {(result.mikroIhtiyac[k as keyof typeof result.mikroIhtiyac] * result.alan).toFixed(2)} kg</div>
+                    </div>
                   </div>
-                </div>
-                <div className="gh-micro-item">
-                  <span className="gh-micro-icon">⚡</span>
-                  <div>
-                    <div className="gh-micro-name">Çinko (Zn)</div>
-                    <div className="gh-micro-val">{result.mikroIhtiyac.zn} kg/da</div>
-                    <div className="gh-micro-total">Toplam: {(result.mikroIhtiyac.zn * result.alan).toFixed(1)} kg</div>
-                  </div>
-                </div>
-                <div className="gh-micro-item">
-                  <span className="gh-micro-icon">🔧</span>
-                  <div>
-                    <div className="gh-micro-name">Mangan (Mn)</div>
-                    <div className="gh-micro-val">{result.mikroIhtiyac.mn} kg/da</div>
-                    <div className="gh-micro-total">Toplam: {(result.mikroIhtiyac.mn * result.alan).toFixed(1)} kg</div>
-                  </div>
-                </div>
-                <div className="gh-micro-item">
-                  <span className="gh-micro-icon">💎</span>
-                  <div>
-                    <div className="gh-micro-name">Bor (B)</div>
-                    <div className="gh-micro-val">{result.mikroIhtiyac.b} kg/da</div>
-                    <div className="gh-micro-total">Toplam: {(result.mikroIhtiyac.b * result.alan).toFixed(1)} kg</div>
-                  </div>
-                </div>
+                ))}
               </div>
+              {result.mikroOneriler.length > 0 && (
+                <div style={{ marginTop: '1rem' }}>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--gh-text-primary)' }}>📦 Önerilen Mikro Besin Ürünleri</h3>
+                  {result.mikroOneriler.map((m, i) => (
+                    <div key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: '0.6rem 0.8rem', marginBottom: '0.4rem' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{m.urun}</div>
+                      <div style={{ fontSize: '0.83rem', color: '#4b5563', marginTop: 2 }}>
+                        Doz: <strong>{m.doz_kgDa} kg/da</strong> → Toplam: <strong>{m.doz_toplam} kg</strong> ({state.alan} da) · Tahmini maliyet: <strong>₺{m.maliyet.toLocaleString('tr-TR')}</strong>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: 2 }}>{m.aciklama}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {result.mikroOneriler.length === 0 && (
+                <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#6b7280' }}>✅ Hesaplanan mikro besin önemsiz düzeyde — normal koşullarda ek uygulama gerekli değildir.</p>
+              )}
             </div>
 
             {/* Fertilizer Recommendations — amounts multiplied by alan */}
@@ -956,10 +1068,9 @@ export default function GubreHesapPage() {
             {/* Price Disclaimer */}
             <div className="gh-card" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '1px solid #f59e0b' }}>
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#92400e', lineHeight: 1.6 }}>
-                ⚠️ <strong>Fiyat Uyarısı (Ocak 2025 güncellemesi):</strong> Gübre fiyatları 2024 yılı ortalamalarına dayalı <strong>tahmini</strong> değerlerdir.
-                Enflasyon, kur ve mevsimsel dalgalanmalar nedeniyle güncel piyasa fiyatları %20-40 farklılık gösterebilir.
-                Satın alma kararı öncesi mutlaka yerel bayinizden güncel fiyat alınız.
-                Bu hesaplama bir <strong>taslak plan</strong> niteliğindedir; profesyonel bir gübreleme tavsiyesi yerine geçmez.
+                ⚠️ <strong>Fiyat Notu (Mart 2025):</strong> Fiyatlar 2025 Türkiye piyasa referanslarına güncellenmiştir (Üre ~40 TL/kg, DAP ~46 TL/kg, K₂SO₄ ~55 TL/kg).
+                Yerel bayi fiyatları bölgeye ve döneme göre %15-25 farklılaşabilir. Organik madde mineralizasyonu hesaba katılmıştır (<strong>{result.omMinN} kg N/da/yıl</strong>).
+                Bu plan uygulama öncesi bir gübreleme mühendisi veya tarım ziraatçışısı ile gözden geçirilmelidir.
               </p>
             </div>
 

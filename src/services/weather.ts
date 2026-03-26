@@ -121,16 +121,52 @@ export interface WeatherData {
   city: string;
 }
 
+export interface ForecastDay {
+  /** YYYY-MM-DD (yerel saat dilimine göre) */
+  date: string;
+  /** Günlük toplam yağış (mm) */
+  rainMm: number;
+  /** Günlük min sıcaklık (°C) */
+  tempMin: number;
+  /** Günlük max sıcaklık (°C) */
+  tempMax: number;
+}
+
+export interface ForecastSummary {
+  city: string;
+  /** Yaklaşık (OpenWeather 3 saatlik tahminlerden) */
+  next24hRainMm: number;
+  /** Yaklaşık (OpenWeather 3 saatlik tahminlerden) */
+  next48hRainMm: number;
+  /** 5 günlük toplam yağış (mm) */
+  next5dRainMm: number;
+  /** Günlük kırılım */
+  daily: ForecastDay[];
+  /** ms */
+  fetchedAt: number;
+}
+
 // ─── Cache ────────────────────────────────────────────────────────────────────
 
 const CACHE_TTL = 10 * 60 * 1000; // 10 dakika
 const cache = new Map<string, { data: WeatherData; ts: number }>();
+
+const forecastCache = new Map<string, { data: ForecastSummary; ts: number }>();
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 const IS_DEV = import.meta.env.DEV;
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
+
+function yyyyMmDdLocal(tsMs: number): string {
+  const d = new Date(tsMs);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 /**
  * İl adıyla OpenWeather API'den güncel hava durumu verisi çeker.
@@ -178,6 +214,95 @@ export async function fetchWeather(il: string): Promise<WeatherData | null> {
     return data;
   } catch (err) {
     if (IS_DEV) console.warn(`[weather] ${il} verisi alınamadı:`, err);
+    return null;
+  }
+}
+
+/**
+ * İl adıyla OpenWeather 5 günlük / 3 saatlik tahmin verisini özetler.
+ * Ücretsiz planda çalışır. 10 dakikalık in-memory cache kullanır.
+ */
+export async function fetchForecast(il: string): Promise<ForecastSummary | null> {
+  if (!API_KEY) return null;
+
+  const coord = IL_KOORDINAT[il];
+  if (!coord) return null;
+
+  const cached = forecastCache.get(il);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const url = `${FORECAST_URL}?lat=${coord.lat}&lon=${coord.lon}&appid=${API_KEY}&units=metric&lang=tr`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(7000) });
+
+    if (!res.ok) {
+      if (IS_DEV) console.warn(`[forecast] ${il} isteği başarısız: ${res.status}`);
+      return null;
+    }
+
+    const json = await res.json();
+    const list: any[] = Array.isArray(json.list) ? json.list : [];
+
+    const now = Date.now();
+    let next24hRainMm = 0;
+    let next48hRainMm = 0;
+
+    const dailyMap = new Map<string, ForecastDay>();
+
+    for (const it of list) {
+      const ts = typeof it?.dt === 'number' ? it.dt * 1000 : null;
+      if (!ts) continue;
+
+      const rain3h = Number(it?.rain?.['3h'] ?? 0) || 0;
+
+      if (ts <= now + 24 * 3600 * 1000) next24hRainMm += rain3h;
+      if (ts <= now + 48 * 3600 * 1000) next48hRainMm += rain3h;
+
+      const date = yyyyMmDdLocal(ts);
+      const tempMin = Number(it?.main?.temp_min);
+      const tempMax = Number(it?.main?.temp_max);
+
+      const prev = dailyMap.get(date);
+      if (!prev) {
+        dailyMap.set(date, {
+          date,
+          rainMm: rain3h,
+          tempMin: Number.isFinite(tempMin) ? tempMin : NaN,
+          tempMax: Number.isFinite(tempMax) ? tempMax : NaN,
+        });
+      } else {
+        prev.rainMm += rain3h;
+        if (Number.isFinite(tempMin)) prev.tempMin = Number.isFinite(prev.tempMin) ? Math.min(prev.tempMin, tempMin) : tempMin;
+        if (Number.isFinite(tempMax)) prev.tempMax = Number.isFinite(prev.tempMax) ? Math.max(prev.tempMax, tempMax) : tempMax;
+      }
+    }
+
+    const daily = Array.from(dailyMap.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(d => ({
+        ...d,
+        rainMm: Math.round(d.rainMm * 10) / 10,
+        tempMin: Number.isFinite(d.tempMin) ? Math.round(d.tempMin * 10) / 10 : NaN,
+        tempMax: Number.isFinite(d.tempMax) ? Math.round(d.tempMax * 10) / 10 : NaN,
+      }));
+
+    const next5dRainMm = daily.reduce((s, d) => s + d.rainMm, 0);
+
+    const data: ForecastSummary = {
+      city: il,
+      next24hRainMm: Math.round(next24hRainMm * 10) / 10,
+      next48hRainMm: Math.round(next48hRainMm * 10) / 10,
+      next5dRainMm: Math.round(next5dRainMm * 10) / 10,
+      daily,
+      fetchedAt: Date.now(),
+    };
+
+    forecastCache.set(il, { data, ts: Date.now() });
+    return data;
+  } catch (err) {
+    if (IS_DEV) console.warn(`[forecast] ${il} verisi alınamadı:`, err);
     return null;
   }
 }
