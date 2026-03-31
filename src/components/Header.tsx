@@ -149,7 +149,7 @@ const turkeyMenuCategories: MenuCategory[] = [
     title: 'Rasyon',
     icon: Beef,
     items: [
-      { label: 'Teknova Rasyon', path: '/rasyon' },
+      { label: 'Rasyon', path: '/rasyon' },
     ],
   },
 ];
@@ -281,13 +281,6 @@ export function Header() {
       <div className={`header-band header-band--bottom ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="header-container header-bottom">
           <div className="subnav">
-            <button
-              type="button"
-              className={`subnav-item ${isActive(`/tarpovizyon/${mode}`) ? 'active' : ''}`}
-              onClick={() => handleNavigate(`/tarpovizyon/${mode}`)}
-            >
-              Ana Sayfa
-            </button>
             {activeCategory?.items?.map(item => (
               <button
                 key={item.path}
@@ -305,6 +298,17 @@ export function Header() {
       {/* Mobile drawer */}
       {mobileMenuOpen && (
         <div className="mobile-menu">
+          {/* Ana Sayfa */}
+          <button
+            type="button"
+            className="mobile-home-btn"
+            onClick={() => handleNavigate('/tarpovizyon')}
+          >
+            <Home size={18} />
+            <span>Ana Sayfa</span>
+          </button>
+
+          {/* Dünya / Türkiye Toggle */}
           <div className="mobile-mode">
             <button
               type="button"
@@ -312,6 +316,7 @@ export function Header() {
               onClick={() => {
                 setMode('world');
                 setActiveCategoryIdx(0);
+                handleNavigate('/tarpovizyon/world');
               }}
             >
               <Globe size={18} /> Dünya
@@ -322,12 +327,15 @@ export function Header() {
               onClick={() => {
                 setMode('turkey');
                 setActiveCategoryIdx(0);
+                handleNavigate('/tarpovizyon/turkey');
               }}
             >
               <MapPin size={18} /> Türkiye
             </button>
           </div>
 
+          {/* Kategori Seçimi */}
+          <p className="mobile-section-label">Kategori</p>
           <div className="mobile-categories">
             {menuCategories.map((cat, idx) => {
               const Icon = cat.icon;
@@ -337,7 +345,13 @@ export function Header() {
                   key={`${mode}-m-${cat.title}`}
                   type="button"
                   className={`mobile-category-btn ${isCatActive ? 'active' : ''}`}
-                  onClick={() => setActiveCategoryIdx(idx)}
+                  onClick={() => {
+                    setActiveCategoryIdx(idx);
+                    // Navigate to first item in category
+                    if (cat.items && cat.items.length > 0) {
+                      handleNavigate(cat.items[0].path);
+                    }
+                  }}
                 >
                   {Icon && <Icon size={18} />}
                   <span>{cat.title}</span>
@@ -346,25 +360,24 @@ export function Header() {
             })}
           </div>
 
-          <div className="mobile-items">
-            <button
-              type="button"
-              className={`mobile-menu-item ${isActive(`/tarpovizyon/${mode}`) ? 'active' : ''}`}
-              onClick={() => handleNavigate(`/tarpovizyon/${mode}`)}
-            >
-              Ana Sayfa
-            </button>
-            {activeCategory?.items?.map(item => (
-              <button
-                key={item.path}
-                type="button"
-                className={`mobile-menu-item ${isActive(item.path) ? 'active' : ''}`}
-                onClick={() => handleNavigate(item.path)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          {/* Kategori Alt Sayfaları */}
+          {activeCategory?.items && activeCategory.items.length > 0 && (
+            <>
+              <p className="mobile-section-label">{activeCategory.title}</p>
+              <div className="mobile-items">
+                {activeCategory.items.map(item => (
+                  <button
+                    key={item.path}
+                    type="button"
+                    className={`mobile-menu-item ${isActive(item.path) ? 'active' : ''}`}
+                    onClick={() => handleNavigate(item.path)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </header>

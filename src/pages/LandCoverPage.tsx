@@ -54,13 +54,28 @@ function formatShort(value: number): string {
 
 export default function LandCoverPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>(['Ağaç örtülü alanlar', 'Çayır', 'Otsu bitkiler', 'Yapay yüzeyler (kentsel ve ilgili alanlar dahil)']);
-  const [selectedYear, setSelectedYear] = useState('2022');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [maxYear, setMaxYear] = useState(2022);
   const [loading, setLoading] = useState(true);
   const [coverData, setCoverData] = useState<DataItem[]>([]);
   const [countryData, setCountryData] = useState<CountryDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<{year: string; value: number}[]>([]);
   const [sortBy, setSortBy] = useState<'value' | 'name'>('value');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Auto-detect latest available year from DB
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetchQuery("SELECT MAX(year) as max_year FROM fao_land_cover");
+      const my = parseInt(String(res.data?.[0]?.max_year ?? '2022'));
+      if (!cancelled && my) {
+        setMaxYear(my);
+        setSelectedYear(String(my));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const loadData = useCallback(async () => {
     if (selectedItems.length === 0) {
@@ -169,7 +184,7 @@ export default function LandCoverPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 31 }, (_, i) => 2022 - i).map(year => (
+            {Array.from({ length: maxYear - 1991 }, (_, i) => maxYear - i).map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>

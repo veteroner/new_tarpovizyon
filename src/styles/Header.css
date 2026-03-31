@@ -279,6 +279,37 @@
   color: white;
 }
 
+.mobile-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.75rem;
+  background: rgba(16, 185, 129, 0.20);
+  border: 1px solid rgba(52, 211, 153, 0.40);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mobile-home-btn:hover {
+  background: rgba(16, 185, 129, 0.35);
+}
+
+.mobile-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(240, 253, 244, 0.50);
+  margin: 0.75rem 0 0.4rem;
+  padding: 0 0.2rem;
+}
+
 .mobile-categories {
   display: grid;
   grid-template-columns: 1fr 1fr;

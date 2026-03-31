@@ -20,12 +20,12 @@ import type { YearValue, IntelligenceAlert } from '../utils/intelligenceCalculat
 type Tab = 'overview' | 'trade' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
+  { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
   { id: 'trade', label: 'Ticaret Dengesi', icon: '⚖️' },
-  { id: 'concentration', label: 'Pazar Yogunlugu', icon: '🏆' },
-  { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷' },
+  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '🏆' },
+  { id: 'turkey', label: 'Türkiye Profili', icon: '🇹🇷' },
   { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'Intelligence', icon: '🧠' },
+  { id: 'alerts', label: 'Akıllı Analiz', icon: '🧠' },
 ];
 
 const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
@@ -134,10 +134,10 @@ export default function FertilizerPage() {
       });
 
       const ins: Insight[] = [];
-      ins.push({ id: 'ov1', type: 'info', message: `Dunya gubre ithalati ${formatTon(worldTotal)} (${byType.length} ana gubre turu)`, severity: 'low', category: 'Kapsam' });
-      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Gubre ithalati önceki yila gore %${yoy.toFixed(1)} artti - talep artisi`, severity: 'high', category: 'Trend' });
-      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Gubre ithalati %${Math.abs(yoy).toFixed(1)} azaldi`, severity: 'high', category: 'Trend' });
-      if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'achievement' : 'info', message: `Turkiye gubre ithalatinda dunya ${turkeyRank}. - ${formatTon(turkeyData.value)}`, severity: 'medium', category: 'Turkiye' });
+      ins.push({ id: 'ov1', type: 'info', message: `Dünya gübre ithalatı ${formatTon(worldTotal)} (${byType.length} ana gübre türü)`, severity: 'low', category: 'Kapsam' });
+      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Gübre ithalatı önceki yıla göre %${yoy.toFixed(1)} arttı — talep artışı`, severity: 'high', category: 'Trend' });
+      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Gübre ithalatı %${Math.abs(yoy).toFixed(1)} azaldı`, severity: 'high', category: 'Trend' });
+      if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'achievement' : 'info', message: `Türkiye gübre ithalatında dünya ${turkeyRank}. — ${formatTon(turkeyData.value)}`, severity: 'medium', category: 'Türkiye' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
     finally { setLoading(false); }
@@ -182,11 +182,11 @@ export default function FertilizerPage() {
       const totalImp = balanceData.reduce((s, b) => s + b.import, 0);
       const totalExp = balanceData.reduce((s, b) => s + b.export, 0);
       const ins: Insight[] = [];
-      if (totalImp > totalExp * 2) ins.push({ id: 'tr1', type: 'warning', message: `Turkiye gubre ithalati ihracatinin ${(totalImp / (totalExp || 1)).toFixed(1)}x kati - yuksek dis bagimlilik`, severity: 'high', category: 'Ticaret' });
+      if (totalImp > totalExp * 2) ins.push({ id: 'tr1', type: 'warning', message: `Türkiye gübre ithalatı ihracatının ${(totalImp / (totalExp || 1)).toFixed(1)}x katı — yüksek dış bağımlılık`, severity: 'high', category: 'Ticaret' });
       const topDeficit = balanceData[0];
-      if (topDeficit) ins.push({ id: 'tr2', type: 'info', message: `En yuksek ithalat acigi: ${topDeficit.name} (${formatTon(topDeficit.balance)})`, severity: 'medium', category: 'Acik' });
+      if (topDeficit) ins.push({ id: 'tr2', type: 'info', message: `En yüksek ithalat açığı: ${topDeficit.name} (${formatTon(topDeficit.balance)})`, severity: 'medium', category: 'Açık' });
       const surplusItems = balanceData.filter(b => b.export > b.import);
-      if (surplusItems.length > 0) ins.push({ id: 'tr3', type: 'achievement', message: `${surplusItems.length} gubre turunde ihracat fazlasi`, severity: 'medium', category: 'Fazla' });
+      if (surplusItems.length > 0) ins.push({ id: 'tr3', type: 'achievement', message: `${surplusItems.length} gübre türünde ihracat fazlası`, severity: 'medium', category: 'Fazla' });
       setTradeInsights(ins);
     } catch (e) { console.error('Trade hatasi:', e); }
     finally { setLoading(false); }
@@ -214,11 +214,11 @@ export default function FertilizerPage() {
 
       const ins: Insight[] = [];
       if (hhi) {
-        const label = hhi.concentration === 'LOW' ? 'dusuk' : hhi.concentration === 'MODERATE' ? 'orta' : 'yuksek';
-        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Gubre ihracati konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) - Top 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
+        const label = hhi.concentration === 'LOW' ? 'düşük' : hhi.concentration === 'MODERATE' ? 'orta' : 'yüksek';
+        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Gübre ihracatı konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — İlk 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
       }
       const turkeyInList = data.find((c: any) => c.isTurkey);
-      if (turkeyInList) ins.push({ id: 'cn2', type: 'info', message: `Turkiye gubre ihracatinda dunya ${turkeyInList.rank}. (${formatTon(turkeyInList.value)})`, severity: 'medium', category: 'Siralama' });
+      if (turkeyInList) ins.push({ id: 'cn2', type: 'info', message: `Türkiye gübre ihracatında dünya ${turkeyInList.rank}. (${formatTon(turkeyInList.value)})`, severity: 'medium', category: 'Sıralama' });
       setConcInsights(ins);
     } catch (e) { console.error('Concentration hatasi:', e); }
     finally { setLoading(false); }
@@ -272,9 +272,9 @@ export default function FertilizerPage() {
       });
 
       const ins: Insight[] = [];
-      ins.push({ id: 'tp1', type: totalImp > totalExp * 3 ? 'warning' : 'info', message: `Turkiye gubre ticareti: Ithalat ${formatTon(totalImp)} vs Ihracat ${formatTon(totalExp)} (oran: ${(totalImp / (totalExp || 1)).toFixed(1)}x)`, severity: 'high', category: 'Denge' });
-      if (impCAGR) ins.push({ id: 'tp2', type: impCAGR.cagr > 0 ? 'growth' : 'decline', message: `Gubre ithalati yillik %${Math.abs(impCAGR.cagr).toFixed(2)} CAGR ile ${impCAGR.cagr > 0 ? 'artiyor' : 'azaliyor'}`, severity: 'medium', category: 'Trend' });
-      if (byProduct.length > 0) ins.push({ id: 'tp3', type: 'info', message: `En cok ithal edilen: ${byProduct[0].name} (${formatTon(byProduct[0].import)})`, severity: 'low', category: 'Urun' });
+      ins.push({ id: 'tp1', type: totalImp > totalExp * 3 ? 'warning' : 'info', message: `Türkiye gübre ticareti: İthalat ${formatTon(totalImp)} — İhracat ${formatTon(totalExp)} (oran: ${(totalImp / (totalExp || 1)).toFixed(1)}x)`, severity: 'high', category: 'Denge' });
+      if (impCAGR) ins.push({ id: 'tp2', type: impCAGR.cagr > 0 ? 'growth' : 'decline', message: `Gübre ithalatı yıllık %${Math.abs(impCAGR.cagr).toFixed(2)} bileşik büyüme oranıyla ${impCAGR.cagr > 0 ? 'artıyor' : 'azalıyor'}`, severity: 'medium', category: 'Trend' });
+      if (byProduct.length > 0) ins.push({ id: 'tp3', type: 'info', message: `En çok ithal edilen: ${byProduct[0].name} (${formatTon(byProduct[0].import)})`, severity: 'low', category: 'Ürün' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
     finally { setLoading(false); }
@@ -315,8 +315,8 @@ export default function FertilizerPage() {
       });
 
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye gubre ithalati trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, volatilite %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dunya gubre ticareti trendi: CAGR %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dunya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye gübre ithalatı trendi: BBO %${turkeyTrend.cagr.toFixed(2)}, oynaklık %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya gübre ticareti trendi: BBO %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dünya' });
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
@@ -345,25 +345,25 @@ export default function FertilizerPage() {
       const impBefore = before['İthalat Miktarı'] || 0;
       if (impBefore > 0) {
         const change = ((impNow - impBefore) / impBefore) * 100;
-        alerts.push({ id: 'int-imp-change', severity: change > 30 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'Ithalat Degisimi (2015-2022)', message: `Gubre ithalati %${change.toFixed(1)} ${change > 0 ? 'artti' : 'azaldi'} (${formatTon(impBefore)} -> ${formatTon(impNow)})`, metric: 'Ithalat trendi', value: change });
+        alerts.push({ id: 'int-imp-change', severity: change > 30 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'İthalat Değişimi (2015-2022)', message: `Gübre ithalatı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(impBefore)} → ${formatTon(impNow)})`, metric: 'İthalat trendi', value: change });
       }
       const expNow = now['İhracat Miktarı'] || 0;
       const expBefore = before['İhracat Miktarı'] || 0;
       if (expBefore > 0) {
         const change = ((expNow - expBefore) / expBefore) * 100;
-        alerts.push({ id: 'int-exp-change', severity: change > 20 ? 'positive' : 'info', title: 'Ihracat Performansi', message: `Gubre ihracati %${change.toFixed(1)} ${change > 0 ? 'artti' : 'azaldi'}`, metric: 'Ihracat trendi', value: change });
+        alerts.push({ id: 'int-exp-change', severity: change > 20 ? 'positive' : 'info', title: 'İhracat Performansı', message: `Gübre ihracatı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'}`, metric: 'İhracat trendi', value: change });
       }
       if (impNow > 0 && expNow > 0) {
         const ratio = impNow / expNow;
-        alerts.push({ id: 'int-trade-ratio', severity: ratio > 5 ? 'critical' : ratio > 2 ? 'warning' : 'positive', title: 'Ticaret Dengesi', message: `Ithalat/ihracat orani: ${ratio.toFixed(1)}x${ratio > 3 ? ' - yuksek dis bagimlilik riski' : ''}`, metric: 'Ticaret orani', value: ratio });
+        alerts.push({ id: 'int-trade-ratio', severity: ratio > 5 ? 'critical' : ratio > 2 ? 'warning' : 'positive', title: 'Ticaret Dengesi', message: `İthalat/ihracat oranı: ${ratio.toFixed(1)}x${ratio > 3 ? ' — yüksek dış bağımlılık riski' : ''}`, metric: 'Ticaret oranı', value: ratio });
       }
       const impValueNow = now['İthalat Değeri'] || 0;
       if (impNow > 0 && impValueNow > 0) {
         const unitPrice = impValueNow / impNow;
-        alerts.push({ id: 'int-unit-price', severity: 'info', title: 'Birim Ithalat Maliyeti', message: `Ortalama gubre ithalat fiyati: ${formatUSD(unitPrice * 1000)}/ton`, metric: 'Birim fiyat', value: unitPrice });
+        alerts.push({ id: 'int-unit-price', severity: 'info', title: 'Birim İthalat Maliyeti', message: `Ortalama gübre ithalat fiyatı: ${formatUSD(unitPrice * 1000)}/ton`, metric: 'Birim fiyat', value: unitPrice });
       }
       if (worldAvg['İthalat Miktarı'] && impNow > worldAvg['İthalat Miktarı'] * 2) {
-        alerts.push({ id: 'int-above-avg', severity: 'warning', title: 'Ortalamanin Uzerinde Ithalat', message: `Turkiye gubre ithalati dunya ulke ortalamasinin ${(impNow / worldAvg['İthalat Miktarı']).toFixed(1)}x kati`, metric: 'Benchmark', value: impNow / worldAvg['İthalat Miktarı'] });
+        alerts.push({ id: 'int-above-avg', severity: 'warning', title: 'Ortalamanın Üzerinde İthalat', message: `Türkiye gübre ithalatı dünya ülke ortalamasının ${(impNow / worldAvg['İthalat Miktarı']).toFixed(1)}x katı`, metric: 'Kıyaslama', value: impNow / worldAvg['İthalat Miktarı'] });
       }
 
       setIntelligenceAlerts(alerts);
@@ -392,8 +392,8 @@ export default function FertilizerPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Gubre Intelligence Dashboard</h1>
-        <p className="page-subtitle">FAO gubre ticareti - akilli analiz motoru</p>
+        <h1 className="page-title">🌱 Gübre Ticareti Analizi</h1>
+        <p className="page-subtitle">FAO gübre ticareti — akıllı analiz motoru</p>
       </div>
 
       <div style={{ display: 'flex', gap: '6px', marginBottom: '24px', flexWrap: 'wrap', padding: '6px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
@@ -411,27 +411,27 @@ export default function FertilizerPage() {
       </div>
 
       {loading ? (
-        <div className="loading"><div className="loading-spinner"></div><p>Intelligence analizi yukleniyor...</p></div>
+        <div className="loading"><div className="loading-spinner"></div><p>Analiz yükleniyor...</p></div>
       ) : (
         <>
           {/* OVERVIEW */}
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA GUBRE ITHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`YoY: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | CAGR: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
-                <KPICard title="TURKIYE ITHALATI" value={formatTon(overviewKPIs.turkeyImport)} subtitle={`Dunya sirasi: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
-                <KPICard title="EN BUYUK ITHALATCI" value={overviewKPIs.topImporter} subtitle="2022" icon={Award} color="blue" />
-                <KPICard title="EN BUYUK IHRACATCI" value={overviewKPIs.topExporter} subtitle="2022" icon={TrendingUp} color="green" />
+                <KPICard title="DÜNYA GÜBRE İTHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="TÜRKİYE İTHALATI" value={formatTon(overviewKPIs.turkeyImport)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
+                <KPICard title="EN BÜYÜK İTHALATÇI" value={overviewKPIs.topImporter} subtitle="2023" icon={Award} color="blue" />
+                <KPICard title="EN BÜYÜK İHRACATÇI" value={overviewKPIs.topExporter} subtitle="2023" icon={TrendingUp} color="green" />
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Gubre Turu Dagilimi</h3>
+                  <h3 className="chart-title">Gübre Türü Dağılımı</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewByType} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={130} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Ithalat']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'İthalat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {overviewByType.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -439,13 +439,13 @@ export default function FertilizerPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Top 15 Ithalatci Ulke</h3>
+                  <h3 className="chart-title">Top 15 İthalatçı Ülke</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} />
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Ithalat']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'İthalat']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                         {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -455,7 +455,7 @@ export default function FertilizerPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Dunya Gubre Ithalat Trendi</h3>
+                  <h3 className="chart-title">Dünya Gübre İthalat Trendi</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -476,15 +476,15 @@ export default function FertilizerPage() {
             <>
               {tradeBalance.length > 0 && (
                 <div className="kpi-grid">
-                  <KPICard title="TOPLAM ITHALAT" value={formatTon(tradeBalance.reduce((s, b) => s + b.import, 0))} subtitle="Turkiye 2022" icon={TrendingDown} color="red" large />
-                  <KPICard title="TOPLAM IHRACAT" value={formatTon(tradeBalance.reduce((s, b) => s + b.export, 0))} subtitle="Turkiye 2022" icon={TrendingUp} color="green" />
-                  <KPICard title="TICARET ACIGI" value={formatTon(tradeBalance.reduce((s, b) => s + b.balance, 0))} subtitle="Ithalat - Ihracat" icon={Scale} color="orange" />
-                  <KPICard title="GUBRE TURU" value={String(tradeBalance.length)} subtitle="Izlenen" icon={Layers} color="blue" />
+                  <KPICard title="TOPLAM İTHALAT" value={formatTon(tradeBalance.reduce((s, b) => s + b.import, 0))} subtitle="Türkiye 2023" icon={TrendingDown} color="red" large />
+                  <KPICard title="TOPLAM İHRACAT" value={formatTon(tradeBalance.reduce((s, b) => s + b.export, 0))} subtitle="Türkiye 2023" icon={TrendingUp} color="green" />
+                  <KPICard title="TİCARET AÇIĞI" value={formatTon(tradeBalance.reduce((s, b) => s + b.balance, 0))} subtitle="İthalat — İhracat" icon={Scale} color="orange" />
+                  <KPICard title="GÜBRE TÜRÜ" value={String(tradeBalance.length)} subtitle="İzlenen" icon={Layers} color="blue" />
                 </div>
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Gubre Ticaret Dengesi (Tur Bazli)</h3>
+                  <h3 className="chart-title">Türkiye Gübre Ticaret Dengesi (Tür Bazlı)</h3>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={tradeBalance}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -492,8 +492,8 @@ export default function FertilizerPage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
-                      <Bar dataKey="import" name="Ithalat" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="export" name="Ihracat" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="import" name="İthalat" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="export" name="İhracat" fill="#22c55e" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -501,7 +501,7 @@ export default function FertilizerPage() {
               {tradeTimeSeries.length > 0 && (
                 <div className="chart-grid">
                   <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <h3 className="chart-title">Turkiye Gubre Ticareti Zaman Serisi</h3>
+                    <h3 className="chart-title">Türkiye Gübre Ticareti Zaman Serisi</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart data={tradeTimeSeries}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -509,9 +509,9 @@ export default function FertilizerPage() {
                         <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                         <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                         <Legend />
-                        <Area type="monotone" dataKey="import" name="Ithalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
-                        <Area type="monotone" dataKey="export" name="Ihracat" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
-                        <Line type="monotone" dataKey="balance" name="Acik" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                        <Area type="monotone" dataKey="import" name="İthalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
+                        <Area type="monotone" dataKey="export" name="İhracat" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
+                        <Line type="monotone" dataKey="balance" name="Açık" stroke="#f59e0b" strokeWidth={2} dot={false} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
@@ -526,21 +526,21 @@ export default function FertilizerPage() {
             <>
               {concHHI && (
                 <div className="kpi-grid">
-                  <KPICard title="HHI ENDEKSI" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration}`} icon={BarChart2} color="purple" large />
-                  <KPICard title="TOP 1 PAY" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle="En buyuk ihracatci" icon={Award} color="orange" />
-                  <KPICard title="TOP 3 PAY" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="Ilk 3 ulke" icon={Layers} color="blue" />
-                  <KPICard title="ETKIN RAKIP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayi" icon={Activity} color="green" />
+                  <KPICard title="HHI ENDEKSİ" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration === 'HIGH' ? 'Yüksek' : concHHI.concentration === 'MODERATE' ? 'Orta' : 'Düşük'}`} icon={BarChart2} color="purple" large />
+                  <KPICard title="İLK 1 PAYI" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle="En büyük ihracatçı" icon={Award} color="orange" />
+                  <KPICard title="İLK 3 PAYI" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
+                  <KPICard title="ETKİN RAKİP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayı" icon={Activity} color="green" />
                 </div>
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Gubre Ihracati - Ulke Siralamasi</h3>
+                  <h3 className="chart-title">Gübre İhracatı — Ülke Sıralaması</h3>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Ihracat']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'İhracat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {concData.slice(0, 25).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -556,14 +556,14 @@ export default function FertilizerPage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM ITHALAT" value={formatTon(turkeyProfile.totalImp)} subtitle={`CAGR: %${turkeyProfile.impCAGR.toFixed(2)}`} icon={TrendingDown} color="red" large />
-                <KPICard title="TOPLAM IHRACAT" value={formatTon(turkeyProfile.totalExp)} subtitle="2022" icon={TrendingUp} color="green" />
-                <KPICard title="ITHALAT DEGERI" value={formatUSD(turkeyProfile.totalImpVal * 1000)} subtitle="2022 USD" icon={Target} color="blue" />
-                <KPICard title="TICARET ORANI" value={`${turkeyProfile.tradeRatio.toFixed(1)}x`} subtitle="Ithalat / Ihracat" icon={Scale} color={turkeyProfile.tradeRatio > 3 ? 'red' : 'orange'} />
+                <KPICard title="TOPLAM İTHALAT" value={formatTon(turkeyProfile.totalImp)} subtitle={`BBO: %${turkeyProfile.impCAGR.toFixed(2)}`} icon={TrendingDown} color="red" large />
+                <KPICard title="TOPLAM İHRACAT" value={formatTon(turkeyProfile.totalExp)} subtitle="2023" icon={TrendingUp} color="green" />
+                <KPICard title="İTHALAT DEĞERİ" value={formatUSD(turkeyProfile.totalImpVal * 1000)} subtitle="2023 USD" icon={Target} color="blue" />
+                <KPICard title="TİCARET ORANI" value={`${turkeyProfile.tradeRatio.toFixed(1)}x`} subtitle="İthalat / İhracat" icon={Scale} color={turkeyProfile.tradeRatio > 3 ? 'red' : 'orange'} />
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye Gubre Ticareti (Urun Bazli)</h3>
+                  <h3 className="chart-title">Türkiye Gübre Ticareti (Ürün Bazlı)</h3>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={turkeyProfile.byProduct} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -571,13 +571,13 @@ export default function FertilizerPage() {
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={130} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
-                      <Bar dataKey="import" name="Ithalat" fill="#ef4444" />
-                      <Bar dataKey="export" name="Ihracat" fill="#22c55e" />
+                      <Bar dataKey="import" name="İthalat" fill="#ef4444" />
+                      <Bar dataKey="export" name="İhracat" fill="#22c55e" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye Gubre Trend (2000+)</h3>
+                  <h3 className="chart-title">Türkiye Gübre Trendi (2000+)</h3>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -585,8 +585,8 @@ export default function FertilizerPage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
-                      <Area type="monotone" dataKey="import" name="Ithalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
-                      <Line type="monotone" dataKey="export" name="Ihracat" stroke="#22c55e" strokeWidth={2} />
+                      <Area type="monotone" dataKey="import" name="İthalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
+                      <Line type="monotone" dataKey="export" name="İhracat" stroke="#22c55e" strokeWidth={2} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -599,14 +599,14 @@ export default function FertilizerPage() {
           {activeTab === 'forecast' && forecastData && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TURKIYE CAGR" value={`%${forecastData.turkeyTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R2 = ${forecastData.turkeyR2?.toFixed(3) || '0'}`} icon={forecastData.turkeyTrend?.direction === 'up' ? TrendingUp : TrendingDown} color={forecastData.turkeyTrend?.direction === 'up' ? 'green' : 'red'} large />
-                <KPICard title="DUNYA CAGR" value={`%${forecastData.worldTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R2 = ${forecastData.worldR2?.toFixed(3) || '0'}`} icon={Globe} color="blue" />
-                <KPICard title="VOLATILITE" value={`%${forecastData.turkeyTrend?.volatility?.toFixed(1) || '0'}`} subtitle="Turkiye" icon={Activity} color="purple" />
-                <KPICard title="ANOMALI" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayisi" icon={AlertTriangle} color="orange" />
+                <KPICard title="TÜRKİYE BBO" value={`%${forecastData.turkeyTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R² = ${forecastData.turkeyR2?.toFixed(3) || '0'}`} icon={forecastData.turkeyTrend?.direction === 'up' ? TrendingUp : TrendingDown} color={forecastData.turkeyTrend?.direction === 'up' ? 'green' : 'red'} large />
+                <KPICard title="DÜNYA BBO" value={`%${forecastData.worldTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R² = ${forecastData.worldR2?.toFixed(3) || '0'}`} icon={Globe} color="blue" />
+                <KPICard title="OYNAKLIK" value={`%${forecastData.turkeyTrend?.volatility?.toFixed(1) || '0'}`} subtitle="Türkiye" icon={Activity} color="purple" />
+                <KPICard title="ANOMALİ" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayısı" icon={AlertTriangle} color="orange" />
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Gubre Ithalati - Tahmin Projeksiyonu</h3>
+                  <h3 className="chart-title">Türkiye Gübre İthalatı — Tahmin Projeksiyonu</h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -614,7 +614,7 @@ export default function FertilizerPage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [v ? formatTon(v) : '-', '']} />
                       <Legend />
-                      <Area type="monotone" dataKey="historical" name="Gercek" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} connectNulls />
+                      <Area type="monotone" dataKey="historical" name="Gerçek" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} connectNulls />
                       <Line type="monotone" dataKey="forecast" name="Tahmin" stroke="#8b5cf6" strokeDasharray="5 5" strokeWidth={2} connectNulls dot={{ r: 4 }} />
                       <Scatter dataKey="anomaly" name="Anomali" fill="#ef4444" />
                     </ComposedChart>
@@ -629,10 +629,10 @@ export default function FertilizerPage() {
           {activeTab === 'alerts' && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM ALERT" value={String(intelligenceAlerts.length)} subtitle="Otomatik tespit" icon={Zap} color="purple" large />
-                <KPICard title="KRITIK" value={String(intelligenceAlerts.filter(a => a.severity === 'critical').length)} subtitle="Acil" icon={AlertTriangle} color="red" />
-                <KPICard title="UYARI" value={String(intelligenceAlerts.filter(a => a.severity === 'warning').length)} subtitle="Izlenmeli" icon={Activity} color="orange" />
-                <KPICard title="POZITIF" value={String(intelligenceAlerts.filter(a => a.severity === 'positive').length)} subtitle="Gelisim" icon={TrendingUp} color="green" />
+                <KPICard title="TOPLAM UYARI" value={String(intelligenceAlerts.length)} subtitle="Otomatik tespit" icon={Zap} color="purple" large />
+                <KPICard title="KRİTİK" value={String(intelligenceAlerts.filter(a => a.severity === 'critical').length)} subtitle="Acil" icon={AlertTriangle} color="red" />
+                <KPICard title="UYARI" value={String(intelligenceAlerts.filter(a => a.severity === 'warning').length)} subtitle="İzlenmeli" icon={Activity} color="orange" />
+                <KPICard title="POZİTİF" value={String(intelligenceAlerts.filter(a => a.severity === 'positive').length)} subtitle="Gelişim" icon={TrendingUp} color="green" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                 {intelligenceAlerts.map((alert: IntelligenceAlert) => {

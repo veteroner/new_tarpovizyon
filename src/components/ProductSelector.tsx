@@ -118,7 +118,6 @@ export default function ProductSelector({
                 <span className="option-checkbox"></span>
                 <span className="option-label">
                   <span className="option-name-tr">{product.nameTR}</span>
-                  <span className="option-name-en">{product.name}</span>
                 </span>
               </label>
             ))}

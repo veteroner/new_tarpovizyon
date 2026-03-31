@@ -1173,7 +1173,7 @@ export default function TurkeyRedMeatProductionPage() {
                   <div className="kpi-subtitle">
                     {importAnalytics.yoy && (
                       <span style={{ color: importAnalytics.yoy.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
-                        {importAnalytics.yoy.carcass >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.carcass).toFixed(1)} YoY
+                        {importAnalytics.yoy.carcass >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.carcass).toFixed(1)} Yıllık Değişim
                       </span>
                     )}
                   </div>
@@ -1202,7 +1202,7 @@ export default function TurkeyRedMeatProductionPage() {
                   <div className="kpi-subtitle">
                     {importAnalytics.yoy && (
                       <span style={{ color: importAnalytics.yoy.cattle >= 0 ? '#22c55e' : '#ef4444' }}>
-                        {importAnalytics.yoy.cattle >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.cattle).toFixed(1)} YoY
+                        {importAnalytics.yoy.cattle >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.cattle).toFixed(1)} Yıllık Değişim
                       </span>
                     )}
                   </div>
@@ -1217,7 +1217,7 @@ export default function TurkeyRedMeatProductionPage() {
                   <div className="kpi-subtitle">
                     {importAnalytics.yoy && (
                       <span style={{ color: importAnalytics.yoy.smallRuminant >= 0 ? '#22c55e' : '#ef4444' }}>
-                        {importAnalytics.yoy.smallRuminant >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.smallRuminant).toFixed(1)} YoY
+                        {importAnalytics.yoy.smallRuminant >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.smallRuminant).toFixed(1)} Yıllık Değişim
                       </span>
                     )}
                   </div>
@@ -1234,7 +1234,7 @@ export default function TurkeyRedMeatProductionPage() {
                       <div className="kpi-subtitle">
                         {importAnalytics.yoy && (
                           <span style={{ color: importAnalytics.yoy.spending >= 0 ? '#ef4444' : '#22c55e' }}>
-                            {importAnalytics.yoy.spending >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.spending).toFixed(1)} YoY
+                            {importAnalytics.yoy.spending >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.spending).toFixed(1)} Yıllık Değişim
                           </span>
                         )}
                       </div>

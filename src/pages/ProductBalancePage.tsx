@@ -364,7 +364,7 @@ export default function ProductBalancePage() {
               <p className="text-xs uppercase mt-1" style={{ color: 'var(--text-secondary)' }}>Gıda Güvenlik Skoru</p>
             </div>
             <KPI icon={Wheat} title="Üretim" value={fmt(production) + ' ' + getUnit('Üretim')}
-                 sub={`YoY: ${prodYoY >= 0 ? '+' : ''}${prodYoY.toFixed(1)}%`} color={GREEN} />
+                 sub={`Yıllık: ${prodYoY >= 0 ? '+' : ''}${prodYoY.toFixed(1)}%`} color={GREEN} />
             <KPI icon={selfSufficiency >= 100 ? ShieldCheck : ShieldAlert}
                  title="Yeterlilik" value={pct(selfSufficiency)}
                  sub={`Δ ${ssYoY >= 0 ? '+' : ''}${ssYoY.toFixed(1)} puan`}

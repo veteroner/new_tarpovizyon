@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package, BarChart3, Bot } from 'lucide-react';
+import { Menu, X, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package, BarChart3, Bot } from 'lucide-react';
+import tarpolLogo from '../assets/tarpol-logo.svg';
 import '../styles/Header.css';
 
 type MenuCategory = {
@@ -149,7 +150,7 @@ const turkeyMenuCategories: MenuCategory[] = [
     title: 'Rasyon',
     icon: Beef,
     items: [
-      { label: 'Teknova Rasyon', path: '/rasyon' },
+      { label: 'Rasyon', path: '/rasyon' },
     ],
   },
 ];
@@ -210,7 +211,7 @@ export function Header() {
       <div className="header-band header-band--top">
         <div className="header-container">
           <div className="header-logo" onClick={() => handleNavigate('/tarpovizyon') }>
-            <Home size={24} />
+            <img src={tarpolLogo} alt="TARPOL" width={28} height={28} />
             <span className="logo-text">TARPOL</span>
           </div>
 

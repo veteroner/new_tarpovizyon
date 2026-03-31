@@ -377,7 +377,7 @@ export default function GubreHesapPage() {
     <div className="gh-wizard">
       {/* Topbar */}
       <div className="gh-topbar">
-        <button className="gh-topbar__back" onClick={() => navigate(-1)}>← Geri</button>
+        <button className="gh-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="gh-topbar__title">
           <span>🧪</span>
           <span>Gübre Hesaplayıcı</span>

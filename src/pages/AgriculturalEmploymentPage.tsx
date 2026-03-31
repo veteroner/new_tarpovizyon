@@ -387,7 +387,7 @@ export default function AgriculturalEmploymentPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA TARIM ISTIHDAMI" value={formatPop(overviewKPIs.worldTotal)} subtitle={`YoY: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | CAGR: %${overviewKPIs.cagr.toFixed(2)}`} icon={Users} color="purple" large />
+                <KPICard title="DUNYA TARIM ISTIHDAMI" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.cagr.toFixed(2)}`} icon={Users} color="purple" large />
                 <KPICard title="EN BUYUK" value={overviewKPIs.topCountry} subtitle={formatPop(overviewKPIs.topCountryValue)} icon={Award} color="blue" />
                 <KPICard title="KADIN PAYI" value={formatPercent(overviewKPIs.femaleShare)} subtitle="Dunya ortalama" icon={UserCheck} color="teal" />
                 <KPICard title="ERKEK" value={formatPop(overviewKPIs.worldMale)} subtitle={`Kadin: ${formatPop(overviewKPIs.worldFemale)}`} icon={BarChart2} color="orange" />

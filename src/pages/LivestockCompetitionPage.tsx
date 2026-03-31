@@ -176,7 +176,7 @@ export function LivestockCompetitionPage() {
     if (tr && trPast && trPast.total > 0) {
       const g = cagr5(tr.total, trPast.total);
       if (g > 3) out.push({ id: `ci${id++}`, type: 'growth', severity: 'medium',
-        message: `Türkiye toplam hayvansal üretimde %${g.toFixed(1)} CAGR ile güçlü büyüyor`, category: 'BÜYÜME' });
+        message: `Türkiye toplam hayvansal üretimde %${g.toFixed(1)} BBO ile güçlü büyüyor`, category: 'BÜYÜME' });
       else if (g < -1) out.push({ id: `ci${id++}`, type: 'decline', severity: 'medium',
         message: `Türkiye toplam üretimde %${Math.abs(g).toFixed(1)} yıllık daralma yaşıyor`, category: 'DÜŞÜŞ' });
     }
@@ -209,7 +209,7 @@ export function LivestockCompetitionPage() {
 
     if (growths[0]?.cagr > 5)
       out.push({ id: `ci${id++}`, type: 'info', severity: 'medium',
-        message: `En hızlı büyüyen: ${growths[0].country} (%${growths[0].cagr.toFixed(1)} CAGR) – yükselen pazar`, category: 'TREND' });
+        message: `En hızlı büyüyen: ${growths[0].country} (%${growths[0].cagr.toFixed(1)} BBO) – yükselen pazar`, category: 'TREND' });
 
     if (tr && cur[0] && !isTR(cur[0].country)) {
       const lp = past.find(p => p.country === cur[0].country);
@@ -375,7 +375,7 @@ export function LivestockCompetitionPage() {
       background: v > 0 ? 'rgba(34,197,94,.2)' : v < 0 ? 'rgba(239,68,68,.2)' : 'rgba(245,158,11,.2)',
       color: v > 0 ? POS : v < 0 ? NEG : NEUT,
     }}>
-      {v > 0 ? '↑' : v < 0 ? '↓' : '→'} {Math.abs(v).toFixed(1)}% CAGR
+      {v > 0 ? '↑' : v < 0 ? '↓' : '→'} {Math.abs(v).toFixed(1)}% BBO
     </span>
   );
 
@@ -389,7 +389,7 @@ export function LivestockCompetitionPage() {
     <div>
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="page-header">
-        <h1 className="page-title">🏆 Rekabet Intelligence</h1>
+        <h1 className="page-title">🏆 Rekabet Analizi</h1>
         <p className="page-subtitle">
           Türkiye'nin dünya hayvansal üretimindeki stratejik konumu · FAO verileri · {selectedYear}
         </p>
@@ -539,7 +539,7 @@ export function LivestockCompetitionPage() {
               <XAxis type="number" dataKey="share" stroke="var(--text-secondary)"
                 label={{ value: 'Pazar Payı (%)', position: 'bottom', fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis type="number" dataKey="cagr" stroke="var(--text-secondary)"
-                label={{ value: 'CAGR (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                label={{ value: 'BBO (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} />
               <Tooltip content={({ payload }) => {
                 const d = payload?.[0]?.payload;
                 if (!d) return null;
@@ -547,7 +547,7 @@ export function LivestockCompetitionPage() {
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: 10, borderRadius: 8 }}>
                     <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{d.fullName}</div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                      Pay: %{d.share.toFixed(2)} · CAGR: %{d.cagr.toFixed(1)}
+                      Pay: %{d.share.toFixed(2)} · BBO: %{d.cagr.toFixed(1)}
                     </div>
                   </div>
                 );
@@ -656,7 +656,7 @@ export function LivestockCompetitionPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,.05)' }}>
-                {['Kategori', 'Lider', 'Lider Üretim', 'Türkiye', 'TR Sıra', 'Fark', 'TR CAGR', 'Lider CAGR', 'Yakalama'].map(h => (
+                {['Kategori', 'Lider', 'Lider Üretim', 'Türkiye', 'TR Sıra', 'Fark', 'TR BBO', 'Lider BBO', 'Yakalama'].map(h => (
                   <th key={h} style={{ padding: 12, textAlign: h === 'Yakalama' ? 'center' : h === 'Kategori' || h === 'Lider' ? 'left' : 'right',
                     borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{h}</th>
                 ))}
@@ -699,7 +699,7 @@ export function LivestockCompetitionPage() {
           border: '1px solid rgba(59,130,246,.3)'
         }}>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            💡 <strong>Yakalama formülü:</strong> Türkiye CAGR &gt; Lider CAGR ise mevcut büyüme hızıyla liderliğe ulaşma süresi hesaplanır.
+            💡 <strong>Yakalama formülü:</strong> Türkiye BBO &gt; Lider BBO ise mevcut büyüme hızıyla liderliğe ulaşma süresi hesaplanır.
             Lider daha hızlı büyüyorsa yakalama imkansız (∞).
           </div>
         </div>
@@ -712,7 +712,7 @@ export function LivestockCompetitionPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,.05)' }}>
-                {['#', 'Ülke', 'Toplam', 'Et', 'Süt', 'Yumurta', 'CAGR', 'Sıra Δ', 'Fark'].map((h, i) => (
+                {['#', 'Ülke', 'Toplam', 'Et', 'Süt', 'Yumurta', 'BBO', 'Sıra Δ', 'Fark'].map((h, i) => (
                   <th key={h} style={{ padding: 12, textAlign: i === 0 ? 'center' : i === 1 ? 'left' : i >= 6 ? 'center' : 'right',
                     borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{h}</th>
                 ))}

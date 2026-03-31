@@ -4,7 +4,6 @@ import {
 } from 'recharts';
 import { fetchCommodityPrices, fetchCommodityChart } from '../services/api';
 import type { CommodityItem, ChartPoint } from '../services/api';
-import { BackToHome } from '../components/BackToHome';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Tahıllar': '🌾',
@@ -111,7 +110,6 @@ export default function CommodityPricesPage() {
 
   return (
     <div>
-      <BackToHome />
       <div className="page-header">
         <h1 className="page-title">📊 Uluslararası Emtia Fiyatları</h1>
         <p className="page-subtitle">
