@@ -13,7 +13,6 @@ import {
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { Insight } from '../components/InsightCard';
-import { BackToHome } from '../components/BackToHome';
 import { Loading } from '../components/Loading';
 import { fetchQuery } from '../services/api';
 import {
@@ -607,7 +606,6 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
   // RENDER
   return (
     <div className="production-page" style={{ animation: 'fadeIn 0.3s ease-in' }}>
-      <BackToHome />
       <div className="page-header" style={{ marginBottom: '24px' }}>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {categoryIcon || '🌾'} {categoryTitle || 'Bitkisel Üretim Intelligence'}

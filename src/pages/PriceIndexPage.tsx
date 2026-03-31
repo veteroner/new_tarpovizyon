@@ -404,7 +404,7 @@ export default function PriceIndexPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <span className="kpi-title">5Y CAGR</span>
+                <span className="kpi-title">5 YIL BBO</span>
                 <div className="kpi-icon purple"><BarChart3 size={18} /></div>
               </div>
               <div className="kpi-value" style={{ color: cagr5 >= 0 ? '#ef4444' : '#22c55e' }}>

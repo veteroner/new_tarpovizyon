@@ -1763,7 +1763,7 @@ export default function TurkeyProvincialLivestockPage() {
             border: '1px solid var(--border)'
           }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-              📊 Yıllık Büyüme Oranları (YoY %)
+              📊 Yıllık Büyüme Oranları (%)
             </h3>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart

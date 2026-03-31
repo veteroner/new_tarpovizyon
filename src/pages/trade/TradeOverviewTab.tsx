@@ -247,7 +247,7 @@ export default function TradeOverviewTab() {
         <KPICard
           title="Toplam İhracat"
           value={formatMoney(expTotal)}
-          subtitle={`YoY: ${yoyExpGrowth >= 0 ? '+' : ''}${yoyExpGrowth.toFixed(1)}%`}
+          subtitle={`Yıllık: ${yoyExpGrowth >= 0 ? '+' : ''}${yoyExpGrowth.toFixed(1)}%`}
           icon={TrendingUp}
           color="green"
           large
@@ -282,7 +282,7 @@ export default function TradeOverviewTab() {
           color="purple"
         />
         <KPICard
-          title="YoY Büyüme"
+          title="Yıllık Büyüme"
           value={`${yoyExpGrowth >= 0 ? '+' : ''}${yoyExpGrowth.toFixed(1)}%`}
           subtitle="İhracat büyümesi"
           icon={Zap}

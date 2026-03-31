@@ -575,7 +575,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
                 <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                {kpiData.redMeat.change >= 0 ? '+' : ''}{kpiData.redMeat.change.toFixed(1)}% YoY
+                {kpiData.redMeat.change >= 0 ? '+' : ''}{kpiData.redMeat.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
           </div>
@@ -599,7 +599,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
                 <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                {kpiData.milk.change >= 0 ? '+' : ''}{kpiData.milk.change.toFixed(1)}% YoY
+                {kpiData.milk.change >= 0 ? '+' : ''}{kpiData.milk.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
           </div>
@@ -623,7 +623,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
                 <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                {kpiData.egg.change >= 0 ? '+' : ''}{kpiData.egg.change.toFixed(1)}% YoY
+                {kpiData.egg.change >= 0 ? '+' : ''}{kpiData.egg.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
           </div>
@@ -647,7 +647,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
                 <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                {kpiData.honey.change >= 0 ? '+' : ''}{kpiData.honey.change.toFixed(1)}% YoY
+                {kpiData.honey.change >= 0 ? '+' : ''}{kpiData.honey.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
           </div>
@@ -667,7 +667,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK CAGR (KIRMIZI ET)</div>
+            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK BBO (KIRMIZI ET)</div>
             <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{cagr5Year.toFixed(1)}%</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
           </div>

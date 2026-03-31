@@ -16,6 +16,7 @@ import type { Insight } from '../components/InsightCard';
 import { BackToHome } from '../components/BackToHome';
 import { Loading } from '../components/Loading';
 import { fetchQuery } from '../services/api';
+import { translateProduct } from '../utils/productTranslations';
 import {
   calculateCAGR, calculateHHI, calculateYoY, calculateVolatility,
   detectAnomalies, forecastLinear,
@@ -323,14 +324,15 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       });
 
       const ins: Insight[] = [];
-      if (turkeyInTop && turkeyInTop.rank <= 5) ins.push({ id: 'pr1', type: 'achievement', message: `Türkiye ${product} üretiminde dünya ${turkeyInTop.rank}. sırası — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: product });
-      else if (turkeyInTop && turkeyInTop.rank <= 15) ins.push({ id: 'pr1', type: 'info', message: `Türkiye ${product} üretiminde dünya ${turkeyInTop.rank}. sırası`, severity: 'medium', category: product });
-      if (turkeyCAGR && turkeyCAGR.cagr > 2) ins.push({ id: 'pr2', type: 'growth', message: `Türkiye ${product} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile büyüyor`, severity: 'medium', category: 'Trend' });
-      else if (turkeyCAGR && turkeyCAGR.cagr < -1) ins.push({ id: 'pr2', type: 'decline', message: `Türkiye ${product} üretimi yıllık %${Math.abs(turkeyCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'high', category: 'Risk' });
-      if (hhi && hhi.concentration === 'VERY_HIGH') ins.push({ id: 'pr3', type: 'warning', message: `${product} pazarı çok yoğun (HHI: ${hhi.hhi.toFixed(0)}) — ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'high', category: 'Pazar' });
-      if (turkeyVol > 15) ins.push({ id: 'pr4', type: 'warning', message: `Türkiye ${product} üretimi yüksek volatilite gösteriyor (%${turkeyVol.toFixed(1)})`, severity: 'high', category: 'Risk' });
-      if (realAnomalies.length > 0) { const la = realAnomalies[realAnomalies.length - 1]; ins.push({ id: 'pr5', type: la.type === 'SPIKE' ? 'growth' : 'warning', message: `${la.year} yılında ${product} üretiminde ${la.type === 'SPIKE' ? 'ani artış' : 'ani düşüş'} (z-score: ${la.zScore.toFixed(1)})`, severity: 'medium', category: 'Anomali' }); }
-      if (worldCAGR && turkeyCAGR && turkeyCAGR.cagr > worldCAGR.cagr) ins.push({ id: 'pr6', type: 'growth', message: `Türkiye ${product} büyüme hızı (%${turkeyCAGR.cagr.toFixed(1)}) dünya ortalamasının (%${worldCAGR.cagr.toFixed(1)}) üzerinde`, severity: 'medium', category: 'Rekabet' });
+      const productTR = translateProduct(product);
+      if (turkeyInTop && turkeyInTop.rank <= 5) ins.push({ id: 'pr1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. sırası — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: productTR });
+      else if (turkeyInTop && turkeyInTop.rank <= 15) ins.push({ id: 'pr1', type: 'info', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. sırası`, severity: 'medium', category: productTR });
+      if (turkeyCAGR && turkeyCAGR.cagr > 2) ins.push({ id: 'pr2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile büyüyor`, severity: 'medium', category: 'Trend' });
+      else if (turkeyCAGR && turkeyCAGR.cagr < -1) ins.push({ id: 'pr2', type: 'decline', message: `Türkiye ${productTR} üretimi yıllık %${Math.abs(turkeyCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'high', category: 'Risk' });
+      if (hhi && hhi.concentration === 'VERY_HIGH') ins.push({ id: 'pr3', type: 'warning', message: `${productTR} pazarı çok yoğun (HHI: ${hhi.hhi.toFixed(0)}) — ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'high', category: 'Pazar' });
+      if (turkeyVol > 15) ins.push({ id: 'pr4', type: 'warning', message: `Türkiye ${productTR} üretimi yüksek volatilite gösteriyor (%${turkeyVol.toFixed(1)})`, severity: 'high', category: 'Risk' });
+      if (realAnomalies.length > 0) { const la = realAnomalies[realAnomalies.length - 1]; ins.push({ id: 'pr5', type: la.type === 'SPIKE' ? 'growth' : 'warning', message: `${la.year} yılında ${productTR} üretiminde ${la.type === 'SPIKE' ? 'ani artış' : 'ani düşüş'} (z-score: ${la.zScore.toFixed(1)})`, severity: 'medium', category: 'Anomali' }); }
+      if (worldCAGR && turkeyCAGR && turkeyCAGR.cagr > worldCAGR.cagr) ins.push({ id: 'pr6', type: 'growth', message: `Türkiye ${productTR} büyüme hızı (%${turkeyCAGR.cagr.toFixed(1)}) dünya ortalamasının (%${worldCAGR.cagr.toFixed(1)}) üzerinde`, severity: 'medium', category: 'Rekabet' });
       setPrimaryInsights(ins);
     } catch (error) { console.error('Primary veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -381,10 +383,11 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       });
 
       const ins: Insight[] = [];
-      if (turkeyInTop && turkeyInTop.rank <= 10) ins.push({ id: 'pc1', type: 'achievement', message: `Türkiye ${product} üretiminde dünya ${turkeyInTop.rank}. — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: 'Sıralama' });
-      if (turkeyCAGR && turkeyCAGR.cagr > 3) ins.push({ id: 'pc2', type: 'growth', message: `Türkiye ${product} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile hızla büyüyor`, severity: 'medium', category: 'Büyüme' });
-      if (worldCAGR && worldCAGR.cagr < 0) ins.push({ id: 'pc3', type: 'decline', message: `Dünya ${product} üretimi yıllık %${Math.abs(worldCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'medium', category: 'Trend' });
-      if (topCountries[0]?.share > 40) ins.push({ id: 'pc4', type: 'warning', message: `${product} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile baskın — tedarik riski`, severity: 'high', category: 'Konsantrasyon' });
+      const productTR = translateProduct(product);
+      if (turkeyInTop && turkeyInTop.rank <= 10) ins.push({ id: 'pc1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: 'Sıralama' });
+      if (turkeyCAGR && turkeyCAGR.cagr > 3) ins.push({ id: 'pc2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile hızla büyüyor`, severity: 'medium', category: 'Büyüme' });
+      if (worldCAGR && worldCAGR.cagr < 0) ins.push({ id: 'pc3', type: 'decline', message: `Dünya ${productTR} üretimi yıllık %${Math.abs(worldCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'medium', category: 'Trend' });
+      if (topCountries[0]?.share > 40) ins.push({ id: 'pc4', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile baskın — tedarik riski`, severity: 'high', category: 'Konsantrasyon' });
       setProcessedInsights(ins);
     } catch (error) { console.error('Processed veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -462,11 +465,12 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       });
 
       const yIns: Insight[] = [];
-      if (turkeyYield > worldAvgYield) yIns.push({ id: 'y1', type: 'achievement', message: `Türkiye ${product} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${((turkeyYield / worldAvgYield - 1) * 100).toFixed(0)} üzerinde`, severity: 'high', category: 'Verim' });
-      else yIns.push({ id: 'y1', type: 'warning', message: `Türkiye ${product} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${Math.abs(gapToWorld).toFixed(0)} altında`, severity: 'high', category: 'Verim' });
+      const productTR = translateProduct(product);
+      if (turkeyYield > worldAvgYield) yIns.push({ id: 'y1', type: 'achievement', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${((turkeyYield / worldAvgYield - 1) * 100).toFixed(0)} üzerinde`, severity: 'high', category: 'Verim' });
+      else yIns.push({ id: 'y1', type: 'warning', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${Math.abs(gapToWorld).toFixed(0)} altında`, severity: 'high', category: 'Verim' });
       if (gapToLeader > 50) yIns.push({ id: 'y2', type: 'warning', message: `${leader?.country} (${formatYield(leaderYield)}) lider — Türkiye'nin verim açığı %${gapToLeader.toFixed(0)}`, severity: 'high', category: 'Gap' });
       if (catchUpYears !== Infinity && catchUpYears < 50) yIns.push({ id: 'y3', type: 'info', message: `Mevcut CAGR (%${turkeyYieldCAGR?.cagr.toFixed(1)}) ile lidere tahmini ${catchUpYears} yılda yetişilir`, severity: 'medium', category: 'Projeksiyon' });
-      if (turkeyYieldCAGR && turkeyYieldCAGR.cagr > 2) yIns.push({ id: 'y4', type: 'growth', message: `Türkiye ${product} verimi yıllık %${turkeyYieldCAGR.cagr.toFixed(1)} CAGR ile artıyor`, severity: 'medium', category: 'Trend' });
+      if (turkeyYieldCAGR && turkeyYieldCAGR.cagr > 2) yIns.push({ id: 'y4', type: 'growth', message: `Türkiye ${productTR} verimi yıllık %${turkeyYieldCAGR.cagr.toFixed(1)} CAGR ile artıyor`, severity: 'medium', category: 'Trend' });
       setYieldInsights(yIns);
     } catch (error) { console.error('Yield veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -529,11 +533,12 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       });
 
       const cIns: Insight[] = [];
+      const productTR = translateProduct(product);
       const turkeyMover = movers.find((m: any) => m.isTurkey);
-      if (turkeyMover && turkeyMover.growth > 10) cIns.push({ id: 'c1', type: 'growth', message: `Türkiye ${product} üretimi son 5 yılda %${turkeyMover.growth.toFixed(1)} büyüdü`, severity: 'high', category: 'Büyüme' });
-      else if (turkeyMover && turkeyMover.growth < -10) cIns.push({ id: 'c1', type: 'decline', message: `Türkiye ${product} üretimi son 5 yılda %${Math.abs(turkeyMover.growth).toFixed(1)} geriledi`, severity: 'high', category: 'Gerileme' });
+      if (turkeyMover && turkeyMover.growth > 10) cIns.push({ id: 'c1', type: 'growth', message: `Türkiye ${productTR} üretimi son 5 yılda %${turkeyMover.growth.toFixed(1)} büyüdü`, severity: 'high', category: 'Büyüme' });
+      else if (turkeyMover && turkeyMover.growth < -10) cIns.push({ id: 'c1', type: 'decline', message: `Türkiye ${productTR} üretimi son 5 yılda %${Math.abs(turkeyMover.growth).toFixed(1)} geriledi`, severity: 'high', category: 'Gerileme' });
       if (topGainers.length > 0 && !topGainers[0].isTurkey) cIns.push({ id: 'c2', type: 'info', message: `En hızlı büyüyen: ${topGainers[0].country} (%${topGainers[0].growth.toFixed(1)})`, severity: 'medium', category: 'Rekabet' });
-      if (topCountries[0]?.share > 30) cIns.push({ id: 'c3', type: 'warning', message: `${product} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'medium', category: 'Konsantrasyon' });
+      if (topCountries[0]?.share > 30) cIns.push({ id: 'c3', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'medium', category: 'Konsantrasyon' });
       setCompInsights(cIns);
     } catch (error) { console.error('Competition veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -583,8 +588,9 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       });
 
       const pIns: Insight[] = [];
-      if (prodChange > 5) pIns.push({ id: 'pd1', type: 'growth', message: `Türkiye ${product} üretimi 3 yıl sonra tahminen %${prodChange.toFixed(1)} artacak — ${formatValue(forecastProd)}`, severity: 'high', category: 'Tahmin' });
-      else if (prodChange < -5) pIns.push({ id: 'pd1', type: 'warning', message: `Türkiye ${product} üretimi 3 yıl sonra tahminen %${Math.abs(prodChange).toFixed(1)} azalacak`, severity: 'high', category: 'Tahmin' });
+      const productTR = translateProduct(product);
+      if (prodChange > 5) pIns.push({ id: 'pd1', type: 'growth', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen %${prodChange.toFixed(1)} artacak — ${formatValue(forecastProd)}`, severity: 'high', category: 'Tahmin' });
+      else if (prodChange < -5) pIns.push({ id: 'pd1', type: 'warning', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen %${Math.abs(prodChange).toFixed(1)} azalacak`, severity: 'high', category: 'Tahmin' });
       if (prodForecast.r2 > 0.8) pIns.push({ id: 'pd2', type: 'info', message: `Üretim tahmin modeli güvenilir (R²=${prodForecast.r2.toFixed(2)})`, severity: 'medium', category: 'Model' });
       else if (prodForecast.r2 < 0.4) pIns.push({ id: 'pd2', type: 'warning', message: `Üretim tahmin modeli düşük güvenilirlik (R²=${prodForecast.r2.toFixed(2)})`, severity: 'medium', category: 'Model' });
       if (forecastYieldVal > lastYield * 1.1) pIns.push({ id: 'pd3', type: 'growth', message: `Verim artışı bekleniyor: ${formatYield(lastYield)} → ${formatYield(forecastYieldVal)}`, severity: 'medium', category: 'Verim' });
@@ -643,13 +649,13 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       {activeTab === 'overview' && !loading && overviewKPIs && (
         <div style={{ animation: 'slideInUp 0.4s ease-out' }}>
           <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-            <KPICard title="Dünya Toplam Üretim" value={formatValue(overviewKPIs.worldTotal)} subtitle={`YoY: ${overviewKPIs.worldYoY >= 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(1)}% | ${overviewKPIs.countryCount} ülke`} icon={Globe} color="blue" large />
+            <KPICard title="Dünya Toplam Üretim" value={formatValue(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.worldYoY >= 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(1)}% | ${overviewKPIs.countryCount} ülke`} icon={Globe} color="blue" large />
             <KPICard title="Dünya Ekim Alanı" value={formatHa(overviewKPIs.worldArea)} subtitle={`${overviewKPIs.productCount} ürün`} icon={Layers} color="green" />
             <KPICard title="Dünya Ort. Verim" value={formatYield(overviewKPIs.worldYield)} subtitle="Tüm ürünler ortalaması" icon={Activity} color="teal" />
             <KPICard title="İşlenmiş Üretim" value={formatValue(overviewKPIs.processedTotal)} subtitle={`İşleme oranı: %${overviewKPIs.processingRatio.toFixed(1)}`} icon={Factory} color="purple" />
           </div>
           <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-            <KPICard title="🇹🇷 Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | YoY: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${overviewKPIs.turkeyYoY.toFixed(1)}%`} icon={Leaf} color="green" large />
+            <KPICard title="🇹🇷 Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${overviewKPIs.turkeyYoY.toFixed(1)}%`} icon={Leaf} color="green" large />
             <KPICard title="🇹🇷 Ekim Alanı" value={formatHa(overviewKPIs.turkeyArea)} subtitle={`${overviewKPIs.turkeyProductCount} ürün`} icon={MapPin} color="teal" />
             <KPICard title="🇹🇷 Ort. Verim" value={formatYield(overviewKPIs.turkeyYield)} subtitle={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? '✅ Dünya üstü' : '⚠️ Dünya altı'} icon={TrendingUp} color={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'green' : 'red'} />
             <KPICard title="🇹🇷 İşlenmiş" value={formatValue(overviewKPIs.turkeyProcessedTotal)} subtitle={`İşleme: %${overviewSupplyChain?.turkeyProcessingRatio?.toFixed(1) || '?'}`} icon={Factory} color="orange" />
@@ -772,7 +778,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Wheat size={14} /> Ürün Seçin</label>
               <select value={primaryProduct} onChange={(e) => setPrimaryProduct(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
-                {primaryProducts.map(p => <option key={p} value={p}>{p}</option>)}
+                {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
               </select>
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '8px 16px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px' }}>
@@ -782,7 +788,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
 
           {primaryKPIs && (<>
             <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-              <KPICard title={`Dünya ${primaryProduct.substring(0,20)}`} value={formatValue(primaryKPIs.worldTotal)} subtitle={`${primaryKPIs.producerCount} ülke`} icon={Globe} color="blue" large />
+              <KPICard title={`Dünya ${translateProduct(primaryProduct).substring(0,20)}`} value={formatValue(primaryKPIs.worldTotal)} subtitle={`${primaryKPIs.producerCount} ülke`} icon={Globe} color="blue" large />
               <KPICard title="🇹🇷 Türkiye" value={formatValue(primaryKPIs.turkeyProduction)} subtitle={`${primaryKPIs.turkeyRank}. | %${primaryKPIs.turkeyShare.toFixed(1)}`} icon={Leaf} color="green" />
               <KPICard title="Dünya CAGR" value={`${primaryKPIs.worldCAGR >= 0 ? '+' : ''}${primaryKPIs.worldCAGR.toFixed(2)}%`} subtitle="2000-2023" icon={TrendingUp} color={primaryKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
               <KPICard title="🇹🇷 CAGR" value={`${primaryKPIs.turkeyCAGR >= 0 ? '+' : ''}${primaryKPIs.turkeyCAGR.toFixed(2)}%`} subtitle={`Vol: %${primaryKPIs.turkeyVolatility.toFixed(1)}`} icon={Activity} color={primaryKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
@@ -800,7 +806,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
             <div style={{ marginBottom: '24px' }}><InsightCard insights={primaryInsights} maxDisplay={8} /></div>
 
             <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
-              <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {primaryProduct} (2023)</h3>
+              <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {translateProduct(primaryProduct)} (2023)</h3>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
                   {['#','Ülke','Üretim','Pay %','Ekim (ha)','Verim'].map(h => <th key={h} style={{ textAlign: h === '#' || h === 'Ülke' ? 'left' : 'right', padding: '10px 8px', color: 'var(--text-secondary)', fontWeight: 600 }}>{h}</th>)}
@@ -887,7 +893,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Factory size={14} /> İşlenmiş Ürün</label>
               <select value={processedProduct} onChange={(e) => setProcessedProduct(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
-                {processedProducts.map(p => <option key={p} value={p}>{p}</option>)}
+                {processedProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
               </select>
             </div>
           </div>
@@ -903,7 +909,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
             <div style={{ marginBottom: '24px' }}><InsightCard insights={processedInsights} maxDisplay={6} /></div>
 
             <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
-              <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {processedProduct.substring(0, 40)}</h3>
+              <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {translateProduct(processedProduct).substring(0, 40)}</h3>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
                   {['#','Ülke','Üretim','Pay %'].map(h => <th key={h} style={{ textAlign: h === '#' || h === 'Ülke' ? 'left' : 'right', padding: '10px 8px', color: 'var(--text-secondary)', fontWeight: 600 }}>{h}</th>)}
@@ -962,7 +968,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Target size={14} /> Verim Analizi</label>
               <select value={yieldProduct} onChange={(e) => setYieldProduct(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
-                {primaryProducts.map(p => <option key={p} value={p}>{p}</option>)}
+                {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
               </select>
             </div>
           </div>
@@ -1075,7 +1081,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Zap size={14} /> Rekabet Analizi</label>
               <select value={compProduct} onChange={(e) => setCompProduct(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
-                {primaryProducts.map(p => <option key={p} value={p}>{p}</option>)}
+                {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
               </select>
             </div>
           </div>
@@ -1184,7 +1190,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Sprout size={14} /> Tahmin</label>
               <select value={predProduct} onChange={(e) => setPredProduct(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
-                {primaryProducts.map(p => <option key={p} value={p}>{p}</option>)}
+                {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
               </select>
             </div>
           </div>

@@ -98,7 +98,7 @@ export function ProgramSelectionPage() {
         </div>
 
         <footer className="program-selection__footer">
-          <p>© 2026 TARPOL - Teknova Tarım Teknolojileri</p>
+          <p>© 2026 TARPOL - Tarım Politika ve Yönetim Araçları</p>
         </footer>
       </div>
     </div>

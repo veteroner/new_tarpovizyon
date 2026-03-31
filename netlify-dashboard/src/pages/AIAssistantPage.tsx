@@ -3,7 +3,6 @@ import type { FormEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { fetchAIChat } from '../services/api';
-import { BackToHome } from '../components/BackToHome';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -76,7 +75,6 @@ export default function AIAssistantPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
-      <BackToHome />
       <div className="page-header" style={{ flexShrink: 0 }}>
         <h1 className="page-title">🤖 Tarpol AI Asistan</h1>
         <p className="page-subtitle">Tarım, hayvancılık ve gıda sektörü hakkında sorularınızı sorun</p>

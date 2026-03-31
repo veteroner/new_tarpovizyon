@@ -219,7 +219,7 @@ export default function ProductIntelligenceTab() {
 
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPICard title="İhracat (2024)" value={formatMoney(totalExp)} subtitle={`YoY: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+            <KPICard title="İhracat (2024)" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
             <KPICard title="İthalat (2024)" value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
             <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Partner" value={topCountry} subtitle="En büyük ihracat ülkesi" icon={Globe} color="blue" />

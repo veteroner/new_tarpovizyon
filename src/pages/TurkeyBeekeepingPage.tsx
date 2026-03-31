@@ -993,7 +993,7 @@ export default function TurkeyBeekeepingPage() {
                       {tuikKovanKpi.latest.balmumu.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ton
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '8px' }}>
-                      YoY: {tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{tuikKovanKpi.balmumuYoy.toFixed(1)}%
+                      Yıllık: {tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{tuikKovanKpi.balmumuYoy.toFixed(1)}%
                     </div>
                   </div>
                 </div>

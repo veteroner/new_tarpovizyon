@@ -463,7 +463,7 @@ export default function LandUsePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`YoY: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(2)}% | CAGR: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="green" large />
+                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`Yıllık: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(2)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="green" large />
                 <KPICard title="TURKIYE ARAZISI" value={formatArea(overviewKPIs.turkeyAg)} subtitle={`Dunya payi: %${overviewKPIs.turkeyShare.toFixed(2)} | Sira: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="SULAMA ORANI" value={formatPercent(overviewKPIs.irrigationRate)} subtitle={`${formatArea(overviewKPIs.turkeyIrrigation)} sulanan`} icon={Target} color="blue" />
                 <KPICard title="NADAS ORANI" value={formatPercent(overviewKPIs.fallowRate)} subtitle={`${formatArea(overviewKPIs.turkeyFallow)} nadas`} icon={AlertTriangle} color={overviewKPIs.fallowRate > 15 ? 'red' : 'green'} />

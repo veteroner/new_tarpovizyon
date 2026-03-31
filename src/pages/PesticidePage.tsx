@@ -20,12 +20,12 @@ import type { YearValue, IntelligenceAlert } from '../utils/intelligenceCalculat
 type Tab = 'overview' | 'composition' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
-  { id: 'composition', label: 'Kullanim Profili', icon: '🧪' },
-  { id: 'concentration', label: 'Pazar Yogunlugu', icon: '🏆' },
-  { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷' },
+  { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
+  { id: 'composition', label: 'Kullanım Profili', icon: '🧪' },
+  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '🏆' },
+  { id: 'turkey', label: 'Türkiye Profili', icon: '🇹🇷' },
   { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'Intelligence', icon: '🧠' },
+  { id: 'alerts', label: 'Akıllı Analiz', icon: '🧠' },
 ];
 
 const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
@@ -122,15 +122,15 @@ export default function PesticidePage() {
       });
 
       const ins: Insight[] = [];
-      ins.push({ id: 'ov1', type: 'info', message: `Dunya toplam pestisit kullanimi ${formatTon(worldTotal)} (${byType.length} tur)`, severity: 'low', category: 'Genel' });
-      if (yoy > 3) ins.push({ id: 'ov2', type: 'growth', message: `Pestisit kullanimi %${yoy.toFixed(1)} artti - cevre kaygisi artabilir`, severity: 'high', category: 'Trend' });
-      else if (yoy < -3) ins.push({ id: 'ov2', type: 'decline', message: `Pestisit kullanimi %${Math.abs(yoy).toFixed(1)} azaldi - organik tarim etkisi olabilir`, severity: 'medium', category: 'Trend' });
-      if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'warning' : 'info', message: `Turkiye pestisit kullaniminda dunya ${turkeyRank}. - ${formatTon(turkeyData.value)}${turkeyRank <= 10 ? ' (yuksek kullanim riski)' : ''}`, severity: turkeyRank <= 10 ? 'high' : 'medium', category: 'Turkiye' });
+      ins.push({ id: 'ov1', type: 'info', message: `Dünya toplam pestisit kullanımı ${formatTon(worldTotal)} (${byType.length} tür)`, severity: 'low', category: 'Genel' });
+      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Pestisit kullanımı önceki yıla göre %${yoy.toFixed(1)} arttı — risk artışı`, severity: 'high', category: 'Trend' });
+      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Pestisit kullanımı %${Math.abs(yoy).toFixed(1)} azaldı`, severity: 'medium', category: 'Trend' });
+      if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'warning' : 'info', message: `Türkiye pestisit kullanımında dünya ${turkeyRank}. — ${formatTon(turkeyData.value)}${turkeyRank <= 10 ? ' (yüksek kullanım riski)' : ''}`, severity: turkeyRank <= 10 ? 'high' : 'medium', category: 'Türkiye' });
       const herbicide = byType.find((b: any) => b.name.includes('Herbisit'));
       const total = byType.reduce((s: number, b: any) => s + b.value, 0);
-      if (herbicide && total > 0) ins.push({ id: 'ov4', type: 'info', message: `Herbisitler toplam pestisitin %${(herbicide.value / total * 100).toFixed(1)}'ini olusturuyor`, severity: 'low', category: 'Kompozisyon' });
+      if (herbicide && total > 0) ins.push({ id: 'ov4', type: 'info', message: `Herbisitler toplam pestisitin %${(herbicide.value / total * 100).toFixed(1)}'ini oluşturuyor`, severity: 'low', category: 'Kompozisyon' });
       setOverviewInsights(ins);
-    } catch (e) { console.error('Overview hatasi:', e); }
+    } catch (e) { console.error('Genel Bakış hatası:', e); }
     finally { setLoading(false); }
   }, []);
 
@@ -178,13 +178,13 @@ export default function PesticidePage() {
       const types = Object.values(typeMap);
       if (types.length > 0) {
         const dominant = types.sort((a, b) => b.countries.reduce((s, c) => s + c.value, 0) - a.countries.reduce((s, c) => s + c.value, 0))[0];
-        ins.push({ id: 'cp1', type: 'info', message: `En cok kullanilan alt tur: ${dominant.name} - Lider: ${dominant.countries[0]?.country || '-'}`, severity: 'medium', category: 'Kompozisyon' });
+        ins.push({ id: 'cp1', type: 'info', message: `En çok kullanılan alt tür: ${dominant.name} — Lider: ${dominant.countries[0]?.country || '-'}`, severity: 'medium', category: 'Kompozisyon' });
       }
       const turkeyIntensity = intensityData.find(c => c.isTurkey);
       const worldAvgIntensity = intensityData.length > 0 ? intensityData.reduce((s, c) => s + c.value, 0) / intensityData.length : 0;
-      if (turkeyIntensity) ins.push({ id: 'cp2', type: turkeyIntensity.value > worldAvgIntensity * 1.5 ? 'warning' : 'achievement', message: `Turkiye pestisit yogunlugu: ${formatKgHa(turkeyIntensity.value)} (Dunya ort: ${formatKgHa(worldAvgIntensity)})`, severity: turkeyIntensity.value > worldAvgIntensity * 1.5 ? 'high' : 'medium', category: 'Yogunluk' });
+      if (turkeyIntensity) ins.push({ id: 'cp2', type: turkeyIntensity.value > worldAvgIntensity * 1.5 ? 'warning' : 'achievement', message: `Türkiye pestisit yoğunluğu: ${formatKgHa(turkeyIntensity.value)} (Dünya ort: ${formatKgHa(worldAvgIntensity)})`, severity: turkeyIntensity.value > worldAvgIntensity * 1.5 ? 'high' : 'medium', category: 'Yoğunluk' });
       setCompInsights(ins);
-    } catch (e) { console.error('Composition hatasi:', e); }
+    } catch (e) { console.error('Kullanım Profili hatası:', e); }
     finally { setLoading(false); }
   }, []);
 
@@ -209,15 +209,15 @@ export default function PesticidePage() {
 
       const ins: Insight[] = [];
       if (hhi) {
-        const label = hhi.concentration === 'LOW' ? 'dusuk' : hhi.concentration === 'MODERATE' ? 'orta' : 'yuksek';
-        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Pestisit kullanim konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) - Top 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
+        const label = hhi.concentration === 'LOW' ? 'düşük' : hhi.concentration === 'MODERATE' ? 'orta' : 'yüksek';
+        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Pestisit kullanım konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — Top 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
       }
       if (data.length >= 2) {
         const top1Share = (data[0].value / shares.reduce((s: number, v: number) => s + v, 0)) * 100;
-        ins.push({ id: 'cn2', type: top1Share > 30 ? 'warning' : 'info', message: `${data[0].country} tek basina dunya kullaniminin %${top1Share.toFixed(1)}'ini olusturuyor`, severity: top1Share > 30 ? 'high' : 'medium', category: 'Hakimiyet' });
+        ins.push({ id: 'cn2', type: top1Share > 30 ? 'warning' : 'info', message: `${data[0].country} tek başına dünya kullanımının %${top1Share.toFixed(1)}'ini oluşturuyor`, severity: top1Share > 30 ? 'high' : 'medium', category: 'Hakimiyet' });
       }
       setConcInsights(ins);
-    } catch (e) { console.error('Concentration hatasi:', e); }
+    } catch (e) { console.error('Pazar Yoğunluğu hatası:', e); }
     finally { setLoading(false); }
   }, []);
 
@@ -264,15 +264,15 @@ export default function PesticidePage() {
       });
 
       const ins: Insight[] = [];
-      ins.push({ id: 'tp1', type: 'info', message: `Turkiye toplam pestisit kullanimi: ${formatTon(totalUsage)} (Yogunluk: ${formatKgHa(kgHa)})`, severity: 'medium', category: 'Kullanim' });
-      if (kgHa > 3) ins.push({ id: 'tp2', type: 'warning', message: `Pestisit yogunlugu ${formatKgHa(kgHa)} - AB ortalamasinin uzerinde olabilir`, severity: 'high', category: 'Yogunluk' });
+      ins.push({ id: 'tp1', type: 'info', message: `Türkiye toplam pestisit kullanımı: ${formatTon(totalUsage)} (Yoğunluk: ${formatKgHa(kgHa)})`, severity: 'medium', category: 'Kullanım' });
+      if (kgHa > 3) ins.push({ id: 'tp2', type: 'warning', message: `Pestisit yoğunluğu ${formatKgHa(kgHa)} — AB ortalamasının üzerinde olabilir`, severity: 'high', category: 'Yoğunluk' });
       if (composition.length > 0) {
         const dominant = composition[0];
-        ins.push({ id: 'tp3', type: 'info', message: `En cok kullanilan: ${dominant.name} (%${dominant.share.toFixed(1)} pay, ${formatTon(dominant.tonaj)})`, severity: 'low', category: 'Kompozisyon' });
+        ins.push({ id: 'tp3', type: 'info', message: `En çok kullanılan: ${dominant.name} (%${dominant.share.toFixed(1)} pay, ${formatTon(dominant.tonaj)})`, severity: 'low', category: 'Kompozisyon' });
       }
-      if (trendAnalysis) ins.push({ id: 'tp4', type: trendAnalysis.direction === 'up' ? 'growth' : 'decline', message: `Turkiye pestisit trendi: CAGR %${trendAnalysis.cagr.toFixed(2)} (${trendAnalysis.direction === 'up' ? 'artiyor' : 'azaliyor'})`, severity: 'medium', category: 'Trend' });
+      if (trendAnalysis) ins.push({ id: 'tp4', type: trendAnalysis.direction === 'up' ? 'growth' : 'decline', message: `Türkiye pestisit trendi: BBO %${trendAnalysis.cagr.toFixed(2)} (${trendAnalysis.direction === 'up' ? 'artıyor' : 'azalıyor'})`, severity: 'medium', category: 'Trend' });
       setTurkeyInsights(ins);
-    } catch (e) { console.error('Turkey hatasi:', e); }
+    } catch (e) { console.error('Türkiye Profili hatası:', e); }
     finally { setLoading(false); }
   }, []);
 
@@ -310,11 +310,11 @@ export default function PesticidePage() {
       });
 
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye pestisit trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, volatilite %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dunya pestisit trendi: CAGR %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dunya' });
-      if (turkeyTrend && worldTrend && turkeyTrend.cagr > worldTrend.cagr * 1.5) ins.push({ id: 'fc3', type: 'warning', message: `Turkiye pestisit artis hizi dunya ortalamasinin ${(turkeyTrend.cagr / (worldTrend.cagr || 1)).toFixed(1)}x kati`, severity: 'high', category: 'Uyari' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye pestisit trendi: BBO %${turkeyTrend.cagr.toFixed(2)}, oynaklık %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya pestisit trendi: BBO %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dünya' });
+      if (turkeyTrend && worldTrend && turkeyTrend.cagr > worldTrend.cagr * 1.5) ins.push({ id: 'fc3', type: 'warning', message: `Türkiye pestisit artış hızı dünya ortalamasının ${(turkeyTrend.cagr / (worldTrend.cagr || 1)).toFixed(1)}x katı`, severity: 'high', category: 'Uyarı' });
       setForecastInsights(ins);
-    } catch (e) { console.error('Forecast hatasi:', e); }
+    } catch (e) { console.error('Trend & Tahmin hatası:', e); }
     finally { setLoading(false); }
   }, []);
 
@@ -341,14 +341,14 @@ export default function PesticidePage() {
       const totalBefore = before['Pestisitler (toplam)'] || 0;
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'Pestisit Kullanim Degisimi (2015-2021)', message: `Toplam pestisit kullanimi %${change.toFixed(1)} ${change > 0 ? 'artti' : 'azaldi'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanim trendi', value: change });
+        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'Pestisit Kullanım Değişimi (2015-2021)', message: `Toplam pestisit kullanımı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanım trendi', value: change });
       }
       if (worldAvg > 0 && totalNow > 0) {
         const vsAvg = totalNow / worldAvg;
-        alerts.push({ id: 'int-vs-world', severity: vsAvg > 3 ? 'warning' : 'info', title: 'Dunya Ortalamasina Gore', message: `Turkiye pestisit kullanimi dunya ulke ortalamasinin ${vsAvg.toFixed(1)}x kati`, metric: 'Benchmark', value: vsAvg });
+        alerts.push({ id: 'int-vs-world', severity: vsAvg > 3 ? 'warning' : 'info', title: 'Dünya Ortalamasına Göre', message: `Türkiye pestisit kullanımı dünya ülke ortalamasının ${vsAvg.toFixed(1)}x katı`, metric: 'Kıyaslama', value: vsAvg });
       }
       if (turkeyIntensity > 0) {
-        alerts.push({ id: 'int-intensity', severity: turkeyIntensity > 5 ? 'critical' : turkeyIntensity > 2 ? 'warning' : 'positive', title: 'Pestisit Yogunlugu', message: `Hektar basina ${formatKgHa(turkeyIntensity)} pestisit kullaniliyor${turkeyIntensity > 3 ? ' - AB surdurulebilirlik hedeflerinin uzerinde' : ''}`, metric: 'kg/ha', value: turkeyIntensity });
+        alerts.push({ id: 'int-intensity', severity: turkeyIntensity > 5 ? 'critical' : turkeyIntensity > 2 ? 'warning' : 'positive', title: 'Pestisit Yoğunluğu', message: `Hektar başına ${formatKgHa(turkeyIntensity)} pestisit kullanılıyor${turkeyIntensity > 3 ? ' — AB sürdürülebilirlik hedeflerinin üzerinde' : ''}`, metric: 'kg/ha', value: turkeyIntensity });
       }
       // Sub-type analysis
       ['Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'].forEach(type => {
@@ -386,8 +386,8 @@ export default function PesticidePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Pestisit Intelligence Dashboard</h1>
-        <p className="page-subtitle">FAO pestisit kullanim verileri - akilli analiz motoru</p>
+        <h1 className="page-title">🌿 Pestisit Analizi</h1>
+        <p className="page-subtitle">FAO pestisit kullanımı — akıllı analiz motoru</p>
       </div>
 
       <div style={{ display: 'flex', gap: '6px', marginBottom: '24px', flexWrap: 'wrap', padding: '6px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
@@ -405,38 +405,38 @@ export default function PesticidePage() {
       </div>
 
       {loading ? (
-        <div className="loading"><div className="loading-spinner"></div><p>Intelligence analizi yukleniyor...</p></div>
+        <div className="loading"><div className="loading-spinner"></div><p>Analiz yükleniyor...</p></div>
       ) : (
         <>
           {/* OVERVIEW */}
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA PESTISIT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`YoY: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | CAGR: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
-                <KPICard title="TURKIYE KULLANIMI" value={formatTon(overviewKPIs.turkeyUsage)} subtitle={`Dunya sirasi: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
-                <KPICard title="EN BUYUK KULLANICI" value={overviewKPIs.topUser} subtitle="2021" icon={Award} color="blue" />
-                <KPICard title="PESTISIT TURU" value={String(overviewKPIs.typeCount)} subtitle="Aktif tur" icon={Bug} color="red" />
+                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="TÜRKİYE KULLANIMI" value={formatTon(overviewKPIs.turkeyUsage)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
+                <KPICard title="EN BÜYÜK KULLANICI" value={overviewKPIs.topUser} subtitle="2021" icon={Award} color="blue" />
+                <KPICard title="PESTİSİT TÜRÜ" value={String(overviewKPIs.typeCount)} subtitle="Aktif tür" icon={Bug} color="red" />
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Pestisit Tur Dagilimi</h3>
+                  <h3 className="chart-title">Pestisit Tür Dağılımı</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={overviewByType} cx="50%" cy="50%" outerRadius={100} innerRadius={40} dataKey="value" label={({ name, percent }) => `${(name || '').substring(0, 12)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
                         {overviewByType.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Pie>
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanim']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Top 15 Pestisit Kullanicisi Ulke</h3>
+                  <h3 className="chart-title">Top 15 Pestisit Kullanıcısı Ülke</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} />
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanim']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                         {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -446,7 +446,7 @@ export default function PesticidePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Dunya Pestisit Kullanim Trendi</h3>
+                  <h3 className="chart-title">Dünya Pestisit Kullanım Trendi</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -478,7 +478,7 @@ export default function PesticidePage() {
               {compTrends.length > 0 && (
                 <div className="chart-grid">
                   <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <h3 className="chart-title">Pestisit Alt Tur Trendleri (2000+)</h3>
+                    <h3 className="chart-title">Pestisit Alt Tür Trendleri (2000+)</h3>
                     <ResponsiveContainer width="100%" height={350}>
                       <AreaChart data={compTrends}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -504,21 +504,21 @@ export default function PesticidePage() {
             <>
               {concHHI && (
                 <div className="kpi-grid">
-                  <KPICard title="HHI ENDEKSI" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration}`} icon={BarChart2} color="purple" large />
-                  <KPICard title="TOP 1 PAY" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle={concData[0]?.country || '-'} icon={Award} color="orange" />
-                  <KPICard title="TOP 3 PAY" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="Ilk 3 ulke" icon={Layers} color="blue" />
-                  <KPICard title="ETKIN RAKIP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayi" icon={Activity} color="green" />
+                  <KPICard title="HHI ENDEKSİ" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration === 'HIGH' ? 'Yüksek' : concHHI.concentration === 'MODERATE' ? 'Orta' : 'Düşük'}`} icon={BarChart2} color="purple" large />
+                  <KPICard title="İLK 1 PAYI" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle={concData[0]?.country || '-'} icon={Award} color="orange" />
+                  <KPICard title="İLK 3 PAYI" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
+                  <KPICard title="ETKİN RAKİP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayı" icon={Activity} color="green" />
                 </div>
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Pestisit Kullanimi - Ulke Siralamasi</h3>
+                  <h3 className="chart-title">Pestisit Kullanımı — Ülke Sıralaması</h3>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanim']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {concData.slice(0, 25).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -534,20 +534,20 @@ export default function PesticidePage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM PESTISIT" value={formatTon(turkeyProfile.totalUsage)} subtitle={`CAGR: %${turkeyProfile.cagr.toFixed(2)}`} icon={Bug} color="red" large />
-                <KPICard title="YOGUNLUK" value={formatKgHa(turkeyProfile.kgHa)} subtitle="kg/ha" icon={Droplets} color="purple" />
-                <KPICard title="DUNYA ORTALAMASI" value={formatTon(turkeyProfile.worldAvg)} subtitle="Ulke ort." icon={Globe} color="blue" />
-                <KPICard title="TREND YONU" value={turkeyProfile.direction === 'up' ? 'Artis' : turkeyProfile.direction === 'down' ? 'Dusus' : 'Stabil'} subtitle={`%${Math.abs(turkeyProfile.vsWorldAvg).toFixed(0)} ${turkeyProfile.vsWorldAvg > 0 ? 'uzerinde' : 'altinda'}`} icon={turkeyProfile.direction === 'up' ? TrendingUp : TrendingDown} color={turkeyProfile.direction === 'up' ? 'orange' : 'green'} />
+                <KPICard title="TOPLAM PESTİSİT" value={formatTon(turkeyProfile.totalUsage)} subtitle={`BBO: %${turkeyProfile.cagr.toFixed(2)}`} icon={Bug} color="red" large />
+                <KPICard title="YOĞUNLUK" value={formatKgHa(turkeyProfile.kgHa)} subtitle="kg/ha" icon={Droplets} color="purple" />
+                <KPICard title="DÜNYA ORTALAMASI" value={formatTon(turkeyProfile.worldAvg)} subtitle="Ülke ort." icon={Globe} color="blue" />
+                <KPICard title="TREND YÖNÜ" value={turkeyProfile.direction === 'up' ? 'Artış' : turkeyProfile.direction === 'down' ? 'Düşüş' : 'Stabil'} subtitle={`%${Math.abs(turkeyProfile.vsWorldAvg).toFixed(0)} ${turkeyProfile.vsWorldAvg > 0 ? 'üzerinde' : 'altında'}`} icon={turkeyProfile.direction === 'up' ? TrendingUp : TrendingDown} color={turkeyProfile.direction === 'up' ? 'orange' : 'green'} />
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye Pestisit Kompozisyonu</h3>
+                  <h3 className="chart-title">Türkiye Pestisit Kompozisyonu</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={turkeyProfile.composition} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={160} />
-                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanim']} />
+                      <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="tonaj" radius={[0, 4, 4, 0]}>
                         {turkeyProfile.composition.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -555,7 +555,7 @@ export default function PesticidePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye Pestisit Trend (2000+)</h3>
+                  <h3 className="chart-title">Türkiye Pestisit Trendi (2000+)</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -575,14 +575,14 @@ export default function PesticidePage() {
           {activeTab === 'forecast' && forecastData && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TURKIYE CAGR" value={`%${forecastData.turkeyTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R2 = ${forecastData.turkeyR2?.toFixed(3) || '0'}`} icon={forecastData.turkeyTrend?.direction === 'up' ? TrendingUp : TrendingDown} color={forecastData.turkeyTrend?.direction === 'up' ? 'orange' : 'green'} large />
-                <KPICard title="DUNYA CAGR" value={`%${forecastData.worldTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R2 = ${forecastData.worldR2?.toFixed(3) || '0'}`} icon={Globe} color="blue" />
-                <KPICard title="VOLATILITE" value={`%${forecastData.turkeyTrend?.volatility?.toFixed(1) || '0'}`} subtitle="Turkiye" icon={Activity} color="purple" />
-                <KPICard title="ANOMALI" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayisi" icon={AlertTriangle} color="red" />
+                <KPICard title="TÜRKİYE BBO" value={`%${forecastData.turkeyTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R² = ${forecastData.turkeyR2?.toFixed(3) || '0'}`} icon={forecastData.turkeyTrend?.direction === 'up' ? TrendingUp : TrendingDown} color={forecastData.turkeyTrend?.direction === 'up' ? 'orange' : 'green'} large />
+                <KPICard title="DÜNYA BBO" value={`%${forecastData.worldTrend?.cagr?.toFixed(2) || '0'}`} subtitle={`R² = ${forecastData.worldR2?.toFixed(3) || '0'}`} icon={Globe} color="blue" />
+                <KPICard title="OYNAKLIK" value={`%${forecastData.turkeyTrend?.volatility?.toFixed(1) || '0'}`} subtitle="Türkiye" icon={Activity} color="purple" />
+                <KPICard title="ANOMALİ" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayısı" icon={AlertTriangle} color="red" />
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Pestisit Kullanimi - Tahmin Projeksiyonu</h3>
+                  <h3 className="chart-title">Türkiye Pestisit Kullanımı — Tahmin Projeksiyonu</h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -590,7 +590,7 @@ export default function PesticidePage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [v ? formatTon(v) : '-', '']} />
                       <Legend />
-                      <Area type="monotone" dataKey="historical" name="Gercek" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} connectNulls />
+                      <Area type="monotone" dataKey="historical" name="Gerçek" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} connectNulls />
                       <Line type="monotone" dataKey="forecast" name="Tahmin" stroke="#ef4444" strokeDasharray="5 5" strokeWidth={2} connectNulls dot={{ r: 4 }} />
                       <Scatter dataKey="anomaly" name="Anomali" fill="#f59e0b" />
                     </ComposedChart>
@@ -605,10 +605,10 @@ export default function PesticidePage() {
           {activeTab === 'alerts' && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM ALERT" value={String(intelligenceAlerts.length)} subtitle="Otomatik tespit" icon={Zap} color="purple" large />
-                <KPICard title="KRITIK" value={String(intelligenceAlerts.filter(a => a.severity === 'critical').length)} subtitle="Acil" icon={AlertTriangle} color="red" />
-                <KPICard title="UYARI" value={String(intelligenceAlerts.filter(a => a.severity === 'warning').length)} subtitle="Izlenmeli" icon={Activity} color="orange" />
-                <KPICard title="POZITIF" value={String(intelligenceAlerts.filter(a => a.severity === 'positive').length)} subtitle="Gelisim" icon={TrendingUp} color="green" />
+                <KPICard title="TOPLAM UYARI" value={String(intelligenceAlerts.length)} subtitle="Otomatik tespit" icon={Zap} color="purple" large />
+                <KPICard title="KRİTİK" value={String(intelligenceAlerts.filter(a => a.severity === 'critical').length)} subtitle="Acil" icon={AlertTriangle} color="red" />
+                <KPICard title="UYARI" value={String(intelligenceAlerts.filter(a => a.severity === 'warning').length)} subtitle="İzlenmeli" icon={Activity} color="orange" />
+                <KPICard title="POZİTİF" value={String(intelligenceAlerts.filter(a => a.severity === 'positive').length)} subtitle="Gelişim" icon={TrendingUp} color="green" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                 {intelligenceAlerts.map((alert: IntelligenceAlert) => {

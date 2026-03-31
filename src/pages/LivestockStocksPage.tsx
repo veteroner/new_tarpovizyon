@@ -725,18 +725,18 @@ export default function LivestockStocksPage() {
       // Turkey insight
       if (trIdx >= 0) {
         insArr.push({ id: `si${iid++}`, type: turkeyCAGR5 > 0 ? 'achievement' : 'warning',
-          message: `Türkiye dünya ${trIdx + 1}. sırada (${formatNumber(trTotal)} baş, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5y CAGR: %${turkeyCAGR5.toFixed(1)}`,
+          message: `Türkiye dünya ${trIdx + 1}. sırada (${formatNumber(trTotal)} baş, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5Y BBO: %${turkeyCAGR5.toFixed(1)}`,
           severity: turkeyCAGR5 < 0 ? 'high' : 'medium', category: 'TÜRKİYE' });
       }
       // Most growing animal
       const topGrowAnimal = [...animalCAGRArr].sort((a, b) => b.cagr5 - a.cagr5)[0];
       if (topGrowAnimal && topGrowAnimal.cagr5 > 1) {
-        insArr.push({ id: `si${iid++}`, type: 'growth', message: `En hızlı büyüyen tür: ${topGrowAnimal.animal} (5y CAGR %${topGrowAnimal.cagr5.toFixed(1)}). Mevcut stok: ${formatNumber(topGrowAnimal.current)}`, severity: 'medium', category: 'TÜR ANALİZİ' });
+        insArr.push({ id: `si${iid++}`, type: 'growth', message: `En hızlı büyüyen tür: ${topGrowAnimal.animal} (5Y BBO %${topGrowAnimal.cagr5.toFixed(1)}). Mevcut stok: ${formatNumber(topGrowAnimal.current)}`, severity: 'medium', category: 'TÜR ANALİZİ' });
       }
       // Declining animal
       const decAnimal = [...animalCAGRArr].sort((a, b) => a.cagr5 - b.cagr5)[0];
       if (decAnimal && decAnimal.cagr5 < -1) {
-        insArr.push({ id: `si${iid++}`, type: 'decline', message: `⚠️ ${decAnimal.animal} populasyonu eriyor! 5y CAGR %${decAnimal.cagr5.toFixed(1)}, acil dikkat gerekiyor.`, severity: 'high', category: 'RİSK' });
+        insArr.push({ id: `si${iid++}`, type: 'decline', message: `⚠️ ${decAnimal.animal} populasyonu eriyor! 5Y BBO %${decAnimal.cagr5.toFixed(1)}, acil dikkat gerekiyor.`, severity: 'high', category: 'RİSK' });
       }
       // HHI insight
       if (hhiResult.hhi < 500) {
@@ -903,23 +903,23 @@ export default function LivestockStocksPage() {
       let iid = 1;
       // Global trend
       ins.push({ id: `pi${iid++}`, type: globalCAGR5 > 0 ? 'growth' : 'decline',
-        message: `Küresel ${activePrimaryTab === 'meat' ? 'et' : activePrimaryTab === 'milk' ? 'süt' : activePrimaryTab === 'eggs' ? 'yumurta' : ''} üretimi ${globalCAGR5 > 0 ? 'büyüyor' : 'azalıyor'}: 5Y CAGR %${globalCAGR5.toFixed(1)}. Toplam: ${formatNumber(globalTotal)} ton.`,
+        message: `Küresel ${activePrimaryTab === 'meat' ? 'et' : activePrimaryTab === 'milk' ? 'süt' : activePrimaryTab === 'eggs' ? 'yumurta' : ''} üretimi ${globalCAGR5 > 0 ? 'büyüyor' : 'azalıyor'}: 5Y BBO %${globalCAGR5.toFixed(1)}. Toplam: ${formatNumber(globalTotal)} ton.`,
         severity: 'medium', category: 'TREND' });
       // Turkey
       if (trIdx >= 0) {
         ins.push({ id: `pi${iid++}`, type: turkeyCAGR5 > globalCAGR5 ? 'achievement' : 'warning',
-          message: `Türkiye dünya #${trIdx + 1} (${formatNumber(trTotal)} ton, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5Y CAGR %${turkeyCAGR5.toFixed(1)} ${turkeyCAGR5 > globalCAGR5 ? '- küreselden hızlı!' : '- küreselden yavaş.'}`,
+          message: `Türkiye dünya #${trIdx + 1} (${formatNumber(trTotal)} ton, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5Y BBO %${turkeyCAGR5.toFixed(1)} ${turkeyCAGR5 > globalCAGR5 ? '- küreselden hızlı!' : '- küreselden yavaş.'}`,
           severity: turkeyCAGR5 < 0 ? 'high' : 'medium', category: 'TÜRKİYE' });
       }
       // Emerging products
       const emerging = prodCAGRArr.filter(p => p.lifecycle === 'emerging');
       if (emerging.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'growth', message: `🌱 ${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${e.product} (CAGR %${e.cagr5.toFixed(1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
+        ins.push({ id: `pi${iid++}`, type: 'growth', message: `🌱 ${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${e.product} (BBO %${e.cagr5.toFixed(1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
       }
       // Declining products
       const declining = prodCAGRArr.filter(p => p.lifecycle === 'declining');
       if (declining.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'decline', message: `📉 ${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${d.product} (CAGR %${d.cagr5.toFixed(1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
+        ins.push({ id: `pi${iid++}`, type: 'decline', message: `📉 ${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${d.product} (BBO %${d.cagr5.toFixed(1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
       }
       // Leader
       ins.push({ id: `pi${iid}`, type: 'info', message: `Pazar lideri: ${allCountries[0]?.name || '-'} (%${(allCountries[0]?.value / globalTotal * 100).toFixed(1)} pay). Top 3 ülke toplam %${(allCountries.slice(0, 3).reduce((s: number, c: {value: number}) => s + c.value, 0) / globalTotal * 100).toFixed(1)} kontrol ediyor.`, severity: 'low', category: 'PAZAR' });
@@ -1660,13 +1660,13 @@ export default function LivestockStocksPage() {
                         color: intelligenceMetrics.yoyGrowth > 0 ? '#22c55e' : '#ef4444',
                         fontWeight: '600'
                       }}>
-                        {intelligenceMetrics.yoyGrowth > 0 ? '▲' : '▼'} {Math.abs(intelligenceMetrics.yoyGrowth).toFixed(1)}% YoY
+                        {intelligenceMetrics.yoyGrowth > 0 ? '▲' : '▼'} {Math.abs(intelligenceMetrics.yoyGrowth).toFixed(1)}% Yıllık Değişim
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="kpi-card">
-                  <div className="kpi-header"><span className="kpi-title">5-YIL CAGR</span><div className="kpi-icon green">📊</div></div>
+                  <div className="kpi-header"><span className="kpi-title">5-YIL BBO</span><div className="kpi-icon green">📊</div></div>
                   <div className="kpi-value" style={{ 
                     color: (intelligenceMetrics?.cagr5Year || 0) > 0 ? '#22c55e' : '#ef4444',
                     fontSize: '1.8rem'

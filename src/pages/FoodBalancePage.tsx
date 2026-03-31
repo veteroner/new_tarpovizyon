@@ -447,7 +447,7 @@ export default function FoodBalancePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA GIDA URETIMI" value={formatTon(overviewKPIs.worldProd)} subtitle={`YoY: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | CAGR: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DUNYA GIDA URETIMI" value={formatTon(overviewKPIs.worldProd)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
                 <KPICard title="EN BUYUK URETICI" value={overviewKPIs.topProducer} subtitle="2022" icon={Award} color="blue" />
                 <KPICard title="ORT KALORI" value={`${overviewKPIs.avgCal.toFixed(0)} kcal`} subtitle="kisi/gun" icon={Heart} color="orange" />
                 <KPICard title="IZLENEN URUN" value={String(overviewKPIs.productCount)} subtitle="Temel gida" icon={Wheat} color="green" />

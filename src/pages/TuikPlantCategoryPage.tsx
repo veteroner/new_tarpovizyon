@@ -568,13 +568,13 @@ export default function TuikPlantCategoryPage({
                   <Tooltip
                     formatter={(value: number, name: string) => [
                       name === 'value' ? `${fmt(value)} ${currentBirim}` : `${(value as number).toFixed(1)}%`,
-                      name === 'value' ? selectedUnsur : 'YoY Değişim'
+                      name === 'value' ? selectedUnsur : 'Yıllık Değişim'
                     ]}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
                   />
                   <Legend />
                   <Bar yAxisId="left" dataKey="value" name={selectedUnsur} fill="#3b82f6" radius={[4, 4, 0, 0]} opacity={0.8} />
-                  <Line yAxisId="right" type="monotone" dataKey="change" name="YoY %" stroke="#ef4444" strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="change" name="Yıllık Değişim %" stroke="#ef4444" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>

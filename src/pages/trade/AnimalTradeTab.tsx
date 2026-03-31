@@ -174,8 +174,8 @@ export default function AnimalTradeTab() {
 
       {/* KPIs */}
       <div className="kpi-grid">
-        <KPICard title="Hayvansal İhracat" value={formatMoney(totalExp)} subtitle={`YoY: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
-        <KPICard title="Hayvansal İthalat" value={formatMoney(totalImp)} subtitle={`YoY: ${impChange >= 0 ? '+' : ''}${impChange.toFixed(1)}%`} icon={TrendingDown} color="orange" large />
+        <KPICard title="Hayvansal İhracat" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+        <KPICard title="Hayvansal İthalat" value={formatMoney(totalImp)} subtitle={`Yıllık: ${impChange >= 0 ? '+' : ''}${impChange.toFixed(1)}%`} icon={TrendingDown} color="orange" large />
         <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
         <KPICard title="Ürün Sayısı" value={String(productCount)} subtitle="Hayvansal ürün grubu" icon={Beef} color="red" />
         <KPICard title="Ülke Sayısı" value={String(countryCount)} subtitle="Ticaret ortağı" icon={Zap} color="blue" />
