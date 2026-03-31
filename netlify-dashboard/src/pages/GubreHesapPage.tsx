@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { ILLER, getBolge, BOLGE_META, BOLGE_TOPRAK_PROFILLERI } from '../utils/climate-data';
+import { ILLER, getBolge, BOLGE_META, getToprakProfil, getToprakProfilAd } from '../utils/climate-data';
 import ProductTrustPanel from '../components/ProductTrustPanel';
 import './GubreHesapPage.css';
 
@@ -447,8 +447,8 @@ export default function GubreHesapPage() {
   const cropData = state.urun ? CROP_NUTRIENT_DB[state.urun] : null;
   const bolge = state.il ? getBolge(state.il) : null;
   const bolgeMeta = bolge ? BOLGE_META[bolge] : null;
-  const bolgeAd = bolgeMeta?.ad ?? '';
-  const bolgeProfil = bolgeAd ? BOLGE_TOPRAK_PROFILLERI[bolgeAd] : null;
+  const bolgeProfilAd = state.il ? getToprakProfilAd(state.il) : (bolgeMeta?.ad ?? '');
+  const bolgeProfil = state.il ? getToprakProfil(state.il) : null;
   const fertilizerTrust = result ? buildFertilizerTrust(state, result, cropData) : null;
 
   return (
@@ -719,7 +719,7 @@ export default function GubreHesapPage() {
                     className="gh-preset-btn gh-preset-btn--bolge"
                     onClick={() => setState({ ...state, toprak: { n: bolgeProfil.n, p2o5: bolgeProfil.p2o5, k2o: bolgeProfil.k2o, ph: bolgeProfil.ph, organik_madde: bolgeProfil.organik_madde } })}
                   >
-                    {bolgeMeta?.emoji} {bolgeAd} Profili
+                    {bolgeMeta?.emoji} {bolgeProfilAd} Profili
                   </button>
                 )}
                 <button
@@ -907,7 +907,7 @@ export default function GubreHesapPage() {
 
             {/* Micro-nutrients */}
             <div className="gh-card">
-              <h2 className="gh-card__title">🔬 Mikro Besin İhtiyacı ve Üürün Önerisi</h2>
+              <h2 className="gh-card__title">🔬 Mikro Besin İhtiyacı ve Ürün Önerisi</h2>
               <div className="gh-micro-result-grid">
                 {[{k:'fe',icon:'🔩',ad:'Demir (Fe)'},{k:'zn',icon:'⚡',ad:'Çinko (Zn)'},{k:'mn',icon:'🔧',ad:'Mangan (Mn)'},{k:'b',icon:'💎',ad:'Bor (B)'}].map(({k,icon,ad})=>(
                   <div className="gh-micro-item" key={k}>
@@ -971,6 +971,9 @@ export default function GubreHesapPage() {
                     </tbody>
                   </table>
                 </div>
+                <p style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                  ℹ️ Fiyatlar 2025 Türkiye piyasası referansıdır; güncel fiyatlar için tedarikçinize danışınız.
+                </p>
               </div>
             )}
 
@@ -1005,6 +1008,9 @@ export default function GubreHesapPage() {
                     </tbody>
                   </table>
                 </div>
+                <p style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                  ℹ️ Fiyatlar 2025 Türkiye piyasası referansıdır; güncel fiyatlar için tedarikçinize danışınız.
+                </p>
               </div>
             )}
 
@@ -1068,9 +1074,9 @@ export default function GubreHesapPage() {
             {/* Price Disclaimer */}
             <div className="gh-card" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '1px solid #f59e0b' }}>
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#92400e', lineHeight: 1.6 }}>
-                ⚠️ <strong>Fiyat Notu (Mart 2025):</strong> Fiyatlar 2025 Türkiye piyasa referanslarına güncellenmiştir (Üre ~40 TL/kg, DAP ~46 TL/kg, K₂SO₄ ~55 TL/kg).
+                ⚠️ <strong>Fiyat Notu (2025 Referansı):</strong> Fiyatlar 2025 Türkiye piyasa referanslarına güncellenmiştir (Üre ~40 TL/kg, DAP ~46 TL/kg, K₂SO₄ ~55 TL/kg).
                 Yerel bayi fiyatları bölgeye ve döneme göre %15-25 farklılaşabilir. Organik madde mineralizasyonu hesaba katılmıştır (<strong>{result.omMinN} kg N/da/yıl</strong>).
-                Bu plan uygulama öncesi bir gübreleme mühendisi veya tarım ziraatçışısı ile gözden geçirilmelidir.
+                Bu plan uygulama öncesi bir gübreleme mühendisi veya tarım danışmanı ile gözden geçirilmelidir.
               </p>
             </div>
 

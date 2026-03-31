@@ -66,6 +66,8 @@ import TarimTakvimPage from './pages/TarimTakvimPage';
 import ProductBalancePage from './pages/ProductBalancePage';
 import TurkeyMacroPage from './pages/TurkeyMacroPage';
 import CrossIntelligencePage from './pages/CrossIntelligencePage';
+import CommodityPricesPage from './pages/CommodityPricesPage';
+import AIAssistantPage from './pages/AIAssistantPage';
 import ErrorBoundary from './components/ErrorBoundary';
 
 import './styles/globals.css';
@@ -128,6 +130,8 @@ function AppContent() {
           <Route path="/tarpovizyon/world" element={<HomePage />} />
           <Route path="/tarpovizyon/turkey" element={<HomePage />} />
           <Route path="/tarpovizyon/overview" element={<OverviewPage />} />
+          <Route path="/tarpovizyon/commodity-prices" element={<ErrorBoundary><CommodityPricesPage /></ErrorBoundary>} />
+          <Route path="/tarpovizyon/ai-assistant" element={<ErrorBoundary><AIAssistantPage /></ErrorBoundary>} />
           
           {/* DÜNYA (FAO) VERİLERİ */}
           <Route path="/tarpovizyon/world/macro-economic" element={<MacroEconomicPage />} />

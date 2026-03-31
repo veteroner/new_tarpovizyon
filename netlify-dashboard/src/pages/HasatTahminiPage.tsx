@@ -7,7 +7,7 @@ import {
 import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvinceRanking } from '../services/api';
 import ProductTrustPanel from '../components/ProductTrustPanel';
 import { TurkeyHeatMap, type RegionTotal } from '../components/TurkeyHeatMap';
-import { getBolge, BOLGE_META, getETo, getYagis } from '../utils/climate-data';
+import { getBolge, BOLGE_META, getETo, getYagis, type IklimBolge } from '../utils/climate-data';
 import WeatherWidget from '../components/WeatherWidget';
 import './HasatTahminiPage.css';
 
@@ -57,9 +57,62 @@ interface WizardState {
   ilRanking: { il: string; verim: number }[];
 }
 
+// ─── Bölge-aware ekim/hasat notları ─────────────────────────────────────────
+
+function getEkimBolgeNotu(bolge: IklimBolge, urun: string): string {
+  const u = urun.toLocaleLowerCase('tr-TR');
+  const kislik = u.includes('buğday') || u.includes('arpa') || u.includes('çavdar')
+    || u.includes('mercimek') || u.includes('kanola') || u.includes('sarımsak')
+    || u.includes('bakla') || u.includes('bezelye');
+  const yazlik = u.includes('mısır') || u.includes('fasulye') || u.includes('pamuk')
+    || u.includes('soya') || u.includes('domates') || u.includes('biber')
+    || u.includes('patlıcan') || u.includes('salatalık') || u.includes('kabak');
+  switch (bolge) {
+    case 'dogu_anadolu':
+      if (kislik)  return '⚠️ Doğu Anadolu: Kasım başına kadar toprak donmamalı; yüksek kesimlerde Ekim sonu son fırsattır';
+      if (yazlik)  return '⚠️ Doğu Anadolu: Don riski Haziran başına dek sürer; bu bitkiyi erkenden ekmekten kaçının';
+      return '⚠️ Doğu Anadolu: Takvimi 4-5 hafta ileri alın';
+    case 'guneydogu':
+      if (kislik) return '✓ Güneydoğu: Kışlık ekimler Eylül sonuna/Ekim başına çekilebilir; 2. ürün imkânı değerlendirin';
+      if (yazlik) return '✓ Güneydoğu: Nisan ortasında toprak zaten sıcaktır; erken ekim uygundur';
+      return '✓ Güneydoğu: 2-3 hafta erkene alabilirsiniz';
+    case 'akdeniz':
+      if (kislik) return '✓ Akdeniz: Kışlık çeşitler Eylül ortasından itibaren ekilebilir; erken ekim avantaj sağlar';
+      return '✓ Akdeniz: Erken ekim uygundur';
+    case 'karadeniz':
+      return '⚠️ Karadeniz: Yüksek toprak nemi — ekim öncesi drenaj durumunu kontrol edin';
+    case 'ic_anadolu':
+      if (kislik) return '⚠️ İç Anadolu: Kışlık ekim için Ekim ilk haftasını geçirmeyin; don riski Mayıs başına dek';
+      return '';
+    default:
+      return '';
+  }
+}
+
+function getHasatBolgeNotu(bolge: IklimBolge, urun: string): string {
+  const u = urun.toLocaleLowerCase('tr-TR');
+  const tahil = u.includes('buğday') || u.includes('arpa') || u.includes('çavdar')
+    || u.includes('yulaf') || u.includes('triticale');
+  switch (bolge) {
+    case 'dogu_anadolu':
+      if (tahil) return '⚠️ Doğu Anadolu: Hasat Temmuz-Ağustos; yüksek kesimlerde Ağustos sonuna kayabilir';
+      return '⚠️ Doğu Anadolu: Tarihleri 3-5 hafta ileri alın';
+    case 'akdeniz':
+      if (tahil) return '✓ Akdeniz: Hasat Mayıs-Haziran; diğer bölgelerden 2-3 hafta önce başlar';
+      return '✓ Akdeniz: Hasat tarihleri erkene kayar';
+    case 'guneydogu':
+      if (tahil) return "✓ Güneydoğu: Hasat Mayıs sonu-Haziran; Türkiye'nin en erken hasat bölgesi";
+      return '✓ Güneydoğu: Hasat 2-3 hafta önce başlar';
+    case 'karadeniz':
+      return '⚠️ Karadeniz: Yüksek nem hasat kalitesini etkiler; makineye girmeden önce tarlada kuruma kontrolü yapın';
+    default:
+      return '';
+  }
+}
+
 // ─── Sowing Calendar ──────────────────────────────────────────────────────────
 
-function getSowingCalendar(urun: string): { ekimAy: string; ekimBitis: string; aciklama: string } {
+function _getSowingBase(urun: string): { ekimAy: string; ekimBitis: string; aciklama: string } {
   const u = urun.toLocaleLowerCase('tr-TR');
   if (u.includes('buğday'))
     return { ekimAy: 'Ekim', ekimBitis: 'Kasım', aciklama: 'Sonbahar ekimi; toprak sıcaklığı 8-12°C' };
@@ -106,9 +159,18 @@ function getSowingCalendar(urun: string): { ekimAy: string; ekimBitis: string; a
   return { ekimAy: 'Mart', ekimBitis: 'Nisan', aciklama: 'İlkbahar ekimi; bölge iklimine göre ayarlayın' };
 }
 
+function getSowingCalendar(urun: string, il?: string): { ekimAy: string; ekimBitis: string; aciklama: string } {
+  const result = { ..._getSowingBase(urun) };
+  if (il) {
+    const notu = getEkimBolgeNotu(getBolge(il), urun);
+    if (notu) result.aciklama += ` — ${notu}`;
+  }
+  return result;
+}
+
 // ─── Harvest Calendar ─────────────────────────────────────────────────────────
 
-function getHarvestCalendar(urun: string): { baslangic: string; bitis: string; aciklama: string } {
+function _getHarvestBase(urun: string): { baslangic: string; bitis: string; aciklama: string } {
   const u = urun.toLocaleLowerCase('tr-TR');
   if (u.includes('buğday') || u.includes('arpa') || u.includes('çavdar') || u.includes('yulaf') || u.includes('triticale'))
     return { baslangic: 'Haziran', bitis: 'Temmuz', aciklama: 'Sıcaklık yükseldikçe hasat hızlanır' };
@@ -151,6 +213,15 @@ function getHarvestCalendar(urun: string): { baslangic: string; bitis: string; a
   if (u.includes('tütün'))
     return { baslangic: 'Temmuz', bitis: 'Eylül', aciklama: 'Alt yapraklardan başlayarak elle hasat' };
   return { baslangic: 'Mayıs', bitis: 'Eylül', aciklama: 'Çiçeklenme döneminde biçim yapılır' };
+}
+
+function getHarvestCalendar(urun: string, il?: string): { baslangic: string; bitis: string; aciklama: string } {
+  const result = { ..._getHarvestBase(urun) };
+  if (il) {
+    const notu = getHasatBolgeNotu(getBolge(il), urun);
+    if (notu) result.aciklama += ` — ${notu}`;
+  }
+  return result;
 }
 
 // ─── Statistics ───────────────────────────────────────────────────────────────
@@ -761,17 +832,21 @@ export function HasatTahminiPage(): React.ReactElement {
 
   // Step-4 values
   const calc    = state.step === 4 ? calculate(state) : null;
-  const harvest = state.urun ? getHarvestCalendar(state.urun) : null;
-  const sowing  = state.urun ? getSowingCalendar(state.urun) : null;
+  const harvest = state.urun ? getHarvestCalendar(state.urun, state.il) : null;
+  const sowing  = state.urun ? getSowingCalendar(state.urun, state.il) : null;
 
   // Save to history when results are calculated
+  // NOTE: `calc` must NOT be in deps — it's a new object every render, which would cause
+  // an infinite loop (setHistory → re-render → new calc ref → effect re-runs → …).
+  // We only need to save once when step transitions to 4.
   useEffect(() => {
-    if (calc && state.step === 4) {
-      saveToHistory(state, calc);
+    if (state.step === 4) {
+      const snapshot = calculate(state);
+      saveToHistory(state, snapshot);
       setHistory(loadHistory());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.step, calc]);
+  }, [state.step]);
 
   const ydVal = (yd: YearData | null | undefined, yr: string): number | undefined => {
     if (!yd) return undefined;
@@ -1324,7 +1399,7 @@ export function HasatTahminiPage(): React.ReactElement {
               const maxV = Math.max(...rows.map(r => r.value));
               return (
                 <div className="hz-compare-card">
-                  <h3>2024 Yılı Verim Karşılaştırması (Kg/da)</h3>
+                  <h3>Son Mevcut Veri (2024) — Verim Karşılaştırması (Kg/da)</h3>
                   {rows.map(row => (
                     <div key={row.label} className="hz-bar-row">
                       <span className="hz-bar-label">{row.label}</span>
@@ -1341,7 +1416,7 @@ export function HasatTahminiPage(): React.ReactElement {
             {/* ── Turkey Yield HeatMap ── */}
             {state.ilVerimler.length > 0 && (
               <div className="hz-map-card">
-                <h3>🗺️ Türkiye Verim Haritası — {state.urun} (2024)</h3>
+                <h3>🗺️ Türkiye Verim Haritası — {state.urun} (Son Mevcut Veri: 2024)</h3>
                 <p className="hz-chart-note">İller üzerinde gezinerek verim değerini görebilirsiniz. Koyu renk = yüksek verim.</p>
                 <TurkeyHeatMap
                   regionTotals={state.ilVerimler}
@@ -1361,7 +1436,7 @@ export function HasatTahminiPage(): React.ReactElement {
             {/* ── İl Sıralaması Tablosu ── */}
             {state.ilRanking.length > 0 && (
               <div className="hz-ranking-card">
-                <h3>🏆 İl Verim Sıralaması — {state.urun} (2024, Kg/da)</h3>
+                <h3>🏆 İl Verim Sıralaması — {state.urun} (Son Mevcut Veri: 2024, Kg/da)</h3>
                 <div className="hz-ranking-table-wrap">
                   <table className="hz-ranking-table">
                     <thead>

@@ -306,16 +306,48 @@ export interface BolgeToprakProfil {
 }
 
 export const BOLGE_TOPRAK_PROFILLERI: Record<string, BolgeToprakProfil> = {
-  'Trakya':        { n: 5, p2o5: 3, k2o: 12, ph: 6.5, organik_madde: 2.0, aciklama: 'Ağır killi topraklar, asit eğilimli' },
-  'Çukurova':      { n: 8, p2o5: 5, k2o: 15, ph: 7.5, organik_madde: 1.8, aciklama: 'Alüvyal verimli topraklar' },
-  'İç Anadolu':    { n: 4, p2o5: 3, k2o: 8,  ph: 7.8, organik_madde: 1.2, aciklama: 'Kireçli step toprakları, düşük organik madde' },
-  'Ege':           { n: 6, p2o5: 4, k2o: 10, ph: 7.0, organik_madde: 2.2, aciklama: 'Verimli ova toprakları' },
-  'Karadeniz':     { n: 7, p2o5: 4, k2o: 9,  ph: 5.5, organik_madde: 3.5, aciklama: 'Asit orman toprakları, yüksek organik madde' },
+  'Trakya':            { n: 5, p2o5: 3, k2o: 12, ph: 6.5, organik_madde: 2.0, aciklama: 'Ağır killi topraklar, asit eğilimli' },
+  'Çukurova':          { n: 8, p2o5: 5, k2o: 15, ph: 7.5, organik_madde: 1.8, aciklama: 'Alüvyal verimli topraklar' },
+  'İç Anadolu':        { n: 4, p2o5: 3, k2o: 8,  ph: 7.8, organik_madde: 1.2, aciklama: 'Kireçli step toprakları, düşük organik madde' },
+  'Ege':               { n: 6, p2o5: 4, k2o: 10, ph: 7.0, organik_madde: 2.2, aciklama: 'Verimli ova toprakları' },
+  'Karadeniz':         { n: 7, p2o5: 4, k2o: 9,  ph: 5.5, organik_madde: 3.5, aciklama: 'Asit orman toprakları, yüksek organik madde' },
   'Güneydoğu Anadolu': { n: 5, p2o5: 6, k2o: 14, ph: 7.8, organik_madde: 1.5, aciklama: 'Bazalt kökenli killi topraklar' },
-  'Doğu Anadolu':  { n: 3, p2o5: 2, k2o: 7,  ph: 7.2, organik_madde: 1.0, aciklama: 'Erozyona uğramış, düşük besin' },
-  'Akdeniz':       { n: 5, p2o5: 4, k2o: 11, ph: 7.5, organik_madde: 1.8, aciklama: 'Terra rossa, kireçli topraklar' },
-  'Marmara':       { n: 6, p2o5: 4, k2o: 11, ph: 6.8, organik_madde: 2.3, aciklama: 'Geçiş tipli topraklar' },
+  'Doğu Anadolu':      { n: 3, p2o5: 2, k2o: 7,  ph: 7.2, organik_madde: 1.0, aciklama: 'Erozyona uğramış, düşük besin' },
+  'Akdeniz':           { n: 5, p2o5: 4, k2o: 11, ph: 7.5, organik_madde: 1.8, aciklama: 'Terra rossa, kireçli topraklar' },
+  'Marmara':           { n: 6, p2o5: 4, k2o: 11, ph: 6.8, organik_madde: 2.3, aciklama: 'Geçiş tipli topraklar' },
 };
+
+/** Bazı iller için bölge genel profilinden farklı toprak tipine sahipken
+ *  BOLGE_META.ad eşleşmesi olmayan 'Trakya' ve 'Çukurova' profillerini
+ *  il bazında erişilebilir kılmak için override haritası. */
+const IL_TOPRAK_OVERRIDE: Record<string, string> = {
+  'Edirne':    'Trakya',
+  'Tekirdağ':  'Trakya',
+  'Kırklareli':'Trakya',
+  'Adana':     'Çukurova',
+  'Mersin':    'Çukurova',
+  'Hatay':     'Çukurova',
+  'Osmaniye':  'Çukurova',
+};
+
+/** İl adından toprak profilini döndürür.
+ *  Önce il-bazlı override kontrol eder, yoksa bölge profilini kullanır. */
+export function getToprakProfil(il: string): BolgeToprakProfil | null {
+  const normalized = IL_NORMALIZE_MAP[il] ?? il;
+  const overrideKey = IL_TOPRAK_OVERRIDE[normalized];
+  if (overrideKey) return BOLGE_TOPRAK_PROFILLERI[overrideKey] ?? null;
+  const bolge = getBolge(il);
+  const bolgeAd = BOLGE_META[bolge].ad;
+  return BOLGE_TOPRAK_PROFILLERI[bolgeAd] ?? null;
+}
+
+/** getToprakProfil ile birlikte buton etiketi için profil adını döndürür. */
+export function getToprakProfilAd(il: string): string {
+  const normalized = IL_NORMALIZE_MAP[il] ?? il;
+  const overrideKey = IL_TOPRAK_OVERRIDE[normalized];
+  if (overrideKey) return overrideKey;
+  return BOLGE_META[getBolge(il)].ad;
+}
 
 // ─── Yardımcı Fonksiyonlar ────────────────────────────────────────────────────
 
