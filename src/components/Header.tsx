@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package } from 'lucide-react';
+import { Menu, X, Home, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package, BarChart3 } from 'lucide-react';
 import '../styles/Header.css';
 
 type MenuCategory = {
@@ -15,6 +15,14 @@ type MenuItem = {
 };
 
 const worldMenuCategories: MenuCategory[] = [
+  {
+    title: 'Canlı Piyasa & AI',
+    icon: BarChart3,
+    items: [
+      { label: '📊 Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
+      { label: '🤖 AI Asistan', path: '/tarpovizyon/ai-assistant' },
+    ],
+  },
   {
     title: 'Makroekonomik',
     icon: TrendingUp,
@@ -68,6 +76,14 @@ const worldMenuCategories: MenuCategory[] = [
 ];
 
 const turkeyMenuCategories: MenuCategory[] = [
+  {
+    title: 'Canlı Piyasa & AI',
+    icon: BarChart3,
+    items: [
+      { label: '📊 Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
+      { label: '🤖 AI Asistan', path: '/tarpovizyon/ai-assistant' },
+    ],
+  },
   {
     title: 'Fiyat ve Ekonomi',
     icon: DollarSign,
@@ -333,8 +349,8 @@ export function Header() {
           <div className="mobile-items">
             <button
               type="button"
-              className={`mobile-menu-item ${isActive(`/${mode}`) ? 'active' : ''}`}
-              onClick={() => handleNavigate(`/${mode}`)}
+              className={`mobile-menu-item ${isActive(`/tarpovizyon/${mode}`) ? 'active' : ''}`}
+              onClick={() => handleNavigate(`/tarpovizyon/${mode}`)}
             >
               Ana Sayfa
             </button>

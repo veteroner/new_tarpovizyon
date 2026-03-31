@@ -707,9 +707,14 @@ export default function TarimTakvimPage() {
           </div>
           {selectedIl && <WeatherWidget il={selectedIl} compact />}
 
-          {selectedIl && (
+          {selectedIl ? (
             <div className="tt-bolge-uyari">
               <strong>⚠️ Bölge Notu:</strong> {BOLGE_UYARILAR[bolge]}
+            </div>
+          ) : (
+            <div className="tt-bolge-uyari tt-bolge-uyari--fallback">
+              <strong>ℹ️ İl Seçilmedi:</strong> Takvim şu an <strong>İç Anadolu</strong> bölgesi baz alınarak gösteriliyor.
+              Gerçek bölgenize özel tarihler için yukarıdan ilinizi seçin.
             </div>
           )}
         </div>

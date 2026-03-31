@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ILLER, BOLGE_META, applyBolgeOffset, getBolge,
-  donRiskiVar, yogunYagisTahmini, getYagis, getETo,
+  donRiskiVar,
 } from '../utils/climate-data';
 import type { IklimBolge } from '../utils/climate-data';
 import { ConfidenceBadge } from '../components/ConfidenceBadge';
@@ -565,6 +565,18 @@ export default function TarimTakvimPage() {
           {selectedIl && <WeatherWidget il={selectedIl} compact />}
 
           {selectedIl && (
+            <div style={{ marginTop: 8 }}>
+              <ConfidenceBadge
+                score={70}
+                label="Takvim Güveni"
+              />
+              <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#718096' }}>
+                Tarihler bölge iklim ortalamalarına dayanır; gerçek koşullar 1-3 hafta değişkenlik gösterebilir.
+              </p>
+            </div>
+          )}
+
+          {selectedIl && (
             <div className="tt-bolge-uyari">
               <strong>⚠️ Bölge Notu:</strong> {BOLGE_UYARILAR[bolge]}
             </div>
@@ -648,6 +660,12 @@ export default function TarimTakvimPage() {
                 <span>Bu Hafta — {AYLAR[now.ay - 1]}, Hafta {now.hafta}</span>
                 {selectedIl && <span className="tt-thisweek__il">{selectedIl}</span>}
               </div>
+              {selectedIl && donRiskiVar(bolge, now.ay) && (
+                <div style={{ fontSize: '0.82rem', color: '#dc2626', background: 'rgba(220,38,38,0.06)', padding: '6px 12px', borderRadius: 6, border: '1px solid #fca5a5', margin: '6px 0' }}>
+                  ❄️ <strong>Don riski:</strong> Bu ay {bolgeMeta.ad} bölgesinde don riski bulunmaktadır.
+                  Soğuğa hassas fideleri ve çiçeklenme dönemindeki ürünleri koruma altına alın.
+                </div>
+              )}
               {buHaftaGorevler.length === 0 && gecikmisGorevler.length === 0 && (
                 <div className="tt-thisweek__empty">Bu hafta planlanmış görev yok ✓</div>
               )}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { ILLER, getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall } from '../utils/climate-data';
+import { ILLER, getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall, type IklimBolge } from '../utils/climate-data';
 import ProductTrustPanel from '../components/ProductTrustPanel';
 import WeatherWidget from '../components/WeatherWidget';
 import { IL_KOORDINAT, fetchForecast, fetchWeather, isWeatherConfigured, type ForecastSummary, type WeatherData } from '../services/weather';
@@ -64,7 +64,6 @@ interface IrrigationSystem {
 interface WizardState {
   step: 1 | 2 | 3 | 4;
   il: string;
-  ilce: string;
   urun: string;
   alan: number;              // dekar
   toprakTipi: 'kumlu' | 'tınlı' | 'killi' | 'organik';
@@ -234,7 +233,6 @@ function buildIrrigationTrust(
 const INITIAL: WizardState = {
   step: 1,
   il: '',
-  ilce: '',
   urun: '',
   alan: 100,
   toprakTipi: 'tınlı',
@@ -359,6 +357,23 @@ const KY_DB: Record<string, number[]> = {
 //  Calculation Engine — Monthly Water Balance
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Sulama sezonu ay kaydırması — İç Anadolu baz alınır (takvimOffset referansına paralel)
+const SEZON_AY_KAYMA: Record<IklimBolge, number> = {
+  guneydogu:    -1,  // 1 ay erken – sıcak ilkbahar
+  akdeniz:      -1,  // 1 ay erken – ılık kış, erken bahar
+  ege:           0,  // İç Anadolu ile benzer sulama takvimi
+  marmara:       0,  // İç Anadolu ile benzer sulama takvimi
+  ic_anadolu:    0,  // Baz
+  karadeniz:    +1,  // 1 ay geç – bulutlu/serin ilkbahar
+  dogu_anadolu: +2,  // 2 ay geç – sert kış, geç don
+};
+
+function getSezonAylari(base: number[], bolge: IklimBolge): number[] {
+  const kayma = SEZON_AY_KAYMA[bolge];
+  if (kayma === 0) return base;
+  return base.map(m => ((m - 1 + kayma + 120) % 12) + 1);
+}
+
 const AYLAR = [
   'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
@@ -371,6 +386,9 @@ function calculate(
 ): CalcResult | null {
   const cropData = CROP_WATER_DB[state.urun];
   if (!cropData || !state.il) return null;
+
+  const bolge = getBolge(state.il);
+  const cropSezonAylari = getSezonAylari(cropData.sezonAylari, bolge);
 
   const system = IRRIGATION_SYSTEMS[state.sulamaSistemi];
   const sulamaYok = state.sulamaSistemi === 'yok';
@@ -385,7 +403,7 @@ function calculate(
   const wetFrac = WET_FRACTION_BY_SYSTEM[state.sulamaSistemi];
 
   const nStages = cropData.donemKc.length;
-  const nMonths = cropData.sezonAylari.length;
+  const nMonths = cropSezonAylari.length;
 
   const daysInMonthArr = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -396,7 +414,7 @@ function calculate(
   let totalDeficit = 0;
   let weightedYieldLoss = 0;
 
-  const aylikDenge: MonthlyBalance[] = cropData.sezonAylari.map((ayNo, idx) => {
+  const aylikDenge: MonthlyBalance[] = cropSezonAylari.map((ayNo, idx) => {
     const stageIdx = Math.min(nStages - 1, Math.floor((idx / nMonths) * nStages));
     const kcBase = cropData.donemKc[stageIdx];
 
@@ -451,7 +469,7 @@ function calculate(
     };
   });
 
-  const sezonGun = cropData.sezonAylari.reduce((sum, ayNo) => sum + daysInMonthArr[ayNo - 1], 0);
+  const sezonGun = cropSezonAylari.reduce((sum, ayNo) => sum + daysInMonthArr[ayNo - 1], 0);
   const totalBrutMmForTotals = sulamaYok ? 0 : aylikDenge.reduce((s, m) => s + m.brutSulama, 0);
   const sezonlukM3 = totalBrutMmForTotals * state.alan;
 

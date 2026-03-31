@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Globe, MapPin } from 'lucide-react';
+import { Globe, MapPin, BarChart3, Bot } from 'lucide-react';
 import '../styles/SelectionPage.css';
 
 export function SelectionPage() {
@@ -44,6 +44,36 @@ export function SelectionPage() {
             <h2 className="selection-card-title">TÜRKİYE VERİLERİ</h2>
             <p className="selection-card-description">
               TÜİK Türkiye tarım verileri, il bazında üretim ve ticaret istatistikleri
+            </p>
+            <div className="selection-arrow">→</div>
+          </button>
+
+          <button
+            className="selection-card market-card"
+            onClick={() => navigate('/tarpovizyon/commodity-prices')}
+            aria-label="Canlı piyasa verilerine git"
+          >
+            <div className="selection-icon-wrapper">
+              <BarChart3 size={72} strokeWidth={1.5} />
+            </div>
+            <h2 className="selection-card-title">CANLI VERİLER</h2>
+            <p className="selection-card-description">
+              Yahoo Finance canlı emtia fiyatları: tahıllar, yağlı tohumlar, hayvancılık
+            </p>
+            <div className="selection-arrow">→</div>
+          </button>
+
+          <button
+            className="selection-card ai-card"
+            onClick={() => navigate('/tarpovizyon/ai-assistant')}
+            aria-label="AI asistana git"
+          >
+            <div className="selection-icon-wrapper">
+              <Bot size={72} strokeWidth={1.5} />
+            </div>
+            <h2 className="selection-card-title">AI ASISTAN</h2>
+            <p className="selection-card-description">
+              Tarım, hayvancılık ve gıda sektörü hakkında yapay zeka destekli analizler
             </p>
             <div className="selection-arrow">→</div>
           </button>

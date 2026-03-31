@@ -349,8 +349,8 @@ export function Header() {
           <div className="mobile-items">
             <button
               type="button"
-              className={`mobile-menu-item ${isActive(`/${mode}`) ? 'active' : ''}`}
-              onClick={() => handleNavigate(`/${mode}`)}
+              className={`mobile-menu-item ${isActive(`/tarpovizyon/${mode}`) ? 'active' : ''}`}
+              onClick={() => handleNavigate(`/tarpovizyon/${mode}`)}
             >
               Ana Sayfa
             </button>

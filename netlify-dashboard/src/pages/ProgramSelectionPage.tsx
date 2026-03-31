@@ -37,8 +37,8 @@ export function ProgramSelectionPage() {
     {
       id: 'sulama',
       title: 'Sulama Planlayıcı',
-      description: 'Su Ihtiyaci ve Sulama Karar Destegi',
-      subtitle: 'Iklim tablolari ve hava tahminiyle sulama plan taslagi',
+      description: 'Su İhtiyacı ve Sulama Karar Desteği',
+      subtitle: 'İklim tabloları ve hava tahminiyle sulama plan taslaği',
       icon: Droplets,
       color: '#3b82f6',
       path: '/sulama-plan',
@@ -46,8 +46,8 @@ export function ProgramSelectionPage() {
     {
       id: 'gubre',
       title: 'Gübre Hesaplayıcı',
-      description: 'Besin Acigi ve Gubre Plan Taslagi',
-      subtitle: 'Toprak analizi girdisiyle taslak besleme ve maliyet plani',
+      description: 'Besin Açığı ve Gübre Plan Taslaği',
+      subtitle: 'Toprak analizi girdisiyle taslak besleme ve maliyet planı',
       icon: FlaskConical,
       color: '#a855f7',
       path: '/gubre-hesap',
@@ -55,8 +55,8 @@ export function ProgramSelectionPage() {
     {
       id: 'takvim',
       title: 'Tarımsal Takvim',
-      description: 'Bolgesel Tarimsal Operasyon Rehberi',
-      subtitle: 'Bolgesel sezon akisiyla gorev ve zamanlama rehberi',
+      description: 'Bölgesel Tarımsal Operasyon Rehberi',
+      subtitle: 'Bölgesel sezon akışıyla görev ve zamanlama rehberi',
       icon: Calendar,
       color: '#ec4899',
       path: '/tarim-takvim',

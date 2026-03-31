@@ -6,7 +6,7 @@ import {
 import {
   ILLER, getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall,
   calcEToByMetod, ETO_METOD_LISTESI, donRiskiVar,
-  type EToMetodId, type IklimBolge,
+  type EToMetodId,
 } from '../utils/climate-data';
 import { ConfidenceBadge } from '../components/ConfidenceBadge';
 import { ModelWarningBox } from '../components/ModelWarningBox';

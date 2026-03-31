@@ -40,77 +40,57 @@ export const COMMODITY_META: Record<string, {
   'DC=F': { name: 'Süt (Class III)', category: 'sut',        unit: 'USD/cwt' },
 };
 
-const ALL_SYMBOLS = Object.keys(COMMODITY_META).join(',');
+// Backend PHP proxy URL — çalışır hem web hem Capacitor native'de
+const BACKEND_COMMODITY_URL =
+  'https://dersbende.com/api.php?action=commodity_prices&api_key=dashboard_secret_key_2024';
 
-// Convert US cents to dollars where applicable
-function formatPrice(price: number, symbol: string): number {
-  // YF futures USc → display as USD when > 10 (grain prices around 500-800c = $5-8)
-  if (['ZW=F', 'ZC=F', 'ZS=F'].includes(symbol)) {
-    return Math.round((price / 100) * 100) / 100; // 652c → $6.52
-  }
-  if (['CT=F', 'SB=F', 'KC=F', 'LE=F', 'GF=F', 'HE=F'].includes(symbol)) {
-    return Math.round(price * 100) / 100; // cents but per lb, show as-is USc
-  }
-  return Math.round(price * 100) / 100;
-}
-
-function formatCurrency(symbol: string): string {
-  if (['ZW=F', 'ZC=F', 'ZS=F'].includes(symbol)) return 'USD/bu';
-  if (['CT=F', 'SB=F', 'KC=F'].includes(symbol)) return 'USc/lb';
-  if (['LE=F', 'GF=F', 'HE=F'].includes(symbol)) return 'USc/lb';
-  if (symbol === 'DC=F') return 'USD/cwt';
-  return 'USD';
+function mapBackendCategory(cat: string): CommodityQuote['category'] {
+  if (cat === 'Hayvancılık') return 'hayvancilik';
+  if (cat === 'Süt Ürünleri') return 'sut';
+  return 'bitkisel';
 }
 
 export async function fetchCommodities(): Promise<CommodityQuote[]> {
-  const url = `/yahoo-proxy/v7/finance/quote?symbols=${encodeURIComponent(ALL_SYMBOLS)}&fields=regularMarketPrice,regularMarketPreviousClose,regularMarketChange,regularMarketChangePercent,marketState,currency`;
-
-  const res = await fetch(url, {
-    headers: {
-      'Accept': 'application/json',
-    },
+  const res = await fetch(BACKEND_COMMODITY_URL, {
+    headers: { 'Accept': 'application/json' },
   });
 
   if (!res.ok) {
-    throw new Error(`Yahoo Finance API error: ${res.status}`);
+    throw new Error(`Backend API error: ${res.status}`);
   }
 
-  interface YahooQuote {
+  interface BackendCommodity {
     symbol: string;
-    regularMarketPrice?: number;
-    regularMarketPreviousClose?: number;
-    regularMarketChange?: number;
-    regularMarketChangePercent?: number;
-    marketState?: string;
+    name: string;
+    category: string;
+    unit: string;
+    price: number;
+    change: number;
+    changePct: number;
+    currency: string;
   }
 
   const json = await res.json();
-  const results: YahooQuote[] = json?.quoteResponse?.result ?? [];
 
-  if (results.length === 0) {
-    throw new Error('No data returned from Yahoo Finance');
+  if (!json.success || !Array.isArray(json.commodities) || json.commodities.length === 0) {
+    throw new Error('No data returned from backend');
   }
 
-  return results
-    .filter((r) => COMMODITY_META[r.symbol])
-    .map((r) => {
-      const meta = COMMODITY_META[r.symbol];
-      const rawPrice = r.regularMarketPrice ?? 0;
-      const rawPrev = r.regularMarketPreviousClose ?? rawPrice;
-      const rawChange = r.regularMarketChange ?? (rawPrice - rawPrev);
-      const rawChangePct = r.regularMarketChangePercent ?? ((rawChange / rawPrev) * 100);
-
+  return (json.commodities as BackendCommodity[])
+    .filter((c) => COMMODITY_META[c.symbol])
+    .map((c) => {
+      const previousClose = Math.round((c.price - c.change) * 100) / 100;
       return {
-        symbol: r.symbol,
-        name: meta.name,
-        category: meta.category,
-        price: formatPrice(rawPrice, r.symbol),
-        previousClose: formatPrice(rawPrev, r.symbol),
-        change: Math.round(rawChange * 100) / 100,
-        changePercent: Math.round(rawChangePct * 100) / 100,
-        currency: formatCurrency(r.symbol),
-        unit: meta.unit,
-        marketState: r.marketState ?? 'CLOSED',
+        symbol: c.symbol,
+        name: c.name,
+        category: mapBackendCategory(c.category),
+        price: c.price,
+        previousClose,
+        change: c.change,
+        changePercent: c.changePct,
+        currency: c.currency || 'USD',
+        unit: COMMODITY_META[c.symbol]?.unit ?? c.unit,
+        marketState: 'CLOSED',
       };
     })
     .sort((a, b) => {
