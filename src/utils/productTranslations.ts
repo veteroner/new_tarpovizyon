@@ -300,6 +300,117 @@ export const faoProductTranslations: Record<string, string> = {
   'Apple juice': 'Elma Suyu',
   'Orange juice': 'Portakal Suyu',
   'Grape juice': 'Üzüm Suyu',
+
+  // ── Canlı Hayvanlar ─────────────────────────────────────
+  'Cattle': 'Sığır',
+  'Sheep': 'Koyun',
+  'Goats': 'Keçi',
+  'Swine / pigs': 'Domuz',
+  'Chickens': 'Tavuk',
+  'Buffalo': 'Manda',
+  'Horses': 'At',
+  'Turkeys': 'Hindi',
+  'Ducks': 'Ördek',
+  'Geese': 'Kaz',
+  'Asses': 'Eşek',
+  'Mules and hinnies': 'Katır ve Bardo',
+  'Camels': 'Deve',
+  'Bees': 'Arı',
+  'Rabbits and hares': 'Tavşan ve Yabani Tavşan',
+  'Other birds': 'Diğer Kuşlar',
+  'Other camelids': 'Diğer Devegiller',
+  'Other rodents': 'Diğer Kemirgenler',
+
+  // ── Etler ───────────────────────────────────────────────
+  'Meat of cattle with the bone, fresh or chilled': 'Sığır Eti (Kemikli, Taze/Soğuk)',
+  'Meat of sheep, fresh or chilled': 'Koyun Eti (Taze/Soğuk)',
+  'Meat of goat, fresh or chilled': 'Keçi Eti (Taze/Soğuk)',
+  'Meat of pig with the bone, fresh or chilled': 'Domuz Eti (Kemikli, Taze/Soğuk)',
+  'Meat of chickens, fresh or chilled': 'Tavuk Eti (Taze/Soğuk)',
+  'Meat of turkeys, fresh or chilled': 'Hindi Eti (Taze/Soğuk)',
+  'Meat of ducks, fresh or chilled': 'Ördek Eti (Taze/Soğuk)',
+  'Meat of geese, fresh or chilled': 'Kaz Eti (Taze/Soğuk)',
+  'Meat of buffalo, fresh or chilled': 'Manda Eti (Taze/Soğuk)',
+  'Meat of camels, fresh or chilled': 'Deve Eti (Taze/Soğuk)',
+  'Meat of other domestic camelids, fresh or chilled': 'Diğer Devegil Eti (Taze/Soğuk)',
+  'Meat of rabbits and hares, fresh or chilled': 'Tavşan Eti (Taze/Soğuk)',
+  'Horse meat, fresh or chilled': 'At Eti (Taze/Soğuk)',
+  'Meat of asses, fresh or chilled': 'Eşek Eti (Taze/Soğuk)',
+  'Meat of mules, fresh or chilled': 'Katır Eti (Taze/Soğuk)',
+  'Meat of pigeons and other birds n.e.c., fresh, chilled or frozen': 'Güvercin ve Diğer Kuş Eti',
+  'Meat of other domestic rodents, fresh or chilled': 'Diğer Kemirgen Eti',
+  'Game meat, fresh, chilled or frozen': 'Av Eti (Taze/Soğuk/Dondurulmuş)',
+  'Other meat of mammals, fresh or chilled': 'Diğer Memeli Eti',
+  'Snails, fresh, chilled, frozen, dried, salted or in brine, except sea snails': 'Salyangoz (Kara)',
+
+  // ── Sakatat ─────────────────────────────────────────────
+  'Edible offal of cattle, fresh, chilled or frozen': 'Sığır Sakatatı',
+  'Edible offal of sheep, fresh, chilled or frozen': 'Koyun Sakatatı',
+  'Edible offal of goat, fresh, chilled or frozen': 'Keçi Sakatatı',
+  'Edible offal of pigs, fresh, chilled or frozen': 'Domuz Sakatatı',
+  'Edible offal of buffalo, fresh, chilled or frozen': 'Manda Sakatatı',
+  'Edible offals of camels and other camelids, fresh, chilled or frozen': 'Deve Sakatatı',
+  'Edible offals of horses and other equines, fresh, chilled or frozen': 'At Sakatatı',
+
+  // ── Süt (Ham) ───────────────────────────────────────────
+  'Raw milk of cattle': 'Ham İnek Sütü',
+  'Raw milk of sheep': 'Ham Koyun Sütü',
+  'Raw milk of goats': 'Ham Keçi Sütü',
+  'Raw milk of buffalo': 'Ham Manda Sütü',
+  'Raw milk of camel': 'Ham Deve Sütü',
+
+  // ── Yumurta ─────────────────────────────────────────────
+  'Hen eggs in shell, fresh': 'Tavuk Yumurtası (Kabuklu, Taze)',
+  'Eggs from other birds in shell, fresh, n.e.c.': 'Diğer Kuş Yumurtaları',
+
+  // ── Bal & İpek ──────────────────────────────────────────
+  'Natural honey': 'Doğal Bal',
+  'Beeswax': 'Balmumu',
+  'Silk-worm cocoons suitable for reeling': 'İpek Böceği Kozası',
+
+  // ── Yağlar ──────────────────────────────────────────────
+  'Cattle fat, unrendered': 'Sığır İç Yağı (Ham)',
+  'Buffalo fat, unrendered': 'Manda İç Yağı (Ham)',
+  'Sheep fat, unrendered': 'Koyun İç Yağı (Ham)',
+  'Goat fat, unrendered': 'Keçi İç Yağı (Ham)',
+  'Fat of pigs': 'Domuz Yağı',
+  'Fat of camels': 'Deve Yağı',
+
+  // ── Deri & Yün ──────────────────────────────────────────
+  'Raw hides and skins of cattle': 'Ham Sığır Derisi',
+  'Raw hides and skins of buffaloes': 'Ham Manda Derisi',
+  'Raw hides and skins of sheep or lambs': 'Ham Koyun/Kuzu Derisi',
+  'Raw hides and skins of goats or kids': 'Ham Keçi/Oğlak Derisi',
+  'Shorn wool, greasy, including fleece-washed shorn wool': 'Kırkım Yünü (Yağlı)',
+
+  // ── İşlenmiş Süt Ürünleri ──────────────────────────────
+  'Butter of cow milk': 'İnek Sütü Tereyağı',
+  'Butter of buffalo milk': 'Manda Sütü Tereyağı',
+  'Butter and ghee of sheep milk': 'Koyun Sütü Tereyağı/Sadeyağı',
+  'Ghee from cow milk': 'İnek Sütü Sadeyağı',
+  'Ghee from buffalo milk': 'Manda Sütü Sadeyağı',
+  'Cheese from whole cow milk': 'Tam Yağlı İnek Peyniri',
+  'Cheese from skimmed cow milk': 'Yağsız İnek Peyniri',
+  'Cheese from milk of sheep, fresh or processed': 'Koyun Peyniri',
+  'Cheese from milk of goats, fresh or processed': 'Keçi Peyniri',
+  'Cheese from milk of buffalo, fresh or processed': 'Manda Peyniri',
+  'Cream, fresh': 'Taze Krema',
+  'Yoghurt': 'Yoğurt',
+  'Whole milk powder': 'Tam Yağlı Süt Tozu',
+  'Whole milk, condensed': 'Yoğunlaştırılmış Süt',
+  'Whole milk, evaporated': 'Buharlaştırılmış Süt',
+  'Skim milk of cows': 'Yağsız İnek Sütü',
+  'Skim milk and whey powder': 'Yağsız Süt ve Peynir Altı Suyu Tozu',
+  'Skim milk, condensed': 'Yoğunlaştırılmış Yağsız Süt',
+  'Skim milk, evaporated': 'Buharlaştırılmış Yağsız Süt',
+  'Buttermilk, dry': 'Kuru Ayran',
+  'Whey, dry': 'Kuru Peynir Altı Suyu',
+  'Whey, condensed': 'Yoğunlaştırılmış Peynir Altı Suyu',
+
+  // ── İşlenmiş Yağlar ────────────────────────────────────
+  'Tallow': 'Don Yağı',
+  'Pig fat, rendered': 'Eritilmiş Domuz Yağı',
+  'Raw silk (not thrown)': 'Ham İpek',
 };
 
 /**
