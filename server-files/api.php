@@ -720,6 +720,92 @@ switch($action) {
         echo json_encode(['error' => 'Chart data not available']);
         break;
 
+    // ========== PROPHET TAHMİN SONUÇLARI ==========
+    case 'forecasts':
+        $veri_tipi = $_GET['veri_tipi'] ?? '';
+        $ulkead = $_GET['ulkead'] ?? '';
+        $urunad = $_GET['urunad'] ?? '';
+        $tahmin_yil = $_GET['tahmin_yil'] ?? '';
+
+        // Check if table exists
+        $tableCheck = $pdo->query("SHOW TABLES LIKE 'fao_tahmin_sonuclari'");
+        if ($tableCheck->rowCount() === 0) {
+            echo json_encode(['data' => [], 'error' => 'Tahmin tablosu henüz oluşturulmadı. Prophet script çalıştırılmalı.']);
+            break;
+        }
+
+        $where = [];
+        $params = [];
+
+        if (!empty($veri_tipi)) {
+            $where[] = "veri_tipi = ?";
+            $params[] = $veri_tipi;
+        }
+        if (!empty($ulkead)) {
+            $where[] = "ulkead = ?";
+            $params[] = $ulkead;
+        }
+        if (!empty($urunad)) {
+            $where[] = "urunad = ?";
+            $params[] = $urunad;
+        }
+        if (!empty($tahmin_yil)) {
+            $where[] = "tahmin_yil = ?";
+            $params[] = $tahmin_yil;
+        }
+
+        $sql = "SELECT urunad, ulkead, veri_tipi, tahmin_yil, tahmin_deger, alt_sinir, ust_sinir, trend, r2_cv, mae_cv, mape_cv, model_tarihi FROM fao_tahmin_sonuclari";
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+        $sql .= " ORDER BY ulkead, urunad, tahmin_yil";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(['data' => $data, 'total' => count($data)]);
+        break;
+
+    // ========== TAHMİN İSTATİSTİKLERİ ==========
+    case 'forecast_stats':
+        $tableCheck = $pdo->query("SHOW TABLES LIKE 'fao_tahmin_sonuclari'");
+        if ($tableCheck->rowCount() === 0) {
+            echo json_encode(['data' => [], 'error' => 'Tahmin tablosu henüz oluşturulmadı.']);
+            break;
+        }
+
+        $veri_tipi = $_GET['veri_tipi'] ?? 'birincil';
+        $params = [$veri_tipi];
+
+        $stats = [];
+
+        // Toplam model sayısı
+        $stmt = $pdo->prepare("SELECT COUNT(DISTINCT CONCAT(ulkead,'|||',urunad)) as total_models FROM fao_tahmin_sonuclari WHERE veri_tipi = ?");
+        $stmt->execute($params);
+        $stats['total_models'] = (int)$stmt->fetch(PDO::FETCH_ASSOC)['total_models'];
+
+        // R² ortalaması
+        $stmt = $pdo->prepare("SELECT AVG(r2_cv) as avg_r2, AVG(mae_cv) as avg_mae, AVG(mape_cv) as avg_mape FROM fao_tahmin_sonuclari WHERE veri_tipi = ? AND r2_cv IS NOT NULL");
+        $stmt->execute($params);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['avg_r2'] = $row['avg_r2'] !== null ? round((float)$row['avg_r2'], 4) : null;
+        $stats['avg_mae'] = $row['avg_mae'] !== null ? round((float)$row['avg_mae'], 2) : null;
+        $stats['avg_mape'] = $row['avg_mape'] !== null ? round((float)$row['avg_mape'], 4) : null;
+
+        // Trend dağılımı
+        $stmt = $pdo->prepare("SELECT trend, COUNT(DISTINCT CONCAT(ulkead,'|||',urunad)) as cnt FROM fao_tahmin_sonuclari WHERE veri_tipi = ? GROUP BY trend");
+        $stmt->execute($params);
+        $stats['trends'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Model tarihi
+        $stmt = $pdo->prepare("SELECT MAX(model_tarihi) as last_update FROM fao_tahmin_sonuclari WHERE veri_tipi = ?");
+        $stmt->execute($params);
+        $stats['last_update'] = $stmt->fetch(PDO::FETCH_ASSOC)['last_update'];
+
+        echo json_encode($stats);
+        break;
+
     default:
         echo json_encode(['error' => 'Unknown action']);
         break;
