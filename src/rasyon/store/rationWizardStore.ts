@@ -238,7 +238,7 @@ export const useRationWizardStore = create<RationWizardStore>()(
       },
     }),
     {
-      name: 'teknova-ration-wizard-draft',
+      name: 'tarpol-ration-wizard-draft',
       version: 2,
       migrate: (persistedState: unknown) => {
         if (typeof persistedState !== 'object' || persistedState === null) return persistedState

@@ -21,7 +21,7 @@ export default function DataBackup() {
     }
 
     try {
-      localStorage.setItem('teknova-rasyon-last-backup', data.exportDate)
+      localStorage.setItem('tarpol-rasyon-last-backup', data.exportDate)
     } catch {
       // Ignore storage failures (private mode / quota). Export still works.
     }
@@ -30,7 +30,7 @@ export default function DataBackup() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `teknova-rasyon-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.download = `tarpol-rasyon-backup-${new Date().toISOString().split('T')[0]}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

@@ -5,11 +5,11 @@ import { useState, useRef } from 'react';
 /**
  * Rasyon Hesaplayıcı - WebView Page
  * 
- * teknova-rasyon.netlify.app adresini iframe ile yükler.
+ * tarpol-rasyon.netlify.app adresini iframe ile yükler.
  * NRC 2021 bazlı hayvan beslenme rasyon hesaplayıcı.
  */
 
-const RASYON_URL = 'https://teknova-rasyon.netlify.app';
+const RASYON_URL = 'https://tarpol-rasyon.netlify.app';
 
 export default function RasyonPage() {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 const SENTRY_ENABLED = import.meta.env.VITE_SENTRY_ENABLED !== 'false'
 const ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE
 const APP_VERSION = import.meta.env.VITE_APP_VERSION || '2.0.0'
-const RELEASE = import.meta.env.VITE_SENTRY_RELEASE || `teknova-rasyon@${APP_VERSION}`
+const RELEASE = import.meta.env.VITE_SENTRY_RELEASE || `tarpol-rasyon@${APP_VERSION}`
 
 export function initSentry() {
   // Only enable outside dev, and only if configured

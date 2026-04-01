@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 const workspaceRoot = process.cwd();
-const rasyonDist = path.join(workspaceRoot, 'teknova rasyon mobil', 'dist');
+const rasyonDist = path.join(workspaceRoot, 'tarpol rasyon mobil', 'dist');
 const targetDir = path.join(workspaceRoot, 'public', 'rasyon');
 
 async function exists(p) {

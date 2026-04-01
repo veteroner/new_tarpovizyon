@@ -99,7 +99,7 @@ export default function FeedLibrary() {
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = 'teknova-user-feeds.csv'
+                a.download = 'tarpol-user-feeds.csv'
                 a.click()
                 URL.revokeObjectURL(url)
               }}

@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
-FAO Hayvansal Üretim — Prophet Tahmin Sistemi
-==============================================
-Bu script, FAO hayvansal üretim verilerini Prophet ile modelleyip
-tahminleri MySQL'e yazar. Yılda 1 kez çalıştırılması yeterlidir.
+FAO Hayvansal Üretim — Prophet Tahmin Sistemi (API Modu)
+========================================================
+Bu script, FAO hayvansal üretim verilerini uzak API üzerinden çekip
+Prophet ile modelleyip sonuçları yine API üzerinden veritabanına yazar.
+Yılda 1 kez çalıştırılması yeterlidir.
 
 Kullanım:
-  pip install prophet mysql-connector-python pandas numpy
+  pip install prophet pandas numpy requests
   python3 scripts/prophet_forecaster.py
 
 Parametreler (ortam değişkenleri):
-  DB_HOST     (varsayılan: localhost)
-  DB_USER     (varsayılan: ist_172505)
-  DB_PASS     (varsayılan: ist_172505)
-  DB_NAME     (varsayılan: ist)
+  API_URL     (varsayılan: https://dersbende.com/api.php)
+  API_KEY     (varsayılan: REDACTED_DASHBOARD_KEY)
   MIN_TON     (varsayılan: 1000)   — minimum toplam üretim filtresi
   HORIZON     (varsayılan: 3)      — kaç yıl ileri tahmin
 """
@@ -21,13 +20,14 @@ Parametreler (ortam değişkenleri):
 import os
 import sys
 import time
+import json
 import logging
 import warnings
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import mysql.connector
+import requests
 from prophet import Prophet
 from prophet.diagnostics import cross_validation, performance_metrics
 
@@ -36,15 +36,11 @@ logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
 logging.getLogger("prophet").setLevel(logging.WARNING)
 
 # ─── Yapılandırma ─────────────────────────────────────────────────────────────
-DB_CONFIG = {
-    "host": os.environ.get("DB_HOST", "localhost"),
-    "user": os.environ.get("DB_USER", "ist_172505"),
-    "password": os.environ.get("DB_PASS", "ist_172505"),
-    "database": os.environ.get("DB_NAME", "ist"),
-    "charset": "utf8",
-}
+API_URL = os.environ.get("API_URL", "https://dersbende.com/api.php")
+API_KEY = os.environ.get("API_KEY", "REDACTED_DASHBOARD_KEY")
 MIN_TON = int(os.environ.get("MIN_TON", "1000"))
 HORIZON = int(os.environ.get("HORIZON", "3"))
+BATCH_SIZE = 500  # API batch insert limiti
 
 # Hariç tutulacak bölgeler (aggregate)
 EXCLUDED_AREAS = (
@@ -72,14 +68,48 @@ handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"
 log.addHandler(handler)
 
 
-def get_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+# ─── API Yardımcıları ─────────────────────────────────────────────────────────
+def api_query(sql: str) -> list:
+    """API üzerinden SELECT sorgusu çalıştır."""
+    r = requests.get(API_URL, params={"action": "query", "sql": sql, "api_key": API_KEY}, timeout=120)
+    r.raise_for_status()
+    data = r.json()
+    if "error" in data:
+        raise RuntimeError(f"API query hatası: {data['error']}")
+    return data.get("data", [])
 
 
-def create_results_table(conn):
+def api_execute(sql: str):
+    """API üzerinden DDL/DML çalıştır (CREATE, DELETE, vb.)."""
+    r = requests.post(
+        f"{API_URL}?action=execute&api_key={API_KEY}",
+        data={"sql": sql},
+        timeout=60,
+    )
+    r.raise_for_status()
+    data = r.json()
+    if "error" in data:
+        raise RuntimeError(f"API execute hatası: {data['error']}")
+    return data
+
+
+def api_batch_insert(table: str, rows: list):
+    """API üzerinden batch insert."""
+    r = requests.post(
+        f"{API_URL}?action=batch_insert&api_key={API_KEY}",
+        data={"table": table, "data": json.dumps(rows)},
+        timeout=120,
+    )
+    r.raise_for_status()
+    data = r.json()
+    if "error" in data:
+        raise RuntimeError(f"API batch_insert hatası: {data['error']}")
+    return data
+
+
+def create_results_table():
     """fao_tahmin_sonuclari tablosunu oluştur (yoksa)."""
-    cursor = conn.cursor()
-    cursor.execute("""
+    api_execute("""
         CREATE TABLE IF NOT EXISTS fao_tahmin_sonuclari (
             id INT AUTO_INCREMENT PRIMARY KEY,
             urunad VARCHAR(255) NOT NULL,
@@ -87,10 +117,10 @@ def create_results_table(conn):
             veri_tipi VARCHAR(50) NOT NULL COMMENT 'birincil / islenmis / canlihayvan',
             tahmin_yil INT NOT NULL,
             tahmin_deger DOUBLE NOT NULL,
-            alt_sinir DOUBLE NOT NULL COMMENT '80%% CI lower',
-            ust_sinir DOUBLE NOT NULL COMMENT '80%% CI upper',
+            alt_sinir DOUBLE NOT NULL COMMENT '80% CI lower',
+            ust_sinir DOUBLE NOT NULL COMMENT '80% CI upper',
             trend VARCHAR(30) NOT NULL COMMENT 'UP / DOWN / STABLE / ACCELERATING',
-            r2_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated R²',
+            r2_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated R2',
             mae_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated MAE',
             mape_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated MAPE',
             model_tarihi DATETIME NOT NULL,
@@ -99,49 +129,51 @@ def create_results_table(conn):
             INDEX idx_tahmin_yil (tahmin_yil)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
     """)
-    conn.commit()
-    cursor.close()
 
 
-def clear_old_results(conn, veri_tipi: str):
+def clear_old_results(veri_tipi: str):
     """Eski sonuçları temizle (yeni batch öncesi)."""
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM fao_tahmin_sonuclari WHERE veri_tipi = %s", (veri_tipi,))
-    conn.commit()
-    cursor.close()
+    api_execute(f"DELETE FROM fao_tahmin_sonuclari WHERE veri_tipi = '{veri_tipi}'")
 
 
-def fetch_series(conn, table: str, veri_tipi: str) -> pd.DataFrame:
-    """Belirtilen tablodan anlamlı serileri çek."""
-    placeholders = ",".join(["%s"] * len(EXCLUDED_AREAS))
+def fetch_series(table: str, veri_tipi: str) -> pd.DataFrame:
+    """Belirtilen tablodan anlamlı serileri API üzerinden çek."""
 
     # Uygun kolon adını belirle
-    unit_col = "uretim_birim"
-    value_col = "uretim_deger"
-
     if veri_tipi == "canlihayvan":
-        # canlihayvan tablosunda kolon adları farklı olabilir
-        cursor = conn.cursor()
-        cursor.execute(f"SHOW COLUMNS FROM `{table}`")
-        cols = [row[0] for row in cursor.fetchall()]
-        cursor.close()
-        if "stok_birim" in cols:
+        # Kolon adlarını kontrol et
+        cols_data = api_query(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' AND TABLE_SCHEMA = DATABASE()")
+        cols = [r["COLUMN_NAME"] for r in cols_data]
+        if "miktar_birim" in cols:
+            unit_col = "miktar_birim"
+            value_col = "miktar_deger"
+            unit_values = "'An','1000 An','No','Head','1000 Head','head'"
+        elif "stok_birim" in cols:
             unit_col = "stok_birim"
             value_col = "stok_deger"
+            unit_values = "'t','Head','1000 Head','1000 No','No','head','tonnes'"
+        else:
+            unit_col = "uretim_birim"
+            value_col = "uretim_deger"
+            unit_values = "'t','Head','1000 Head','1000 No','No','head','tonnes'"
+    else:
+        unit_col = "uretim_birim"
+        value_col = "uretim_deger"
+        unit_values = "'t','Head','1000 Head','1000 No','No','head','tonnes'"
+
+    # Excluded areas SQL
+    excluded_sql = ", ".join(f"'{a}'" for a in EXCLUDED_AREAS)
 
     query = f"""
         SELECT ulkead, urunad, year,
                SUM(CAST({value_col} AS DECIMAL(20,2))) as total
         FROM `{table}`
-        WHERE {unit_col} IN ('t','Head','1000 Head','1000 No','No','head','tonnes')
-          AND ulkead NOT IN ({placeholders})
+        WHERE {unit_col} IN ({unit_values})
+          AND ulkead NOT IN ({excluded_sql})
         GROUP BY ulkead, urunad, year
         ORDER BY ulkead, urunad, year
     """
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute(query, EXCLUDED_AREAS)
-    rows = cursor.fetchall()
-    cursor.close()
+    rows = api_query(query)
 
     if not rows:
         return pd.DataFrame()
@@ -149,7 +181,7 @@ def fetch_series(conn, table: str, veri_tipi: str) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     df["total"] = pd.to_numeric(df["total"], errors="coerce").fillna(0)
 
-    # Minimum üretim filtresi: toplam üretim > MIN_TON
+    # Minimum üretim filtresi
     group_totals = df.groupby(["ulkead", "urunad"])["total"].sum().reset_index()
     valid = group_totals[group_totals["total"] > MIN_TON][["ulkead", "urunad"]]
     df = df.merge(valid, on=["ulkead", "urunad"], how="inner")
@@ -266,11 +298,11 @@ def run_prophet(series_df: pd.DataFrame, horizon: int = 3):
     }
 
 
-def process_table(conn, table: str, veri_tipi: str):
+def process_table(table: str, veri_tipi: str):
     """Bir tabloyu işle: verileri çek, Prophet çalıştır, sonuçları yaz."""
     log.info(f"━━━ {table} ({veri_tipi}) işleniyor ━━━")
 
-    df = fetch_series(conn, table, veri_tipi)
+    df = fetch_series(table, veri_tipi)
     if df.empty:
         log.warning(f"  {table}: veri bulunamadı")
         return 0
@@ -279,9 +311,9 @@ def process_table(conn, table: str, veri_tipi: str):
     total = len(groups)
     log.info(f"  {total} ülke-ürün kombinasyonu bulundu")
 
-    clear_old_results(conn, veri_tipi)
+    clear_old_results(veri_tipi)
 
-    now = datetime.now()
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     batch = []
     success = 0
     failed = 0
@@ -298,18 +330,25 @@ def process_table(conn, table: str, veri_tipi: str):
                 continue
 
             for fc in result["forecasts"]:
-                batch.append((
-                    urun, ulke, veri_tipi,
-                    fc["year"], fc["yhat"], fc["yhat_lower"], fc["yhat_upper"],
-                    result["trend"],
-                    result["r2_cv"], result["mae_cv"], result["mape_cv"],
-                    now,
-                ))
+                batch.append({
+                    "urunad": urun,
+                    "ulkead": ulke,
+                    "veri_tipi": veri_tipi,
+                    "tahmin_yil": fc["year"],
+                    "tahmin_deger": round(fc["yhat"], 2),
+                    "alt_sinir": round(fc["yhat_lower"], 2),
+                    "ust_sinir": round(fc["yhat_upper"], 2),
+                    "trend": result["trend"],
+                    "r2_cv": round(result["r2_cv"], 4) if result["r2_cv"] is not None else None,
+                    "mae_cv": round(result["mae_cv"], 2) if result["mae_cv"] is not None else None,
+                    "mape_cv": round(result["mape_cv"], 4) if result["mape_cv"] is not None else None,
+                    "model_tarihi": now,
+                })
             success += 1
 
-            # Her 200 seride batch insert
-            if len(batch) >= 600:
-                _insert_batch(conn, batch)
+            # Her BATCH_SIZE satırda API'ye gönder
+            if len(batch) >= BATCH_SIZE:
+                _insert_batch(batch)
                 batch = []
 
         except Exception as e:
@@ -319,36 +358,29 @@ def process_table(conn, table: str, veri_tipi: str):
 
     # Kalan batch
     if batch:
-        _insert_batch(conn, batch)
+        _insert_batch(batch)
 
     log.info(f"  ✓ {veri_tipi}: {success} model, {skipped} atlanan, {failed} hata")
     return success
 
 
-def _insert_batch(conn, batch):
-    """Batch insert ile sonuçları yaz."""
-    cursor = conn.cursor()
-    cursor.executemany("""
-        INSERT INTO fao_tahmin_sonuclari
-        (urunad, ulkead, veri_tipi, tahmin_yil, tahmin_deger, alt_sinir, ust_sinir,
-         trend, r2_cv, mae_cv, mape_cv, model_tarihi)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, batch)
-    conn.commit()
-    cursor.close()
+def _insert_batch(batch):
+    """API batch insert ile sonuçları yaz."""
+    result = api_batch_insert("fao_tahmin_sonuclari", batch)
+    log.info(f"    → {result.get('inserted', 0)} satır yazıldı")
 
 
 def main():
     log.info("=" * 60)
-    log.info("FAO Prophet Tahmin Sistemi başlatılıyor")
+    log.info("FAO Prophet Tahmin Sistemi başlatılıyor (API Modu)")
+    log.info(f"  API: {API_URL}")
     log.info(f"  Horizon: {HORIZON} yıl, Min üretim: {MIN_TON}")
     log.info("=" * 60)
 
     start = time.time()
-    conn = get_connection()
 
     # Tablo oluştur
-    create_results_table(conn)
+    create_results_table()
 
     tables = [
         ("fao_uretim_hayvansal_birincil", "birincil"),
@@ -359,11 +391,10 @@ def main():
     total_models = 0
     for table, veri_tipi in tables:
         try:
-            total_models += process_table(conn, table, veri_tipi)
+            total_models += process_table(table, veri_tipi)
         except Exception as e:
             log.error(f"Tablo hatası {table}: {e}")
 
-    conn.close()
     elapsed = time.time() - start
 
     log.info("=" * 60)

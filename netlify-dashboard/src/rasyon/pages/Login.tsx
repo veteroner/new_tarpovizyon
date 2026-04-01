@@ -47,7 +47,7 @@ export default function Login() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">
-            Teknova Rasyon
+            TARPOL Rasyon
           </h1>
           <p className="mt-2 text-sm text-gray-600">
             Hesabınıza giriş yapın
@@ -86,7 +86,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="ornek@teknova.com"
+                placeholder="ornek@tarpol.com"
               />
             </div>
 

@@ -234,7 +234,7 @@ export function getSystemHealth(): SystemHealth {
   // Last backup timestamp (set on export in DataBackup page)
   const lastBackup = (() => {
     try {
-      return localStorage.getItem('teknova-rasyon-last-backup') ?? undefined
+      return localStorage.getItem('tarpol-rasyon-last-backup') ?? undefined
     } catch {
       return undefined
     }

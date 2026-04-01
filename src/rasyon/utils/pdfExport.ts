@@ -88,7 +88,7 @@ export function generateShareText(ration: Ration): string {
   // Gelişmiş maliyet analizi
   const enhancedCost = calculateEnhancedCost(cost.dailyFeedCostTL, profile)
   
-  return `📊 Teknova Rasyon
+  return `📊 TARPOL Rasyon
 
 🐄 Hayvan: ${profile.breed} (${profile.weightKg}kg)
 

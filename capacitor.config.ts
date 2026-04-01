@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     allowNavigation: [
       'newtarpovizyon.netlify.app',
-      'teknova-rasyon.netlify.app',
+      'tarpol-rasyon.netlify.app',
       'tarpovizyonai.netlify.app',
       'www.tarpol.org.tr',
       'dersbende.com',

@@ -240,7 +240,7 @@ export default function RationResultV2() {
 
   const handleShare = async () => {
     const shareData = {
-      title: 'Teknova Rasyon',
+      title: 'TARPOL Rasyon',
       text: generateShareText(ration),
       url: window.location.href,
     }
