@@ -9,6 +9,7 @@ import {
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
+import { translateProduct } from '../utils/productTranslations';
 import { TurkeyHeatMap, type RegionTotal } from '../components/TurkeyHeatMap';
 import { InsightCard, type Insight } from '../components/InsightCard';
 import { generateLivestockInsights } from '../utils/livestockInsights';
@@ -914,12 +915,12 @@ export default function LivestockStocksPage() {
       // Emerging products
       const emerging = prodCAGRArr.filter(p => p.lifecycle === 'emerging');
       if (emerging.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'growth', message: `🌱 ${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${e.product} (BBO %${e.cagr5.toFixed(1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
+        ins.push({ id: `pi${iid++}`, type: 'growth', message: `🌱 ${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${translateProduct(e.product)} (BBO %${e.cagr5.toFixed(1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
       }
       // Declining products
       const declining = prodCAGRArr.filter(p => p.lifecycle === 'declining');
       if (declining.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'decline', message: `📉 ${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${d.product} (BBO %${d.cagr5.toFixed(1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
+        ins.push({ id: `pi${iid++}`, type: 'decline', message: `📉 ${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${translateProduct(d.product)} (BBO %${d.cagr5.toFixed(1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
       }
       // Leader
       ins.push({ id: `pi${iid}`, type: 'info', message: `Pazar lideri: ${allCountries[0]?.name || '-'} (%${(allCountries[0]?.value / globalTotal * 100).toFixed(1)} pay). Top 3 ülke toplam %${(allCountries.slice(0, 3).reduce((s: number, c: {value: number}) => s + c.value, 0) / globalTotal * 100).toFixed(1)} kontrol ediyor.`, severity: 'low', category: 'PAZAR' });
@@ -1331,12 +1332,12 @@ export default function LivestockStocksPage() {
         if (turkeyForecasts.length > 0) {
           const trGrowing = turkeyForecasts.filter(t => t.changePercent > 0);
           ins.push({ id: `pr${iid++}`, type: trGrowing.length > turkeyForecasts.length / 2 ? 'growth' : 'warning',
-            message: `🇹🇷 Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${trGrowing[0].product} (+%${trGrowing[0].changePercent.toFixed(1)})` : ''}`,
+            message: `🇹🇷 Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${translateProduct(trGrowing[0].product)} (+%${trGrowing[0].changePercent.toFixed(1)})` : ''}`,
             severity: 'medium', category: 'TÜRKİYE' });
         }
         if (risks.length > 0) {
           ins.push({ id: `pr${iid++}`, type: 'warning',
-            message: `⚠️ ${risks.length} ülke-ürün kombinasyonunda kritik düşüş (CAGR<-5%). En şiddetli: ${risks[0].country} - ${risks[0].product} (%${risks[0].decline.toFixed(1)})`,
+            message: `⚠️ ${risks.length} ülke-ürün kombinasyonunda kritik düşüş (CAGR<-5%). En şiddetli: ${risks[0].country} - ${translateProduct(risks[0].product)} (%${risks[0].decline.toFixed(1)})`,
             severity: 'high', category: 'RİSK' });
         }
         if (anomalies.length > 0) {
@@ -1518,17 +1519,17 @@ export default function LivestockStocksPage() {
         .sort((a, b) => a.turkeyRank - b.turkeyRank);
       if (trBestProd.length > 0) {
         pInsights.push({ id: `pi${iid++}`, type: 'achievement', severity: 'high',
-          message: `Türkiye'nin en güçlü işlenmiş ürünü: ${trBestProd[0].product} (Dünya #${trBestProd[0].turkeyRank})`, category: 'REKABET' });
+          message: `Türkiye'nin en güçlü işlenmiş ürünü: ${translateProduct(trBestProd[0].product)} (Dünya #${trBestProd[0].turkeyRank})`, category: 'REKABET' });
       }
       const fastGrowing = growths.filter(g => g.cagr > 3 && g.current > 1e6);
       if (fastGrowing.length > 0) {
         pInsights.push({ id: `pi${iid++}`, type: 'growth', severity: 'medium',
-          message: `En hızlı büyüyen: ${fastGrowing[0].product} (%${fastGrowing[0].cagr.toFixed(1)} CAGR)`, category: 'BÜYÜME' });
+          message: `En hızlı büyüyen: ${translateProduct(fastGrowing[0].product)} (%${fastGrowing[0].cagr.toFixed(1)} CAGR)`, category: 'BÜYÜME' });
       }
       const declining = growths.filter(g => g.cagr < -2 && g.current > 1e5);
       if (declining.length > 0) {
         pInsights.push({ id: `pi${iid}`, type: 'decline', severity: 'medium',
-          message: `Dikkat: ${declining[0].product} küresel olarak daralıyor (%${Math.abs(declining[0].cagr).toFixed(1)} yıllık)`, category: 'RİSK' });
+          message: `Dikkat: ${translateProduct(declining[0].product)} küresel olarak daralıyor (%${Math.abs(declining[0].cagr).toFixed(1)} yıllık)`, category: 'RİSK' });
       }
       setProcessedInsights(pInsights);
 
@@ -2386,7 +2387,7 @@ export default function LivestockStocksPage() {
                     return (
                       <div key={i} style={{background: lcStyle.bg, border: `1px solid ${lcStyle.border}`, borderRadius: '12px', padding: '14px', position: 'relative'}}>
                         <span style={{position: 'absolute', top: '8px', right: '8px', fontSize: '10px', fontWeight: 700, color: lcStyle.color, background: 'var(--bg-card)', borderRadius: '6px', padding: '2px 8px', border: `1px solid ${lcStyle.border}`}}>{lcStyle.badge}</span>
-                        <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%', lineHeight: 1.3}}>{p.product}</div>
+                        <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%', lineHeight: 1.3}}>{translateProduct(p.product)}</div>
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px'}}>
                           <div><div style={{fontSize: '10px', color: 'var(--text-secondary)'}}>Üretim</div><div style={{fontWeight: 700, fontSize: '13px', color: 'var(--text-primary)'}}>{formatShort(p.current)}</div></div>
                           <div><div style={{fontSize: '10px', color: 'var(--text-secondary)'}}>CAGR</div><div style={{fontWeight: 700, fontSize: '13px', color: p.cagr5 >= 0 ? '#22c55e' : '#ef4444'}}>%{p.cagr5.toFixed(1)}</div></div>
@@ -2403,7 +2404,7 @@ export default function LivestockStocksPage() {
                 <div className="chart-card">
                   <h3 className="chart-title">📊 Ürün CAGR Karşılaştırması (5Y)</h3>
                   <ResponsiveContainer width="100%" height={380}>
-                    <BarChart data={primaryProductCAGR.slice(0, 12)} layout="vertical">
+                    <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={(v: number) => `%${v.toFixed(0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
                       <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={140} />
@@ -2484,7 +2485,7 @@ export default function LivestockStocksPage() {
                       const pct = (tp.production / maxProd) * 100;
                       return (
                         <div key={i} style={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px'}}>
-                          <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '6px'}}>{tp.product}</div>
+                          <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '6px'}}>{translateProduct(tp.product)}</div>
                           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
                             <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>{formatNumber(tp.production)} ton</span>
                             <span style={{fontSize: '12px', fontWeight: 700, color: tp.cagr5 >= 0 ? '#22c55e' : '#ef4444'}}>CAGR %{tp.cagr5.toFixed(1)}</span>
@@ -2639,7 +2640,7 @@ export default function LivestockStocksPage() {
                         labelFormatter={(_, payload) => {
                           if (payload && payload.length > 0) {
                             const d = payload[0].payload as {country: string; product: string};
-                            return `${d.country} - ${d.product}`;
+                            return `${d.country} - ${translateProduct(d.product)}`;
                           }
                           return '';
                         }}
@@ -2683,7 +2684,7 @@ export default function LivestockStocksPage() {
                       return (
                         <div key={i} style={{background: isUp ? 'rgba(34,197,94,.06)' : 'rgba(239,68,68,.06)', border: `1px solid ${isUp ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)'}`, borderRadius: '12px', padding: '14px'}}>
                           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px'}}>
-                            <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', maxWidth: '70%', lineHeight: 1.3}}>{tf.product}</div>
+                            <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', maxWidth: '70%', lineHeight: 1.3}}>{translateProduct(tf.product)}</div>
                             <span style={{fontSize: '10px', fontWeight: 700, color: isUp ? '#22c55e' : '#ef4444', background: isUp ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', borderRadius: '6px', padding: '2px 8px'}}>{isUp ? '📈' : '📉'} {tf.changePercent > 0 ? '+' : ''}{tf.changePercent.toFixed(1)}%</span>
                           </div>
                           <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px'}}>
@@ -2726,7 +2727,7 @@ export default function LivestockStocksPage() {
                     <tbody>
                       {predictionsData.filter(p => p.country === predSelectedCountry).slice(0, 15).map((pred, idx) => (
                         <tr key={idx} style={{borderBottom: '1px solid var(--border)'}}>
-                          <td style={{padding: '6px', fontWeight: 500}}>{pred.product}</td>
+                          <td style={{padding: '6px', fontWeight: 500}}>{translateProduct(pred.product)}</td>
                           <td style={{padding: '6px', textAlign: 'right'}}>
                             <span style={{fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
                               background: pred.trend.includes('UP') || pred.trend === 'EXPONENTIAL' ? 'rgba(34,197,94,.15)' : pred.trend === 'DECLINING' ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
@@ -2761,7 +2762,7 @@ export default function LivestockStocksPage() {
                             {severity === 'critical' ? '🔴 KRİTİK' : severity === 'high' ? '🟠 YÜKSEK' : '🟡 ORTA'}
                           </span>
                           <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px'}}>{risk.country}</div>
-                          <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%'}}>{risk.product}</div>
+                          <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%'}}>{translateProduct(risk.product)}</div>
                           <div style={{fontSize: '1.2rem', fontWeight: 700, color: sColor}}>%{risk.decline.toFixed(1)} CAGR</div>
                         </div>
                       );
@@ -2789,7 +2790,7 @@ export default function LivestockStocksPage() {
                         {anomalyAlerts.slice(0, 15).map((a, idx) => (
                           <tr key={idx} style={{borderBottom: '1px solid var(--border)'}}>
                             <td style={{padding: '6px'}}>{a.country}</td>
-                            <td style={{padding: '6px', color: 'var(--text-secondary)'}}>{a.product}</td>
+                            <td style={{padding: '6px', color: 'var(--text-secondary)'}}>{translateProduct(a.product)}</td>
                             <td style={{padding: '6px'}}>{a.year}</td>
                             <td style={{padding: '6px', textAlign: 'center'}}>
                               <span style={{fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
@@ -3172,7 +3173,7 @@ export default function LivestockStocksPage() {
                         marginBottom: 5,
                       }}>#{p.turkeyRank}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 8, minHeight: 32 }}>
-                        {p.product.length > 40 ? p.product.substring(0, 40) + '...' : p.product}
+                        {translateProduct(p.product).length > 40 ? translateProduct(p.product).substring(0, 40) + '...' : translateProduct(p.product)}
                       </div>
                       <div style={{ fontWeight: 600, color: '#ef4444', fontSize: '1.1rem' }}>{formatShort(p.turkeyVal)}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 4 }}>
@@ -3229,7 +3230,7 @@ export default function LivestockStocksPage() {
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart
                       data={processedGrowthData.slice(0, 15).map(g => ({
-                        name: g.product.length > 25 ? g.product.substring(0, 25) + '..' : g.product,
+                        name: translateProduct(g.product).length > 25 ? translateProduct(g.product).substring(0, 25) + '..' : translateProduct(g.product),
                         cagr: g.cagr,
                         fill: g.cagr > 5 ? '#22c55e' : g.cagr > 0 ? '#3b82f6' : g.cagr > -3 ? '#f59e0b' : '#ef4444',
                       }))}
@@ -3293,7 +3294,7 @@ export default function LivestockStocksPage() {
                             background: p.turkeyRank > 0 && p.turkeyRank <= 5 ? 'rgba(34,197,94,.05)' : 'transparent',
                           }}>
                             <td style={{ padding: 12, fontWeight: 500, color: 'var(--text-primary)', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {p.product}
+                              {translateProduct(p.product)}
                             </td>
                             <td style={{ padding: 12, textAlign: 'right', color: 'var(--text-secondary)' }}>{formatShort(p.total)}</td>
                             <td style={{ padding: 12, color: 'var(--text-secondary)' }}>{p.topCountry}</td>
