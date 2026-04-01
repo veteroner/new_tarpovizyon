@@ -53,7 +53,7 @@ export default function HelpPage() {
             Tüm özelliklerin detaylı açıklaması, adım adım rehber, örnek kullanımlar
           </p>
           <a
-            href="https://github.com/veteroner/teknovarasyon/blob/main/USER_GUIDE.md"
+            href="https://github.com/veteroner/tarpolrasyon/blob/main/USER_GUIDE.md"
             target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 hover:text-green-700 font-medium"
@@ -72,7 +72,7 @@ export default function HelpPage() {
             En çok sorulan 50+ soru ve detaylı cevaplar, sorun giderme ipuçları
           </p>
           <a
-            href="https://github.com/veteroner/teknovarasyon/blob/main/FAQ.md"
+            href="https://github.com/veteroner/tarpolrasyon/blob/main/FAQ.md"
             target="_blank"
             rel="noopener noreferrer"
             className="text-purple-600 hover:text-purple-700 font-medium"
@@ -91,7 +91,7 @@ export default function HelpPage() {
             Tüm özellikler, teknik detaylar, bilimsel standartlar (NRC 2021)
           </p>
           <a
-            href="https://github.com/veteroner/teknovarasyon/blob/main/FEATURES.md"
+            href="https://github.com/veteroner/tarpolrasyon/blob/main/FEATURES.md"
             target="_blank"
             rel="noopener noreferrer"
             className="text-orange-600 hover:text-orange-700 font-medium"
@@ -218,7 +218,7 @@ export default function HelpPage() {
               Hata bildirimi, özellik önerisi, kod katkısı
             </p>
             <a
-              href="https://github.com/veteroner/teknovarasyon/issues"
+              href="https://github.com/veteroner/tarpolrasyon/issues"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 font-medium text-sm"
@@ -236,10 +236,10 @@ export default function HelpPage() {
               Teknik destek ve genel sorular
             </p>
             <a
-              href="mailto:info@teknova.vet"
+              href="mailto:info@tarpol.vet"
               className="text-blue-600 hover:text-blue-700 font-medium text-sm"
             >
-              info@teknova.vet
+              info@tarpol.vet
             </a>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function HelpPage() {
           <p className="text-gray-600 text-sm">
             <strong>Açık Kaynak:</strong> MIT License - Ticari/akademik kullanım serbesttir. 
             <a
-              href="https://github.com/veteroner/teknovarasyon"
+              href="https://github.com/veteroner/tarpolrasyon"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 ml-1"

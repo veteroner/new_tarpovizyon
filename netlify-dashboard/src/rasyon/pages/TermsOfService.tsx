@@ -15,7 +15,7 @@ export default function TermsOfService() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">1. Kabul</h2>
           <p className="text-gray-600 mb-4">
-            Teknova Rasyon uygulamasını ("Uygulama") kullanarak, bu Kullanım Şartlarını 
+            TARPOL Rasyon uygulamasını ("Uygulama") kullanarak, bu Kullanım Şartlarını 
             kabul etmiş sayılırsınız. Kabul etmiyorsanız, lütfen Uygulamayı kullanmayınız.
           </p>
         </section>
@@ -23,7 +23,7 @@ export default function TermsOfService() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">2. Hizmet Tanımı</h2>
           <p className="text-gray-600 mb-4">
-            Teknova Rasyon, büyükbaş ve küçükbaş hayvanlar için rasyon hesaplama ve 
+            TARPOL Rasyon, büyükbaş ve küçükbaş hayvanlar için rasyon hesaplama ve 
             optimizasyon aracıdır. Uygulama şunları sağlar:
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2">
@@ -75,7 +75,7 @@ export default function TermsOfService() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">5. Fikri Mülkiyet</h2>
           <p className="text-gray-600 mb-4">
             Uygulama ve içeriği (kod, tasarım, algoritmalar) MIT Lisansı altında sunulmaktadır. 
-            Detaylar için <a href="https://github.com/teknova/rasyon/blob/main/LICENSE" 
+            Detaylar için <a href="https://github.com/tarpol/rasyon/blob/main/LICENSE" 
             className="text-green-600 hover:underline" target="_blank" rel="noopener noreferrer">
             LICENSE</a> dosyasına bakınız.
           </p>
@@ -84,7 +84,7 @@ export default function TermsOfService() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">6. Sınırlı Garanti</h2>
           <p className="text-gray-600 mb-4">
-            Teknova, Uygulamanın kesintisiz veya hatasız çalışacağını garanti etmez. 
+            TARPOL, Uygulamanın kesintisiz veya hatasız çalışacağını garanti etmez. 
             Uygulamanın kullanımından doğabilecek doğrudan veya dolaylı zararlardan 
             sorumlu tutulamaz.
           </p>
@@ -123,8 +123,8 @@ export default function TermsOfService() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">10. İletişim</h2>
           <p className="text-gray-600">
-            Sorularınız için: <a href="mailto:info@teknova.com.tr" className="text-green-600 hover:underline">
-              info@teknova.com.tr
+            Sorularınız için: <a href="mailto:info@tarpol.com.tr" className="text-green-600 hover:underline">
+              info@tarpol.com.tr
             </a>
           </p>
         </section>

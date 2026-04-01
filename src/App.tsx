@@ -122,7 +122,7 @@ function AppContent() {
           <Route path="/gubre-hesap" element={<ErrorBoundary><GubreHesapPage /></ErrorBoundary>} />
           <Route path="/tarim-takvim" element={<ErrorBoundary><TarimTakvimPage /></ErrorBoundary>} />
           
-          {/* Teknova Rasyon (tam entegre) */}
+          {/* TARPOL Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />
           
           {/* TARPOVIZYON - Tarım İstihbarat Platformu */}

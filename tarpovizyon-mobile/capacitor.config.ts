@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
       'lookerstudio.google.com',
       'datastudio.google.com',
       'tarpovizyonai.netlify.app',
-      'teknova-rasyon.netlify.app',
+      'tarpol-rasyon.netlify.app',
       'www.tarpol.org.tr',
       'dersbende.com',
       'googletagmanager.com',

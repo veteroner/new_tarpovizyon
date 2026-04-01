@@ -16,7 +16,7 @@ const APPS: Record<string, { url: string; title: string; subtitle: string }> = {
     subtitle: 'Tarım Politikaları Derneği',
   },
   rasyon: {
-    url: 'https://teknova-rasyon.netlify.app',
+    url: 'https://tarpol-rasyon.netlify.app',
     title: 'Rasyon Hesaplayıcı',
     subtitle: 'NRC 2021 Bazlı',
   },

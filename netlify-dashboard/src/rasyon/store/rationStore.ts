@@ -86,7 +86,7 @@ export const useRationStore = create<RationStore>()(
         }),
     }),
     {
-      name: 'teknova-ration-storage',
+      name: 'tarpol-ration-storage',
       version: 1,
     }
   )

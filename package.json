@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --port 5000",
     "lint": "eslint src/",
-    "build:rasyon:embed": "RASYON_BASE=/rasyon/ npm --prefix \"teknova rasyon mobil\" run build && node scripts/sync-rasyon.mjs",
+    "build:rasyon:embed": "RASYON_BASE=/rasyon/ npm --prefix \"tarpol rasyon mobil\" run build && node scripts/sync-rasyon.mjs",
     "build": "npm run build:rasyon:embed && tsc -b && vite build",
     "preview": "vite preview --port 5000",
     "api": "node server.js",

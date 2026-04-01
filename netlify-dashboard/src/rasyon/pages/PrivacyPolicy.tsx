@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">1. Giriş</h2>
           <p className="text-gray-600 mb-4">
-            Teknova Rasyon uygulaması ("Uygulama"), kullanıcılarının gizliliğine saygı gösterir. 
+            TARPOL Rasyon uygulaması ("Uygulama"), kullanıcılarının gizliliğine saygı gösterir. 
             Bu Gizlilik Politikası, Uygulama'nın kişisel verileri nasıl topladığını, kullandığını 
             ve koruduğunu açıklamaktadır.
           </p>
@@ -96,8 +96,8 @@ export default function PrivacyPolicy() {
             Gizlilik ile ilgili sorularınız için:
           </p>
           <p className="text-gray-600">
-            E-posta: <a href="mailto:privacy@teknova.com.tr" className="text-green-600 hover:underline">
-              privacy@teknova.com.tr
+            E-posta: <a href="mailto:privacy@tarpol.com.tr" className="text-green-600 hover:underline">
+              privacy@tarpol.com.tr
             </a>
           </p>
         </section>

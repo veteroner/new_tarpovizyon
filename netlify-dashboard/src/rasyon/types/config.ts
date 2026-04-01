@@ -8,7 +8,7 @@
 export interface AppConfig {
   /**
    * Application display name
-   * @example "Teknova Rasyon", "Tarpole Rasyon", "Manyas Süt Birliği Rasyon"
+   * @example "TARPOL Rasyon", "Tarpole Rasyon", "Manyas Süt Birliği Rasyon"
    */
   appName: string
 
@@ -20,7 +20,7 @@ export interface AppConfig {
 
   /**
    * Logo image path or URL
-   * @example "/teknova-logo.svg", "https://cdn.example.com/logo.png"
+   * @example "/tarpol-logo.svg", "https://cdn.example.com/logo.png"
    */
   logo?: string
 
@@ -114,10 +114,10 @@ export interface AppConfig {
 }
 
 /**
- * Default configuration (Teknova brand)
+ * Default configuration (TARPOL brand)
  */
 export const DEFAULT_CONFIG: AppConfig = {
-  appName: 'Teknova Rasyon',
+  appName: 'TARPOL Rasyon',
   appSlogan: 'NRC 2021 Tabanlı Karar Destek Sistemi',
   theme: {
     primary: '#2563eb', // blue-600
@@ -125,9 +125,9 @@ export const DEFAULT_CONFIG: AppConfig = {
     accent: '#f59e0b', // amber-500
   },
   contact: {
-    email: 'info@teknova.vet',
-    website: 'https://teknova-rasyon.netlify.app',
-    githubUrl: 'https://github.com/veteroner/teknovarasyon',
+    email: 'info@tarpol.vet',
+    website: 'https://tarpol-rasyon.netlify.app',
+    githubUrl: 'https://github.com/veteroner/tarpolrasyon',
   },
   features: {
     aiExplain: true,
@@ -154,7 +154,7 @@ export const DEFAULT_CONFIG: AppConfig = {
  * Example configs for different deployments
  */
 export const EXAMPLE_CONFIGS = {
-  teknova: DEFAULT_CONFIG,
+  tarpol: DEFAULT_CONFIG,
 
   tarpole: {
     appName: 'Tarpole Rasyon',

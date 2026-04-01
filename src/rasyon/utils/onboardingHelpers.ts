@@ -1,4 +1,4 @@
-const TOUR_COMPLETED_KEY = 'teknova-tour-completed';
+const TOUR_COMPLETED_KEY = 'tarpol-tour-completed';
 
 export function resetOnboardingTour() {
   localStorage.removeItem(TOUR_COMPLETED_KEY);

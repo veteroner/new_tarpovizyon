@@ -11,7 +11,7 @@ export function exportRationToExcel(ration: Ration): void {
   const rows: string[][] = []
 
   // ===== HEADER =====
-  rows.push(['=== TEKNOVA RASYON - PROFESYONEL RAPOR ==='])
+  rows.push(['=== TARPOL RASYON - PROFESYONEL RAPOR ==='])
   rows.push([`Oluşturulma: ${new Date(ration.createdAt).toLocaleString('tr-TR')}`])
   rows.push([`Rasyon ID: ${ration.id}`])
   rows.push([`Çözücü: ${solver === 'lp' ? 'LP (GLPK)' : solver === 'greedy' ? 'Greedy' : 'Bilinmiyor'}`])
@@ -334,7 +334,7 @@ export function exportRationToExcel(ration: Ration): void {
 export function generateExcelShareText(ration: Ration): string {
   const { profile, cost, totals, ingredients } = ration
 
-  let text = '📊 TEKNOVA RASYON RAPORU\n\n'
+  let text = '📊 TARPOL RASYON RAPORU\n\n'
   
   text += `🐄 ${profile.breed} • ${profile.purpose || ''}\n`
   text += `⚖️ ${profile.weightKg} kg`
@@ -353,7 +353,7 @@ export function generateExcelShareText(ration: Ration): string {
     text += `${idx + 1}. ${ing.feedName}: ${(ing.kgAsFedPerDay ?? 0).toFixed(1)} kg yaş (${ratio}% KM)\n`
   })
 
-  text += '\n📱 Teknova Rasyon ile oluşturuldu'
+  text += '\n📱 TARPOL Rasyon ile oluşturuldu'
   
   return text
 }

@@ -6,7 +6,7 @@ export function RasyonEmbedPage() {
       <iframe
         className="rasyon-embed__frame"
         src="/rasyon/index.html"
-        title="Teknova Rasyon"
+        title="TARPOL Rasyon"
       />
     </div>
   );

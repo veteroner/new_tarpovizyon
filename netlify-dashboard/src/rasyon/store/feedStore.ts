@@ -343,7 +343,7 @@ export const useFeedStore = create<FeedStore>()(
         })),
     }),
     {
-      name: 'teknova-feed-store',
+      name: 'tarpol-feed-store',
       version: 1,
     }
   )

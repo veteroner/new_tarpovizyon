@@ -66,7 +66,7 @@ export default function Signup() {
             Hesap Oluştur
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Teknova Rasyon'a katılın
+            TARPOL Rasyon'a katılın
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function Signup() {
                 value={formData.email}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="ornek@teknova.com"
+                placeholder="ornek@tarpol.com"
               />
             </div>
 

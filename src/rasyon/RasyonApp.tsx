@@ -1,5 +1,5 @@
 /**
- * RasyonApp — teknova rasyon mobil uygulamasının dashboard içine entegre edilmiş hali.
+ * RasyonApp — tarpol rasyon mobil uygulamasının dashboard içine entegre edilmiş hali.
  * BrowserRouter kaldırıldı; dashboard'un mevcut Router'ı kullanılıyor.
  * Tüm route'lar /rasyon/* prefix'i ile tanımlı.
  */
