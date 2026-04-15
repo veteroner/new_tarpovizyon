@@ -414,7 +414,7 @@ export default function PriceIndexPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header">
-                <span className="kpi-title">VOLATİLİTE</span>
+                <span className="kpi-title">DALGALANMA</span>
                 <div className="kpi-icon blue"><Activity size={18} /></div>
               </div>
               <div className="kpi-value">{volatility.toFixed(2)}</div>

@@ -209,10 +209,10 @@ export default function MobileSettingsPage() {
       {/* Footer */}
       <div className="px-5 pb-8 text-center">
         <p className="text-[10px] text-slate-400">
-          TarpoVizyon © 2024 TARPOL
+          TarpoVizyon © 2025 TARPOL
         </p>
         <p className="text-[9px] text-slate-500 mt-0.5">
-          Tarım İstihbarat Platformu
+          Tarım Komuta Merkezi
         </p>
       </div>
     </div>

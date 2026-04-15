@@ -91,7 +91,7 @@ const turkeyMenuCategories: MenuCategory[] = [
       { label: 'Fiyat Endeksleri', path: '/tarpovizyon/turkey/price-index' },
       { label: 'Arz-Talep Dengesi', path: '/tarpovizyon/turkey/product-balance' },
       { label: 'Makroekonomik', path: '/tarpovizyon/turkey/macro' },
-      { label: 'Çapraz İstihbarat', path: '/tarpovizyon/turkey/cross-intelligence' },
+      { label: 'Çapraz İçgörü', path: '/tarpovizyon/turkey/cross-intelligence' },
     ],
   },
   {
@@ -117,9 +117,9 @@ const turkeyMenuCategories: MenuCategory[] = [
       { label: 'Genel Bakış', path: '/tarpovizyon/turkey/trade?tab=overview' },
       { label: 'Bitkisel Ticaret', path: '/tarpovizyon/turkey/trade?tab=plant' },
       { label: 'Hayvansal Ticaret', path: '/tarpovizyon/turkey/trade?tab=animal' },
-      { label: 'Ürün İstihbaratı', path: '/tarpovizyon/turkey/trade?tab=product' },
-      { label: 'Ülke İstihbaratı', path: '/tarpovizyon/turkey/trade?tab=country' },
-      { label: 'Ticaret İstihbaratı', path: '/tarpovizyon/turkey/trade?tab=intelligence' },
+      { label: 'Ürün Radar', path: '/tarpovizyon/turkey/trade?tab=product' },
+      { label: 'Ülke Radar', path: '/tarpovizyon/turkey/trade?tab=country' },
+      { label: 'Ticaret İçgörüleri', path: '/tarpovizyon/turkey/trade?tab=intelligence' },
     ],
   },
   {
@@ -178,7 +178,8 @@ export function Header() {
     if (itemSearch) {
       return location.pathname === itemPath && location.search === `?${itemSearch}`;
     }
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    // Exact match only — prevents /turkey/plant-production from also highlighting /turkey/plant-provincial
+    return location.pathname === path;
   }, [location.pathname, location.search]);
 
   const menuCategories = useMemo(() => {

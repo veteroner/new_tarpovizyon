@@ -14,7 +14,7 @@ import { TurkeyHeatMap } from '../components/TurkeyHeatMap';
 
 // Constants
 const TABLE_NAME = 'tuik_hayvancilik_canlihayvan';
-const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
+const YEARS = Array.from({ length: 21 }, (_, i) => 2004 + i); // 2004-2024
 const YEAR_COLUMNS = YEARS.map(y => `y${y}`);
 
 const ANIMAL_GROUPS = [
@@ -101,9 +101,9 @@ function formatNumber(value: number): string {
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
+  if (value >= 1e9) return (value / 1e9).toFixed(1) + ' Mly';
+  if (value >= 1e6) return (value / 1e6).toFixed(1) + ' Mln';
+  if (value >= 1e3) return (value / 1e3).toFixed(0) + ' Bin';
   return value.toFixed(0);
 }
 
@@ -130,7 +130,7 @@ export default function TurkeyProvincialLivestockPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'districts' | 'trends' | 'comparison' | 'correlation' | 'forecast'>('overview');
   
   // Filters
-  const [selectedYear, setSelectedYear] = useState<string>('y2025');
+  const [selectedYear, setSelectedYear] = useState<string>('y2024');
   const [selectedAnimals, setSelectedAnimals] = useState<string[]>(['Sığır']);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string>('Tümü');
@@ -834,7 +834,7 @@ export default function TurkeyProvincialLivestockPage() {
           { id: 'districts', label: '📍 İlçe Detayları', desc: 'District Deep Dive' },
           { id: 'trends', label: '📈 Zaman Serisi', desc: 'Time Series' },
           { id: 'comparison', label: '⚖️ Karşılaştırma', desc: 'Comparative Analysis' },
-          { id: 'correlation', label: '🔗 Korelasyon', desc: 'Cross-Animal Intelligence' },
+          { id: 'correlation', label: '🔗 Korelasyon', desc: 'Türler arası içgörü' },
           { id: 'forecast', label: '🔮 Tahmin', desc: 'Forecasting' }
         ].map(tab => (
           <button

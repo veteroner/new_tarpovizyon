@@ -760,7 +760,7 @@ export default function TurkeyProvincialPlantPage() {
           { id: 'districts', icon: '📍', label: 'İlçe Detayları', desc: 'District Deep Dive' },
           { id: 'trends', icon: '📈', label: 'Zaman Serisi', desc: 'Time Series & Trends' },
           { id: 'comparison', icon: '⚖️', label: 'Karşılaştırma', desc: 'Comparative Analysis' },
-          { id: 'correlation', icon: '🔗', label: 'Korelasyon', desc: 'Cross-Product Intelligence' },
+          { id: 'correlation', icon: '🔗', label: 'Korelasyon', desc: 'Ürünler arası içgörü' },
           { id: 'forecast', icon: '🔮', label: 'Tahmin', desc: 'Forecasting & Projection' }
         ].map(tab => (
           <button

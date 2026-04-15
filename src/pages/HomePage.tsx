@@ -144,7 +144,7 @@ export function HomePage() {
 
       {/* Footer */}
       <div className="home-footer">
-        <p>© 2024 TARPOL - Tarımsal Veri Analiz Platformu</p>
+        <p>© 2025 TARPOL - Tarımsal Veri Analiz Platformu</p>
       </div>
     </div>
   );

@@ -16,6 +16,12 @@ const CATEGORY_META = {
   bitkisel:    { label: '🌾 Bitkisel Ürünler',  color: 'amber'  },
   hayvancilik: { label: '🐄 Hayvancılık',        color: 'orange' },
   sut:         { label: '🥛 Süt Ürünleri',       color: 'sky'    },
+  et_gida:     { label: '🥩 Et & Gıda',          color: 'red'    },
+  enerji:      { label: '⚡ Enerji',             color: 'purple' },
+  gubre:       { label: '🧪 Gübre',              color: 'lime'   },
+  orman:       { label: '🪵 Orman Ürünleri',     color: 'stone'  },
+  metal:       { label: '🥇 Metaller',            color: 'yellow' },
+  doviz:       { label: '💱 Döviz',              color: 'teal'   },
 } as const;
 
 function SkeletonCard() {

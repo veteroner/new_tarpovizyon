@@ -565,10 +565,42 @@ switch($action) {
             'LE=F'  => ['name' => 'Canlı Sığır', 'category' => 'Hayvancılık', 'unit' => '¢/lb'],
             'GF=F'  => ['name' => 'Besilik Sığır', 'category' => 'Hayvancılık', 'unit' => '¢/lb'],
             'HE=F'  => ['name' => 'Yağsız Domuz', 'category' => 'Hayvancılık', 'unit' => '¢/lb'],
-            // Süt
-            'DC=F'  => ['name' => 'Süt (Class III)', 'category' => 'Süt Ürünleri', 'unit' => '$/cwt'],
+            // Süt Ürünleri
+            'DC=F'  => ['name' => 'Süt (Class III)',     'category' => 'Süt Ürünleri', 'unit' => '$/cwt'],
+            'GDK=F' => ['name' => 'Süt (Class IV)',      'category' => 'Süt Ürünleri', 'unit' => '$/cwt'],
+            'CB=F'  => ['name' => 'Tereyağı',            'category' => 'Süt Ürünleri', 'unit' => '¢/lb'],
+            'CSC=F' => ['name' => 'Peynir',              'category' => 'Süt Ürünleri', 'unit' => '$/lb'],
+            'DY=F'  => ['name' => 'Kuru Whey (Peynir Altı Suyu)', 'category' => 'Süt Ürünleri', 'unit' => '¢/lb'],
+            'GNF=F' => ['name' => 'Yağsız Süt Tozu',    'category' => 'Süt Ürünleri', 'unit' => '¢/lb'],
+            // Et & Gıda (hisse)
+            'TSN'   => ['name' => 'Tyson Foods (Sığır+Tavuk+Domuz eti)', 'category' => 'Et & Gıda', 'unit' => 'USD/hisse'],
+            'HRL'   => ['name' => 'Hormel Foods (İşlenmiş Et)',           'category' => 'Et & Gıda', 'unit' => 'USD/hisse'],
+            'PPC'   => ['name' => 'Pilgrim\'s Pride (Piliç Eti)',         'category' => 'Et & Gıda', 'unit' => 'USD/hisse'],
+            'SFD'   => ['name' => 'Smithfield Foods (Domuz Eti)',         'category' => 'Et & Gıda', 'unit' => 'USD/hisse'],
+            'CALM'  => ['name' => 'Cal-Maine Foods (Yumurta)',            'category' => 'Et & Gıda', 'unit' => 'USD/hisse'],
+            // Metaller
+            'GC=F'  => ['name' => 'Altın',    'category' => 'Metaller', 'unit' => '$/troy oz'],
+            'SI=F'  => ['name' => 'Gümüş',   'category' => 'Metaller', 'unit' => '$/troy oz'],
+            'HG=F'  => ['name' => 'Bakır',   'category' => 'Metaller', 'unit' => '$/lb'],
+            'PL=F'  => ['name' => 'Platin',  'category' => 'Metaller', 'unit' => '$/troy oz'],
+            'PA=F'  => ['name' => 'Paladyum','category' => 'Metaller', 'unit' => '$/troy oz'],
+            // Döviz
+            'USDTRY=X' => ['name' => 'Dolar / Türk Lirası', 'category' => 'Döviz', 'unit' => 'TRY/USD'],
+            'EURTRY=X' => ['name' => 'Euro / Türk Lirası',  'category' => 'Döviz', 'unit' => 'TRY/EUR'],
             // Enerji (tarımla ilişkili)
-            'NG=F'  => ['name' => 'Doğal Gaz', 'category' => 'Enerji', 'unit' => '$/MMBtu'],
+            'NG=F'  => ['name' => 'Doğal Gaz',       'category' => 'Enerji', 'unit' => '$/MMBtu'],
+            'BZ=F'  => ['name' => 'Brent Petrol',     'category' => 'Enerji', 'unit' => 'USD/varil'],
+            'CL=F'  => ['name' => 'Ham Petrol (WTI)', 'category' => 'Enerji', 'unit' => 'USD/varil'],
+            'HO=F'  => ['name' => 'Isıtma Yakıtı',   'category' => 'Enerji', 'unit' => '$/galon'],
+            'RB=F'  => ['name' => 'Benzin (RBOB)',    'category' => 'Enerji', 'unit' => '$/galon'],
+            // Orman Ürünleri
+            'LB=F'  => ['name' => 'Tomruk (Kereste)', 'category' => 'Orman Ürünleri', 'unit' => '$/1000 bf'],
+            // Gübre & Tarım Kimyasalları (hisse senedi)
+            'CF'    => ['name' => 'CF Industries (Azot Gübre)', 'category' => 'Gübre', 'unit' => 'USD/hisse'],
+            'UAN'   => ['name' => 'CVR Partners (Üre Gübre)',   'category' => 'Gübre', 'unit' => 'USD/hisse'],
+            'NTR'   => ['name' => 'Nutrien (Gübre Holdingi)',   'category' => 'Gübre', 'unit' => 'USD/hisse'],
+            'MOS'   => ['name' => 'Mosaic (Fosfatlı Gübre)',    'category' => 'Gübre', 'unit' => 'USD/hisse'],
+            'IPI'   => ['name' => 'Intrepid Potash (Potasyum Gübre)', 'category' => 'Gübre', 'unit' => 'USD/hisse'],
         ];
 
         $symbolList = implode(',', array_keys($symbols));

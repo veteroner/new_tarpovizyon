@@ -271,7 +271,7 @@ export default function TradeIntelligenceTab() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Zap className="w-6 h-6 text-amber-500" />
-            Ticaret Intelligence Analizi
+            Ticaret İçgörüleri
           </h2>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
             Mevsimsellik, pazar yoğunlaşma, birim fiyat trendi, dengesizlik &amp; fırsat analizi

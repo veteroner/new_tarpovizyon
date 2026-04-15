@@ -22,8 +22,8 @@ const YEAR_LABELS = YEAR_KEYS.map(k => k.replace('y','').split('/')[0]);
 /* ─── Helper ─── */
 const fmt = (v: number | null | undefined, decimals = 0): string => {
   if (v == null || isNaN(v)) return '-';
-  if (Math.abs(v) >= 1e6) return (v / 1e6).toFixed(1) + 'M';
-  if (Math.abs(v) >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  if (Math.abs(v) >= 1e6) return (v / 1e6).toFixed(1) + ' Mln';
+  if (Math.abs(v) >= 1e3) return (v / 1e3).toFixed(1) + ' Bin';
   return v.toFixed(decimals);
 };
 const pct = (v: number | null | undefined): string =>
@@ -636,7 +636,7 @@ export default function ProductBalancePage() {
         <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '2px solid var(--border)' }}>
           <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Activity size={16} className="text-green-400" />
-            🧠 Intelligence Özeti — {selectedProduct}
+            🧠 İçgörü Özeti — {selectedProduct}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>

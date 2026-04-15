@@ -734,7 +734,7 @@ export default function TuikLivestockPage() {
               boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)',
             }}>
               <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🧠 Hayvan Varlığı Intelligence Özeti
+                🧠 Hayvan Varlığı İçgörü Özeti
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                 <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>

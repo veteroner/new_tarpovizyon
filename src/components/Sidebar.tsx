@@ -9,7 +9,7 @@ interface SidebarProps {
 export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
   const mainNavItems = [
     { path: '/', icon: LayoutDashboard, label: 'Genel Bakış' },
-    { path: '/trade', icon: ArrowLeftRight, label: 'Dış Ticaret İstihbaratı' },
+    { path: '/trade', icon: ArrowLeftRight, label: 'Ticaret İçgörüleri' },
     { path: '/production', icon: Leaf, label: 'Üretim' },
   ];
 

@@ -101,7 +101,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-white">TarpoVizyon</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Tarım İstihbarat Platformu</p>
+            <p className="text-xs text-gray-500 mt-0.5">Tarım Komuta Merkezi</p>
           </div>
           <button
             onClick={() => navigate('/settings')}

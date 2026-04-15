@@ -276,7 +276,7 @@ export default function CrossIntelligencePage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Brain className="w-7 h-7 text-green-600" />
-            Çapraz İstihbarat Analizi
+            Çapraz İçgörü
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
             Üretim ↔ Fiyat ↔ Ticaret ↔ Gıda Güvenliği bağlantısı
@@ -297,7 +297,7 @@ export default function CrossIntelligencePage() {
       <div className="rounded-xl p-5 shadow-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <Lightbulb className="w-5 h-5 text-yellow-400" />
-          Otomatik İstihbarat Sinyalleri — {product.label}
+          Akıllı Sinyaller — {product.label}
         </h3>
         <div className="space-y-2">
           {insights.map((m, i) => (

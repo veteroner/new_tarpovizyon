@@ -245,7 +245,7 @@ export default function SettingsPage() {
           TarpoVizyon © 2024 TARPOL
         </p>
         <p className="text-[9px] text-gray-700 mt-0.5">
-          Tarım İstihbarat Platformu
+          Tarım Komuta Merkezi
         </p>
       </div>
     </div>

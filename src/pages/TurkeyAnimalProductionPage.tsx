@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Package, Download, TrendingUp, Award } from 'lucide-react';
+import { Package, Download, TrendingUp, TrendingDown, Award } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
   BarChart, Bar, CartesianGrid, XAxis, YAxis, Legend,
@@ -422,13 +422,13 @@ const TurkeyAnimalProductionPage: React.FC = () => {
 
   // Helper functions
   const formatValue = (v: number) => 
-    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)}M` : 
-    v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : 
+    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} Milyon` : 
+    v >= 1_000 ? `${(v / 1_000).toFixed(0)} Bin` : 
     v.toFixed(0);
 
   const formatShort = (v: number) => 
-    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : 
-    v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : 
+    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)} Mln` : 
+    v >= 1_000 ? `${(v / 1_000).toFixed(0)} Bin` : 
     v.toString();
 
   /* ─── 🧠 Intelligence Metrics ─── */
@@ -574,7 +574,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
                 {formatValue(kpiData.redMeat.value)} ton
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                {kpiData.redMeat.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
                 {kpiData.redMeat.change >= 0 ? '+' : ''}{kpiData.redMeat.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
@@ -598,7 +598,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
                 {formatValue(kpiData.milk.value)} ton
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                {kpiData.milk.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
                 {kpiData.milk.change >= 0 ? '+' : ''}{kpiData.milk.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
@@ -619,10 +619,10 @@ const TurkeyAnimalProductionPage: React.FC = () => {
                 TOPLAM YUMURTA
               </div>
               <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                {kpiData.egg.value.toFixed(1)}B adet
+                {kpiData.egg.value.toFixed(1)} Milyar adet
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                {kpiData.egg.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
                 {kpiData.egg.change >= 0 ? '+' : ''}{kpiData.egg.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
@@ -646,7 +646,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
                 {formatValue(kpiData.honey.value)} ton
               </div>
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                {kpiData.honey.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
                 {kpiData.honey.change >= 0 ? '+' : ''}{kpiData.honey.change.toFixed(1)}% Yıllık Değişim
               </div>
             </div>
@@ -663,7 +663,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
         color: 'white'
       }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          🧠 Hayvansal Üretim Intelligence Özeti
+          🧠 Hayvansal Üretim İçgörü Özeti
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
@@ -679,7 +679,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>TAHMİN (KIRMIZI ET)</div>
             <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{forecastRedMeat > 0 ? formatValue(forecastRedMeat) : '-'} ton</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Linear trend tahmini</div>
+            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Doğrusal trend tahmini</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BÜYÜME STRATEJİSİ</div>
