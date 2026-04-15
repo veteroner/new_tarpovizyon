@@ -1836,7 +1836,7 @@ export default function LivestockStocksPage() {
 
                   {/* Cross-Tab Navigation */}
                   <div className="chart-card" style={{ marginBottom: 24 }}>
-                    <h3 className="chart-title">🧭 Derin Analiz Sekmeleri — Intelligence Hub</h3>
+                    <h3 className="chart-title">🧭 Derin Analiz Sekmeleri — İçgörü Merkezi</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
                       {[
                         { tab: 'stocks' as Tab, icon: '🐄', title: 'Canlı Hayvan Stokları', desc: '9 hayvan türü CAGR, risk analizi, Türkiye profili', color: '#ef4444' },

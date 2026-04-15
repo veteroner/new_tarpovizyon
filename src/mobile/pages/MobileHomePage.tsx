@@ -103,7 +103,7 @@ export default function MobileHomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-slate-800">TarpoVizyon</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Tarım İstihbarat Platformu</p>
+            <p className="text-xs text-slate-400 mt-0.5">Tarım Komuta Merkezi</p>
           </div>
           <button
             onClick={() => navigate('/m/settings')}

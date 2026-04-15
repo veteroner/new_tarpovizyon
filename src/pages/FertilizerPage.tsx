@@ -372,7 +372,7 @@ export default function FertilizerPage() {
         type: a.severity === 'critical' ? 'decline' as const : a.severity === 'warning' ? 'warning' as const : a.severity === 'positive' ? 'achievement' as const : 'info' as const,
         message: a.title + ': ' + a.message,
         severity: a.severity === 'critical' ? 'high' as const : a.severity === 'warning' ? 'medium' as const : 'low' as const,
-        category: a.metric || 'Intelligence'
+        category: a.metric || 'İçgörü'
       })));
     } catch (e) { console.error('Intelligence hatasi:', e); }
     finally { setLoading(false); }

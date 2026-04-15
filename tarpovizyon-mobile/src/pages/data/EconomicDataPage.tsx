@@ -56,7 +56,7 @@ const CATEGORIES: Record<string, CategoryConfig> = {
     ],
   },
   'cross-intelligence': {
-    title: 'Çapraz İstihbarat',
+    title: 'Çapraz İçgörü',
     emoji: '🔗',
     icon: BarChart3,
     description: 'Bitkisel ve hayvansal korelasyon analizleri',

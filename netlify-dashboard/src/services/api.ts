@@ -127,9 +127,9 @@ export async function fetchEggPrices(): Promise<EggPricesResult> {
       return eggPricesCache;
     }
 
-    if (IS_DEV) console.log('🥚 Fetching egg prices from API...');
-    const url = `${API_BASE}/api.php?action=egg_prices&api_key=${API_KEY}`;
-    const response = await axios.get(url, { timeout: 30000 });
+    if (IS_DEV) console.log('🥚 Fetching egg prices from Puppeteer endpoint...');
+    const url = `${API_BASE}/egg-prices-puppeteer`;
+    const response = await axios.get(url, { timeout: 60000 }); // 60s timeout for Puppeteer+OCR
     const data = response.data as EggPricesResult;
 
     if (IS_DEV) console.log('🥚 Received prices:', data);
@@ -144,96 +144,6 @@ export async function fetchEggPrices(): Promise<EggPricesResult> {
   } catch (err) {
     if (IS_DEV) console.error('🥚 Egg prices fetch failed:', err);
     return { success: false, error: 'Egg prices fetch failed' };
-  }
-}
-
-// ========== EMTİA FİYATLARI (Yahoo Finance) ==========
-export interface CommodityItem {
-  symbol: string;
-  name: string;
-  category: string;
-  unit: string;
-  price: number;
-  change: number;
-  changePct: number;
-  currency: string;
-  exchange: string;
-  time: number;
-}
-
-export interface CommodityResult {
-  success?: boolean;
-  commodities?: CommodityItem[];
-  source?: string;
-  updated?: string;
-  count?: number;
-  error?: string;
-}
-
-let commodityCache: CommodityResult | null = null;
-let commodityCacheAt = 0;
-const COMMODITY_CACHE_MS = 3 * 60 * 1000; // 3 min cache
-
-export async function fetchCommodityPrices(): Promise<CommodityResult> {
-  try {
-    const now = Date.now();
-    if (commodityCache && now - commodityCacheAt < COMMODITY_CACHE_MS) {
-      if (IS_DEV) console.log('📊 Using cached commodity prices');
-      return commodityCache;
-    }
-
-    if (IS_DEV) console.log('📊 Fetching commodity prices from Yahoo Finance proxy...');
-    const url = `${API_BASE}/api.php?action=commodity_prices&api_key=${API_KEY}`;
-    const response = await axios.get(url, { timeout: 30000 });
-    const data = response.data as CommodityResult;
-
-    if (data && data.success && data.commodities && data.commodities.length > 0) {
-      commodityCache = data;
-      commodityCacheAt = now;
-      return data;
-    }
-
-    return { success: false, error: 'No commodity data returned' };
-  } catch (err) {
-    if (IS_DEV) console.error('📊 Commodity prices fetch failed:', err);
-    return { success: false, error: 'Commodity prices fetch failed' };
-  }
-}
-
-export interface ChartPoint { t: number; c: number; }
-export interface ChartResult {
-  success?: boolean;
-  symbol?: string;
-  range?: string;
-  data?: ChartPoint[];
-  error?: string;
-}
-
-export async function fetchCommodityChart(symbol: string, range = '1mo', interval = '1d'): Promise<ChartResult> {
-  try {
-    const url = `${API_BASE}/api.php?action=commodity_chart&api_key=${API_KEY}&symbol=${encodeURIComponent(symbol)}&range=${range}&interval=${interval}`;
-    const response = await axios.get(url, { timeout: 15000 });
-    return response.data as ChartResult;
-  } catch (err) {
-    return { success: false, error: 'Chart fetch failed' };
-  }
-}
-
-// ========== AI CHAT ==========
-export interface AIChatResult {
-  success?: boolean;
-  reply?: string;
-  model?: string;
-  error?: string;
-}
-
-export async function fetchAIChat(message: string): Promise<AIChatResult> {
-  try {
-    const url = `${API_BASE}/api.php?action=ai_chat&api_key=${API_KEY}`;
-    const response = await axios.post(url, { message }, { timeout: 60000 });
-    return response.data as AIChatResult;
-  } catch (err) {
-    return { success: false, error: 'AI Chat bağlantı hatası' };
   }
 }
 
@@ -473,6 +383,90 @@ export const queries = {
     LIMIT 20
   `,
 };
+
+// ========== EMTİA FİYATLARI (Yahoo Finance via Backend) ==========
+export interface CommodityItem {
+  symbol: string;
+  name: string;
+  category: string;
+  unit: string;
+  price: number;
+  change: number;
+  changePct: number;
+  currency: string;
+  exchange: string;
+  time: number;
+}
+
+export interface CommodityResult {
+  success?: boolean;
+  commodities?: CommodityItem[];
+  source?: string;
+  updated?: string;
+  count?: number;
+  error?: string;
+}
+
+let commodityCache: CommodityResult | null = null;
+let commodityCacheAt = 0;
+const COMMODITY_CACHE_MS = 3 * 60 * 1000;
+
+export async function fetchCommodityPrices(): Promise<CommodityResult> {
+  try {
+    const now = Date.now();
+    if (commodityCache && now - commodityCacheAt < COMMODITY_CACHE_MS) {
+      return commodityCache;
+    }
+    const url = `${API_BASE}/api.php?action=commodity_prices&api_key=${API_KEY}`;
+    const response = await axios.get(url, { timeout: 30000 });
+    const data = response.data as CommodityResult;
+    if (data && data.success && data.commodities && data.commodities.length > 0) {
+      commodityCache = data;
+      commodityCacheAt = now;
+      return data;
+    }
+    return { success: false, error: 'No commodity data returned' };
+  } catch {
+    return { success: false, error: 'Commodity prices fetch failed' };
+  }
+}
+
+export interface ChartPoint { t: number; c: number; }
+export interface ChartResult {
+  success?: boolean;
+  symbol?: string;
+  range?: string;
+  data?: ChartPoint[];
+  error?: string;
+}
+
+export async function fetchCommodityChart(symbol: string, range = '1mo', interval = '1d'): Promise<ChartResult> {
+  try {
+    const url = `${API_BASE}/api.php?action=commodity_chart&api_key=${API_KEY}&symbol=${encodeURIComponent(symbol)}&range=${range}&interval=${interval}`;
+    const response = await axios.get(url, { timeout: 15000 });
+    return response.data as ChartResult;
+  } catch {
+    return { success: false, error: 'Chart fetch failed' };
+  }
+}
+
+// ========== AI CHAT ==========
+export interface AIChatResult {
+  success?: boolean;
+  reply?: string;
+  model?: string;
+  error?: string;
+}
+
+export async function fetchAIChat(message: string): Promise<AIChatResult> {
+  try {
+    const url = `${API_BASE}/api.php?action=ai_chat&api_key=${API_KEY}`;
+    const response = await axios.post(url, { message }, { timeout: 60000 });
+    return response.data as AIChatResult;
+  } catch {
+    return { success: false, error: 'AI Chat bağlantı hatası' };
+  }
+}
 
 // Helper function to calculate unit price
 export function calculateUnitPrice(value: number, quantity: number): number | null {

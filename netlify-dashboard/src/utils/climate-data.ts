@@ -17,14 +17,79 @@ export type IklimBolge =
   | 'dogu_anadolu'
   | 'guneydogu';
 
-export const BOLGE_META: Record<IklimBolge, { ad: string; emoji: string; takvimOffset: number; aciklama: string }> = {
-  akdeniz:       { ad: 'Akdeniz',          emoji: '🌞', takvimOffset: 0,  aciklama: 'Sıcak kışlar, erken ilkbahar' },
-  ege:           { ad: 'Ege',              emoji: '🌤️', takvimOffset: 1,  aciklama: 'Ilık iklim, şubat sonu bahar' },
-  marmara:       { ad: 'Marmara',          emoji: '🌥️', takvimOffset: 2,  aciklama: 'Ilık-soğuk geçiş, mart başı bahar' },
-  ic_anadolu:    { ad: 'İç Anadolu',       emoji: '🌾', takvimOffset: 3,  aciklama: 'Karasal, geç ilkbahar, don riski' },
-  karadeniz:     { ad: 'Karadeniz',        emoji: '🌧️', takvimOffset: 2,  aciklama: 'Nemli, bol yağış, ılık kıyı' },
-  dogu_anadolu:  { ad: 'Doğu Anadolu',     emoji: '❄️', takvimOffset: 5,  aciklama: 'Sert kışlar, hazirana kadar don' },
-  guneydogu:     { ad: 'Güneydoğu Anadolu', emoji: '☀️', takvimOffset: -1, aciklama: 'Çok sıcak yazlar, kurak' },
+// ─── Bölge Bazlı Aylık Tmax / Tmin (°C) + Enlem ─────────────────────────────
+// [Oca, Şub, Mar, Nis, May, Haz, Tem, Ağu, Eyl, Eki, Kas, Ara]
+// Kaynak: MGM yayınları + FAO bölgesel istatistikler (kamuya açık).
+
+export interface BolgeKlima {
+  ad: string;
+  emoji: string;
+  takvimOffset: number;
+  aciklama: string;
+  enlem: number;           // derece N
+  tmax: number[];          // Aylık ortalama günlük maksimum °C
+  tmin: number[];          // Aylık ortalama günlük minimum °C
+  /** Güneşlenme süresi (saat/gün) — Angstrom ışınım hesabı için */
+  guneslenmeSaat: number[];
+}
+
+export const BOLGE_META: Record<IklimBolge, BolgeKlima> = {
+  akdeniz: {
+    ad: 'Akdeniz', emoji: '🌞', takvimOffset: 0,
+    aciklama: 'Sıcak kışlar, erken ilkbahar',
+    enlem: 37.0,
+    tmax: [14, 15, 18, 23, 28, 33, 37, 37, 33, 27, 20, 15],
+    tmin: [5,  6,  8,  12, 16, 21, 25, 25, 21, 15, 10, 6],
+    guneslenmeSaat: [4.5, 5.5, 6.5, 8.0, 10.0, 11.5, 12.0, 11.5, 9.5, 7.0, 5.0, 4.0],
+  },
+  ege: {
+    ad: 'Ege', emoji: '🌤️', takvimOffset: 1,
+    aciklama: 'Ilık iklim, şubat sonu bahar',
+    enlem: 38.0,
+    tmax: [12, 14, 17, 22, 27, 32, 35, 35, 30, 24, 18, 13],
+    tmin: [3,  4,  6,  10, 14, 18, 22, 22, 18, 13, 8,  4],
+    guneslenmeSaat: [4.0, 5.0, 6.5, 8.0, 9.5, 11.0, 11.5, 11.0, 9.0, 6.5, 4.5, 3.5],
+  },
+  marmara: {
+    ad: 'Marmara', emoji: '🌥️', takvimOffset: 2,
+    aciklama: 'Ilık-soğuk geçiş, mart başı bahar',
+    enlem: 40.5,
+    tmax: [8,  9,  12, 17, 22, 27, 30, 30, 26, 20, 14, 10],
+    tmin: [2,  2,  4,  8,  12, 17, 20, 20, 16, 11, 7,  3],
+    guneslenmeSaat: [3.5, 4.5, 5.5, 7.0, 8.5, 10.0, 10.5, 10.0, 8.0, 5.5, 3.5, 2.5],
+  },
+  ic_anadolu: {
+    ad: 'İç Anadolu', emoji: '🌾', takvimOffset: 3,
+    aciklama: 'Karasal, geç ilkbahar, don riski',
+    enlem: 39.5,
+    tmax: [5,  7,  12, 18, 24, 29, 32, 32, 27, 20, 12, 7],
+    tmin: [-4, -3, 0,  5,  9,  13, 16, 16, 11, 5,  1,  -3],
+    guneslenmeSaat: [4.0, 5.0, 6.0, 7.5, 9.0, 10.5, 11.0, 10.5, 8.5, 6.0, 4.0, 3.0],
+  },
+  karadeniz: {
+    ad: 'Karadeniz', emoji: '🌧️', takvimOffset: 2,
+    aciklama: 'Nemli, bol yağış, ılık kıyı',
+    enlem: 41.0,
+    tmax: [8,  9,  11, 16, 20, 25, 28, 28, 24, 19, 14, 10],
+    tmin: [3,  3,  5,  9,  13, 17, 20, 20, 16, 12, 8,  4],
+    guneslenmeSaat: [2.5, 3.5, 4.5, 5.5, 6.5, 7.0, 7.5, 7.0, 6.0, 4.0, 2.5, 2.0],
+  },
+  dogu_anadolu: {
+    ad: 'Doğu Anadolu', emoji: '❄️', takvimOffset: 5,
+    aciklama: 'Sert kışlar, hazirana kadar don',
+    enlem: 39.5,
+    tmax: [0,  2,  8,  15, 21, 27, 31, 31, 26, 18, 9,  2],
+    tmin: [-12,-10,-6,  0,  5,  10, 14, 14, 8,  2,  -4, -10],
+    guneslenmeSaat: [4.5, 5.5, 6.5, 7.5, 9.0, 10.5, 11.0, 10.5, 8.5, 6.0, 4.0, 3.5],
+  },
+  guneydogu: {
+    ad: 'Güneydoğu Anadolu', emoji: '☀️', takvimOffset: -1,
+    aciklama: 'Çok sıcak yazlar, kurak',
+    enlem: 37.5,
+    tmax: [9,  11, 16, 22, 29, 36, 40, 40, 34, 26, 17, 10],
+    tmin: [1,  2,  5,  10, 15, 21, 25, 25, 19, 12, 6,  2],
+    guneslenmeSaat: [5.0, 6.5, 7.5, 9.0, 10.5, 12.0, 12.5, 12.0, 10.0, 7.5, 5.5, 4.5],
+  },
 };
 
 // ─── 81 İl → Bölge Eşlemesi ──────────────────────────────────────────────────
@@ -306,48 +371,16 @@ export interface BolgeToprakProfil {
 }
 
 export const BOLGE_TOPRAK_PROFILLERI: Record<string, BolgeToprakProfil> = {
-  'Trakya':            { n: 5, p2o5: 3, k2o: 12, ph: 6.5, organik_madde: 2.0, aciklama: 'Ağır killi topraklar, asit eğilimli' },
-  'Çukurova':          { n: 8, p2o5: 5, k2o: 15, ph: 7.5, organik_madde: 1.8, aciklama: 'Alüvyal verimli topraklar' },
-  'İç Anadolu':        { n: 4, p2o5: 3, k2o: 8,  ph: 7.8, organik_madde: 1.2, aciklama: 'Kireçli step toprakları, düşük organik madde' },
-  'Ege':               { n: 6, p2o5: 4, k2o: 10, ph: 7.0, organik_madde: 2.2, aciklama: 'Verimli ova toprakları' },
-  'Karadeniz':         { n: 7, p2o5: 4, k2o: 9,  ph: 5.5, organik_madde: 3.5, aciklama: 'Asit orman toprakları, yüksek organik madde' },
+  'Trakya':        { n: 5, p2o5: 3, k2o: 12, ph: 6.5, organik_madde: 2.0, aciklama: 'Ağır killi topraklar, asit eğilimli' },
+  'Çukurova':      { n: 8, p2o5: 5, k2o: 15, ph: 7.5, organik_madde: 1.8, aciklama: 'Alüvyal verimli topraklar' },
+  'İç Anadolu':    { n: 4, p2o5: 3, k2o: 8,  ph: 7.8, organik_madde: 1.2, aciklama: 'Kireçli step toprakları, düşük organik madde' },
+  'Ege':           { n: 6, p2o5: 4, k2o: 10, ph: 7.0, organik_madde: 2.2, aciklama: 'Verimli ova toprakları' },
+  'Karadeniz':     { n: 7, p2o5: 4, k2o: 9,  ph: 5.5, organik_madde: 3.5, aciklama: 'Asit orman toprakları, yüksek organik madde' },
   'Güneydoğu Anadolu': { n: 5, p2o5: 6, k2o: 14, ph: 7.8, organik_madde: 1.5, aciklama: 'Bazalt kökenli killi topraklar' },
-  'Doğu Anadolu':      { n: 3, p2o5: 2, k2o: 7,  ph: 7.2, organik_madde: 1.0, aciklama: 'Erozyona uğramış, düşük besin' },
-  'Akdeniz':           { n: 5, p2o5: 4, k2o: 11, ph: 7.5, organik_madde: 1.8, aciklama: 'Terra rossa, kireçli topraklar' },
-  'Marmara':           { n: 6, p2o5: 4, k2o: 11, ph: 6.8, organik_madde: 2.3, aciklama: 'Geçiş tipli topraklar' },
+  'Doğu Anadolu':  { n: 3, p2o5: 2, k2o: 7,  ph: 7.2, organik_madde: 1.0, aciklama: 'Erozyona uğramış, düşük besin' },
+  'Akdeniz':       { n: 5, p2o5: 4, k2o: 11, ph: 7.5, organik_madde: 1.8, aciklama: 'Terra rossa, kireçli topraklar' },
+  'Marmara':       { n: 6, p2o5: 4, k2o: 11, ph: 6.8, organik_madde: 2.3, aciklama: 'Geçiş tipli topraklar' },
 };
-
-/** Bazı iller için bölge genel profilinden farklı toprak tipine sahipken
- *  BOLGE_META.ad eşleşmesi olmayan 'Trakya' ve 'Çukurova' profillerini
- *  il bazında erişilebilir kılmak için override haritası. */
-const IL_TOPRAK_OVERRIDE: Record<string, string> = {
-  'Edirne':    'Trakya',
-  'Tekirdağ':  'Trakya',
-  'Kırklareli':'Trakya',
-  'Adana':     'Çukurova',
-  'Mersin':    'Çukurova',
-  'Hatay':     'Çukurova',
-  'Osmaniye':  'Çukurova',
-};
-
-/** İl adından toprak profilini döndürür.
- *  Önce il-bazlı override kontrol eder, yoksa bölge profilini kullanır. */
-export function getToprakProfil(il: string): BolgeToprakProfil | null {
-  const normalized = IL_NORMALIZE_MAP[il] ?? il;
-  const overrideKey = IL_TOPRAK_OVERRIDE[normalized];
-  if (overrideKey) return BOLGE_TOPRAK_PROFILLERI[overrideKey] ?? null;
-  const bolge = getBolge(il);
-  const bolgeAd = BOLGE_META[bolge].ad;
-  return BOLGE_TOPRAK_PROFILLERI[bolgeAd] ?? null;
-}
-
-/** getToprakProfil ile birlikte buton etiketi için profil adını döndürür. */
-export function getToprakProfilAd(il: string): string {
-  const normalized = IL_NORMALIZE_MAP[il] ?? il;
-  const overrideKey = IL_TOPRAK_OVERRIDE[normalized];
-  if (overrideKey) return overrideKey;
-  return BOLGE_META[getBolge(il)].ad;
-}
 
 // ─── Yardımcı Fonksiyonlar ────────────────────────────────────────────────────
 
@@ -406,4 +439,238 @@ export function applyBolgeOffset(
   const ay = Math.ceil(totalHafta / 4);
   const hafta = ((totalHafta - 1) % 4) + 1;
   return { ay, hafta };
+}
+
+// ─── Gerçek ETo Hesap Metodları ──────────────────────────────────────────────
+//
+// Her metod gerçek agronomik formülleri kullanır.
+// Referans: FAO-56 Paper, Allen et al. 1998
+
+/**
+ * Ekstraterrestrial Radiation (Ra) — MJ/m²/gün
+ * FAO-56 Eq. 21. Enlem ve günün yılın kaçıncı günü olduğuna göre hesaplanır.
+ * Kaynak: Allen et al. (1998) FAO-56, Table 2.6.
+ */
+export function calcRa(enlemDerece: number, ayNo: number): number {
+  // Ayın ortasına denk gelen günün yılın kaçıncı günü olduğu (J)
+  const MID_DAY = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349];
+  const J = MID_DAY[Math.max(0, Math.min(11, ayNo - 1))];
+  const phi = (Math.PI / 180) * enlemDerece;
+  const dr = 1 + 0.033 * Math.cos((2 * Math.PI * J) / 365);
+  const delta = 0.409 * Math.sin((2 * Math.PI * J) / 365 - 1.39);
+  const ws = Math.acos(-Math.tan(phi) * Math.tan(delta));
+  const Gsc = 0.0820; // MJ/m²/dk
+  const Ra = (24 * 60 / Math.PI) * Gsc * dr * (
+    ws * Math.sin(phi) * Math.sin(delta) +
+    Math.cos(phi) * Math.cos(delta) * Math.sin(ws)
+  );
+  return Math.max(0, Ra);
+}
+
+/**
+ * Hargreaves-Samani ETo (mm/gün)
+ * Formül: ETo = 0.0023 × (Tmean + 17.8) × (Tmax - Tmin)^0.5 × Ra
+ * Sadece Tmax, Tmin, Ra gerekir. Meteoroloji istasyonu gerektirmez.
+ * Referans: Hargreaves & Samani (1985).
+ */
+export function calcEToHargreaves(
+  tmax: number,
+  tmin: number,
+  enlemDerece: number,
+  ayNo: number,
+): number {
+  const Ra = calcRa(enlemDerece, ayNo);
+  const Tmean = (tmax + tmin) / 2;
+  const TD = Math.max(0, tmax - tmin);
+  return 0.0023 * (Tmean + 17.8) * Math.sqrt(TD) * Ra;
+}
+
+/**
+ * Blaney-Criddle ETo (mm/gün)
+ * Formül: ETo = p × (0.46 × Tmean + 8.13)
+ * p = ortalama günlük gün ışığı saati / toplam yıllık gün ışığı saati
+ * Referans: FAO-24, Doorenbos & Pruitt (1977).
+ */
+export function calcEToBlaneyCriddle(
+  tmean: number,
+  enlemDerece: number,
+  ayNo: number,
+): number {
+  // Gün uzunluğu (saat) enlem ve aya göre hesapla
+  const MID_DAY = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349];
+  const J = MID_DAY[Math.max(0, Math.min(11, ayNo - 1))];
+  const phi = (Math.PI / 180) * enlemDerece;
+  const delta = 0.409 * Math.sin((2 * Math.PI * J) / 365 - 1.39);
+  const ws = Math.acos(-Math.tan(phi) * Math.tan(delta));
+  const N = (24 / Math.PI) * ws; // max. günlük güneşlenme süresi
+  // p (aylık gün ışığı yüzdesi) — yıllık toplal yaklaşık 4380 saat varsayımı
+  const p = Math.max(0.05, Math.min(0.50, N / 24));
+  return Math.max(0, p * (0.46 * tmean + 8.13));
+}
+
+/**
+ * Thornthwaite ETo (mm/gün)
+ * Formül: PET = 1.6 × (L_adj/12) × (10T/I)^a
+ * L_adj = aylık gün uzunluğu düzeltmesi
+ * Referans: Thornthwaite (1948), modifiye Willmott (1977).
+ */
+export function calcEToThornthwaite(
+  tmean: number,
+  enlemDerece: number,
+  ayNo: number,
+  bolge: IklimBolge,
+): number {
+  if (tmean <= 0) return 0;
+  const klima = BOLGE_META[bolge];
+  // Isı indeksi (I) — yıllık toplam
+  const I = klima.tmax.reduce((sum, tx, i) => {
+    const tm = (tx + klima.tmin[i]) / 2;
+    return sum + (tm > 0 ? Math.pow(tm / 5, 1.514) : 0);
+  }, 0);
+  const a = 6.75e-7 * Math.pow(I, 3) - 7.71e-5 * Math.pow(I, 2) + 1.792e-2 * I + 0.49239;
+  // Aylık gün uzunluğu düzelmesi (gün sayısı)
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const N_days = daysInMonth[Math.max(0, Math.min(11, ayNo - 1))];
+  // Gün uzunluğu hesabı
+  const MID_DAY = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349];
+  const J = MID_DAY[Math.max(0, Math.min(11, ayNo - 1))];
+  const phi = (Math.PI / 180) * enlemDerece;
+  const delta = 0.409 * Math.sin((2 * Math.PI * J) / 365 - 1.39);
+  const ws = Math.acos(-Math.tan(phi) * Math.tan(delta));
+  const N_hours = (24 / Math.PI) * ws; // max. günlük güneşlenme süresi
+  // Aylık PET (mm) → günlük
+  const petMonthly = 1.6 * (N_hours / 12) * (N_days / 30) * Math.pow(10 * tmean / I, a);
+  return Math.max(0, petMonthly / N_days) * 10; // cm → mm
+}
+
+/**
+ * Angstrom-Prescott ışınım + Penman-Monteith basitleştirilmiş versiyonu.
+ * Gerçek meteoroloji istasyonu verisi olmadan günlük Rn tahmin eder.
+ * Referans: FAO-56 Eq. 39 (Makcink yaklaşımı baz alınarak).
+ */
+export function calcEToMakkink(
+  tmean: number,
+  enlemDerece: number,
+  ayNo: number,
+  guneslenmeSaatOrt: number,
+): number {
+  const Ra = calcRa(enlemDerece, ayNo);
+  // Angstrom (a=0.25, b=0.50) ile Rs tahmini
+  const MID_DAY = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349];
+  const J = MID_DAY[Math.max(0, Math.min(11, ayNo - 1))];
+  const phi = (Math.PI / 180) * enlemDerece;
+  const delta = 0.409 * Math.sin((2 * Math.PI * J) / 365 - 1.39);
+  const ws = Math.acos(-Math.tan(phi) * Math.tan(delta));
+  const N = (24 / Math.PI) * ws;
+  const n_N = Math.max(0, Math.min(1, guneslenmeSaatOrt / Math.max(1, N)));
+  const Rs = (0.25 + 0.50 * n_N) * Ra; // MJ/m²/gün
+  // Makkink: ETo = (0.61 × Δ/(Δ+γ) × Rs/λ) - 0.12
+  const Delta = (4098 * (0.6108 * Math.exp(17.27 * tmean / (tmean + 237.3)))) / Math.pow(tmean + 237.3, 2);
+  const gamma = 0.067; // kPa/°C (deniz seviyesi)
+  const lambda = 2.45; // MJ/kg
+  const ETo = (0.61 * (Delta / (Delta + gamma)) * (Rs / lambda)) - 0.12;
+  return Math.max(0, ETo);
+}
+
+/**
+ * Tüm ETo metodlarını tek fonksiyonda hesapla.
+ * Metod ID'sine göre doğru formülü seçer.
+ */
+export type EToMetodId = 'tablo' | 'hargreaves' | 'blaney_criddle' | 'thornthwaite' | 'makkink';
+
+export interface EToMetodInfo {
+  id: EToMetodId;
+  label: string;
+  aciklama: string;
+  gercekFormul: boolean;
+}
+
+export const ETO_METOD_LISTESI: EToMetodInfo[] = [
+  {
+    id: 'tablo',
+    label: 'Referans Tablo (Hargreaves tabanlı)',
+    aciklama: 'Uzun yıl iklim verilerinden türetilmiş il başına ETo tablosu.',
+    gercekFormul: false,
+  },
+  {
+    id: 'hargreaves',
+    label: 'Hargreaves-Samani',
+    aciklama: 'ETo = 0.0023 × (Tmean + 17.8) × √(Tmax−Tmin) × Ra. Yalnızca sıcaklık gerektirir. [Hargreaves & Samani, 1985]',
+    gercekFormul: true,
+  },
+  {
+    id: 'blaney_criddle',
+    label: 'Blaney-Criddle',
+    aciklama: 'ETo = p × (0.46 × T + 8.13). Sıcaklık ve gün uzunluğu tabanlı. [FAO-24, Doorenbos & Pruitt, 1977]',
+    gercekFormul: true,
+  },
+  {
+    id: 'thornthwaite',
+    label: 'Thornthwaite',
+    aciklama: 'Aylık ortalama sıcaklık ve enlem bazlı ısı indeksi yöntemi. [Thornthwaite, 1948]',
+    gercekFormul: true,
+  },
+  {
+    id: 'makkink',
+    label: 'Makkink (Angstrom-Prescott ışınım)',
+    aciklama: 'Rs = Angstrom-Prescott formülü ile hesaplanır; Makkink ETo = 0.61 × Δ/(Δ+γ) × Rs/λ − 0.12. [FAO-56]',
+    gercekFormul: true,
+  },
+];
+
+/**
+ * Seçilen metoda göre ETo hesapla (mm/gün).
+ * @param metod ETo metod ID
+ * @param il İl adı (tablo için)
+ * @param bolge İklim bölgesi (sıcaklık verisi için)
+ * @param ayNo 1-indexed ay numarası
+ */
+export function calcEToByMetod(
+  metod: EToMetodId,
+  il: string,
+  bolge: IklimBolge,
+  ayNo: number,
+): number {
+  const klima = BOLGE_META[bolge];
+  const ayIdx = Math.max(0, Math.min(11, ayNo - 1));
+  const tmax = klima.tmax[ayIdx];
+  const tmin = klima.tmin[ayIdx];
+  const tmean = (tmax + tmin) / 2;
+  const enlem = klima.enlem;
+  const guneslenmeSaat = klima.guneslenmeSaat[ayIdx];
+
+  switch (metod) {
+    case 'tablo':
+      return getETo(il, ayNo);
+    case 'hargreaves':
+      return calcEToHargreaves(tmax, tmin, enlem, ayNo);
+    case 'blaney_criddle':
+      return calcEToBlaneyCriddle(tmean, enlem, ayNo);
+    case 'thornthwaite':
+      return calcEToThornthwaite(tmean, enlem, ayNo, bolge);
+    case 'makkink':
+      return calcEToMakkink(tmean, enlem, ayNo, guneslenmeSaat);
+    default:
+      return getETo(il, ayNo);
+  }
+}
+
+/**
+ * Don riski kontrolü — bölge ve aya göre
+ * @returns true: don riski var, false: don yok
+ */
+export function donRiskiVar(bolge: IklimBolge, ayNo: number): boolean {
+  const klima = BOLGE_META[bolge];
+  const ayIdx = Math.max(0, Math.min(11, ayNo - 1));
+  return klima.tmin[ayIdx] <= 0;
+}
+
+/**
+ * Yoğun yağış günleri tahmini — aylık yağış miktarına göre
+ * @returns Sert yağışlı gün sayısı tahmini (ay içinde ilaçlama/sulama uyarısı için)
+ */
+export function yogunYagisTahmini(il: string, ayNo: number): number {
+  const yagis = getYagis(il, ayNo);
+  // Basit tahmin: toplam yağış / 15 mm/gün ortalama olay büyüklüğü
+  return Math.round(yagis / 15);
 }

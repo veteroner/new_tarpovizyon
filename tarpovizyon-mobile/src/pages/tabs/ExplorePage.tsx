@@ -110,7 +110,7 @@ const sections: ModuleSection[] = [
       { title: 'Fiyat Endeksleri', subtitle: 'ÜFE, TÜFE, Tarım', icon: DollarSign, path: '/data/economic/price-index', iconColor: 'text-green-400', bgColor: 'bg-green-500/10' },
       { title: 'Ürün Dengesi', subtitle: 'Üretim-Tüketim', icon: Scale, path: '/data/economic/product-balance', iconColor: 'text-blue-400', bgColor: 'bg-blue-500/10' },
       { title: 'Makro Ekonomi', subtitle: 'GSYH, Nüfus, İstihdam', icon: Building2, path: '/data/economic/macro', iconColor: 'text-amber-400', bgColor: 'bg-amber-500/10' },
-      { title: 'Çapraz İstihbarat', subtitle: 'Korelasyon analizi', icon: BarChart3, path: '/data/economic/cross-intelligence', iconColor: 'text-purple-400', bgColor: 'bg-purple-500/10' },
+      { title: 'Çapraz İçgörü', subtitle: 'Korelasyon analizi', icon: BarChart3, path: '/data/economic/cross-intelligence', iconColor: 'text-purple-400', bgColor: 'bg-purple-500/10' },
     ],
   },
   {
@@ -208,7 +208,7 @@ export default function ExplorePage() {
       {/* ── Footer ────────────────────────── */}
       <div className="px-5 pb-8 text-center">
         <p className="text-[10px] text-gray-600">
-          TarpoVizyon v2.0 — Kapsamlı Tarım İstihbarat Platformu
+          TarpoVizyon v2.0 — Tarım Komuta Merkezi
         </p>
       </div>
     </div>

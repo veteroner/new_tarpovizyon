@@ -25,7 +25,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'demographics', label: 'Demografi', icon: '⚧️' },
   { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷' },
   { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'Intelligence', icon: '🧠' },
+  { id: 'alerts', label: 'İçgörüler', icon: '🧠' },
 ];
 
 const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
@@ -343,7 +343,7 @@ export default function PopulationPage() {
         id: a.id, type: a.severity === 'critical' ? 'decline' as const : a.severity === 'warning' ? 'warning' as const : a.severity === 'positive' ? 'achievement' as const : 'info' as const,
         message: a.title + ': ' + a.message,
         severity: a.severity === 'critical' ? 'high' as const : a.severity === 'warning' ? 'medium' as const : 'low' as const,
-        category: a.metric || 'Intelligence'
+        category: a.metric || 'İçgörü'
       })));
     } catch (e) { console.error('Intelligence hatasi:', e); }
     finally { setLoading(false); }
@@ -363,7 +363,7 @@ export default function PopulationPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Dunya Nufus Intelligence Dashboard</h1>
+        <h1 className="page-title">Dünya Nüfus İçgörü Paneli</h1>
         <p className="page-subtitle">FAO nufus & kentlesme analizi - akilli karar destek motoru</p>
       </div>
 
@@ -382,7 +382,7 @@ export default function PopulationPage() {
       </div>
 
       {loading ? (
-        <div className="loading"><div className="loading-spinner"></div><p>Intelligence analizi yukleniyor...</p></div>
+        <div className="loading"><div className="loading-spinner"></div><p>İçgörü analizi yükleniyor...</p></div>
       ) : (
         <>
           {/* OVERVIEW */}

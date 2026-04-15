@@ -25,7 +25,7 @@ const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'benchmark', label: 'Ulke Siralamasi', icon: '🏆', desc: 'Arazi verimliligi karsilastirma' },
   { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷', desc: 'Turkiye arazi intelligence' },
   { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮', desc: 'Zaman serisi projeksiyonlari' },
-  { id: 'alerts', label: 'Intelligence', icon: '🧠', desc: 'Otomatik uyarilar & icgoruler' },
+  { id: 'alerts', label: 'İçgörüler', icon: '🧠', desc: 'Otomatik uyarılar ve içgörüler' },
 ];
 
 const CHART_COLORS = [
@@ -415,7 +415,7 @@ export default function LandUsePage() {
         type: a.severity === 'critical' ? 'decline' as const : a.severity === 'warning' ? 'warning' as const : a.severity === 'positive' ? 'achievement' as const : 'info' as const,
         message: a.title + ': ' + a.message,
         severity: a.severity === 'critical' ? 'high' as const : a.severity === 'warning' ? 'medium' as const : 'low' as const,
-        category: a.metric || 'Intelligence'
+        category: a.metric || 'İçgörü'
       }));
       setAllInsights(allIns);
     } catch (error) { console.error('Intelligence alerts hatasi:', error); }
@@ -436,7 +436,7 @@ export default function LandUsePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Arazi Intelligence Dashboard</h1>
+        <h1 className="page-title">Arazi İçgörü Paneli</h1>
         <p className="page-subtitle">FAO arazi kullanimi - akilli analiz motoru</p>
       </div>
 
@@ -456,7 +456,7 @@ export default function LandUsePage() {
       </div>
 
       {loading ? (
-        <div className="loading"><div className="loading-spinner"></div><p>Intelligence analizi yukleniyor...</p></div>
+        <div className="loading"><div className="loading-spinner"></div><p>İçgörü analizi yükleniyor...</p></div>
       ) : (
         <>
           {/* ==================== OVERVIEW TAB ==================== */}

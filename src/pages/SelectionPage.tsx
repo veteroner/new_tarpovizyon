@@ -81,7 +81,7 @@ export function SelectionPage() {
 
         {/* Footer */}
         <div className="selection-footer">
-          <p>© 2024 TARPOL - Tarımsal Veri Analiz Platformu</p>
+          <p>© 2025 TARPOL - Tarımsal Veri Analiz Platformu</p>
         </div>
       </div>
     </div>

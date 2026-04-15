@@ -31,7 +31,7 @@ const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'overview', label: 'Genel Bakış', icon: '🌍', desc: 'Dünya bitkisel üretim özeti' },
   { id: 'primary', label: 'Birincil Üretim', icon: '🌾', desc: 'FAO birincil ürün analizi' },
   { id: 'processed', label: 'İşlenmiş Üretim', icon: '🏭', desc: 'İşlenmiş tarım ürünleri' },
-  { id: 'yield', label: 'Verim Analizi', icon: '📊', desc: 'Verim intelligence & gap analizi' },
+  { id: 'yield', label: 'Verim Analizi', icon: '📊', desc: 'Verim ve açık analizi' },
   { id: 'competition', label: 'Rekabet Analizi', icon: '⚔️', desc: 'Küresel rekabet matrisi' },
   { id: 'predictions', label: 'Tahminler', icon: '🔮', desc: 'Üretim & verim projeksiyonları' },
 ];
@@ -616,12 +616,12 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
       <BackToHome />
       <div className="page-header" style={{ marginBottom: '24px' }}>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {categoryIcon || '🌾'} {categoryTitle || 'Bitkisel Üretim Intelligence'}
+          {categoryIcon || '🌾'} {categoryTitle || 'Bitkisel Üretim İçgörüleri'}
         </h1>
         <p className="page-subtitle" style={{ opacity: 0.8 }}>
           {categoryFilter
-            ? `FAO dünya verileri — ${CROP_CATEGORIES[categoryFilter]?.name || ''} kategorisi — Agriculture Intelligence Tool`
-            : 'FAO dünya verileri — 232 ülke, 161 ürün, 24 işlenmiş ürün — Agriculture Intelligence Tool'}
+            ? `FAO dünya verileri — ${CROP_CATEGORIES[categoryFilter]?.name || ''} kategorisi — Tarım İçgörü Aracı`
+            : 'FAO dünya verileri — 232 ülke, 161 ürün, 24 işlenmiş ürün — Tarım İçgörü Aracı'}
         </p>
       </div>
 

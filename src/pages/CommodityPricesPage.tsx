@@ -14,6 +14,11 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Hayvancılık': '🐄',
   'Süt Ürünleri': '🥛',
   'Enerji': '⚡',
+  'Orman Ürünleri': '🪵',
+  'Gübre': '🧪',
+  'Et & Gıda': '🥩',
+  'Metaller': '🥇',
+  'Döviz': '💱',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -24,6 +29,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Hayvancılık': 'from-red-500 to-pink-600',
   'Süt Ürünleri': 'from-sky-400 to-blue-500',
   'Enerji': 'from-purple-500 to-violet-600',
+  'Orman Ürünleri': 'from-stone-500 to-amber-700',
+  'Gübre': 'from-lime-500 to-green-600',
+  'Et & Gıda': 'from-red-600 to-orange-600',
+  'Metaller': 'from-yellow-400 to-amber-500',
+  'Döviz': 'from-teal-500 to-cyan-600',
 };
 
 const RANGE_OPTIONS = [
