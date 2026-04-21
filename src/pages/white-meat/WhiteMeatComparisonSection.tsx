@@ -20,7 +20,7 @@ type Props = {
 };
 
 export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, quailMeatData }: Props) {
-  if (tuikData.length === 0 && turkeyMeatData.length === 0 && quailMeatData.length === 0) return null;
+  if ((!tuikData || tuikData.length === 0) && (!turkeyMeatData || turkeyMeatData.length === 0) && (!quailMeatData || quailMeatData.length === 0)) return null;
 
   return (
     <>

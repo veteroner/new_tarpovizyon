@@ -23,7 +23,7 @@ export default function MilkTuikSection({
   tuikSelectedData, tuikLatestYear, tuikYoyChange,
   tuikAllProductsLatest, tuikSeasonality, tuikSeasonHeatmap, tuikGrowthRates
 }: Props) {
-  if (tuikSutData.length === 0) return null;
+  if (!tuikSutData || tuikSutData.length === 0) return null;
 
   const fiveYearChange = useMemo(() => {
     if (tuikSelectedData.length < 5 || !tuikLatestYear) return null;
@@ -33,7 +33,7 @@ export default function MilkTuikSection({
   }, [tuikSelectedData, tuikLatestYear]);
 
   const maxMonth = useMemo(() => {
-    if (tuikSeasonality.length === 0) return null;
+    if (!tuikSeasonality || tuikSeasonality.length === 0) return null;
     return tuikSeasonality.reduce((max, m) => m.miktar > max.miktar ? m : max, tuikSeasonality[0]);
   }, [tuikSeasonality]);
 

@@ -21,7 +21,7 @@ type Props = {
 };
 
 export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterData, monthlyQuailMeat }: Props) {
-  if (quailMeatData.length === 0) return null;
+  if (!quailMeatData || quailMeatData.length === 0) return null;
 
   return (
     <>

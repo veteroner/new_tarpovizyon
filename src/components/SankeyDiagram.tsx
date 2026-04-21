@@ -51,7 +51,7 @@ export function SankeyDiagram({ nodes, links, height = 380, formatValue }: Props
   }, []);
 
   const { computedNodes, computedLinks } = useMemo(() => {
-    if (!nodes.length || !links.length || width < 100) {
+    if (!nodes || !links || !nodes.length || !links.length || width < 100) {
       return { computedNodes: [], computedLinks: [] };
     }
     try {

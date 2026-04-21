@@ -410,6 +410,7 @@ export function useMilkData() {
     econStartDate, setEconStartDate,
     econEndDate, setEconEndDate,
     selectedTuikSutUrun, setSelectedTuikSutUrun,
+    tuikSutData,
     // computed
     latest,
     yoy,
