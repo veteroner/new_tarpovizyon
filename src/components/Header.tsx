@@ -65,7 +65,6 @@ const worldMenuCategories: MenuCategory[] = [
     icon: MapPinned,
     items: [
       { label: 'Genel Kaynaklar', path: '/tarpovizyon/world/resources' },
-      { label: 'Arazi Kullanımı', path: '/tarpovizyon/world/land-use' },
       { label: 'Arazi Örtüsü', path: '/tarpovizyon/world/land-cover' },
       { label: 'Gübre', path: '/tarpovizyon/world/fertilizer' },
       { label: 'Pestisit', path: '/tarpovizyon/world/pesticide' },
@@ -98,7 +97,7 @@ const turkeyMenuCategories: MenuCategory[] = [
     title: 'Bitkisel Üretim',
     icon: Sprout,
     items: [
-      { label: 'Genel Üretim', path: '/tarpovizyon/turkey/plant-production' },
+      { label: 'Genel Üretim (TÜİK)', path: '/tarpovizyon/turkey/plant-production' },
       { label: 'Tahıllar', path: '/tarpovizyon/turkey/cereals' },
       { label: 'Sebzeler', path: '/tarpovizyon/turkey/vegetables' },
       { label: 'Meyveler', path: '/tarpovizyon/turkey/fruits' },

@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { fetchAIChat } from '../services/api';
 import { BackToHome } from '../components/BackToHome';
+import DynamicChart from '../components/DynamicChart';
+import type { ChartConfig } from '../components/DynamicChart';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -158,7 +160,30 @@ export default function AIAssistantPage() {
             }}>
               {msg.role === 'assistant' ? (
                 <div className="ai-assistant-prose prose prose-sm max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code(props) {
+                        const { className, children } = props;
+                        const lang = /language-([\w-]+)/.exec(className ?? '')?.[1];
+                        if (lang === 'chart-json') {
+                          try {
+                            const config = JSON.parse(String(children)) as ChartConfig;
+                            return <DynamicChart config={config} />;
+                          } catch {
+                            return (
+                              <pre style={{ background: '#f1f5f9', padding: '0.75rem', borderRadius: 8, overflow: 'auto' }}>
+                                <code className={className}>{children}</code>
+                              </pre>
+                            );
+                          }
+                        }
+                        return <code className={className}>{children}</code>;
+                      },
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
               ) : (
                 <p style={{ margin: 0, lineHeight: 1.5 }}>{msg.content}</p>

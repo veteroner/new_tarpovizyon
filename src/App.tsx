@@ -13,7 +13,6 @@ import MobileAIPage from './mobile/pages/MobileAIPage';
 import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
 import { SelectionPage } from './pages/SelectionPage';
 import { HomePage } from './pages/HomePage';
-import { OverviewPage } from './pages/OverviewPage';
 import { TradePage } from './pages/TradePage';
 import { ProductionPage } from './pages/ProductionPage';
 import TurkeyAnimalProductionPage from './pages/TurkeyAnimalProductionPage';
@@ -30,6 +29,7 @@ import TurkeyWhiteMeatProductionPage from './pages/TurkeyWhiteMeatProductionPage
 import TurkeyMilkProductionPage from './pages/TurkeyMilkProductionPage';
 import TurkeyEggProductionPage from './pages/TurkeyEggProductionPage';
 import TurkeyBeekeepingPage from './pages/TurkeyBeekeepingPage';
+import TurkeyOtherAnimalProductsPage from './pages/TurkeyOtherAnimalProductsPage';
 // Bitkisel Üretim Sayfaları
 import CerealProductionPage from './pages/CerealProductionPage';
 import VegetableProductionPage from './pages/VegetableProductionPage';
@@ -68,6 +68,7 @@ import TurkeyMacroPage from './pages/TurkeyMacroPage';
 import CrossIntelligencePage from './pages/CrossIntelligencePage';
 import CommodityPricesPage from './pages/CommodityPricesPage';
 import AIAssistantPage from './pages/AIAssistantPage';
+import { OverviewPage } from './pages/OverviewPage';
 import ErrorBoundary from './components/ErrorBoundary';
 
 import './styles/globals.css';
@@ -129,7 +130,8 @@ function AppContent() {
           <Route path="/tarpovizyon" element={<SelectionPage />} />
           <Route path="/tarpovizyon/world" element={<HomePage />} />
           <Route path="/tarpovizyon/turkey" element={<HomePage />} />
-          <Route path="/tarpovizyon/overview" element={<OverviewPage />} />
+          <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
+          <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
           <Route path="/tarpovizyon/commodity-prices" element={<ErrorBoundary><CommodityPricesPage /></ErrorBoundary>} />
           <Route path="/tarpovizyon/ai-assistant" element={<ErrorBoundary><AIAssistantPage /></ErrorBoundary>} />
           
@@ -160,7 +162,6 @@ function AppContent() {
           
           {/* Dünya Kaynak ve Çevre */}
           <Route path="/tarpovizyon/world/resources" element={<LandUsePage />} />
-          <Route path="/tarpovizyon/world/land-use" element={<LandUsePage />} />
           <Route path="/tarpovizyon/world/land-cover" element={<LandCoverPage />} />
           <Route path="/tarpovizyon/world/fertilizer" element={<FertilizerPage />} />
           <Route path="/tarpovizyon/world/pesticide" element={<PesticidePage />} />
@@ -174,7 +175,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/cross-intelligence" element={<CrossIntelligencePage />} />
           
           {/* Türkiye Bitkisel Üretim */}
-          <Route path="/tarpovizyon/turkey/plant-production" element={<ProductionPage />} />
+          <Route path="/tarpovizyon/turkey/plant-production" element={<TuikPlantProductionPage />} />
           <Route path="/tarpovizyon/turkey/cereals" element={<CerealProductionPage />} />
           <Route path="/tarpovizyon/turkey/vegetables" element={<VegetableProductionPage />} />
           <Route path="/tarpovizyon/turkey/fruits" element={<FruitProductionPage />} />
@@ -193,6 +194,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/milk" element={<TurkeyMilkProductionPage />} />
           <Route path="/tarpovizyon/turkey/eggs" element={<TurkeyEggProductionPage />} />
           <Route path="/tarpovizyon/turkey/beekeeping" element={<TurkeyBeekeepingPage />} />
+          <Route path="/tarpovizyon/turkey/other-animal-products" element={<TurkeyOtherAnimalProductsPage />} />
           <Route path="/tarpovizyon/turkey/tuik-livestock" element={<TuikLivestockPage />} />
 
           
@@ -201,7 +203,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/plant-provincial" element={<TurkeyProvincialPlantPage />} />
           <Route path="/tarpovizyon/turkey/basin-production" element={<BasinProductionPage />} />
           <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
-          <Route path="/tarpovizyon/turkey/tuik-plant" element={<TuikPlantProductionPage />} />
+          <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
         </Routes>
       </main>
     </>
