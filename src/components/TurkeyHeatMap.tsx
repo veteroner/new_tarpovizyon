@@ -100,6 +100,8 @@ export function TurkeyHeatMap({
   regionColors,
   highlightRegion,
   dimNonSelected = false,
+  onProvinceClick,
+  selectedProvince,
 }: {
   regionTotals: RegionTotal[];
   unitLabel?: string;
@@ -108,6 +110,8 @@ export function TurkeyHeatMap({
   regionColors?: Record<string, string>;
   highlightRegion?: string;
   dimNonSelected?: boolean;
+  onProvinceClick?: (province: string, region: string, value?: number) => void;
+  selectedProvince?: string | null;
 }) {
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState>(null);
@@ -210,16 +214,20 @@ export function TurkeyHeatMap({
               const d = pathGenerator(feature as unknown as GeoPermissibleObjects);
               if (!d) return null;
 
+              const isSelected = selectedProvince
+                ? normalizeTr(selectedProvince) === provinceKey
+                : false;
+
               return (
                 <path
                   key={`${provinceKey || 'p'}-${idx}`}
                   d={d}
                   fill={categoricalFill ?? getFill(value)}
-                  stroke="var(--border)"
-                  strokeOpacity={0.9}
-                  strokeWidth={1.1}
+                  stroke={isSelected ? '#f59e0b' : 'var(--border)'}
+                  strokeOpacity={isSelected ? 1 : 0.9}
+                  strokeWidth={isSelected ? 3 : 1.1}
                   vectorEffect="non-scaling-stroke"
-                  style={{ cursor: 'default', outline: 'none' }}
+                  style={{ cursor: onProvinceClick ? 'pointer' : 'default', outline: 'none' }}
                   onMouseEnter={() => {
                     setTooltip({
                       province: province || '—',
@@ -229,6 +237,11 @@ export function TurkeyHeatMap({
                     });
                   }}
                   onMouseLeave={() => setTooltip(null)}
+                  onClick={() => {
+                    if (onProvinceClick && province) {
+                      onProvinceClick(province, regionName, value);
+                    }
+                  }}
                 />
               );
             })}

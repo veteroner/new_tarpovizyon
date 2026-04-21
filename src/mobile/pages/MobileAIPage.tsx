@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { askAI } from '../services/ai';
+import DynamicChart from '../../components/DynamicChart';
+import type { ChartConfig } from '../../components/DynamicChart';
 
 /**
  * AI Asistan Tab Page — Chat interface
@@ -144,7 +148,32 @@ export default function MobileAIPage() {
                     : 'bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                {msg.role === 'user' ? (
+                  <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                ) : (
+                  <div className="text-[13px] leading-relaxed prose prose-sm max-w-none prose-slate">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code({ className, children, ...rest }) {
+                          const match = /language-(\w+)/.exec(className || '');
+                          const lang = match ? match[1] : '';
+                          if (lang === 'chart-json') {
+                            try {
+                              const config: ChartConfig = JSON.parse(String(children));
+                              return <DynamicChart config={config} />;
+                            } catch {
+                              return <pre className="text-[11px] overflow-x-auto"><code className={className} {...rest}>{children}</code></pre>;
+                            }
+                          }
+                          return <code className={className} {...rest}>{children}</code>;
+                        },
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+                )}
                 <p className="text-[9px] text-slate-400 mt-1.5 text-right">
                   {msg.timestamp.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                 </p>

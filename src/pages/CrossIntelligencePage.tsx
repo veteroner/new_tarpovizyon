@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import {
-  Bar, CartesianGrid, Cell, ComposedChart, Legend, Line,
+  Bar, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceLine,
   ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar, Scatter, ScatterChart, ZAxis,
 } from 'recharts';
@@ -10,262 +9,19 @@ import {
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
-import { fetchQuery } from '../services/api';
+import { useCrossIntelligenceData, ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
 
-/* ------------------------------------------------------------------ */
-/*  SABİTLER                                                          */
-/* ------------------------------------------------------------------ */
-const YEAR_COLS = [
-  'y2015/16', 'y2016/17', 'y2017/18', 'y2018/19', 'y2019/20',
-  'y2020/21', 'y2021/22', 'y2022/23', 'y2023/24',
-];
-const YEAR_LABELS = YEAR_COLS.map(c => c.replace('y', '').split('/')[0]);
-const YEAR_SQL = YEAR_COLS.map(c => `\`${c}\``).join(', ');
-
-const MONTH_COLS = [
-  '`Ocak`', '`Şubat`', '`Mart`', '`Nisan`', '`Mayıs`', '`Haziran`',
-  '`Temmuz`', '`Ağustos`', '`Eylül`', '`Ekim`', '`Kasım`', '`Aralık`',
-];
-
-
-// Products that exist in both production, trade AND price index data
-const CROSS_PRODUCTS = [
-  { label: 'Buğday', urundenge: 'Buğday (toplam)', trade: 'Buğday', priceKey: 'Buğday' },
-  { label: 'Arpa', urundenge: 'Arpa', trade: 'Arpa', priceKey: 'Arpa' },
-  { label: 'Mısır', urundenge: 'Mısır', trade: 'Mısır', priceKey: 'Mısır' },
-  { label: 'Pirinç', urundenge: 'Pirinç', trade: 'Pirinç', priceKey: 'Pirinç' },
-  { label: 'Ayçiçeği', urundenge: 'Ayçiçeği', trade: 'Ayçiçeği', priceKey: 'Ayçiçeği' },
-  { label: 'Şekerpancarı', urundenge: 'Şeker pancarı', trade: '', priceKey: 'Şeker' },
-  { label: 'Patates', urundenge: 'Patates', trade: '', priceKey: 'Patates' },
-  { label: 'Mercimek', urundenge: 'Kırmızı mercimek', trade: 'Mercimek', priceKey: 'Mercimek' },
-  { label: 'Nohut', urundenge: 'Nohut', trade: 'Nohut', priceKey: 'Nohut' },
-  { label: 'Çay', urundenge: 'Çay', trade: 'Çay', priceKey: 'Çay' },
-];
-
-/* ------------------------------------------------------------------ */
-/*  TIPLER                                                            */
-/* ------------------------------------------------------------------ */
-interface CrossRow {
-  year: string;
-  production: number;
-  exports: number;
-  imports: number;
-  sufficiency: number;
-  priceIndex: number;
-}
-interface InsightMsg { type: 'warning' | 'info' | 'danger' | 'success'; text: string }
-interface RadarDim { dimension: string; value: number; fullMark: number }
-interface ScatterPoint { x: number; y: number; name: string; size: number }
-
-/* ------------------------------------------------------------------ */
-/*  COMPONENT                                                         */
-/* ------------------------------------------------------------------ */
 export default function CrossIntelligencePage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [selected, setSelected] = useState(0); // index into CROSS_PRODUCTS
-
-  // Cross data
-  const [crossData, setCrossData] = useState<CrossRow[]>([]);
-  const [insights, setInsights] = useState<InsightMsg[]>([]);
-  const [radar, setRadar] = useState<RadarDim[]>([]);
-  const [scatterData, setScatterData] = useState<ScatterPoint[]>([]);
-
-  // Global food security overview
-  const [foodSecurityTable, setFoodSecurityTable] = useState<{
-    product: string; sufficiency: number; importDep: number; consumption: number; trend: string;
-  }[]>([]);
-
-  const product = CROSS_PRODUCTS[selected];
-
-  /* ----- LOAD ----- */
-  const loadCross = useCallback(async (pIdx: number) => {
-    setLoading(true);
-    setError(false);
-    const p = CROSS_PRODUCTS[pIdx];
-    try {
-      /* 1. Ürün dengesi — üretim, ithalat, ihracat, yeterlilik */
-      const [prodRes, impRes, expRes, suffRes] = await Promise.all([
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='Üretim'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='İthalat'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='İhracat'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='Yeterlilik derecesi'`),
-      ]);
-
-      const getYearVals = (res: typeof prodRes) => {
-        if (!res.data?.[0]) return YEAR_COLS.map(() => 0);
-        return YEAR_COLS.map(c => Number(res.data![0][c]) || 0);
-      };
-
-      const productions = getYearVals(prodRes);
-      const imports = getYearVals(impRes);
-      const exports = getYearVals(expRes);
-      const sufficiencies = getYearVals(suffRes);
-
-      /* 2. Fiyat endeksi (T-GFE veya TÜFE gıda) */
-      let priceIndices = YEAR_LABELS.map(() => 100);
-      if (p.priceKey) {
-        const priceRes = await fetchQuery(`
-          SELECT yil, AVG((${MONTH_COLS.join('+')}) / 12) as avg_idx
-          FROM tuik_fiyatendex
-          WHERE endeks='T-GFE' AND (d2 LIKE '%${p.priceKey}%' OR d3 LIKE '%${p.priceKey}%')
-          AND yil >= 2015 AND yil <= 2024
-          GROUP BY yil ORDER BY yil
-        `);
-        if (priceRes.data?.length) {
-          const priceMap: Record<string, number> = {};
-          for (const r of priceRes.data) priceMap[String(r.yil)] = Number(r.avg_idx) || 100;
-          priceIndices = YEAR_LABELS.map(y => priceMap[y] || 100);
-        }
-      }
-
-      /* 3. Cross data construction */
-      const rows: CrossRow[] = YEAR_LABELS.map((y, i) => ({
-        year: y,
-        production: productions[i],
-        exports: exports[i],
-        imports: imports[i],
-        sufficiency: sufficiencies[i],
-        priceIndex: priceIndices[i],
-      }));
-      setCrossData(rows);
-
-      /* 4. Otomatik Insights (en önemli kısım!) */
-      const msgs: InsightMsg[] = [];
-      const latest = rows[rows.length - 1];
-      const prev = rows[rows.length - 2];
-      if (latest && prev) {
-        // Production trend
-        const prodChange = prev.production > 0 ? ((latest.production - prev.production) / prev.production) * 100 : 0;
-        if (prodChange < -10) {
-          msgs.push({ type: 'danger', text: `${p.label} üretimi %${Math.abs(prodChange).toFixed(1)} düştü → İthalat baskısı artabilir` });
-        } else if (prodChange > 15) {
-          msgs.push({ type: 'success', text: `${p.label} üretimi %${prodChange.toFixed(1)} arttı → İhracat potansiyeli yükseliyor` });
-        }
-
-        // Import dependency
-        const impDep = latest.imports > 0 && (latest.production + latest.imports) > 0
-          ? (latest.imports / (latest.production + latest.imports)) * 100 : 0;
-        if (impDep > 30) {
-          msgs.push({ type: 'warning', text: `İthalat bağımlılığı %${impDep.toFixed(1)} → Kritik eşik (%30) aşıldı! Dış fiyat şoklarına açık` });
-        }
-
-        // Sufficiency
-        if (latest.sufficiency > 0 && latest.sufficiency < 80) {
-          msgs.push({ type: 'danger', text: `Yeterlilik derecesi %${latest.sufficiency.toFixed(0)} → Gıda güvenliği riski! Üretim artışı veya ithalat çeşitlendirmesi gerekli` });
-        } else if (latest.sufficiency > 120) {
-          msgs.push({ type: 'success', text: `Yeterlilik derecesi %${latest.sufficiency.toFixed(0)} → Fazla üretim, ihracat ile değerlendirme fırsatı` });
-        }
-
-        // Price-production inverse correlation check
-        const prodDelta = prodChange;
-        const priceDelta = prev.priceIndex > 0 ? ((latest.priceIndex - prev.priceIndex) / prev.priceIndex) * 100 : 0;
-        if (prodDelta < -5 && priceDelta > 10) {
-          msgs.push({ type: 'warning', text: `Üretim ↓%${Math.abs(prodDelta).toFixed(0)} iken fiyat ↑%${priceDelta.toFixed(0)} → Arz daralması fiyatı yukarı itiyor` });
-        } else if (prodDelta > 10 && priceDelta < -5) {
-          msgs.push({ type: 'info', text: `Üretim ↑%${prodDelta.toFixed(0)} iken fiyat ↓%${Math.abs(priceDelta).toFixed(0)} → Arz bolluğu fiyatı baskılıyor` });
-        }
-
-        // Trade balance
-        if (latest.imports > latest.exports * 5 && latest.imports > 1e4) {
-          msgs.push({ type: 'danger', text: `İthalat, ihracatın ${(latest.imports / Math.max(1, latest.exports)).toFixed(0)} katı → Ticaret açığı derinleşiyor` });
-        }
-      }
-      if (msgs.length === 0) {
-        msgs.push({ type: 'info', text: `${p.label} için şu an kritik bir sinyal tespit edilmedi. Veriler stabil.` });
-      }
-      setInsights(msgs);
-
-      /* 5. Radar — Gıda Güvenliği 5-Boyut */
-      const latestR = rows[rows.length - 1];
-      if (latestR) {
-        const impDep = latestR.imports > 0 ? (latestR.imports / (latestR.production + latestR.imports)) * 100 : 0;
-        // Volatility = std_dev of production / mean
-        const meanProd = productions.reduce((a, b) => a + b, 0) / productions.length;
-        const stdProd = Math.sqrt(productions.reduce((s, v) => s + (v - meanProd) ** 2, 0) / productions.length);
-        const volatility = meanProd > 0 ? (stdProd / meanProd) * 100 : 0;
-
-        // Price stability = inverse of price change volatility
-        const priceChanges = priceIndices.slice(1).map((v, i) => priceIndices[i] > 0 ? ((v - priceIndices[i]) / priceIndices[i]) * 100 : 0);
-        const meanPC = priceChanges.reduce((a, b) => a + b, 0) / priceChanges.length;
-        const stdPC = Math.sqrt(priceChanges.reduce((s, v) => s + (v - meanPC) ** 2, 0) / priceChanges.length);
-        const priceStab = Math.max(0, Math.min(100, 100 - stdPC * 2));
-
-        const tradeBalance = latestR.exports > 0 ? Math.min(100, (latestR.exports / Math.max(1, latestR.imports)) * 50) : 5;
-
-        setRadar([
-          { dimension: 'Yeterlilik', value: Math.min(100, latestR.sufficiency), fullMark: 100 },
-          { dimension: 'İthalat Bağımsızlığı', value: Math.max(0, 100 - impDep), fullMark: 100 },
-          { dimension: 'Fiyat Stabilitesi', value: priceStab, fullMark: 100 },
-          { dimension: 'Ticaret Dengesi', value: tradeBalance, fullMark: 100 },
-          { dimension: 'Üretim Stabilitesi', value: Math.max(0, 100 - volatility * 3), fullMark: 100 },
-        ]);
-      }
-
-      /* 6. Scatter — Tüm ürünler: Üretim vs Yeterlilik (son yıl) */
-      const [allSuff, allProd2] = await Promise.all([
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Yeterlilik derecesi' AND \`y2023/24\` > 0`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Üretim' AND \`y2023/24\` > 0`),
-      ]);
-
-      const suffMap: Record<string, number> = {};
-      for (const r of (allSuff.data || [])) suffMap[String(r.urun).trim()] = Number(r.val) || 0;
-      const scatter: ScatterPoint[] = [];
-      for (const r of (allProd2.data || [])) {
-        const name = String(r.urun).trim();
-        const prod = Number(r.val) || 0;
-        const suff = suffMap[name];
-        if (suff && suff > 0) scatter.push({ x: prod, y: suff, name, size: prod });
-      }
-      setScatterData(scatter.sort((a, b) => b.x - a.x).slice(0, 30));
-
-      /* 7. Global food security table */
-      const [fsTable, fsCons, fsImp, fsProd] = await Promise.all([
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Yeterlilik derecesi' ORDER BY CAST(\`y2023/24\` AS DECIMAL) ASC`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Kişi başına tüketim' ORDER BY urun`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as imp, \`y2022/23\` as imp_prev FROM tuik_urundenge WHERE \`fasıl\`='İthalat'`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as prod FROM tuik_urundenge WHERE \`fasıl\`='Üretim'`),
-      ]);
-
-      const consMap: Record<string, number> = {};
-      for (const r of (fsCons.data || [])) consMap[String(r.urun).trim()] = Number(r.val) || 0;
-      const impMap: Record<string, { imp: number; prev: number }> = {};
-      for (const r of (fsImp.data || [])) impMap[String(r.urun).trim()] = { imp: Number(r.imp) || 0, prev: Number(r.imp_prev) || 0 };
-      const prodMap2: Record<string, number> = {};
-      for (const r of (fsProd.data || [])) prodMap2[String(r.urun).trim()] = Number(r.prod) || 0;
-
-      const fsRows = (fsTable.data || [])
-        .filter(r => Number(r.val) > 0)
-        .map(r => {
-          const name = String(r.urun).trim();
-          const suff = Number(r.val) || 0;
-          const imp = impMap[name]?.imp || 0;
-          const prod = prodMap2[name] || 0;
-          const impDep = (prod + imp) > 0 ? (imp / (prod + imp)) * 100 : 0;
-          const impPrev = impMap[name]?.prev || 0;
-          const trend = impPrev > 0 ? ((imp - impPrev) / impPrev) * 100 : 0;
-          return {
-            product: name,
-            sufficiency: suff,
-            importDep: impDep,
-            consumption: consMap[name] || 0,
-            trend: trend > 5 ? '↑ İthalat artıyor' : trend < -5 ? '↓ İthalat azalıyor' : '→ Stabil',
-          };
-        });
-      setFoodSecurityTable(fsRows);
-
-    } catch (e) {
-      console.error('CrossIntelligence error:', e);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { loadCross(selected); }, [selected, loadCross]);
+  const {
+    loading, error,
+    selected, setSelected,
+    crossData, insights, radar, scatterData, foodSecurityTable,
+    product,
+    retry,
+  } = useCrossIntelligenceData();
 
   if (loading) return <Loading />;
-  if (error) return <ErrorState title="Çapraz analiz yüklenemedi" onRetry={() => loadCross(selected)} />;
+  if (error) return <ErrorState title="Çapraz analiz yüklenemedi" onRetry={retry} />;
 
   const latestRow = crossData[crossData.length - 1];
 
@@ -287,8 +43,8 @@ export default function CrossIntelligencePage() {
           value={selected}
           onChange={e => setSelected(Number(e.target.value))}
         >
-          {CROSS_PRODUCTS.map((p, i) => (
-            <option key={i} value={i}>{p.label}</option>
+          {['Buğday','Arpa','Mısır','Pirinç','Ayçiçeği','Şekerpancarı','Patates','Mercimek','Nohut','Çay'].map((label, i) => (
+            <option key={i} value={i}>{label}</option>
           ))}
         </select>
       </div>
@@ -347,7 +103,6 @@ export default function CrossIntelligencePage() {
 
       {/* Main Cross Chart + Radar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cross Time Series */}
         <div className="lg:col-span-2 rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
           <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <ArrowRightLeft className="w-4 h-4 text-green-600" />
@@ -373,7 +128,6 @@ export default function CrossIntelligencePage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Radar */}
         <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
           <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Shield className="w-4 h-4 text-green-600" />
@@ -423,7 +177,6 @@ export default function CrossIntelligencePage() {
                 </div>
               );
             }} />
-            {/* Reference line at 100% sufficiency */}
             <Scatter data={scatterData} fill="#16a34a">
               {scatterData.map((s, i) => (
                 <Cell key={i} fill={s.y >= 100 ? '#10b981' : s.y >= 80 ? '#f59e0b' : '#ef4444'} />
@@ -506,6 +259,136 @@ export default function CrossIntelligencePage() {
           </table>
         </div>
       </div>
+
+      {/* ── Korelasyon Matrisi Heatmap ──────────────────────────────── */}
+      {crossData.length > 4 && (() => {
+        type CKey = 'production' | 'imports' | 'exports' | 'priceIndex' | 'sufficiency';
+        const CORR_KEYS: Array<{ key: CKey; label: string }> = [
+          { key: 'production', label: 'Üretim' },
+          { key: 'imports', label: 'İthalat' },
+          { key: 'exports', label: 'İhracat' },
+          { key: 'priceIndex', label: 'Fiyat' },
+          { key: 'sufficiency', label: 'Yeterlilik' },
+        ];
+        const pearson = (xs: number[], ys: number[]): number => {
+          const n = xs.length;
+          const mx = xs.reduce((a, b) => a + b, 0) / n;
+          const my = ys.reduce((a, b) => a + b, 0) / n;
+          const num = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
+          const dx = Math.sqrt(xs.reduce((s, x) => s + (x - mx) ** 2, 0));
+          const dy = Math.sqrt(ys.reduce((s, y) => s + (y - my) ** 2, 0));
+          return dx * dy === 0 ? 0 : num / (dx * dy);
+        };
+        const cd = crossData as unknown as Record<CKey | 'year', number>[];
+        const matrix = CORR_KEYS.map(r =>
+          CORR_KEYS.map(c => pearson(cd.map(d => d[r.key]), cd.map(d => d[c.key])))
+        );
+        const cellBg = (v: number) =>
+          v >= 0.7 ? '#15803d' : v >= 0.4 ? '#4ade80' : v >= 0.1 ? '#bbf7d0' :
+          v >= -0.1 ? '#f1f5f9' : v >= -0.4 ? '#fca5a5' : v >= -0.7 ? '#ef4444' : '#991b1b';
+        const cellFg = (v: number) => (Math.abs(v) >= 0.4 ? '#fff' : 'var(--text-primary)');
+        return (
+          <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <ArrowRightLeft className="w-4 h-4 text-purple-600" />
+              Gösterge Korelasyon Matrisi — {product.label}
+            </h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Pearson korelasyon katsayısı (tüm yıllar). +1 = tam pozitif ilişki, -1 = tam negatif ilişki.
+            </p>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ borderCollapse: 'separate', borderSpacing: 3, margin: '0 auto' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: 90 }} />
+                    {CORR_KEYS.map(k => (
+                      <th key={k.key} style={{ padding: '4px 8px', fontSize: '0.75rem', textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        {k.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {CORR_KEYS.map((row, ri) => (
+                    <tr key={row.key}>
+                      <td style={{ padding: '4px 8px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, textAlign: 'right' }}>
+                        {row.label}
+                      </td>
+                      {matrix[ri].map((v, ci) => (
+                        <td key={ci} style={{
+                          padding: '10px 16px', textAlign: 'center',
+                          background: cellBg(v), color: cellFg(v),
+                          fontSize: '0.82rem', fontWeight: 700, borderRadius: 6,
+                        }}>
+                          {v.toFixed(2)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex items-center gap-3 mt-4 flex-wrap text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#15803d', borderRadius: 2 }} /> Güçlü (+)</span>
+              <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#4ade80', borderRadius: 2 }} /> Orta (+)</span>
+              <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#f1f5f9', borderRadius: 2, border: '1px solid #e5e7eb' }} /> Zayıf</span>
+              <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#fca5a5', borderRadius: 2 }} /> Orta (-)</span>
+              <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#991b1b', borderRadius: 2 }} /> Güçlü (-)</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Anomali Tespiti (Z-Skor) ─────────────────────────────── */}
+      {crossData.length > 4 && (() => {
+        const typed = crossData as unknown as { production: number; year: number }[];
+        const vals = typed.map(d => d.production);
+        const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+        const std = Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length) || 1;
+        const anomalyData = typed.map(d => ({
+          year: d.year,
+          production: d.production,
+          z: parseFloat(((d.production - mean) / std).toFixed(2)),
+          isOutlier: Math.abs((d.production - mean) / std) > 1.5,
+        }));
+        const outlierCount = anomalyData.filter(d => d.isOutlier).length;
+        return (
+          <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+              Üretim Anomali Tespiti — {product.label}
+            </h3>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+              Z-skor analizi · |z| &gt; 1,5 olan yıllar anomali olarak işaretlenir · Tespit edilen anomali: <strong>{outlierCount} yıl</strong>
+            </p>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={anomalyData} margin={{ top: 10, right: 55, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="year" fontSize={10} />
+                <YAxis yAxisId="prod" fontSize={9} tickFormatter={v => (v as number) > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`} />
+                <YAxis yAxisId="z" orientation="right" fontSize={9} domain={[-3.5, 3.5]} tickFormatter={v => `z${(v as number) >= 0 ? '+' : ''}${v}`} />
+                <Tooltip formatter={(v: number, name: string) => {
+                  if (name === 'Z-Skor') return [`z=${v}`, 'Z-Skor'];
+                  return [v > 1e6 ? `${(v / 1e6).toFixed(2)}M ton` : `${(v / 1e3).toFixed(0)}K ton`, 'Üretim'];
+                }} />
+                <ReferenceLine yAxisId="z" y={1.5} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: '+1.5σ', fontSize: 9, fill: '#f59e0b', position: 'right' }} />
+                <ReferenceLine yAxisId="z" y={-1.5} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: '-1.5σ', fontSize: 9, fill: '#f59e0b', position: 'right' }} />
+                <Bar yAxisId="prod" dataKey="production" name="Üretim" isAnimationActive={false}>
+                  {anomalyData.map((d, i) => (
+                    <Cell key={i} fill={d.isOutlier ? '#ef4444' : '#10b981'} fillOpacity={0.8} />
+                  ))}
+                </Bar>
+                <Line yAxisId="z" type="monotone" dataKey="z" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name="Z-Skor" />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div className="flex items-center gap-4 mt-3 text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /> Normal yıl</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /> Anomali (|z| &gt; 1,5)</span>
+              <span className="flex items-center gap-1"><span style={{ width: 20, height: 2, background: '#8b5cf6', display: 'inline-block', verticalAlign: 'middle' }} /> Z-skor</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Cross Correlation Explanation */}
       <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '2px solid #16a34a' }}>

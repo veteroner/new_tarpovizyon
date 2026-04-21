@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { TrendingUp, Wheat, Beef, MapPinned, Home, Scale } from 'lucide-react';
+import { TrendingUp, Wheat, Beef, MapPinned, Home, Scale, Package, DollarSign, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
 import '../styles/HomePage.css';
 
@@ -46,6 +46,14 @@ const worldCategories: CategoryCard[] = [
     description: 'Arazi kullanımı, gübre, istihdam',
     gradient: 'linear-gradient(135deg, #16a34a 0%, #14b8a6 100%)',
   },
+  {
+    id: 'food-balance',
+    title: 'GIDA DENGESİ',
+    icon: <UtensilsCrossed size={56} strokeWidth={1.8} />,
+    path: '/tarpovizyon/world/food-balance',
+    description: 'Arz-talep dengesi, gıda güvenliği, kalori analizi',
+    gradient: 'linear-gradient(135deg, #0d9488 0%, #065f46 100%)',
+  },
 ];
 
 // Türkiye (TÜİK) kategorileri
@@ -54,8 +62,8 @@ const turkeyCategories: CategoryCard[] = [
     id: 'macro',
     title: 'MAKRO VERİLER',
     icon: <TrendingUp size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/price-index',
-    description: 'Fiyat endeksleri, TÜFE, ÜFE, GFE',
+    path: '/tarpovizyon/turkey/macro',
+    description: 'Türkiye GSYH, tarım ekonomisi göstergeleri',
     gradient: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)',
   },
   {
@@ -63,7 +71,7 @@ const turkeyCategories: CategoryCard[] = [
     title: 'BİTKİSEL ÜRETİM',
     icon: <Wheat size={56} strokeWidth={1.8} />,
     path: '/tarpovizyon/turkey/plant-production',
-    description: 'Türkiye tahıl, sebze ve meyve',
+    description: 'TÜİK tahıl, sebze, meyve üretim verileri',
     gradient: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
   },
   {
@@ -75,11 +83,27 @@ const turkeyCategories: CategoryCard[] = [
     gradient: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
   },
   {
+    id: 'trade',
+    title: 'DIŞ TİCARET',
+    icon: <Package size={56} strokeWidth={1.8} />,
+    path: '/tarpovizyon/turkey/trade',
+    description: 'İhracat, ithalat, ticaret dengesi ve istihbarat',
+    gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+  },
+  {
+    id: 'price',
+    title: 'FİYAT ENDEKSLERİ',
+    icon: <DollarSign size={56} strokeWidth={1.8} />,
+    path: '/tarpovizyon/turkey/price-index',
+    description: 'TÜFE, Tarım-ÜFE, GFE, FAO fiyat endeksleri',
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+  },
+  {
     id: 'provincial',
     title: 'İL BAZINDA VERİLER',
     icon: <MapPinned size={56} strokeWidth={1.8} />,
     path: '/tarpovizyon/turkey/provincial',
-    description: 'İl bazında detaylı tarımsal istatistikler',
+    description: 'İl bazında hayvancılık, bitkisel, havza, coğrafi işaret',
     gradient: 'linear-gradient(135deg, #16a34a 0%, #14b8a6 100%)',
   },
   {

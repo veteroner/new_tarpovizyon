@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line,
-  ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
+  PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart,
+  ResponsiveContainer, Scatter, ScatterChart, Tooltip, Treemap, XAxis, YAxis, ZAxis,
 } from 'recharts';
 import { Search, TrendingUp, TrendingDown, Scale, Package, Globe } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
@@ -312,6 +314,120 @@ export default function ProductIntelligenceTab() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* ScatterChart + RadarChart grid */}
+          <div className="chart-grid" style={{ marginTop: 16 }}>
+            <div className="chart-card">
+              <h3 className="chart-title">🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge</h3>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
+              </div>
+              <ResponsiveContainer width="100%" height={320}>
+                <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis
+                    type="number" dataKey="x" name="İhracat Payı (%)"
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                    label={{ value: 'İhracat Payı (%)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)', fontSize: 11 }}
+                  />
+                  <YAxis
+                    type="number" dataKey="y" name="Denge ($M)"
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                    tickFormatter={v => `$${Number(v).toFixed(0)}M`}
+                  />
+                  <ZAxis type="number" dataKey="z" range={[40, 600]} name="İhracat ($M)" />
+                  <Tooltip
+                    cursor={{ strokeDasharray: '3 3' }}
+                    content={({ payload }: any) => {
+                      if (!payload?.length) return null;
+                      const d = payload[0].payload;
+                      return (
+                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                          <div style={{ fontWeight: 700, marginBottom: 4 }}>{d.name}</div>
+                          <div>İhracat Payı: %{d.x.toFixed(1)}</div>
+                          <div>Denge: ${d.y.toFixed(1)}M</div>
+                          <div>İhracat: ${d.z.toFixed(1)}M</div>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Scatter
+                    data={countries.map(c => ({
+                      x: totalExp > 0 ? parseFloat((c.exp / totalExp * 100).toFixed(2)) : 0,
+                      y: parseFloat((c.balance / 1e6).toFixed(2)),
+                      z: parseFloat((c.exp / 1e6).toFixed(2)),
+                      name: c.name,
+                    }))}
+                    fill="#6366f1"
+                  >
+                    {countries.map((_c, i) => (
+                      <Cell key={i} fill={_c.balance >= 0 ? '#10b981' : '#ef4444'} fillOpacity={0.75} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3 className="chart-title">🕸️ {selectedProduct} Rekabet Profili</h3>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                Her boyut 0–100 skor · Büyük alan = güçlü rekabet pozisyonu
+              </div>
+              <ResponsiveContainer width="100%" height={320}>
+                <RadarChart data={[
+                  { metric: 'İhracat Hacmi', value: Math.min(100, (totalExp / 5e8) * 100) },
+                  { metric: 'YoY Büyüme', value: Math.min(100, Math.max(0, yoyGrowth + 50)) },
+                  { metric: 'Pazar Çeşitliliği', value: Math.min(100, (countryCount / 40) * 100) },
+                  { metric: 'İhr/İth Oranı', value: totalExp + totalImp > 0 ? (totalExp / (totalExp + totalImp)) * 100 : 50 },
+                  { metric: 'Denge Skoru', value: totalExp + totalImp > 0 ? Math.min(100, Math.max(0, 50 + (balance / (totalExp + totalImp)) * 100)) : 50 },
+                ]}>
+                  <PolarGrid stroke="var(--border)" />
+                  <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+                  <Radar name={selectedProduct} dataKey="value" stroke="#6366f1" fill="#6366f1" fillOpacity={0.35} strokeWidth={2} />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(1)}`, 'Skor']} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Treemap — ülke ihracat dağılımı */}
+          <div className="chart-card" style={{ marginTop: 16 }}>
+            <h3 className="chart-title">🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</h3>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              Alan büyüklüğü ihracat değerine orantılı · İlk 15 ülke
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <Treemap
+                data={countries.slice(0, 15).map(c => ({
+                  name: c.name.length > 14 ? c.name.substring(0, 14) + '.' : c.name,
+                  size: c.exp,
+                  fullName: c.name,
+                }))}
+                dataKey="size"
+                stroke="var(--bg)"
+                content={(props: any) => {
+                  const { x, y, width, height, name } = props;
+                  const size = props.size ?? props.value ?? 0;
+                  if (!width || !height || width < 20 || height < 15) return <g />;
+                  const COLORS = ['#6366f1','#8b5cf6','#a78bfa','#7c3aed','#4f46e5','#4338ca','#818cf8','#c4b5fd','#7dd3fc','#38bdf8','#0ea5e9','#22d3ee','#34d399','#6ee7b7','#86efac'];
+                  const fi = countries.slice(0, 15).findIndex(c => (c.name.length > 14 ? c.name.substring(0, 14) + '.' : c.name) === name);
+                  const fill = COLORS[fi >= 0 ? fi : 0];
+                  return (
+                    <g>
+                      <rect x={x} y={y} width={width} height={height} fill={fill} fillOpacity={0.8} stroke="var(--bg)" strokeWidth={2} rx={3} />
+                      {width > 50 && height > 25 && (
+                        <>
+                          <text x={x + width / 2} y={y + height / 2 - 5} textAnchor="middle" fill="#fff" fontSize={Math.min(12, width / 5)} fontWeight={600}>{name}</text>
+                          <text x={x + width / 2} y={y + height / 2 + 10} textAnchor="middle" fill="rgba(255,255,255,0.85)" fontSize={Math.min(10, width / 6)}>${(size / 1e6).toFixed(1)}M</text>
+                        </>
+                      )}
+                    </g>
+                  );
+                }}
+              />
+            </ResponsiveContainer>
           </div>
         </>
       )}
