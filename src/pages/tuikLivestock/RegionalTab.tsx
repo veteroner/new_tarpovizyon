@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, Legend,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import TurkeyHeatMap from '../../components/TurkeyHeatMap';
+import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { COLORS, REGION_COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 

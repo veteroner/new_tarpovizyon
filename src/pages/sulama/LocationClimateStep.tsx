@@ -1,5 +1,5 @@
 import React from 'react';
-import { WeatherWidget } from '../../components/WeatherWidget';
+import WeatherWidget from '../../components/WeatherWidget';
 import {
   ILLER, getBolge, BOLGE_META, getETo, getYagis,
   type WizardState,

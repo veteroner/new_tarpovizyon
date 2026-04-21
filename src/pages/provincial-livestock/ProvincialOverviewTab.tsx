@@ -2,7 +2,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
-import TurkeyHeatMap from '../../components/TurkeyHeatMap';
+import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import {
   formatNumber,
   formatShort,

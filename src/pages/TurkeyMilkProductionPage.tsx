@@ -1,4 +1,4 @@
-import useMilkData from './milk/useMilkData';
+import { useMilkData } from './milk/useMilkData';
 import MilkHeroSection from './milk/MilkHeroSection';
 import MilkProductionSection from './milk/MilkProductionSection';
 import MilkIndustrySection from './milk/MilkIndustrySection';
