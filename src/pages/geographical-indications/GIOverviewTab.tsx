@@ -1,7 +1,7 @@
 import {
   PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer
 } from 'recharts';
-import TurkeyHeatMap from '../../components/TurkeyHeatMap';
+import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import type { ProvinceData, GIMetrics } from './giTypes';
 import { COLORS, formatNumber } from './giTypes';
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../services/api';
+import { fetchQuery } from '../../services/api';
 
 export const YEAR_COLS = [
   'y2015/16', 'y2016/17', 'y2017/18', 'y2018/19', 'y2019/20',

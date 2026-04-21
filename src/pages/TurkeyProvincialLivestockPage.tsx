@@ -1,4 +1,4 @@
-import Loading from '../components/Loading';
+import { Loading } from '../components/Loading';
 import { useProvincialLivestockData } from './provincial-livestock/useProvincialLivestockData';
 import ProvincialLivestockHeader from './provincial-livestock/ProvincialLivestockHeader';
 import ProvincialOverviewTab from './provincial-livestock/ProvincialOverviewTab';
