@@ -11,7 +11,6 @@ import {
   type ImportData,
   type WorldRankings,
   extractYear,
-  formatTon,
 } from './redmeat/redMeatUtils';
 import ProductionOverviewSection from './redmeat/ProductionOverviewSection';
 import SpeciesDetailSection from './redmeat/SpeciesDetailSection';

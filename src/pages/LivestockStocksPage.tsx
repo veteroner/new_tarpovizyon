@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchQuery } from '../services/api';
-import { Tab, PrimaryTab } from './livestock/livestockUtils';
+import type { Tab, PrimaryTab } from './livestock/livestockUtils';
 import LivestockOverviewSection from './livestock/LivestockOverviewSection';
 import LivestockStocksSection from './livestock/LivestockStocksSection';
 import LivestockPrimarySection from './livestock/LivestockPrimarySection';

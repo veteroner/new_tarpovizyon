@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { fetchQuery } from '../../services/api';
-import { 
-  BasinData, BasinSummary, DistrictProduct, DistrictProductionItem, BASIN_COLORS 
-} from './basinUtils';
+import { BASIN_COLORS } from './basinUtils';
+import type { BasinData, BasinSummary, DistrictProduct, DistrictProductionItem } from './basinUtils';
 import DistrictMap from './DistrictMap';
 
 interface BasinDistrictsSectionProps {

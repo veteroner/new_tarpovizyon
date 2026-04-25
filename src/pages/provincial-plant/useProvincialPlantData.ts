@@ -15,7 +15,6 @@ import {
   TABLE_NAME,
   YEARS,
   DEFAULT_PRODUCTS,
-  UNSUR_OPTIONS,
   REGION_COLORS,
   DEFAULT_METRICS,
 } from './provincialPlantUtils';

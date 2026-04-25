@@ -4,17 +4,20 @@ import {
 } from 'recharts';
 import {
   Wheat, TrendingUp, AlertTriangle, ShieldCheck, ShieldAlert,
-  Scale, ArrowRightLeft, Package, Users, BarChart3, Activity, Search,
+  Scale, Package, Users, BarChart3, Activity, Search, ArrowRightLeft,
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
-import { SankeyDiagram } from '../components/SankeyDiagram';
+import { FlowSankeyCard } from '../components/FlowSankeyCard';
 import {
   useProductBalanceData,
   YEAR_LABELS, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor,
   fmt, pct,
-  GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, PURPLE, CYAN, AREA_COLORS,
+  GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
 } from './productBalance/useProductBalanceData';
+
+const CYAN = '#06b6d4';
+const PURPLE = '#8b5cf6';
 
 /* ─── Local KPI Card ─── */
 function KPI({ icon: Icon, title, value, sub, color, alert }: {
@@ -50,6 +53,41 @@ export default function ProductBalancePage() {
     perCapitaChartData, perCapitaProducts,
     loadDetail,
   } = useProductBalanceData();
+
+  const humanConsumption = get('İnsan tüketimi');
+  const industrialUse = get('Endüstriyel kullanım');
+  const feedUse = get('Yemlik kullanım');
+  const seedUse = get('Tohumluk kullanım');
+  const losses = get('Üretim kayıpları') + get('Kayıplar');
+  const domesticUse = Math.max(
+    0,
+    humanConsumption + industrialUse + feedUse + seedUse + Math.max(0, losses) + Math.max(0, stockChange),
+  );
+
+  const sankeyNodes = [
+    { name: 'Üretim', color: GREEN },
+    { name: 'İthalat', color: BLUE },
+    { name: 'Toplam Arz', color: '#6366f1' },
+    { name: 'Doğrudan Tüketim', color: ORANGE },
+    { name: 'İşleme', color: CYAN },
+    { name: 'Yem', color: PURPLE },
+    { name: 'Tohum', color: '#64748b' },
+    { name: 'Kayıp / Stok', color: '#a855f7' },
+    { name: 'İhracat', color: RED },
+  ];
+
+  const sankeyLinks = [
+    { source: 0, target: 2, value: production },
+    ...(imports > 0 ? [{ source: 1, target: 2, value: imports }] : []),
+    ...(humanConsumption > 0 ? [{ source: 2, target: 3, value: humanConsumption }] : []),
+    ...(industrialUse > 0 ? [{ source: 2, target: 4, value: industrialUse }] : []),
+    ...(feedUse > 0 ? [{ source: 2, target: 5, value: feedUse }] : []),
+    ...(seedUse > 0 ? [{ source: 2, target: 6, value: seedUse }] : []),
+    ...(domesticUse - humanConsumption - industrialUse - feedUse - seedUse > 0
+      ? [{ source: 2, target: 7, value: domesticUse - humanConsumption - industrialUse - feedUse - seedUse }]
+      : []),
+    ...(exports > 0 ? [{ source: 2, target: 8, value: exports }] : []),
+  ];
 
   if (error && !loading) return <ErrorState title="Ürün dengesi yüklenemedi" onRetry={() => selectedProduct && loadDetail(selectedProduct)} />;
 
@@ -199,29 +237,14 @@ export default function ProductBalancePage() {
 
           {/* ─── Sankey Akış ─── */}
           {production > 0 && (
-            <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-              <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                <ArrowRightLeft size={16} className="text-green-600" />
-                Arz-Kullanım Akış Diyagramı — {selectedProduct} ({YEAR_KEYS[latestIdx].replace('y', '')})
-              </h3>
-              <SankeyDiagram
-                nodes={[
-                  { name: 'Üretim', color: GREEN },
-                  { name: 'İthalat', color: BLUE },
-                  { name: 'Toplam Arz', color: '#6366f1' },
-                  { name: 'İç Kullanım', color: ORANGE },
-                  { name: 'İhracat', color: RED },
-                ]}
-                links={[
-                  { source: 0, target: 2, value: production },
-                  ...(imports > 0 ? [{ source: 1, target: 2, value: imports }] : []),
-                  { source: 2, target: 3, value: Math.max(0, production + Math.max(0, imports) - exports) },
-                  ...(exports > 0 ? [{ source: 2, target: 4, value: exports }] : []),
-                ]}
-                height={280}
-                formatValue={v => fmt(v, 0)}
-              />
-            </div>
+            <FlowSankeyCard
+              title={`Arz-Kullanım Akış Diyagramı — ${selectedProduct} (${YEAR_KEYS[latestIdx].replace('y', '')})`}
+              subtitle="Üretim ve ithalatın doğrudan tüketim, işleme, yem, tohum, kayıp/stok ve ihracata dağılımı"
+              nodes={sankeyNodes}
+              links={sankeyLinks}
+              height={320}
+              formatValue={v => `${fmt(v, 0)} Ton`}
+            />
           )}
 
           {/* ─── Detail Table ─── */}

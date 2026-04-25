@@ -8,8 +8,9 @@ import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import {
-  useAgriculturalEmploymentData, Tab, TABS, formatPop, formatShort, formatPercent
+  useAgriculturalEmploymentData, TABS, formatPop, formatShort, formatPercent
 } from './agriculturalEmployment/useAgriculturalEmploymentData';
+import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');

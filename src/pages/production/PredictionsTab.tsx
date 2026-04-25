@@ -10,9 +10,8 @@ import { formatValue, formatShort, formatYield, formatHa } from './productionTyp
 import type { Insight, PredKPIs, ForecastData } from './productionTypes';
 
 // Local icon stand-ins
-const Leaf = (props: any) => <TrendingUp {...props} />;
-const Sprout = (props: any) => <TrendingUp {...props} />;
-const Target = (props: any) => <Activity {...props} />;
+const Leaf: typeof TrendingUp = TrendingUp;
+const Target: typeof TrendingUp = TrendingUp;
 
 interface PredictionsTabProps {
   predProduct: string;
@@ -51,7 +50,7 @@ export function PredictionsTab({
     <div style={{ animation: 'slideInUp 0.4s ease-out' }}>
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', padding: '16px', background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--border)', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '250px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Sprout size={14} /> Tahmin Analizi</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}><Leaf size={14} /> Tahmin Analizi</label>
           <select value={predProduct} onChange={(e) => setPredProduct(e.target.value)}
             style={{ width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px' }}>
             {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}

@@ -3,21 +3,27 @@ import {
   ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis,
 } from 'recharts';
 import { TrendingUp, TrendingDown, Scale, ArrowLeftRight, Zap, AlertTriangle } from 'lucide-react';
+import { FlowSankeyCard } from '../../components/FlowSankeyCard';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { TreemapContent } from '../../components/TreemapContent';
-import { SankeyDiagram } from '../../components/SankeyDiagram';
 import { formatMoney } from '../../services/api';
 import { useTradeOverviewData } from './useTradeOverviewData';
+
+const GROUP_FILTER_LABELS = {
+  all: 'Tum Gruplar',
+  bitkisel: 'Bitkisel',
+  hayvansal: 'Hayvansal',
+} as const;
 
 export default function TradeOverviewTab() {
   const {
     loading,
     selectedYear, setSelectedYear, yearOptions,
+    productGroupFilter, setProductGroupFilter,
     expTotal, impTotal,
-    plantExp,
     monthlyData, yearlyData,
-    topExpProducts, topImpProducts, topExpCountries,
+    topExpProducts, topImpProducts, topExpCountries, topImpCountries,
     fastestGrowing, biggestImportIncrease, top5CountryShare,
     balance, ratio, yoyExpGrowth, plantShare,
     treemapExpData, treemapImpData,
@@ -34,6 +40,33 @@ export default function TradeOverviewTab() {
           <select className="filter-select" value={selectedYear} onChange={e => setSelectedYear(e.target.value)}>
             {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+        </div>
+      </div>
+
+      <div className="date-filter" style={{ marginBottom: 20 }}>
+        <div className="filter-group" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label className="filter-label">Urun Grubu Filtresi</label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {Object.entries(GROUP_FILTER_LABELS).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setProductGroupFilter(value as keyof typeof GROUP_FILTER_LABELS)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 999,
+                  border: '1px solid var(--border)',
+                  background: productGroupFilter === value ? 'var(--primary)' : 'var(--bg-card)',
+                  color: productGroupFilter === value ? '#fff' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -201,7 +234,7 @@ export default function TradeOverviewTab() {
       {/* Charts Row 2: Treemaps */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🟢 İhracat Ürün Dağılımı ({selectedYear})</h3>
+          <h3 className="chart-title">🟢 İhracat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
           <ResponsiveContainer width="100%" height={350}>
             <Treemap data={treemapExpData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapExpData.map((entry, i) => (
@@ -213,7 +246,7 @@ export default function TradeOverviewTab() {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🟠 İthalat Ürün Dağılımı ({selectedYear})</h3>
+          <h3 className="chart-title">🟠 İthalat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
           <ResponsiveContainer width="100%" height={350}>
             <Treemap data={treemapImpData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapImpData.map((entry, i) => (
@@ -228,7 +261,7 @@ export default function TradeOverviewTab() {
       {/* Charts Row 3: Countries */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <h3 className="chart-title">🌍 Top 10 İhracat Ülkesi - İhracat vs İthalat ({selectedYear})</h3>
+          <h3 className="chart-title">🌍 Top 10 İhracat Ülkesi - İhracat vs İthalat ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topExpCountries.map(c => ({
               name: c.name.length > 18 ? c.name.substring(0, 18) + '..' : c.name,
@@ -249,31 +282,41 @@ export default function TradeOverviewTab() {
 
       {/* Sankey: İhracat Akış */}
       {topExpCountries.length > 0 && (
-        <div className="chart-grid">
-          <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-            <h3 className="chart-title">🌊 İhracat Akış Haritası — Türkiye → Hedef Ülkeler ({selectedYear})</h3>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
-              Türkiye ihracatının ülkelere dağılımı
-            </p>
-            <SankeyDiagram
-              nodes={[
-                { name: 'Türkiye', color: '#10b981' },
-                ...topExpCountries.map(c => ({
-                  name: c.name.length > 18 ? c.name.slice(0, 17) + '..' : c.name,
-                })),
-              ]}
-              links={topExpCountries.map((c, i) => ({ source: 0, target: i + 1, value: c.exp }))}
-              height={420}
-              formatValue={v => formatMoney(v)}
-            />
-          </div>
-        </div>
+        <FlowSankeyCard
+          title={`🌊 İhracat Akış Haritası — Türkiye → Hedef Ülkeler (${selectedYear})`}
+          subtitle={`${GROUP_FILTER_LABELS[productGroupFilter]} ihracatının ülkelere dağılımı`}
+          nodes={[
+            { name: 'Türkiye', color: '#10b981' },
+            ...topExpCountries.map(c => ({
+              name: c.name.length > 18 ? c.name.slice(0, 17) + '..' : c.name,
+            })),
+          ]}
+          links={topExpCountries.map((c, i) => ({ source: 0, target: i + 1, value: c.exp }))}
+          height={420}
+          formatValue={v => formatMoney(v)}
+        />
+      )}
+
+      {topImpCountries.length > 0 && (
+        <FlowSankeyCard
+          title={`🌊 İthalat Akış Haritası — Kaynak Ülkeler → Türkiye (${selectedYear})`}
+          subtitle={`${GROUP_FILTER_LABELS[productGroupFilter]} ithalatının kaynak ülke dağılımı`}
+          nodes={[
+            ...topImpCountries.map(c => ({
+              name: c.name.length > 18 ? c.name.slice(0, 17) + '..' : c.name,
+            })),
+            { name: 'Türkiye', color: '#f59e0b' },
+          ]}
+          links={topImpCountries.map((c, i) => ({ source: i, target: topImpCountries.length, value: c.imp }))}
+          height={420}
+          formatValue={v => formatMoney(v)}
+        />
       )}
 
       {/* Products Tables */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🏆 Top İhracat Ürünleri ({selectedYear})</h3>
+          <h3 className="chart-title">🏆 Top İhracat Ürünleri ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
           <div style={{ maxHeight: 400, overflow: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
@@ -313,7 +356,7 @@ export default function TradeOverviewTab() {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📦 Top İthalat Ürünleri ({selectedYear})</h3>
+          <h3 className="chart-title">📦 Top İthalat Ürünleri ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
           <div style={{ maxHeight: 400, overflow: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>

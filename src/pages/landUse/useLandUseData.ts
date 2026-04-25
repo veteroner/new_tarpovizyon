@@ -18,6 +18,89 @@ export const CHART_COLORS = [
   '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#14b8a6'
 ];
 
+interface LandUseCrosswalkTarget {
+  target: string;
+  weight: number;
+  rationale: string;
+}
+
+interface LandUseCrosswalkRule {
+  source: string;
+  targets: LandUseCrosswalkTarget[];
+}
+
+interface CsvTransitionRow {
+  source_item: string;
+  target_item: string;
+  weight: number;
+  rationale: string;
+  source_system?: string;
+  target_system?: string;
+  valid_from_year?: string;
+  valid_to_year?: string;
+  notes?: string;
+}
+
+export const LAND_USE_CROSSWALK_RULES: LandUseCrosswalkRule[] = [
+  {
+    source: 'Geçici nadas alanı',
+    targets: [
+      { target: 'Ekili alan', weight: 0.5, rationale: 'Kısa vadede tekrar üretime dönme olasılığı en yüksek yüzey.' },
+      { target: 'İşlenebilir arazi', weight: 0.25, rationale: 'Nadas alanı çoğu zaman işlenebilir stok içinde yeniden emilir.' },
+      { target: 'Çok yıllık ürünler', weight: 0.15, rationale: 'Bahçe ve çok yıllık dikim dönüşümü sınırlı ama olası.' },
+      { target: 'Sürekli çayırlar ve meralar', weight: 0.1, rationale: 'Kullanım bırakılan parsellerin mera rejimine kayması mümkün.' },
+    ],
+  },
+  {
+    source: 'İşlenebilir arazi',
+    targets: [
+      { target: 'Ekili alan', weight: 0.45, rationale: 'İşlenebilir yüzeyin önemli kısmı fiilen ekili alana dönüşür.' },
+      { target: 'Çok yıllık ürünler', weight: 0.2, rationale: 'Meyve-bahçe kurulumları işlenebilir tabandan beslenir.' },
+      { target: 'Sürekli çayırlar ve meralar', weight: 0.2, rationale: 'Kullanım yoğunluğu düşen alanlar otlak rejimine kayabilir.' },
+      { target: 'Orman alanı', weight: 0.15, rationale: 'Ormanlaştırma veya doğal geri kazanım etkisi sınırlı ama mümkündür.' },
+    ],
+  },
+  {
+    source: 'Sürekli çayırlar ve meralar',
+    targets: [
+      { target: 'Ekili alan', weight: 0.35, rationale: 'Tarımsal genişleme çoğu zaman mera çözülmesinden beslenir.' },
+      { target: 'İşlenebilir arazi', weight: 0.25, rationale: 'İlk geçiş çoğu durumda işlenebilir stok olarak görünür.' },
+      { target: 'Orman alanı', weight: 0.25, rationale: 'Terk edilen meraların doğal ardıllıkla ormana dönmesi mümkündür.' },
+      { target: 'Çok yıllık ürünler', weight: 0.15, rationale: 'Daha yoğun kullanım senaryosunda çok yıllık dikim oluşabilir.' },
+    ],
+  },
+  {
+    source: 'Orman alanı',
+    targets: [
+      { target: 'İşlenebilir arazi', weight: 0.35, rationale: 'Arazi açılması önce işlenebilir sınıfta görünür.' },
+      { target: 'Ekili alan', weight: 0.35, rationale: 'Doğrudan tarıma açılan alan etkisi.' },
+      { target: 'Sürekli çayırlar ve meralar', weight: 0.2, rationale: 'Orman çözülmesi sonrası düşük yoğunluklu kullanım.' },
+      { target: 'Çok yıllık ürünler', weight: 0.1, rationale: 'Sınırlı bağ-bahçe dönüşümleri.' },
+    ],
+  },
+  {
+    source: 'Ekili alan',
+    targets: [
+      { target: 'İşlenebilir arazi', weight: 0.4, rationale: 'Ekim deseninden çıkan yüzey önce işlenebilir stokta görünür.' },
+      { target: 'Geçici nadas alanı', weight: 0.25, rationale: 'Dinlendirme ve döngüsel nadas etkisi.' },
+      { target: 'Çok yıllık ürünler', weight: 0.2, rationale: 'Bahçe ve kalıcı ürün desenine geçiş.' },
+      { target: 'Sürekli çayırlar ve meralar', weight: 0.15, rationale: 'Düşük yoğunluklu kullanıma çekilme.' },
+    ],
+  },
+  {
+    source: 'Çok yıllık ürünler',
+    targets: [
+      { target: 'Ekili alan', weight: 0.35, rationale: 'Bahçeden tarla desenine geri dönüş.' },
+      { target: 'İşlenebilir arazi', weight: 0.3, rationale: 'Söküm sonrası işlenebilir stokta iz bırakması.' },
+      { target: 'Orman alanı', weight: 0.2, rationale: 'Terk edilen perennial alanların doğal geri kazanımı.' },
+      { target: 'Geçici nadas alanı', weight: 0.15, rationale: 'Üretim dışına çıkan alanın geçici bekleme dönemi.' },
+    ],
+  },
+];
+
+const LAND_USE_TRANSITION_MATRIX_PATH = '/data/land-use-transition-matrix.csv';
+export const LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY = 'land-use-transition-matrix-override';
+
 /* ── Format helpers ────────────────────────────────────────── */
 export function formatArea(value: number): string {
   if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyar ha';
@@ -35,8 +118,149 @@ export function formatPercent(value: number): string {
   return '%' + value.toFixed(1);
 }
 
+function shortLandUseLabel(name: string): string {
+  return name
+    .replace('Sürekli çayırlar ve meralar', 'Mera')
+    .replace('Geçici nadas alanı', 'Nadas')
+    .replace('İşlenebilir arazi', 'İşlenebilir')
+    .replace('Çok yıllık ürünler', 'Cok Yillik')
+    .replace('Ekili alan', 'Ekili')
+    .replace('Orman alanı', 'Orman');
+}
+
+function buildCrosswalkLinks(
+  normalized: Array<any>,
+  nodeIndex: Map<string, number>,
+  matchedFlow: number,
+  totalLoss: number,
+  crosswalkRules: LandUseCrosswalkRule[],
+) {
+  const gainMap = new Map(normalized.map(item => [item.name, item.gain]));
+  const ruleMap = new Map(crosswalkRules.map(rule => [rule.source, rule.targets]));
+  const links: Array<{ source: number; target: number; value: number }> = [];
+  let allocatedMatchedFlow = 0;
+
+  normalized.forEach(item => {
+    if (item.loss <= 0 || matchedFlow <= 0) return;
+    const preferredTargets = (ruleMap.get(item.name) || [])
+      .map(target => ({ ...target, availableGain: gainMap.get(target.target) || 0 }))
+      .filter(target => target.availableGain > 0);
+    const weightTotal = preferredTargets.reduce((sum, target) => sum + (target.weight * target.availableGain), 0);
+    if (weightTotal <= 0) return;
+
+    const matchedLoss = totalLoss > 0 ? matchedFlow * (item.loss / totalLoss) : 0;
+    preferredTargets.forEach(target => {
+      const value = matchedLoss * ((target.weight * target.availableGain) / weightTotal);
+      if (value <= 1) return;
+      links.push({
+        source: nodeIndex.get(`${item.shortName}-start`)!,
+        target: nodeIndex.get(`${shortLandUseLabel(target.target)}-end`)!,
+        value,
+      });
+      allocatedMatchedFlow += value;
+    });
+  });
+
+  return { links, allocatedMatchedFlow };
+}
+
+function parseCsvLine(line: string): string[] {
+  const values: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"') {
+      if (inQuotes && line[index + 1] === '"') {
+        current += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (character === ',' && !inQuotes) {
+      values.push(current.trim());
+      current = '';
+    } else {
+      current += character;
+    }
+  }
+
+  values.push(current.trim());
+  return values.map(value => value.replace(/^"|"$/g, ''));
+}
+
+function parseTransitionMatrixCsv(text: string): CsvTransitionRow[] {
+  const lines = text
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !line.startsWith('#'));
+  if (lines.length < 2) return [];
+
+  const headers = parseCsvLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const columns = parseCsvLine(line);
+    const row: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      row[header] = columns[index] || '';
+    });
+    return {
+      source_item: row.source_item || '',
+      target_item: row.target_item || '',
+      weight: Number(row.weight) || 0,
+      rationale: row.rationale || '',
+      source_system: row.source_system || '',
+      target_system: row.target_system || '',
+      valid_from_year: row.valid_from_year || '',
+      valid_to_year: row.valid_to_year || '',
+      notes: row.notes || '',
+    };
+  });
+}
+
+function normalizeTransitionRows(rows: CsvTransitionRow[]): LandUseCrosswalkRule[] {
+  const grouped = new Map<string, LandUseCrosswalkTarget[]>();
+  rows.forEach(row => {
+    if (!row.source_item || !row.target_item || row.weight <= 0) return;
+    const targets = grouped.get(row.source_item) || [];
+    targets.push({
+      target: row.target_item,
+      weight: row.weight,
+      rationale: row.rationale || row.notes || 'CSV override kuralı',
+    });
+    grouped.set(row.source_item, targets);
+  });
+
+  return Array.from(grouped.entries()).map(([source, targets]) => ({
+    source,
+    targets,
+  }));
+}
+
+async function loadTransitionMatrixOverrides(): Promise<{ rules: LandUseCrosswalkRule[]; source: string } | null> {
+  try {
+    if (typeof window !== 'undefined') {
+      const localOverride = window.localStorage.getItem(LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY);
+      if (localOverride) {
+        const normalizedLocal = normalizeTransitionRows(parseTransitionMatrixCsv(localOverride));
+        if (normalizedLocal.length > 0) {
+          return { rules: normalizedLocal, source: 'local-admin-import' };
+        }
+      }
+    }
+    const response = await fetch(LAND_USE_TRANSITION_MATRIX_PATH);
+    if (!response.ok) return null;
+    const text = await response.text();
+    const rows = parseTransitionMatrixCsv(text);
+    const normalized = normalizeTransitionRows(rows);
+    return normalized.length > 0 ? { rules: normalized, source: LAND_USE_TRANSITION_MATRIX_PATH } : null;
+  } catch {
+    return null;
+  }
+}
+
 /* ── Hook ──────────────────────────────────────────────────── */
-export function useLandUseData(activeTab: Tab) {
+export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
   const [loading, setLoading] = useState(true);
 
   // Overview state
@@ -49,7 +273,9 @@ export function useLandUseData(activeTab: Tab) {
   // Transformation state
   const [transformData, setTransformData] = useState<any[]>([]);
   const [transformComparison, setTransformComparison] = useState<any[]>([]);
+  const [transformFlowModel, setTransformFlowModel] = useState<any>(null);
   const [transformInsights, setTransformInsights] = useState<Insight[]>([]);
+  const [transitionMatrixMeta, setTransitionMatrixMeta] = useState<any>(null);
 
   // Benchmark state
   const [benchmarkData, setBenchmarkData] = useState<any[]>([]);
@@ -146,10 +372,12 @@ export function useLandUseData(activeTab: Tab) {
   const loadTransformationData = useCallback(async () => {
     setLoading(true);
     try {
-      const ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı')";
+      const ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı','Ekili alan','Çok yıllık ürünler')";
       const [turkeyTimeRes] = await Promise.all([
         fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND item_tr IN ${ITEMS} AND CAST(year AS SIGNED) >= 2000 ORDER BY year`),
       ]);
+      const overridePayload = await loadTransitionMatrixOverrides();
+      const effectiveCrosswalkRules = overridePayload?.rules || LAND_USE_CROSSWALK_RULES;
 
       const turkeyByType: Record<string, YearValue[]> = {};
       (turkeyTimeRes.data || []).forEach((r: any) => {
@@ -169,6 +397,98 @@ export function useLandUseData(activeTab: Tab) {
         }
       }
       setTransformComparison(transformComp);
+
+      const flowCandidates = transformComp.filter(item =>
+        !['Tarım arazisi', 'Sulama altyapısı bulunan arazi'].includes(item.name),
+      );
+      const startYear = flowCandidates[0]?.startYear || '2000';
+      const endYear = flowCandidates[0]?.endYear || '2023';
+      const normalized = flowCandidates.map(item => ({
+        ...item,
+        shortName: shortLandUseLabel(item.name),
+        stable: Math.max(0, Math.min(item.startValue, item.endValue)),
+        loss: Math.max(0, item.startValue - item.endValue),
+        gain: Math.max(0, item.endValue - item.startValue),
+      }));
+      const totalLoss = normalized.reduce((sum, item) => sum + item.loss, 0);
+      const totalGain = normalized.reduce((sum, item) => sum + item.gain, 0);
+      const matchedFlow = Math.min(totalLoss, totalGain);
+
+      const nodeEntries = normalized.flatMap(item => ([
+        { key: `${item.shortName}-start`, name: `${item.shortName} (${startYear})`, color: item.loss > 0 ? '#ef4444' : '#94a3b8' },
+        { key: `${item.shortName}-end`, name: `${item.shortName} (${endYear})`, color: item.gain > 0 ? '#22c55e' : '#94a3b8' },
+      ]));
+      if (totalLoss > matchedFlow) {
+        nodeEntries.push({ key: 'residual-loss', name: 'Net Kayip / Belirsiz Cikis', color: '#7c3aed' });
+      }
+      if (totalGain > matchedFlow) {
+        nodeEntries.push({ key: 'residual-gain', name: 'Siniflama Farki / Net Kazanim', color: '#06b6d4' });
+      }
+
+      const nodeIndex = new Map(nodeEntries.map((node, index) => [node.key, index]));
+      const { links: crosswalkLinks, allocatedMatchedFlow } = buildCrosswalkLinks(
+        normalized,
+        nodeIndex,
+        matchedFlow,
+        totalLoss,
+        effectiveCrosswalkRules,
+      );
+      const residualMatchedFlow = Math.max(0, matchedFlow - allocatedMatchedFlow);
+      const links = normalized.flatMap(item => {
+        const stableLinks = item.stable > 0
+          ? [{ source: nodeIndex.get(`${item.shortName}-start`)!, target: nodeIndex.get(`${item.shortName}-end`)!, value: item.stable }]
+          : [];
+        const sourceLossShare = totalLoss > 0 ? item.loss / totalLoss : 0;
+        const residualLossLink = totalLoss > matchedFlow && item.loss > 0
+          ? [{
+              source: nodeIndex.get(`${item.shortName}-start`)!,
+              target: nodeIndex.get('residual-loss')!,
+              value: (totalLoss - matchedFlow) * sourceLossShare,
+            }]
+          : [];
+        const unmatchedLossLink = residualMatchedFlow > 0 && item.loss > 0
+          ? [{
+              source: nodeIndex.get(`${item.shortName}-start`)!,
+              target: nodeIndex.get('residual-loss')!,
+              value: residualMatchedFlow * sourceLossShare,
+            }]
+          : [];
+        return [...stableLinks, ...residualLossLink, ...unmatchedLossLink];
+      });
+
+      const residualGainLinks = totalGain > allocatedMatchedFlow
+        ? normalized
+            .filter(item => item.gain > 0)
+            .map(item => ({
+              source: nodeIndex.get('residual-gain')!,
+              target: nodeIndex.get(`${item.shortName}-end`)!,
+              value: (totalGain - allocatedMatchedFlow) * (item.gain / totalGain),
+            }))
+            .filter(link => link.value > 1)
+        : [];
+
+      setTransformFlowModel({
+        startYear,
+        endYear,
+        nodes: nodeEntries.map(({ name, color }) => ({ name, color })),
+        links: [...links, ...crosswalkLinks, ...residualGainLinks],
+        summary: {
+          modeledTypes: normalized.map(item => item.name),
+          excludedTypes: ['Tarım arazisi', 'Sulama altyapısı bulunan arazi'],
+          matchedFlow,
+          crosswalkAllocatedFlow: allocatedMatchedFlow,
+          totalLoss,
+          totalGain,
+          ruleCount: effectiveCrosswalkRules.length,
+          methodology: overridePayload ? 'csv-transition-matrix-override' : 'rule-based-crosswalk',
+        },
+        crosswalkRules: effectiveCrosswalkRules,
+      });
+      setTransitionMatrixMeta({
+        source: overridePayload?.source || 'inline-default-rules',
+        overrideActive: Boolean(overridePayload),
+        rowCount: effectiveCrosswalkRules.reduce((sum, rule) => sum + rule.targets.length, 0),
+      });
 
       const yearSet = new Set<string>();
       Object.values(turkeyByType).forEach(arr => arr.forEach(v => yearSet.add(v.year)));
@@ -427,12 +747,12 @@ export function useLandUseData(activeTab: Tab) {
       case 'forecast': loadForecastData(); break;
       case 'alerts': loadIntelligenceAlerts(); break;
     }
-  }, [activeTab, loadOverviewData, loadTransformationData, loadBenchmarkData, loadTurkeyProfile, loadForecastData, loadIntelligenceAlerts]);
+  }, [activeTab, transitionOverrideVersion, loadOverviewData, loadTransformationData, loadBenchmarkData, loadTurkeyProfile, loadForecastData, loadIntelligenceAlerts]);
 
   return {
     loading,
     overviewKPIs, overviewLandTypes, overviewTopCountries, overviewTrend, overviewInsights,
-    transformData, transformComparison, transformInsights,
+    transformData, transformComparison, transformFlowModel, transitionMatrixMeta, transformInsights,
     benchmarkData, benchmarkHHI, benchmarkInsights,
     turkeyProfile, turkeyTrends, turkeyRadar, turkeyInsights,
     forecastData, forecastInsights,

@@ -6,7 +6,6 @@ import {
 import { fetchQuery } from '../../services/api';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
-import { formatNumber, formatShort } from './livestockUtils';
 
 interface Props {
   selectedYear: string;

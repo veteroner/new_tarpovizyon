@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchQuery } from '../../services/api';
 import {
-  OverviewData, DataItem, YearlyData, COLORS,
+  COLORS,
   translateMilkItem, translateMeatItem, translateEggItem,
 } from './overviewTypes';
+import type { OverviewData, DataItem, YearlyData } from './overviewTypes';
 
 export interface UseOverviewDataReturn {
   data: OverviewData | null;

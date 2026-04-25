@@ -9,13 +9,13 @@ import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
-import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
+import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR } from './productionTypes';
 import type { Insight, CompKPIs } from './productionTypes';
 
 // Local icon stand-ins
-const Target = (props: any) => <Globe {...props} />;
-const Award = (props: any) => <Globe {...props} />;
-const Zap = (props: any) => <BarChart2 {...props} />;
+const Target: typeof Globe = Globe;
+const Award: typeof Globe = Globe;
+const Zap: typeof BarChart2 = BarChart2;
 
 interface CompetitionTabProps {
   compProduct: string;
@@ -48,8 +48,8 @@ export function CompetitionTab({
       {compKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title="🇹🇷 Sıralama" value={compKPIs.turkeyRank > 0 ? `${compKPIs.turkeyRank}.` : '-'} subtitle={`${compKPIs.totalProducers} üretici`} icon={Target} color="blue" large />
-          <KPICard title="Lider" value={compKPIs.leader.substring(0, 15)} subtitle={`%${compKPIs.leaderShare.toFixed(1)}`} icon={Award} color="gold" />
-          <KPICard title="HHI" value={compKPIs.hhi.toFixed(0)} subtitle={compKPIs.hhi > 2500 ? '🔴 Çok Yoğun' : compKPIs.hhi > 1500 ? '🟡 Yoğun' : '🟢 Rekabetçi'} icon={BarChart2} color={compKPIs.hhi > 2500 ? 'red' : compKPIs.hhi > 1500 ? 'orange' : 'green'} />
+          <KPICard title="Lider" value={compKPIs.leader.substring(0, 15)} subtitle={`%${compKPIs.leaderShare.toFixed(1)}`} icon={Award} color="orange" />
+          <KPICard title="HHI" value={compKPIs.latestHHI.toFixed(0)} subtitle={compKPIs.latestHHI > 2500 ? '🔴 Çok Yoğun' : compKPIs.latestHHI > 1500 ? '🟡 Yoğun' : '🟢 Rekabetçi'} icon={BarChart2} color={compKPIs.latestHHI > 2500 ? 'red' : compKPIs.latestHHI > 1500 ? 'orange' : 'green'} />
           <KPICard title="Aktif Ülke" value={compKPIs.totalProducers.toString()} subtitle="Üretim yapan" icon={Globe} color="teal" />
         </div>
 

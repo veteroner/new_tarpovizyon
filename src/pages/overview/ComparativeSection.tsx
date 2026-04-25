@@ -3,7 +3,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   ComposedChart, Area, Line,
 } from 'recharts';
-import { COLORS, formatNumber, formatShort, OverviewData } from './overviewTypes';
+import { COLORS, formatNumber, formatShort } from './overviewTypes';
+import type { OverviewData } from './overviewTypes';
 
 interface Props {
   data: OverviewData;

@@ -61,35 +61,50 @@ export default function MobilePageHeader() {
     <div
       className="fixed top-0 left-0 right-0 z-[9999]"
       style={{
-        background: 'rgba(255,255,255,0.97)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid #d1fae5',
-        boxShadow: '0 1px 8px rgba(16,185,129,0.08)',
+        background: 'rgba(236, 253, 245, 0.92)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(209, 250, 229, 0.8)',
+        boxShadow: '0 2px 12px rgba(16, 185, 129, 0.10)',
       }}
     >
-      <div className="flex items-center justify-between px-4 pb-2 pt-safe">
-        {/* Back button */}
+      <div className="flex items-center justify-between px-4 pb-2.5 pt-safe">
+        {/* Geri butonu */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 active:scale-95 transition-transform"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl tap-active transition-transform duration-150"
+          style={{
+            background: 'rgba(255, 255, 255, 0.70)',
+            border: '1px solid rgba(209, 250, 229, 0.8)',
+            boxShadow: '0 1px 4px rgba(16, 185, 129, 0.08)',
+          }}
         >
-          <ArrowLeft size={16} className="text-slate-600" />
-          <span className="text-xs text-slate-600 font-medium">Geri</span>
+          <ArrowLeft size={15} className="text-slate-600" />
+          <span className="text-xs text-slate-700 font-semibold">Geri</span>
         </button>
 
-        {/* Current page label */}
-        <span className="text-xs font-semibold text-slate-600 truncate max-w-[140px]">
-          {label}
-        </span>
+        {/* Mevcut sayfa etiketi */}
+        <div className="flex flex-col items-center min-w-0 flex-1 px-3">
+          <span className="text-[11px] font-bold text-emerald-700 truncate max-w-[160px] leading-tight">
+            {label}
+          </span>
+          <span className="text-[9px] text-slate-400 font-medium mt-0.5 tracking-wide uppercase">
+            TarpoVizyon
+          </span>
+        </div>
 
-        {/* Home button */}
+        {/* Ana Sayfa butonu */}
         <button
           onClick={() => navigate('/m')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 active:scale-95 transition-transform"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl tap-active transition-transform duration-150"
+          style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.10) 100%)',
+            border: '1px solid rgba(16, 185, 129, 0.30)',
+            boxShadow: '0 1px 4px rgba(16, 185, 129, 0.12)',
+          }}
         >
-          <Home size={16} className="text-emerald-600" />
-          <span className="text-xs text-emerald-600 font-medium">Ana Sayfa</span>
+          <Home size={15} className="text-emerald-600" />
+          <span className="text-xs text-emerald-700 font-semibold">Ana Sayfa</span>
         </button>
       </div>
     </div>

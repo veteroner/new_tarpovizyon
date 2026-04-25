@@ -1,7 +1,7 @@
 import React from 'react';
 import WeatherWidget from '../../components/WeatherWidget';
 import {
-  ILLER, getBolge, BOLGE_META, getETo, getYagis,
+  ILLER, BOLGE_META, getETo, getYagis,
   type WizardState,
 } from './sulamaUtils';
 
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function LocationClimateStep({ state, setState, bolge, goStep2 }: Props) {
-  const bolgeMeta = bolge ? BOLGE_META[bolge] : null;
+  const bolgeMeta = bolge ? BOLGE_META[bolge as keyof typeof BOLGE_META] : null;
 
   return (
     <div className="sp-card">

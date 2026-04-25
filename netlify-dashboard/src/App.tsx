@@ -77,7 +77,6 @@ function AppContent() {
   const isSulamaPage = location.pathname === '/sulama-plan';
   const isGubrePage = location.pathname === '/gubre-hesap';
   const isTakvimPage = location.pathname === '/tarim-takvim';
-  const isAIPage = location.pathname === '/tarpovizyon/ai-assistant';
   const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
 
   return (

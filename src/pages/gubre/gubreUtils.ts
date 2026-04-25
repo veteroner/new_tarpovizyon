@@ -1,6 +1,7 @@
 // ── Pure calculation utilities for GubreHesapPage ────────────────────────────
 
-import { WizardState, CalcResult, SoilAnalysis, CROP_NUTRIENT_DB, FERTILIZER_PRODUCTS } from './gubreTypes';
+import { CROP_NUTRIENT_DB, FERTILIZER_PRODUCTS } from './gubreData';
+import type { WizardState, CalcResult, SoilAnalysis } from './gubreTypes';
 
 export function calculateFertilizerMix(
   needed: { n: number; p2o5: number; k2o: number },

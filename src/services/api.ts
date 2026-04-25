@@ -12,6 +12,8 @@ export interface QueryResult {
   error?: string;
 }
 
+export const DEFAULT_TRADE_YEAR = '2025';
+
 export async function fetchQuery(sql: string): Promise<QueryResult> {
   try {
     const url = `${API_BASE}/api.php?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`;

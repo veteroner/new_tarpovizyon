@@ -7,7 +7,7 @@ import { TrendingUp, TrendingDown, Leaf, ArrowLeftRight, Zap } from 'lucide-reac
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { TreemapContent } from '../../components/TreemapContent';
-import { fetchQuery, formatMoney, formatNumber, TRADE_TABLES } from '../../services/api';
+import { fetchQuery, formatMoney, formatNumber, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const TABLE = TRADE_TABLES.PLANT;
 const MONTHS_TR: Record<string, string> = {
@@ -23,7 +23,7 @@ interface YearRow { yil: string; exp: number; imp: number; denge: number }
 
 export default function PlantTradeTab() {
   const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState(DEFAULT_TRADE_YEAR);
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [productOptions, setProductOptions] = useState<string[]>([]);

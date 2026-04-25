@@ -5,7 +5,8 @@ import {
   ComposedChart, Line,
   ScatterChart, Scatter, ZAxis, Cell,
 } from 'recharts';
-import { COLORS, fmt, fmtShort, CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
+import { COLORS, fmt, fmtShort } from './plantTypes';
+import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
 
 interface PlantAnalysisChartsProps {
   scatterData: ScatterRow[];

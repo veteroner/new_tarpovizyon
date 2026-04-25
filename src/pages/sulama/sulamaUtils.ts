@@ -1,6 +1,6 @@
 import {
-  getBolge, BOLGE_META, getETo, getYagis, calcEffectiveRainfall,
-  calcEToByMetod, ETO_METOD_LISTESI, donRiskiVar,
+  getBolge, getYagis, calcEffectiveRainfall,
+  calcEToByMetod, ETO_METOD_LISTESI,
   type EToMetodId,
 } from '../../utils/climate-data';
 import type { ForecastSummary, WeatherData } from '../../services/weather';

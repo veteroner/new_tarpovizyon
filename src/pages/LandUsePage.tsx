@@ -6,11 +6,12 @@ import {
   ComposedChart, Line, Scatter, LineChart
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Layers, BarChart2, Activity, Zap } from 'lucide-react';
+import { FlowSankeyCard } from '../components/FlowSankeyCard';
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
-import { SankeyDiagram } from '../components/SankeyDiagram';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
-import { useLandUseData, Tab, CHART_COLORS, formatArea, formatShort, formatPercent } from './landUse/useLandUseData';
+import { useLandUseData, CHART_COLORS, formatArea, formatShort, formatPercent, LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY } from './landUse/useLandUseData';
+import type { Tab } from './landUse/useLandUseData';
 
 const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍', desc: 'Dunya arazi kullanimi ozeti' },
@@ -23,15 +24,34 @@ const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
 
 export default function LandUsePage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [transitionOverrideVersion, setTransitionOverrideVersion] = useState(0);
   const {
     loading,
     overviewKPIs, overviewLandTypes, overviewTopCountries, overviewTrend, overviewInsights,
-    transformData, transformComparison, transformInsights,
+    transformData, transformComparison, transformFlowModel, transitionMatrixMeta, transformInsights,
     benchmarkData, benchmarkHHI, benchmarkInsights,
     turkeyProfile, turkeyTrends, turkeyRadar, turkeyInsights,
     forecastData, forecastInsights,
     intelligenceAlerts, allInsights,
-  } = useLandUseData(activeTab);
+  } = useLandUseData(activeTab, transitionOverrideVersion);
+
+  const handleTransitionMatrixImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY, text);
+      setTransitionOverrideVersion(version => version + 1);
+    }
+    event.target.value = '';
+  };
+
+  const clearTransitionMatrixImport = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY);
+      setTransitionOverrideVersion(version => version + 1);
+    }
+  };
 
   return (
     <div>
@@ -119,6 +139,23 @@ export default function LandUsePage() {
           {/* ==================== TRANSFORMATION TAB ==================== */}
           {activeTab === 'transformation' && (
             <>
+              <div className="chart-card" style={{ marginBottom: 16 }}>
+                <h3 className="chart-title">🛠️ Geçiş Matrisi Admin Import</h3>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg)' }}>
+                    <span>CSV Override Yükle</span>
+                    <input type="file" accept=".csv,text/csv" onChange={handleTransitionMatrixImport} style={{ display: 'none' }} />
+                  </label>
+                  <button onClick={clearTransitionMatrixImport} style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                    Override Temizle
+                  </button>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  <div>Aktif kaynak: {transitionMatrixMeta?.source || 'inline-default-rules'}</div>
+                  <div>Override aktif: {transitionMatrixMeta?.overrideActive ? 'Evet' : 'Hayır'}</div>
+                  <div>Kural satırı: {transitionMatrixMeta?.rowCount || 0}</div>
+                </div>
+              </div>
               {transformComparison.length > 0 && (
                 <div className="kpi-grid">
                   {transformComparison.slice(0, 4).map((tc: any, i: number) => (
@@ -126,31 +163,15 @@ export default function LandUsePage() {
                   ))}
                 </div>
               )}
-              {transformComparison.length > 0 && (
-                <div className="chart-grid">
-                  <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <h3 className="chart-title">🌊 Türkiye Arazi Kullanımı Dağılımı (Güncel)</h3>
-                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                      Son yıl arazi tipi dağılımı ve değişim yönü
-                    </p>
-                    <SankeyDiagram
-                      nodes={[
-                        { name: 'Türkiye Arazisi', color: '#6366f1' },
-                        ...transformComparison.map((t: any) => ({
-                          name: t.name as string,
-                          color: (t.change as number) > 0 ? '#22c55e' : (t.change as number) < 0 ? '#ef4444' : '#f59e0b',
-                        })),
-                      ]}
-                      links={transformComparison.map((t: any, i: number) => ({
-                        source: 0,
-                        target: i + 1,
-                        value: Math.max(0, t.endValue as number),
-                      }))}
-                      height={380}
-                      formatValue={v => formatArea(v)}
-                    />
-                  </div>
-                </div>
+              {transformFlowModel && (
+                <FlowSankeyCard
+                  title={`🌊 Türkiye Arazi Dönüşüm Sinyali (${transformFlowModel.startYear} → ${transformFlowModel.endYear})`}
+                  subtitle="Tarım toplamı ve sulama altyapısını dışarıda bırakan, açık crosswalk kurallarıyla kaybeden arazi tiplerinden kazanan tiplerine türetilmiş yönlü akış sinyali. Gerçek parsel bazlı geçiş matrisi değildir."
+                  nodes={transformFlowModel.nodes}
+                  links={transformFlowModel.links}
+                  height={420}
+                  formatValue={v => formatArea(v)}
+                />
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>

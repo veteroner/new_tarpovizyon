@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchQuery } from '../services/api';
 import {
+  BASIN_COLORS, formatNumber
+} from './basin/basinUtils';
+import type {
   BasinData, BasinSummary, ProvinceBasinData, TopProduct, ProvinceDiversity,
-  BasinProductionStats, MetricsData, BASIN_COLORS, formatNumber
+  BasinProductionStats, MetricsData,
 } from './basin/basinUtils';
 import BasinOverviewSection from './basin/BasinOverviewSection';
 import BasinAnalysisSection from './basin/BasinAnalysisSection';

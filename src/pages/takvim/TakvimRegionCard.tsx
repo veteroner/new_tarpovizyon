@@ -47,7 +47,7 @@ export function TakvimRegionCard({ selectedIl, setSelectedIl, bolge }: Props) {
       {selectedIl && (
         <>
           <WeatherWidget il={selectedIl} />
-          <ConfidenceBadge level="orta" text="Bölgesel iklim ortalaması" />
+          <ConfidenceBadge score={50} label="Bölgesel iklim ortalaması" />
           <div className="tt-bolge-uyari">{BOLGE_UYARILAR[bolge]}</div>
         </>
       )}

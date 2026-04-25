@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  STEPS, INITIAL, CROP_WATER_DB, getBolge, BOLGE_META,
+  STEPS, INITIAL, CROP_WATER_DB, getBolge,
   calculate,
   type WizardState,
 } from './sulama/sulamaUtils';

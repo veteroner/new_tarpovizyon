@@ -3,13 +3,13 @@ import {
   AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
-import { UseTuikLivestockDataReturn } from './useTuikLivestockData';
+import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedCategory' | 'yearLabel'
   | 'totalValue' | 'provinceCount' | 'topCity' | 'topCityValue' | 'avgValue' | 'yearChange'
   | 'groupChartData' | 'yearlyData' | 'growthData'
-  | 'categoryData' | 'cityData'
+  | 'categoryData' | 'cityData' | 'cagrAnalysis'
 >;
 
 export default function OverviewTab({

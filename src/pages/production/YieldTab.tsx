@@ -8,12 +8,12 @@ import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
-import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
+import { formatValue, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, YieldKPIs } from './productionTypes';
 
 // Local icon stand-ins for icons not in lucide-react default set
-const Target = (props: any) => <AlertTriangle {...props} />;
-const Award = (props: any) => <Globe {...props} />;
+const Target: typeof AlertTriangle = AlertTriangle;
+const Award: typeof AlertTriangle = AlertTriangle;
 
 interface YieldTabProps {
   yieldProduct: string;

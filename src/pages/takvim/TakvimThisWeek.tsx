@@ -1,6 +1,7 @@
 import { BOLGE_META, donRiskiVar } from '../../utils/climate-data';
 import type { IklimBolge } from '../../utils/climate-data';
-import { Activity, AYLAR, TIP_META } from './takvimTypes';
+import { AYLAR, TIP_META } from './takvimTypes';
+import type { Activity } from './takvimTypes';
 
 interface Props {
   now: { ay: number; hafta: number };

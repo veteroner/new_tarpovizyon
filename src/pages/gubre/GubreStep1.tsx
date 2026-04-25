@@ -1,5 +1,6 @@
 import { ILLER, getBolge, BOLGE_META, BOLGE_TOPRAK_PROFILLERI } from '../../utils/climate-data';
-import { CROP_NUTRIENT_DB, WizardState } from './gubreTypes';
+import { CROP_NUTRIENT_DB, GUBRE_DATA_ASSUMPTION, GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
+import type { WizardState } from './gubreTypes';
 
 interface Props {
   state: WizardState;
@@ -18,6 +19,7 @@ export function GubreStep1({ state, setState, onNext }: Props) {
     <div className="gh-card">
       <h2 className="gh-card__title">Konum, Ürün ve Hedef</h2>
       <p className="gh-card__desc">İl, ürün, alan ve hedef verim bilgilerinizi girin.</p>
+      <div className="gh-data-meta">Veri sürümü: v{GUBRE_DATA_VERSION} · {GUBRE_DATA_SOURCE}</div>
 
       {/* İl Seçimi */}
       <div className="gh-field">
@@ -105,9 +107,14 @@ export function GubreStep1({ state, setState, onNext }: Props) {
             <span title="Bor">💎 B: {cropData.b} kg</span>
           </div>
           <p><strong>Uygun pH:</strong> {cropData.ph_min} — {cropData.ph_max}</p>
+          <p><strong>Kaynak:</strong> {cropData.kaynak}</p>
+          <p><strong>Varsayım:</strong> {cropData.varsayim}</p>
+          <p><strong>Revizyon:</strong> {cropData.revizyonTarihi}</p>
           <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>💡 {cropData.notes}</p>
         </div>
       )}
+
+      <div className="gh-data-meta">{GUBRE_DATA_ASSUMPTION}</div>
 
       {/* Hedef Verim */}
       <div className="gh-field">

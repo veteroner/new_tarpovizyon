@@ -1,5 +1,3 @@
-import { fetchQuery } from '../../services/api';
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface YearData {

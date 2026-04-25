@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { KpiData } from './useTurkeyAnimalProductionData';
+import type { KpiData } from './useTurkeyAnimalProductionData';
 import { formatValue } from './turkeyAnimalProductionTypes';
 
 interface HeroSectionProps {

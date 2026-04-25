@@ -147,7 +147,17 @@ export async function fetchCommodities(): Promise<CommodityQuote[]> {
       };
     })
     .sort((a, b) => {
-      const catOrder = { bitkisel: 0, hayvancilik: 1, sut: 2 };
+      const catOrder: Record<CommodityQuote['category'], number> = {
+        bitkisel: 0,
+        hayvancilik: 1,
+        sut: 2,
+        gubre: 3,
+        enerji: 4,
+        orman: 5,
+        et_gida: 6,
+        metal: 7,
+        doviz: 8,
+      };
       return catOrder[a.category] - catOrder[b.category];
     });
 }

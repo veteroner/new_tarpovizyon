@@ -5,14 +5,15 @@ import {
   Cell, AreaChart, Area, ComposedChart, Line, Scatter
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Activity, Zap, Shield, Heart, Scale, Wheat } from 'lucide-react';
+import { FlowSankeyCard } from '../components/FlowSankeyCard';
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
-import { SankeyDiagram } from '../components/SankeyDiagram';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import {
-  useFoodBalanceData, Tab, CHART_COLORS,
+  useFoodBalanceData, CHART_COLORS,
   formatTon, formatShort, formatPercent
 } from './foodBalance/useFoodBalanceData';
+import type { Tab } from './foodBalance/useFoodBalanceData';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
@@ -239,20 +240,14 @@ export default function FoodBalancePage() {
                   { source: 2, target: 4, value: totalExp },
                 ];
                 return (
-                  <div className="chart-grid">
-                    <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                      <h3 className="chart-title">⚖️ Gıda Arz-Kullanım Akış Diyagramı</h3>
-                      <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                        Dünya gıda üretimi ve ticaretinin arz→kullanım dağılımı (bin ton)
-                      </p>
-                      <SankeyDiagram
-                        nodes={sankeyNodes}
-                        links={sankeyLinks}
-                        height={320}
-                        formatValue={v => formatTon(v)}
-                      />
-                    </div>
-                  </div>
+                  <FlowSankeyCard
+                    title="⚖️ Gıda Arz-Kullanım Akış Diyagramı"
+                    subtitle="Dünya gıda üretimi ve ticaretinin arz→kullanım dağılımı (bin ton)"
+                    nodes={sankeyNodes}
+                    links={sankeyLinks}
+                    height={320}
+                    formatValue={v => formatTon(v)}
+                  />
                 );
               })()}
               <InsightCard insights={tradeInsights} />

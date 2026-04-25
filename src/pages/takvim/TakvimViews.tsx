@@ -1,4 +1,5 @@
-import { Activity, AYLAR, TIP_META, CROP_PROFILES } from './takvimTypes';
+import { AYLAR, TIP_META, CROP_PROFILES } from './takvimTypes';
+import type { Activity } from './takvimTypes';
 
 interface Props {
   viewMode: 'takvim' | 'liste' | 'timeline';

@@ -2,7 +2,8 @@ import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { formatNumber, formatShort, OverviewData } from './overviewTypes';
+import { formatNumber, formatShort } from './overviewTypes';
+import type { OverviewData } from './overviewTypes';
 
 interface Props {
   data: OverviewData;
