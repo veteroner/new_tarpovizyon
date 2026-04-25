@@ -8,7 +8,7 @@ import { fetchQuery } from '../../services/api';
 import ProductSelector from '../../components/ProductSelector';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
-import { calculateCAGR, calculateHHI } from '../../utils/livestockCalculations';
+import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, EXCLUDED_FULL, type DataItem, formatNumber, formatShort } from './livestockUtils';
 
 interface Props {

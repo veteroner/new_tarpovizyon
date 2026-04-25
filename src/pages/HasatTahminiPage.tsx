@@ -4,7 +4,7 @@ import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvin
 import type { RegionTotal } from '../components/TurkeyHeatMap';
 
 import {
-  type WizardState, type SavedForecast, type YearData, type CalcResult,
+  type WizardState, type SavedForecast, type YearData,
   INITIAL, KATEGORILER, calculate, getHarvestCalendar, getSowingCalendar,
   linearRegression, getYearsAll, calcClimateRisk, calcQuick,
   toYD, CHART_YEARS, PROJ_YEARS,

@@ -3,8 +3,8 @@ import { fetchQuery } from '../../services/api';
 import {
   COLORS, TABLE_NAME, YEARS, YEAR_COLUMNS,
   formatShort, calculateCAGR, linearRegression, detectAnomalies, getRegion,
-  CityDataItem, YearlyDataItem, CategoryDataItem, RegionalData, CorrelationData
 } from './tuikLivestockTypes';
+import type { CityDataItem, YearlyDataItem, CategoryDataItem, RegionalData, CorrelationData } from './tuikLivestockTypes';
 
 export interface UseTuikLivestockDataReturn {
   selectedYear: string; setSelectedYear: (y: string) => void;

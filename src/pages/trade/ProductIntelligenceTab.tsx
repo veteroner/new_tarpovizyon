@@ -8,7 +8,7 @@ import {
 import { Search, TrendingUp, TrendingDown, Scale, Package, Globe } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
-import { fetchQuery, formatMoney, TRADE_TABLES } from '../../services/api';
+import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -37,7 +37,7 @@ export default function ProductIntelligenceTab() {
   const [countries, setCountries] = useState<CountryDetail[]>([]);
   const [yearlyData, setYearlyData] = useState<YearDetail[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthDetail[]>([]);
-  const [yearForMonthly, setYearForMonthly] = useState('2024');
+  const [yearForMonthly, setYearForMonthly] = useState(DEFAULT_TRADE_YEAR);
 
   // Load product list
   useEffect(() => {
@@ -62,8 +62,8 @@ export default function ProductIntelligenceTab() {
       // bitkisel tablosunda duzey_1='tüm' ve duzey_3='yil' verisi yok
       const d1Agg = cat === 'bitkisel' ? 'ülke' : 'tüm';
       const d3Year = cat === 'bitkisel' ? 'ay' : 'yil';
-      const yr = '2024';
-      const prevYr = '2023';
+      const yr = DEFAULT_TRADE_YEAR;
+      const prevYr = String(Number(yr) - 1);
 
       const [kpi, kpiPrev, ccnt] = await Promise.all([
         fetchQuery(`SELECT SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${table} WHERE duzey_1='${d1Agg}' AND duzey_2='ürün' AND duzey_3='${d3Year}' AND yil='${yr}' AND ana_urun='${product}'`),
@@ -221,8 +221,8 @@ export default function ProductIntelligenceTab() {
 
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPICard title="İhracat (2024)" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
-            <KPICard title="İthalat (2024)" value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
+            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+            <KPICard title={`İthalat (${yearForMonthly})`} value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
             <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Partner" value={topCountry} subtitle="En büyük ihracat ülkesi" icon={Globe} color="blue" />
           </div>
@@ -263,7 +263,7 @@ export default function ProductIntelligenceTab() {
 
           {/* Country Table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">🌍 {selectedProduct} — Ülke Bazlı Ticaret (2024)</h3>
+            <h3 className="chart-title">🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</h3>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={countries.slice(0, 12).map(c => ({
                 name: c.name.length > 16 ? c.name.substring(0, 16) + '..' : c.name,

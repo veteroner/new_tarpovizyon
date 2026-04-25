@@ -1,0 +1,25 @@
+source_item,target_item,weight,rationale,source_system,target_system,valid_from_year,valid_to_year,notes
+Geçici nadas alanı,Ekili alan,0.50,Kısa vadede tekrar üretime dönme olasılığı en yüksek yüzey.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Geçici nadas alanı,İşlenebilir arazi,0.25,Nadas alanı çoğu zaman işlenebilir stok içinde yeniden emilir.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Geçici nadas alanı,Çok yıllık ürünler,0.15,Bahçe ve çok yıllık dikim dönüşümü sınırlı ama olası.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Geçici nadas alanı,Sürekli çayırlar ve meralar,0.10,Kullanım bırakılan parsellerin mera rejimine kayması mümkün.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+İşlenebilir arazi,Ekili alan,0.45,İşlenebilir yüzeyin önemli kısmı fiilen ekili alana dönüşür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+İşlenebilir arazi,Çok yıllık ürünler,0.20,Meyve-bahçe kurulumları işlenebilir tabandan beslenir.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+İşlenebilir arazi,Sürekli çayırlar ve meralar,0.20,Kullanım yoğunluğu düşen alanlar otlak rejimine kayabilir.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+İşlenebilir arazi,Orman alanı,0.15,Ormanlaştırma veya doğal geri kazanım etkisi sınırlı ama mümkündür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Sürekli çayırlar ve meralar,Ekili alan,0.35,Tarımsal genişleme çoğu zaman mera çözülmesinden beslenir.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Sürekli çayırlar ve meralar,İşlenebilir arazi,0.25,İlk geçiş çoğu durumda işlenebilir stok olarak görünür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Sürekli çayırlar ve meralar,Orman alanı,0.25,Terk edilen meraların doğal ardıllıkla ormana dönmesi mümkündür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Sürekli çayırlar ve meralar,Çok yıllık ürünler,0.15,Daha yoğun kullanım senaryosunda çok yıllık dikim oluşabilir.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Orman alanı,İşlenebilir arazi,0.35,Arazi açılması önce işlenebilir sınıfta görünür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Orman alanı,Ekili alan,0.35,Doğrudan tarıma açılan alan etkisi.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Orman alanı,Sürekli çayırlar ve meralar,0.20,Orman çözülmesi sonrası düşük yoğunluklu kullanım.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Orman alanı,Çok yıllık ürünler,0.10,Sınırlı bağ-bahçe dönüşümleri.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Ekili alan,İşlenebilir arazi,0.40,Ekim deseninden çıkan yüzey önce işlenebilir stokta görünür.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Ekili alan,Geçici nadas alanı,0.25,Dinlendirme ve döngüsel nadas etkisi.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Ekili alan,Çok yıllık ürünler,0.20,Bahçe ve kalıcı ürün desenine geçiş.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Ekili alan,Sürekli çayırlar ve meralar,0.15,Düşük yoğunluklu kullanıma çekilme.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Çok yıllık ürünler,Ekili alan,0.35,Bahçeden tarla desenine geri dönüş.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Çok yıllık ürünler,İşlenebilir arazi,0.30,Söküm sonrası işlenebilir stokta iz bırakması.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Çok yıllık ürünler,Orman alanı,0.20,Terk edilen perennial alanların doğal geri kazanımı.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed
+Çok yıllık ürünler,Geçici nadas alanı,0.15,Üretim dışına çıkan alanın geçici bekleme dönemi.,FAO_LAND_USE,FAO_LAND_USE,2000,,Varsayılan crosswalk seed

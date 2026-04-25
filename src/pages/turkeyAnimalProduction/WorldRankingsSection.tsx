@@ -3,7 +3,7 @@ import { Award } from 'lucide-react';
 import {
   ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell
 } from 'recharts';
-import { WorldRankingItem } from './useTurkeyAnimalProductionData';
+import type { WorldRankingItem } from './useTurkeyAnimalProductionData';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
 
 interface WorldRankingsSectionProps {

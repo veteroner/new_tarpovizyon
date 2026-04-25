@@ -4,9 +4,10 @@ import {
   LineChart, Line, Legend, Treemap
 } from 'recharts';
 import { fetchQuery } from '../../services/api';
-import { 
-  BasinSummary, TopProduct, ProductLeader, TrendDataPoint, 
-  MetricsData, formatNumber 
+import { formatNumber } from './basinUtils';
+import type {
+  BasinSummary, TopProduct, ProductLeader, TrendDataPoint,
+  MetricsData,
 } from './basinUtils';
 
 interface BasinOverviewSectionProps {

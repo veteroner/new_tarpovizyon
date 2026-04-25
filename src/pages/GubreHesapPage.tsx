@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { WizardState, CalcResult } from './gubre/gubreTypes';
+import type { WizardState, CalcResult } from './gubre/gubreTypes';
 import { calculate, calcConfidenceScore } from './gubre/gubreUtils';
 import { GubreStep1 } from './gubre/GubreStep1';
 import { GubreStep2 } from './gubre/GubreStep2';

@@ -1,5 +1,5 @@
 import { getBolge, BOLGE_META, BOLGE_TOPRAK_PROFILLERI } from '../../utils/climate-data';
-import { WizardState } from './gubreTypes';
+import type { WizardState } from './gubreTypes';
 
 interface Props {
   state: WizardState;

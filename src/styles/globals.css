@@ -406,6 +406,7 @@ body {
   padding: 8px 14px !important;
   font-size: 12px !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25) !important;
 }
@@ -1021,22 +1022,27 @@ body {
 /* ===== GRADIENT BACKGROUNDS ===== */
 .gradient-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
 .gradient-green {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
 }
 
 .gradient-amber {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
 }
 
 .gradient-blue {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
 }
 
 .gradient-red {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
 }
 
 /* ===== MOBILE SCROLLBAR HIDE ===== */
@@ -1086,4 +1092,90 @@ body {
 /* ===== OVERSCROLL ===== */
 .overscroll-contain {
   overscroll-behavior: contain;
+}
+
+/* ============================================================
+   KATMAN 1 — MOBİL RESPONSIVE (Tüm Platformlar, ≤768px)
+   Tarayıcı + Capacitor uygulama her ikisinde de geçerli.
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Grafik yüksekliğini ekran genişliğine göre sınırla */
+  .recharts-wrapper {
+    max-height: 260px !important;
+  }
+
+  /* Tablolar yatay kaydırılabilir olsun */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* 3–4 kolonlu Tailwind grid → 2 kolon */
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Sayfa iç dolgu — içerik kenarlara değmesin */
+  .page-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Tab buton grubu: 2 kolon */
+  .tab-group {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Intelligence tablo kaydırma */
+  .intelligence-table {
+    overflow-x: auto;
+  }
+}
+
+/* ============================================================
+   KATMAN 2 — MOBILE-NATIVE (Yalnızca Capacitor Uygulaması)
+   html.mobile-native üzerinden CSS değişkenlerini override et.
+   ============================================================ */
+html.mobile-native {
+  /* Ana arka plan — açık emerald tonu */
+  --bg-primary: #ecfdf5;
+  --bg-secondary: #f0fdf4;
+  /* Kart arka planı — hafif transparan (glass hissi) */
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --card-bg: rgba(255, 255, 255, 0.88);
+  /* Kenarlık — emerald tonu */
+  --border: #d1fae5;
+  --border-light: #ecfdf5;
+}
+
+html.mobile-native body {
+  background: #ecfdf5;
+}
+
+/* Dokunma geri bildirimi — tüm interaktif öğeler */
+html.mobile-native button,
+html.mobile-native a,
+html.mobile-native [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Kart köşe yarıçapı tutarlılığı */
+html.mobile-native .chart-container,
+html.mobile-native .stat-card,
+html.mobile-native .intelligence-card {
+  border-radius: 1rem !important;
+}
+
+/* Recharts tooltip native arka plan */
+html.mobile-native .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #d1fae5 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12) !important;
 }

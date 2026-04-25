@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
-import { useCrossIntelligenceData, ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
+import { useCrossIntelligenceData } from './crossIntelligence/useCrossIntelligenceData';
+import type { ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
 
 export default function CrossIntelligencePage() {
   const {

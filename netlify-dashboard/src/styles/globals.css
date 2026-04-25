@@ -401,6 +401,7 @@ body {
   padding: 8px 14px !important;
   font-size: 12px !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25) !important;
 }

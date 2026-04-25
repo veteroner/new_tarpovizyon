@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchQuery } from '../../services/api';
 import {
   COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, buildSumCols, pct,
+} from './plantTypes';
+import type {
   CityRow, YearRow, RegionRow, ProductRow, ScatterRow, DistrictRow, YieldTrendRow,
-  TuikPlantCategoryPageProps
+  TuikPlantCategoryPageProps,
 } from './plantTypes';
 
 type ProductItem = { id: string; name: string; nameTR: string };

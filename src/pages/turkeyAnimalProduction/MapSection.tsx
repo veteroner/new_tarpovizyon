@@ -1,6 +1,7 @@
 import React from 'react';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
-import { COLORS, MapFilterKey } from './turkeyAnimalProductionTypes';
+import { COLORS } from './turkeyAnimalProductionTypes';
+import type { MapFilterKey } from './turkeyAnimalProductionTypes';
 
 interface MapSectionProps {
   mapData: { name: string; value: number }[];

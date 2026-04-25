@@ -27,8 +27,9 @@ export async function initCapacitor() {
     // 3. App lifecycle listeners (back button, deep links, state changes)
     initAppListeners();
 
-    // 4. Add mobile-app class to html element for mobile-specific CSS
+    // 4. Add mobile-app + mobile-native classes to html element for mobile-specific CSS
     document.documentElement.classList.add('mobile-app');
+    document.documentElement.classList.add('mobile-native');
 
     console.log('[Capacitor] Native init tamamlandı ✓');
   } catch (e) {

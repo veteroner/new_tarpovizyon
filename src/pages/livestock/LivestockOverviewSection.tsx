@@ -12,7 +12,7 @@ import {
   calculateCAGR, calculateHHI, calculateYoY, calculateVolatility,
   type YearValue
 } from '../../utils/livestockCalculations';
-import { COLORS, type Tab, type DataItem, formatNumber, formatShort, EXCLUDED_FULL } from './livestockUtils';
+import { type Tab, type DataItem, formatNumber, formatShort, EXCLUDED_FULL } from './livestockUtils';
 
 interface Props {
   selectedYear: string;
@@ -466,16 +466,14 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
             ))}
           </div>
           <TurkeyHeatMap
-            data={provincialLivestock.map(p => ({
+            regionTotals={provincialLivestock.map(p => ({
               ...p,
               value: livestockMapType === 'total' ? p.value
-                : livestockMapType === 'cattle' ? (p.cattle || 0)
-                : livestockMapType === 'sheep' ? (p.sheep || 0)
-                : (p.goat || 0)
+                : livestockMapType === 'cattle' ? ((p as any).cattle || 0)
+                : livestockMapType === 'sheep' ? ((p as any).sheep || 0)
+                : ((p as any).goat || 0)
             }))}
-            title={livestockMapType === 'total' ? 'Toplam Hayvan Varlığı' : livestockMapType === 'cattle' ? 'Sığır+Manda Varlığı' : livestockMapType === 'sheep' ? 'Koyun Varlığı' : 'Keçi Varlığı'}
-            unit="baş"
-            colorScheme="green"
+            unitLabel="baş"
           />
         </div>
       )}

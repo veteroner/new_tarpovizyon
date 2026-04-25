@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { ModelWarningBox } from '../../components/ModelWarningBox';
-import { CalcResult, WizardState } from './gubreTypes';
+import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
+import type { CalcResult, WizardState } from './gubreTypes';
 
 interface Props {
   result: CalcResult;
@@ -45,6 +46,9 @@ export function GubreStep4({ result, state, onReset, confidenceScore }: Props) {
         </span>
         <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
           Taslak gübre planı — profesyonel uygulama öncesi uzman görüşü alınız
+        </span>
+        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          Veri: v{GUBRE_DATA_VERSION} · {GUBRE_DATA_SOURCE}
         </span>
       </div>
 

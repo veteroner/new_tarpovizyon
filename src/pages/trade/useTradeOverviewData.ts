@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { fetchQuery, TRADE_TABLES } from '../../services/api';
+import { fetchQuery, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -10,9 +10,12 @@ const MONTHS_TR: Record<string, string> = {
 const COLORS_EXPORT = ['#10b981', '#059669', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', '#047857', '#065f46', '#064e3b', '#022c22'];
 const COLORS_IMPORT = ['#f59e0b', '#d97706', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7', '#b45309', '#92400e', '#78350f', '#451a03'];
 
+export type TradeGroupFilter = 'all' | 'bitkisel' | 'hayvansal';
+
 export function useTradeOverviewData() {
   const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState(DEFAULT_TRADE_YEAR);
+  const [productGroupFilter, setProductGroupFilter] = useState<TradeGroupFilter>('all');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [expTotal, setExpTotal] = useState(0);
   const [impTotal, setImpTotal] = useState(0);
@@ -27,6 +30,7 @@ export function useTradeOverviewData() {
   const [topExpProducts, setTopExpProducts] = useState<{name: string; value: number; category: string}[]>([]);
   const [topImpProducts, setTopImpProducts] = useState<{name: string; value: number; category: string}[]>([]);
   const [topExpCountries, setTopExpCountries] = useState<{name: string; exp: number; imp: number}[]>([]);
+  const [topImpCountries, setTopImpCountries] = useState<{name: string; exp: number; imp: number}[]>([]);
   const [fastestGrowing, setFastestGrowing] = useState<{name: string; growth: number} | null>(null);
   const [biggestImportIncrease, setBiggestImportIncrease] = useState<{name: string; growth: number} | null>(null);
   const [top5CountryShare, setTop5CountryShare] = useState(0);
@@ -43,6 +47,13 @@ export function useTradeOverviewData() {
     try {
       const yr = selectedYear;
       const prevYr = String(Number(yr) - 1);
+      const plantTradeBase = `SELECT ana_urun, ulke, ihracat_deger as exp, ithalat_deger as imp, 'bitkisel' as kategori FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}'`;
+      const animalTradeBase = `SELECT ana_urun, ulke, ihracat_deger as exp, ithalat_deger as imp, 'hayvansal' as kategori FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}'`;
+      const selectedTradeBase = productGroupFilter === 'bitkisel'
+        ? plantTradeBase
+        : productGroupFilter === 'hayvansal'
+          ? animalTradeBase
+          : `${plantTradeBase} UNION ALL ${animalTradeBase}`;
 
       const [plantKpi, animalKpi, plantKpiPrev, animalKpiPrev] = await Promise.all([
         fetchQuery(`SELECT SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}'`),
@@ -89,35 +100,39 @@ export function useTradeOverviewData() {
       }));
 
       const expProdRes = await fetchQuery(`
-        SELECT ana_urun, SUM(ihracat_deger) as val, kategori FROM (
-          SELECT ana_urun, ihracat_deger, 'bitkisel' as kategori FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}'
-          UNION ALL
-          SELECT ana_urun, ihracat_deger, 'hayvansal' as kategori FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}'
-        ) t GROUP BY ana_urun, kategori ORDER BY val DESC LIMIT 15
+        SELECT ana_urun, SUM(exp) as val, kategori
+        FROM (${selectedTradeBase}) t
+        GROUP BY ana_urun, kategori ORDER BY val DESC LIMIT 15
       `);
       setTopExpProducts((expProdRes.data || []).map((r: any) => ({
         name: String(r.ana_urun), value: Number(r.val) || 0, category: String(r.kategori),
       })));
 
       const impProdRes = await fetchQuery(`
-        SELECT ana_urun, SUM(ithalat_deger) as val, kategori FROM (
-          SELECT ana_urun, ithalat_deger, 'bitkisel' as kategori FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}'
-          UNION ALL
-          SELECT ana_urun, ithalat_deger, 'hayvansal' as kategori FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}'
-        ) t GROUP BY ana_urun, kategori ORDER BY val DESC LIMIT 15
+        SELECT ana_urun, SUM(imp) as val, kategori
+        FROM (${selectedTradeBase}) t
+        GROUP BY ana_urun, kategori ORDER BY val DESC LIMIT 15
       `);
       setTopImpProducts((impProdRes.data || []).map((r: any) => ({
         name: String(r.ana_urun), value: Number(r.val) || 0, category: String(r.kategori),
       })));
 
-      const countryRes = await fetchQuery(`
+      const [countryExpRes, countryImpRes] = await Promise.all([
+        fetchQuery(`
         SELECT ulke, SUM(exp) as exp, SUM(imp) as imp FROM (
-          SELECT ulke, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}'
-          UNION ALL
-          SELECT ulke, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}'
+          ${selectedTradeBase}
         ) t WHERE ulke != '' GROUP BY ulke ORDER BY exp DESC LIMIT 10
-      `);
-      setTopExpCountries((countryRes.data || []).map((r: any) => ({
+        `),
+        fetchQuery(`
+        SELECT ulke, SUM(exp) as exp, SUM(imp) as imp FROM (
+          ${selectedTradeBase}
+        ) t WHERE ulke != '' GROUP BY ulke ORDER BY imp DESC LIMIT 10
+        `),
+      ]);
+      setTopExpCountries((countryExpRes.data || []).map((r: any) => ({
+        name: String(r.ulke), exp: Number(r.exp) || 0, imp: Number(r.imp) || 0,
+      })));
+      setTopImpCountries((countryImpRes.data || []).map((r: any) => ({
         name: String(r.ulke), exp: Number(r.exp) || 0, imp: Number(r.imp) || 0,
       })));
 
@@ -179,7 +194,7 @@ export function useTradeOverviewData() {
     } finally {
       setLoading(false);
     }
-  }, [selectedYear]);
+  }, [productGroupFilter, selectedYear]);
 
   useEffect(() => { loadYears(); }, [loadYears]);
   useEffect(() => { loadData(); }, [loadData]);
@@ -206,10 +221,11 @@ export function useTradeOverviewData() {
   return {
     loading,
     selectedYear, setSelectedYear, yearOptions,
+    productGroupFilter, setProductGroupFilter,
     expTotal, impTotal, prevYearExp,
     plantExp,
     monthlyData, yearlyData,
-    topExpProducts, topImpProducts, topExpCountries,
+    topExpProducts, topImpProducts, topExpCountries, topImpCountries,
     fastestGrowing, biggestImportIncrease, top5CountryShare,
     balance, ratio, yoyExpGrowth, plantShare,
     treemapExpData, treemapImpData,

@@ -10,7 +10,7 @@ import {
 import type { YearValue, HHIResult } from '../../utils/livestockCalculations';
 import {
   EXCLUDED_AREAS, CROP_CATEGORIES, TURKEY_COLOR, DEVELOPED_COUNTRIES,
-  getCropCategory, formatValue, formatHa, formatYield,
+  getCropCategory, formatValue, formatYield,
   type Tab,
 } from './productionTypes';
 

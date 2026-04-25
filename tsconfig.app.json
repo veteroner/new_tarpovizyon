@@ -35,9 +35,12 @@
   "include": ["src"],
   "exclude": [
     "src/**/*.old.tsx",
+    "src/pages/**/*pre_orchestrator*",
     "src/pages/**/*_OLD_*",
     "src/pages/**/*OLD*",
     "src/pages/**/*BACKUP*",
+    "src/pages/**/*_old_*",
+    "src/pages/_backup_fao_clones/**",
     "src/rasyon/engine/__tests__/**"
   ]
 }

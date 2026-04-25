@@ -87,7 +87,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
               nameKey={xKey}
               cx="50%" cy="50%"
               outerRadius={height * 0.32}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+              label={(props: any) => `${props.name} ${((props.percent ?? 0) * 100).toFixed(1)}%`}
               labelLine
             >
               {data.map((entry, i) => (

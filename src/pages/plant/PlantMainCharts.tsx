@@ -3,7 +3,8 @@ import {
   PieChart, Pie, Cell,
   ComposedChart, Line,
 } from 'recharts';
-import { COLORS, fmt, fmtShort, CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
+import { COLORS, fmt, fmtShort } from './plantTypes';
+import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
 
 interface PlantMainChartsProps {
   yearlyData: YearRow[];

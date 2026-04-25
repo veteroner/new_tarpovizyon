@@ -1,5 +1,5 @@
 import { formatShort } from './tuikLivestockTypes';
-import { UseTuikLivestockDataReturn } from './useTuikLivestockData';
+import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 
 type Props = Pick<UseTuikLivestockDataReturn, 'correlationLinks'>;
 

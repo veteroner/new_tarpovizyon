@@ -348,7 +348,7 @@ export function useMilkData() {
   }, [tuikSutData, selectedTuikSutUrun]);
 
   const tuikLatestYear = useMemo(() => {
-    if (tuikSelectedData.length === 0) return null;
+    if (tuikSelectedData.length === 0) return undefined;
     for (let i = tuikSelectedData.length - 1; i >= 0; i--) {
       if (tuikSelectedData[i].toplam > 0) return tuikSelectedData[i];
     }

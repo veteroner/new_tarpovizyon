@@ -11,14 +11,25 @@
 ## Faz 0 — Temizlik (Önkoşul)
 
 ### 0.1 Zombi Dosya Temizliği
-- [ ] `TurkeyOtherAnimalProductsPage.tsx` → ya rotaya bağla (`/tarpovizyon/turkey/other-animal-products`) ya da sil
-- [ ] Karar: Türkiye diğer hayvansal ürünler (su ürünleri, deri, yün, ipek) verisi TÜİK'te var mı? Varsa rota ver, yoksa sil
+- [x] `TurkeyOtherAnimalProductsPage.tsx` rotaya bağlı (`/tarpovizyon/turkey/other-animal-products`)
+- [x] Karar doğrulandı: Türkiye diğer hayvansal ürünler sayfası canlı veriyle kullanılıyor, silinmeyecek
+- [x] `src/pages` ve `src/components` altındaki macOS artifact dosyaları (`._*`, `.!*`) temizlendi
 
 ### 0.2 Duplikat Rota Temizliği
-- [ ] `/tarpovizyon/turkey/tuik-plant` ve `/tarpovizyon/turkey/plant-production` aynı bileşene gidiyor → birini kaldır, diğerinden redirect yap
+- [x] `/tarpovizyon/turkey/tuik-plant` → `/tarpovizyon/turkey/plant-production` redirect'i mevcut
 
 ### 0.3 OverviewPage Rotası
-- [ ] `OverviewPage.tsx` var ama doğrudan rotası yok → ya rota ver ya başka sayfaya entegre et ya sil
+- [x] `OverviewPage.tsx` doğrudan rotaya bağlı (`/tarpovizyon/turkey/overview`)
+
+### 0.4 Güvenli Yedek Temizlik Listesi
+- [x] `src/pages` altında silinmeye aday `.old` / `_old_*` / `_BACKUP` / `pre_orchestrator` envanteri çıkarıldı
+- [x] Referans/import taraması sonrası listedeki batch güvenli biçimde silindi
+- Tekil `_old_*` adayları:
+	`BasinProductionPage_old_2432.tsx`, `GeographicalIndicationsPage_old_1341.tsx`, `GubreHesapPage_old_1016.tsx`, `HasatTahminiPage_old_1561.tsx`, `LivestockStocksPage_old_3410.tsx`, `OverviewPage_old_1062.tsx`, `ProductionPage_old_1319.tsx`, `SulamaPlanPage_old_1459.tsx`, `TarimTakvimPage_old_931.tsx`, `TuikLivestockPage_old_1268.tsx`, `TuikPlantCategoryPage_old_885.tsx`, `TurkeyAnimalProductionPage_old_1205.tsx`, `TurkeyBeekeepingPage_old_1365.tsx`, `TurkeyEggProductionPage_old_1884.tsx`, `TurkeyMilkProductionPage_old_2503.tsx`, `TurkeyProvincialLivestockPage_old_2291.tsx`, `TurkeyProvincialPlantPage_old_2105.tsx`, `TurkeyRedMeatProductionPage_old_1844.tsx`, `TurkeyWhiteMeatProductionPage_old_2393.tsx`
+- `pre_orchestrator` adayları:
+	`BasinProductionPage_pre_orchestrator.tsx`, `LivestockStocksPage_pre_orchestrator.tsx`
+- Klasor bazli FAO klon yedekleri:
+	`_backup_fao_clones/RedMeatProductionPage.tsx`, `_backup_fao_clones/WhiteMeatProductionPage.tsx`, `_backup_fao_clones/MilkProductionPage.tsx`, `_backup_fao_clones/EggProductionPage.tsx`, `_backup_fao_clones/OtherAnimalProductsPage.tsx`, `_backup_fao_clones/LivestockStocksPage_original.tsx`
 
 ---
 
@@ -28,17 +39,17 @@
 > **Çözüm:** TuikPlantCategoryPage modeli gibi tek bir temel bileşen
 
 ### 1.1 `FaoAnimalProductionPage.tsx` Oluştur (Yeni Baz Bileşen)
-- [ ] `RedMeatProductionPage`, `WhiteMeatProductionPage`, `MilkProductionPage`, `EggProductionPage`, `OtherAnimalProductsPage` → ortak yapıyı çıkar
+- [x] `RedMeatProductionPage`, `WhiteMeatProductionPage`, `MilkProductionPage`, `EggProductionPage`, `OtherAnimalProductsPage` ortak tabana taşındı
 - [ ] Props: `categoryKey`, `products[]`, `defaultProducts[]`, `colorPalette`, `title`
 - [ ] Ortak import'lar: BarChart, PieChart, Treemap, RadarChart, ComposedChart, AreaChart, ProductSelector
-- [ ] Her kategori için sadece config/ürün listesi farklı olan ince wrapper dosyaları bırak
+- [x] Her kategori için sadece config/ürün listesi farklı olan ince wrapper dosyaları bırakıldı
 
 ### 1.2 Wrapper Dosyalarını Dönüştür
-- [ ] `RedMeatProductionPage.tsx` → ~30 satırlık wrapper (ürün listesi + renk paleti)
-- [ ] `WhiteMeatProductionPage.tsx` → ~30 satırlık wrapper
-- [ ] `MilkProductionPage.tsx` → ~30 satırlık wrapper
-- [ ] `EggProductionPage.tsx` → ~30 satırlık wrapper
-- [ ] `OtherAnimalProductsPage.tsx` → ~30 satırlık wrapper
+- [x] `RedMeatProductionPage.tsx` ince wrapper
+- [x] `WhiteMeatProductionPage.tsx` ince wrapper
+- [x] `MilkProductionPage.tsx` ince wrapper
+- [x] `EggProductionPage.tsx` ince wrapper
+- [x] `OtherAnimalProductsPage.tsx` ince wrapper
 
 ### 1.3 Sonuç
 - **Silinen kod:** ~2.100 satır
@@ -49,26 +60,35 @@
 
 ## Faz 2 — Sankey Dağıtımı (Eksik Akış Diyagramları)
 
-> **Problem:** Sankey sadece 1 sayfada (TuikLivestockPage), akış gösterilmesi gereken 4+ sayfada yok
+> **Revize Durum:** Sankey artık birden fazla yüzeyde mevcut. Eksik olan şey ilk dilimi başlatmak değil, tekrarlı kart yapısını ortaklaştırıp kalan sayfalara aynı desenle yaymak.
 
 ### 2.1 FoodBalancePage'e Sankey Ekle
-- [ ] Arz → İç tüketim / İhracat / Stok akışı
-- [ ] Veri yapısı: `{ nodes: [Üretim, İthalat, İç Tüketim, İhracat, Stok Değişimi, Kayıp], links: [...] }`
-- [ ] Mevcut BarChart + AreaChart + ComposedChart'ın yanına 4. görselleştirme olarak ekle
-- [ ] Yıl seçici ile dinamik akış
+- [x] Arz → İç tüketim / ihracat akışı mevcut
+- [x] Sankey veri yapısı sayfa içinde kuruluyor
+- [x] Mevcut trade sekmesinde akış diyagramı gösteriliyor
+- [ ] Yıl seçici ile doğrudan akış varyasyonu daha görünür hale getirilebilir
 
 ### 2.2 ProductBalancePage'e Sankey Ekle
-- [ ] Üretim → İşleme / Doğrudan Tüketim / İhracat akışı
-- [ ] Ürün bazlı Sankey (seçilen ürünün arz-kullanım akışı)
+- [x] Üretim → Doğrudan tüketim / işleme / yem / tohum / kayıp-stok / ihracat akışı
+- [x] Ürün bazlı Sankey (seçilen ürünün arz-kullanım akışı) mevcut
 
 ### 2.3 LandUsePage'e Sankey Ekle
+- [x] Net yeniden dağılımı gösteren ilk türetilmiş Sankey dilimi eklendi (`2000→güncel`, dönüşüm havuzu modeli)
+- [x] Hook seviyesinde daha anlamlı dönüşüm sinyal yüzeyi tasarlandı; toplam tarım ve sulama overlay'i dışarıda bırakılıp kayıp→kazanç yönlü model kuruldu
+- [x] Açık crosswalk kural seti tanımlandı; dönüşüm sinyali artık kural tabanlı source→target eşlemesiyle üretiliyor
+- [x] CSV override pipeline kuruldu; `public/data/land-use-transition-matrix.csv` varsa inline crosswalk bununla eziliyor
+- [x] Statik CSV üstüne local admin import akışı eklendi; override dosyası sayfa içinden yüklenip temizlenebiliyor
 - [ ] Arazi dönüşüm akışı: Orman → Tarım, Tarım → Kentsel, vb.
 - [ ] "Arazi Dönüşümü" sekmesine yerleştir (zaten 6 sekme var, uygun yer mevcut)
 
 ### 2.4 TradePage (TradeOverviewTab)'a Sankey Ekle
-- [ ] İhracat akışı: Türkiye → Hedef ülkeler (top 10)
-- [ ] İthalat akışı: Kaynak ülkeler → Türkiye
-- [ ] Ürün grubu bazlı filtre
+- [x] İhracat akışı: Türkiye → Hedef ülkeler (top 10)
+- [x] İthalat akışı: Kaynak ülkeler → Türkiye
+- [x] Ürün grubu bazlı filtre
+
+### 2.5 Ortak Sankey Kartı
+- [x] `FlowSankeyCard` ortak bileşeni çıkarıldı
+- [x] `FoodBalancePage`, `TradeOverviewTab` ve `ProductBalancePage` aynı ortak Sankey kartını kullanıyor
 
 ---
 
@@ -119,17 +139,19 @@
 
 ## Faz 5 — Trade Intelligence Sekmeleri Derinleştirme
 
-> **Mevcut Durum:** 6 trade sekmesinin hepsi aynı değil. TradeOverviewTab zaten Treemap + KPI strip içeriyor, PlantTradeTab Treemap kullanıyor, AnimalTradeTab PieChart kullanıyor. Asıl zayıf halka **ProductIntelligenceTab** ve **CountryIntelligenceTab**: bu ikisi sadece AreaChart + BarChart + ComposedChart ile sınırlı, Scatter/Radar/Treemap yok. Odak bu iki sekmeye verilmeli.
+> **Mevcut Durum:** 6 trade sekmesinin hepsi aynı değil. TradeOverviewTab zaten Treemap + KPI strip içeriyor, PlantTradeTab Treemap kullanıyor, AnimalTradeTab PieChart kullanıyor. ProductIntelligenceTab ileri katmanları aldı; CountryIntelligenceTab için gerçek boşluk etkileşimli detay okumasıydı.
 
 ### 5.1 ProductIntelligenceTab İyileştir (Öncelikli)
-- [ ] **ScatterChart** ekle — Fırsat matrisi (X: büyüme, Y: pazar payı, Z: hacim)
-- [ ] **Treemap** ekle — Ürün hacim dağılımı
-- [ ] **RadarChart** ekle — Ürün rekabet profili (fiyat, hacim, büyüme, çeşitlilik)
+- [x] **ScatterChart** mevcut — Fırsat matrisi (X: ihracat payı, Y: denge, Z: hacim)
+- [x] **Treemap** mevcut — Ülke ihracat dağılımı katmanı
+- [x] **RadarChart** mevcut — Ürün rekabet profili (hacim, büyüme, çeşitlilik, denge)
 
 ### 5.2 CountryIntelligenceTab İyileştir (Öncelikli)
-- [ ] **RadarChart** ekle — Ülke çok boyutlu profili
-- [ ] **ScatterChart** ekle — Büyüme-hacim dağılımı
-- [ ] Ülke tıklanınca detay drawer (ticaret dengesi, ürün dağılımı)
+- [x] **RadarChart** mevcut — Ülke çok boyutlu ticaret profili
+- [x] **ScatterChart** mevcut — Ürün bazlı ihracat payı vs denge matrisi
+- [x] Tablodan / scatter'dan / treemap'ten açılan ürün detay drawer eklendi
+- [x] Drawer içine seçili ürün için yıl bazlı mini trend sparkline eklendi
+- [x] Drawer içine seçili ürünün ülke içi pay değişimini gösteren ikinci mini sparkline eklendi
 
 ### 5.3 TradeOverviewTab'a Sankey Ekle
 - [ ] Bkz. Faz 2.4

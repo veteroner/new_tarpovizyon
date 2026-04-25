@@ -5,9 +5,9 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../../services/api';
 import { 
-  BasinSummary, BasinProductionStats, BasinData, BasinProduct, 
   BASIN_COLORS, formatNumber 
 } from './basinUtils';
+import type { BasinSummary, BasinProductionStats, BasinData, BasinProduct } from './basinUtils';
 
 interface BasinAnalysisSectionProps {
   basinSummary: BasinSummary[];

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery, TRADE_TABLES } from '../../services/api';
+import { fetchQuery, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -16,7 +16,7 @@ export interface RadarRow { dimension: string; value: number; fullMark: number }
 
 export function useTradeIntelligenceData() {
   const [loading, setLoading] = useState(true);
-  const [year, setYear] = useState('2024');
+  const [year, setYear] = useState(DEFAULT_TRADE_YEAR);
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [seasonalData, setSeasonalData] = useState<SeasonalRow[]>([]);
   const [hhiExport, setHhiExport] = useState<HHIResult | null>(null);
@@ -91,8 +91,8 @@ export function useTradeIntelligenceData() {
         return { type: '', hhi: Math.round(hhi), top3share: top3, riskLevel, topCountries: shares.slice(0, 5).map(s => ({ name: s.name, share: s.share * 100 })) };
       };
 
-      setHhiExport({ ...calcHHI(hExp.data, hExpP.data), type: 'İhracat' });
-      setHhiImport({ ...calcHHI(hImp.data, hImpP.data), type: 'İthalat' });
+      setHhiExport({ ...calcHHI(hExp.data ?? [], hExpP.data ?? []), type: 'İhracat' });
+      setHhiImport({ ...calcHHI(hImp.data ?? [], hImpP.data ?? []), type: 'İthalat' });
 
       const [imb1, imb2] = await Promise.all([
         fetchQuery(`SELECT ana_urun, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' GROUP BY ana_urun`),
@@ -144,7 +144,7 @@ export function useTradeIntelligenceData() {
         Math.max(1, (Number((imb1.data || []).reduce((s: number, r: any) => s + (Number(r.imp) || 0), 0)) +
           Number((imb2.data || []).reduce((s: number, r: any) => s + (Number(r.imp) || 0), 0))));
 
-      const hhiEResult = { ...calcHHI(hExp.data, hExpP.data), type: 'İhracat' };
+      const hhiEResult = { ...calcHHI(hExp.data ?? [], hExpP.data ?? []), type: 'İhracat' };
       const diversificationScore = Math.min(100, Math.max(0, 100 - (hhiEResult.hhi / 50)));
       const concentrationRisk = Math.min(100, hhiEResult.top3share);
       const imbalanceRisk = Math.min(100, imbRows.length * 5);

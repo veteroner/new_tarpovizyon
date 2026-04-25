@@ -90,6 +90,12 @@
   font-size: 0.95rem;
 }
 
+.tt-data-meta {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.78rem;
+  color: var(--tt-text-secondary);
+}
+
 /* ── Region Selection ───────────────────────────────────────────────────────── */
 
 .tt-region-row {
@@ -201,8 +207,28 @@
   font-size: 1.3rem;
 }
 
+.tt-crop-chip__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
 .tt-crop-chip__name {
   font-size: 0.9rem;
+}
+
+.tt-crop-chip__meta {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tt-text-secondary);
+}
+
+.tt-crop-chip--selected .tt-crop-chip__meta {
+  color: rgba(255, 255, 255, 0.88);
 }
 
 /* ── Empty State ────────────────────────────────────────────────────────────── */

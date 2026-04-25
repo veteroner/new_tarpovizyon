@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { normalizeTurkish, BasinData } from './basinUtils';
+import { normalizeTurkish } from './basinUtils';
+import type { BasinData } from './basinUtils';
 
 interface DistrictMapProps {
   basinData: BasinData[];

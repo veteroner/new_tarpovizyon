@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
 import { fetchQuery } from '../../services/api';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
-import { 
-  ProvinceBasinData, ProvinceDiversity, ProvinceProductDistribution, formatNumber 
-} from './basinUtils';
+import { formatNumber } from './basinUtils';
+import type { ProvinceBasinData, ProvinceDiversity, ProvinceProductDistribution } from './basinUtils';
 
 interface BasinProvincesSectionProps {
   provinceBasinData: ProvinceBasinData[];

@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchQuery } from '../../services/api';
 import { getRegionByProvince } from '../../utils/productionCategories';
 import {
-  HistoricalData, WorldData, RedMeatData, PoultryData, CityData,
-  COLORS, MapFilterKey, formatValue
+  COLORS, formatValue
 } from './turkeyAnimalProductionTypes';
+import type { HistoricalData, WorldData, RedMeatData, PoultryData, CityData, MapFilterKey } from './turkeyAnimalProductionTypes';
 
 export interface KpiData {
   redMeat: { value: number; change: number };
@@ -98,7 +98,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
           GROUP BY yer`),
       ]);
 
-      if (histRes.data?.length > 0) {
+      if ((histRes.data?.length ?? 0) > 0) {
         setHistoricalData((histRes.data as Record<string, string | number>[]).map(row => ({
           yillar: String(row['yillar'] || row['Yıllar'] || ''),
           bal_uretimi: parseFloat(String(row['bal_uretimi'] || row['Bal Üretimi'] || '0')) || 0,
@@ -109,7 +109,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         })));
       }
 
-      if (worldRes.data?.length > 0) {
+      if ((worldRes.data?.length ?? 0) > 0) {
         setWorldData((worldRes.data as Record<string, string | number>[])
           .map(row => ({
             ulke: String(row['ulke'] || row['Ülke'] || ''),
@@ -119,7 +119,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
           .filter(d => d.ulke?.trim().length > 0));
       }
 
-      if (redMeatRes.data?.length > 0) {
+      if ((redMeatRes.data?.length ?? 0) > 0) {
         setRedMeatData((redMeatRes.data as Record<string, string | number>[]).map(row => ({
           yil: parseInt(String(row['yil'] || '0')) || 0,
           sigir: parseFloat(String(row['sigir'] || '0')) || 0,
@@ -132,7 +132,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         })));
       }
 
-      if (poultryRes.data?.length > 0) {
+      if ((poultryRes.data?.length ?? 0) > 0) {
         setPoultryData((poultryRes.data as Record<string, string | number>[]).map(row => ({
           tarih: String(row['tarih'] || ''),
           tavuk_yumurtasi_bin_adet: parseFloat(String(row['tavuk_yumurtasi_bin_adet'] || '0')) || 0,
@@ -140,7 +140,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         })));
       }
 
-      if (cityRes.data?.length > 0) {
+      if ((cityRes.data?.length ?? 0) > 0) {
         const cityMap = new Map<string, CityData>();
         (cityRes.data as Record<string, string | number>[]).forEach(row => {
           const il = String(row['il'] || '').toUpperCase();
@@ -159,7 +159,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
             cityMap.set(il, { il, sigir, manda, koyun, keci, balUretimi: 0, kovan: 0, balmumu: 0, etTavugu, yumurtaTavugu });
           }
         });
-        if (kovanRes.data?.length > 0) {
+        if ((kovanRes.data?.length ?? 0) > 0) {
           (kovanRes.data as Record<string, string | number>[]).forEach(row => {
             const yer = String(row['yer'] || '').toUpperCase();
             if (!yer || yer === 'TOPLAM' || yer === 'TÜRKİYE') return;

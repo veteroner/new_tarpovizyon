@@ -1,4 +1,4 @@
-import { WizardState } from './gubreTypes';
+import type { WizardState } from './gubreTypes';
 
 interface Props {
   state: WizardState;

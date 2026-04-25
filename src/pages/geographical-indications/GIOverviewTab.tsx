@@ -17,8 +17,6 @@ interface Props {
 
 export function GIOverviewTab({
   provinceData,
-  metrics,
-  allProductsCount,
   registeredCount,
   pendingCount,
   typeData,
@@ -117,7 +115,7 @@ export function GIOverviewTab({
                 outerRadius={90}
                 dataKey="count"
                 nameKey="type"
-                label={({ type, count }) => `${type}: ${formatNumber(count)}`}
+                label={({ type, count }: any) => `${type}: ${formatNumber(count)}`}
                 labelLine={true}
               >
                 {typeData.map((_, index) => (

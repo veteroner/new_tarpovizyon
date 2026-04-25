@@ -8,6 +8,16 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
+    /* Path aliases (mirrors vite resolve.alias) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/rasyon/*"],
+      "@sentry/react": ["src/rasyon/stubs/sentry.ts"],
+      "@sentry/aws-serverless": ["src/rasyon/stubs/sentry.ts"],
+      "@capacitor-community/admob": ["src/rasyon/stubs/capacitor-admob.ts"],
+      "@capacitor/push-notifications": ["src/rasyon/stubs/capacitor-push.ts"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -25,5 +35,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/pages/_backup_fao_clones",
+    "src/pages/TurkeyAnimalProductionPage_OLD_BACKUP.tsx",
+    "src/pages/OverviewPage.old.tsx",
+    "src/pages/ProductionPage.old.tsx"
+  ]
 }

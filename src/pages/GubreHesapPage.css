@@ -196,6 +196,13 @@
   font-size: 0.95rem;
 }
 
+.gh-data-meta {
+  margin: -0.5rem 0 1rem;
+  color: var(--gh-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 /* ── Form Elements ──────────────────────────────────────────────────────────── */
 
 .gh-field {

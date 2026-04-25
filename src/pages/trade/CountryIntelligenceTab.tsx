@@ -8,7 +8,7 @@ import {
 import { Globe, TrendingUp, TrendingDown, Scale, Package } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
-import { fetchQuery, formatMoney, TRADE_TABLES } from '../../services/api';
+import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -18,6 +18,11 @@ const MONTHS_TR: Record<string, string> = {
 interface ProductDetail { name: string; exp: number; imp: number; balance: number; category: string }
 interface YearDetail { yil: string; exp: number; imp: number; denge: number }
 interface MonthDetail { ay: string; exp: number; imp: number }
+interface ProductYearDetail { yil: string; exp: number; imp: number; denge: number }
+
+function toProductShare(value: number, total: number): number {
+  return total > 0 ? (value / total) * 100 : 0;
+}
 
 export default function CountryIntelligenceTab() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +40,9 @@ export default function CountryIntelligenceTab() {
   const [products, setProducts] = useState<ProductDetail[]>([]);
   const [yearlyData, setYearlyData] = useState<YearDetail[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthDetail[]>([]);
-  const [yearForMonthly, setYearForMonthly] = useState('2024');
+  const [yearForMonthly, setYearForMonthly] = useState(DEFAULT_TRADE_YEAR);
+  const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetail | null>(null);
+  const [selectedProductYearlyData, setSelectedProductYearlyData] = useState<ProductYearDetail[]>([]);
 
   // Load country list
   useEffect(() => {
@@ -54,8 +61,8 @@ export default function CountryIntelligenceTab() {
     if (!country) return;
     setLoading(true);
     try {
-      const yr = '2024';
-      const prevYr = '2023';
+      const yr = DEFAULT_TRADE_YEAR;
+      const prevYr = String(Number(yr) - 1);
       const esc = country.replace(/'/g, "''");
 
       // KPIs — combine plant + animal for this country
@@ -102,6 +109,7 @@ export default function CountryIntelligenceTab() {
       }));
       setProducts(pData);
       setTopProduct(pData[0]?.name || '-');
+      setSelectedProductDetail(null);
 
       // Yearly trend
       const yearRes = await fetchQuery(`
@@ -137,12 +145,65 @@ export default function CountryIntelligenceTab() {
 
   useEffect(() => { if (selectedCountry) loadCountry(selectedCountry); }, [selectedCountry, loadCountry]);
 
+  useEffect(() => {
+    if (!selectedCountry || !selectedProductDetail) {
+      setSelectedProductYearlyData([]);
+      return;
+    }
+
+    let ignore = false;
+    (async () => {
+      try {
+        const escCountry = selectedCountry.replace(/'/g, "''");
+        const escProduct = selectedProductDetail.name.replace(/'/g, "''");
+        const yearRes = await fetchQuery(`
+          SELECT yil, SUM(exp) as exp, SUM(imp) as imp FROM (
+            SELECT yil, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND ulke='${escCountry}' AND ana_urun='${escProduct}'
+            UNION ALL SELECT yil, ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND ulke='${escCountry}' AND ana_urun='${escProduct}'
+          ) t GROUP BY yil ORDER BY yil
+        `);
+        if (ignore) return;
+        setSelectedProductYearlyData((yearRes.data || []).map((row: any) => {
+          const exp = Number(row.exp) || 0;
+          const imp = Number(row.imp) || 0;
+          return { yil: String(row.yil), exp, imp, denge: exp - imp };
+        }));
+      } catch (error) {
+        if (!ignore) {
+          console.error('CountryIntelligence product yearly detail error:', error);
+          setSelectedProductYearlyData([]);
+        }
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [selectedCountry, selectedProductDetail]);
+
   const filteredCountries = countryOptions.filter(c =>
     c.toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR'))
   );
 
   const balance = totalExp - totalImp;
   const yoyGrowth = prevExp > 0 ? ((totalExp - prevExp) / prevExp * 100) : 0;
+  const selectedProductExportShare = selectedProductDetail ? toProductShare(selectedProductDetail.exp, totalExp) : 0;
+  const selectedProductImportShare = selectedProductDetail ? toProductShare(selectedProductDetail.imp, totalImp) : 0;
+  const selectedProductTurnover = selectedProductDetail ? selectedProductDetail.exp + selectedProductDetail.imp : 0;
+  const selectedProductShareTrend = selectedProductYearlyData.map(row => {
+    const totalRow = yearlyData.find(total => total.yil === row.yil);
+    const totalYearExp = totalRow?.exp || 0;
+    const totalYearImp = totalRow?.imp || 0;
+    return {
+      yil: row.yil,
+      expShare: parseFloat(toProductShare(row.exp, totalYearExp).toFixed(2)),
+      impShare: parseFloat(toProductShare(row.imp, totalYearImp).toFixed(2)),
+    };
+  });
+  const openProductDetail = (productName: string) => {
+    const match = products.find(product => product.name === productName);
+    if (match) setSelectedProductDetail(match);
+  };
 
   return (
     <div>
@@ -222,15 +283,15 @@ export default function CountryIntelligenceTab() {
             <div>
               <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>{selectedCountry}</div>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                {productCount} ürün grubu ile ticaret · 2024 yılı
+                {productCount} ürün grubu ile ticaret · {yearForMonthly} yılı
               </div>
             </div>
           </div>
 
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPICard title="İhracat (2024)" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
-            <KPICard title="İthalat (2024)" value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
+            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+            <KPICard title={`İthalat (${yearForMonthly})`} value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
             <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Ürün" value={topProduct} subtitle="En çok ihracat" icon={Package} color="purple" />
           </div>
@@ -271,13 +332,14 @@ export default function CountryIntelligenceTab() {
 
           {/* Top products bar */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">📦 Ürün Bazlı Ticaret — {selectedCountry} (2024)</h3>
+            <h3 className="chart-title">📦 Ürün Bazlı Ticaret — {selectedCountry} ({yearForMonthly})</h3>
             <ResponsiveContainer width="100%" height={Math.max(300, products.length * 28)}>
               <BarChart data={products.slice(0, 15).map(p => ({
                 name: p.name.length > 18 ? p.name.substring(0, 18) + '..' : p.name,
+                fullName: p.name,
                 İhracat: p.exp / 1e6,
                 İthalat: p.imp / 1e6,
-              }))} layout="vertical">
+              }))} layout="vertical" onClick={(state: any) => openProductDetail(state?.activePayload?.[0]?.payload?.fullName || '')}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
                 <YAxis type="category" dataKey="name" width={140} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
@@ -307,7 +369,15 @@ export default function CountryIntelligenceTab() {
                 </thead>
                 <tbody>
                   {products.map((p, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <tr
+                      key={i}
+                      onClick={() => setSelectedProductDetail(p)}
+                      style={{
+                        borderBottom: '1px solid var(--border)',
+                        cursor: 'pointer',
+                        background: selectedProductDetail?.name === p.name ? 'rgba(139,92,246,0.08)' : 'transparent',
+                      }}
+                    >
                       <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{i + 1}</td>
                       <td style={{ padding: '8px', color: 'var(--text-primary)', fontWeight: 600 }}>{p.name}</td>
                       <td style={{ padding: '8px' }}>
@@ -372,12 +442,13 @@ export default function CountryIntelligenceTab() {
                   />
                   <Scatter
                     data={products.map(p => ({
-                      x: totalExp > 0 ? parseFloat((p.exp / totalExp * 100).toFixed(2)) : 0,
+                      x: parseFloat(toProductShare(p.exp, totalExp).toFixed(2)),
                       y: parseFloat((p.balance / 1e6).toFixed(2)),
                       z: parseFloat((p.exp / 1e6).toFixed(2)),
                       name: p.name,
                     }))}
                     fill="#8b5cf6"
+                    onClick={(point: any) => openProductDetail(point?.name || '')}
                   >
                     {products.map((_p, i) => (
                       <Cell key={i} fill={_p.balance >= 0 ? '#10b981' : '#ef4444'} fillOpacity={0.75} />
@@ -420,11 +491,13 @@ export default function CountryIntelligenceTab() {
               <Treemap
                 data={products.slice(0, 15).map(p => ({
                   name: p.name.length > 14 ? p.name.substring(0, 14) + '.' : p.name,
+                  fullName: p.name,
                   size: p.exp,
                   category: p.category,
                 }))}
                 dataKey="size"
                 stroke="var(--bg)"
+                onClick={(node: any) => openProductDetail(node?.fullName || '')}
                 content={(props: any) => {
                   const { x, y, width, height, name, category } = props;
                   const size = props.size ?? props.value ?? 0;
@@ -449,6 +522,153 @@ export default function CountryIntelligenceTab() {
               />
             </ResponsiveContainer>
           </div>
+
+          {selectedProductDetail && (
+            <>
+              <div
+                onClick={() => setSelectedProductDetail(null)}
+                style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.45)', zIndex: 40 }}
+              />
+              <aside
+                style={{
+                  position: 'fixed', top: 0, right: 0, height: '100vh', width: 'min(420px, 100vw)',
+                  background: 'var(--card-bg)', borderLeft: '1px solid var(--border)', zIndex: 41,
+                  boxShadow: '-24px 0 48px rgba(15, 23, 42, 0.18)', display: 'flex', flexDirection: 'column',
+                }}
+              >
+                <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                      Ürün Detay Drawer
+                    </div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4 }}>
+                      {selectedProductDetail.name}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
+                      {selectedCountry} ülkesinin {yearForMonthly} ürün ticaret profili
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedProductDetail(null)}
+                    style={{
+                      width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border)',
+                      background: 'var(--bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div style={{ padding: 20, overflowY: 'auto', display: 'grid', gap: 16 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+                    <div style={{ padding: 14, borderRadius: 12, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.18)' }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>İhracat</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: '#10b981', marginTop: 4 }}>{formatMoney(selectedProductDetail.exp)}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>%{selectedProductExportShare.toFixed(1)} ülke payı</div>
+                    </div>
+                    <div style={{ padding: 14, borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.18)' }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>İthalat</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: '#f59e0b', marginTop: 4 }}>{formatMoney(selectedProductDetail.imp)}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>%{selectedProductImportShare.toFixed(1)} ülke payı</div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: 16, borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Ticaret Denge Özeti</div>
+                    <div style={{ display: 'grid', gap: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Net denge</span>
+                        <strong style={{ color: selectedProductDetail.balance >= 0 ? '#10b981' : '#ef4444' }}>
+                          {selectedProductDetail.balance >= 0 ? '+' : ''}{formatMoney(selectedProductDetail.balance)}
+                        </strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Toplam ciro</span>
+                        <strong style={{ color: 'var(--text-primary)' }}>{formatMoney(selectedProductTurnover)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Kategori</span>
+                        <strong style={{ color: selectedProductDetail.category === 'bitkisel' ? '#10b981' : '#ef4444' }}>
+                          {selectedProductDetail.category === 'bitkisel' ? 'Bitkisel' : 'Hayvansal'}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: 16, borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Yıl Bazlı Mini Trend</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                      Seçili ürünün ülke içindeki yıllık ihracat / ithalat izi
+                    </div>
+                    <ResponsiveContainer width="100%" height={140}>
+                      <AreaChart data={selectedProductYearlyData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="countryDrawerExp" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                          </linearGradient>
+                          <linearGradient id="countryDrawerImp" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.04} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                        <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
+                        <YAxis hide />
+                        <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
+                        <Area type="monotone" dataKey="exp" stroke="#10b981" fill="url(#countryDrawerExp)" strokeWidth={2} dot={false} />
+                        <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="url(#countryDrawerImp)" strokeWidth={2} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ padding: 16, borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Ülke İçi Pay Değişimi</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                      Seçili ürünün toplam ülke ihracat ve ithalatı içindeki payının zaman izi
+                    </div>
+                    <ResponsiveContainer width="100%" height={120}>
+                      <AreaChart data={selectedProductShareTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="countryDrawerExpShare" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.04} />
+                          </linearGradient>
+                          <linearGradient id="countryDrawerImpShare" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.03} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                        <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
+                        <YAxis hide />
+                        <Tooltip formatter={(v: number, name: string) => [`%${v.toFixed(1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
+                        <Area type="monotone" dataKey="expShare" stroke="#6366f1" fill="url(#countryDrawerExpShare)" strokeWidth={2} dot={false} />
+                        <Area type="monotone" dataKey="impShare" stroke="#ef4444" fill="url(#countryDrawerImpShare)" strokeWidth={2} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ padding: 16, borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Okuma Notları</div>
+                    <div style={{ display: 'grid', gap: 10, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                      <div>
+                        {selectedProductDetail.balance >= 0
+                          ? 'Bu ürün ülke için net fazla üretiyor; pozitif denge güçlü pazar pozisyonuna işaret ediyor.'
+                          : 'Bu ürün ülke için net açık üretiyor; negatif denge dışa bağımlılık sinyali veriyor.'}
+                      </div>
+                      <div>
+                        İhracat payı %{selectedProductExportShare.toFixed(1)} ve toplam ülke cirosundaki ağırlığı {selectedProductTurnover > 0 ? `%${toProductShare(selectedProductTurnover, totalExp + totalImp).toFixed(1)}` : '%0.0'}.
+                      </div>
+                      <div>
+                        Drawer, tablo, bar chart, scatter ve treemap üzerindeki ürün seçimini tek okuma yüzeyinde birleştirir.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </>
+          )}
         </>
       )}
     </div>

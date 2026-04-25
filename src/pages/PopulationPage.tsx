@@ -7,7 +7,7 @@ import { Globe, TrendingUp, TrendingDown, Users, Award, AlertTriangle, Activity,
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
-import { usePopulationData, TABS, CHART_COLORS, formatPop, formatShort, formatPercent } from './population/usePopulationData';
+import { usePopulationData, TABS, formatPop, formatShort, formatPercent } from './population/usePopulationData';
 import type { Tab } from './population/usePopulationData';
 
 export default function PopulationPage() {

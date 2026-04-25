@@ -8,7 +8,7 @@ import {
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { ModelWarningBox } from '../../components/ModelWarningBox';
 import {
-  CROP_WATER_DB, SOIL_TYPES, IRRIGATION_SYSTEMS,
+  SOIL_TYPES, IRRIGATION_SYSTEMS,
   ETO_METOD_LISTESI, BOLGE_META, donRiskiVar,
   type WizardState, type CalcResult, type CropWaterData,
 } from './sulamaUtils';
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export function ResultsView({ state, setState, calc, cropData, bolge, forecast, wxStatus, reset }: Props) {
-  const bolgeMeta = bolge ? BOLGE_META[bolge] : null;
+  const bolgeMeta = bolge ? BOLGE_META[bolge as keyof typeof BOLGE_META] : null;
 
   return (
     <div className="sp-results">
@@ -37,8 +37,8 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
         let conf = 30;
         if (etoMetod?.gercekFormul) conf += 30;
         if (wxStatus === 'ready' && forecast) conf += 15;
-        const donRisk = donRiskiVar(bolge ?? 'ic_anadolu', new Date().getMonth() + 1);
-        const bolgeLabel = BOLGE_META[bolge ?? 'ic_anadolu']?.ad ?? '';
+        const donRisk = donRiskiVar((bolge ?? 'ic_anadolu') as keyof typeof BOLGE_META, new Date().getMonth() + 1);
+        const bolgeLabel = BOLGE_META[(bolge ?? 'ic_anadolu') as keyof typeof BOLGE_META]?.ad ?? '';
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

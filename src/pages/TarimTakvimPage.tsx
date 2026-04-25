@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBolge } from '../utils/climate-data';
-import { Activity, STORAGE_KEY, getCurrentWeekOfYear, generateActivities } from './takvim/takvimTypes';
+import { STORAGE_KEY, getCurrentWeekOfYear, generateActivities } from './takvim/takvimTypes';
+import type { Activity } from './takvim/takvimTypes';
 import { TakvimRegionCard } from './takvim/TakvimRegionCard';
 import { TakvimCropSelector } from './takvim/TakvimCropSelector';
 import { TakvimThisWeek } from './takvim/TakvimThisWeek';

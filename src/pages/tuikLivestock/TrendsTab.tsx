@@ -1,11 +1,11 @@
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Line, ComposedChart, ReferenceLine, Legend,
   ScatterChart, Scatter, ZAxis,
   Sankey
 } from 'recharts';
 import { formatNumber, formatShort } from './tuikLivestockTypes';
-import { UseTuikLivestockDataReturn } from './useTuikLivestockData';
+import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'yearLabel'
