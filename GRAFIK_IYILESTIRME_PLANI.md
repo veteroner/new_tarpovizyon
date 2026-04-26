@@ -134,15 +134,15 @@
 - [x] Her wrapper'dan kategori-özel içerik geçilebiliyor (kod: Cereal, Fruit, Vegetable, Legume, Oilseed, Sugar, Nut, Beverage, Fiber wrapper'ları `extraSection` gönderiyor)
 
 ### 4.2 Kategori Özelleştirmeleri
-- [ ] **CerealProductionPage** → Verim trendi vurgulu (LineChart ön plana), dünya karşılaştırması ek bölüm
-- [ ] **VegetableProductionPage** → Mevsimsellik takvimi ek bölüm (hangi sebze hangi ayda?)
-- [ ] **FruitProductionPage** → Ağaç yaşı analizi (showTreeMetrics zaten var → öne çıkar, ağaç başı verim)
-- [ ] **LegumeProductionPage** → Protein kaynağı karşılaştırma bölümü (baklagiller vs hayvansal)
-- [ ] **OilseedProductionPage** → Yağ verimi karşılaştırma (ton tohum → litre yağ)
-- [ ] **SugarCropProductionPage** → Şeker pancarı kampanya takvimi
-- [ ] **NutProductionPage** → Ağaç başı verim + dış ticaret bağlantısı
-- [ ] **BeverageCropPage** → Çay hasat takvimi + baharat ihracat verileri
-- [ ] **FiberCropPage** → Pamuk lif kalitesi göstergeleri
+- [x] **CerealProductionPage** → Verim trendi LineChart (TR vs Dünya, FAO 2014-2023, kg/ha) + dünya karşılaştırması bar (`CerealProductionPage.tsx`)
+- [x] **VegetableProductionPage** → Mevsimsellik takvimi (`VegetableProductionPage.tsx:28`)
+- [x] **FruitProductionPage** → Türkiye'nin dünya meyve üretimindeki payı (showTreeMetrics zaten `TuikPlantCategoryPage` içinde aktif) (`FruitProductionPage.tsx:34`)
+- [x] **LegumeProductionPage** → Baklagiller vs Hayvansal protein karşılaştırması (`LegumeProductionPage.tsx:26`)
+- [x] **OilseedProductionPage** → Yağ içeriği karşılaştırması % (`OilseedProductionPage.tsx:26`)
+- [x] **SugarCropProductionPage** → Şeker pancarı kampanya takvimi (`SugarCropProductionPage.tsx:22`)
+- [x] **NutProductionPage** → Dünya fındık üretiminde Türkiye + showTreeMetrics aktif (`NutProductionPage.tsx:20`)
+- [x] **BeverageCropPage** → Rize çayı hasat sezonu takvimi (`BeverageCropPage.tsx:32`)
+- [x] **FiberCropPage** → Pamuk lif kalite göstergeleri TR vs dünya referansı (`FiberCropPage.tsx:25`)
 
 ---
 
