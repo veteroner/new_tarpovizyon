@@ -460,10 +460,16 @@ export interface AIChatResult {
   error?: string;
 }
 
-export async function fetchAIChat(message: string): Promise<AIChatResult> {
+// Faz 8.2 — chart-json sözleşmesi (bkz. AI_CHART_CONTRACT.md). Backend system
+// prompt'una uygun davranabilmesi için opsiyonel hint olarak kullanıcı mesajına
+// ön-eklenir. Backend bu satırları görmezse bile zarar vermez (yalnızca metin).
+const CHART_JSON_HINT = '[Grafik gerekiyorsa cevabına ```chart-json {type,data,xKey,series,title,unit}``` bloğu ekle (şema: AI_CHART_CONTRACT.md). Gerek yoksa ekleme.]\n\n';
+
+export async function fetchAIChat(message: string, chartHint = true): Promise<AIChatResult> {
   try {
     const url = `${API_BASE}/api.php?action=ai_chat&api_key=${API_KEY}`;
-    const response = await axios.post(url, { message }, { timeout: 60000 });
+    const payload = chartHint ? CHART_JSON_HINT + message : message;
+    const response = await axios.post(url, { message: payload }, { timeout: 60000 });
     return response.data as AIChatResult;
   } catch {
     return { success: false, error: 'AI Chat bağlantı hatası' };
