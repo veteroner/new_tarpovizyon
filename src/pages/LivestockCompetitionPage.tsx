@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from 'react';
 import {
   BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  AreaChart, Area, ScatterChart, Scatter, Treemap,
+  AreaChart, Area, ScatterChart, Scatter, Treemap, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
 import { Loading } from '../components/Loading';
@@ -34,6 +35,12 @@ export function LivestockCompetitionPage() {
     turkeyData, rnk, pRnk, trCagr, world, hhi,
     mktShareChart, bcgData, rivals, catchUp, radarData, top2,
   } = useLivestockCompetitionData();
+
+  /* ── BCG drill-down state ───────────────────────────────── */
+  const [drillCountry, setDrillCountry] = useState<string | null>(null);
+  const drillData = drillCountry
+    ? currentRankings.find(c => c.country === drillCountry || c.countryRaw === drillCountry)
+    : null;
 
   /* ── render helpers ──────────────────────────────────────── */
   const rankBadge = (chg: number) =>
@@ -223,8 +230,10 @@ export function LivestockCompetitionPage() {
               }} />
               <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
               <ReferenceLine x={2} stroke="var(--border)" strokeDasharray="3 3" />
-              <Scatter data={bcgData.filter(d => !d.isTurkey)} fill="#6366f1" fillOpacity={0.6} />
-              <Scatter data={bcgData.filter(d => d.isTurkey)} fill={TURKEY_COLOR} fillOpacity={1} shape="star" />
+              <Scatter data={bcgData.filter(d => !d.isTurkey)} fill="#6366f1" fillOpacity={0.6}
+                onClick={(d: any) => setDrillCountry(d?.fullName ?? null)} cursor="pointer" />
+              <Scatter data={bcgData.filter(d => d.isTurkey)} fill={TURKEY_COLOR} fillOpacity={1} shape="star"
+                onClick={(d: any) => setDrillCountry(d?.fullName ?? null)} cursor="pointer" />
             </ScatterChart>
           </ResponsiveContainer>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, fontSize: '0.75rem', padding: 10, color: 'var(--text-secondary)' }}>
@@ -232,6 +241,9 @@ export function LivestockCompetitionPage() {
             <span>↘️ Sağ alt: Nakit İnekleri</span>
             <span>↖️ Sol üst: Soru İşaretleri</span>
             <span>↙️ Sol alt: Köpekler</span>
+          </div>
+          <div style={{ marginTop: 8, fontSize: '0.72rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+            💡 Bir noktaya tıklayarak ülke detayını açabilirsiniz.
           </div>
         </div>
       </div>
@@ -491,6 +503,73 @@ export function LivestockCompetitionPage() {
           </table>
         </div>
       </div>
+
+      {/* ── BCG Drill-down Drawer ──────────────────────────── */}
+      {drillCountry && drillData && (() => {
+        const total = drillData.meat + drillData.milk + drillData.eggs;
+        const breakdown = [
+          { name: 'Et',      val: drillData.meat, color: '#ef4444' },
+          { name: 'Süt',     val: drillData.milk, color: '#3b82f6' },
+          { name: 'Yumurta', val: drillData.eggs, color: '#f59e0b' },
+        ];
+        const sharePct = world.total > 0 ? (total / world.total) * 100 : 0;
+        return (
+          <div onClick={() => setDrillCountry(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <div onClick={(e) => e.stopPropagation()}
+              style={{ background: 'var(--bg-card)', width: '100%', maxWidth: 720, maxHeight: '80vh', overflow: 'auto', padding: 24, borderTopLeftRadius: 16, borderTopRightRadius: 16, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: 700 }}>
+                  {isTR(drillCountry) ? '🇹🇷 ' : '🌍 '}{drillCountry} — Ürün Detayı ({selectedYear})
+                </h3>
+                <button onClick={() => setDrillCountry(null)}
+                  style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                  ✕ Kapat
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+                <div className="kpi-card"><div className="kpi-title" style={{ fontSize: '0.7rem' }}>TOPLAM</div>
+                  <div className="kpi-value" style={{ fontSize: '1.3rem', color: '#10b981' }}>{fmtVal(total)}</div>
+                  <div className="kpi-subtitle">ton</div>
+                </div>
+                <div className="kpi-card"><div className="kpi-title" style={{ fontSize: '0.7rem' }}>DÜNYA PAYI</div>
+                  <div className="kpi-value" style={{ fontSize: '1.3rem', color: '#8b5cf6' }}>%{sharePct.toFixed(2)}</div>
+                  <div className="kpi-subtitle">{currentRankings.length} ülke arasında</div>
+                </div>
+                <div className="kpi-card"><div className="kpi-title" style={{ fontSize: '0.7rem' }}>SIRA</div>
+                  <div className="kpi-value" style={{ fontSize: '1.3rem', color: '#f59e0b' }}>#{currentRankings.indexOf(drillData) + 1}</div>
+                  <div className="kpi-subtitle">toplam üretim</div>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={breakdown} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" />
+                  <YAxis stroke="var(--text-secondary)" tickFormatter={fmtVal} />
+                  <Tooltip formatter={(v: number) => [fmtVal(v) + ' ton', 'Üretim']}
+                    contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+                  <Bar dataKey="val" radius={[6, 6, 0, 0]}>
+                    {breakdown.map((b, i) => (
+                      <Cell key={i} fill={b.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {breakdown.map(b => (
+                  <div key={b.name} style={{ padding: 10, background: 'var(--bg)', borderRadius: 8, borderLeft: `3px solid ${b.color}` }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{b.name}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtVal(b.val)}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                      %{total > 0 ? ((b.val / total) * 100).toFixed(1) : '0'} payı
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

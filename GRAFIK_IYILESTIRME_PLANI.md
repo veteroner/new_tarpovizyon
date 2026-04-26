@@ -223,15 +223,15 @@
 > **Eksik olan:** İkinci katman analitik derinlik — korelasyon matrisi, drill-down, segment bazlı decomposition, anomaly layer gibi zenginleştirmeler
 
 ### 7.1 CrossIntelligencePage (533 satır → ikinci katman ekle)
-- [ ] **Korelasyon matrisi heatmap** ekle (ürün×ürün veya ürün×gösterge — mevcut ComposedChart'ı tamamlayıcı)
-- [ ] **Anomali tespiti** görselleştirmesi (z-score bazlı outlier işaretleme — mevcut ScatterChart üzerine layer)
+- [x] **Korelasyon matrisi heatmap** (Pearson, 5×5 gösterge: Üretim/İthalat/İhracat/Fiyat/Yeterlilik) (`CrossIntelligencePage.tsx`)
+- [x] **Anomali tespiti** görselleştirmesi (z-score, |z|>1.5 outlier; ComposedChart Bar+Line + ReferenceLine ±1.5σ) (`CrossIntelligencePage.tsx`)
 - [ ] **Drill-down** — Mevcut grafiklerde tıkla → detay modal/drawer
 - [ ] **Segment decomposition** — Seçili göstergeyi alt kategorilere ayırma
 
 ### 7.2 LivestockCompetitionPage (ikinci katman ekle)
 - [x] **Treemap** mevcut — Ülke pazar payı hiyerarşisi (`LivestockCompetitionPage.tsx:327`)
 - [x] **HHI zaman serisi** mevcut — `LineChart` olarak zaman boyutunda (`LivestockCompetitionPage.tsx:362-392`)
-- [ ] **Drill-down** — BCG matrisinde ülke tıkla → ürün bazlı detay drawer
+- [x] **Drill-down** — BCG matrisinde ülke tıkla → ürün bazlı detay drawer (toplam/dünya payı/sıra KPI + Et/Süt/Yumurta BarChart breakdown; `LivestockCompetitionPage.tsx`)
 
 ### 7.3 ProductionPage "Rekabet Analizi" Sekmesi
 - [ ] Mevcut durumu kontrol et, ScatterChart var — yeterli mi?
