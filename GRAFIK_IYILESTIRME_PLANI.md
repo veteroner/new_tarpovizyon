@@ -167,9 +167,9 @@
 
 ### 5.5 WorldTradeMap Entegrasyonu (Yeni — Gözden Kaçmış Kaliteli Bileşen)
 - [x] `src/components/WorldTradeMap.tsx` mevcut: d3-geo tabanlı, hover tooltip, ülke seçim, ihracat/ithalat/denge metrikleri, diverging palette
-- [ ] TradeOverviewTab içine ülke düzeyinde ihracat/ithalat/denge harita katmanı olarak yerleştir
+- [x] TradeOverviewTab içine ülke düzeyinde ihracat/ithalat/denge harita katmanı olarak yerleştir (`TradeOverviewTab.tsx` Dünya Ticaret Haritası bölümü, top10 exp+imp ülkeleri normalize/merge edilmiş, metric switcher)
 - [ ] CountryIntelligenceTab içinde seçili ülkeyi vurgulayan harita görünümü
-- [ ] `public/world.geojson` dosyasının her iki dist'te de mevcut olduğunu doğrula
+- [x] `public/world.geojson` dosyasının her iki dist'te de mevcut olduğunu doğrula (netlify-dashboard/public/world.geojson kopyalandı)
 
 ### 5.4 Plant vs Animal Trade İnce Ayarlar (Düşük Öncelik)
 - [x] PlantTradeTab — aylık ihracat/ithalat AreaChart (mevsimsellik) zaten var (`PlantTradeTab.tsx:185`)
@@ -260,23 +260,22 @@
 > **Problem:** Bazı sayfalarda veri tipine uygun olmayan grafik kullanılmış
 
 ### 9.1 SulamaPlanPage → Zenginleştir
-- [ ] **Gauge / RadialBarChart** — Su seviyesi göstergesi
-- [ ] **AreaChart** — Yağış zaman serisi (aylık)
-- [ ] **ComposedChart** — Bitki su ihtiyacı vs gerçek sulama
-- [ ] Mevcut tek BarChart → zengin dashboard'a dönüştür
+- [x] **Gauge / RadialBarChart** — Su seviyesi göstergesi (`ResultsView.tsx:261`)
+- [x] **AreaChart** — Yağış zaman serisi (aylık) (`ResultsView.tsx:301`)
+- [x] **ComposedChart** — Bitki su ihtiyacı vs gerçek sulama (`ResultsView.tsx:336`)
 
 ### 9.2 GubreHesapPage → Zenginleştir
-- [ ] **RadarChart** — N-P-K profili (toprak analizi vs ideal)
-- [ ] **ComposedChart** — Gübre maliyeti vs verim artışı
-- [ ] **PieChart** — Gübre bileşen dağılımı
+- [x] **RadarChart** — N-P-K profili (toprak analizi vs ideal) (`GubreStep4.tsx:85`)
+- [ ] **ComposedChart** — Gübre maliyeti vs verim artışı (calc shape genişletilmesi gerekli)
+- [x] **PieChart** — Gübre bileşen dağılımı (`GubreStep4.tsx:114`)
 
 ### 9.3 PriceIndexPage → Makas Grafiği Güçlendir
-- [ ] **ComposedChart** — TÜFE-GFE makası (bar + line overlapping)
-- [ ] Mevcut anomali heatmap tablosu zaten iyi → koru
+- [x] **ComposedChart** — TÜFE-GFE makası (bar + line overlapping) (`PriceIndexPage.tsx` — makas bölümü, fark Bar (kırmızı/yeşil) + endeks Line, dual y-axis, ReferenceLine y=0)
+- [x] Mevcut anomali heatmap tablosu zaten iyi → korundu
 
 ### 9.4 TurkeyBeekeepingPage
-- [ ] Mevcut Treemap iyi → koru
-- [ ] **RadarChart** ekle — İl arıcılık profili (kovan, verim, arıcı sayısı)
+- [x] Mevcut Treemap iyi → korundu
+- [x] **RadarChart** — İl arıcılık profili (arıcı, üretim, verim normalize 0–100) (`BeekeepingProvincialSection.tsx:188`)
 
 ---
 

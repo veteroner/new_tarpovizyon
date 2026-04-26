@@ -2,11 +2,13 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis,
 } from 'recharts';
+import { useMemo, useState } from 'react';
 import { TrendingUp, TrendingDown, Scale, ArrowLeftRight, Zap, AlertTriangle } from 'lucide-react';
 import { FlowSankeyCard } from '../../components/FlowSankeyCard';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { TreemapContent } from '../../components/TreemapContent';
+import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '../../components/WorldTradeMap';
 import { formatMoney } from '../../services/api';
 import { useTradeOverviewData } from './useTradeOverviewData';
 
@@ -15,6 +17,17 @@ const GROUP_FILTER_LABELS = {
   bitkisel: 'Bitkisel',
   hayvansal: 'Hayvansal',
 } as const;
+
+function normalizeCountryKey(value: string): string {
+  return String(value || '')
+    .toLocaleLowerCase('tr-TR')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/ı/g, 'i')
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export default function TradeOverviewTab() {
   const {
@@ -28,6 +41,27 @@ export default function TradeOverviewTab() {
     balance, ratio, yoyExpGrowth, plantShare,
     treemapExpData, treemapImpData,
   } = useTradeOverviewData();
+
+  const [worldMapMetric, setWorldMapMetric] = useState<WorldTradeMetric>('exportValue');
+
+  const worldCountryMetrics = useMemo<Record<string, CountryTradeMetrics>>(() => {
+    const acc: Record<string, CountryTradeMetrics> = {};
+    const ingest = (rows: { name: string; exp: number; imp: number }[]) => {
+      rows.forEach(r => {
+        const key = normalizeCountryKey(r.name);
+        if (!key) return;
+        if (!acc[key]) {
+          acc[key] = { exportValue: 0, importValue: 0, balanceValue: 0 };
+        }
+        acc[key].exportValue = Math.max(acc[key].exportValue, r.exp || 0);
+        acc[key].importValue = Math.max(acc[key].importValue, r.imp || 0);
+        acc[key].balanceValue = acc[key].exportValue - acc[key].importValue;
+      });
+    };
+    ingest(topExpCountries);
+    ingest(topImpCountries);
+    return acc;
+  }, [topExpCountries, topImpCountries]);
 
   if (loading) return <Loading />;
 
@@ -279,6 +313,48 @@ export default function TradeOverviewTab() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Dünya Ticaret Haritası */}
+      {Object.keys(worldCountryMetrics).length > 0 && (
+        <div className="chart-card" style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+            <h3 className="chart-title" style={{ margin: 0 }}>🗺️ Dünya Ticaret Haritası ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {([
+                { key: 'exportValue', label: 'İhracat' },
+                { key: 'importValue', label: 'İthalat' },
+                { key: 'balanceValue', label: 'Denge' },
+              ] as { key: WorldTradeMetric; label: string }[]).map(opt => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setWorldMapMetric(opt.key)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 999,
+                    border: '1px solid var(--border)',
+                    background: worldMapMetric === opt.key ? 'var(--primary)' : 'var(--bg-card)',
+                    color: worldMapMetric === opt.key ? '#fff' : 'var(--text-secondary)',
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <WorldTradeMap
+            metric={worldMapMetric}
+            countryMetrics={worldCountryMetrics}
+            height={460}
+          />
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8 }}>
+            Top {Object.keys(worldCountryMetrics).length} ülke birleştirilmiş ihracat/ithalat verisi. Renk yoğunluğu metrik büyüklüğünü, kırmızı/yeşil ayrımı denge metriğinde açık/fazlayı gösterir.
+          </div>
+        </div>
+      )}
 
       {/* Sankey: İhracat Akış */}
       {topExpCountries.length > 0 && (
