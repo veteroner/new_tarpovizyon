@@ -234,8 +234,8 @@
 - [x] **Drill-down** — BCG matrisinde ülke tıkla → ürün bazlı detay drawer (toplam/dünya payı/sıra KPI + Et/Süt/Yumurta BarChart breakdown; `LivestockCompetitionPage.tsx`)
 
 ### 7.3 ProductionPage "Rekabet Analizi" Sekmesi
-- [ ] Mevcut durumu kontrol et, ScatterChart var — yeterli mi?
-- [ ] RCA (Revealed Comparative Advantage) göstergeleri ekle
+- [x] Mevcut: ScatterChart (Büyüme vs Üretim), AreaChart (HHI trendi), Rekabet Matrisi tablosu, Top Movers — yeterli temel
+- [x] **RCA (Revealed Comparative Advantage) göstergeleri eklendi**: Pazar payı / Verim / Ölçek (alan) / Verim vs Top 5 — 4 KPI kartı (avantaj rözeti) + RadarChart (Medyan 1,0× referans çizgisi); `CompetitionTab.tsx`
 
 ---
 

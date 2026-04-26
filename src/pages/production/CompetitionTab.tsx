@@ -2,6 +2,7 @@
 import { Globe, BarChart2 } from 'lucide-react';
 import {
   ScatterChart, Scatter, AreaChart, Area,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine
 } from 'recharts';
@@ -85,6 +86,70 @@ export function CompetitionTab({
             </div>
           </div>
         )}
+
+        {/* ── RCA & Rekabet Avantajı Göstergeleri ────────────────── */}
+        {compMatrix.length >= 5 && (() => {
+          const tr = compMatrix.find((c: any) => c.isTurkey);
+          if (!tr) return null;
+          const sharesSorted = compMatrix.map((c: any) => c.share).sort((a: number, b: number) => a - b);
+          const yieldsSorted = compMatrix.filter((c: any) => c.yieldVal > 0).map((c: any) => c.yieldVal).sort((a: number, b: number) => a - b);
+          const areasSorted = compMatrix.filter((c: any) => c.area > 0).map((c: any) => c.area).sort((a: number, b: number) => a - b);
+          const median = (arr: number[]) => arr.length === 0 ? 0 : arr.length % 2 === 0 ? (arr[arr.length/2 - 1] + arr[arr.length/2]) / 2 : arr[Math.floor(arr.length/2)];
+          const medShare = median(sharesSorted) || 0.001;
+          const medYield = median(yieldsSorted) || 1;
+          const medArea = median(areasSorted) || 1;
+          const top5avgYield = yieldsSorted.slice(-5).reduce((a, b) => a + b, 0) / Math.max(1, Math.min(5, yieldsSorted.length));
+          // RCA-benzeri normalize göstergeler (1.0 = medyan ile eşit; >1 avantaj)
+          const rcaShare = tr.share / medShare;
+          const rcaYield = tr.yieldVal / medYield;
+          const rcaArea = tr.area / medArea;
+          const rcaYieldVsTop = top5avgYield > 0 ? tr.yieldVal / top5avgYield : 0;
+          const radarRcaData = [
+            { metric: 'Pay (RCA)', value: Math.min(rcaShare, 5), full: 5 },
+            { metric: 'Verim Avantajı', value: Math.min(rcaYield, 5), full: 5 },
+            { metric: 'Ölçek (Alan)', value: Math.min(rcaArea, 5), full: 5 },
+            { metric: 'Verim vs Top 5', value: Math.min(rcaYieldVsTop * 2, 5), full: 5 }, // x2 ölçek (1=Top5 eşit → 2 nokta)
+          ];
+          const tile = (label: string, val: number, hint: string) => {
+            const color = val >= 1.5 ? '#10b981' : val >= 1.0 ? '#3b82f6' : val >= 0.7 ? '#f59e0b' : '#ef4444';
+            const badge = val >= 1.5 ? '🏆 Avantaj' : val >= 1.0 ? '✅ Üzerinde' : val >= 0.7 ? '⚠️ Altında' : '🔴 Zayıf';
+            return (
+              <div style={{ padding: '14px', background: 'var(--bg)', border: `1px solid ${color}33`, borderLeft: `4px solid ${color}`, borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color, margin: '4px 0' }}>{val.toFixed(2)}×</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{hint}</div>
+                <div style={{ fontSize: '10px', color, marginTop: '4px', fontWeight: 600 }}>{badge}</div>
+              </div>
+            );
+          };
+          return (
+            <div className="chart-card" style={{ marginBottom: '24px', padding: '20px' }}>
+              <h3 className="chart-title" style={{ marginBottom: '6px' }}>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Türkiye'nin değerleri global medyana ve top 5 ortalamasına göre normalize edilir. <strong>1,0×</strong> medyan ile eşit, <strong>&gt;1</strong> avantaj.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+                {tile('Pazar Payı (RCA)', rcaShare, `TR %${tr.share.toFixed(2)} · Medyan %${medShare.toFixed(2)}`)}
+                {tile('Verim Avantajı', rcaYield, `TR ${formatYield(tr.yieldVal)} · Medyan ${formatYield(medYield)}`)}
+                {tile('Üretim Ölçeği (Alan)', rcaArea, `TR ${formatHa(tr.area)} · Medyan ${formatHa(medArea)}`)}
+                {tile('Verim vs Top 5', rcaYieldVsTop, `Top 5 ort: ${formatYield(top5avgYield)}`)}
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <RadarChart data={radarRcaData}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--text-primary)', fontSize: 11 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 5]} tick={{ fontSize: 9, fill: 'var(--text-secondary)' }} />
+                  <Radar name="Türkiye" dataKey="value" stroke={TURKEY_COLOR} fill={TURKEY_COLOR} fillOpacity={0.35} strokeWidth={2} />
+                  <Radar name="Medyan (1,0×)" dataKey="full" stroke="#94a3b8" fill="transparent" strokeDasharray="3 3" strokeWidth={1} />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(2)}×`, '']} />
+                </RadarChart>
+              </ResponsiveContainer>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', fontStyle: 'italic' }}>
+                💡 RCA (Revealed Comparative Advantage) yaklaşımı: değer ne kadar yüksekse Türkiye o boyutta o denli avantajlı.
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
           <h3 className="chart-title" style={{ marginBottom: '16px' }}>🗺️ Rekabet Matrisi — Top 15</h3>
