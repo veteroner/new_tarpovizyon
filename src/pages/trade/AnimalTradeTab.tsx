@@ -151,6 +151,27 @@ export default function AnimalTradeTab() {
       name: p.name, value: p.exp,
     })), [products]);
 
+  // Canlı vs İşlenmiş ayrımı — heuristik: ürün adında "canlı" / "damızlık" / "diri" geçiyorsa canlı kabul
+  const liveProcessed = useMemo(() => {
+    const isLive = (name: string) => /canl[ıi]|dam[ıi]zl[ıi]k|diri/i.test(name);
+    let liveExp = 0, liveImp = 0, procExp = 0, procImp = 0;
+    let liveCount = 0, procCount = 0;
+    for (const p of products) {
+      if (isLive(p.name)) {
+        liveExp += p.exp; liveImp += p.imp; liveCount++;
+      } else {
+        procExp += p.exp; procImp += p.imp; procCount++;
+      }
+    }
+    return { liveExp, liveImp, procExp, procImp, liveCount, procCount };
+  }, [products]);
+  const totalExpForSplit = liveProcessed.liveExp + liveProcessed.procExp;
+  const totalImpForSplit = liveProcessed.liveImp + liveProcessed.procImp;
+  const liveProcChart = useMemo(() => ([
+    { yon: 'İhracat', Canlı: liveProcessed.liveExp, İşlenmiş: liveProcessed.procExp },
+    { yon: 'İthalat', Canlı: liveProcessed.liveImp, İşlenmiş: liveProcessed.procImp },
+  ]), [liveProcessed]);
+
   if (loading) return <Loading />;
 
   return (
@@ -233,6 +254,55 @@ export default function AnimalTradeTab() {
             {formatMoney(Math.abs(balance))}
           </div>
         </div>
+      </div>
+
+      {/* Canlı vs İşlenmiş Hayvansal Ürün Ayrımı */}
+      <div className="chart-card" style={{ marginBottom: 16 }}>
+        <h3 className="chart-title">🐄 Canlı Hayvan vs İşlenmiş Ürün Ayrımı ({selectedYear})</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 14 }}>
+            <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 700, marginBottom: 4 }}>🐄 CANLI — İhracat</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.liveExp)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              Pay: %{totalExpForSplit > 0 ? ((liveProcessed.liveExp / totalExpForSplit) * 100).toFixed(1) : '0'} · {liveProcessed.liveCount} ürün
+            </div>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 14 }}>
+            <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 700, marginBottom: 4 }}>🐄 CANLI — İthalat</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.liveImp)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              Pay: %{totalImpForSplit > 0 ? ((liveProcessed.liveImp / totalImpForSplit) * 100).toFixed(1) : '0'}
+            </div>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: 14 }}>
+            <div style={{ fontSize: 12, color: '#10b981', fontWeight: 700, marginBottom: 4 }}>🥩 İŞLENMİŞ — İhracat</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.procExp)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              Pay: %{totalExpForSplit > 0 ? ((liveProcessed.procExp / totalExpForSplit) * 100).toFixed(1) : '0'} · {liveProcessed.procCount} ürün
+            </div>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: 14 }}>
+            <div style={{ fontSize: 12, color: '#10b981', fontWeight: 700, marginBottom: 4 }}>🥩 İŞLENMİŞ — İthalat</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.procImp)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              Pay: %{totalImpForSplit > 0 ? ((liveProcessed.procImp / totalImpForSplit) * 100).toFixed(1) : '0'}
+            </div>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart data={liveProcChart} layout="vertical" margin={{ top: 8, right: 24, left: 24, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e6).toFixed(0)}M`} />
+            <YAxis type="category" dataKey="yon" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} width={80} />
+            <Tooltip formatter={(v: number) => formatMoney(v)} />
+            <Legend />
+            <Bar dataKey="Canlı" stackId="a" fill="#6366f1" />
+            <Bar dataKey="İşlenmiş" stackId="a" fill="#10b981" />
+          </BarChart>
+        </ResponsiveContainer>
+        <p style={{ marginTop: 8, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center' }}>
+          Sınıflandırma heuristiği: ürün adında "canlı" / "damızlık" / "diri" geçenler canlı, diğerleri işlenmiş kabul edilir.
+        </p>
       </div>
 
       {/* Charts Row 1: Monthly + Product Pie */}
