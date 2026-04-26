@@ -2,20 +2,23 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   PieChart, Pie, Cell,
+  ComposedChart, Line,
 } from 'recharts';
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { ModelWarningBox } from '../../components/ModelWarningBox';
 import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
-import type { CalcResult, WizardState } from './gubreTypes';
+import { calculate } from './gubreUtils';
+import type { CalcResult, WizardState, FertilizerProduct } from './gubreTypes';
 
 interface Props {
   result: CalcResult;
   state: WizardState;
   onReset: () => void;
   confidenceScore: number;
+  effectiveProducts?: FertilizerProduct[];
 }
 
-export function GubreStep4({ result, state, onReset, confidenceScore }: Props) {
+export function GubreStep4({ result, state, onReset, confidenceScore, effectiveProducts }: Props) {
   return (
     <div className="gh-results">
       {/* Confidence Score + Model Warning */}
@@ -141,6 +144,93 @@ export function GubreStep4({ result, state, onReset, confidenceScore }: Props) {
           </div>
         );
       })()}
+
+      {/* ComposedChart — Senaryo bazlı Maliyet vs Hedef Verim (Faz 9.2) */}
+      {(() => {
+        const senaryolar: Array<{ key: 'tutucu' | 'standart' | 'agresif'; label: string; carpan: number }> = [
+          { key: 'tutucu',   label: 'Tutumlu (-%20)',  carpan: 0.80 },
+          { key: 'standart', label: 'Standart',         carpan: 1.00 },
+          { key: 'agresif',  label: 'Agresif (+%20)',  carpan: 1.20 },
+        ];
+        const scenarioData = senaryolar.map(s => {
+          let kim = 0, org = 0;
+          try {
+            const r = calculate({ ...state, senaryo: s.key }, effectiveProducts);
+            kim = r.toplam_maliyet_kimyasal;
+            org = r.toplam_maliyet_organik;
+          } catch { /* ignore */ }
+          const maliyet = state.gubre_tipi === 'organik'
+            ? org
+            : state.gubre_tipi === 'kimyasal'
+              ? kim
+              : Math.min(kim, org);
+          const verim = state.hedef_verim * s.carpan; // ton/da hedef
+          const toplamVerim = verim * state.alan; // ton (toplam alan)
+          const birimMaliyet = toplamVerim > 0 ? maliyet / (toplamVerim * 1000) : 0; // ₺/kg ürün
+          return {
+            senaryo: s.label,
+            maliyet: Math.round(maliyet),
+            verim: +verim.toFixed(2),
+            toplamVerim: +toplamVerim.toFixed(1),
+            birimMaliyet: +birimMaliyet.toFixed(2),
+          };
+        });
+        const isCurrent = (label: string) =>
+          (state.senaryo === 'tutucu' && label.startsWith('Tutumlu')) ||
+          (state.senaryo === 'standart' && label === 'Standart') ||
+          (state.senaryo === 'agresif' && label.startsWith('Agresif'));
+
+        return (
+          <div className="gh-card">
+            <h2 className="gh-card__title">📈 Senaryo Karşılaştırması · Maliyet vs Verim</h2>
+            <p className="gh-card__desc" style={{ marginBottom: '1rem', color: 'var(--gh-text-secondary, #6b7280)', fontSize: '0.9rem' }}>
+              Üç senaryonun ({state.alan} dekar üzerinden) toplam gübre maliyeti ve hedeflenen verim karşılaştırması.
+              <strong> Kalın işaretli</strong> sütun seçili senaryodur.
+            </p>
+            <ResponsiveContainer width="100%" height={320}>
+              <ComposedChart data={scenarioData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="senaryo" tick={{ fontSize: 12 }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11 }} label={{ value: '₺ Toplam Maliyet', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} tickFormatter={(v) => `₺${(v / 1000).toFixed(0)}k`} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} label={{ value: 'Verim (ton/da)', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} />
+                <Tooltip
+                  formatter={(value: number, name: string) => {
+                    if (name === 'Toplam Maliyet') return [`₺${value.toLocaleString()}`, name];
+                    if (name === 'Hedef Verim')    return [`${value.toFixed(2)} ton/da`, name];
+                    return [value, name];
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar yAxisId="left"  dataKey="maliyet" name="Toplam Maliyet" radius={[4, 4, 0, 0]}>
+                  {scenarioData.map((d, i) => (
+                    <Cell key={i} fill={isCurrent(d.senaryo) ? '#1d4ed8' : '#93c5fd'} />
+                  ))}
+                </Bar>
+                <Line yAxisId="right" dataKey="verim" name="Hedef Verim" stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981' }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginTop: 12 }}>
+              {scenarioData.map((d) => (
+                <div key={d.senaryo} style={{
+                  padding: 10, borderRadius: 8,
+                  border: isCurrent(d.senaryo) ? '2px solid #1d4ed8' : '1px solid #e5e7eb',
+                  background: isCurrent(d.senaryo) ? '#eff6ff' : '#fafafa',
+                }}>
+                  <div style={{ fontSize: '0.78rem', color: '#6b7280', marginBottom: 2 }}>{d.senaryo}</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1f2937' }}>₺{d.maliyet.toLocaleString()}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#374151', marginTop: 2 }}>
+                    {d.toplamVerim.toLocaleString()} ton hasat · {d.birimMaliyet > 0 ? `₺${d.birimMaliyet}/kg` : '—'}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p style={{ marginTop: 8, fontSize: '0.78rem', color: '#6b7280' }}>
+              💡 Birim maliyet (₺/kg ürün) = toplam gübre maliyeti ÷ (hedef verim × alan). Düşük olan senaryo sermaye verimliliği açısından daha avantajlı.
+            </p>
+          </div>
+        );
+      })()}
+
       <div className="gh-card">
         <h2 className="gh-card__title">🧪 Makro Besin İhtiyacı</h2>
         <div className="gh-summary-grid">
