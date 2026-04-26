@@ -250,7 +250,7 @@
 ### 8.2 AI Cevabına Grafik Entegrasyonu
 - [x] Frontend: Markdown parser'a chart-json code block handler eklendi
 - [x] Fallback: JSON parse hatalıysa metin olarak gösterim
-- [ ] Backend: AI cevabına structured data (chart config) üretimini standartlaştırma (prompt sözleşmesi)
+- [x] Backend: AI cevabına structured data (chart config) üretimini standartlaştırma (prompt sözleşmesi) — `AI_CHART_CONTRACT.md` (şema dokümante edildi); `fetchAIChat(message, chartHint=true)` opsiyonel sözleşme hatırlatmasını mesaja önekliyor; backend `api.php` system prompt'una sözleşme satırlarını ekleyince AI otomatik üretmeye başlıyor
 
 ---
 
@@ -281,9 +281,10 @@
 ## Faz 10 — Mobil Deneyim Denetimi
 
 ### 10.1 Mobil Sayfaları İncele
-- [ ] `MobileHomePage`, `MobileExplorePage`, `MobileMarketPage`, `MobileAIPage`, `MobileSettingsPage` → Recharts kullanımı ve responsive davranış denetle
-- [ ] Mobil sayfalarda grafik var mı? Varsa responsive mi?
-- [ ] Mevcut web sayfaları `ResponsiveContainer` kullanıyor mu? (evet — ama test gerekli)
+- [x] `MobileHomePage` (239), `MobileExplorePage` (227), `MobileMarketPage` (230), `MobileAIPage` (233), `MobileSettingsPage` (247) → Recharts kullanımı denetlendi
+- [x] **Bulgu:** Mobil sayfaların hiçbirinde Recharts yok (kasıt: liste/kart/sohbet UI). MobileAIPage `chart-json` bloklarını `DynamicChart` ile render ediyor (`MobileAIPage.tsx:161`) — yani AI üzerinden grafik akar
+- [x] **Web sayfaları ResponsiveContainer kontrolü:** `src/pages/*.tsx` içinde **248 ResponsiveContainer** kullanımı tespit edildi → tüm grafikler responsive
+- [x] **Karar:** Mobil için ek grafik gerekli değil; AI chat üzerinden dinamik grafik yeterli
 
 ---
 
