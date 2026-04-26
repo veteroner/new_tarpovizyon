@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WizardState, CalcResult } from './gubre/gubreTypes';
 import { calculate, calcConfidenceScore } from './gubre/gubreUtils';
@@ -6,6 +6,7 @@ import { GubreStep1 } from './gubre/GubreStep1';
 import { GubreStep2 } from './gubre/GubreStep2';
 import { GubreStep3 } from './gubre/GubreStep3';
 import { GubreStep4 } from './gubre/GubreStep4';
+import { useFertilizerPricing, FertilizerPricingPanel } from './gubre/FertilizerPricingPanel';
 import './GubreHesapPage.css';
 
 export default function GubreHesapPage() {
@@ -17,6 +18,18 @@ export default function GubreHesapPage() {
   });
   const [result, setResult] = useState<CalcResult | null>(null);
   const [error, setError] = useState('');
+  const pricing = useFertilizerPricing();
+
+  // Step 4'teyken fiyat değişikliklerinde otomatik yeniden hesapla
+  useEffect(() => {
+    if (step === 4 && state.toprak && state.urun) {
+      try {
+        setResult(calculate(state, pricing.effectiveProducts));
+      } catch {
+        // ignore
+      }
+    }
+  }, [pricing.effectiveProducts, step, state]);
 
   const handleNext = () => {
     setError('');
@@ -25,7 +38,7 @@ export default function GubreHesapPage() {
     if (step === 2 && !state.toprak) return setError('Lütfen toprak analizi bilgilerini girin');
     if (step === 3) {
       try {
-        setResult(calculate(state));
+        setResult(calculate(state, pricing.effectiveProducts));
         setStep(4);
       } catch (_err) {
         setError('Hesaplama hatası');
@@ -79,6 +92,9 @@ export default function GubreHesapPage() {
 
         {error && <div className="gh-error">{error}</div>}
 
+        {/* Canlı gübre fiyatı paneli — her adımda erişilebilir */}
+        <FertilizerPricingPanel pricing={pricing} />
+
         {step === 1 && <GubreStep1 state={state} setState={setState} onNext={handleNext} />}
         {step === 2 && <GubreStep2 state={state} setState={setState} onNext={handleNext} onBack={handleBack} />}
         {step === 3 && <GubreStep3 state={state} setState={setState} onNext={handleNext} onBack={handleBack} />}
@@ -88,6 +104,7 @@ export default function GubreHesapPage() {
             state={state}
             onReset={handleReset}
             confidenceScore={calcConfidenceScore(state.toprak)}
+            effectiveProducts={pricing.effectiveProducts}
           />
         )}
       </div>

@@ -1,13 +1,14 @@
 // ── Pure calculation utilities for GubreHesapPage ────────────────────────────
 
 import { CROP_NUTRIENT_DB, FERTILIZER_PRODUCTS } from './gubreData';
-import type { WizardState, CalcResult, SoilAnalysis } from './gubreTypes';
+import type { WizardState, CalcResult, SoilAnalysis, FertilizerProduct } from './gubreTypes';
 
 export function calculateFertilizerMix(
   needed: { n: number; p2o5: number; k2o: number },
-  tip: 'kimyasal' | 'organik'
+  tip: 'kimyasal' | 'organik',
+  productsList: FertilizerProduct[] = FERTILIZER_PRODUCTS
 ): Array<{ urun: string; miktar: number; fiyat: number }> {
-  const products = FERTILIZER_PRODUCTS.filter((p) => p.tip === tip);
+  const products = productsList.filter((p) => p.tip === tip);
   const mix: Array<{ urun: string; miktar: number; fiyat: number }> = [];
 
   let remainingN = needed.n;
@@ -76,7 +77,7 @@ export function calculateFertilizerMix(
   return mix;
 }
 
-export function calculate(state: WizardState): CalcResult {
+export function calculate(state: WizardState, productsList: FertilizerProduct[] = FERTILIZER_PRODUCTS): CalcResult {
   const crop = CROP_NUTRIENT_DB[state.urun];
   if (!crop || !state.toprak) throw new Error('Eksik veri');
 
@@ -109,8 +110,8 @@ export function calculate(state: WizardState): CalcResult {
   };
 
   const oneriler = {
-    kimyasal: calculateFertilizerMix(eksik, 'kimyasal'),
-    organik:  calculateFertilizerMix(eksik, 'organik'),
+    kimyasal: calculateFertilizerMix(eksik, 'kimyasal', productsList),
+    organik:  calculateFertilizerMix(eksik, 'organik', productsList),
   };
 
   const chartData = [

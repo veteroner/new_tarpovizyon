@@ -266,7 +266,7 @@
 
 ### 9.2 GubreHesapPage → Zenginleştir
 - [x] **RadarChart** — N-P-K profili (toprak analizi vs ideal) (`GubreStep4.tsx:85`)
-- [ ] **ComposedChart** — Gübre maliyeti vs verim artışı (calc shape genişletilmesi gerekli)
+- [x] **ComposedChart** — Gübre maliyeti vs verim artışı (3 senaryo; canlı USD/TRY × Argus/World Bank USD/ton + manuel override; `GubreStep4.tsx` + `FertilizerPricingPanel.tsx`)
 - [x] **PieChart** — Gübre bileşen dağılımı (`GubreStep4.tsx:114`)
 
 ### 9.3 PriceIndexPage → Makas Grafiği Güçlendir

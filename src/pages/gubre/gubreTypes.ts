@@ -37,6 +37,12 @@ export interface FertilizerProduct {
   k: number;
   fiyat_kg: number;
   uygulama: string;
+  /**
+   * Dünya pazar referansı (USD/ton). Kimyasal gübreler için doldurulur;
+   * organik gübrelerde lokal pazar baskın olduğundan opsiyoneldir.
+   * Kaynak: 2025 ortalama dünya pazar fiyatları (Argus, World Bank Pink Sheet).
+   */
+  usd_ton?: number;
 }
 
 export interface WizardState {
