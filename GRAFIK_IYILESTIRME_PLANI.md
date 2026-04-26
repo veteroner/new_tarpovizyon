@@ -225,8 +225,8 @@
 ### 7.1 CrossIntelligencePage (533 satır → ikinci katman ekle)
 - [x] **Korelasyon matrisi heatmap** (Pearson, 5×5 gösterge: Üretim/İthalat/İhracat/Fiyat/Yeterlilik) (`CrossIntelligencePage.tsx`)
 - [x] **Anomali tespiti** görselleştirmesi (z-score, |z|>1.5 outlier; ComposedChart Bar+Line + ReferenceLine ±1.5σ) (`CrossIntelligencePage.tsx`)
-- [ ] **Drill-down** — Mevcut grafiklerde tıkla → detay modal/drawer
-- [ ] **Segment decomposition** — Seçili göstergeyi alt kategorilere ayırma
+- [x] **Drill-down** — Üretim vs Yeterlilik scatter'da nokta tıkla → o ürün seçilir, tüm grafikler güncellenir + sayfa başa scroll (`CrossIntelligencePage.tsx`)
+- [x] **Segment decomposition** — Arz dağılımı ComposedChart (Yerli üretim + İthalat stacked, İhracat negatif) + ithalat bağımlılığı % çizgisi (`CrossIntelligencePage.tsx`)
 
 ### 7.2 LivestockCompetitionPage (ikinci katman ekle)
 - [x] **Treemap** mevcut — Ülke pazar payı hiyerarşisi (`LivestockCompetitionPage.tsx:327`)

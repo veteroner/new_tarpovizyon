@@ -178,7 +178,16 @@ export default function CrossIntelligencePage() {
                 </div>
               );
             }} />
-            <Scatter data={scatterData} fill="#16a34a">
+            <Scatter data={scatterData} fill="#16a34a"
+              cursor="pointer"
+              onClick={(d: any) => {
+                const labels = ['Buğday','Arpa','Mısır','Pirinç','Ayçiçeği','Şekerpancarı','Patates','Mercimek','Nohut','Çay'];
+                const idx = labels.indexOf(d?.name);
+                if (idx >= 0 && idx !== selected) {
+                  setSelected(idx);
+                  if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}>
               {scatterData.map((s, i) => (
                 <Cell key={i} fill={s.y >= 100 ? '#10b981' : s.y >= 80 ? '#f59e0b' : '#ef4444'} />
               ))}
@@ -189,6 +198,7 @@ export default function CrossIntelligencePage() {
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500" /> Yeterli (%100+)</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-amber-500" /> Kısmi (%80-100)</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-red-500" /> Yetersiz (&lt;%80)</span>
+          <span className="ml-auto italic" style={{ color: 'var(--text-secondary)' }}>💡 Bir noktaya tıklayarak ürünü seçebilirsiniz.</span>
         </div>
       </div>
 
@@ -335,6 +345,66 @@ export default function CrossIntelligencePage() {
               <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#f1f5f9', borderRadius: 2, border: '1px solid #e5e7eb' }} /> Zayıf</span>
               <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#fca5a5', borderRadius: 2 }} /> Orta (-)</span>
               <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: 12, height: 12, background: '#991b1b', borderRadius: 2 }} /> Güçlü (-)</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Segment Decomposition: Arz Dağılımı (Üretim/İthalat/İhracat) ─────── */}
+      {crossData.length > 0 && (() => {
+        const decomp = crossData.map(d => {
+          const supply = d.production + d.imports;
+          const consumption = supply - d.exports;
+          const importDep = supply > 0 ? (d.imports / supply) * 100 : 0;
+          const exportRatio = d.production > 0 ? (d.exports / d.production) * 100 : 0;
+          return {
+            year: d.year,
+            production: d.production,
+            imports: d.imports,
+            exports: -d.exports, // negative bar — net çıkış
+            consumption,
+            importDep: parseFloat(importDep.toFixed(1)),
+            exportRatio: parseFloat(exportRatio.toFixed(1)),
+          };
+        });
+        const avgImportDep = decomp.reduce((a, b) => a + b.importDep, 0) / decomp.length;
+        const avgExportRatio = decomp.reduce((a, b) => a + b.exportRatio, 0) / decomp.length;
+        return (
+          <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <BarChart3 className="w-4 h-4 text-indigo-600" />
+              Arz Dağılımı (Segment Decomposition) — {product.label}
+            </h3>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+              Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>%{avgImportDep.toFixed(1)}</strong> · Ortalama ihracat oranı: <strong>%{avgExportRatio.toFixed(1)}</strong>
+            </p>
+            <ResponsiveContainer width="100%" height={320}>
+              <ComposedChart data={decomp} margin={{ top: 10, right: 55, left: 20, bottom: 5 }} stackOffset="sign">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="year" fontSize={10} />
+                <YAxis yAxisId="left" fontSize={9} tickFormatter={v => {
+                  const n = Math.abs(v as number);
+                  return n > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`;
+                }} />
+                <YAxis yAxisId="right" orientation="right" fontSize={9} domain={[0, 'auto']} tickFormatter={v => `%${v}`} />
+                <Tooltip formatter={(v: number, name: string) => {
+                  if (name.includes('Bağımlılık') || name.includes('Oran')) return [`%${Math.abs(v).toFixed(1)}`, name];
+                  const n = Math.abs(v);
+                  return [n > 1e6 ? `${(n / 1e6).toFixed(2)}M ton` : `${(n / 1e3).toFixed(0)}K ton`, name];
+                }} />
+                <Legend />
+                <ReferenceLine yAxisId="left" y={0} stroke="#94a3b8" />
+                <Bar yAxisId="left" dataKey="production" stackId="supply" fill="#10b981" name="Yerli Üretim" />
+                <Bar yAxisId="left" dataKey="imports" stackId="supply" fill="#ef4444" name="İthalat" />
+                <Bar yAxisId="left" dataKey="exports" fill="#3b82f6" name="İhracat (negatif)" />
+                <Line yAxisId="right" type="monotone" dataKey="importDep" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} name="İthalat Bağımlılığı %" />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div className="flex items-center gap-4 mt-3 text-xs flex-wrap" style={{ color: 'var(--text-secondary)' }}>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Yerli üretim</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block" /> İthalat</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-blue-500 inline-block" /> İhracat (negatif)</span>
+              <span className="flex items-center gap-1"><span style={{ width: 20, height: 2, background: '#f59e0b', display: 'inline-block', verticalAlign: 'middle' }} /> İthalat bağımlılığı %</span>
             </div>
           </div>
         );
