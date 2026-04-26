@@ -1,6 +1,6 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area, Cell,
+  LineChart, Line, AreaChart, Area, Cell, ComposedChart, ReferenceLine,
 } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, Activity, BarChart3, Thermometer } from 'lucide-react';
 import {
@@ -196,18 +196,25 @@ export default function PriceIndexPage() {
               <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                 <h3 className="chart-title">✂️ Fiyat Makası — Gıda TÜFE vs GFE (Girdi Fiyat)</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 12 }}>
-                  Pozitif fark = Girdi fiyatları tüketici fiyatlarından yüksek → Çiftçi sıkışması
+                  Pozitif fark = Girdi fiyatları tüketici fiyatlarından yüksek → Çiftçi sıkışması (kırmızı bar). Çizgiler TÜFE/GFE endekslerini gösterir.
                 </p>
-                <ResponsiveContainer width="100%" height={320}>
-                  <AreaChart data={scissorData}>
+                <ResponsiveContainer width="100%" height={360}>
+                  <ComposedChart data={scissorData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(scissorData.length / 12))} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
-                    <Area type="monotone" dataKey="tufe" name="Gıda TÜFE" stroke="#ef4444" fill="#ef4444" fillOpacity={0.1} strokeWidth={2} />
-                    <Area type="monotone" dataKey="gfe" name="GFE" stroke="#22c55e" fill="#22c55e" fillOpacity={0.1} strokeWidth={2} />
+                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}`} label={{ value: 'Fark (puan)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <Tooltip formatter={(v: number, name: string) => name === 'Fark (GFE-TÜFE)' ? [`${v >= 0 ? '+' : ''}${Number(v).toFixed(1)} puan`, name] : [formatIndex(Number(v)), name]} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Legend />
-                  </AreaChart>
+                    <ReferenceLine yAxisId="right" y={0} stroke="var(--border)" strokeDasharray="3 3" />
+                    <Bar yAxisId="right" dataKey="gap" name="Fark (GFE-TÜFE)" radius={[2, 2, 0, 0]}>
+                      {scissorData.map((d, i) => (
+                        <Cell key={i} fill={d.gap >= 0 ? '#ef4444' : '#22c55e'} fillOpacity={0.45} />
+                      ))}
+                    </Bar>
+                    <Line yAxisId="left" type="monotone" dataKey="tufe" name="Gıda TÜFE" stroke="#ef4444" strokeWidth={2} dot={false} />
+                    <Line yAxisId="left" type="monotone" dataKey="gfe" name="GFE" stroke="#22c55e" strokeWidth={2} dot={false} />
+                  </ComposedChart>
                 </ResponsiveContainer>
                 {(() => {
                   const recent = scissorData.slice(-3);
