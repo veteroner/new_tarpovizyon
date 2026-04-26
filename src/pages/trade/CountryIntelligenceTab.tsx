@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart,
@@ -8,6 +8,7 @@ import {
 import { Globe, TrendingUp, TrendingDown, Scale, Package } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
+import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '../../components/WorldTradeMap';
 import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
@@ -187,6 +188,17 @@ export default function CountryIntelligenceTab() {
 
   const balance = totalExp - totalImp;
   const yoyGrowth = prevExp > 0 ? ((totalExp - prevExp) / prevExp * 100) : 0;
+
+  // World map highlight — yalnızca seçili ülke metriklerini map'e besle
+  const [worldMapMetric, setWorldMapMetric] = useState<WorldTradeMetric>('exportValue');
+  const normalizeCountryKey = (raw: string): string =>
+    raw.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ı/g, 'i').replace(/[^a-z0-9 ]+/g, '').replace(/\s+/g, ' ').trim();
+  const worldCountryMetrics = useMemo<Record<string, CountryTradeMetrics>>(() => {
+    if (!selectedCountry) return {};
+    const k = normalizeCountryKey(selectedCountry);
+    return { [k]: { exportValue: totalExp, importValue: totalImp, balanceValue: balance } };
+  }, [selectedCountry, totalExp, totalImp, balance]);
   const selectedProductExportShare = selectedProductDetail ? toProductShare(selectedProductDetail.exp, totalExp) : 0;
   const selectedProductImportShare = selectedProductDetail ? toProductShare(selectedProductDetail.imp, totalImp) : 0;
   const selectedProductTurnover = selectedProductDetail ? selectedProductDetail.exp + selectedProductDetail.imp : 0;
@@ -286,6 +298,38 @@ export default function CountryIntelligenceTab() {
                 {productCount} ürün grubu ile ticaret · {yearForMonthly} yılı
               </div>
             </div>
+          </div>
+
+          {/* World map highlight */}
+          <div className="chart-card" style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ margin: 0 }}>🗺️ {selectedCountry} — Dünya Haritasında Konum</h3>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {(['exportValue', 'importValue', 'balanceValue'] as WorldTradeMetric[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setWorldMapMetric(m)}
+                    style={{
+                      padding: '4px 10px', borderRadius: 16, border: '1px solid var(--border)',
+                      background: worldMapMetric === m ? 'var(--accent)' : 'var(--bg)',
+                      color: worldMapMetric === m ? '#fff' : 'var(--text-secondary)',
+                      cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                    }}
+                  >
+                    {m === 'exportValue' ? 'İhracat' : m === 'importValue' ? 'İthalat' : 'Denge'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <WorldTradeMap
+              metric={worldMapMetric}
+              countryMetrics={worldCountryMetrics}
+              selectedCountry={selectedCountry}
+              height={380}
+            />
+            <p style={{ marginTop: 8, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center' }}>
+              Seçili ülke renklendirilmiştir; diğer ülkeler bu sekmede metriksizdir.
+            </p>
           </div>
 
           {/* KPIs */}

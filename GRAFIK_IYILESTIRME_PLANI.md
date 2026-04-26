@@ -168,13 +168,13 @@
 ### 5.5 WorldTradeMap Entegrasyonu (Yeni — Gözden Kaçmış Kaliteli Bileşen)
 - [x] `src/components/WorldTradeMap.tsx` mevcut: d3-geo tabanlı, hover tooltip, ülke seçim, ihracat/ithalat/denge metrikleri, diverging palette
 - [x] TradeOverviewTab içine ülke düzeyinde ihracat/ithalat/denge harita katmanı olarak yerleştir (`TradeOverviewTab.tsx` Dünya Ticaret Haritası bölümü, top10 exp+imp ülkeleri normalize/merge edilmiş, metric switcher)
-- [ ] CountryIntelligenceTab içinde seçili ülkeyi vurgulayan harita görünümü
+- [x] CountryIntelligenceTab içinde seçili ülkeyi vurgulayan harita görünümü (`CountryIntelligenceTab.tsx` — selectedCountry highlight + ihracat/ithalat/denge switcher)
 - [x] `public/world.geojson` dosyasının her iki dist'te de mevcut olduğunu doğrula (netlify-dashboard/public/world.geojson kopyalandı)
 
 ### 5.4 Plant vs Animal Trade İnce Ayarlar (Düşük Öncelik)
 - [x] PlantTradeTab — aylık ihracat/ithalat AreaChart (mevsimsellik) zaten var (`PlantTradeTab.tsx:185`)
-- [ ] AnimalTradeTab — canlı hayvan vs işlenmiş ürün ayrımını ayrı bir kart/segment olarak vurgulayan görünüm henüz yok; mevcut PieChart ürün dağılımı ölçeğinde kalıyor
-- [ ] Not: Bu iki sekme ProductIntelligence/CountryIntelligence kadar acil değil
+- [x] AnimalTradeTab — canlı hayvan vs işlenmiş ürün ayrımı ayrı bir kart olarak eklendi (4'lü KPI tile + yatay stacked bar; heuristik: "canlı/damızlık/diri")
+- [x] Not: Bu iki sekme ProductIntelligence/CountryIntelligence kadar acil değildi
 
 ---
 
