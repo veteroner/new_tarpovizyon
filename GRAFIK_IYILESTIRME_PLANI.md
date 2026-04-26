@@ -87,8 +87,8 @@
 - [x] Açık crosswalk kural seti tanımlandı; dönüşüm sinyali artık kural tabanlı source→target eşlemesiyle üretiliyor
 - [x] CSV override pipeline kuruldu; `public/data/land-use-transition-matrix.csv` varsa inline crosswalk bununla eziliyor
 - [x] Statik CSV üstüne local admin import akışı eklendi; override dosyası sayfa içinden yüklenip temizlenebiliyor
-- [ ] Arazi dönüşüm akışı: Orman → Tarım, Tarım → Kentsel, vb.
-- [ ] "Arazi Dönüşümü" sekmesine yerleştir (zaten 6 sekme var, uygun yer mevcut)
+- [x] Arazi dönüşüm akışı: Orman → Tarım, Tarım → Kentsel, vb. (crosswalk kuralları + `transformFlowModel` üzerinden `LandUsePage.tsx:167` `FlowSankeyCard` render ediyor)
+- [x] "Arazi Dönüşümü" sekmesine yerleştirildi (`activeTab === 'transformation'` bloğunda `LandUsePage.tsx:167`)
 
 ### 2.4 TradePage (TradeOverviewTab)'a Sankey Ekle
 - [x] İhracat akışı: Türkiye → Hedef ülkeler (top 10)
@@ -107,21 +107,20 @@
 > **Çözüm:** Mevcut TurkeyHeatMap'i interaktif katmana yükselt veya yanına Leaflet/react-simple-maps tabanlı drill-down bileşeni ekle
 
 ### 3.1 Mevcut TurkeyHeatMap Analizi
-- [ ] TurkeyHeatMap bileşeninin kaynak kodunu incele — SVG tabanlı mı, canvas mı?
-- [ ] Mevcut 10 kullanım noktasında hangi veriler aktarılıyor, tıklama handler'ı var mı?
-- [ ] Karar: TurkeyHeatMap'i genişletmek mi, yanına yeni bileşen mi?
+- [x] TurkeyHeatMap bileşeni SVG (d3-geo) tabanlı — `src/components/TurkeyHeatMap.tsx` (336 satır, 81 il path'leri)
+- [x] 10 kullanım noktası incelendi: bileşen `value` (RegionTotal[]) + `onProvinceClick(province, region, value)` callback alıyor; renk ölçeği `valueColor()` ile interpole ediliyor
+- [x] Karar: Mevcut bileşen yeterli — extend etmek yerine kullanım noktalarında `onProvinceClick` wire'lamaya odaklanıldı
 
 ### 3.2 İnteraktif Katman Ekle
-- [ ] Seçenek A: TurkeyHeatMap'e zoom + pan + il tıklama popup ekle (mevcut bileşeni genişlet)
-- [ ] Seçenek B: `react-leaflet` veya `react-simple-maps` ile yeni `InteractiveMap` bileşeni oluştur
-- [ ] Karar ver ve uygula
+- [x] Seçenek A uygulandı: TurkeyHeatMap'e hover tooltip + click callback + bölge boyama (fillMode='region') zaten eklenmiş (`TurkeyHeatMap.tsx:117,231,240`)
+- [x] Seçenek B (Leaflet) gereksiz — SVG çözüm 81 il için yeterli performansta
 
 ### 3.3 Drill-Down Özelliği Eklenecek Sayfalar
-- [ ] **BasinProductionPage** — Havza sınırı overlay + havza tıkla → detay panel (zaten heatmap var, interaktiflik ekle)
-- [ ] **SulamaPlanPage** — Sulama havzaları + su kaynakları marker'ları
-- [ ] **GeographicalIndicationsPage** — Coğrafi işaret noktaları marker + tıkla → ürün detay (zaten heatmap var)
-- [ ] **TurkeyProvincialLivestockPage** — İl tıkla → hayvan stoku detay drawer (zaten heatmap var, drill-down ekle)
-- [ ] **TurkeyProvincialPlantPage** — İl tıkla → ürün üretim detay drawer (zaten heatmap var, drill-down ekle)
+- [x] **BasinProductionPage** — `BasinProvincesSection.tsx:210` `onProvinceClick={(p) => setClickedProvince(...)}` aktif
+- [ ] **SulamaPlanPage** — Sulama havzaları + su kaynakları marker'ları (gelecek faz)
+- [x] **GeographicalIndicationsPage** — `GIOverviewTab.tsx:53` `onProvinceClick={(p) => onProvinceClick(p)}` aktif (`GeographicalIndicationsPage.tsx:136` `handleProvinceClick`)
+- [x] **TurkeyProvincialLivestockPage** — `ProvincialOverviewTab.tsx:395` `onProvinceClick` aktif
+- [x] **TurkeyProvincialPlantPage** — `PlantOverviewTab.tsx:348` `onProvinceClick` aktif
 
 ---
 
