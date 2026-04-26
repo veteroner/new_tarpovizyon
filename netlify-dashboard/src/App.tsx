@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
@@ -21,6 +21,7 @@ import TurkeyWhiteMeatProductionPage from './pages/TurkeyWhiteMeatProductionPage
 import TurkeyMilkProductionPage from './pages/TurkeyMilkProductionPage';
 import TurkeyEggProductionPage from './pages/TurkeyEggProductionPage';
 import TurkeyBeekeepingPage from './pages/TurkeyBeekeepingPage';
+import TurkeyOtherAnimalProductsPage from './pages/TurkeyOtherAnimalProductsPage';
 // Bitkisel Üretim Sayfaları
 import CerealProductionPage from './pages/CerealProductionPage';
 import VegetableProductionPage from './pages/VegetableProductionPage';
@@ -104,7 +105,8 @@ function AppContent() {
           <Route path="/tarpovizyon" element={<SelectionPage />} />
           <Route path="/tarpovizyon/world" element={<HomePage />} />
           <Route path="/tarpovizyon/turkey" element={<HomePage />} />
-          <Route path="/tarpovizyon/overview" element={<OverviewPage />} />
+          <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
+          <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
           
           {/* Emtia Fiyatları & AI */}
           <Route path="/tarpovizyon/commodity-prices" element={<CommodityPricesPage />} />
@@ -151,7 +153,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/cross-intelligence" element={<CrossIntelligencePage />} />
           
           {/* Türkiye Bitkisel Üretim */}
-          <Route path="/tarpovizyon/turkey/plant-production" element={<ProductionPage />} />
+          <Route path="/tarpovizyon/turkey/plant-production" element={<TuikPlantProductionPage />} />
           <Route path="/tarpovizyon/turkey/cereals" element={<CerealProductionPage />} />
           <Route path="/tarpovizyon/turkey/vegetables" element={<VegetableProductionPage />} />
           <Route path="/tarpovizyon/turkey/fruits" element={<FruitProductionPage />} />
@@ -170,6 +172,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/milk" element={<TurkeyMilkProductionPage />} />
           <Route path="/tarpovizyon/turkey/eggs" element={<TurkeyEggProductionPage />} />
           <Route path="/tarpovizyon/turkey/beekeeping" element={<TurkeyBeekeepingPage />} />
+          <Route path="/tarpovizyon/turkey/other-animal-products" element={<TurkeyOtherAnimalProductsPage />} />
           <Route path="/tarpovizyon/turkey/tuik-livestock" element={<TuikLivestockPage />} />
 
           
@@ -178,7 +181,7 @@ function AppContent() {
           <Route path="/tarpovizyon/turkey/plant-provincial" element={<TurkeyProvincialPlantPage />} />
           <Route path="/tarpovizyon/turkey/basin-production" element={<BasinProductionPage />} />
           <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
-          <Route path="/tarpovizyon/turkey/tuik-plant" element={<TuikPlantProductionPage />} />
+          <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
         </Routes>
       </main>
     </>

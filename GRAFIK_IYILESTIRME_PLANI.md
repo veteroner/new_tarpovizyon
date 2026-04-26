@@ -14,12 +14,21 @@
 - [x] `TurkeyOtherAnimalProductsPage.tsx` rotaya bağlı (`/tarpovizyon/turkey/other-animal-products`)
 - [x] Karar doğrulandı: Türkiye diğer hayvansal ürünler sayfası canlı veriyle kullanılıyor, silinmeyecek
 - [x] `src/pages` ve `src/components` altındaki macOS artifact dosyaları (`._*`, `.!*`) temizlendi
+- [x] `RasyonEmbedPage.tsx/.css` silindi (eski iframe wrapper, artık `RasyonApp` ile boğulmuştu) — ana app + netlify kopyası
+- [x] `TrendComparison.tsx` silindi (KPICard duplikatı, hiç import edilmiyordu) — ana app + netlify kopyası
 
 ### 0.2 Duplikat Rota Temizliği
 - [x] `/tarpovizyon/turkey/tuik-plant` → `/tarpovizyon/turkey/plant-production` redirect'i mevcut
 
 ### 0.3 OverviewPage Rotası
 - [x] `OverviewPage.tsx` doğrudan rotaya bağlı (`/tarpovizyon/turkey/overview`)
+
+### 0.5 Netlify–Ana Uygulama Route Senkronizasyonu
+- [x] `netlify-dashboard/src/App.tsx` ana uygulamayla eşitlendi:
+	- `/tarpovizyon/overview` artık `/tarpovizyon/turkey/overview` redirect
+	- `/tarpovizyon/turkey/plant-production` artık `TuikPlantProductionPage` (`ProductionPage` yerine)
+	- `/tarpovizyon/turkey/tuik-plant` artık redirect
+	- `/tarpovizyon/turkey/other-animal-products` route'u eklendi (sayfa dosyası zaten vardı, bağlanmayı unutmuşuz)
 
 ### 0.4 Güvenli Yedek Temizlik Listesi
 - [x] `src/pages` altında silinmeye aday `.old` / `_old_*` / `_BACKUP` / `pre_orchestrator` envanteri çıkarıldı
@@ -40,8 +49,8 @@
 
 ### 1.1 `FaoAnimalProductionPage.tsx` Oluştur (Yeni Baz Bileşen)
 - [x] `RedMeatProductionPage`, `WhiteMeatProductionPage`, `MilkProductionPage`, `EggProductionPage`, `OtherAnimalProductsPage` ortak tabana taşındı
-- [ ] Props: `categoryKey`, `products[]`, `defaultProducts[]`, `colorPalette`, `title`
-- [ ] Ortak import'lar: BarChart, PieChart, Treemap, RadarChart, ComposedChart, AreaChart, ProductSelector
+- [x] Props: `categoryKey`, `products[]`, `defaultProducts[]`, `colorPalette`, `title` (kod: `FaoPageConfig` — colors, products, defaultSelected, pageTitle, pageSubtitle, primaryColor, unit, kpiIcon, productPlaceholder)
+- [x] Ortak import'lar: BarChart, PieChart, Treemap, RadarChart, ComposedChart, AreaChart, ProductSelector (kod: `FaoAnimalProductionPage.tsx` zaten tümünü içeriyor)
 - [x] Her kategori için sadece config/ürün listesi farklı olan ince wrapper dosyaları bırakıldı
 
 ### 1.2 Wrapper Dosyalarını Dönüştür
@@ -121,8 +130,8 @@
 > **Mevcut Durum:** TuikPlantCategoryPage zaten zengin bir grafik seti barındırıyor: ComposedChart, ScatterChart, RadarChart, Treemap, PieChart ve çoklu BarChart (toplam 10 grafik tipi). Bazı wrapper'lar `showTreeMetrics` prop'u geçiriyor (FruitProductionPage, NutProductionPage, BeverageCropPage). Sorun grafik eksikliği değil — sorun 9 wrapper'ın kategoriye özel ek içerik alanının olmaması; hepsi aynı genel dashboard'u gösteriyor.
 
 ### 4.1 TuikPlantCategoryPage'e Kategori-Spesifik Bölüm Slot'u Ekle
-- [ ] `extraSection?: React.ReactNode` prop'u ekle
-- [ ] Her wrapper'dan kategori-özel içerik geçilebilsin
+- [x] `extraSection?: React.ReactNode` prop'u eklendi (kod: `plant/plantTypes.ts` + `TuikPlantCategoryPage.tsx`)
+- [x] Her wrapper'dan kategori-özel içerik geçilebiliyor (kod: Cereal, Fruit, Vegetable, Legume, Oilseed, Sugar, Nut, Beverage, Fiber wrapper'ları `extraSection` gönderiyor)
 
 ### 4.2 Kategori Özelleştirmeleri
 - [ ] **CerealProductionPage** → Verim trendi vurgulu (LineChart ön plana), dünya karşılaştırması ek bölüm
@@ -154,11 +163,17 @@
 - [x] Drawer içine seçili ürünün ülke içi pay değişimini gösteren ikinci mini sparkline eklendi
 
 ### 5.3 TradeOverviewTab'a Sankey Ekle
-- [ ] Bkz. Faz 2.4
+- [x] Bkz. Faz 2.4
+
+### 5.5 WorldTradeMap Entegrasyonu (Yeni — Gözden Kaçmış Kaliteli Bileşen)
+- [x] `src/components/WorldTradeMap.tsx` mevcut: d3-geo tabanlı, hover tooltip, ülke seçim, ihracat/ithalat/denge metrikleri, diverging palette
+- [ ] TradeOverviewTab içine ülke düzeyinde ihracat/ithalat/denge harita katmanı olarak yerleştir
+- [ ] CountryIntelligenceTab içinde seçili ülkeyi vurgulayan harita görünümü
+- [ ] `public/world.geojson` dosyasının her iki dist'te de mevcut olduğunu doğrula
 
 ### 5.4 Plant vs Animal Trade İnce Ayarlar (Düşük Öncelik)
-- [ ] PlantTradeTab → zaten Treemap var; mevsimsellik grafiği ekle (aylık ihracat/ithalat dalgalanması)
-- [ ] AnimalTradeTab → zaten PieChart var; canlı hayvan vs işlenmiş ürün ayrımını vurgula
+- [x] PlantTradeTab — aylık ihracat/ithalat AreaChart (mevsimsellik) zaten var (`PlantTradeTab.tsx:185`)
+- [ ] AnimalTradeTab — canlı hayvan vs işlenmiş ürün ayrımını ayrı bir kart/segment olarak vurgulayan görünüm henüz yok; mevcut PieChart ürün dağılımı ölçeğinde kalıyor
 - [ ] Not: Bu iki sekme ProductIntelligence/CountryIntelligence kadar acil değil
 
 ---
@@ -214,8 +229,8 @@
 - [ ] **Segment decomposition** — Seçili göstergeyi alt kategorilere ayırma
 
 ### 7.2 LivestockCompetitionPage (ikinci katman ekle)
-- [ ] **Treemap** ekle — Ülke pazar payı hiyerarşisi (mevcut BCG ScatterChart'ı tamamlayıcı)
-- [ ] **HHI zaman serisi** — Mevcut HHI hesaplama var, bunu LineChart olarak zaman boyutunda göster
+- [x] **Treemap** mevcut — Ülke pazar payı hiyerarşisi (`LivestockCompetitionPage.tsx:327`)
+- [x] **HHI zaman serisi** mevcut — `LineChart` olarak zaman boyutunda (`LivestockCompetitionPage.tsx:362-392`)
 - [ ] **Drill-down** — BCG matrisinde ülke tıkla → ürün bazlı detay drawer
 
 ### 7.3 ProductionPage "Rekabet Analizi" Sekmesi
@@ -229,14 +244,14 @@
 > **Problem:** AIAssistantPage'de Recharts import'u yok, sadece metin tabanlı sohbet
 
 ### 8.1 Dinamik Grafik Render Bileşeni
-- [ ] `DynamicChart.tsx` oluştur — JSON config'den grafik render eden bileşen
-- [ ] Desteklenen tipler: BarChart, LineChart, AreaChart, PieChart, ComposedChart
-- [ ] AI cevabında ````chart-json ... ``` ` bloğu gelince otomatik render
+- [x] `DynamicChart.tsx` oluşturuldu — JSON config'den grafik render eden bileşen (`src/components/DynamicChart.tsx`)
+- [x] Desteklenen tipler: BarChart, LineChart, AreaChart, PieChart, ComposedChart
+- [x] AI cevabında ` ```chart-json ... ``` ` bloğu gelince otomatik render (`AIAssistantPage.tsx`, `MobileAIPage.tsx`)
 
 ### 8.2 AI Cevabına Grafik Entegrasyonu
-- [ ] Backend: AI cevabına structured data (chart config) ekleme
-- [ ] Frontend: Markdown parser'a chart-json code block handler ekle
-- [ ] Fallback: JSON parse hatalıysa metin olarak göster
+- [x] Frontend: Markdown parser'a chart-json code block handler eklendi
+- [x] Fallback: JSON parse hatalıysa metin olarak gösterim
+- [ ] Backend: AI cevabına structured data (chart config) üretimini standartlaştırma (prompt sözleşmesi)
 
 ---
 
