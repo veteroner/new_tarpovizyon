@@ -177,40 +177,29 @@
 
 ---
 
-## Faz 6 — Devasa Dosya Decomposition
+## Faz 6 — Devasa Dosya Decomposition (DEFERRED — yapılmayacak)
 
-> **Problem:** 7 dosya toplam 13.230 satır, hiçbirinde component decomposition yok
+> **Karar (27 Nis 2026):** Bu faz **şu an icra edilmeyecek**, "deferred technical debt" olarak kapatıldı.
+>
+> **Gerekçe:**
+> 1. **Sıfır kullanıcı değeri.** Saf mekanik refactor — yeni grafik/veri/sekme yok.
+> 2. **Yüksek regresyon riski, sıfır test ağı.** Hedef dosyalar prod-kritik (`LivestockStocksPage` 3410, `BasinProductionPage` 2432, `TurkeyRedMeatProductionPage` 1844). Repo'da unit/integration test yok; tek doğrulama yolu manuel smoke (5 dosya × ~6 sekme × ~10 grafik) — pratikte tam kapsama imkansız. `useMemo` zincirleri ve `useEffect` cleanup'ları bölme sırasında sessizce kopabilir.
+> 3. **"500 satır" hedefi keyfi.** Asıl bakım acısı satır sayısı değil, iç içe geçmiş hesaplama mantığı + UI. Mantığı hook'a almak değer üretir; UI'ı 6 parçaya bölmek prop-drilling ve dosya zıplama getirir → bakım zorlaşabilir.
+> 4. **Bundle uyarısı (3.7MB) bu refactor ile çözülmez.** Çözüm: `React.lazy` + route-level code splitting + `manualChunks` (ayrı performans fazı).
+> 5. **Fırsat maliyeti.** Aynı eforla: bundle splitting, SulamaPlan marker overlay (Faz 3.3 erteleme), E2E smoke test scaffolding daha yüksek getirili.
+>
+> **Ne zaman gözden geçirilecek?** Bu sayfalardan birinde yeni feature veya non-trivial bug fix gerektiğinde, **opportunistic** olarak: dokunulan sekme/bölüm o iş kapsamında ayrı bileşene taşınır (boyscout rule), büyük patlama refactor yok.
+>
+> **Tetikleyici eşikler (yeniden açılırsa):**
+> - Aynı dosyada art arda 3+ bug fix gerekirse → o dosya parçalanır.
+> - Bir sayfaya 200+ satırlık yeni sekme eklenmesi gerekirse → mevcut sekmeler de bu fırsatla bölünür.
+> - E2E smoke test pipeline'ı kurulduktan sonra (regresyon emniyet ağı varken) toplu refactor yeniden değerlendirilir.
 
-### 6.1 LivestockStocksPage (3.410 satır) → Parçala
-- [ ] `LivestockOverviewSection.tsx` — Genel bakış sekmesi
-- [ ] `LivestockStocksSection.tsx` — Stok verileri sekmesi
-- [ ] `LivestockPrimarySection.tsx` — Birincil üretim
-- [ ] `LivestockProcessedSection.tsx` — İşlenmiş ürünler
-- [ ] `LivestockEfficiencySection.tsx` — Verimlilik
-- [ ] `LivestockPredictionsSection.tsx` — Tahminler
-- [ ] Ana dosya: sadece sekme yönetimi + veri çekme (~200 satır)
-
-### 6.2 BasinProductionPage (2.432 satır) → Parçala
-- [ ] `BasinMapSection.tsx` — Harita + havza seçimi
-- [ ] `BasinAnalysisSection.tsx` — Analiz grafikleri
-- [ ] `BasinExportSection.tsx` — XLSX export logic'i ayrı util'e taşı
-
-### 6.3 TurkeyRedMeatProductionPage (1.844 satır) → Parçala
-- [ ] Sekme/bölüm bazlı alt bileşenlere ayır
-- [ ] Karkas paritesi hesaplama logic'ini util'e taşı
-
-### 6.4 HasatTahminiPage (1.561 satır) → Parçala
-- [ ] Tahmin modeli logic'i → ayrı hook (`useHarvestForecast`)
-- [ ] Harita bölümü → ayrı bileşen
-- [ ] Hava durumu bölümü → zaten WeatherWidget var, iyi
-
-### 6.5 SulamaPlanPage (1.459 satır) → Parçala
-- [ ] İklim hesaplama logic'i → `useIrrigationCalc` hook
-- [ ] Plan oluşturma UI → ayrı bileşen
-
-### 6.6 Hedef
-- Her dosya **max 500 satır**
-- Logic ve UI ayrımı (custom hooks + bileşenler)
+### 6.1 LivestockStocksPage (3.410 satır) — DEFERRED
+### 6.2 BasinProductionPage (2.432 satır) — DEFERRED
+### 6.3 TurkeyRedMeatProductionPage (1.844 satır) — DEFERRED
+### 6.4 HasatTahminiPage (1.561 satır) — DEFERRED
+### 6.5 SulamaPlanPage (1.459 satır) — DEFERRED
 
 ---
 
@@ -294,7 +283,7 @@
 |:-------:|:---:|:----:|:----:|
 | 🔴 P0 | Faz 0 — Temizlik | Düşük | Düşük |
 | 🔴 P0 | Faz 1 — Klon eliminasyonu | Yüksek | Orta |
-| 🟠 P1 | Faz 6 — Devasa dosya decomposition | Yüksek | Yüksek |
+| ⚫ — | Faz 6 — Devasa dosya decomposition | DEFERRED | — |
 | 🟠 P1 | Faz 2 — Sankey dağıtımı | Yüksek | Orta |
 | 🟡 P2 | Faz 5 — Trade intelligence sekmeleri | Orta | Orta |
 | 🟡 P2 | Faz 7 — Intelligence ikinci katman analitik | Orta | Orta |
