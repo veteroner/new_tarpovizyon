@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "description": "Ülke profil bilgileri. Anahtar = toWorldGeoCountryKey(country) çıktısı. Eksik alanlar UI'da 'Veri yok' olarak gösterilir.",
+    "source": "Manuel curasyon + dünya bankası / wikipedia kamusal verileri (yaklaşık 2024-2025)",
+    "schema": {
+      "name_tr": "Türkçe ülke adı",
+      "name_en": "İngilizce ülke adı (geojson eşleşmesi için)",
+      "capital": "Başkent",
+      "languages": ["Resmi diller"],
+      "area_km2": "Yüzölçümü km²",
+      "population": "Nüfus",
+      "currency": { "name": "Para birimi adı", "code": "ISO kodu" },
+      "gdp_usd_billion": "GSYİH (Nominal, milyar USD)"
+    }
+  },
+  "afghanistan": {
+    "name_tr": "Afganistan", "name_en": "Afghanistan",
+    "capital": "Kabil", "languages": ["Peştuca", "Darice"],
+    "area_km2": 652230, "population": 41128771,
+    "currency": { "name": "Afgani", "code": "AFN" }, "gdp_usd_billion": 14.5
+  },
+  "germany": {
+    "name_tr": "Almanya", "name_en": "Germany",
+    "capital": "Berlin", "languages": ["Almanca"],
+    "area_km2": 357592, "population": 83294633,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 4456
+  },
+  "united states of america": {
+    "name_tr": "Amerika Birleşik Devletleri", "name_en": "United States of America",
+    "capital": "Washington, D.C.", "languages": ["İngilizce"],
+    "area_km2": 9833517, "population": 333287557,
+    "currency": { "name": "ABD Doları", "code": "USD" }, "gdp_usd_billion": 27360
+  },
+  "iraq": {
+    "name_tr": "Irak", "name_en": "Iraq",
+    "capital": "Bağdat", "languages": ["Arapça", "Kürtçe"],
+    "area_km2": 438317, "population": 44496122,
+    "currency": { "name": "Irak Dinarı", "code": "IQD" }, "gdp_usd_billion": 254
+  },
+  "russia": {
+    "name_tr": "Rusya", "name_en": "Russia",
+    "capital": "Moskova", "languages": ["Rusça"],
+    "area_km2": 17098242, "population": 144713314,
+    "currency": { "name": "Ruble", "code": "RUB" }, "gdp_usd_billion": 2240
+  },
+  "italy": {
+    "name_tr": "İtalya", "name_en": "Italy",
+    "capital": "Roma", "languages": ["İtalyanca"],
+    "area_km2": 301336, "population": 58940425,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 2255
+  },
+  "united kingdom": {
+    "name_tr": "Birleşik Krallık", "name_en": "United Kingdom",
+    "capital": "Londra", "languages": ["İngilizce"],
+    "area_km2": 243610, "population": 67791400,
+    "currency": { "name": "Sterlin", "code": "GBP" }, "gdp_usd_billion": 3340
+  },
+  "france": {
+    "name_tr": "Fransa", "name_en": "France",
+    "capital": "Paris", "languages": ["Fransızca"],
+    "area_km2": 643801, "population": 64756584,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 3030
+  },
+  "netherlands": {
+    "name_tr": "Hollanda", "name_en": "Netherlands",
+    "capital": "Amsterdam", "languages": ["Felemenkçe"],
+    "area_km2": 41850, "population": 17618299,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 1118
+  },
+  "spain": {
+    "name_tr": "İspanya", "name_en": "Spain",
+    "capital": "Madrid", "languages": ["İspanyolca"],
+    "area_km2": 505992, "population": 47519628,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 1620
+  },
+  "china": {
+    "name_tr": "Çin", "name_en": "China",
+    "capital": "Pekin", "languages": ["Mandarin Çincesi"],
+    "area_km2": 9596961, "population": 1410710000,
+    "currency": { "name": "Yuan", "code": "CNY" }, "gdp_usd_billion": 17700
+  },
+  "poland": {
+    "name_tr": "Polonya", "name_en": "Poland",
+    "capital": "Varşova", "languages": ["Lehçe"],
+    "area_km2": 312696, "population": 36821749,
+    "currency": { "name": "Zloti", "code": "PLN" }, "gdp_usd_billion": 811
+  },
+  "united arab emirates": {
+    "name_tr": "Birleşik Arap Emirlikleri", "name_en": "United Arab Emirates",
+    "capital": "Abu Dabi", "languages": ["Arapça"],
+    "area_km2": 83600, "population": 9441129,
+    "currency": { "name": "BAE Dirhemi", "code": "AED" }, "gdp_usd_billion": 504
+  },
+  "romania": {
+    "name_tr": "Romanya", "name_en": "Romania",
+    "capital": "Bükreş", "languages": ["Rumence"],
+    "area_km2": 238397, "population": 19053815,
+    "currency": { "name": "Ley", "code": "RON" }, "gdp_usd_billion": 350
+  },
+  "israel": {
+    "name_tr": "İsrail", "name_en": "Israel",
+    "capital": "Kudüs", "languages": ["İbranice", "Arapça"],
+    "area_km2": 22072, "population": 9756000,
+    "currency": { "name": "Yeni Şekel", "code": "ILS" }, "gdp_usd_billion": 522
+  },
+  "egypt": {
+    "name_tr": "Mısır", "name_en": "Egypt",
+    "capital": "Kahire", "languages": ["Arapça"],
+    "area_km2": 1001450, "population": 110990103,
+    "currency": { "name": "Mısır Lirası", "code": "EGP" }, "gdp_usd_billion": 348
+  },
+  "saudi arabia": {
+    "name_tr": "Suudi Arabistan", "name_en": "Saudi Arabia",
+    "capital": "Riyad", "languages": ["Arapça"],
+    "area_km2": 2149690, "population": 36947025,
+    "currency": { "name": "Suudi Riyali", "code": "SAR" }, "gdp_usd_billion": 1067
+  },
+  "belgium": {
+    "name_tr": "Belçika", "name_en": "Belgium",
+    "capital": "Brüksel", "languages": ["Felemenkçe", "Fransızca", "Almanca"],
+    "area_km2": 30528, "population": 11754004,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 627
+  },
+  "greece": {
+    "name_tr": "Yunanistan", "name_en": "Greece",
+    "capital": "Atina", "languages": ["Yunanca"],
+    "area_km2": 131957, "population": 10394055,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 243
+  },
+  "bulgaria": {
+    "name_tr": "Bulgaristan", "name_en": "Bulgaria",
+    "capital": "Sofya", "languages": ["Bulgarca"],
+    "area_km2": 110879, "population": 6447710,
+    "currency": { "name": "Leva", "code": "BGN" }, "gdp_usd_billion": 102
+  },
+  "azerbaijan": {
+    "name_tr": "Azerbaycan", "name_en": "Azerbaijan",
+    "capital": "Bakü", "languages": ["Azerice"],
+    "area_km2": 86600, "population": 10358000,
+    "currency": { "name": "Manat", "code": "AZN" }, "gdp_usd_billion": 78
+  },
+  "turkmenistan": {
+    "name_tr": "Türkmenistan", "name_en": "Turkmenistan",
+    "capital": "Aşkabat", "languages": ["Türkmence"],
+    "area_km2": 488100, "population": 6430770,
+    "currency": { "name": "Manat", "code": "TMT" }, "gdp_usd_billion": 76
+  },
+  "iran": {
+    "name_tr": "İran", "name_en": "Iran",
+    "capital": "Tahran", "languages": ["Farsça"],
+    "area_km2": 1648195, "population": 89172767,
+    "currency": { "name": "İran Riyali", "code": "IRR" }, "gdp_usd_billion": 401
+  },
+  "ukraine": {
+    "name_tr": "Ukrayna", "name_en": "Ukraine",
+    "capital": "Kiev", "languages": ["Ukraynaca"],
+    "area_km2": 603550, "population": 36744634,
+    "currency": { "name": "Grivnası", "code": "UAH" }, "gdp_usd_billion": 178
+  },
+  "hungary": {
+    "name_tr": "Macaristan", "name_en": "Hungary",
+    "capital": "Budapeşte", "languages": ["Macarca"],
+    "area_km2": 93030, "population": 9676135,
+    "currency": { "name": "Forint", "code": "HUF" }, "gdp_usd_billion": 212
+  },
+  "austria": {
+    "name_tr": "Avusturya", "name_en": "Austria",
+    "capital": "Viyana", "languages": ["Almanca"],
+    "area_km2": 83879, "population": 9027999,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 516
+  },
+  "czech republic": {
+    "name_tr": "Çekya", "name_en": "Czech Republic",
+    "capital": "Prag", "languages": ["Çekçe"],
+    "area_km2": 78867, "population": 10516707,
+    "currency": { "name": "Çek Korunası", "code": "CZK" }, "gdp_usd_billion": 335
+  },
+  "slovakia": {
+    "name_tr": "Slovakya", "name_en": "Slovakia",
+    "capital": "Bratislava", "languages": ["Slovakça"],
+    "area_km2": 49035, "population": 5447900,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 132
+  },
+  "lebanon": {
+    "name_tr": "Lübnan", "name_en": "Lebanon",
+    "capital": "Beyrut", "languages": ["Arapça"],
+    "area_km2": 10452, "population": 5489739,
+    "currency": { "name": "Lübnan Lirası", "code": "LBP" }, "gdp_usd_billion": 23
+  },
+  "syria": {
+    "name_tr": "Suriye", "name_en": "Syria",
+    "capital": "Şam", "languages": ["Arapça"],
+    "area_km2": 185180, "population": 23227014,
+    "currency": { "name": "Suriye Lirası", "code": "SYP" }, "gdp_usd_billion": 23
+  },
+  "libya": {
+    "name_tr": "Libya", "name_en": "Libya",
+    "capital": "Trablus", "languages": ["Arapça"],
+    "area_km2": 1759540, "population": 6888388,
+    "currency": { "name": "Libya Dinarı", "code": "LYD" }, "gdp_usd_billion": 50
+  },
+  "india": {
+    "name_tr": "Hindistan", "name_en": "India",
+    "capital": "Yeni Delhi", "languages": ["Hintçe", "İngilizce"],
+    "area_km2": 3287263, "population": 1428627663,
+    "currency": { "name": "Rupi", "code": "INR" }, "gdp_usd_billion": 3730
+  },
+  "japan": {
+    "name_tr": "Japonya", "name_en": "Japan",
+    "capital": "Tokyo", "languages": ["Japonca"],
+    "area_km2": 377975, "population": 124516650,
+    "currency": { "name": "Yen", "code": "JPY" }, "gdp_usd_billion": 4231
+  },
+  "south korea": {
+    "name_tr": "Güney Kore", "name_en": "South Korea",
+    "capital": "Seul", "languages": ["Korece"],
+    "area_km2": 100210, "population": 51784059,
+    "currency": { "name": "Won", "code": "KRW" }, "gdp_usd_billion": 1712
+  },
+  "brazil": {
+    "name_tr": "Brezilya", "name_en": "Brazil",
+    "capital": "Brasília", "languages": ["Portekizce"],
+    "area_km2": 8515767, "population": 215313498,
+    "currency": { "name": "Real", "code": "BRL" }, "gdp_usd_billion": 2127
+  },
+  "argentina": {
+    "name_tr": "Arjantin", "name_en": "Argentina",
+    "capital": "Buenos Aires", "languages": ["İspanyolca"],
+    "area_km2": 2780400, "population": 46044703,
+    "currency": { "name": "Arjantin Pezosu", "code": "ARS" }, "gdp_usd_billion": 641
+  },
+  "canada": {
+    "name_tr": "Kanada", "name_en": "Canada",
+    "capital": "Ottawa", "languages": ["İngilizce", "Fransızca"],
+    "area_km2": 9984670, "population": 39858480,
+    "currency": { "name": "Kanada Doları", "code": "CAD" }, "gdp_usd_billion": 2140
+  },
+  "mexico": {
+    "name_tr": "Meksika", "name_en": "Mexico",
+    "capital": "Meksiko", "languages": ["İspanyolca"],
+    "area_km2": 1964375, "population": 128455567,
+    "currency": { "name": "Meksika Pezosu", "code": "MXN" }, "gdp_usd_billion": 1789
+  },
+  "australia": {
+    "name_tr": "Avustralya", "name_en": "Australia",
+    "capital": "Canberra", "languages": ["İngilizce"],
+    "area_km2": 7692024, "population": 26439111,
+    "currency": { "name": "Avustralya Doları", "code": "AUD" }, "gdp_usd_billion": 1688
+  },
+  "indonesia": {
+    "name_tr": "Endonezya", "name_en": "Indonesia",
+    "capital": "Cakarta", "languages": ["Endonezya Dili"],
+    "area_km2": 1904569, "population": 277534122,
+    "currency": { "name": "Rupiah", "code": "IDR" }, "gdp_usd_billion": 1371
+  },
+  "pakistan": {
+    "name_tr": "Pakistan", "name_en": "Pakistan",
+    "capital": "İslamabad", "languages": ["Urduca", "İngilizce"],
+    "area_km2": 881912, "population": 240485658,
+    "currency": { "name": "Pakistan Rupisi", "code": "PKR" }, "gdp_usd_billion": 338
+  },
+  "morocco": {
+    "name_tr": "Fas", "name_en": "Morocco",
+    "capital": "Rabat", "languages": ["Arapça", "Berberice"],
+    "area_km2": 446550, "population": 37457971,
+    "currency": { "name": "Fas Dirhemi", "code": "MAD" }, "gdp_usd_billion": 142
+  },
+  "tunisia": {
+    "name_tr": "Tunus", "name_en": "Tunisia",
+    "capital": "Tunus", "languages": ["Arapça"],
+    "area_km2": 163610, "population": 12356117,
+    "currency": { "name": "Tunus Dinarı", "code": "TND" }, "gdp_usd_billion": 49
+  },
+  "algeria": {
+    "name_tr": "Cezayir", "name_en": "Algeria",
+    "capital": "Cezayir", "languages": ["Arapça", "Berberice"],
+    "area_km2": 2381741, "population": 44903225,
+    "currency": { "name": "Cezayir Dinarı", "code": "DZD" }, "gdp_usd_billion": 224
+  },
+  "georgia": {
+    "name_tr": "Gürcistan", "name_en": "Georgia",
+    "capital": "Tiflis", "languages": ["Gürcüce"],
+    "area_km2": 69700, "population": 3736400,
+    "currency": { "name": "Lari", "code": "GEL" }, "gdp_usd_billion": 30
+  },
+  "kazakhstan": {
+    "name_tr": "Kazakistan", "name_en": "Kazakhstan",
+    "capital": "Astana", "languages": ["Kazakça", "Rusça"],
+    "area_km2": 2724900, "population": 19606633,
+    "currency": { "name": "Tenge", "code": "KZT" }, "gdp_usd_billion": 261
+  },
+  "uzbekistan": {
+    "name_tr": "Özbekistan", "name_en": "Uzbekistan",
+    "capital": "Taşkent", "languages": ["Özbekçe"],
+    "area_km2": 447400, "population": 35648100,
+    "currency": { "name": "Som", "code": "UZS" }, "gdp_usd_billion": 102
+  },
+  "qatar": {
+    "name_tr": "Katar", "name_en": "Qatar",
+    "capital": "Doha", "languages": ["Arapça"],
+    "area_km2": 11586, "population": 2716391,
+    "currency": { "name": "Katar Riyali", "code": "QAR" }, "gdp_usd_billion": 235
+  },
+  "kuwait": {
+    "name_tr": "Kuveyt", "name_en": "Kuwait",
+    "capital": "Kuveyt", "languages": ["Arapça"],
+    "area_km2": 17818, "population": 4310108,
+    "currency": { "name": "Kuveyt Dinarı", "code": "KWD" }, "gdp_usd_billion": 161
+  },
+  "jordan": {
+    "name_tr": "Ürdün", "name_en": "Jordan",
+    "capital": "Amman", "languages": ["Arapça"],
+    "area_km2": 89342, "population": 11285869,
+    "currency": { "name": "Ürdün Dinarı", "code": "JOD" }, "gdp_usd_billion": 51
+  },
+  "switzerland": {
+    "name_tr": "İsviçre", "name_en": "Switzerland",
+    "capital": "Bern", "languages": ["Almanca", "Fransızca", "İtalyanca"],
+    "area_km2": 41285, "population": 8796669,
+    "currency": { "name": "İsviçre Frangı", "code": "CHF" }, "gdp_usd_billion": 906
+  },
+  "sweden": {
+    "name_tr": "İsveç", "name_en": "Sweden",
+    "capital": "Stockholm", "languages": ["İsveççe"],
+    "area_km2": 450295, "population": 10612086,
+    "currency": { "name": "İsveç Kronu", "code": "SEK" }, "gdp_usd_billion": 593
+  },
+  "norway": {
+    "name_tr": "Norveç", "name_en": "Norway",
+    "capital": "Oslo", "languages": ["Norveççe"],
+    "area_km2": 385207, "population": 5474360,
+    "currency": { "name": "Norveç Kronu", "code": "NOK" }, "gdp_usd_billion": 485
+  },
+  "finland": {
+    "name_tr": "Finlandiya", "name_en": "Finland",
+    "capital": "Helsinki", "languages": ["Fince", "İsveççe"],
+    "area_km2": 338424, "population": 5563970,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 305
+  },
+  "denmark": {
+    "name_tr": "Danimarka", "name_en": "Denmark",
+    "capital": "Kopenhag", "languages": ["Danca"],
+    "area_km2": 42933, "population": 5910913,
+    "currency": { "name": "Danimarka Kronu", "code": "DKK" }, "gdp_usd_billion": 410
+  },
+  "portugal": {
+    "name_tr": "Portekiz", "name_en": "Portugal",
+    "capital": "Lizbon", "languages": ["Portekizce"],
+    "area_km2": 92090, "population": 10467366,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 287
+  },
+  "ireland": {
+    "name_tr": "İrlanda", "name_en": "Ireland",
+    "capital": "Dublin", "languages": ["İrlandaca", "İngilizce"],
+    "area_km2": 70273, "population": 5056935,
+    "currency": { "name": "Euro", "code": "EUR" }, "gdp_usd_billion": 545
+  },
+  "south africa": {
+    "name_tr": "Güney Afrika", "name_en": "South Africa",
+    "capital": "Pretoria", "languages": ["İngilizce", "Afrikanca"],
+    "area_km2": 1221037, "population": 60414496,
+    "currency": { "name": "Rand", "code": "ZAR" }, "gdp_usd_billion": 380
+  },
+  "nigeria": {
+    "name_tr": "Nijerya", "name_en": "Nigeria",
+    "capital": "Abuja", "languages": ["İngilizce"],
+    "area_km2": 923768, "population": 218541212,
+    "currency": { "name": "Naira", "code": "NGN" }, "gdp_usd_billion": 390
+  },
+  "vietnam": {
+    "name_tr": "Vietnam", "name_en": "Vietnam",
+    "capital": "Hanoi", "languages": ["Vietnamca"],
+    "area_km2": 331212, "population": 98858950,
+    "currency": { "name": "Dong", "code": "VND" }, "gdp_usd_billion": 433
+  },
+  "thailand": {
+    "name_tr": "Tayland", "name_en": "Thailand",
+    "capital": "Bangkok", "languages": ["Tayca"],
+    "area_km2": 513120, "population": 71697030,
+    "currency": { "name": "Baht", "code": "THB" }, "gdp_usd_billion": 514
+  },
+  "malaysia": {
+    "name_tr": "Malezya", "name_en": "Malaysia",
+    "capital": "Kuala Lumpur", "languages": ["Malayca"],
+    "area_km2": 330803, "population": 33938221,
+    "currency": { "name": "Ringgit", "code": "MYR" }, "gdp_usd_billion": 432
+  },
+  "singapore": {
+    "name_tr": "Singapur", "name_en": "Singapore",
+    "capital": "Singapur", "languages": ["İngilizce", "Mandarin", "Malayca", "Tamilce"],
+    "area_km2": 728, "population": 5917648,
+    "currency": { "name": "Singapur Doları", "code": "SGD" }, "gdp_usd_billion": 501
+  },
+  "philippines": {
+    "name_tr": "Filipinler", "name_en": "Philippines",
+    "capital": "Manila", "languages": ["Filipince", "İngilizce"],
+    "area_km2": 300000, "population": 117337368,
+    "currency": { "name": "Filipin Pezosu", "code": "PHP" }, "gdp_usd_billion": 437
+  },
+  "new zealand": {
+    "name_tr": "Yeni Zelanda", "name_en": "New Zealand",
+    "capital": "Wellington", "languages": ["İngilizce", "Maori"],
+    "area_km2": 268021, "population": 5228100,
+    "currency": { "name": "Yeni Zelanda Doları", "code": "NZD" }, "gdp_usd_billion": 252
+  }
+}
