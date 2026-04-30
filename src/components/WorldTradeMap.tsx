@@ -87,6 +87,7 @@ export function WorldTradeMap({
   countryMetrics,
   selectedCountry,
   height = 420,
+  allowEmptyCountrySelect = false,
   onCountrySelect,
   onCountryHover,
   formatCountryLabel,
@@ -95,6 +96,7 @@ export function WorldTradeMap({
   countryMetrics: Record<string, CountryTradeMetrics>; // key = normalized country name
   selectedCountry?: string; // normalized key
   height?: number;
+  allowEmptyCountrySelect?: boolean;
   onCountrySelect?: (countryKey?: string) => void;
   onCountryHover?: (countryKey?: string) => void;
   formatCountryLabel?: (geoCountryName: string) => string;
@@ -158,6 +160,7 @@ export function WorldTradeMap({
   }, [countryMetrics, metric]);
 
   const features = geoData?.features ?? [];
+  const hasMetrics = Object.keys(countryMetrics).length > 0;
 
   const handleMove = (evt: ReactMouseEvent) => {
     if (!containerRef.current || !tooltip) return;
@@ -192,7 +195,7 @@ export function WorldTradeMap({
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Dünya Haritası</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-          Hover: İhracat / İthalat / Denge • Click: ülke seç/temizle
+          {hasMetrics ? 'Hover: İhracat / İthalat / Denge • Click: ülke seç/temizle' : 'Ülke sınırları • Click: ülke seç'}
         </div>
       </div>
 
@@ -212,10 +215,11 @@ export function WorldTradeMap({
               ? (metric === 'balanceValue'
                   ? pickDivergingFill(metrics.balanceValue, domain.maxAbs)
                   : pickFillForValue(metrics[metric], domain.min, domain.max))
-              : 'var(--border-light)';
+              : (hasMetrics ? 'var(--border-light)' : '#dbeafe');
 
-            const stroke = isSelected ? 'var(--text-primary)' : 'var(--border)';
-            const strokeWidth = isSelected ? 1.6 : 0.6;
+            const stroke = isSelected ? 'var(--text-primary)' : (hasMetrics ? 'var(--border)' : '#93c5fd');
+            const strokeWidth = isSelected ? 1.6 : (hasMetrics ? 0.6 : 0.75);
+            const canSelect = Boolean(metrics) || allowEmptyCountrySelect;
 
             const d = pathGen(feat as unknown as GeoPermissibleObjects);
             if (!d) return null;
@@ -227,7 +231,8 @@ export function WorldTradeMap({
                 fill={fill}
                 stroke={stroke}
                 strokeWidth={strokeWidth}
-                style={{ cursor: metrics ? 'pointer' : 'default' }}
+                fillOpacity={metrics ? 1 : (hasMetrics ? 1 : 0.9)}
+                style={{ cursor: canSelect ? 'pointer' : 'default' }}
                 onMouseEnter={(e) => {
                   if (!metrics) return;
                   const rect = (containerRef.current?.getBoundingClientRect()) ?? { left: 0, top: 0 };
@@ -240,7 +245,7 @@ export function WorldTradeMap({
                   onCountryHover?.(key);
                 }}
                 onClick={() => {
-                  if (!metrics) return;
+                  if (!canSelect) return;
                   const next = isSelected ? undefined : key;
                   onCountrySelect?.(next);
                 }}
@@ -277,7 +282,7 @@ export function WorldTradeMap({
       )}
 
       <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 12 }}>
-        Renk: {metric === 'exportValue' ? 'İhracat Değeri' : metric === 'importValue' ? 'İthalat Değeri' : 'Denge'}
+        Renk: {hasMetrics ? (metric === 'exportValue' ? 'İhracat Değeri' : metric === 'importValue' ? 'İthalat Değeri' : 'Denge') : 'Nötr baz harita'}
       </div>
     </div>
   );

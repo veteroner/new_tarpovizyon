@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { fetchQuery, sqlEsc, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -118,7 +118,7 @@ export function useTradeIntelligenceData() {
       const topProds = (topProdsRes.data || []).map((r: any) => String(r.ana_urun));
       const upData: { product: string; data: UnitPriceRow[] }[] = [];
       for (const p of topProds) {
-        const res = await fetchQuery(`SELECT yil, CASE WHEN SUM(ihracat_mik) > 0 THEN SUM(ihracat_deger) / SUM(ihracat_mik) ELSE 0 END as exp_up, CASE WHEN SUM(ithalat_mik) > 0 THEN SUM(ithalat_deger) / SUM(ithalat_mik) ELSE 0 END as imp_up FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ana_urun='${p}' GROUP BY yil ORDER BY yil`);
+        const res = await fetchQuery(`SELECT yil, CASE WHEN SUM(ihracat_mik) > 0 THEN SUM(ihracat_deger) / SUM(ihracat_mik) ELSE 0 END as exp_up, CASE WHEN SUM(ithalat_mik) > 0 THEN SUM(ithalat_deger) / SUM(ithalat_mik) ELSE 0 END as imp_up FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ana_urun='${sqlEsc(p)}' GROUP BY yil ORDER BY yil`);
         upData.push({ product: p, data: (res.data || []).map((r: any) => ({ yil: String(r.yil), exp_usd_ton: Number(r.exp_up) || 0, imp_usd_ton: Number(r.imp_up) || 0 })) });
       }
       setUnitPrices(upData);

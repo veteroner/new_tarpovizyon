@@ -8,6 +8,7 @@ import {
 import { Search, TrendingUp, TrendingDown, Scale, Package, Globe } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const MONTHS_TR: Record<string, string> = {
@@ -18,6 +19,18 @@ const MONTHS_TR: Record<string, string> = {
 interface CountryDetail { name: string; exp: number; imp: number; balance: number }
 interface YearDetail { yil: string; exp: number; imp: number; denge: number }
 interface MonthDetail { ay: string; exp: number; imp: number }
+
+const QUICK_PRODUCTS = [
+  { label: 'Fındık', value: 'Fındık' },
+  { label: 'Buğday', value: 'Buğday' },
+  { label: 'Pamuk', value: 'Pamuk' },
+  { label: 'Zeytinyağı', value: 'Zeytinyağı' },
+  { label: 'Soya', value: 'Soya' },
+  { label: 'Piliç Eti', value: 'Piliç Eti' },
+  { label: 'Mercimek', value: 'Mercimek' },
+  { label: 'Mısır', value: 'Mısır' },
+  { label: 'Üzüm Kuru', value: 'Üzüm (Kuru)' },
+];
 
 export default function ProductIntelligenceTab() {
   const [loading, setLoading] = useState(false);
@@ -130,6 +143,30 @@ export default function ProductIntelligenceTab() {
 
   const balance = totalExp - totalImp;
   const yoyGrowth = prevExp > 0 ? ((totalExp - prevExp) / prevExp * 100) : 0;
+  const productContext = { product: selectedProduct, category: productCategory, year: yearForMonthly, totalExp, totalImp, balance, countryCount, topCountry, yoyGrowth: Number(yoyGrowth.toFixed(2)) };
+  const countryBarData = countries.slice(0, 12).map(c => ({
+    name: c.name.length > 16 ? c.name.substring(0, 16) + '..' : c.name,
+    ihracatMilyonUsd: Number((c.exp / 1e6).toFixed(2)),
+    ithalatMilyonUsd: Number((c.imp / 1e6).toFixed(2)),
+  }));
+  const scatterData = countries.map(c => ({
+    x: totalExp > 0 ? parseFloat((c.exp / totalExp * 100).toFixed(2)) : 0,
+    y: parseFloat((c.balance / 1e6).toFixed(2)),
+    z: parseFloat((c.exp / 1e6).toFixed(2)),
+    name: c.name,
+  }));
+  const radarData = [
+    { metric: 'İhracat Hacmi', value: Math.min(100, (totalExp / 5e8) * 100) },
+    { metric: 'YoY Büyüme', value: Math.min(100, Math.max(0, yoyGrowth + 50)) },
+    { metric: 'Pazar Çeşitliliği', value: Math.min(100, (countryCount / 40) * 100) },
+    { metric: 'İhr/İth Oranı', value: totalExp + totalImp > 0 ? (totalExp / (totalExp + totalImp)) * 100 : 50 },
+    { metric: 'Denge Skoru', value: totalExp + totalImp > 0 ? Math.min(100, Math.max(0, 50 + (balance / (totalExp + totalImp)) * 100)) : 50 },
+  ].map(row => ({ ...row, value: Number(row.value.toFixed(2)) }));
+  const treemapData = countries.slice(0, 15).map(c => ({
+    name: c.name.length > 14 ? c.name.substring(0, 14) + '.' : c.name,
+    size: c.exp,
+    fullName: c.name,
+  }));
 
   return (
     <div>
@@ -171,18 +208,18 @@ export default function ProductIntelligenceTab() {
 
         {/* Quick pick buttons */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-          {['Fındık', 'Buğday', 'Pamuk', 'Zeytinyağı', 'Soya', 'Piliç Eti', 'Mercimek', 'Mısır', 'Üzüm Kuru'].map(p => (
+          {QUICK_PRODUCTS.map(p => (
             <button
-              key={p}
-              onClick={() => setSelectedProduct(p)}
+              key={p.value}
+              onClick={() => setSelectedProduct(p.value)}
               style={{
                 padding: '6px 14px', borderRadius: 20, border: '1px solid var(--border)',
-                background: selectedProduct === p ? 'var(--accent)' : 'var(--bg)',
-                color: selectedProduct === p ? '#fff' : 'var(--text-secondary)',
+                background: selectedProduct === p.value ? 'var(--accent)' : 'var(--bg)',
+                color: selectedProduct === p.value ? '#fff' : 'var(--text-secondary)',
                 cursor: 'pointer', fontSize: 12, fontWeight: 600,
               }}
             >
-              {p}
+              {p.label}
             </button>
           ))}
         </div>
@@ -230,7 +267,10 @@ export default function ProductIntelligenceTab() {
           {/* Charts */}
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Aylık {selectedProduct} Ticareti ({yearForMonthly})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık {selectedProduct} Ticareti ({yearForMonthly})</h3>
+                <ChartInsightButton title={`Aylık ${selectedProduct} Ticareti`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={productContext} />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -245,7 +285,10 @@ export default function ProductIntelligenceTab() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">📈 Yıllık {selectedProduct} Trendi (2000–2025)</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık {selectedProduct} Trendi (2000–2025)</h3>
+                <ChartInsightButton title={`Yıllık ${selectedProduct} Trendi`} description="2000-2025 ihracat, ithalat ve denge serisi" data={yearlyData} context={productContext} />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -263,20 +306,19 @@ export default function ProductIntelligenceTab() {
 
           {/* Country Table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ margin: 0 }}>🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</h3>
+              <ChartInsightButton title={`${selectedProduct} Ülke Bazlı Ticaret`} description="İlk 12 ülke için milyon USD bazında ihracat ve ithalat" data={countryBarData} context={productContext} />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={countries.slice(0, 12).map(c => ({
-                name: c.name.length > 16 ? c.name.substring(0, 16) + '..' : c.name,
-                İhracat: c.exp / 1e6,
-                İthalat: c.imp / 1e6,
-              }))}>
+              <BarChart data={countryBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-25} textAnchor="end" height={65} />
                 <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
                 <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
                 <Legend />
-                <Bar dataKey="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -319,7 +361,10 @@ export default function ProductIntelligenceTab() {
           {/* ScatterChart + RadarChart grid */}
           <div className="chart-grid" style={{ marginTop: 16 }}>
             <div className="chart-card">
-              <h3 className="chart-title">🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge</h3>
+                <ChartInsightButton title={`${selectedProduct} Ülke Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={scatterData} context={productContext} />
+              </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
@@ -353,12 +398,7 @@ export default function ProductIntelligenceTab() {
                     }}
                   />
                   <Scatter
-                    data={countries.map(c => ({
-                      x: totalExp > 0 ? parseFloat((c.exp / totalExp * 100).toFixed(2)) : 0,
-                      y: parseFloat((c.balance / 1e6).toFixed(2)),
-                      z: parseFloat((c.exp / 1e6).toFixed(2)),
-                      name: c.name,
-                    }))}
+                    data={scatterData}
                     fill="#6366f1"
                   >
                     {countries.map((_c, i) => (
@@ -370,18 +410,15 @@ export default function ProductIntelligenceTab() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🕸️ {selectedProduct} Rekabet Profili</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>🕸️ {selectedProduct} Rekabet Profili</h3>
+                <ChartInsightButton title={`${selectedProduct} Rekabet Profili`} description="0-100 normalize rekabet skorları" data={radarData} context={productContext} />
+              </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Her boyut 0–100 skor · Büyük alan = güçlü rekabet pozisyonu
               </div>
               <ResponsiveContainer width="100%" height={320}>
-                <RadarChart data={[
-                  { metric: 'İhracat Hacmi', value: Math.min(100, (totalExp / 5e8) * 100) },
-                  { metric: 'YoY Büyüme', value: Math.min(100, Math.max(0, yoyGrowth + 50)) },
-                  { metric: 'Pazar Çeşitliliği', value: Math.min(100, (countryCount / 40) * 100) },
-                  { metric: 'İhr/İth Oranı', value: totalExp + totalImp > 0 ? (totalExp / (totalExp + totalImp)) * 100 : 50 },
-                  { metric: 'Denge Skoru', value: totalExp + totalImp > 0 ? Math.min(100, Math.max(0, 50 + (balance / (totalExp + totalImp)) * 100)) : 50 },
-                ]}>
+                <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
                   <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
@@ -394,17 +431,16 @@ export default function ProductIntelligenceTab() {
 
           {/* Treemap — ülke ihracat dağılımı */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ margin: 0 }}>🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</h3>
+              <ChartInsightButton title={`${selectedProduct} Ülke İhracat Dağılımı`} description="İlk 15 ülkenin ihracat ağırlığı" data={treemapData} context={productContext} />
+            </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Alan büyüklüğü ihracat değerine orantılı · İlk 15 ülke
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <Treemap
-                data={countries.slice(0, 15).map(c => ({
-                  name: c.name.length > 14 ? c.name.substring(0, 14) + '.' : c.name,
-                  size: c.exp,
-                  fullName: c.name,
-                }))}
+                data={treemapData}
                 dataKey="size"
                 stroke="var(--bg)"
                 content={(props: any) => {

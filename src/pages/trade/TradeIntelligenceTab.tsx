@@ -7,6 +7,7 @@ import {
   AlertTriangle, BarChart3, Calendar, Globe, Shield, TrendingDown, TrendingUp, Zap,
 } from 'lucide-react';
 import { Loading } from '../../components/Loading';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { useTradeIntelligenceData, MONTHS_TR } from './useTradeIntelligenceData';
 import type { HHIResult } from './useTradeIntelligenceData';
@@ -21,6 +22,16 @@ export default function TradeIntelligenceTab() {
   } = useTradeIntelligenceData();
 
   if (loading) return <Loading />;
+
+  const intelligenceContext = { year, totalAlerts, riskScore, hhiExport, hhiImport, opportunityCount: opportunities.length };
+  const seasonalHeatmapData = seasonalData.map(row => ({ product: row.product, peakMonth: MONTHS_TR[String(row.peakMonth + 1)], amplitude: Number(row.amplitude.toFixed(2)), months: row.months }));
+  const seasonalProfileData = Object.entries(MONTHS_TR).map(([k, v]) => ({
+    ax: v,
+    ...(seasonalData.slice(0, 3).reduce((acc, s, i) => {
+      acc[`p${i}`] = s.months[Number(k) - 1] || 0;
+      return acc;
+    }, {} as Record<string, number>)),
+  }));
 
   return (
     <div className="space-y-6 pb-8">
@@ -91,10 +102,13 @@ export default function TradeIntelligenceTab() {
       {/* Radar + HHI Detay */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <Shield className="w-4 h-4 text-green-600" />
-            Ticaret Sağlık Profili
-          </h3>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Shield className="w-4 h-4 text-green-600" />
+              Ticaret Sağlık Profili
+            </h3>
+            <ChartInsightButton title={`Ticaret Sağlık Profili (${year})`} description="0-100 normalize ticaret sağlık skorları" data={radarData} context={intelligenceContext} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
               <PolarGrid />
@@ -155,10 +169,13 @@ export default function TradeIntelligenceTab() {
 
       {/* Mevsimsellik Heatmap */}
       <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-        <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-          <Calendar className="w-4 h-4 text-purple-600" />
-          Mevsimsellik Heatmap — Ürün × Ay İhracat Yoğunluğu ({year})
-        </h3>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Calendar className="w-4 h-4 text-purple-600" />
+            Mevsimsellik Heatmap — Ürün × Ay İhracat Yoğunluğu ({year})
+          </h3>
+          <ChartInsightButton title={`Mevsimsellik Heatmap (${year})`} description="Ürün x ay ihracat yoğunluğu ve amplitüd" data={seasonalHeatmapData} context={intelligenceContext} />
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -264,7 +281,10 @@ export default function TradeIntelligenceTab() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {unitPrices.map((up, idx) => (
               <div key={idx} className="border rounded-lg p-3">
-                <p className="text-xs font-semibold mb-2 truncate" style={{ color: 'var(--text-primary)' }}>{up.product}</p>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{up.product}</p>
+                  <ChartInsightButton compact title={`${up.product} Birim Fiyat Trendi`} description="İhracat ve ithalat birim fiyat trendi" data={up.data} context={{ ...intelligenceContext, product: up.product }} />
+                </div>
                 <ResponsiveContainer width="100%" height={160}>
                   <ComposedChart data={up.data}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -283,10 +303,13 @@ export default function TradeIntelligenceTab() {
 
       {/* Sezonsal Fırsat Takvimi */}
       <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-        <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-          <Calendar className="w-4 h-4 text-indigo-600" />
-          Sezonsal İhracat Fırsat Takvimi — {year}
-        </h3>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Calendar className="w-4 h-4 text-indigo-600" />
+            Sezonsal İhracat Fırsat Takvimi — {year}
+          </h3>
+          <ChartInsightButton title={`Sezonsal İhracat Fırsat Takvimi (${year})`} description="Ürünlerin mevsimsel ihracat endeksi" data={opportunities.slice(0, 10)} context={intelligenceContext} />
+        </div>
         {opportunities.length === 0 ? (
           <p className="text-sm text-center py-8" style={{ color: 'var(--text-secondary)' }}>Belirgin mevsimsel fırsat bulunamadı</p>
         ) : (
@@ -323,18 +346,15 @@ export default function TradeIntelligenceTab() {
       {/* Mevsimsellik Trend */}
       {seasonalData.length > 0 && (
         <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <BarChart3 className="w-4 h-4 text-teal-600" />
-            En Yüksek Mevsimsel Amplitüd — Top 3 Ürün Aylık Profil
-          </h3>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <BarChart3 className="w-4 h-4 text-teal-600" />
+              En Yüksek Mevsimsel Amplitüd — Top 3 Ürün Aylık Profil
+            </h3>
+            <ChartInsightButton title="En Yüksek Mevsimsel Amplitüd" description="İlk 3 ürünün aylık ihracat profili" data={seasonalProfileData} context={intelligenceContext} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={Object.entries(MONTHS_TR).map(([k, v]) => ({
-              ax: v,
-              ...(seasonalData.slice(0, 3).reduce((acc, s, i) => {
-                acc[`p${i}`] = s.months[Number(k) - 1] || 0;
-                return acc;
-              }, {} as Record<string, number>)),
-            }))}>
+            <AreaChart data={seasonalProfileData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="ax" fontSize={10} />
               <YAxis fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
