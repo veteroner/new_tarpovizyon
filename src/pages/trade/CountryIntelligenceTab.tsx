@@ -10,6 +10,7 @@ import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '../../components/WorldTradeMap';
 import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -191,12 +192,9 @@ export default function CountryIntelligenceTab() {
 
   // World map highlight — yalnızca seçili ülke metriklerini map'e besle
   const [worldMapMetric, setWorldMapMetric] = useState<WorldTradeMetric>('exportValue');
-  const normalizeCountryKey = (raw: string): string =>
-    raw.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/ı/g, 'i').replace(/[^a-z0-9 ]+/g, '').replace(/\s+/g, ' ').trim();
   const worldCountryMetrics = useMemo<Record<string, CountryTradeMetrics>>(() => {
     if (!selectedCountry) return {};
-    const k = normalizeCountryKey(selectedCountry);
+    const k = toWorldGeoCountryKey(selectedCountry);
     return { [k]: { exportValue: totalExp, importValue: totalImp, balanceValue: balance } };
   }, [selectedCountry, totalExp, totalImp, balance]);
   const selectedProductExportShare = selectedProductDetail ? toProductShare(selectedProductDetail.exp, totalExp) : 0;
