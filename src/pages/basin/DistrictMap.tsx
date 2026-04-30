@@ -48,7 +48,7 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
 
   // Create district-to-basin mapping
   const districtBasinMap = useMemo(() => {
-    const map = new Map<string, { basin: string; color: string; province: string }>();
+    const map = new Map<string, { basin: string; color: string; province: string; district: string }>();
     
     const districtOverrides: Record<string, string> = {
       'eyupsultan': 'eyup',
@@ -82,10 +82,12 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
         bn => normalizeTurkish(bn) === normalizedLookup
       ) || basinNameNormalized;
       const [provKey] = key.split('-');
+      const [, districtKey] = key.split('-');
       map.set(key, {
         basin: realBasinName,
         color: basinColors[realBasinName] || '#95a5a6',
-        province: provKey
+        province: provKey,
+        district: districtKey || '',
       });
     });
 
@@ -97,7 +99,8 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
       const value = {
         basin: item.basinName,
         color: basinColors[item.basinName] || '#95a5a6',
-        province: item.provinceName
+        province: item.provinceName,
+        district: rawDistrict,
       };
       
       map.set(`${normalizedProvince}-${normalizedDistrict}`, value);
@@ -219,10 +222,14 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
           if (!basinInfo) return null;
 
           const matchesBasin = !filterBasin || filterBasin === 'Tümü' || basinInfo.basin === filterBasin;
-          const matchesProvince = !filterProvince || filterProvince === 'Tümü' || basinInfo.province === provinceName;
-          const matchesDistrict = !filterDistrict || filterDistrict === 'Tümü' || districtName === filterDistrict;
+          const matchesProvince = !filterProvince || filterProvince === 'Tümü' || normalizeTurkish(basinInfo.province) === normalizeTurkish(filterProvince);
+          const matchesDistrict = !filterDistrict || filterDistrict === 'Tümü' || normalizeTurkish(basinInfo.district) === normalizeTurkish(filterDistrict);
           const isFiltered = !matchesBasin || !matchesProvince || !matchesDistrict;
-          const isSelected = selectedDistrict === `${provinceName}||${districtName}`;
+          const selectedKey = selectedDistrict
+            ? selectedDistrict.split('||').map(part => normalizeTurkish(part)).join('||')
+            : '';
+          const featureKey = `${normalizeTurkish(basinInfo.province)}||${normalizeTurkish(basinInfo.district)}`;
+          const isSelected = selectedKey === featureKey;
 
           const color = basinInfo.color;
 
@@ -256,7 +263,7 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
                   e.currentTarget.style.filter = 'brightness(1.2)';
                   e.currentTarget.style.stroke = 'white';
                   e.currentTarget.style.strokeWidth = '1.5';
-                  setTooltip({ district: districtName, basin: basinInfo.basin, province: basinInfo.province });
+                  setTooltip({ district: basinInfo.district || districtName, basin: basinInfo.basin, province: basinInfo.province });
                 }
               }}
               onMouseLeave={(e) => {
@@ -267,7 +274,7 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
               }}
               onClick={() => {
                 if (!isFiltered && onDistrictClick) {
-                  onDistrictClick(districtName, provinceName, basinInfo.basin);
+                  onDistrictClick(basinInfo.district || districtName, basinInfo.province, basinInfo.basin);
                 }
               }}
             />
