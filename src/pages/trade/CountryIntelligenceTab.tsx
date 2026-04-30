@@ -5,12 +5,38 @@ import {
   PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart,
   ResponsiveContainer, Scatter, ScatterChart, Tooltip, Treemap, XAxis, YAxis, ZAxis,
 } from 'recharts';
-import { Globe, TrendingUp, TrendingDown, Scale, Package } from 'lucide-react';
+import { Globe, TrendingUp, TrendingDown, Scale, Package, MapPin, Languages, Landmark, Users, Banknote, BarChart3, X } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
-import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '../../components/WorldTradeMap';
+import { WorldTradeMap } from '../../components/WorldTradeMap';
+import { CountrySilhouette } from '../../components/CountrySilhouette';
 import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
+import countryProfilesData from '../../data/countryProfiles.json';
+
+interface CountryProfile {
+  name_tr: string;
+  name_en: string;
+  capital: string;
+  languages: string[];
+  area_km2: number;
+  population: number;
+  currency: { name: string; code: string };
+  gdp_usd_billion: number;
+}
+
+const COUNTRY_PROFILES = countryProfilesData as unknown as Record<string, CountryProfile | { description?: string }>;
+
+function getCountryProfile(countryKey: string): CountryProfile | null {
+  const entry = COUNTRY_PROFILES[countryKey];
+  if (entry && 'capital' in entry) return entry as CountryProfile;
+  return null;
+}
+
+function formatNumberTr(value: number): string {
+  if (!Number.isFinite(value)) return '-';
+  return value.toLocaleString('tr-TR');
+}
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -190,13 +216,6 @@ export default function CountryIntelligenceTab() {
   const balance = totalExp - totalImp;
   const yoyGrowth = prevExp > 0 ? ((totalExp - prevExp) / prevExp * 100) : 0;
 
-  // World map highlight — yalnızca seçili ülke metriklerini map'e besle
-  const [worldMapMetric, setWorldMapMetric] = useState<WorldTradeMetric>('exportValue');
-  const worldCountryMetrics = useMemo<Record<string, CountryTradeMetrics>>(() => {
-    if (!selectedCountry) return {};
-    const k = toWorldGeoCountryKey(selectedCountry);
-    return { [k]: { exportValue: totalExp, importValue: totalImp, balanceValue: balance } };
-  }, [selectedCountry, totalExp, totalImp, balance]);
   const selectedProductExportShare = selectedProductDetail ? toProductShare(selectedProductDetail.exp, totalExp) : 0;
   const selectedProductImportShare = selectedProductDetail ? toProductShare(selectedProductDetail.imp, totalImp) : 0;
   const selectedProductTurnover = selectedProductDetail ? selectedProductDetail.exp + selectedProductDetail.imp : 0;
@@ -268,66 +287,109 @@ export default function CountryIntelligenceTab() {
       </div>
 
       {!selectedCountry && (
-        <div style={{
-          textAlign: 'center', padding: '80px 20px',
-          color: 'var(--text-secondary)', fontSize: 16,
-        }}>
-          <Globe size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
-          <div>Yukarıdan bir ülke seçerek istihbarat analizine başlayın</div>
-          <div style={{ fontSize: 13, marginTop: 8, opacity: 0.6 }}>240+ ülke · 75 ürün · 2000–2025 verisi</div>
-        </div>
+        <>
+          <div className="chart-card" style={{ marginBottom: 16 }}>
+            <h3 className="chart-title" style={{ margin: '0 0 8px' }}>🗺️ Dünya Üzerinden Ülke Seçin</h3>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
+              Yukarıdaki listeden veya hızlı erişim çiplerinden bir ülke seçtiğinizde, harita yerine ülke profili açılır.
+            </div>
+            <WorldTradeMap
+              metric="exportValue"
+              countryMetrics={{}}
+              height={420}
+            />
+          </div>
+          <div style={{
+            textAlign: 'center', padding: '40px 20px',
+            color: 'var(--text-secondary)', fontSize: 15,
+          }}>
+            <Globe size={40} style={{ marginBottom: 12, opacity: 0.3 }} />
+            <div>Bir ülke seçerek istihbarat analizine başlayın</div>
+            <div style={{ fontSize: 12, marginTop: 6, opacity: 0.6 }}>240+ ülke · 75 ürün · 2000–2025 verisi</div>
+          </div>
+        </>
       )}
 
       {loading && <Loading />}
 
-      {selectedCountry && !loading && (
+      {selectedCountry && !loading && (() => {
+        const countryKey = toWorldGeoCountryKey(selectedCountry);
+        const profile = getCountryProfile(countryKey);
+        return (
         <>
-          {/* Country header */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.03))',
-            borderRadius: 12, padding: '16px 20px', marginBottom: 16,
-            border: '1px solid rgba(139,92,246,0.3)',
-            display: 'flex', alignItems: 'center', gap: 12,
+          {/* Country profile — siluet + meta + temizleme */}
+          <div className="chart-card" style={{
+            marginBottom: 16,
+            background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.02))',
+            border: '1px solid rgba(139,92,246,0.25)',
           }}>
-            <span style={{ fontSize: 28 }}>🌍</span>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>{selectedCountry}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                {productCount} ürün grubu ile ticaret · {yearForMonthly} yılı
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Ülke Profili</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{selectedCountry}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  {productCount} ürün grubu · {yearForMonthly} yılı{profile ? ` · ${profile.name_en}` : ''}
+                </div>
               </div>
+              <button
+                onClick={() => { setSelectedCountry(''); setSelectedProductDetail(null); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 14px', borderRadius: 20, border: '1px solid var(--border)',
+                  background: 'var(--bg)', color: 'var(--text-secondary)', cursor: 'pointer',
+                  fontSize: 12, fontWeight: 600,
+                }}
+              >
+                <X size={14} /> Tüm dünyaya dön
+              </button>
             </div>
-          </div>
 
-          {/* World map highlight */}
-          <div className="chart-card" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>🗺️ {selectedCountry} — Dünya Haritasında Konum</h3>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['exportValue', 'importValue', 'balanceValue'] as WorldTradeMetric[]).map(m => (
-                  <button
-                    key={m}
-                    onClick={() => setWorldMapMetric(m)}
-                    style={{
-                      padding: '4px 10px', borderRadius: 16, border: '1px solid var(--border)',
-                      background: worldMapMetric === m ? 'var(--accent)' : 'var(--bg)',
-                      color: worldMapMetric === m ? '#fff' : 'var(--text-secondary)',
-                      cursor: 'pointer', fontSize: 11, fontWeight: 600,
-                    }}
-                  >
-                    {m === 'exportValue' ? 'İhracat' : m === 'importValue' ? 'İthalat' : 'Denge'}
-                  </button>
-                ))}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(260px, 360px) 1fr',
+              gap: 16,
+              alignItems: 'stretch',
+            }}>
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 240,
+              }}>
+                <CountrySilhouette countryKey={countryKey} width={320} height={220} />
+              </div>
+
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: 16,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: 12,
+                alignContent: 'start',
+              }}>
+                {profile ? (
+                  <>
+                    <ProfileFact icon={<Landmark size={16} />} label="Başkent" value={profile.capital} />
+                    <ProfileFact icon={<Languages size={16} />} label="Dil" value={profile.languages.join(', ')} />
+                    <ProfileFact icon={<MapPin size={16} />} label="Yüzölçümü" value={`${formatNumberTr(profile.area_km2)} km²`} />
+                    <ProfileFact icon={<Users size={16} />} label="Nüfus" value={formatNumberTr(profile.population)} />
+                    <ProfileFact icon={<Banknote size={16} />} label="Para Birimi" value={`${profile.currency.name} (${profile.currency.code})`} />
+                    <ProfileFact icon={<BarChart3 size={16} />} label="GSYİH (Nominal)" value={`$${formatNumberTr(profile.gdp_usd_billion)} milyar`} />
+                  </>
+                ) : (
+                  <div style={{ gridColumn: '1 / -1', color: 'var(--text-secondary)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
+                    Bu ülke için ek profil verisi henüz girilmedi. <br />
+                    <span style={{ fontSize: 11, opacity: 0.7 }}>(`src/data/countryProfiles.json` dosyasına eklenebilir.)</span>
+                  </div>
+                )}
               </div>
             </div>
-            <WorldTradeMap
-              metric={worldMapMetric}
-              countryMetrics={worldCountryMetrics}
-              selectedCountry={selectedCountry}
-              height={380}
-            />
-            <p style={{ marginTop: 8, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center' }}>
-              Seçili ülke renklendirilmiştir; diğer ülkeler bu sekmede metriksizdir.
-            </p>
           </div>
 
           {/* KPIs */}
@@ -712,7 +774,20 @@ export default function CountryIntelligenceTab() {
             </>
           )}
         </>
-      )}
+        );
+      })()}
+    </div>
+  );
+}
+
+function ProfileFact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {icon}
+        {label}
+      </div>
+      <div style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }}>{value}</div>
     </div>
   );
 }
