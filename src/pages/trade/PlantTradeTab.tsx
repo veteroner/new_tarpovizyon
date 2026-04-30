@@ -7,7 +7,8 @@ import { TrendingUp, TrendingDown, Leaf, ArrowLeftRight, Zap } from 'lucide-reac
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { TreemapContent } from '../../components/TreemapContent';
-import { fetchQuery, formatMoney, formatNumber, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { fetchQuery, formatMoney, formatNumber, sqlEsc, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
 
 const TABLE = TRADE_TABLES.PLANT;
 const MONTHS_TR: Record<string, string> = {
@@ -57,7 +58,7 @@ export default function PlantTradeTab() {
     try {
       const yr = selectedYear;
       const prevYr = String(Number(yr) - 1);
-      const productWhere = selectedProduct ? ` AND ana_urun='${selectedProduct}'` : '';
+      const productWhere = selectedProduct ? ` AND ana_urun='${sqlEsc(selectedProduct)}'` : '';
 
       // KPIs
       const [kpiRes, kpiPrev, cntRes, ccntRes] = await Promise.all([
@@ -145,6 +146,12 @@ export default function PlantTradeTab() {
     products.filter(p => p.exp > 0).slice(0, 15).map((p, i) => ({
       name: p.name, size: p.exp, value: p.exp, fill: COLORS[i % COLORS.length],
     })), [products]);
+  const plantContext = { group: 'Bitkisel ticaret', year: selectedYear, product: selectedProduct || 'Tüm ürünler', totalExp, totalImp, balance, productCount, countryCount, yoyGrowth: Number(yoyGrowth.toFixed(2)), impChange: Number(impChange.toFixed(2)) };
+  const countryChartData = countries.map(c => ({
+    name: c.name.length > 16 ? c.name.substring(0, 16) + '..' : c.name,
+    ihracatMilyonUsd: Number((c.exp / 1e6).toFixed(2)),
+    ithalatMilyonUsd: Number((c.imp / 1e6).toFixed(2)),
+  }));
 
   if (loading) return <Loading />;
 
@@ -180,7 +187,10 @@ export default function PlantTradeTab() {
       {/* Charts Row 1 */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">📊 Aylık Bitkisel Ticaret ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık Bitkisel Ticaret ({selectedYear})</h3>
+            <ChartInsightButton title={`Aylık Bitkisel Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={plantContext} />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -195,7 +205,10 @@ export default function PlantTradeTab() {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📈 Yıllık Bitkisel Trend + Denge</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık Bitkisel Trend + Denge</h3>
+            <ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -215,7 +228,10 @@ export default function PlantTradeTab() {
       {/* Treemap */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <h3 className="chart-title">🌿 İhracat Ürün Treemap ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ margin: 0 }}>🌿 İhracat Ürün Treemap ({selectedYear})</h3>
+            <ChartInsightButton title={`Bitkisel İhracat Ürün Treemap (${selectedYear})`} description="İlk 15 ürünün ihracat ağırlığı" data={treemapData} context={plantContext} />
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <Treemap data={treemapData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapData.map((e, i) => <Cell key={i} fill={e.fill} />)}
@@ -228,20 +244,19 @@ export default function PlantTradeTab() {
       {/* Countries */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <h3 className="chart-title">🌍 Top 15 İhracat Ülkesi ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ margin: 0 }}>🌍 Top 15 İhracat Ülkesi ({selectedYear})</h3>
+            <ChartInsightButton title={`Bitkisel Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={plantContext} />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={countries.map(c => ({
-              name: c.name.length > 16 ? c.name.substring(0, 16) + '..' : c.name,
-              İhracat: c.exp / 1e6,
-              İthalat: c.imp / 1e6,
-            }))}>
+            <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-30} textAnchor="end" height={70} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
               <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
               <Legend />
-              <Bar dataKey="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

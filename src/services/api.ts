@@ -41,6 +41,10 @@ function _sqlEsc(value: string): string {
     .replace(/'/g, "''");
 }
 
+export function sqlEsc(value: string): string {
+  return _sqlEsc(value);
+}
+
 // ─── Hasat Tahmini — Safe API Layer ──────────────────────────────────────────
 // SQL'ler burada izole edilmiştir; page bileşenleri asla doğrudan SQL oluşturmaz.
 
