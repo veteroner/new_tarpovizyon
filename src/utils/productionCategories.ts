@@ -127,43 +127,58 @@ export const TURKEY_REGIONS = {
   }
 } as const;
 
-// İlden bölgeye mapping
-export function getRegionByProvince(province: string): string {
-  const normalizeTr = (input: string): string => {
-    return String(input ?? '')
-      .trim()
-      .toLocaleLowerCase('tr-TR')
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/ı/g, 'i')
-      .replace(/[^a-z0-9 ]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
+const normalizeTr = (input: string): string => {
+  return String(input ?? '')
+    .trim()
+    .toLocaleLowerCase('tr-TR')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/ı/g, 'i')
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
 
-  let provinceKey = normalizeTr(province);
-  if (!provinceKey) return 'Diğer';
+const PROVINCE_ALIASES: Record<string, string> = {
+  // GeoJSON / dataset variants
+  afyon: 'afyonkarahisar',
+  'afyon karahisar': 'afyonkarahisar',
+  zinguldak: 'zonguldak',
 
-  // Common aliases/abbreviations observed in datasets/GeoJSON
-  const ALIASES: Record<string, string> = {
-    // Kahramanmaraş
-    'k maras': 'kahramanmaras',
-    'kmaras': 'kahramanmaras',
-    'maras': 'kahramanmaras',
-    'kahraman maras': 'kahramanmaras',
+  // Kahramanmaraş
+  'k maras': 'kahramanmaras',
+  kmaras: 'kahramanmaras',
+  maras: 'kahramanmaras',
+  'kahraman maras': 'kahramanmaras',
 
-    // Afyonkarahisar
-    'afyon': 'afyonkarahisar',
-    'afyon karahisar': 'afyonkarahisar',
+  // Kırıkkale common typos
+  kinkkale: 'kirikkale',
+};
 
-    // Kırıkkale common typos
-    'kinkkale': 'kirikkale',
-  };
+export function normalizeProvinceKey(province: string): string {
+  const key = normalizeTr(province);
+  return PROVINCE_ALIASES[key] ?? key;
+}
 
-  provinceKey = ALIASES[provinceKey] ?? provinceKey;
+export function getCanonicalProvinceName(province: string): string {
+  const provinceKey = normalizeProvinceKey(province);
+  if (!provinceKey) return province;
 
   for (const [, region] of Object.entries(TURKEY_REGIONS)) {
-    if (region.provinces.some(p => normalizeTr(p) === provinceKey)) {
+    const match = region.provinces.find(p => normalizeProvinceKey(p) === provinceKey);
+    if (match) return match;
+  }
+
+  return province;
+}
+
+// İlden bölgeye mapping
+export function getRegionByProvince(province: string): string {
+  const provinceKey = normalizeProvinceKey(province);
+  if (!provinceKey) return 'Diğer';
+
+  for (const [, region] of Object.entries(TURKEY_REGIONS)) {
+    if (region.provinces.some(p => normalizeProvinceKey(p) === provinceKey)) {
       return region.name;
     }
   }

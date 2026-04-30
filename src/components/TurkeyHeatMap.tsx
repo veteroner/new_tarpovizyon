@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { geoMercator, geoPath } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
-import { getRegionByProvince } from '../utils/productionCategories';
+import { getCanonicalProvinceName, getRegionByProvince, normalizeProvinceKey } from '../utils/productionCategories';
 
 type GeoFeature = {
   type: 'Feature';
   properties?: {
     Name?: string;
+    name?: string;
+    NAME?: string;
     [key: string]: unknown;
   };
   geometry: unknown;
@@ -73,12 +75,6 @@ function normalizeTr(input: string): string {
     .trim();
 }
 
-function normalizeProvinceName(province: string): string {
-  // Fix common misspellings
-  if (province === 'Zinguldak') return 'Zonguldak';
-  return province;
-}
-
 function clamp01(value: number): number {
   if (value < 0) return 0;
   if (value > 1) return 1;
@@ -140,7 +136,7 @@ export function TurkeyHeatMap({
     const byKey = new Map<string, number>();
 
     for (const item of regionTotals) {
-      const key = normalizeTr(item.name);
+      const key = normalizeProvinceKey(item.name) || normalizeTr(item.name);
       byKey.set(key, Number(item.value) || 0);
     }
 
@@ -195,15 +191,17 @@ export function TurkeyHeatMap({
         ) : (
           <svg viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} style={{ width: '100%', height: '100%' }}>
             {geoData.features.map((feature, idx) => {
-              const rawProvince = String(feature.properties?.Name ?? '').trim();
-              const province = normalizeProvinceName(rawProvince);
-              const provinceKey = normalizeTr(province);
+              const rawProvince = String(feature.properties?.Name ?? feature.properties?.name ?? feature.properties?.NAME ?? '').trim();
+              const province = rawProvince ? getCanonicalProvinceName(rawProvince) : '—';
+              const provinceKey = normalizeProvinceKey(province) || normalizeTr(province);
               const regionName = getRegionByProvince(province);
               const regionKey = normalizeTr(regionName);
               const value = valueByRegionKey.get(provinceKey) ?? valueByRegionKey.get(regionKey);
 
               // First check for province-specific color, then region color
-              const categoricalBase = fillMode === 'region' ? (regionColors?.[province] ?? regionColors?.[regionName] ?? 'var(--border)') : undefined;
+              const categoricalBase = fillMode === 'region'
+                ? (regionColors?.[rawProvince] ?? regionColors?.[province] ?? regionColors?.[regionName] ?? 'var(--border)')
+                : undefined;
               const categoricalFill = (() => {
                 if (!categoricalBase) return undefined;
                 if (!highlightRegion || !dimNonSelected) return categoricalBase;
