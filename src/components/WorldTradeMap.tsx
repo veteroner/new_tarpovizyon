@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
+import { normalizeCountryKey, translateCountry } from '../utils/countryTranslations';
 
 export type WorldTradeMetric = 'exportValue' | 'importValue' | 'balanceValue';
 
@@ -47,17 +48,6 @@ function formatMoney(value: number): string {
   if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
   if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
   return `${sign}$${abs.toLocaleString('tr-TR')}`;
-}
-
-function normalizeKey(value: string): string {
-  return String(value || '')
-    .toLocaleLowerCase('tr-TR')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ı/g, 'i')
-    .replace(/[^a-z0-9 ]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 function pickFillForValue(value: number, min: number, max: number): string {
@@ -214,7 +204,7 @@ export function WorldTradeMap({
         <g>
           {features.map((feat, idx) => {
             const name = String(feat.properties?.name || '').trim();
-            const key = normalizeKey(name);
+            const key = normalizeCountryKey(name);
             const metrics = countryMetrics[key];
             const isSelected = Boolean(selectedCountry) && key === selectedCountry;
 
@@ -276,7 +266,7 @@ export function WorldTradeMap({
           }}
         >
           <div style={{ fontWeight: 800, marginBottom: 8, color: 'var(--text-primary)' }}>
-            {formatCountryLabel ? formatCountryLabel(tooltip.countryName) : tooltip.countryName}
+            {formatCountryLabel ? formatCountryLabel(tooltip.countryName) : translateCountry(tooltip.countryName)}
           </div>
           <div style={{ display: 'grid', gap: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
             <div><span style={{ fontWeight: 700 }}>İhracat:</span> {formatMoney(tooltip.metrics.exportValue)}</div>

@@ -10,6 +10,7 @@ import { Loading } from '../../components/Loading';
 import { TreemapContent } from '../../components/TreemapContent';
 import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '../../components/WorldTradeMap';
 import { formatMoney } from '../../services/api';
+import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import { useTradeOverviewData } from './useTradeOverviewData';
 
 const GROUP_FILTER_LABELS = {
@@ -17,17 +18,6 @@ const GROUP_FILTER_LABELS = {
   bitkisel: 'Bitkisel',
   hayvansal: 'Hayvansal',
 } as const;
-
-function normalizeCountryKey(value: string): string {
-  return String(value || '')
-    .toLocaleLowerCase('tr-TR')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ı/g, 'i')
-    .replace(/[^a-z0-9 ]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 export default function TradeOverviewTab() {
   const {
@@ -48,7 +38,7 @@ export default function TradeOverviewTab() {
     const acc: Record<string, CountryTradeMetrics> = {};
     const ingest = (rows: { name: string; exp: number; imp: number }[]) => {
       rows.forEach(r => {
-        const key = normalizeCountryKey(r.name);
+        const key = toWorldGeoCountryKey(r.name);
         if (!key) return;
         if (!acc[key]) {
           acc[key] = { exportValue: 0, importValue: 0, balanceValue: 0 };

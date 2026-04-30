@@ -237,6 +237,53 @@ export const countryTranslations: Record<string, string> = {
   'Net Food Importing Developing Countries': 'Net Gıda İthalatçısı Gelişmekte Olan Ülkeler',
 };
 
+export function normalizeCountryKey(value: string): string {
+  return String(value || '')
+    .toLocaleLowerCase('tr-TR')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/ı/g, 'i')
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const worldGeoCountryOverrides: Record<string, string> = {
+  [normalizeCountryKey('ABD')]: normalizeCountryKey('United States of America'),
+  [normalizeCountryKey('A.B.D.')]: normalizeCountryKey('United States of America'),
+  [normalizeCountryKey('Amerika Birleşik Devletleri')]: normalizeCountryKey('United States of America'),
+  [normalizeCountryKey('Rusya')]: normalizeCountryKey('Russia'),
+  [normalizeCountryKey('İngiltere')]: normalizeCountryKey('United Kingdom'),
+  [normalizeCountryKey('Birleşik Krallık')]: normalizeCountryKey('United Kingdom'),
+  [normalizeCountryKey('Bahamalar')]: normalizeCountryKey('The Bahamas'),
+  [normalizeCountryKey('Brunei')]: normalizeCountryKey('Brunei'),
+  [normalizeCountryKey('Çekya')]: normalizeCountryKey('Czech Republic'),
+  [normalizeCountryKey('Fildişi Sahili')]: normalizeCountryKey('Ivory Coast'),
+  [normalizeCountryKey('Gine-Bissau')]: normalizeCountryKey('Guinea Bissau'),
+  [normalizeCountryKey('Güney Kore')]: normalizeCountryKey('South Korea'),
+  [normalizeCountryKey('Kongo')]: normalizeCountryKey('Republic of the Congo'),
+  [normalizeCountryKey('Laos')]: normalizeCountryKey('Laos'),
+  [normalizeCountryKey('Moldova')]: normalizeCountryKey('Moldova'),
+  [normalizeCountryKey('Tanzanya')]: normalizeCountryKey('Tanzania'),
+  [normalizeCountryKey('Vietnam')]: normalizeCountryKey('Vietnam'),
+};
+
+export function toWorldGeoCountryKey(value: string): string {
+  const rawKey = normalizeCountryKey(value);
+  if (!rawKey) return '';
+
+  const override = worldGeoCountryOverrides[rawKey];
+  if (override) return override;
+
+  for (const [englishName, turkishName] of Object.entries(countryTranslations)) {
+    if (normalizeCountryKey(turkishName) === rawKey) {
+      return normalizeCountryKey(englishName);
+    }
+  }
+
+  return rawKey;
+}
+
 // Ülke ismini Türkçe'ye çevir
 export function translateCountry(name: string): string {
   if (!name) return '';
