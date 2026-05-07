@@ -8,6 +8,7 @@ import {
   calculateCAGR,
   type YearlyTrendData,
 } from './provincialLivestockUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   yearRange: [number, number];
@@ -171,9 +172,12 @@ export default function ProvincialTrendsTab({
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         border: '1px solid var(--border)'
       }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          📊 {yearRange[0]}-{yearRange[1]} Yılları Arası Hayvan Popülasyon Trendi
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
+            📊 {yearRange[0]}-{yearRange[1]} Yılları Arası Hayvan Popülasyon Trendi
+          </h3>
+          <ChartInsightButton title="📊 Popülasyon Trendi" description="Yıllar arası trend analizi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart
             data={yearlyTrendData}
@@ -224,9 +228,12 @@ export default function ProvincialTrendsTab({
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         border: '1px solid var(--border)'
       }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          📊 Yıllık Büyüme Oranları (%)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
+            📊 Yıllık Büyüme Oranları (%)
+          </h3>
+          <ChartInsightButton title="📊 Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart
             data={yearlyTrendData.map((item, idx) => {

@@ -9,6 +9,7 @@ import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { usePesticideData, TABS, CHART_COLORS, formatTon, formatKgHa, formatShort } from './pesticide/usePesticideData';
 import type { Tab } from './pesticide/usePesticideData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 export default function PesticidePage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -58,7 +59,10 @@ export default function PesticidePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Pestisit Tür Dağılımı</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Pestisit Tür Dağılımı</h3>
+                  <ChartInsightButton title="Pestisit Tür Dağılımı" description="Pestisit tür dağılımı" data={overviewByType} context={{ section: 'Pestisit Genel' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={overviewByType} cx="50%" cy="50%" outerRadius={100} innerRadius={40} dataKey="value" label={({ name, percent }) => `${(name || '').substring(0, 12)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
@@ -69,7 +73,10 @@ export default function PesticidePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Top 15 Pestisit Kullanıcısı Ülke</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Pestisit Kullanıcısı Üke</h3>
+                  <ChartInsightButton title="Top 15 Pestisit Kullanıcısı" description="Top 15 pestisit kullanıcı ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Pestisit Genel' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -85,7 +92,10 @@ export default function PesticidePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Dünya Pestisit Kullanım Trendi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Dünya Pestisit Kullanım Trendi</h3>
+                  <ChartInsightButton title="Dünya Pestisit Kullanım Trendi" description="Dünya pestisit kullanım trendi" data={overviewTrend} context={{ section: 'Pestisit Genel' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -117,7 +127,10 @@ export default function PesticidePage() {
               {compTrends.length > 0 && (
                 <div className="chart-grid">
                   <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <h3 className="chart-title">Pestisit Alt Tür Trendleri (2000+)</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Pestisit Alt Tür Trendleri (2000+)</h3>
+                    <ChartInsightButton title="Pestisit Alt Tür Trendleri" description="Pestisit alt tür trendleri (2000+)" data={compTrends} context={{ section: 'Karşılaştırma' }} compact />
+                    </div>
                     <ResponsiveContainer width="100%" height={350}>
                       <AreaChart data={compTrends}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -151,7 +164,10 @@ export default function PesticidePage() {
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Pestisit Kullanımı — Ülke Sıralaması</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Pestisit Kullanımı — Üke Sıralaması</h3>
+                  <ChartInsightButton title="Pestisit Üke Sıralaması" description="Pestisit kullanımı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -180,7 +196,10 @@ export default function PesticidePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Türkiye Pestisit Kompozisyonu</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Pestisit Kompozisyonu</h3>
+                  <ChartInsightButton title="Türkiye Pestisit Kompozisyonu" description="Türkiye pestisit tip kompozisyonu" data={turkeyProfile.composition} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={turkeyProfile.composition} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -194,7 +213,10 @@ export default function PesticidePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Türkiye Pestisit Trendi (2000+)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Pestisit Trendi (2000+)</h3>
+                  <ChartInsightButton title="Türkiye Pestisit Trendi" description="Türkiye pestisit kullanım trendi (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -221,7 +243,10 @@ export default function PesticidePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Türkiye Pestisit Kullanımı — Tahmin Projeksiyonu</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Pestisit Kullanımı — Tahmin Projeksiyonu</h3>
+                  <ChartInsightButton title="Türkiye Pestisit Tahmin Projeksiyonu" description="Türkiye pestisit tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

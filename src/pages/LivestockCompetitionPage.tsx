@@ -8,6 +8,7 @@ import {
 import { Loading } from '../components/Loading';
 import { InsightCard } from '../components/InsightCard';
 import { useLivestockCompetitionData, isTR } from './livestockCompetition/useLivestockCompetitionData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 /* ── Color constants ───────────────────────────────────────── */
 const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
@@ -186,7 +187,10 @@ export function LivestockCompetitionPage() {
       <div className="chart-grid" style={{ marginTop: 20 }}>
         {/* Market Share Evolution */}
         <div className="chart-card">
-          <h3 className="chart-title">📈 Pazar Payı Evrimi (2010–{selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Pazar Payı Evrimi (2010–{selectedYear})</h3>
+          <ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart data={mktShareChart} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -208,7 +212,10 @@ export function LivestockCompetitionPage() {
 
         {/* BCG Matrix */}
         <div className="chart-card">
-          <h3 className="chart-title">🎯 Rekabet Pozisyon Matrisi (Büyüme × Pay)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Rekabet Pozisyon Matrisi (Büyüme × Pay)</h3>
+          <ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -252,7 +259,10 @@ export function LivestockCompetitionPage() {
       <div className="chart-grid">
         {/* Top 15 */}
         <div className="chart-card">
-          <h3 className="chart-title">🏆 Top 15 Hayvansal Üretici ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🏆 Top 15 Hayvansal Üretici ({selectedYear})</h3>
+          <ChartInsightButton title="Top 15 Hayvansal Üretici" description="Top 15 hayvansal üretici ülkeler" data={currentRankings.slice(0,15)} context={{ section: 'Rekabet' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={currentRankings.slice(0, 15).map(c => ({
@@ -291,7 +301,10 @@ export function LivestockCompetitionPage() {
 
         {/* Radar */}
         <div className="chart-card">
-          <h3 className="chart-title">📊 Türkiye vs Top 2 – Kategori Karşılaştırması</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Türkiye vs Top 2 – Kategori Karşılaştırması</h3>
+          <ChartInsightButton title="Türkiye vs Top 2 Karşılaştırması" description="Türkiye vs top 2 kategori karşılaştırması" data={radarData} context={{ section: 'Rekabet' }} compact />
+          </div>
           {top2.length >= 2 && radarData.length > 0 && (
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart data={radarData}>
@@ -314,7 +327,10 @@ export function LivestockCompetitionPage() {
 
       {/* ── Turkey Trend ───────────────────────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">📈 Türkiye Üretim Trendi (Tüm Yıllar)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye Üretim Trendi (Tüm Yıllar)</h3>
+        <ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={turkeyTrend} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -331,7 +347,10 @@ export function LivestockCompetitionPage() {
       </div>
       {/* ── Treemap: Ülke Pazar Payı Haritası ──────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">🗺️ Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Üke Pazar Payı Haritası ({selectedYear}) — Top 20</h3>
+        <ChartInsightButton title="Üke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />
+        </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 12px' }}>
           Alan büyüklüğü toplam hayvansal üretim miktarıyla orantılı. Türkiye kırmızı ile gösterilmiştir.
         </p>
@@ -382,7 +401,10 @@ export function LivestockCompetitionPage() {
         });
         return (
           <div className="chart-card" style={{ marginTop: 20 }}>
-            <h3 className="chart-title">📊 Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi</h3>
+            <ChartInsightButton title="Piyasa Konsantrasyon HHI" description="Piyasa konsantrasyon HHI zaman serisi" data={hhiSeries} context={{ section: 'Konsantrasyon' }} compact />
+            </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 8px' }}>
               HHI &lt; 1500 = Rekabetçi · 1500–2500 = Orta · &gt; 2500 = Yoğunlaşmış piyasa (DOJ kriterleri)
             </p>

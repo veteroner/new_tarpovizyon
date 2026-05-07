@@ -4,6 +4,7 @@ import {
   Treemap,
 } from 'recharts';
 import { COLORS, formatNumber } from './beekeepingTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type TreemapItem = { name: string; children: { name: string; size: number; yield: number; hives: number; beekeepers: number }[] };
 
@@ -27,9 +28,12 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         marginBottom: '24px'
       }}>
-        <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          📍 İl Bazlı Bal Üretim Haritası
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+            📍 İl Bazlı Bal Üretim Haritası
+          </h3>
+          <ChartInsightButton title="📍 İl Bazlı Bal Üretim Haritası" description="Treemap: il bazlı bal üretim dağılımı" data={treemapData} context={{ section: 'İl Dağılım' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={500}>
           <Treemap
             data={treemapData}

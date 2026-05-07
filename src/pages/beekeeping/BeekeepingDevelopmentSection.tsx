@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 import { type YearTrendData, COLORS, formatNumber } from './beekeepingTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData: YearTrendData[] }) {
   return (
@@ -35,9 +36,12 @@ export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData:
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🐝 Arıcı Sayısı Gelişimi
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🐝 Arıcı Sayısı Gelişimi
+            </h3>
+            <ChartInsightButton title="🐝 Arıcı Sayısı Gelişimi" description="Arıcı sayısı yıllık gelişim trendi" data={yearTrendData} context={{ section: 'Arıcı' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={yearTrendData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
               <defs>

@@ -8,6 +8,7 @@ import { fetchQuery } from '../../services/api';
 import ProductSelector from '../../components/ProductSelector';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, EXCLUDED_FULL, type DataItem, formatNumber, formatShort } from './livestockUtils';
 
@@ -346,7 +347,10 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 2: Deep Trend Stacked Area */}
       <div className="chart-grid" style={{marginTop: '24px'}}>
         <div className="chart-card" style={{gridColumn: 'span 2'}}>
-          <h3 className="chart-title">📈 Uzun Vadeli Populasyon Trendi (Stacked)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Uzun Vadeli Populasyon Trendi (Stacked)</h3>
+            <ChartInsightButton title="Uzun Vadeli Populasyon Trendi" description="Hayvan türlerine göre uzun vadeli nüfus trendi" data={stocksDeepTrend} context={{}} />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={stocksDeepTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -367,7 +371,10 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 3: Animal CAGR Bar + Animal Share Pie */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">📊 Tür CAGR Karşılaştırması</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Tür CAGR Karşılaştırması</h3>
+            <ChartInsightButton title="Tür CAGR Karşılaştırması" description="Hayvan türlerine göre büléik büyüme oranı analizi" data={stocksAnimalCAGR} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={stocksAnimalCAGR.map(a => ({
               name: ANIMAL_ITEMS.find(ai => ai.name === a.animal)?.nameTR || a.animal,
@@ -385,7 +392,10 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           </ResponsiveContainer>
         </div>
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Küresel Tür Dağılımı</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Küresel Tür Dağılımı</h3>
+            <ChartInsightButton title="Küresel Hayvan Tür Dağılımı" description="Dünya genelinde hayvan türlerine göre stok dağılımı" data={stocksData} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie data={stocksData.map((d, i) => ({...d, fill: COLORS[i % COLORS.length]}))} cx="50%" cy="50%" outerRadius={95} dataKey="value"
@@ -402,7 +412,10 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {stocksCountryCAGR.length > 0 && (
         <div className="chart-grid">
           <div className="chart-card" style={{gridColumn: 'span 2'}}>
-            <h3 className="chart-title">🎯 Ülke Growth Quadrant (Büyüme × Stok)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Ülke Growth Quadrant (Büyüme × Stok)</h3>
+              <ChartInsightButton title="Ülke Growth Quadrant (Büyüme × Stok)" description="Ülkelerin stok büyüme oranı ve toplam stok dağılımı" data={stocksCountryCAGR} context={{}} />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -444,7 +457,10 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 5: Top 20 Country Ranking */}
       <div className="chart-grid">
         <div className="chart-card" style={{gridColumn: 'span 2'}}>
-          <h3 className="chart-title">🌍 Top 20 Ülke Sıralaması ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Top 20 Ülke Sıralaması ({selectedYear})</h3>
+            <ChartInsightButton title="Top 20 Ülke Sıralaması" description="Seçilen yılda en fazla hayvan stokuna sahip 20 ülke" data={stocksCountryData.slice(0, 20)} context={{ yıl: selectedYear }} />
+          </div>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart data={stocksCountryData.slice(0, 20)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

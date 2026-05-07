@@ -8,6 +8,7 @@ import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatNumber, formatShort } from './livestockUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   selectedYear: string;
@@ -308,7 +309,10 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       {/* Charts Row 1 */}
       <div className="chart-grid" style={{ marginTop: 20 }}>
         <div className="chart-card">
-          <h3 className="chart-title">🏆 Top 15 İşlenmiş Ürün Üreticileri ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🏆 Top 15 İşlenmiş Ürnün Üreticileri ({selectedYear})</h3>
+            <ChartInsightButton title="Top 15 İşlenmiş Ürnün Üreticileri" description="Seçilen yılda işlenmiş hayvansal ürünlerde önde gelen 15 ülke" data={processedCountryData.slice(0, 15)} context={{ yıl: selectedYear }} />
+          </div>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedCountryData.slice(0, 15).map(c => ({
@@ -333,7 +337,10 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📊 Ürün CAGR & Yaşam Döngüsü (5 Yıllık)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ürnün CAGR & Yaşam Döngüsü (5 Yıllık)</h3>
+            <ChartInsightButton title="İşlenmiş Ürnün CAGR & Yaşam Döngüsü" description="5 yıllık işlenmiş hayvansal ürünlerin büyüme ve yaşam döngüsü analizi" data={processedGrowthData.slice(0, 15)} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedGrowthData.slice(0, 15).map(g => ({
@@ -360,7 +367,10 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
 
       {/* Turkey Trend */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">📈 Türkiye İşlenmiş Ürün Trendi (Tüm Yıllar)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye İşlenmiş Ürnün Trendi (Tüm Yıllar)</h3>
+          <ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

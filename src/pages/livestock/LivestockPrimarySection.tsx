@@ -8,6 +8,7 @@ import { fetchQuery } from '../../services/api';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, EXCLUDED_FULL, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
 
 interface Props {
@@ -308,7 +309,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       {/* Product CAGR Chart + Country Growth Quadrant */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
         <div className="chart-card">
-          <h3 className="chart-title">📊 Ürün CAGR Karşılaştırması (5Y)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ürnün CAGR Karşılaştırması (5Y)</h3>
+            <ChartInsightButton title="Ürnün CAGR Karşılaştırması" description="Birincil hayvansal ürünlerin 5 yıllık büléik büyüme analizi" data={primaryProductCAGR.slice(0, 12)} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -329,7 +333,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🌐 Ülke Büyüme Kadranı</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌐 Ülke Büyüme Kadranı</h3>
+            <ChartInsightButton title="Ülke Büyüme Kadranı" description="Ülkelerin pazar payı ve büyüme hızı dağılımı" data={primaryCountryCAGR.slice(0, 25)} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -360,7 +367,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       {/* Top 20 Country Ranking */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
         <div className="chart-card" style={{gridColumn: 'span 2'}}>
-          <h3 className="chart-title">🌍 Top 20 Ülke Üretim Sıralaması</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Top 20 Ülke Üretim Sıralaması</h3>
+            <ChartInsightButton title="Top 20 Ülke Üretim Sıralaması" description="Birincil hayvansal üretimde önde gelen 20 ülke" data={primaryCountryData.slice(0, 20)} context={{}} />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={primaryCountryData.slice(0, 20)}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -408,7 +418,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       {/* Yearly Trend + Country CAGR Table */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
         <div className="chart-card">
-          <h3 className="chart-title">📅 Küresel Üretim Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Küresel Üretim Trendi</h3>
+            <ChartInsightButton title="Küresel Birincil Hayvansal Üretim Trendi" description="Uzun vadeli küresel birincil hayvansal üretim trendi" data={primaryYearlyData} context={{}} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={primaryYearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

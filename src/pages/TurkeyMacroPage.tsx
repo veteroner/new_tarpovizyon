@@ -9,6 +9,7 @@ import {
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { fetchQuery } from '../services/api';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 /* ─── Constants ─── */
 const MAIN_SECTORS = ['A', 'BCD', 'F', 'GHI', 'J', 'K', 'L', 'MN', 'OPQ', 'RST'];
@@ -252,10 +253,13 @@ export default function TurkeyMacroPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sektörel GSYH Dağılımı */}
         <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <BarChart3 size={16} className="text-blue-600" />
             Sektörel GSYH Dağılımı — 2024 (Milyar ₺)
           </h3>
+          <ChartInsightButton title="Sektörel GSYH Dağılımı" description="2024 sektörel GSYH dağılımı" data={pieData} context={{ section: 'Makro Türkiye' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
@@ -275,10 +279,13 @@ export default function TurkeyMacroPage() {
 
         {/* Sektörel Büyüme Sıralaması */}
         <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <TrendingUp size={16} className="text-green-600" />
             Sektörel Reel Büyüme — 2024 (%)
           </h3>
+          <ChartInsightButton title="Sektörel Reel Büyüme" description="2024 sektörel reel büyüme oranları" data={growthRanking} context={{ section: 'Makro Türkiye' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={growthRanking} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 90 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -298,10 +305,13 @@ export default function TurkeyMacroPage() {
 
       {/* ─── Agriculture GDP Share + Growth Trend (25 Years) ─── */}
       <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-        <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
           <Activity size={16} className="text-green-600" />
           Tarım Sektörünün 25 Yıllık Serüveni — GSYH Payı &amp; Reel Büyüme
         </h3>
+        <ChartInsightButton title="Tarım Sektörünün 25 Yıllık Serüveni" description="GSYH payı ve reel büyüme trendi" data={agriChartData} context={{ section: 'Makro Türkiye' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <ComposedChart data={agriChartData} margin={{ top: 10, right: 50, bottom: 10, left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -341,10 +351,13 @@ export default function TurkeyMacroPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top 10 */}
         <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <DollarSign size={16} className="text-green-600" />
             En Yüksek Kişi Başı Gelir — 2024
           </h3>
+          <ChartInsightButton title="En Yüksek Kişi Başı Gelir" description="2024 en yüksek kişi başı gelir" data={incomeTop} context={{ section: 'Makro Türkiye' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={incomeTop} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -362,10 +375,13 @@ export default function TurkeyMacroPage() {
 
         {/* Bottom 10 */}
         <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <MapPin size={16} className="text-red-500" />
             En Düşük Kişi Başı Gelir — 2024
           </h3>
+          <ChartInsightButton title="En Düşük Kişi Başı Gelir" description="2024 en düşük kişi başı gelir" data={incomeBottom} context={{ section: 'Makro Türkiye' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={incomeBottom} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -385,10 +401,13 @@ export default function TurkeyMacroPage() {
       {/* ─── Income Gap Trend ─── */}
       {incomeGapChart.length > 0 && (
         <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <Users size={16} className="text-purple-600" />
             Gelir Eşitsizliği Trendi — En Zengin 5 vs En Yoksul 5 İl (USD)
           </h3>
+          <ChartInsightButton title="Gelir Eşitsizliği Trendi" description="En zengin 5 vs en yoksul 5 il gelir trendi" data={incomeGapChart} context={{ section: 'Makro Türkiye' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={incomeGapChart} margin={{ top: 10, right: 50, bottom: 10, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

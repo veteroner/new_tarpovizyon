@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR } from './productionTypes';
@@ -124,7 +125,10 @@ export function CompetitionTab({
           };
           return (
             <div className="chart-card" style={{ marginBottom: '24px', padding: '20px' }}>
-              <h3 className="chart-title" style={{ marginBottom: '6px' }}>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</h3>
+                <ChartInsightButton title={`RCA & Rekabet Avantajı — ${translateProduct(compProduct)}`} description="Türkiye rekabet avantajı radar analizi" data={radarRcaData} context={{ ürün: compProduct }} compact />
+              </div>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 Türkiye'nin değerleri global medyana ve top 5 ortalamasına göre normalize edilir. <strong>1,0×</strong> medyan ile eşit, <strong>&gt;1</strong> avantaj.
               </p>
@@ -174,7 +178,10 @@ export function CompetitionTab({
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
           <div className="chart-card">
-            <h3 className="chart-title">🔬 Büyüme vs Üretim (Scatter)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🔬 Büyüme vs Üretim (Scatter)</h3>
+              <ChartInsightButton title="Büyüme vs Üretim (Scatter)" description="Ülkelerin üretim büyüme oranı ve üretim hacmi dağılımı" data={compBubbleData} context={{ ürün: compProduct }} />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -194,7 +201,10 @@ export function CompetitionTab({
             </ResponsiveContainer>
           </div>
           <div className="chart-card">
-            <h3 className="chart-title">📉 HHI Konsantrasyon Trendi</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📉 HHI Konsantrasyon Trendi</h3>
+              <ChartInsightButton title="HHI Konsantrasyon Trendi" description="Herfindahl-Hirschman endeksi ile pazar yoğunlaşma trendi" data={compHHITimeline} context={{ hhi: compKPIs?.latestHHI }} />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={compHHITimeline}>
                 <defs>

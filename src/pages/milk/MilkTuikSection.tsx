@@ -4,6 +4,7 @@ import {
   Tooltip, Legend, Area, Line, BarChart, Bar, Cell
 } from 'recharts';
 import { TUIK_SUT_URUNLER, COLORS, AY_ADLARI, AY_TAM, formatShort, type TuikSutUrunData } from './milkUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   tuikSutData: TuikSutUrunData[];
@@ -166,9 +167,12 @@ export default function MilkTuikSection({
           background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
           border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📈 {selectedTuikSutUrun} — Yıllık Üretim Trendi (Ton)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              📈 {selectedTuikSutUrun} — Yıllık Üretim Trendi (Ton)
+            </h3>
+            <ChartInsightButton title="📈 Yıllık Üretim Trendi" description="Seçili süt ürünü yıllık üretim trendi" data={tuikSelectedData} context={{ urun: selectedTuikSutUrun }} />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={tuikSelectedData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -200,9 +204,12 @@ export default function MilkTuikSection({
             background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
             border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📅 Aylık Dağılım ({tuikLatestYear?.yil})
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                📅 Aylık Dağılım ({tuikLatestYear?.yil})
+              </h3>
+              <ChartInsightButton title="📅 Aylık Dağılım" description="Seçili yıl aylık üretim dağılımı" data={tuikSeasonality} context={{ yil: tuikLatestYear?.yil }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={tuikSeasonality} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -232,9 +239,12 @@ export default function MilkTuikSection({
             background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
             border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📊 Yıllık Büyüme Oranları (%)
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                📊 Yıllık Büyüme Oranları (%)
+              </h3>
+              <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Seçili ürün yıllık büyüme oranları" data={tuikGrowthRates} context={{ urun: selectedTuikSutUrun }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={tuikGrowthRates} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -261,9 +271,12 @@ export default function MilkTuikSection({
             background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
             border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🏆 Tüm Süt Ürünleri Karşılaştırması ({tuikAllProductsLatest[0]?.yil})
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                🏆 Tüm Süt Ürünleri Karşılaştırması ({tuikAllProductsLatest[0]?.yil})
+              </h3>
+              <ChartInsightButton title="🏆 Tüm Süt Ürünleri Karşılaştırması" description="Tüm süt ürünleri yıllık üretim karşılaştırması" data={tuikAllProductsLatest} context={{ section: 'Tüm Ürünler' }} />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart 
                 data={tuikAllProductsLatest} 
@@ -311,9 +324,12 @@ export default function MilkTuikSection({
             background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
             border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🌡️ Mevsimsellik Analizi — {selectedTuikSutUrun} (Yıl x Ay)
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                🌡️ Mevsimsellik Analizi — {selectedTuikSutUrun} (Yıl x Ay)
+              </h3>
+              <ChartInsightButton title="🌡️ Mevsimsellik Analizi" description="Süt ürünü mevsimsellik ısı haritası" data={tuikSeasonHeatmap} context={{ urun: selectedTuikSutUrun }} />
+            </div>
             <ResponsiveContainer width="100%" height={380}>
               <ComposedChart data={tuikSeasonHeatmap} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

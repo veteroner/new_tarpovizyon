@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 
@@ -61,7 +62,10 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
       {/* Kombine Üretim Grafiği */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📊 Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)</h3>
+            <ChartInsightButton title="📊 Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" description="Yumurta üretimi ve yumurtacı tavuk sayısı karşılaştırması" data={tuikData} context={{ section: 'Dual Axis' }} />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={tuikData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -91,7 +95,10 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
       {/* Üretim Akışı */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">🔄 Üretim Akışı: Tavuk → Yumurta (2025)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🔄 Üretim Akışı: Tavuk → Yumurta (2025)</h3>
+            <ChartInsightButton title="🔄 Üretim Akışı: Tavuk → Yumurta (2025)" description="2025 tavuktan yumurtaya üretim akışı" data={tuikData} context={{ year: 2025 }} compact />
+          </div>
           <div style={{ padding: '30px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
             <div style={{ textAlign: 'center', flex: '1', minWidth: '220px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🐔</div>

@@ -21,6 +21,7 @@ import {
   type CarcassWeightData,
   type ConsumptionComparison,
 } from './redMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   worldCarcassPrices: WorldCarcassPrices | null;
@@ -97,7 +98,10 @@ export default function WorldComparisonSection({
       {worldCarcassPriceTreemap.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">💰 Dünya Karkas Et Fiyatları (USD/kg)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>💰 Dünya Karkas Et Fiyatları (USD/kg)</h3>
+              <ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <Treemap
                 data={worldCarcassPriceTreemap}
@@ -154,7 +158,10 @@ export default function WorldComparisonSection({
       {productivityRadarData.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
           <div className="chart-card">
-            <h3 className="chart-title">🎯 Verimlilik Karşılaştırması (11 Ülke)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Verimlilik Karşılaştırması (11 Ülke)</h3>
+              <ChartInsightButton title="🎯 Verimlilik Karşılaştırması (11 Ülke)" description="Karkas verimi verimlilik karşılaştırması" data={productivityRadarData} context={{ section: 'Verimlilik' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={380}>
               <RadarChart data={productivityRadarData}>
                 <PolarGrid stroke="var(--border)" />
@@ -177,7 +184,10 @@ export default function WorldComparisonSection({
           </div>
 
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)</h3>
+              <ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)" description="Dünya karkas ağırlıkları dağılım histogrami" data={carcassWeightHistogram} context={{ section: 'Histogram' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={380}>
               <BarChart data={carcassWeightHistogram} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

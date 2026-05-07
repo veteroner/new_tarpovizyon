@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -46,7 +47,10 @@ export function LivestockSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📊 Hayvan Varlığı Dağılımı (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Hayvan Varlığı Dağılımı (2023)</h3>
+            <ChartInsightButton title="Hayvan Varlığı Dağılımı (2023)" description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data.livestockStocks.breakdown} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -65,6 +69,7 @@ export function LivestockSection({ data }: Props) {
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
             <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Bölgesel Dağılım (Top 12)</h3>
+            <ChartInsightButton title="Bölgesel Hayvan Varlığı Dağılımı" description="İl bazlı hayvan varlığı dağılımı" data={data.livestockStocks.regional[regionalGroup] ?? []} context={{ seçiliTür: regionalGroup }} compact />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div
                 role="tablist"

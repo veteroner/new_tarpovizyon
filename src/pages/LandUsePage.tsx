@@ -12,6 +12,7 @@ import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { useLandUseData, CHART_COLORS, formatArea, formatShort, formatPercent, LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY } from './landUse/useLandUseData';
 import type { Tab } from './landUse/useLandUseData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍', desc: 'Dunya arazi kullanimi ozeti' },
@@ -90,7 +91,10 @@ export default function LandUsePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Dunya Arazi Turu Dagilimi (1000 ha)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Dunya Arazi Turu Dagilimi (1000 ha)</h3>
+                  <ChartInsightButton title="Dünya Arazi Türü Dağılımı" description="Dünya arazi türü dağılımı" data={overviewLandTypes} context={{ section: 'Arazi Kullanımı' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart data={overviewLandTypes} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -104,7 +108,10 @@ export default function LandUsePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Top 15 Ulke - Tarim Arazisi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Ulke - Tarim Arazisi</h3>
+                  <ChartInsightButton title="Top 15 Tarım Arazisi" description="Top 15 ülke tarım arazisi" data={overviewTopCountries.slice(0,15)} context={{ section: 'Arazi Kullanımı' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -120,7 +127,10 @@ export default function LandUsePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Dunya Tarim Arazisi Trendi (1000 ha)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Dunya Tarim Arazisi Trendi (1000 ha)</h3>
+                  <ChartInsightButton title="Dünya Tarım Arazisi Trendi" description="Dünya tarım arazisi trendi" data={overviewTrend} context={{ section: 'Arazi Kullanımı' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -175,7 +185,10 @@ export default function LandUsePage() {
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Arazi Tipi Degisimi (2000-2022)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Arazi Tipi Degisimi (2000-2022)</h3>
+                  <ChartInsightButton title="Türkiye Arazi Tipi Değişimi" description="Türkiye arazi tipi değişimi (2000-2022)" data={transformData} context={{ section: 'Dönüşüm' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={transformData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -193,7 +206,10 @@ export default function LandUsePage() {
               {transformComparison.length > 0 && (
                 <div className="chart-grid">
                   <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <h3 className="chart-title">Donemsel Degisim Karsilastirmasi</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Donemsel Degisim Karsilastirmasi</h3>
+                    <ChartInsightButton title="Dönemsel Değişim Karşılaştırması" description="Dönemsel değişim karşılaştırması" data={transformComparison} context={{ section: 'Dönüşüm' }} compact />
+                    </div>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={transformComparison}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -225,7 +241,10 @@ export default function LandUsePage() {
               )}
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Tarim Arazisi - Ulke Siralamasi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Tarim Arazisi - Ulke Siralamasi</h3>
+                  <ChartInsightButton title="Tarım Arazisi Üke Sıralaması" description="Tarım arazisi ülke sıralaması" data={benchmarkData.slice(0,30)} context={{ section: 'Benchmark' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={benchmarkData.slice(0, 30)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -267,7 +286,10 @@ export default function LandUsePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye Arazi Trendleri (2000+)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Arazi Trendleri (2000+)</h3>
+                  <ChartInsightButton title="Türkiye Arazi Trendleri" description="Türkiye arazi trendleri (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={350}>
                     <LineChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -282,7 +304,10 @@ export default function LandUsePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Turkiye vs Dunya Ortalamasi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye vs Dunya Ortalamasi</h3>
+                  <ChartInsightButton title="Türkiye vs Dünya Ortalaması" description="Türkiye vs dünya ortalaması karşılaştırması" data={turkeyRadar} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={turkeyRadar} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -298,7 +323,10 @@ export default function LandUsePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Arazi Yapisi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Arazi Yapisi</h3>
+                  <ChartInsightButton title="Türkiye Arazi Yapısı" description="Türkiye arazi yapısı dağılımı" data={turkeyRadar} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={[
@@ -329,7 +357,10 @@ export default function LandUsePage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Tarim Arazisi - Tahmin Projeksiyonu</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Tarim Arazisi - Tahmin Projeksiyonu</h3>
+                  <ChartInsightButton title="Türkiye Tarım Arazisi Tahmin Projeksiyonu" description="Türkiye tarım arazisi tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

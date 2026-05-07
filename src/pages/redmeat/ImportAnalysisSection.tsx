@@ -25,6 +25,7 @@ import {
   formatShort,
   formatNumber,
 } from './redMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   importData: ImportData[];
@@ -237,7 +238,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
       {ssrProxyTrend.length > 0 && (
         <div className="chart-grid" style={{ marginBottom: '20px' }}>
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">🏠 Yeterlilik (Proxy) Trendi (2010-2024)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏠 Yeterlilik (Proxy) Trendi (2010-2024)</h3>
+              <ChartInsightButton title="🏠 Yeterlilik (Proxy) Trendi (2010-2024)" description="Kırmızı et yeterlilik proxy trendi" data={ssrProxyTrend} context={{ section: 'Yeterlilik' }} />
+            </div>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={ssrProxyTrend} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -268,7 +272,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
       {/* Kategori Bazında Ayrı Grafikler */}
       <div className="chart-grid" style={{ marginBottom: '20px' }}>
         <div className="chart-card">
-          <h3 className="chart-title">🥩 Karkas Et İthalatı Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Karkas Et İthalatı Trendi</h3>
+            <ChartInsightButton title="🥩 Karkas Et İthalatı Trendi" description="Yıllık karkas et ithalat trendi" data={importData} context={{ section: 'Karkas Et' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -284,7 +291,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🐄 Besilik Sığır İthalatı Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐄 Besilik Sığır İthalatı Trendi</h3>
+            <ChartInsightButton title="🐄 Besilik Sığır İthalatı Trendi" description="Yıllık besilik sığır ithalatı" data={importData} context={{ section: 'Besilik Sığır' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -300,7 +310,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🐑 Küçükbaş İthalatı Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐑 Küçükbaş İthalatı Trendi</h3>
+            <ChartInsightButton title="🐑 Küçükbaş İthalatı Trendi" description="Yıllık küçükbaş ithalatı" data={importData} context={{ section: 'Küçükbaş' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -317,7 +330,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
 
         {importAnalytics.latest.spending > 0 && (
           <div className="chart-card">
-            <h3 className="chart-title">💰 İthalat Harcama Trendi</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>💰 İthalat Harcama Trendi</h3>
+              <ChartInsightButton title="💰 İthalat Harcama Trendi" description="Yıllık ithalat harcaması (USD)" data={importData} context={{ section: 'Harcama' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -337,7 +353,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
       {/* Bileşik İthalat Trendi */}
       <div className="chart-grid" style={{ marginBottom: '20px' }}>
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📈 Bileşik İthalat Kompozisyonu Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Bileşik İthalat Kompozisyonu Trendi</h3>
+            <ChartInsightButton title="📈 Bileşik İthalat Kompozisyonu Trendi" description="Bileşik ithalat kompozisyonu yıllık trendi" data={importData} context={{ section: 'Kompozisyon' }} />
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <AreaChart data={importData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -362,7 +381,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
       {/* İthalat Kompozisyonu & Ortalamalar */}
       <div className="chart-grid" style={{ marginBottom: '20px' }}>
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Son Yıl İthalat Dağılımı ({importAnalytics.latest.year})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Son Yıl İthalat Dağılımı ({importAnalytics.latest.year})</h3>
+            <ChartInsightButton title="🥧 Son Yıl İthalat Dağılımı" description="Son yıl ithalat dönüşüm dağılımı" data={importComposition} context={{ year: importAnalytics.latest.year }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie
@@ -391,7 +413,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📊 Ortalama İthalat Değerleri (2010-2024)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ortalama İthalat Değlerleri (2010-2024)</h3>
+            <ChartInsightButton title="📊 Ortalama İthalat Değlerleri (2010-2024)" description="2010-2024 dönem ortalama ithalat değleri" data={importAnalytics ? [importAnalytics.averages] : []} context={{ section: 'Ortalamalar' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart 
               data={[

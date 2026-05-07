@@ -4,6 +4,7 @@ import {
   ComposedChart, Area, Line,
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -45,7 +46,10 @@ export function ComparativeSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📈 Hayvansal Üretim Kategorileri Karşılaştırması (2010-2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Hayvansal Üretim Kategorileri Karşılaştırması (2010-2023)</h3>
+            <ChartInsightButton title="Hayvansal Üretim Kategorileri Karşılaştırması (2010-2023)" description="Süt, et ve yumurta üretiminin karşılaştırmalı trendi" data={combinedData} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange }} />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={combinedData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -69,7 +73,10 @@ export function ComparativeSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Toplam Hayvansal Üretim Dağılımı (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Toplam Hayvansal Üretim Dağılımı (2023)</h3>
+            <ChartInsightButton title="Toplam Hayvansal Üretim Dağılımı (2023)" description="Süt ve et üretiminin toplam içindeki payı" data={[{name:'Süt',value:data.milkProduction.total},{name:'Et',value:data.meatProduction.total}]} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -93,7 +100,10 @@ export function ComparativeSection({ data }: Props) {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📊 Kişi Başı Yıllık Tüketim Tahmini</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Kişi Başı Yıllık Tüketim Tahmini</h3>
+            <ChartInsightButton title="Kişi Başı Yıllık Tüketim Tahmini" description="Kişi başına süt, et ve yumurta tüketim tahmini" data={[{name:'Süt',value:Math.round((data.milkProduction.total*1000)/(data.population||1)),unit:'kg'},{name:'Et',value:Math.round((data.meatProduction.total*1000)/(data.population||1)),unit:'kg'},{name:'Yumurta',value:Math.round(data.eggProduction.total/(data.population||1)),unit:'adet'}]} context={{ nüfus: formatNumber(data.population) }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
               data={[

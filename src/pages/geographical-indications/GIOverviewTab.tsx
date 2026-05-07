@@ -4,6 +4,7 @@ import {
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import type { ProvinceData, GIMetrics } from './giTypes';
 import { COLORS, formatNumber } from './giTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   provinceData: ProvinceData[];
@@ -64,9 +65,12 @@ export function GIOverviewTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-            📊 Durum Dağılımı
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
+              📊 Durum Dağılımı
+            </h3>
+            <ChartInsightButton title="📊 Durum Dağılımı" description="Coğrafi işaretli ürünlerin durum dağılımı" data={statusPieData} context={{ section: 'Coğrafi İşaretler' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -103,9 +107,12 @@ export function GIOverviewTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-            🏷️ İşaret Türü Dağılımı
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
+              🏷️ İşaret Türü Dağılımı
+            </h3>
+            <ChartInsightButton title="🏷️ İşaret Türü Dağılımı" description="Coğrafi işaret türüne göre dağılım" data={typeData} context={{ section: 'Coğrafi İşaretler' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie

@@ -11,6 +11,7 @@ import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { useCrossIntelligenceData } from './crossIntelligence/useCrossIntelligenceData';
 import type { ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 export default function CrossIntelligencePage() {
   const {
@@ -105,10 +106,13 @@ export default function CrossIntelligencePage() {
       {/* Main Cross Chart + Radar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <ArrowRightLeft className="w-4 h-4 text-green-600" />
             {product.label} — Üretim × İthalat × İhracat × Fiyat (2015-2024)
           </h3>
+          <ChartInsightButton title={`${product.label} — Üretim × İthalat × İhracat × Fiyat`} description="Üretim, ithalat, ihracat ve fiyat trendi" data={crossData} context={{ section: 'Çapraz Zeka' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={crossData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -130,10 +134,13 @@ export default function CrossIntelligencePage() {
         </div>
 
         <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
             <Shield className="w-4 h-4 text-green-600" />
             Gıda Güvenliği Radarı
           </h3>
+          <ChartInsightButton title="Gıda Güvenliği Radarı" description="Gıda güvenliği radar grafiği" data={radar} context={{ section: 'Çapraz Zeka' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={280}>
             <RadarChart data={radar}>
               <PolarGrid />
@@ -157,10 +164,13 @@ export default function CrossIntelligencePage() {
 
       {/* Production vs Sufficiency Scatter */}
       <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-        <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
           <Crosshair className="w-4 h-4 text-blue-600" />
           Üretim vs Yeterlilik Derecesi — Tüm Ürünler (2023/24)
         </h3>
+        <ChartInsightButton title="Üretim vs Yeterlilik Derecesi" description="Tüm ürünler için üretim ve yeterlilik karşılaştırması" data={scatterData} context={{ section: 'Çapraz Zeka' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <ScatterChart>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -371,10 +381,13 @@ export default function CrossIntelligencePage() {
         const avgExportRatio = decomp.reduce((a, b) => a + b.exportRatio, 0) / decomp.length;
         return (
           <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
               <BarChart3 className="w-4 h-4 text-indigo-600" />
               Arz Dağılımı (Segment Decomposition) — {product.label}
             </h3>
+            <ChartInsightButton title={`Arz Dağılımı — ${product.label}`} description="Arz segmentlerine göre dağılım" data={decomp} context={{ section: 'Çapraz Zeka' }} compact />
+            </div>
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
               Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>%{avgImportDep.toFixed(1)}</strong> · Ortalama ihracat oranı: <strong>%{avgExportRatio.toFixed(1)}</strong>
             </p>
@@ -425,10 +438,13 @@ export default function CrossIntelligencePage() {
         const outlierCount = anomalyData.filter(d => d.isOutlier).length;
         return (
           <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
-            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
               <AlertTriangle className="w-4 h-4 text-red-600" />
               Üretim Anomali Tespiti — {product.label}
             </h3>
+            <ChartInsightButton title={`Üretim Anomali Tespiti — ${product.label}`} description="Üretim anomali tespiti (Z-skor)" data={anomalyData} context={{ section: 'Çapraz Zeka' }} compact />
+            </div>
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
               Z-skor analizi · |z| &gt; 1,5 olan yıllar anomali olarak işaretlenir · Tespit edilen anomali: <strong>{outlierCount} yıl</strong>
             </p>

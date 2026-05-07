@@ -13,6 +13,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   quailMeatData: TuikTurkeyMeatData[];
@@ -98,7 +99,10 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
       {/* Bıldırcın Eti Yıllık Trend */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📈 Bıldırcın Eti Yıllık Üretim Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Bıldırcın Eti Yıllık Üretim Trendi</h3>
+            <ChartInsightButton title="📈 Bıldırcın Eti Yıllık Üretim Trendi" description="Yıllık bıldırcın eti üretim verisi" data={quailMeatData} context={{ section: 'Trend' }} />
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <ComposedChart data={quailMeatData.slice().reverse()}>
               <defs>
@@ -120,7 +124,10 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
         {/* Kesilen Bıldırcın vs Et */}
         {quailSlaughterData.length > 0 && (
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">🔄 Kesilen Bıldırcın vs Et Üretimi</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🔄 Kesilen Bıldırcın vs Et Üretimi</h3>
+              <ChartInsightButton title="🔄 Kesilen Bıldırcın vs Et Üretimi" description="Kesilen bıldırcın sayısı ile et üretim karşılaştırması" data={quailMeatData} context={{ section: 'Kesim vs Et' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={380}>
               <ComposedChart data={(() => {
                 const merged = quailMeatData.slice().reverse().map(d => {
@@ -147,7 +154,10 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
       {monthlyQuailMeat.some(m => m.value > 0) && (
         <div className="chart-grid" style={{ marginTop: '20px' }}>
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">📅 Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</h3>
+              <ChartInsightButton title="📅 Aylık Bıldırcın Eti Üretimi" description="En son yıl aylık bıldırcın eti üretimi" data={quailMeatData} context={{ year: quailMeatData[0]?.year }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={monthlyQuailMeat}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
