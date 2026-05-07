@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../../services/api';
 import { formatNumber } from './basinUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type {
   BasinSummary, TopProduct, ProductLeader, TrendDataPoint,
   MetricsData,
@@ -176,9 +177,12 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-md)'
       }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🏆 En Büyük 10 Havza (İlçe Sayısına Göre)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
+            🏆 En Büyük 10 Havza (İlçe Sayısına Göre)
+          </h3>
+          <ChartInsightButton title="🏆 En Büyük 10 Havza" description="Havza bazında büyüklük sıralaması" data={basinSummary.slice(0, 10)} context={{ section: 'Havza Genel Bakış' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={500}>
           <Treemap
             data={basinSummary.slice(0, 10).map(basin => ({
@@ -244,9 +248,12 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
         boxShadow: 'var(--shadow-md)',
         marginTop: '24px'
       }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🌾 Türkiye Geneli En Çok Üretilen Ürünler (Ton - 2024)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
+            🌾 Türkiye Geneli En Çok Üretilen Ürünler (Ton - 2024)
+          </h3>
+          <ChartInsightButton title="🌾 En Çok Üretilen Ürünler" description="2024 en çok üretilen ürünler" data={topProducts.slice(0, 20)} context={{ section: 'Havza Genel Bakış' }} compact />
+        </div>
         {loadingTopProducts ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>⏳ Veriler yükleniyor...</div>
         ) : topProducts.length === 0 ? (
@@ -289,9 +296,12 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
         boxShadow: 'var(--shadow-md)',
         marginTop: '24px'
       }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🏅 Ürün Bazlı Üretim Liderleri
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
+            🏅 Ürün Bazlı Üretim Liderleri
+          </h3>
+          <ChartInsightButton title="🏅 Ürün Liderleri" description="Ürün bazlı üretim liderleri" data={provinceLeaders} context={{ section: 'Havza Genel Bakış' }} compact />
+        </div>
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
             🌾 Ürün Seçin:
@@ -412,9 +422,12 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
         boxShadow: 'var(--shadow-md)',
         marginTop: '24px'
       }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          📈 Yıllık Üretim Trend Analizi (2004-2024)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
+            📈 Yıllık Üretim Trend Analizi (2004-2024)
+          </h3>
+          <ChartInsightButton title="📈 Yıllık Trend" description="Uzun dönem üretim trend analizi" data={trendData} context={{ section: 'Havza Trend' }} compact />
+        </div>
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
             🌾 Ürün Seçin (Çoklu seçim için Ctrl/Cmd tuşu ile tıklayın):

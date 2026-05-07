@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 import { type YearPoint, MEAT_COLORS, formatTon, formatShort } from './redMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   filteredSeries: YearPoint[];
@@ -20,7 +21,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
     <div className="chart-grid" style={{ marginTop: '30px' }}>
       {/* Sığır Üretimi */}
       <div className="chart-card">
-        <h3 className="chart-title">🐄 Sığır Eti Üretimi (2010-2024)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐄 Sığır Eti Üretimi (2010-2024)</h3>
+          <ChartInsightButton title="🐄 Sığır Eti Üretimi (2010-2024)" description="Yıllık sığır eti üretim verisi" data={data2010} context={{ tur: 'sigir' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -37,7 +41,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
 
       {/* Koyun Üretimi */}
       <div className="chart-card">
-        <h3 className="chart-title">🐑 Koyun Eti Üretimi (2010-2024)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐑 Koyun Eti Üretimi (2010-2024)</h3>
+          <ChartInsightButton title="🐑 Koyun Eti Üretimi (2010-2024)" description="Yıllık koyun eti üretim verisi" data={data2010} context={{ tur: 'koyun' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -54,7 +61,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
 
       {/* Keçi Üretimi */}
       <div className="chart-card">
-        <h3 className="chart-title">🐐 Keçi Eti Üretimi (2010-2024)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐐 Keçi Eti Üretimi (2010-2024)</h3>
+          <ChartInsightButton title="🐐 Keçi Eti Üretimi (2010-2024)" description="Yıllık keçi eti üretim verisi" data={data2010} context={{ tur: 'keci' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -71,7 +81,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
 
       {/* Manda Üretimi */}
       <div className="chart-card">
-        <h3 className="chart-title">🦬 Manda Eti Üretimi (2010-2024)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🦬 Manda Eti Üretimi (2010-2024)</h3>
+          <ChartInsightButton title="🦬 Manda Eti Üretimi (2010-2024)" description="Yıllık manda eti üretim verisi" data={data2010} context={{ tur: 'manda' }} compact />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

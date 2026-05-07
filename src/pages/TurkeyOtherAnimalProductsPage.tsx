@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 import { fetchQuery } from '../services/api';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const TABLE_NAME = 'tuik_hayvancilik_hayvansaluretim';
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
@@ -311,7 +312,10 @@ export default function TurkeyOtherAnimalProductsPage() {
           {/* Trend + Büyüme */}
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: growthData.length > 0 ? 'span 1' : 'span 2' }}>
-              <h3 className="chart-title">📈 {currentProduct.label} Üretim Trendi</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 {currentProduct.label} Üretim Trendi</h3>
+              <ChartInsightButton title={`${currentProduct.label} Üretim Trendi`} description="Üretim trendi" data={trendData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -325,7 +329,10 @@ export default function TurkeyOtherAnimalProductsPage() {
 
             {growthData.length > 0 && (
               <div className="chart-card">
-                <h3 className="chart-title">📊 Yıllık Büyüme Oranı (%)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yıllık Büyüme Oranı (%)</h3>
+                <ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranı (%)" data={growthData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
+                </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={growthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -347,7 +354,10 @@ export default function TurkeyOtherAnimalProductsPage() {
           {cityData.length > 0 && (
             <div className="chart-grid">
               <div className="chart-card">
-                <h3 className="chart-title">🏙️ İl Bazında {currentProduct.label} Üretimi</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {currentProduct.label} Üretimi</h3>
+                <ChartInsightButton title={`İl Bazında ${currentProduct.label}`} description="İl bazında üretim" data={cityData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
+                </div>
                 <ResponsiveContainer width="100%" height={450}>
                   <BarChart data={cityData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -364,7 +374,10 @@ export default function TurkeyOtherAnimalProductsPage() {
               </div>
 
               <div className="chart-card">
-                <h3 className="chart-title">🥧 İl Payları Dağılımı (Top 10)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı (Top 10)</h3>
+                <ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı (Top 10)" data={cityData.slice(0,10)} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
+                </div>
                 <ResponsiveContainer width="100%" height={450}>
                   <PieChart>
                     <Pie

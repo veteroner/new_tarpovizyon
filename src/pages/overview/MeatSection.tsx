@@ -3,6 +3,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -90,7 +91,10 @@ export function MeatSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🥩 Et Türleri Dağılımı (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Et Türleri Dağılımı (2023)</h3>
+            <ChartInsightButton title="Et Türleri Dağılımı (2023)" description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.meatProduction.breakdown} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -107,7 +111,10 @@ export function MeatSection({ data }: Props) {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📈 Et Üretim Trendi (2010-2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Et Üretim Trendi (2010-2023)</h3>
+            <ChartInsightButton title="Et Üretim Trendi (2010-2023)" description="Yıllık et üretimi değişimi" data={data.meatProduction.yearly} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.meatProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

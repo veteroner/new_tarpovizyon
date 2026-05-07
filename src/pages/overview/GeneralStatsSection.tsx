@@ -3,6 +3,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -67,7 +68,10 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">👥 Nüfus Dağılımı (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>👥 Nüfus Dağılımı (2023)</h3>
+            <ChartInsightButton title="Nüfus Dağılımı (2023)" description="Kentsel ve kırsal nüfus dağılımı" data={[{name:'Kentsel', value: data.urbanPopulation},{name:'Kırsal', value: data.ruralPopulation}]} context={{ nüfus: formatNumber(data.population), kentselOran: urbanPercent+'%', kırsalOran: ruralPercent+'%' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -89,7 +93,10 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🌍 Arazi Kullanımı (2022)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Arazi Kullanımı (2022)</h3>
+            <ChartInsightButton title="Arazi Kullanımı (2022)" description="Türkiye arazi kullanım kategorileri" data={data.landUseData} context={{ tarımArazisi: formatNumber(data.agriculturalLand)+' ha', tarımPayı: agriLandPercent+'%' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.landUseData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

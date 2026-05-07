@@ -4,6 +4,7 @@ import {
   ComposedChart, Line,
 } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
 
 interface PlantMainChartsProps {
@@ -25,7 +26,10 @@ export default function PlantMainCharts({
       {/* ─── Grafik 1: Yıllık Trend (ComposedChart) ─── */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📅 Yıllık Trend (2004–2024)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Trend (2004–2024)</h3>
+            <ChartInsightButton title="📅 Yıllık Trend" description="Bitkisel üretim yıllık trendi" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -50,7 +54,10 @@ export default function PlantMainCharts({
       {/* ─── Grafik 2 & 3: İl Sıralaması + Pie ─── */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🏙️ İl Sıralaması — Top 20 ({selectedYear})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Sıralaması — Top 20 ({selectedYear})</h3>
+            <ChartInsightButton title="🏙️ İl Sıralaması" description="Top 20 il" data={cityData.slice(0, 20)} context={{ section: 'Bitkisel Üretim' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -66,7 +73,10 @@ export default function PlantMainCharts({
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🥧 İl Payları</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları</h3>
+            <ChartInsightButton title="🥧 İl Payları" description="İl bazında üretim payları" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={450}>
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={150}
@@ -85,7 +95,10 @@ export default function PlantMainCharts({
       {regionData.length > 0 && (
         <div className="chart-grid">
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">🗺️ Bölge Karşılaştırması ({selectedYear})</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Bölge Karşılaşması ({selectedYear})</h3>
+              <ChartInsightButton title="🗺️ Bölge Karşılaşması" description="Bölgesel karşılaştirma" data={regionData} context={{ section: 'Bitkisel Üretim' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={regionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -106,7 +119,10 @@ export default function PlantMainCharts({
       {productCompareData.length > 1 && (
         <div className="chart-grid">
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="chart-title">📊 Ürün Karşılaştırması ({selectedYear})</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ürün Karşılaşması ({selectedYear})</h3>
+              <ChartInsightButton title="📊 Ürün Karşılaşması" description="Ürün bazlı karşılaştirma" data={productCompareData} context={{ section: 'Bitkisel Üretim' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={Math.max(250, productCompareData.length * 32)}>
               <BarChart data={productCompareData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

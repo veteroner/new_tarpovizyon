@@ -15,6 +15,7 @@ import {
   fmt, pct,
   GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
 } from './productBalance/useProductBalanceData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const CYAN = '#06b6d4';
 const PURPLE = '#8b5cf6';
@@ -185,10 +186,13 @@ export default function ProductBalancePage() {
           {/* ─── Waterfall + Yearly Trend ─── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-              <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
                 <Scale size={16} className="text-green-600" />
                 Arz-Talep Akışı — {selectedProduct} ({YEAR_KEYS[latestIdx].replace('y','')})
               </h3>
+              <ChartInsightButton title={`Arz-Talep Akışı — ${selectedProduct}`} description="Arz talep akışı" data={waterfallData} context={{ section: 'Ürün Dengesi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={waterfallData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -209,10 +213,13 @@ export default function ProductBalancePage() {
             </div>
 
             <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-              <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
                 <BarChart3 size={16} className="text-green-600" />
                 10 Yıllık Trend — {selectedProduct}
               </h3>
+              <ChartInsightButton title={`10 Yıllık Trend — ${selectedProduct}`} description="10 yıllık ürün trendi" data={yearlyTrend} context={{ section: 'Ürün Dengesi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={320}>
                 <ComposedChart data={yearlyTrend} margin={{ top: 10, right: 40, bottom: 10, left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -350,10 +357,13 @@ export default function ProductBalancePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {importRanking.length > 0 && (
           <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-            <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
               <AlertTriangle size={16} className="text-red-500" />
               İthalat Bağımlılığı Sıralaması (2023/24)
             </h3>
+            <ChartInsightButton title="İthalat Bağımlılığı Sıralaması" description="İthalat bağımlılığı sıralaması" data={importRanking} context={{ section: 'Ürün Dengesi' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={Math.max(300, importRanking.length * 28)}>
               <BarChart data={importRanking} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 100 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -374,10 +384,13 @@ export default function ProductBalancePage() {
 
         {perCapitaChartData.length > 0 && (
           <div className="rounded-xl shadow-md p-4" style={{ background: 'var(--bg-card)' }}>
-            <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
               <Users size={16} className="text-blue-600" />
               Kişi Başı Tüketim Trendleri (Kg/yıl)
             </h3>
+            <ChartInsightButton title="Kişi Başı Tüketim Trendleri" description="Kişi başı tüketim trendleri (Kg/yıl)" data={perCapitaChartData} context={{ section: 'Ürün Dengesi' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={perCapitaChartData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

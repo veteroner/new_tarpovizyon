@@ -120,7 +120,7 @@ export function ChartInsightButton({ title, description, data, context, compact 
             <div style={{ padding: 18, overflowY: 'auto' }}>
               {loading && (
                 <div style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
-                  Grafik verileri LLM'e gönderiliyor ve yorum hazırlanıyor...
+                  Grafik verileri TARPOL AI 'e gönderiliyor ve yorum hazırlanıyor...
                 </div>
               )}
               {error && <div style={{ color: 'var(--error)', fontSize: 14 }}>{error}</div>}

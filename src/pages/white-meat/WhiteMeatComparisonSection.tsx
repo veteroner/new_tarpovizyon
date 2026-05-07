@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import type { TuikChickenData, TuikTurkeyMeatData } from './whiteMeatUtils';
 import { formatShort } from './whiteMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -35,7 +36,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
 
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📈 Beyaz Et Türlerinin Yıllık Karşılaştırması (ton)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Beyaz Et Türlerinin Yıllık Karşılaştırması (ton)</h3>
+            <ChartInsightButton title="📈 Beyaz Et Türlerinin Yıllık Karşılaştırması" description="Tavuk, hindi ve bıldırcın eti yıllık üretim karşılaştırması" data={tuikData} context={{ section: 'Karşılaştırma' }} />
+          </div>
           <ResponsiveContainer width="100%" height={420}>
             <ComposedChart data={(() => {
               const allYears = new Set<string>();
@@ -64,7 +68,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
 
         {/* Son Yıl Pay Dağılımı */}
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Son Yıl Beyaz Et Bileşimi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Son Yıl Beyaz Et Bileşimi</h3>
+            <ChartInsightButton title="🥧 Son Yıl Beyaz Et Bileşimi" description="Son yıl beyaz et tür dağılımı" data={tuikData.slice(0,1)} context={{ section: 'Bileşim' }} compact />
+          </div>
           <div style={{ padding: '20px' }}>
             {(() => {
               const latestTavuk = tuikData[0]?.meatProduction || 0;
@@ -107,7 +114,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
 
         {/* Toplam Beyaz Et Trendi */}
         <div className="chart-card">
-          <h3 className="chart-title">📈 Toplam Beyaz Et Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Toplam Beyaz Et Trendi</h3>
+            <ChartInsightButton title="📈 Toplam Beyaz Et Trendi" description="Tüm beyaz et türlerinin toplam üretim trendi" data={tuikData} context={{ section: 'Toplam Trend' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={(() => {
               const allYears = new Set<string>();

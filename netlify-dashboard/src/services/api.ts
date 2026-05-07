@@ -534,3 +534,56 @@ export function buildWhereClause(filters: {
   
   return conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 }
+
+// ========== FAO GIEWS Ülke Fiyatları ==========
+const FAO_GIEWS_BASE = 'https://fpma.fao.org/giews/v4/global/price_module/api/v1';
+
+export interface GiewsSerie {
+  uuid: string;
+  iso3_country_code: string;
+  country_name: string;
+  market_name: string;
+  commodity_name: string;
+  currency: string;
+  measure_unit_label: string;
+  price_type: string;
+  source_name: string;
+}
+
+export interface GiewsDatapoint {
+  id: number;
+  price_value: number;
+  price_value_dollar: number;
+  date: string;
+  periodicity: string;
+}
+
+export interface GiewsPriceResult {
+  uuid: string;
+  datapoints: GiewsDatapoint[];
+}
+
+export async function fetchGiewsSeries(iso3: string): Promise<GiewsSerie[]> {
+  try {
+    const url = `${FAO_GIEWS_BASE}/FpmaSerieDomestic/?format=json&iso3_country_code=${encodeURIComponent(iso3)}&page_size=200`;
+    const res = await axios.get(url, { timeout: 15000 });
+    return res.data?.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchGiewsPricesBatch(uuids: string[]): Promise<GiewsPriceResult[]> {
+  if (!uuids.length) return [];
+  const CHUNK = 50;
+  const results: GiewsPriceResult[] = [];
+  for (let i = 0; i < uuids.length; i += CHUNK) {
+    const chunk = uuids.slice(i, i + CHUNK);
+    try {
+      const url = `${FAO_GIEWS_BASE}/FpmaSeriePrice/?uuid__in=${chunk.join(',')}&periodicity=monthly&startdate=2022-01-01&page_size=2000`;
+      const res = await axios.get(url, { timeout: 20000 });
+      results.push(...(res.data?.results ?? []));
+    } catch { /* ignore failed chunks */ }
+  }
+  return results;
+}

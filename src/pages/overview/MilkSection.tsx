@@ -3,6 +3,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -46,7 +47,10 @@ export function MilkSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Süt Türlerine Göre Dağılım (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Süt Türlerine Göre Dağılım (2023)</h3>
+            <ChartInsightButton title="Süt Türlerine Göre Dağılım (2023)" description="İnek, koyun ve keçi sütü dağılımı" data={data.milkProduction.breakdown} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', inekSütü: formatNumber(data.milkProduction.cattle)+' ton', koyunSütü: formatNumber(data.milkProduction.sheep)+' ton' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -68,7 +72,10 @@ export function MilkSection({ data }: Props) {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📈 Süt Üretim Trendi (2010-2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Süt Üretim Trendi (2010-2023)</h3>
+            <ChartInsightButton title="Süt Üretim Trendi (2010-2023)" description="Yıllık süt üretimi değişimi" data={data.milkProduction.yearly} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.milkProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

@@ -3,6 +3,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { formatNumber, formatShort } from './overviewTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 
 interface Props {
@@ -41,7 +42,10 @@ export function EggSection({ data }: Props) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🥧 Yumurta Türleri (2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Yumurta Türleri (2023)</h3>
+            <ChartInsightButton title="Yumurta Türleri (2023)" description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -62,7 +66,10 @@ export function EggSection({ data }: Props) {
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📈 Yumurta Üretim Trendi (2010-2023)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Yumurta Üretim Trendi (2010-2023)</h3>
+            <ChartInsightButton title="Yumurta Üretim Trendi (2010-2023)" description="Yıllık yumurta üretimi değişimi" data={data.eggProduction.yearly} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet' }} />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.eggProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

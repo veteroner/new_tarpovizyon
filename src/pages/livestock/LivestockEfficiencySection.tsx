@@ -6,6 +6,7 @@ import {
 import { fetchQuery } from '../../services/api';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   selectedYear: string;
@@ -395,7 +396,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
       <div className="chart-grid">
         {/* Efficiency Scatter */}
         <div className="chart-card">
-          <h3 className="chart-title">📊 Et Verimi vs Üretim Hacmi (Top 50)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Et Verimi vs Üretim Hacmi (Top 50)</h3>
+            <ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -423,7 +427,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
         {/* Segmented Analysis */}
         <div className="chart-card">
-          <h3 className="chart-title">🌍 Segmentasyon: Gelişmiş / Gelişmekte / Türkiye</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Segmentasyon: Gelişmiş / Gelişmekte / Türkiye</h3>
+            <ChartInsightButton title="Verimlilik Segmentasyon Analizi" description="Gelişmiş, gelişmekte olan ülkeler ve Türkiye verimlilik karşılaştırması" data={effBestPractices} context={{}} compact />
+          </div>
           {(() => {
             const devAvg = effBestPractices.filter(d => d.segment === 'Gelişmiş');
             const devingAvg = effBestPractices.filter(d => d.segment === 'Gelişmekte');
@@ -470,7 +477,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
         {/* Efficiency Trends */}
         <div className="chart-card">
-          <h3 className="chart-title">📈 Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)</h3>
+            <ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={efficiencyTrends} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

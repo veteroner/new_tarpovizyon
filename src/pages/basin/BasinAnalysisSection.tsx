@@ -7,6 +7,7 @@ import { fetchQuery } from '../../services/api';
 import { 
   BASIN_COLORS, formatNumber 
 } from './basinUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { BasinSummary, BasinProductionStats, BasinData, BasinProduct } from './basinUtils';
 
 interface BasinAnalysisSectionProps {
@@ -146,9 +147,12 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-md)'
       }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🌾 Havza Üretim Karşılaştırması (2024 - Ton)
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
+            🌾 Havza Üretim Karşılaşması (2024 - Ton)
+          </h3>
+          <ChartInsightButton title="🌾 Havza Karşılaşması" description="Havza bazında üretim karşılaşması" data={basinProductionStats} context={{ section: 'Havza Analiz' }} compact />
+        </div>
         {loadingBasinStats ? (
           <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
             ⏳ Havza üretim verileri yükleniyor...

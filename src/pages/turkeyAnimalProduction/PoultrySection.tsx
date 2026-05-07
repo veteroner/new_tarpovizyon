@@ -4,6 +4,7 @@ import {
   Tooltip, Area, Line
 } from 'recharts';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface PoultrySectionProps {
   poultryMonthlyData: Record<string, string | number>[];
@@ -26,9 +27,12 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '48px' }}>
         {/* Chicken Meat */}
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🍗 Tavuk Eti Üretimi (Aylık Trend)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🍗 Tavuk Eti Üretimi (Aylık Trend)
+            </h3>
+            <ChartInsightButton title="🍗 Tavuk Eti Üretimi" description="Aylık tavuk eti üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -43,9 +47,12 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
 
         {/* Egg Production */}
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🥚 Yumurta Üretimi (Aylık Trend)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🥚 Yumurta Üretimi (Aylık Trend)
+            </h3>
+            <ChartInsightButton title="🥚 Yumurta Üretimi" description="Aylık yumurta üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

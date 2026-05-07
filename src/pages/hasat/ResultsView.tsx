@@ -8,6 +8,7 @@ import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { ModelWarningBox } from '../../components/ModelWarningBox';
 import type { WizardState, CalcResult, ClimateRisk, SavedForecast } from './hasatUtils';
 import { clearHistory } from './hasatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface ChartRow {
   yil: string | number;
@@ -225,7 +226,10 @@ export default function ResultsView({
 
       {/* Trend chart — 7 yıl + projeksiyon + güven aralığı */}
       <div className="hz-chart-card">
-        <h3>Verim Trendi, Projeksiyon ve Güven Aralığı (Kg/da)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ marginBottom: 0 }}>Verim Trendi, Projeksiyon ve Güven Aralığı (Kg/da)</h3>
+          <ChartInsightButton title="Verim Trendi" description="Verim trendi ve projeksiyon" data={chartData} context={{ section: 'Hasat Tahmin' }} compact />
+        </div>
         <p className="hz-chart-note">* 2025-2026 değerleri lineer regresyon projeksiyonudur. Renkli bant ±1σ güven aralığını gösterir.</p>
         <ResponsiveContainer width="100%" height={350}>
           <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

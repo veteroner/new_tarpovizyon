@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { fetchQuery } from '../services/api';
 import ProductSelector from '../components/ProductSelector';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -243,7 +244,10 @@ export default function TuikPlantProductionPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık Üretim Trendi (2004-2024)</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Üretim Trendi (2004-2024)</h3>
+              <ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi (2004-2024)" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -258,7 +262,10 @@ export default function TuikPlantProductionPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">🏙️ İl Bazında {selectedUnsur} ({yearLabel})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {selectedUnsur} ({yearLabel})</h3>
+              <ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={cityData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -275,7 +282,10 @@ export default function TuikPlantProductionPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🥧 İl Payları Dağılımı</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı</h3>
+              <ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie 

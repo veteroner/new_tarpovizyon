@@ -1,5 +1,6 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const BAKLAGIL_URUNLER = [
   'Nohut, Kuru', 'Mercimek, Kuru (Kırmızı)', 'Mercimek, Kuru (Yeşil)',
@@ -23,7 +24,10 @@ const PROTEIN_KARSI = [
 
 const legumeExtra = (
   <div className="chart-card" style={{ marginTop: 20 }}>
-    <h3 className="chart-title">💪 Baklagiller vs Hayvansal Protein (g protein / 100 g)</h3>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <h3 className="chart-title" style={{ marginBottom: 0 }}>💪 Baklagiller vs Hayvansal Protein (g protein / 100 g)</h3>
+      <ChartInsightButton title="💪 Baklagil Protein" description="Baklagiller vs hayvansal protein karşılaşması" data={PROTEIN_KARSI} context={{ section: 'Baklagiller' }} compact />
+    </div>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Baklagiller, hayvansal kaynaklara yakın protein içeriğiyle sürdürülebilir beslenmenin temel taşlarıdır.
       Yeşil = baklagil · Turuncu = hayvansal referans

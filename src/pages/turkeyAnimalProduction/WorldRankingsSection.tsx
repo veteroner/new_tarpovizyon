@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import type { WorldRankingItem } from './useTurkeyAnimalProductionData';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface WorldRankingsSectionProps {
   worldBeefRanking: WorldRankingItem[];
@@ -31,9 +32,12 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '48px' }}>
         {worldBeefRanking.length > 0 && (
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Award size={20} color="#ef4444" /> Sığır Eti - Dünya Top 10
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                <Award size={20} color="#ef4444" /> Sığır Eti - Dünya Top 10
+              </h3>
+              <ChartInsightButton title="Sığır Eti Dünya Sıralaması" description="Dünya sığır eti üretim top 10" data={worldBeefRanking.slice(0, 10)} context={{ section: 'Dünya' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldBeefRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -52,9 +56,12 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
 
         {worldMilkRanking.length > 0 && (
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Award size={20} color="#3b82f6" /> Süt Üretimi - Dünya Top 10
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                <Award size={20} color="#3b82f6" /> Süt Üretimi - Dünya Top 10
+              </h3>
+              <ChartInsightButton title="Süt Üretimi Dünya Sıralaması" description="Dünya süt üretim top 10" data={worldMilkRanking.slice(0, 10)} context={{ section: 'Dünya' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldMilkRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -73,9 +80,12 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
 
         {worldChickenRanking.length > 0 && (
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Award size={20} color="#10b981" /> Tavuk Eti - Dünya Top 10
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                <Award size={20} color="#10b981" /> Tavuk Eti - Dünya Top 10
+              </h3>
+              <ChartInsightButton title="Tavuk Eti Dünya Sıralaması" description="Dünya tavuk eti üretim top 10" data={worldChickenRanking.slice(0, 10)} context={{ section: 'Dünya' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldChickenRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

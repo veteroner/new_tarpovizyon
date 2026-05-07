@@ -13,6 +13,7 @@ import {
   type WizardState, type CalcResult, type CropWaterData,
 } from './sulamaUtils';
 import type { ForecastSummary } from '../../services/weather';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   state: WizardState;
@@ -218,7 +219,10 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {/* Monthly Water Balance Chart */}
       <div className="sp-chart-card">
-        <h3>📊 Aylık Su Dengesi — {state.il}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ marginBottom: 0 }}>📊 Aylık Su Dengesi — {state.il}</h3>
+          <ChartInsightButton title="📊 Aylık Su Dengesi" description="Aylık su dengesi analizi" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+        </div>
         <p className="sp-chart-desc">
           {bolgeMeta && <span style={{ marginRight: 8 }}>{bolgeMeta.emoji} {bolgeMeta.ad}</span>}
           İl bazlı uzun yıl iklim istatistikleriyle hesaplanmıştır (statik veri tablosu, canlı MGM verisi değildir). ETo: <strong>{calc.etoYontemiLabel}</strong>, Senaryo: <strong>{calc.iklimSenaryosuLabel}</strong>, Kc: <strong>{calc.kcModeliLabel}</strong>.
@@ -292,7 +296,10 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {/* ── Aylık Yağış & ETo Alan Grafiği ──────────────────────────────────── */}
       <div className="sp-chart-card">
-        <h3>🌧️ Aylık Yağış & ETo — Alan Grafiği</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ marginBottom: 0 }}>🌧️ Aylık Yağış &amp; ETo — Alan Grafiği</h3>
+          <ChartInsightButton title="🌧️ Yağış &amp; ETo" description="Aylık yağış ve ETo alan grafiği" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+        </div>
         <p className="sp-chart-desc">
           Toplam yağış (mavi) ve efektif yağış (açık mavi) ile referans evapotranspirasyon (ETo) trendleri.
           Alan farkı sulama ihtiyacının yoğunluğunu gösterir.
@@ -327,7 +334,10 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {/* ── ETc vs Sulama Bileşik Grafik ─────────────────────────────────────── */}
       <div className="sp-chart-card">
-        <h3>🌿 Bitki Su İhtiyacı (ETc) vs Sulama — Bileşik Grafik</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ marginBottom: 0 }}>🌿 Bitki Su İhtiyacı (ETc) vs Sulama — Bileşik Grafik</h3>
+          <ChartInsightButton title="🌿 ETc vs Sulama" description="Bitki su ihtiyacı ve sulama karşılaşması" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+        </div>
         <p className="sp-chart-desc">
           Aylık ETc (bar) ile brüt sulama miktarı (bar) ve ETo trendi (çizgi) karşılaştırması.
           İki barın farkı, yağışla karşılanan su miktarını yansıtır.

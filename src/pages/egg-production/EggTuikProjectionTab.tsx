@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import type { TuikEggData, MonthlyEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface EggTuikProjectionTabProps {
   tuikData: TuikEggData[];
@@ -93,7 +94,10 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {/* 2026 Aylık Yumurta Projeksiyonu */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">🥚 2026 Aylık Yumurta Üretim Projeksiyonu</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥚 2026 Aylık Yumurta Üretim Projeksiyonu</h3>
+            <ChartInsightButton title="🥚 2026 Aylık Yumurta Üretim Projeksiyonu" description="2026 yılı aylık yumurta üretim projeksiyonu" data={projection2026Egg} context={{ year: 2026 }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={projection2026Egg}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -129,7 +133,10 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {/* 2026 Aylık Tavuk Projeksiyonu */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu</h3>
+            <ChartInsightButton title="🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu" description="2026 yılı aylık yumurtacı tavuk sayısı projeksiyonu" data={projection2026Layer} context={{ year: 2026 }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={projection2026Layer}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

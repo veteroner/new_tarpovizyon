@@ -1,5 +1,6 @@
 import { TurkeyHeatMap, type RegionTotal } from '../../components/TurkeyHeatMap';
 import type { PoultryMapType } from './whiteMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   provincialPoultry: RegionTotal[];
@@ -39,11 +40,14 @@ export default function WhiteMeatMapSection({ provincialPoultry, provincialBroil
         </div>
       </div>
       <div className="chart-card">
-        <h3 className="chart-title">
-          {poultryMapType === 'total' && 'Et Tavuğu + Yumurta Tavuğu (Toplam)'}
-          {poultryMapType === 'broiler' && 'Et Tavuğu (Etlik Piliç)'}
-          {poultryMapType === 'layer' && 'Yumurta Tavuğu (Yumurtacı Tavuk)'}
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>
+            {poultryMapType === 'total' && 'Et Tavuğu + Yumurta Tavuğu (Toplam)'}
+            {poultryMapType === 'broiler' && 'Et Tavuğu (Etlik Piliç)'}
+            {poultryMapType === 'layer' && 'Yumurta Tavuğu (Yumurtacı Tavuk)'}
+          </h3>
+          <ChartInsightButton title="🗺️ İl Bazlı Kanatlı Hayvan Varlığı" description="Türkiye il bazlı kanatlı hayvan varlığı dağılımı" data={provincialPoultry} context={{ section: 'İl Dağılımı' }} compact />
+        </div>
         {provincialPoultry.length === 0 && (
           <div style={{ marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
             İl bazlı veriler yükleniyor…

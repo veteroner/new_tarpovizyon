@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface EggTuikYieldTabProps {
   tuikData: TuikEggData[];
@@ -25,7 +26,10 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
       {/* Verim Trendi */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📊 Tavuk Başına Yumurta Verimi Trendi (2010-2025)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Tavuk Başına Yumurta Verimi Trendi (2010-2025)</h3>
+            <ChartInsightButton title="📊 Tavuk Başına Yumurta Verimi Trendi (2010-2025)" description="Tavuk başına yumurta verimi 16 yıllık trendi" data={tuikData} context={{ section: 'Verim Trend' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <LineChart data={tuikData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -58,7 +62,10 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
       {/* Yerli vs Hibrit Karşılaştırması */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">🐔 Yerli vs Hibrit Yumurtacı Tavuk (2010-2025)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 Yerli vs Hibrit Yumurtacı Tavuk (2010-2025)</h3>
+            <ChartInsightButton title="🐔 Yerli vs Hibrit Yumurtacı Tavuk (2010-2025)" description="Yerli ve hibrit yumurtacı tavuk karşılaştırması" data={tuikData} context={{ section: 'Yerli-Hibrit' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={tuikData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -95,7 +102,10 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
       {/* Kuluçka Yumurtası Trendi */}
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi - 2010-2025)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi - 2010-2025)</h3>
+            <ChartInsightButton title="🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi - 2010-2025)" description="Layer civciv üretimi için kuluçkaya basılan yumurta sayısı" data={tuikData} context={{ section: 'Kuluçka' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={tuikData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

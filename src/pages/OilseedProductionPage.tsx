@@ -1,5 +1,6 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const YAGLI_TOHUM_URUNLER = [
   'Ayçiçeği Tohumu (Yağlık)', 'Ayçiçeği Tohumu (Çerezlik)',
@@ -23,7 +24,10 @@ const YAG_RENKLER = ['#fbbf24', '#f59e0b', '#f97316', '#ef4444', '#fb923c', '#fc
 
 const oilseedExtra = (
   <div className="chart-card" style={{ marginTop: 20 }}>
-    <h3 className="chart-title">🧴 Yağlı Tohumlarda Yağ İçeriği Karşılaştırması (%)</h3>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <h3 className="chart-title" style={{ marginBottom: 0 }}>🧴 Yağlı Tohumlarda Yağ İçeriği Karşılaşması (%)</h3>
+      <ChartInsightButton title="🧴 Yağ İçeriği" description="Yağlı tohumlarda yağ içeriği karşılaşması" data={YAG_ICERIK} context={{ section: 'Yağlı Tohumlar' }} compact />
+    </div>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Tohum başına ortalama yağ içeriği oranı. Susam ve yerfıstığı en zengin yağ kaynakları arasında yer alır.
     </p>

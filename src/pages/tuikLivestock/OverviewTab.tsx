@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedCategory' | 'yearLabel'
@@ -57,7 +58,10 @@ export default function OverviewTab({
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📊 Hayvan Grubu Özeti ({yearLabel})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Hayvan Grubu Özeti ({yearLabel})</h3>
+            <ChartInsightButton title="📊 Hayvan Grubu Özeti" description="Hayvan grubu dağılımı" data={groupChartData} context={{ section: 'Hayvan Grubu' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={groupChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -77,7 +81,10 @@ export default function OverviewTab({
       {/* Trend + Growth */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">📈 {selectedAnimal} Trend Grafiği (2004–2025)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 {selectedAnimal} Trend Grafiği (2004–2025)</h3>
+            <ChartInsightButton title="📈 Trend Grafiği" description="Yıllık trend analizi" data={yearlyData} context={{ section: 'Trend' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -90,7 +97,10 @@ export default function OverviewTab({
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">📊 Yıllık Büyüme Oranı (%)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yıllık Büyüme Oranı (%)</h3>
+            <ChartInsightButton title="📊 Yıllık Büyüme Oranı" description="Yıllık büyüme oranları" data={growthData} context={{ section: 'Büyüme' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={growthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -111,7 +121,10 @@ export default function OverviewTab({
       {categoryData.length > 0 && (
         <div className="chart-grid">
           <div className="chart-card">
-            <h3 className="chart-title">🥧 Kategori Dağılımı — {selectedAnimal}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Kategori Dağılımı — {selectedAnimal}</h3>
+              <ChartInsightButton title="🥧 Kategori Dağılımı" description="Kategori dağılımı" data={categoryData} context={{ section: 'Kategori' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={120} innerRadius={50} dataKey="value"
@@ -125,7 +138,10 @@ export default function OverviewTab({
           </div>
 
           <div className="chart-card">
-            <h3 className="chart-title">📊 Kategori Karşılaştırma</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Kategori Karşılaştırma</h3>
+              <ChartInsightButton title="📊 Kategori Karşılaştırma" description="Kategori karşılaştırması" data={categoryData} context={{ section: 'Kategori' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -144,7 +160,10 @@ export default function OverviewTab({
       {/* City Bar + Pie */}
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">🏙️ İl Bazında {selectedAnimal} Sayısı ({yearLabel})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {selectedAnimal} Sayısı ({yearLabel})</h3>
+            <ChartInsightButton title="🏙️ İl Bazında Dağılım" description="İl bazında sayısı" data={cityData} context={{ section: 'İl Dağılım' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -159,7 +178,10 @@ export default function OverviewTab({
         </div>
 
         <div className="chart-card">
-          <h3 className="chart-title">🥧 İl Payları Dağılımı (Top 10)</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı (Top 10)</h3>
+            <ChartInsightButton title="🥧 İl Payları Dağılımı" description="İl pay dağılımı" data={cityData.slice(0, 10)} context={{ section: 'İl Dağılım' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={450}>
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={140} innerRadius={40}

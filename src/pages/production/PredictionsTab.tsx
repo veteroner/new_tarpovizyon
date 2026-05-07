@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatValue, formatShort, formatYield, formatHa } from './productionTypes';
 import type { Insight, PredKPIs, ForecastData } from './productionTypes';
@@ -70,7 +71,10 @@ export function PredictionsTab({
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
           <div className="chart-card">
-            <h3 className="chart-title">📈 Türkiye Üretim Tahmini</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye Üretim Tahmini</h3>
+              <ChartInsightButton title="Türkiye Üretim Tahmini" description="Türkiye bitkisel üretim tahmin modeli" data={prodSeries} context={{ ürün: predProduct, tahminiUretim2028: predKPIs?.forecastProduction, modelR2: predKPIs?.r2Production }} />
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={prodSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -86,7 +90,10 @@ export function PredictionsTab({
             </ResponsiveContainer>
           </div>
           <div className="chart-card">
-            <h3 className="chart-title">🌍 Dünya Üretim Tahmini</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Dünya Üretim Tahmini</h3>
+              <ChartInsightButton title="Dünya Üretim Tahmini" description="Dünya bitkisel üretim tahmin modeli" data={worldSeries} context={{ ürün: predProduct }} />
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={worldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -105,7 +112,10 @@ export function PredictionsTab({
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
           <div className="chart-card">
-            <h3 className="chart-title">📊 Verim Tahmini (kg/ha)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Verim Tahmini (kg/ha)</h3>
+              <ChartInsightButton title="Verim Tahmini (kg/ha)" description="Bitkisel üretim verim tahmin modeli" data={yieldSeries} context={{ ürün: predProduct, tahminiVerim: predKPIs?.forecastYield }} />
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={yieldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -121,7 +131,10 @@ export function PredictionsTab({
             </ResponsiveContainer>
           </div>
           <div className="chart-card">
-            <h3 className="chart-title">🗺️ Alan Tahmini (ha)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Alan Tahmini (ha)</h3>
+              <ChartInsightButton title="Alan Tahmini (ha)" description="Ekim alanı tahmin modeli" data={areaSeries} context={{ ürün: predProduct }} />
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={areaSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

@@ -13,6 +13,7 @@ import {
   type YearValue
 } from '../../utils/livestockCalculations';
 import { type Tab, type DataItem, formatNumber, formatShort, EXCLUDED_FULL } from './livestockUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
   selectedYear: string;
@@ -406,7 +407,10 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {overviewTrend.length > 0 && (
         <div className="chart-grid" style={{marginTop: '24px'}}>
           <div className="chart-card" style={{gridColumn: 'span 2'}}>
-            <h3 className="chart-title">📈 Küresel Hayvan Stoku Trendi (20 Yıl)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Küresel Hayvan Stoku Trendi (20 Yıl)</h3>
+              <ChartInsightButton title="Küresel Hayvan Stoku Trendi (20 Yıl)" description="Uzun vadeli küresel hayvan stok trendi" data={overviewTrend} context={{}} />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={overviewTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -425,7 +429,10 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {countryGrowthData.length > 0 && (
         <div className="chart-grid" style={{marginTop: '20px'}}>
           <div className="chart-card" style={{gridColumn: 'span 2'}}>
-            <h3 className="chart-title">🎯 Ülke Growth Quadrant (CAGR × Pazar Payı)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Ülke Growth Quadrant (CAGR × Pazar Payı)</h3>
+              <ChartInsightButton title="Ülke Growth Quadrant (CAGR × Pazar Payı)" description="Ülkelerin CAGR ve pazar payı dağılımı" data={countryGrowthData.slice(0, 30)} context={{}} />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

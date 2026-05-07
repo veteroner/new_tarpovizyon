@@ -7,6 +7,7 @@ import {
 import { fetchQuery } from '../services/api';
 import { translateCountry } from '../utils/countryTranslations';
 import { BackToHome } from '../components/BackToHome';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -175,7 +176,10 @@ export default function MacroEconomicPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık {indicatorName} Trendi</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık {indicatorName} Trendi</h3>
+              <ChartInsightButton title={`Yıllık ${indicatorName} Trendi`} description="Yıllık gösterge trendi" data={yearlyData} context={{ section: 'Makroekonomi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -190,7 +194,10 @@ export default function MacroEconomicPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">🌍 Ülke Dağılımı ({selectedYear})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Üke Dağılımı ({selectedYear})</h3>
+              <ChartInsightButton title="Üke Dağılımı" description="Üke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={countryData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -207,7 +214,10 @@ export default function MacroEconomicPage() {
             </div>
 
             <div className="chart-card">
-              <h3 className="chart-title">🥧 Top 8 Ülke Payı</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Top 8 Üke Payı</h3>
+              <ChartInsightButton title="Top 8 Üke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie 

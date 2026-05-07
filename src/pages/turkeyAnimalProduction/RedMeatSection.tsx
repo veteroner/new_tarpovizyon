@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { COLORS } from './turkeyAnimalProductionTypes';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface RedMeatSectionProps {
   redMeatBreakdown: { name: string; value: number; color: string }[];
@@ -32,9 +33,12 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '48px' }}>
         {/* Breakdown Pie */}
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📊 Kırmızı Et Türlerine Göre Dağılım
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              📊 Kırmızı Et Türlerine Göre Dağılım
+            </h3>
+            <ChartInsightButton title="📊 Kırmızı Et Dağılımı" description="Et türlerine göre dağılım" data={redMeatBreakdown} context={{ section: 'Kırmızı Et' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
@@ -54,9 +58,12 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
         {/* Stacked Trend */}
         {redMeatTrendData.length > 0 && (
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📈 Kırmızı Et Türleri (Son 5 Yıl)
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                📈 Kırmızı Et Türleri (Son 5 Yıl)
+              </h3>
+              <ChartInsightButton title="📈 Kırmızı Et Trend" description="Kırmızı et türleri yıllık trendi" data={redMeatTrendData} context={{ section: 'Kırmızı Et' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={redMeatTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -76,9 +83,12 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
         {/* Büyükbaş vs Küçükbaş */}
         {buyukbasKucukbasData.length > 0 && (
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', gridColumn: 'span 2' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🐂 Büyükbaş vs Küçükbaş Karşılaştırması
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                🐂 Büyükkbaş vs Küçükkbaş Karşılaştırması
+              </h3>
+              <ChartInsightButton title="🐂 Büyükkbaş vs Küçükkbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <ComposedChart data={buyukbasKucukbasData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

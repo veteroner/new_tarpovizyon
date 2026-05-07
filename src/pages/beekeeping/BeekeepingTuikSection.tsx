@@ -15,6 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 import { type TuikKovanYearData, type TuikKovanKpi, type TuikProvinceKovan, formatNumber } from './beekeepingTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   tuikKovanYear: TuikKovanYearData[];
@@ -136,9 +137,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🪔 Kovan Sayısı Gelişimi (Eski Tip + Yeni Tip)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🪔 Kovan Sayısı Gelişimi (Eski Tip + Yeni Tip)
+            </h3>
+            <ChartInsightButton title="🪔 Kovan Sayısı Gelişimi" description="Eski ve yeni tip kovan sayısı yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={tuikKovanYear} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -220,9 +224,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🕯️ Balmumu Üretimi Trendi (Ton)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🕯️ Balmumu Üretimi Trendi (Ton)
+            </h3>
+            <ChartInsightButton title="🕯️ Balmumu Üretimi Trendi" description="Balmumu üretimi yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Balmumu' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={tuikKovanYear} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
               <defs>
@@ -284,9 +291,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📊 Kovan Başına Balmumu Verimi (kg/kovan)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              📊 Kovan Başına Balmumu Verimi (kg/kovan)
+            </h3>
+            <ChartInsightButton title="📊 Kovan Başına Balmumu Verimi" description="kg/kovan verimlilik trendi" data={tuikKovanYear} context={{ section: 'TÜİK Verim' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart 
               data={tuikKovanYear.map(d => ({
@@ -324,9 +334,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🔄 Yeni Tip Kovan Oranı Gelişimi (%)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🔄 Yeni Tip Kovan Oranı Gelişimi (%)
+            </h3>
+            <ChartInsightButton title="🔄 Yeni Tip Kovan Oranı Gelişimi" description="Yeni/eski tip kovan oranı trendi" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart 
               data={tuikKovanYear.map(d => ({
@@ -373,9 +386,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             border: '1px solid var(--border)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🪔 En Fazla Kovan Olan İller (2024 - TÜİK)
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                🪔 En Fazla Kovan Olan İller (2024 - TÜİK)
+              </h3>
+              <ChartInsightButton title="🪔 En Fazla Kovan Olan İller" description="İl bazında kovan sıralaması" data={tuikTopKovan} context={{ section: 'İl Kovan' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopKovan} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -402,9 +418,12 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             border: '1px solid var(--border)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🕯️ En Fazla Balmumu Üreten İller (2024 - TÜİK)
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                🕯️ En Fazla Balmumu Üreten İller (2024 - TÜİK)
+              </h3>
+              <ChartInsightButton title="🕯️ En Fazla Balmumu Üreten İller" description="İl bazında balmumu sıralaması" data={tuikTopBalmumu} context={{ section: 'İl Balmumu' }} compact />
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

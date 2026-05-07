@@ -12,6 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   turkeyMeatData: TuikTurkeyMeatData[];
@@ -92,7 +93,10 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
       {/* Hindi Eti Yıllık Trend */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <h3 className="chart-title">📈 Hindi Eti Yıllık Üretim Trendi</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Hindi Eti Yıllık Üretim Trendi</h3>
+            <ChartInsightButton title="📈 Hindi Eti Yıllık Üretim Trendi" description="Yıllık hindi eti üretim verisi" data={turkeyMeatData} context={{ section: 'Trend' }} />
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={turkeyMeatData.slice().reverse()}>
               <defs>
@@ -137,7 +141,10 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📊 Aylık Üretim Dağılımı</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Aylık Üretim Dağılımı</h3>
+                <ChartInsightButton title="📊 Aylık Üretim Dağılımı" description="Aylık hindi eti üretim dağılımı" data={turkeyMeatData} context={{ section: 'Aylık' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={380}>
                 <BarChart data={monthlyTurkeyMeat}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

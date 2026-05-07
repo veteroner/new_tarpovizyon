@@ -19,8 +19,8 @@ const worldMenuCategories: MenuCategory[] = [
     title: 'Canlı Piyasa & AI',
     icon: BarChart3,
     items: [
-      { label: '📊 Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
-      { label: '🤖 AI Asistan', path: '/tarpovizyon/ai-assistant' },
+      { label: 'Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
+      { label: 'AI Asistan', path: '/tarpovizyon/ai-assistant' },
     ],
   },
   {
@@ -79,8 +79,8 @@ const turkeyMenuCategories: MenuCategory[] = [
     title: 'Canlı Piyasa & AI',
     icon: BarChart3,
     items: [
-      { label: '📊 Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
-      { label: '🤖 AI Asistan', path: '/tarpovizyon/ai-assistant' },
+      { label: 'Emtia Fiyatları', path: '/tarpovizyon/commodity-prices' },
+      { label: 'AI Asistan', path: '/tarpovizyon/ai-assistant' },
     ],
   },
   {

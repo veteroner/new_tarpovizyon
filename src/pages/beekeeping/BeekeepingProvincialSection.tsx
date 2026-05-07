@@ -17,6 +17,7 @@ import {
   Legend,
 } from 'recharts';
 import { COLORS, HONEY_COLORS, formatNumber } from './beekeepingTypes';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   topBeekeepers: { il: string; count: number }[];
@@ -51,9 +52,12 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🐝 En Çok Arıcı Olan İller (2023)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🐝 En Çok Arıcı Olan İller (2023)
+            </h3>
+            <ChartInsightButton title="🐝 En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topBeekeepers} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -80,9 +84,12 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🍯 En Fazla Bal Üreten İller
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🍯 En Fazla Bal Üreten İller
+            </h3>
+            <ChartInsightButton title="🍯 En Fazla Bal Üreten İller" description="İl bazında bal üretimi sıralaması" data={topProducers} context={{ section: 'İl Liderlik' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topProducers} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -109,9 +116,12 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📊 En Yüksek Verimli İller (kg/kovan)
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              📊 En Yüksek Verimli İller (kg/kovan)
+            </h3>
+            <ChartInsightButton title="📊 En Yüksek Verimli İller" description="kg/kovan bazında verimlilik sıralaması" data={topYield} context={{ section: 'İl Liderlik' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -138,9 +148,12 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           border: '1px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🌸 Bal Çeşitleri Dağılımı
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+              🌸 Bal Çeşitleri Dağılımı
+            </h3>
+            <ChartInsightButton title="🌸 Bal Çeşitleri Dağılımı" description="Bal çeşitlerinin dağılımı" data={honeyTypesData} context={{ section: 'Bal Çeşitleri' }} compact />
+          </div>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie

@@ -11,6 +11,7 @@ import {
   useAgriculturalEmploymentData, TABS, formatPop, formatShort, formatPercent
 } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -60,7 +61,10 @@ export default function AgriculturalEmploymentPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Top 20 Ulke - Tarim Istihdami</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 20 Ulke - Tarim Istihdami</h3>
+                  <ChartInsightButton title="Top 20 Ülke Tarım İstihdamı" description="Top 20 ülkede tarım istihdamı" data={topCountries.slice(0,20)} context={{ section: 'Tarım İstihdamı' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={topCountries.slice(0, 20)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -74,7 +78,10 @@ export default function AgriculturalEmploymentPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Yillik Istihdam Trendi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Yillik Istihdam Trendi</h3>
+                  <ChartInsightButton title="Yıllık İstihdam Trendi" description="Yıllık tarım istihdamı trendi" data={yearlyTrend} context={{ section: 'Tarım İstihdamı' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -104,7 +111,10 @@ export default function AgriculturalEmploymentPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Ulke Bazli Erkek-Kadin Istihdami</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Ulke Bazli Erkek-Kadin Istihdami</h3>
+                  <ChartInsightButton title="Ülke Bazlı Erkek-Kadın İstihdamı" description="Ülke bazlı cinsiyet istihdamı" data={genderByCountry.slice(0,15)} context={{ section: 'Cinsiyet' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={genderByCountry.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -118,7 +128,10 @@ export default function AgriculturalEmploymentPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">Kadin Istihdam Orani Trendi (%)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Kadin Istihdam Orani Trendi (%)</h3>
+                  <ChartInsightButton title="Kadın İstihdam Oranı Trendi" description="Kadın tarım istihdamı oranı trendi" data={genderTrend} context={{ section: 'Cinsiyet' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={genderTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -149,7 +162,10 @@ export default function AgriculturalEmploymentPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card">
-                  <h3 className="chart-title">Istihdam Pazar Payi Dagilimi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Istihdam Pazar Payi Dagilimi</h3>
+                  <ChartInsightButton title="İstihdam Pazar Payı Dağılımı" description="Küresel tarım istihdamı pazar payı" data={concentrationData.pieData} context={{ section: 'Konsantrasyon' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={350}>
                     <PieChart>
                       <Pie data={concentrationData.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} dataKey="value" label={({ name, share }: any) => `${name} ${share}%`} labelLine={false}>
@@ -160,7 +176,10 @@ export default function AgriculturalEmploymentPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-card">
-                  <h3 className="chart-title">HHI &amp; Top 5 Payi Tarihsel</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>HHI &amp; Top 5 Payi Tarihsel</h3>
+                  <ChartInsightButton title="HHI & Top 5 Payı Tarihsel" description="HHI konsantrasyon endeksi tarihi" data={concentrationData.hhiHistory} context={{ section: 'Konsantrasyon' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={concentrationData.hhiHistory}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -190,7 +209,10 @@ export default function AgriculturalEmploymentPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Tarim Istihdami Trendi</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Tarim Istihdami Trendi</h3>
+                  <ChartInsightButton title="Türkiye Tarım İstihdamı Trendi" description="Türkiye tarım istihdamı zaman serisi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={turkeyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -222,7 +244,10 @@ export default function AgriculturalEmploymentPage() {
               </div>
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <h3 className="chart-title">Turkiye Istihdam - Tahmin Projeksiyonu</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Istihdam - Tahmin Projeksiyonu</h3>
+                  <ChartInsightButton title="Türkiye İstihdam Tahmin Projeksiyonu" description="Türkiye tarım istihdamı tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
+                  </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

@@ -1,5 +1,6 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 const TAHIL_URUNLER = [
   'Buğday, Durum Buğdayı Hariç', 'Durum Buğdayı', 'Arpa (Diğer)', 'Arpa (Biralık)',
@@ -35,7 +36,10 @@ const VERIM_TREND = [
 const cerealExtra = (
   <>
     <div className="chart-card" style={{ marginTop: 20 }}>
-      <h3 className="chart-title">📈 Türkiye Buğday Verim Trendi vs Dünya Ortalaması (kg/ha)</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye Buğday Verim Trendi vs Dünya Ortalaması (kg/ha)</h3>
+      <ChartInsightButton title="Buğday Verim Trendi" description="Türkiye buğday verimi vs dünya ortalaması" data={VERIM_TREND} context={{ section: 'Tahillar' }} compact />
+      </div>
       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
         Kaynak: FAO + TÜİK (2014-2023) · Türkiye verim açığı son 10 yılda yaklaşık <strong>650-800 kg/ha</strong> · 2023'te en yüksek değer <strong>3.050 kg/ha</strong> · Hedef: dünya ortalaması <strong>3.700 kg/ha</strong>
       </p>
@@ -56,7 +60,10 @@ const cerealExtra = (
     </div>
 
     <div className="chart-card" style={{ marginTop: 20 }}>
-      <h3 className="chart-title">🌍 Küresel Buğday Üretiminde Türkiye (2022, bin ton)</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Küresel Buğday Üretiminde Türkiye (2022, bin ton)</h3>
+      <ChartInsightButton title="Küresel Buğday Üretimi" description="Küresel buğday üretiminde Türkiye payı" data={KURESEL_BUGDAY} context={{ section: 'Tahillar' }} compact />
+      </div>
       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
         Kaynak: FAO 2022 tahminleri · Türkiye küresel buğday üretiminin yaklaşık %2'sini karşılıyor · Kırmızı çubuk = Türkiye
       </p>

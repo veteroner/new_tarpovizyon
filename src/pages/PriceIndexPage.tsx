@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, AlertTriangle, Activity, BarChart3, Thermomet
 import {
   usePriceIndexData, formatIndex, MONTHS_SHORT, type DatasetId,
 } from './priceIndex/usePriceIndexData';
+import { ChartInsightButton } from '../components/ChartInsightButton';
 
 export default function PriceIndexPage() {
   const {
@@ -146,7 +147,10 @@ export default function PriceIndexPage() {
 
           <div className="chart-grid">
             <div className="chart-card">
-              <h3 className="chart-title">📊 Aylık Endeks ({selectedYear})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Aylık Endeks ({selectedYear})</h3>
+              <ChartInsightButton title="Aylık Endeks" description="Aylık fiyat endeksi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -163,7 +167,10 @@ export default function PriceIndexPage() {
               </ResponsiveContainer>
             </div>
             <div className="chart-card">
-              <h3 className="chart-title">📈 Aylık Trend</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Aylık Trend</h3>
+              <ChartInsightButton title="Aylık Trend" description="Aylık fiyat trendi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -178,7 +185,10 @@ export default function PriceIndexPage() {
 
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <h3 className="chart-title">📅 Yıllık Endeks Trendi ({yearlyData[0]?.year || '…'}–{yearlyData[yearlyData.length - 1]?.year || '…'})</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Endeks Trendi ({yearlyData[0]?.year || '…'}–{yearlyData[yearlyData.length - 1]?.year || '…'})</h3>
+              <ChartInsightButton title="Yıllık Endeks Trendi" description="Yıllık fiyat endeksi trendi" data={yearlyData} context={{ section: 'Fiyat Endeksi' }} compact />
+              </div>
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -194,7 +204,10 @@ export default function PriceIndexPage() {
           {scissorData.length > 0 && (
             <div className="chart-grid">
               <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                <h3 className="chart-title">✂️ Fiyat Makası — Gıda TÜFE vs GFE (Girdi Fiyat)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>✂️ Fiyat Makası — Gıda TÜFE vs GFE (Girdi Fiyat)</h3>
+                <ChartInsightButton title="Fiyat Makası" description="Gıda tüfe vs gfe girdi fiyat makası" data={scissorData} context={{ section: 'Fiyat Endeksi' }} compact />
+                </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 12 }}>
                   Pozitif fark = Girdi fiyatları tüketici fiyatlarından yüksek → Çiftçi sıkışması (kırmızı bar). Çizgiler TÜFE/GFE endekslerini gösterir.
                 </p>
@@ -241,7 +254,10 @@ export default function PriceIndexPage() {
           {topProducts.length > 0 && (
             <div className="chart-grid">
               <div className="chart-card">
-                <h3 className="chart-title">🏆 Kategori Endeks Sıralaması ({selectedYear})</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>🏆 Kategori Endeks Sıralaması ({selectedYear})</h3>
+                  <ChartInsightButton title="Kategori Endeks Sıralaması" description="Kategori endeks sıralaması" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />
+                  </div>
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={topProducts} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -257,7 +273,10 @@ export default function PriceIndexPage() {
                 </ResponsiveContainer>
               </div>
               <div className="chart-card">
-                <h3 className="chart-title">📊 Yıllık Değişim Oranı (%)</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yıllık Değişim Oranı (%)</h3>
+                  <ChartInsightButton title="Yıllık Değişim Oranı" description="Yıllık değişim oranı (%)" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />
+                  </div>
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={[...topProducts].sort((a, b) => b.change - a.change)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
