@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package, BarChart3 } from 'lucide-react';
+import { Menu, X, Home, Globe, MapPin, TrendingUp, Sprout, Beef, MapPinned, DollarSign, Package, BarChart3, ChevronLeft } from 'lucide-react';
 import '../styles/Header.css';
 
 type MenuCategory = {
@@ -209,9 +209,21 @@ export function Header() {
       {/* Top band: mode + categories */}
       <div className="header-band header-band--top">
         <div className="header-container">
-          <div className="header-logo" onClick={() => handleNavigate('/tarpovizyon') }>
-            <Home size={24} />
-            <span className="logo-text">TARPOL</span>
+          <div className="header-left">
+            <button
+              type="button"
+              className="back-to-home-btn"
+              onClick={() => handleNavigate('/')}
+              aria-label="Ana programa dön"
+              title="Programlar"
+            >
+              <ChevronLeft size={16} />
+              <span>Programlar</span>
+            </button>
+            <div className="header-logo" onClick={() => handleNavigate('/tarpovizyon')}>
+              <Home size={24} />
+              <span className="logo-text">TARPOL</span>
+            </div>
           </div>
 
           <div className="header-top-controls">

@@ -75,7 +75,7 @@ body {
 }
 
 .main-content.with-header {
-  padding-top: calc(104px + 32px); /* Header height + padding */
+  padding-top: calc(100px + 32px); /* Header height + padding */
 }
 
 .page-header {
