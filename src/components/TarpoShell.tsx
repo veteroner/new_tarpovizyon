@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import type { ComponentType } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Globe, MapPin, Home,
@@ -10,7 +11,7 @@ import '../styles/TarpoShell.css';
 type MenuItem = { label: string; path: string };
 type MenuCategory = {
   title: string;
-  icon: React.ComponentType<{ size: number }>;
+  icon: ComponentType<{ size: number }>;
   items: MenuItem[];
 };
 
