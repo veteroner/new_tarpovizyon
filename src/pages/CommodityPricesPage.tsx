@@ -504,15 +504,19 @@ export default function CommodityPricesPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<'yahoo' | 'fao'>('yahoo');
 
-  // FAO GIEWS state
-  const [giewsCountries, setGiewsCountries] = useState<string[]>(['TUR']);
-  const [giewsCommodityFilter, setGiewsCommodityFilter] = useState('all');
-  const [giewsSeriesByCountry, setGiewsSeriesByCountry] = useState<Record<string, GiewsSerie[]>>({});
-  const [giewsPriceMapByCountry, setGiewsPriceMapByCountry] = useState<Record<string, Map<string, GiewsDatapoint[]>>>({});
-  const [giewsLoading, setGiewsLoading] = useState(false);
-  const [giewsError, setGiewsError] = useState('');
-  const [giewsSelected, setGiewsSelected] = useState<GiewsSelectedPrice | null>(null);
-  const giewsCountryKey = giewsCountries.join(',');
+  // FAO GIEWS state — two-panel comparison
+  const [leftCountry, setLeftCountry] = useState('TUR');
+  const [rightCountry, setRightCountry] = useState('EGY');
+  const [leftCommodity, setLeftCommodity] = useState('');
+  const [rightCommodity, setRightCommodity] = useState('');
+  const [leftSeries, setLeftSeries] = useState<GiewsSerie[]>([]);
+  const [rightSeries, setRightSeries] = useState<GiewsSerie[]>([]);
+  const [leftPriceMap, setLeftPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
+  const [rightPriceMap, setRightPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
+  const [leftLoading, setLeftLoading] = useState(false);
+  const [rightLoading, setRightLoading] = useState(false);
+  const [leftError, setLeftError] = useState('');
+  const [rightError, setRightError] = useState('');
 
   const loadPrices = useCallback(async () => {
     setLoading(true);
@@ -556,43 +560,43 @@ export default function CommodityPricesPage() {
     }
   }, [selectedCommodity, chartRange, loadChart]);
 
-  // FAO GIEWS loading
+  // FAO GIEWS loading — left panel
   useEffect(() => {
     if (activeTab !== 'fao') return;
     let cancelled = false;
-    async function loadGiews() {
-      setGiewsLoading(true);
-      setGiewsError('');
-      setGiewsSeriesByCountry({});
-      setGiewsPriceMapByCountry({});
+    setLeftLoading(true); setLeftError(''); setLeftSeries([]); setLeftPriceMap(new Map()); setLeftCommodity('');
+    (async () => {
       try {
-        const results = await Promise.all(giewsCountries.map(async iso3 => {
-          const series = await fetchGiewsSeries(iso3);
-          const uuids = series.map(s => s.uuid);
-          const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
-          const priceMap = new Map<string, GiewsDatapoint[]>();
-          for (const r of priceResults) {
-            priceMap.set(r.uuid, r.datapoints);
-          }
-          return { iso3, series, priceMap };
-        }));
-        if (cancelled) return;
-        if (!results.some(result => result.series.length)) {
-          setGiewsError('Seçili ülkeler için veri bulunamadı');
-          setGiewsLoading(false);
-          return;
-        }
-        setGiewsSeriesByCountry(Object.fromEntries(results.map(result => [result.iso3, result.series])));
-        setGiewsPriceMapByCountry(Object.fromEntries(results.map(result => [result.iso3, result.priceMap])));
-      } catch {
-        if (!cancelled) setGiewsError('FAO GIEWS verisi alınamadı');
-      } finally {
-        if (!cancelled) setGiewsLoading(false);
-      }
-    }
-    loadGiews();
+        const series = await fetchGiewsSeries(leftCountry);
+        const uuids = series.map(s => s.uuid);
+        const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
+        const pm = new Map<string, GiewsDatapoint[]>();
+        for (const r of priceResults) pm.set(r.uuid, r.datapoints);
+        if (!cancelled) { setLeftSeries(series); setLeftPriceMap(pm); }
+      } catch { if (!cancelled) setLeftError('FAO GIEWS verisi alınamadı'); }
+      finally { if (!cancelled) setLeftLoading(false); }
+    })();
     return () => { cancelled = true; };
-  }, [activeTab, giewsCountryKey]);
+  }, [activeTab, leftCountry]);
+
+  // FAO GIEWS loading — right panel
+  useEffect(() => {
+    if (activeTab !== 'fao') return;
+    let cancelled = false;
+    setRightLoading(true); setRightError(''); setRightSeries([]); setRightPriceMap(new Map()); setRightCommodity('');
+    (async () => {
+      try {
+        const series = await fetchGiewsSeries(rightCountry);
+        const uuids = series.map(s => s.uuid);
+        const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
+        const pm = new Map<string, GiewsDatapoint[]>();
+        for (const r of priceResults) pm.set(r.uuid, r.datapoints);
+        if (!cancelled) { setRightSeries(series); setRightPriceMap(pm); }
+      } catch { if (!cancelled) setRightError('FAO GIEWS verisi alınamadı'); }
+      finally { if (!cancelled) setRightLoading(false); }
+    })();
+    return () => { cancelled = true; };
+  }, [activeTab, rightCountry]);
 
   const categories = ['all', ...Array.from(new Set(commodities.map(c => c.category)))];
   const filtered = selectedCategory === 'all' 
@@ -883,410 +887,232 @@ export default function CommodityPricesPage() {
 
       {/* ===== FAO GIEWS İç Piyasa Tab ===== */}
       {activeTab === 'fao' && (() => {
-        const selectedCountryMeta = giewsCountries.map((iso3, index) => ({
-          iso3,
-          label: getCountryLabel(iso3),
-          color: GIEWS_COUNTRY_COLORS[index % GIEWS_COUNTRY_COLORS.length],
-        }));
-        const allSeries: GiewsCountrySerie[] = selectedCountryMeta.flatMap(country => (
-          (giewsSeriesByCountry[country.iso3] ?? []).map(serie => ({
-            serie,
-            history: giewsPriceMapByCountry[country.iso3]?.get(serie.uuid) ?? [],
-            countryIso: country.iso3,
-            countryName: country.label,
-            color: country.color,
-          }))
-        ));
-        const sortedCommodities = Array.from(new Set(allSeries.map(item => item.serie.commodity_name)))
-          .sort((a, b) => translateCommodity(a).localeCompare(translateCommodity(b), 'tr'));
-        const activeCommodity = giewsCommodityFilter === 'all' || sortedCommodities.includes(giewsCommodityFilter)
-          ? giewsCommodityFilter
-          : 'all';
-        const visibleSeries = activeCommodity === 'all'
-          ? allSeries
-          : allSeries.filter(item => item.serie.commodity_name === activeCommodity);
-        const latestDates = allSeries
-          .map(item => item.history[0]?.date)
-          .filter(Boolean)
-          .sort();
-        const latestDate = latestDates[latestDates.length - 1];
-        const availableCountries = GIEWS_COUNTRIES.filter(country => !giewsCountries.includes(country.iso3));
-
-        const comparisonDateMap = new Map<string, Record<string, string | number>>();
-        if (activeCommodity !== 'all') {
-          for (const country of selectedCountryMeta) {
-            const pointsByDate = new Map<string, number[]>();
-            visibleSeries
-              .filter(item => item.countryIso === country.iso3)
-              .forEach(item => {
-                item.history.forEach(point => {
-                  if (point.price_value_dollar == null) return;
-                  const dateKey = point.date.slice(0, 10);
-                  const values = pointsByDate.get(dateKey) ?? [];
-                  values.push(point.price_value_dollar);
-                  pointsByDate.set(dateKey, values);
-                });
-              });
-            pointsByDate.forEach((values, dateKey) => {
-              const row = comparisonDateMap.get(dateKey) ?? { date: new Date(dateKey).toLocaleDateString('tr-TR', { year: '2-digit', month: 'short' }) };
-              row[country.iso3] = values.reduce((sum, value) => sum + value, 0) / values.length;
-              comparisonDateMap.set(dateKey, row);
-            });
+        // Build averaged USD price history (last 24 months) for a selected commodity
+        const buildHistory = (series: GiewsSerie[], priceMap: Map<string, GiewsDatapoint[]>, commodity: string) => {
+          const relevant = series.filter(s => s.commodity_name === commodity);
+          const dateMap = new Map<string, { sum: number; cnt: number }>();
+          for (const s of relevant) {
+            for (const p of (priceMap.get(s.uuid) ?? [])) {
+              if (p.price_value_dollar == null) continue;
+              const d = p.date.slice(0, 7);
+              const cur = dateMap.get(d) ?? { sum: 0, cnt: 0 };
+              cur.sum += p.price_value_dollar;
+              cur.cnt++;
+              dateMap.set(d, cur);
+            }
           }
-        }
-        const comparisonData = Array.from(comparisonDateMap.entries())
-          .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
-          .slice(-36)
-          .map(([, row]) => row);
+          return Array.from(dateMap.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([d, { sum, cnt }]) => ({
+              date: d,
+              label: new Date(d + '-01').toLocaleDateString('tr-TR', { year: '2-digit', month: 'short' }),
+              usd: sum / cnt,
+            }));
+        };
 
-        const groupedByCommodity = visibleSeries.reduce((acc, item) => {
-          const key = item.serie.commodity_name;
-          if (!acc[key]) acc[key] = [];
-          acc[key].push(item);
-          return acc;
-        }, {} as Record<string, GiewsCountrySerie[]>);
-        const visibleCommodityNames = Object.keys(groupedByCommodity)
+        // Get KPI info for best series (most data points) of selected commodity
+        const getInfo = (series: GiewsSerie[], priceMap: Map<string, GiewsDatapoint[]>, commodity: string) => {
+          const relevant = series.filter(s => s.commodity_name === commodity);
+          const best = relevant.reduce<GiewsSerie | null>((b, s) => {
+            const pts = priceMap.get(s.uuid) ?? [];
+            return pts.length > (b ? (priceMap.get(b.uuid) ?? []) : []).length ? s : b;
+          }, null);
+          if (!best) return null;
+          const pts = priceMap.get(best.uuid) ?? [];
+          if (!pts[0]) return null;
+          const pct = pts[1] && pts[1].price_value
+            ? ((pts[0].price_value - pts[1].price_value) / pts[1].price_value) * 100
+            : null;
+          return {
+            price: pts[0].price_value,
+            usd: pts[0].price_value_dollar,
+            currency: best.currency,
+            unit: best.measure_unit_label,
+            date: new Date(pts[0].date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' }),
+            pct,
+            market: best.market_name,
+          };
+        };
+
+        const leftComms = Array.from(new Set(leftSeries.map(s => s.commodity_name)))
           .sort((a, b) => translateCommodity(a).localeCompare(translateCommodity(b), 'tr'));
+        const rightComms = Array.from(new Set(rightSeries.map(s => s.commodity_name)))
+          .sort((a, b) => translateCommodity(a).localeCompare(translateCommodity(b), 'tr'));
+
+        const leftInfo = leftCommodity ? getInfo(leftSeries, leftPriceMap, leftCommodity) : null;
+        const rightInfo = rightCommodity ? getInfo(rightSeries, rightPriceMap, rightCommodity) : null;
+
+        const leftHistory = leftCommodity ? buildHistory(leftSeries, leftPriceMap, leftCommodity).slice(-24) : [];
+        const rightHistory = rightCommodity ? buildHistory(rightSeries, rightPriceMap, rightCommodity).slice(-24) : [];
+
+        // Merge histories by date for comparison chart
+        const compMap = new Map<string, { date: string; label: string; left?: number; right?: number }>();
+        for (const p of leftHistory) compMap.set(p.date, { date: p.date, label: p.label, left: p.usd });
+        for (const p of rightHistory) {
+          const ex = compMap.get(p.date) ?? { date: p.date, label: p.label };
+          ex.right = p.usd;
+          compMap.set(p.date, ex);
+        }
+        const compData = Array.from(compMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+        const hasComparison = !!leftCommodity && !!rightCommodity && compData.some(d => d.left != null && d.right != null);
+
+        const lLabel = COUNTRY_TR[GIEWS_COUNTRIES.find(c => c.iso3 === leftCountry)?.name ?? ''] ?? leftCountry;
+        const rLabel = COUNTRY_TR[GIEWS_COUNTRIES.find(c => c.iso3 === rightCountry)?.name ?? ''] ?? rightCountry;
+
+        const selStyle = {
+          width: '100%', padding: '0.55rem 0.75rem', borderRadius: '0.6rem',
+          border: '1px solid #e2e8f0', fontSize: '0.87rem', fontWeight: 600 as const,
+          color: '#1e293b', background: '#f8fafc', cursor: 'pointer' as const,
+        };
 
         return (
           <div>
-            <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
-              <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">FAO ÜRÜN</span></div>
-                <div className="kpi-value">{sortedCommodities.length}</div>
-                <div className="kpi-subtitle">Seçili ülkelerde bulunan</div>
-              </div>
-              <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">FİYAT SERİSİ</span></div>
-                <div className="kpi-value">{allSeries.length}</div>
-                <div className="kpi-subtitle">Market ve fiyat tipi toplamı</div>
-              </div>
-              <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">ÜLKE</span></div>
-                <div className="kpi-value">{giewsCountries.length}/{MAX_GIEWS_COUNTRIES}</div>
-                <div className="kpi-subtitle">Karşılaştırmaya dahil</div>
-              </div>
-              <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">SON VERİ</span></div>
-                <div className="kpi-value" style={{ fontSize: '1.55rem' }}>
-                  {latestDate ? new Date(latestDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' }) : '-'}
-                </div>
-                <div className="kpi-subtitle">FAO GIEWS aylık veri</div>
-              </div>
+            {/* Info bar */}
+            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', padding: '0.6rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#1d4ed8' }}>
+              📡 <strong>FAO GIEWS</strong> — Gıda ve Tarım Örgütü Küresel Fiyat İzleme Sistemi · Ülke ve ürün seçerek iç piyasa fiyatlarını karşılaştırın
             </div>
 
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1rem', marginBottom: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
-                <div>
-                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>Ülke karşılaştırması</div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>Aynı ürün için en fazla 4 ülkenin iç piyasa fiyatını USD bazında kıyasla</div>
+            {/* Two panels */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
+
+              {/* ── LEFT PANEL ── */}
+              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', borderTop: '4px solid #3b82f6', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Panel A</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <select value={leftCountry} onChange={e => { setLeftCountry(e.target.value); setLeftCommodity(''); }} style={selStyle}>
+                    {GIEWS_COUNTRIES.map(c => <option key={c.iso3} value={c.iso3}>{COUNTRY_TR[c.name] ?? c.name}</option>)}
+                  </select>
+                  <select value={leftCommodity} onChange={e => setLeftCommodity(e.target.value)} disabled={leftLoading || leftComms.length === 0} style={{ ...selStyle, opacity: leftLoading || leftComms.length === 0 ? 0.5 : 1 }}>
+                    <option value="">Ürün seçin...</option>
+                    {leftComms.map(name => <option key={name} value={name}>{getCommodityEmoji(name)} {translateCommodity(name)}</option>)}
+                  </select>
                 </div>
-                <select
-                  value=""
-                  disabled={giewsCountries.length >= MAX_GIEWS_COUNTRIES}
-                  onChange={event => {
-                    const iso3 = event.target.value;
-                    if (!iso3) return;
-                    setGiewsCountries(current => current.includes(iso3) || current.length >= MAX_GIEWS_COUNTRIES ? current : [...current, iso3]);
-                  }}
-                  style={{
-                    padding: '0.55rem 0.9rem',
-                    borderRadius: '0.75rem',
-                    border: '1px solid #e2e8f0',
-                    background: giewsCountries.length >= MAX_GIEWS_COUNTRIES ? '#f8fafc' : '#fff',
-                    color: giewsCountries.length >= MAX_GIEWS_COUNTRIES ? '#94a3b8' : '#0f172a',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    cursor: giewsCountries.length >= MAX_GIEWS_COUNTRIES ? 'not-allowed' : 'pointer',
-                    minWidth: '210px',
-                  }}
-                >
-                  <option value="">+ Ülke ekle</option>
-                  {availableCountries.map(country => (
-                    <option key={country.iso3} value={country.iso3}>{COUNTRY_TR[country.name] ?? country.name} ({country.iso3})</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {selectedCountryMeta.map(country => (
-                  <button
-                    key={country.iso3}
-                    onClick={() => setGiewsCountries(current => current.length === 1 ? current : current.filter(iso3 => iso3 !== country.iso3))}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      padding: '0.45rem 0.75rem',
-                      borderRadius: '999px',
-                      border: `1px solid ${country.color}`,
-                      background: `${country.color}14`,
-                      color: '#0f172a',
-                      fontWeight: 700,
-                      cursor: giewsCountries.length === 1 ? 'default' : 'pointer',
-                    }}
-                    title={giewsCountries.length === 1 ? 'En az bir ülke seçili kalmalı' : 'Ülkeyi karşılaştırmadan çıkar'}
-                  >
-                    <span style={{ width: 9, height: 9, borderRadius: '999px', background: country.color, display: 'inline-block' }} />
-                    {country.label}
-                    {giewsCountries.length > 1 && <span style={{ color: '#64748b' }}>×</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="date-filter" style={{ marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => setGiewsCommodityFilter('all')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.75rem',
-                    border: activeCommodity === 'all' ? 'none' : '1px solid #e2e8f0',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: activeCommodity === 'all' ? 700 : 500,
-                    background: activeCommodity === 'all' ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : '#ffffff',
-                    color: activeCommodity === 'all' ? '#fff' : '#475569',
-                    boxShadow: activeCommodity === 'all' ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
-                  }}
-                >
-                  🌐 Tümü
-                </button>
-                {sortedCommodities.map(commodityName => (
-                  <button
-                    key={commodityName}
-                    onClick={() => setGiewsCommodityFilter(commodityName)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '0.75rem',
-                      border: activeCommodity === commodityName ? 'none' : '1px solid #e2e8f0',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      fontWeight: activeCommodity === commodityName ? 700 : 500,
-                      background: activeCommodity === commodityName ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : '#ffffff',
-                      color: activeCommodity === commodityName ? '#fff' : '#475569',
-                      boxShadow: activeCommodity === commodityName ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
-                    }}
-                  >
-                    {getCommodityEmoji(commodityName)} {translateCommodity(commodityName)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {giewsLoading && (
-              <div className="loading"><div className="loading-spinner"></div><p>FAO GIEWS fiyatları yükleniyor...</p></div>
-            )}
-
-            {giewsError && !giewsLoading && (
-              <div className="text-center py-12 text-red-400">
-                <p className="text-lg">❌ {giewsError}</p>
-              </div>
-            )}
-
-            {!giewsLoading && !giewsError && activeCommodity === 'all' && giewsCountries.length > 1 && (
-              <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '1rem', padding: '1rem', color: '#475569', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                Karşılaştırma grafiği için ürün filtresinden tek bir ürün seçin.
-              </div>
-            )}
-
-            {!giewsLoading && !giewsError && activeCommodity !== 'all' && giewsCountries.length > 1 && (
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-                  <div>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      {getCommodityEmoji(activeCommodity)} {translateCommodity(activeCommodity)} ülke karşılaştırması
-                    </h2>
-                    <p style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '0.15rem' }}>Market serileri tarih bazında ortalanır, ortak eksen için USD değer kullanılır.</p>
-                  </div>
-                  <ChartInsightButton title={`${translateCommodity(activeCommodity)} FAO Ülke Karşılaştırması`} description="FAO GIEWS çoklu ülke fiyat karşılaştırması" data={comparisonData} context={{ section: 'FAO İç Piyasa Fiyatları' }} compact />
-                </div>
-                {comparisonData.length > 1 ? (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={comparisonData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="date" stroke="#64748b" fontSize={10} />
-                      <YAxis stroke="#64748b" fontSize={10} domain={['auto', 'auto']} tickFormatter={value => `$${Number(value).toFixed(0)}`} />
-                      <Tooltip
-                        contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', color: '#0f172a' }}
-                        formatter={(value: number, name: string) => [`$${Number(value).toFixed(2)}`, getCountryLabel(String(name))]}
-                      />
-                      {selectedCountryMeta.map(country => (
-                        <Line key={country.iso3} type="monotone" dataKey={country.iso3} stroke={country.color} strokeWidth={2.4} dot={false} name={country.iso3} connectNulls />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Karşılaştırma grafiği için yeterli USD veri noktası yok</div>
+                {leftLoading && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>⏳ Yükleniyor...</div>}
+                {leftError && !leftLoading && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>❌ {leftError}</div>}
+                {!leftLoading && !leftError && !leftCommodity && leftComms.length > 0 && (
+                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Ürün seçerek fiyat verilerini görüntüleyin</div>
                 )}
-              </div>
-            )}
-
-            {!giewsLoading && !giewsError && visibleCommodityNames.map(commodityName => (
-              <div key={commodityName} style={{ marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {getCommodityEmoji(commodityName)} {translateCommodity(commodityName)}
-                  <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>({groupedByCommodity[commodityName].length} seri)</span>
-                </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
-                  {groupedByCommodity[commodityName].map(item => {
-                    const latest = item.history[0] ?? null;
-                    const pctChange = getLatestPctChange(item.history);
-                    return (
-                      <div
-                        key={`${item.countryIso}-${item.serie.uuid}`}
-                        onClick={() => setGiewsSelected(item)}
-                        style={{
-                          background: '#ffffff',
-                          border: giewsSelected?.serie.uuid === item.serie.uuid ? `2px solid ${item.color}` : '1px solid #e2e8f0',
-                          borderRadius: '1rem',
-                          padding: '1rem',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
-                          borderTop: `4px solid ${item.color}`,
-                        }}
-                        className="hover:shadow-md"
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem', gap: '0.75rem' }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: item.color, marginBottom: '0.15rem' }}>{item.countryName}</div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {item.serie.market_name}
-                            </div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.1rem' }}>
-                              {item.serie.price_type} • {item.serie.source_name}
-                            </div>
-                          </div>
-                          <span style={{
-                            fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem',
-                            borderRadius: '0.5rem', background: item.serie.price_type === 'RETAIL' ? '#dbeafe' : '#fef3c7',
-                            color: item.serie.price_type === 'RETAIL' ? '#1d4ed8' : '#92400e',
-                            whiteSpace: 'nowrap',
-                          }}>
-                            {item.serie.price_type}
-                          </span>
+                {leftInfo && !leftLoading && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
+                          {leftInfo.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
+                          <span style={{ fontSize: '0.73rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>{leftInfo.currency}/{leftInfo.unit}</span>
                         </div>
-                        {latest ? (
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '0.75rem' }}>
-                            <div>
-                              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
-                                {latest.price_value.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
-                                <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#64748b', marginLeft: '0.3rem' }}>
-                                  {item.serie.currency}/{item.serie.measure_unit_label}
-                                </span>
-                              </div>
-                              {latest.price_value_dollar != null && (
-                                <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.15rem' }}>
-                                  ≈ ${latest.price_value_dollar.toFixed(2)} USD
-                                </div>
-                              )}
-                              <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-                                {getLatestDateLabel(item.history)}
-                              </div>
-                            </div>
-                            {pctChange !== null && (
-                              <div style={{
-                                color: pctChange >= 0 ? '#22c55e' : '#ef4444',
-                                fontWeight: 700, fontSize: '0.85rem', textAlign: 'right',
-                              }}>
-                                {pctChange >= 0 ? '▲' : '▼'} {Math.abs(pctChange).toFixed(1)}%
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.5rem' }}>Fiyat verisi yok</div>
-                        )}
+                        {leftInfo.usd != null && <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.15rem' }}>≈ ${leftInfo.usd.toFixed(2)} USD</div>}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* FAO Chart Modal */}
-            {giewsSelected && (
-              <div style={{
-                position: 'fixed', inset: 0, zIndex: 1000,
-                background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '1rem',
-              }} onClick={() => setGiewsSelected(null)}>
-                <div
-                  onClick={e => e.stopPropagation()}
-                  style={{
-                    background: '#1e293b', borderRadius: '1.5rem', padding: '1.5rem',
-                    width: '100%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <div style={{ marginBottom: '1rem' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>
-                      {getCommodityEmoji(giewsSelected.serie.commodity_name)} {translateCommodity(giewsSelected.serie.commodity_name)}
-                    </h3>
-                    <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.25rem' }}>
-                      {giewsSelected.countryName} • {giewsSelected.serie.market_name} • {giewsSelected.serie.price_type} • {giewsSelected.serie.source_name}
-                    </p>
-                    {giewsSelected.history[0] && (
-                      <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                        <div>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc' }}>
-                            {giewsSelected.history[0].price_value.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
-                            <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginLeft: '0.4rem' }}>
-                              {giewsSelected.serie.currency}/{giewsSelected.serie.measure_unit_label}
-                            </span>
-                          </div>
-                          {giewsSelected.history[0].price_value_dollar != null && (
-                            <div style={{ fontSize: '0.95rem', color: '#94a3b8' }}>
-                              ≈ ${giewsSelected.history[0].price_value_dollar.toFixed(2)} USD
-                            </div>
-                          )}
+                      {leftInfo.pct != null && (
+                        <div style={{ fontSize: '1rem', fontWeight: 800, color: leftInfo.pct >= 0 ? '#16a34a' : '#dc2626', background: leftInfo.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.35rem 0.65rem', borderRadius: '0.5rem' }}>
+                          {leftInfo.pct >= 0 ? '▲' : '▼'} {Math.abs(leftInfo.pct).toFixed(1)}%
                         </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.4rem' }}>{leftInfo.date} · {leftInfo.market}</div>
+                    {leftHistory.length > 3 && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <ResponsiveContainer width="100%" height={75}>
+                          <LineChart data={leftHistory}>
+                            <Line type="monotone" dataKey="usd" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                            <Tooltip contentStyle={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} labelFormatter={(l: unknown) => String(l)} />
+                          </LineChart>
+                        </ResponsiveContainer>
                       </div>
                     )}
                   </div>
+                )}
+              </div>
 
-                  {giewsSelected.history.length > 1 ? (
-                    <ResponsiveContainer width="100%" height={280}>
-                      <LineChart data={[...giewsSelected.history].reverse().map(p => ({
-                        date: new Date(p.date).toLocaleDateString('tr-TR', { year: '2-digit', month: 'short' }),
-                        price: p.price_value,
-                        usd: p.price_value_dollar,
-                      }))}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
-                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']} />
-                        <Tooltip
-                          contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
-                          formatter={(v: number, name: string) => [
-                            name === 'usd' ? `$${v?.toFixed(2)}` : v?.toLocaleString('tr-TR', { maximumFractionDigits: 2 }),
-                            name === 'usd' ? 'USD' : `${giewsSelected.serie.currency}/${giewsSelected.serie.measure_unit_label}`,
-                          ]}
-                        />
-                        <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} dot={false} name="price" />
-                        {giewsSelected.history[0]?.price_value_dollar != null && (
-                          <Line type="monotone" dataKey="usd" stroke="#f59e0b" strokeWidth={1.5} dot={false} strokeDasharray="4 2" name="usd" />
-                        )}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Grafik için yeterli veri yok</div>
-                  )}
-
-                  <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
-                    Kaynak: FAO GIEWS — {giewsSelected.serie.source_name} • Mavi: yerel para, Sarı kesikli: USD
+              {/* ── RIGHT PANEL ── */}
+              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', borderTop: '4px solid #f59e0b', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Panel B</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <select value={rightCountry} onChange={e => { setRightCountry(e.target.value); setRightCommodity(''); }} style={selStyle}>
+                    {GIEWS_COUNTRIES.map(c => <option key={c.iso3} value={c.iso3}>{COUNTRY_TR[c.name] ?? c.name}</option>)}
+                  </select>
+                  <select value={rightCommodity} onChange={e => setRightCommodity(e.target.value)} disabled={rightLoading || rightComms.length === 0} style={{ ...selStyle, opacity: rightLoading || rightComms.length === 0 ? 0.5 : 1 }}>
+                    <option value="">Ürün seçin...</option>
+                    {rightComms.map(name => <option key={name} value={name}>{getCommodityEmoji(name)} {translateCommodity(name)}</option>)}
+                  </select>
+                </div>
+                {rightLoading && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>⏳ Yükleniyor...</div>}
+                {rightError && !rightLoading && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>❌ {rightError}</div>}
+                {!rightLoading && !rightError && !rightCommodity && rightComms.length > 0 && (
+                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Ürün seçerek fiyat verilerini görüntüleyin</div>
+                )}
+                {rightInfo && !rightLoading && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
+                          {rightInfo.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
+                          <span style={{ fontSize: '0.73rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>{rightInfo.currency}/{rightInfo.unit}</span>
+                        </div>
+                        {rightInfo.usd != null && <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.15rem' }}>≈ ${rightInfo.usd.toFixed(2)} USD</div>}
+                      </div>
+                      {rightInfo.pct != null && (
+                        <div style={{ fontSize: '1rem', fontWeight: 800, color: rightInfo.pct >= 0 ? '#16a34a' : '#dc2626', background: rightInfo.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.35rem 0.65rem', borderRadius: '0.5rem' }}>
+                          {rightInfo.pct >= 0 ? '▲' : '▼'} {Math.abs(rightInfo.pct).toFixed(1)}%
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.4rem' }}>{rightInfo.date} · {rightInfo.market}</div>
+                    {rightHistory.length > 3 && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <ResponsiveContainer width="100%" height={75}>
+                          <LineChart data={rightHistory}>
+                            <Line type="monotone" dataKey="usd" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                            <Tooltip contentStyle={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} labelFormatter={(l: unknown) => String(l)} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <button
-                    onClick={() => setGiewsSelected(null)}
-                    style={{
-                      marginTop: '1rem', width: '100%', padding: '0.75rem',
-                      background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-                      borderRadius: '0.75rem', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.9rem',
-                    }}
-                  >
-                    Kapat
-                  </button>
+            {/* Comparison chart */}
+            {!hasComparison ? (
+              <div style={{ background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '1rem', padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+                📊 Her iki panelden de ürün seçildiğinde karşılaştırma grafiği görünür
+              </div>
+            ) : (
+              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>📈 Fiyat Karşılaştırması</h3>
+                    <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>Son 24 ay · USD bazında normalize edilmiş aylık ortalama fiyatlar</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <span style={{ width: 20, height: 3, background: '#3b82f6', display: 'inline-block', borderRadius: 2 }} />
+                      {lLabel} / {translateCommodity(leftCommodity)}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <span style={{ width: 20, height: 3, background: '#f59e0b', display: 'inline-block', borderRadius: 2 }} />
+                      {rLabel} / {translateCommodity(rightCommodity)}
+                    </div>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <LineChart data={compData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} />
+                    <Tooltip
+                      contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', fontSize: '0.82rem' }}
+                      formatter={(v: number, name: string) => [
+                        `$${Number(v).toFixed(2)}`,
+                        name === 'left' ? `${lLabel} / ${translateCommodity(leftCommodity)}` : `${rLabel} / ${translateCommodity(rightCommodity)}`,
+                      ]}
+                    />
+                    <Line type="monotone" dataKey="left" stroke="#3b82f6" strokeWidth={2.5} dot={false} connectNulls name="left" />
+                    <Line type="monotone" dataKey="right" stroke="#f59e0b" strokeWidth={2.5} dot={false} connectNulls name="right" strokeDasharray="6 3" />
+                  </LineChart>
+                </ResponsiveContainer>
+                <div style={{ fontSize: '0.72rem', color: '#94a3b8', textAlign: 'center', marginTop: '0.5rem' }}>
+                  Kaynak: FAO GIEWS · Birden fazla market serisi aylık ortalamalarla birleştirilmiştir
                 </div>
               </div>
             )}
