@@ -536,7 +536,7 @@ export function buildWhereClause(filters: {
 }
 
 // ========== FAO GIEWS Ülke Fiyatları ==========
-const FAO_GIEWS_BASE = 'https://fpma.fao.org/giews/v4/global/price_module/api/v1';
+const FAO_GIEWS_BASE = '/api/fao';
 
 export interface GiewsSerie {
   uuid: string;

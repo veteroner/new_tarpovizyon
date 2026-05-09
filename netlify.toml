@@ -28,6 +28,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/fao/*"
+  to = "https://fpma.fao.org/giews/v4/global/price_module/api/v1/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
