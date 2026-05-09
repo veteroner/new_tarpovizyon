@@ -126,6 +126,10 @@ const turkeyCategories: MenuCategory[] = [
   {
     title: 'Araçlar', icon: TrendingUp, items: [
       { label: 'Rasyon', path: '/rasyon' },
+      { label: 'Hasat Tahmini', path: '/hasat-tahmini' },
+      { label: 'Sulama Planı', path: '/sulama-plan' },
+      { label: 'Gübre Hesap', path: '/gubre-hesap' },
+      { label: 'Tarım Takvimi', path: '/tarim-takvim' },
     ],
   },
 ];

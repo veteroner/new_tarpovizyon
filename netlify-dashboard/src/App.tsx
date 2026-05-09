@@ -4,7 +4,6 @@ import { Header } from './components/Header';
 import TarpoShell from './components/TarpoShell';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
 import { SelectionPage } from './pages/SelectionPage';
-import { HomePage } from './pages/HomePage';
 import { OverviewPage } from './pages/OverviewPage';
 import { TradePage } from './pages/TradePage';
 import { ProductionPage } from './pages/ProductionPage';
@@ -101,11 +100,12 @@ function AppContent() {
           {/* Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />
           
-          {/* TARPOVIZYON - Tüm sayfalar Responsive Hybrid layout içinde */}
+          {/* TARPOVIZYON - Seçim sayfası standalone, veri sayfaları TarpoShell içinde */}
+          <Route path="/tarpovizyon" element={<SelectionPage />} />
+
           <Route element={<TarpoShell />}>
-            <Route path="/tarpovizyon" element={<SelectionPage />} />
-            <Route path="/tarpovizyon/world" element={<HomePage />} />
-            <Route path="/tarpovizyon/turkey" element={<HomePage />} />
+            <Route path="/tarpovizyon/world" element={<Navigate to="/tarpovizyon/world/macro-economic" replace />} />
+            <Route path="/tarpovizyon/turkey" element={<Navigate to="/tarpovizyon/turkey/macro" replace />} />
             <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
             <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
             <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />

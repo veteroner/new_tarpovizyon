@@ -46,7 +46,7 @@ function calcStdDev(values: number[]): number {
 // ---------- HOOK ----------
 export function usePriceIndexData() {
   const [dataset, setDataset] = useState<DatasetId>('TUFE');
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState('2026');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [productOptions, setProductOptions] = useState<{ code: string; name: string }[]>([]);
