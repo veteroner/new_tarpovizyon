@@ -134,7 +134,7 @@ export function HomePage() {
       {/* Back to Selection Button */}
       <button 
         className="back-to-selection"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/tarpovizyon')}
         aria-label="Ana seçim sayfasına dön"
       >
         <Home size={20} />

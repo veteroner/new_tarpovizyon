@@ -67,12 +67,12 @@ export default function PriceIndexPage() {
       ) : (
         <>
           <div className="kpi-grid">
-            <div className="kpi-card large">
+            <div className="kpi-card large" style={{ background: `linear-gradient(135deg, ${config.color}, ${config.color}cc)` }}>
               <div className="kpi-header">
                 <span className="kpi-title">YIL ORTALAMASI</span>
-                <div className="kpi-icon" style={{ color: config.color }}><Activity size={18} /></div>
+                <div className="kpi-icon" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}><Activity size={18} /></div>
               </div>
-              <div className="kpi-value" style={{ color: config.color }}>{formatIndex(avgIndex)}</div>
+              <div className="kpi-value">{formatIndex(avgIndex)}</div>
               <div className="kpi-subtitle">{selectedProductName} · {selectedYear}</div>
             </div>
             <div className="kpi-card">
