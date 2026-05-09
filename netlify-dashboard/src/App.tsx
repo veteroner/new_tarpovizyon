@@ -70,19 +70,15 @@ const queryClient = new QueryClient();
 function AppContent() {
   const location = useLocation();
   
-  // Ana program seçimi, Tarpovizyon giriş ve Tarpovizyon ana sayfalarda header'ı gizle
+  // Ana program seçimi ve araç sayfalarında header'ı gizle
   const isProgramSelection = location.pathname === '/';
-  const isTarpovizyonSelection = location.pathname === '/tarpovizyon';
-  const isTarpovizyonHome = location.pathname === '/tarpovizyon/world' || location.pathname === '/tarpovizyon/turkey';
   const isRasyonPage = location.pathname.startsWith('/rasyon');
   const isHasatPage = location.pathname === '/hasat-tahmini';
   const isSulamaPage = location.pathname === '/sulama-plan';
   const isGubrePage = location.pathname === '/gubre-hesap';
   const isTakvimPage = location.pathname === '/tarim-takvim';
-  const isTarpoShellRoute =
-    location.pathname.startsWith('/tarpovizyon/') &&
-    !isTarpovizyonHome;
-  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isTarpoShellRoute;
+  const isTarpoShellRoute = location.pathname.startsWith('/tarpovizyon');
+  const hideHeader = isProgramSelection || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isTarpoShellRoute;
 
   return (
     <>
@@ -105,15 +101,13 @@ function AppContent() {
           {/* Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />
           
-          {/* TARPOVIZYON - Tarım İstihbarat Platformu */}
-          <Route path="/tarpovizyon" element={<SelectionPage />} />
-          <Route path="/tarpovizyon/world" element={<HomePage />} />
-          <Route path="/tarpovizyon/turkey" element={<HomePage />} />
-          <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
-          <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
-
-          {/* TARPOVIZYON - Veri Sayfaları (Responsive Hybrid layout) */}
+          {/* TARPOVIZYON - Tüm sayfalar Responsive Hybrid layout içinde */}
           <Route element={<TarpoShell />}>
+            <Route path="/tarpovizyon" element={<SelectionPage />} />
+            <Route path="/tarpovizyon/world" element={<HomePage />} />
+            <Route path="/tarpovizyon/turkey" element={<HomePage />} />
+            <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
+            <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
             <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
 
             {/* Emtia Fiyatları & AI */}
