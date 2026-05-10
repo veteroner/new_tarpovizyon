@@ -571,7 +571,7 @@ export default function CommodityPricesPage() {
 
   // International prices — load on first visit to tab
   useEffect(() => {
-    if (activeTab !== 'intl' || intlSeries.length > 0 || intlLoading) return;
+    if (activeTab !== 'intl' || intlSeries.length > 0) return;
     let cancelled = false;
     setIntlLoading(true);
     setIntlError('');
@@ -588,7 +588,7 @@ export default function CommodityPricesPage() {
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, intlSeries.length, intlLoading]);
+  }, [activeTab, intlSeries.length]);
 
 
   const categories = ['all', ...Array.from(new Set(commodities.map(c => c.category)))];
