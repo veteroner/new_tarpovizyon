@@ -21,7 +21,7 @@ import EconomicIndicatorsSection from './redmeat/EconomicIndicatorsSection';
 export default function TurkeyRedMeatProductionPage() {
   const [loading, setLoading] = useState(true);
   const [series, setSeries] = useState<YearPoint[]>([]);
-  const [startYear, setStartYear] = useState(2010);
+  const [startYear, setStartYear] = useState(1986);
   const [economicData, setEconomicData] = useState<EconomicData[]>([]);
   const [worldCarcassPrices, setWorldCarcassPrices] = useState<WorldCarcassPrices | null>(null);
   const [productivityComparison, setProductivityComparison] = useState<ProductivityComparison[]>([]);
@@ -38,7 +38,13 @@ export default function TurkeyRedMeatProductionPage() {
       const histRes = await fetchQuery('SELECT * FROM oner_hayvansal_urun_uretimi ORDER BY yillar');
       const histData = (histRes.data ?? []) as Record<string, string | number>[];
 
-      // 2. Türlere Göre Kırılım (2010-2024)
+      // 2a. Türlere Göre Kırılım - Tarihsel (1986-2009): büyükbaş+koyun+keçi
+      const histSpeciesRes = await fetchQuery(
+        'SELECT YEAR(yil) as yil, buyukbas_et_uretimi_ton, koyun_et_uretimi_ton, keci_et_uretimi_ton FROM oner_kirmizi_et_uretim_miktari ORDER BY yil'
+      );
+      const histSpeciesData = (histSpeciesRes.data ?? []) as Record<string, string | number>[];
+
+      // 2b. Türlere Göre Kırılım - Güncel (2010-2024): sığır/manda/koyun/keçi ayrı
       const detailRes = await fetchQuery('SELECT * FROM oner_kirmizi_et_uretimi ORDER BY yil');
       const detailData = (detailRes.data ?? []) as Record<string, string | number>[];
 
@@ -53,6 +59,20 @@ export default function TurkeyRedMeatProductionPage() {
         kucukbasToplam: 0,
       }));
 
+      // 1986-2009 arası tarihsel tür verisi (büyükbaş = sığır+manda birlikte)
+      histSpeciesData.forEach(row => {
+        const year = Number(row['yil']);
+        const point = allPoints.find(p => p.year === year);
+        if (point && year < 2010) {
+          point.cattleTon = Number(row['buyukbas_et_uretimi_ton']) || 0;
+          point.sheepTon = Number(row['koyun_et_uretimi_ton']) || 0;
+          point.goatTon = Number(row['keci_et_uretimi_ton']) || 0;
+          point.buyukbasToplam = Number(row['buyukbas_et_uretimi_ton']) || 0;
+          point.kucukbasToplam = (Number(row['koyun_et_uretimi_ton']) || 0) + (Number(row['keci_et_uretimi_ton']) || 0);
+        }
+      });
+
+      // 2010+ TÜİK verisini üzerine yaz (daha detaylı sığır/manda/koyun/keçi)
       detailData.forEach(row => {
         const year = Number(row['yil']);
         const point = allPoints.find(p => p.year === year);
@@ -376,13 +396,14 @@ export default function TurkeyRedMeatProductionPage() {
           <select
             className="filter-select"
             value={startYear}
-            onChange={(e) => setStartYear(Number(e.target.value) || 2010)}
+            onChange={(e) => setStartYear(Number(e.target.value) || 1986)}
             disabled={!availableYears.length}
           >
+            <option value={1986}>1986 (Tüm Veriler)</option>
+            <option value={2000}>2000</option>
             <option value={2010}>2010</option>
             <option value={2015}>2015</option>
             <option value={2020}>2020</option>
-            {availableYears.includes(minYear) && <option value={minYear}>{minYear} (Tüm Veriler)</option>}
           </select>
         </div>
       </div>
