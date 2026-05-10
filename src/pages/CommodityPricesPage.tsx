@@ -530,6 +530,48 @@ export default function CommodityPricesPage() {
   const [intlSelected, setIntlSelected] = useState<GiewsSerie | null>(null);
   const [intlSelectedHistory, setIntlSelectedHistory] = useState<GiewsDatapoint[]>([]);
 
+  const loadPrices = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetchCommodityPrices();
+      if (res.success && res.commodities) {
+        setCommodities(res.commodities);
+        setLastUpdate(res.updated || '');
+        setSource(res.source || '');
+      } else {
+        setError(res.error || 'Veriler alınamadı');
+      }
+    } catch {
+      setError('Bağlantı hatası');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPrices();
+    const interval = setInterval(loadPrices, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [loadPrices]);
+
+  const loadChart = useCallback(async (symbol: string, range: string) => {
+    setChartLoading(true);
+    try {
+      const res = await fetchCommodityChart(symbol, range);
+      if (res.success && res.data) {
+        setChartData(res.data);
+      }
+    } catch { /* ignore */ }
+    setChartLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedCommodity) {
+      loadChart(selectedCommodity.symbol, chartRange);
+    }
+  }, [selectedCommodity, chartRange, loadChart]);
+
   // FAO GIEWS — load selected country data
   useEffect(() => {
     if (activeTab !== 'fao') return;
