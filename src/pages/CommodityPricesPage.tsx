@@ -657,7 +657,7 @@ export default function CommodityPricesPage() {
       <BackToHome />
       <div className="page-header">
         <h1 className="page-title">
-          {activeTab === 'yahoo' ? '📊 Borsa Emtia Fiyatları' : activeTab === 'fao' ? '🌍 FAO İç Piyasa Fiyatları' : '🌐 Uluslararası Emtia Fiyatları'}
+          {activeTab === 'yahoo' ? '📊 Borsa & Vadeli Piyasa Fiyatları' : activeTab === 'fao' ? '🌍 Ülkelerin Yurtiçi Tarım Ürünleri Fiyatları' : '🌐 Küresel Emtia Fiyatları'}
         </h1>
         <p className="page-subtitle">
           {activeTab === 'yahoo' ? 'Yahoo Finance canlı vadeli işlem ve spot piyasa göstergeleri' : activeTab === 'fao' ? 'FAO GIEWS ülke bazlı yerel market fiyatları ve çoklu ülke karşılaştırması' : 'FAO FPMA · 90 uluslararası emtia serisi · Gübre, Enerji, Tahıllar, Et, Süt ve daha fazlası'}
@@ -685,7 +685,7 @@ export default function CommodityPricesPage() {
               transition: 'all 0.2s',
             }}
           >
-            {tab === 'yahoo' ? '📊 Yahoo Finance' : tab === 'fao' ? '🌍 FAO İç Piyasa' : '🌐 Uluslararası Emtia'}
+            {tab === 'yahoo' ? '📊 Borsa & Vadeli Piyasa' : tab === 'fao' ? '🌍 Ülkelerin Yurtiçi Tarım Ürünleri' : '🌐 Küresel Emtia Fiyatları'}
           </button>
         ))}
       </div>
@@ -777,7 +777,7 @@ export default function CommodityPricesPage() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{c.name}</div>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{translateCommodity(c.name)}</div>
                         <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{c.symbol} • {c.unit}</div>
                       </div>
                       <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r ${CATEGORY_COLORS[category] || 'from-gray-500 to-gray-600'} text-white`}>
@@ -824,7 +824,7 @@ export default function CommodityPricesPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9' }}>
-                      {selectedCommodity.name} ({selectedCommodity.symbol})
+                      {translateCommodity(selectedCommodity.name)} ({selectedCommodity.symbol})
                     </h3>
                     <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
                       {selectedCommodity.category} • {selectedCommodity.unit}
@@ -839,7 +839,7 @@ export default function CommodityPricesPage() {
                       {selectedCommodity.changePct >= 0 ? '▲' : '▼'} {Math.abs(selectedCommodity.changePct).toFixed(2)}%
                     </div>
                   </div>
-                  <ChartInsightButton title={`${selectedCommodity.name} Fiyat Grafiği`} description="Emtia fiyat grafiği" data={chartData.map(p => ({ date: new Date(p.t * 1000).toLocaleDateString('tr-TR'), price: p.c }))} context={{ section: 'Emtia Fiyatları' }} compact />
+                  <ChartInsightButton title={`${translateCommodity(selectedCommodity.name)} Fiyat Grafiği`} description="Emtia fiyat grafiği" data={chartData.map(p => ({ date: new Date(p.t * 1000).toLocaleDateString('tr-TR'), price: p.c }))} context={{ section: 'Emtia Fiyatları' }} compact />
                   </div>
                 </div>
 
