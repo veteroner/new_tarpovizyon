@@ -576,14 +576,50 @@ export async function fetchGiewsSeries(iso3: string): Promise<GiewsSerie[]> {
 export async function fetchGiewsPricesBatch(uuids: string[]): Promise<GiewsPriceResult[]> {
   if (!uuids.length) return [];
   const CHUNK = 50;
-  const results: GiewsPriceResult[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const flat: any[] = [];
   for (let i = 0; i < uuids.length; i += CHUNK) {
     const chunk = uuids.slice(i, i + CHUNK);
     try {
-      const url = `${FAO_GIEWS_BASE}/FpmaSeriePrice/?uuid__in=${chunk.join(',')}&periodicity=monthly&startdate=2022-01-01&page_size=2000`;
+      const url = `${FAO_GIEWS_BASE}/FpmaSeriePrice/?uuid__in=${chunk.join(',')}&periodicity=monthly&startdate=2021-01-01&page_size=5000`;
       const res = await axios.get(url, { timeout: 20000 });
-      results.push(...(res.data?.results ?? []));
+      flat.push(...(res.data?.results ?? []));
     } catch { /* ignore failed chunks */ }
   }
-  return results;
+  // Handle both API formats:
+  //   grouped: { uuid, datapoints: [...] }
+  //   flat:    { uuid, price_value, price_value_dollar, date, periodicity, id }
+  const grouped = new Map<string, GiewsDatapoint[]>();
+  for (const r of flat) {
+    if (Array.isArray(r.datapoints)) {
+      grouped.set(r.uuid, r.datapoints as GiewsDatapoint[]);
+    } else if (r.uuid !== undefined && r.price_value !== undefined) {
+      const pts = grouped.get(r.uuid) ?? [];
+      pts.push({ id: r.id ?? 0, price_value: r.price_value, price_value_dollar: r.price_value_dollar ?? null, date: r.date, periodicity: r.periodicity ?? 'monthly' });
+      grouped.set(r.uuid, pts);
+    }
+  }
+  for (const pts of grouped.values()) pts.sort((a, b) => b.date.localeCompare(a.date));
+  return Array.from(grouped.entries()).map(([uuid, datapoints]) => ({ uuid, datapoints }));
+}
+
+// Fetch all series for a commodity across all countries (for world comparison)
+export async function fetchGiewsSeriesByCommodity(commodityName: string): Promise<GiewsSerie[]> {
+  try {
+    const url = `${FAO_GIEWS_BASE}/FpmaSerieDomestic/?format=json&commodity_name=${encodeURIComponent(commodityName)}&page_size=500`;
+    const res = await axios.get(url, { timeout: 25000 });
+    return res.data?.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchGiewsInternationalSeries(): Promise<GiewsSerie[]> {
+  try {
+    const url = `${FAO_GIEWS_BASE}/FpmaSerieInternational/?format=json&page_size=200`;
+    const res = await axios.get(url, { timeout: 25000 });
+    return res.data?.results ?? [];
+  } catch {
+    return [];
+  }
 }

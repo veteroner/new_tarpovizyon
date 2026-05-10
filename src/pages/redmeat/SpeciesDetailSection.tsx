@@ -15,18 +15,20 @@ type Props = {
 };
 
 export default function SpeciesDetailSection({ filteredSeries }: Props) {
-  const data2010 = filteredSeries.filter(p => p.year >= 2010);
+  const rangeLabel = filteredSeries.length
+    ? `${filteredSeries[0].year}–${filteredSeries[filteredSeries.length - 1].year}`
+    : '';
 
   return (
     <div className="chart-grid" style={{ marginTop: '30px' }}>
       {/* Sığır Üretimi */}
       <div className="chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐄 Sığır Eti Üretimi (2010-2024)</h3>
-          <ChartInsightButton title="🐄 Sığır Eti Üretimi (2010-2024)" description="Yıllık sığır eti üretim verisi" data={data2010} context={{ tur: 'sigir' }} compact />
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐄 Sığır Eti Üretimi {rangeLabel && `(${rangeLabel})`}</h3>
+          <ChartInsightButton title={`🐄 Sığır Eti Üretimi (${rangeLabel})`} description="Yıllık sığır eti üretim verisi" data={filteredSeries} context={{ tur: 'sigir' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
@@ -42,11 +44,11 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       {/* Koyun Üretimi */}
       <div className="chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐑 Koyun Eti Üretimi (2010-2024)</h3>
-          <ChartInsightButton title="🐑 Koyun Eti Üretimi (2010-2024)" description="Yıllık koyun eti üretim verisi" data={data2010} context={{ tur: 'koyun' }} compact />
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐑 Koyun Eti Üretimi {rangeLabel && `(${rangeLabel})`}</h3>
+          <ChartInsightButton title={`🐑 Koyun Eti Üretimi (${rangeLabel})`} description="Yıllık koyun eti üretim verisi" data={filteredSeries} context={{ tur: 'koyun' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
@@ -62,11 +64,11 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       {/* Keçi Üretimi */}
       <div className="chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐐 Keçi Eti Üretimi (2010-2024)</h3>
-          <ChartInsightButton title="🐐 Keçi Eti Üretimi (2010-2024)" description="Yıllık keçi eti üretim verisi" data={data2010} context={{ tur: 'keci' }} compact />
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🐐 Keçi Eti Üretimi {rangeLabel && `(${rangeLabel})`}</h3>
+          <ChartInsightButton title={`🐐 Keçi Eti Üretimi (${rangeLabel})`} description="Yıllık keçi eti üretim verisi" data={filteredSeries} context={{ tur: 'keci' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
@@ -82,11 +84,11 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       {/* Manda Üretimi */}
       <div className="chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🦬 Manda Eti Üretimi (2010-2024)</h3>
-          <ChartInsightButton title="🦬 Manda Eti Üretimi (2010-2024)" description="Yıllık manda eti üretim verisi" data={data2010} context={{ tur: 'manda' }} compact />
+          <h3 className="chart-title" style={{ marginBottom: 0 }}>🦬 Manda Eti Üretimi {rangeLabel && `(${rangeLabel})`}</h3>
+          <ChartInsightButton title={`🦬 Manda Eti Üretimi (${rangeLabel})`} description="Yıllık manda eti üretim verisi" data={filteredSeries} context={{ tur: 'manda' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data2010} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
