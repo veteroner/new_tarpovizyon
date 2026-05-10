@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, BarChart, Bar, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { fetchCommodityPrices, fetchCommodityChart, fetchGiewsSeries, fetchGiewsPricesBatch } from '../services/api';
+import { fetchCommodityPrices, fetchCommodityChart, fetchGiewsSeries, fetchGiewsPricesBatch, fetchGiewsSeriesByCommodity, fetchGiewsInternationalSeries } from '../services/api';
 import type { CommodityItem, ChartPoint, GiewsSerie, GiewsDatapoint, GiewsPriceResult } from '../services/api';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -502,101 +503,93 @@ export default function CommodityPricesPage() {
   const [chartLoading, setChartLoading] = useState(false);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'yahoo' | 'fao'>('yahoo');
+  const [activeTab, setActiveTab] = useState<'yahoo' | 'fao' | 'intl'>('yahoo');
 
-  // FAO GIEWS state — two-panel comparison
-  const [leftCountry, setLeftCountry] = useState('TUR');
-  const [rightCountry, setRightCountry] = useState('EGY');
-  const [leftCommodity, setLeftCommodity] = useState('');
-  const [rightCommodity, setRightCommodity] = useState('');
-  const [leftSeries, setLeftSeries] = useState<GiewsSerie[]>([]);
-  const [rightSeries, setRightSeries] = useState<GiewsSerie[]>([]);
-  const [leftPriceMap, setLeftPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
-  const [rightPriceMap, setRightPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
-  const [leftLoading, setLeftLoading] = useState(false);
-  const [rightLoading, setRightLoading] = useState(false);
-  const [leftError, setLeftError] = useState('');
-  const [rightError, setRightError] = useState('');
+  // FAO GIEWS state
+  const [faoCountry, setFaoCountry] = useState('TUR');
+  const [faoSeries, setFaoSeries] = useState<GiewsSerie[]>([]);
+  const [faoPriceMap, setFaoPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
+  const [faoLoading, setFaoLoading] = useState(false);
+  const [faoError, setFaoError] = useState('');
+  const [faoSearch, setFaoSearch] = useState('');
+  const [faoSort, setFaoSort] = useState<'name' | 'price_asc' | 'price_desc' | 'change_desc' | 'change_asc'>('name');
+  const [faoDetailComm, setFaoDetailComm] = useState('');
+  const [faoDetailRange, setFaoDetailRange] = useState<'6mo' | '1y' | '2y' | 'max'>('1y');
+  const [worldModalComm, setWorldModalComm] = useState('');
+  const [worldSeries, setWorldSeries] = useState<GiewsSerie[]>([]);
+  const [worldPriceMap, setWorldPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
+  const [worldLoading, setWorldLoading] = useState(false);
+  const [worldError, setWorldError] = useState('');
 
-  const loadPrices = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetchCommodityPrices();
-      if (res.success && res.commodities) {
-        setCommodities(res.commodities);
-        setLastUpdate(res.updated || '');
-        setSource(res.source || '');
-      } else {
-        setError(res.error || 'Veriler alınamadı');
-      }
-    } catch {
-      setError('Bağlantı hatası');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // International prices state
+  const [intlSeries, setIntlSeries] = useState<GiewsSerie[]>([]);
+  const [intlPriceMap, setIntlPriceMap] = useState<Map<string, GiewsDatapoint[]>>(new Map());
+  const [intlLoading, setIntlLoading] = useState(false);
+  const [intlError, setIntlError] = useState('');
+  const [intlCategoryFilter, setIntlCategoryFilter] = useState<string>('all');
+  const [intlSelected, setIntlSelected] = useState<GiewsSerie | null>(null);
+  const [intlSelectedHistory, setIntlSelectedHistory] = useState<GiewsDatapoint[]>([]);
 
-  useEffect(() => {
-    loadPrices();
-    const interval = setInterval(loadPrices, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [loadPrices]);
-
-  const loadChart = useCallback(async (symbol: string, range: string) => {
-    setChartLoading(true);
-    try {
-      const res = await fetchCommodityChart(symbol, range);
-      if (res.success && res.data) {
-        setChartData(res.data);
-      }
-    } catch { /* ignore */ }
-    setChartLoading(false);
-  }, []);
-
-  useEffect(() => {
-    if (selectedCommodity) {
-      loadChart(selectedCommodity.symbol, chartRange);
-    }
-  }, [selectedCommodity, chartRange, loadChart]);
-
-  // FAO GIEWS loading — left panel
+  // FAO GIEWS — load selected country data
   useEffect(() => {
     if (activeTab !== 'fao') return;
     let cancelled = false;
-    setLeftLoading(true); setLeftError(''); setLeftSeries([]); setLeftPriceMap(new Map()); setLeftCommodity('');
+    setFaoLoading(true); setFaoError(''); setFaoSeries([]); setFaoPriceMap(new Map());
     (async () => {
       try {
-        const series = await fetchGiewsSeries(leftCountry);
+        const series = await fetchGiewsSeries(faoCountry);
         const uuids = series.map(s => s.uuid);
         const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
         const pm = new Map<string, GiewsDatapoint[]>();
         for (const r of priceResults) pm.set(r.uuid, r.datapoints);
-        if (!cancelled) { setLeftSeries(series); setLeftPriceMap(pm); }
-      } catch { if (!cancelled) setLeftError('FAO GIEWS verisi alınamadı'); }
-      finally { if (!cancelled) setLeftLoading(false); }
+        if (!cancelled) { setFaoSeries(series); setFaoPriceMap(pm); }
+      } catch { if (!cancelled) setFaoError('FAO GIEWS verisi alınamadı'); }
+      finally { if (!cancelled) setFaoLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, [activeTab, leftCountry]);
+  }, [activeTab, faoCountry]);
 
-  // FAO GIEWS loading — right panel
+  // FAO GIEWS — load world comparison data when world modal opens
   useEffect(() => {
-    if (activeTab !== 'fao') return;
+    if (!worldModalComm) return;
     let cancelled = false;
-    setRightLoading(true); setRightError(''); setRightSeries([]); setRightPriceMap(new Map()); setRightCommodity('');
+    setWorldLoading(true); setWorldError(''); setWorldSeries([]); setWorldPriceMap(new Map());
     (async () => {
       try {
-        const series = await fetchGiewsSeries(rightCountry);
+        const series = await fetchGiewsSeriesByCommodity(worldModalComm);
+        if (!cancelled) setWorldSeries(series);
         const uuids = series.map(s => s.uuid);
         const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
         const pm = new Map<string, GiewsDatapoint[]>();
         for (const r of priceResults) pm.set(r.uuid, r.datapoints);
-        if (!cancelled) { setRightSeries(series); setRightPriceMap(pm); }
-      } catch { if (!cancelled) setRightError('FAO GIEWS verisi alınamadı'); }
-      finally { if (!cancelled) setRightLoading(false); }
+        if (!cancelled) setWorldPriceMap(pm);
+      } catch { if (!cancelled) setWorldError('Dünya verileri alınamadı'); }
+      finally { if (!cancelled) setWorldLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, [activeTab, rightCountry]);
+  }, [worldModalComm]);
+
+  // International prices — load on first visit to tab
+  useEffect(() => {
+    if (activeTab !== 'intl' || intlSeries.length > 0 || intlLoading) return;
+    let cancelled = false;
+    setIntlLoading(true);
+    setIntlError('');
+    (async () => {
+      try {
+        const series = await fetchGiewsInternationalSeries();
+        const uuids = series.map(s => s.uuid);
+        const priceResults: GiewsPriceResult[] = uuids.length ? await fetchGiewsPricesBatch(uuids) : [];
+        const pm = new Map<string, GiewsDatapoint[]>();
+        for (const r of priceResults) pm.set(r.uuid, r.datapoints);
+        if (!cancelled) { setIntlSeries(series); setIntlPriceMap(pm); }
+      } catch { if (!cancelled) setIntlError('Uluslararası fiyat verisi alınamadı'); }
+      finally { if (!cancelled) setIntlLoading(false); }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, intlSeries.length, intlLoading]);
+
 
   const categories = ['all', ...Array.from(new Set(commodities.map(c => c.category)))];
   const filtered = selectedCategory === 'all' 
@@ -622,10 +615,10 @@ export default function CommodityPricesPage() {
       <BackToHome />
       <div className="page-header">
         <h1 className="page-title">
-          {activeTab === 'yahoo' ? '📊 Borsa Emtia Fiyatları' : '🌍 FAO İç Piyasa Fiyatları'}
+          {activeTab === 'yahoo' ? '📊 Borsa Emtia Fiyatları' : activeTab === 'fao' ? '🌍 FAO İç Piyasa Fiyatları' : '🌐 Uluslararası Emtia Fiyatları'}
         </h1>
         <p className="page-subtitle">
-          {activeTab === 'yahoo' ? 'Yahoo Finance canlı vadeli işlem ve spot piyasa göstergeleri' : 'FAO GIEWS ülke bazlı yerel market fiyatları ve çoklu ülke karşılaştırması'}
+          {activeTab === 'yahoo' ? 'Yahoo Finance canlı vadeli işlem ve spot piyasa göstergeleri' : activeTab === 'fao' ? 'FAO GIEWS ülke bazlı yerel market fiyatları ve çoklu ülke karşılaştırması' : 'FAO FPMA · 90 uluslararası emtia serisi · Gübre, Enerji, Tahıllar, Et, Süt ve daha fazlası'}
           {activeTab === 'yahoo' && lastUpdate && <span className="ml-2 text-xs opacity-70">• Son güncelleme: {lastUpdate}</span>}
           {activeTab === 'yahoo' && source && <span className="ml-2 text-xs opacity-70">• Kaynak: {source}</span>}
         </p>
@@ -633,7 +626,7 @@ export default function CommodityPricesPage() {
 
       {/* Tab Switcher */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-        {(['yahoo', 'fao'] as const).map(tab => (
+        {(['yahoo', 'fao', 'intl'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -650,7 +643,7 @@ export default function CommodityPricesPage() {
               transition: 'all 0.2s',
             }}
           >
-            {tab === 'yahoo' ? '📊 Yahoo Finance' : '🌍 FAO İç Piyasa'}
+            {tab === 'yahoo' ? '📊 Yahoo Finance' : tab === 'fao' ? '🌍 FAO İç Piyasa' : '🌐 Uluslararası Emtia'}
           </button>
         ))}
       </div>
@@ -886,233 +879,795 @@ export default function CommodityPricesPage() {
       )}
 
       {/* ===== FAO GIEWS İç Piyasa Tab ===== */}
+
+      {/* ===== FAO GIEWS İç Piyasa Tab ===== */}
       {activeTab === 'fao' && (() => {
-        // Build averaged USD price history (last 24 months) for a selected commodity
-        const buildHistory = (series: GiewsSerie[], priceMap: Map<string, GiewsDatapoint[]>, commodity: string) => {
-          const relevant = series.filter(s => s.commodity_name === commodity);
+        // ─── helpers ──────────────────────────────────────────────────────────
+        const getCardData = (commodity: string) => {
+          const relevant = faoSeries.filter(s => s.commodity_name === commodity);
+          let best: GiewsSerie | null = null;
+          let bestPts: GiewsDatapoint[] = [];
+          for (const s of relevant) {
+            const pts = faoPriceMap.get(s.uuid) ?? [];
+            if (pts.length > bestPts.length) { best = s; bestPts = pts; }
+          }
+          if (!best || bestPts.length === 0) return null;
+          const latest = bestPts.find(p => p.price_value > 0);
+          if (!latest) return null;
+          const prev = bestPts.find(p => p.price_value > 0 && p.date < latest.date);
+          const pct = prev ? ((latest.price_value - prev.price_value) / prev.price_value) * 100 : null;
+          const sparkline = bestPts.slice(0, 12).reverse()
+            .filter(p => p.price_value_dollar != null && p.price_value_dollar > 0)
+            .map(p => ({ date: p.date.slice(0, 7), usd: p.price_value_dollar }));
+          return { price: latest.price_value, usd: latest.price_value_dollar, currency: best.currency, unit: best.measure_unit_label, date: latest.date, pct, market: best.market_name, sparkline };
+        };
+
+        const buildDetailHistory = (commodity: string, range: string) => {
+          const relevant = faoSeries.filter(s => s.commodity_name === commodity);
           const dateMap = new Map<string, { sum: number; cnt: number }>();
           for (const s of relevant) {
-            for (const p of (priceMap.get(s.uuid) ?? [])) {
-              if (p.price_value_dollar == null) continue;
+            for (const p of (faoPriceMap.get(s.uuid) ?? [])) {
+              if (!p.price_value_dollar || p.price_value_dollar <= 0) continue;
               const d = p.date.slice(0, 7);
               const cur = dateMap.get(d) ?? { sum: 0, cnt: 0 };
-              cur.sum += p.price_value_dollar;
-              cur.cnt++;
+              cur.sum += p.price_value_dollar; cur.cnt++;
               dateMap.set(d, cur);
             }
           }
-          return Array.from(dateMap.entries())
-            .sort(([a], [b]) => a.localeCompare(b))
+          const all = Array.from(dateMap.entries()).sort(([a], [b]) => a.localeCompare(b))
             .map(([d, { sum, cnt }]) => ({
               date: d,
               label: new Date(d + '-01').toLocaleDateString('tr-TR', { year: '2-digit', month: 'short' }),
               usd: sum / cnt,
             }));
+          if (range === '6mo') return all.slice(-6);
+          if (range === '1y') return all.slice(-12);
+          if (range === '2y') return all.slice(-24);
+          return all;
         };
 
-        // Get KPI info for best series (most data points) of selected commodity
-        const getInfo = (series: GiewsSerie[], priceMap: Map<string, GiewsDatapoint[]>, commodity: string) => {
-          const relevant = series.filter(s => s.commodity_name === commodity);
-          const best = relevant.reduce<GiewsSerie | null>((b, s) => {
-            const pts = priceMap.get(s.uuid) ?? [];
-            return pts.length > (b ? (priceMap.get(b.uuid) ?? []) : []).length ? s : b;
-          }, null);
-          if (!best) return null;
-          const pts = priceMap.get(best.uuid) ?? [];
-          if (!pts[0]) return null;
-          const pct = pts[1] && pts[1].price_value
-            ? ((pts[0].price_value - pts[1].price_value) / pts[1].price_value) * 100
-            : null;
-          return {
-            price: pts[0].price_value,
-            usd: pts[0].price_value_dollar,
-            currency: best.currency,
-            unit: best.measure_unit_label,
-            date: new Date(pts[0].date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' }),
-            pct,
-            market: best.market_name,
-          };
+        type WorldItem = { iso3: string; name: string; latestUsd: number; latestDate: string; marketCount: number };
+        const computeWorldRankings = (): WorldItem[] => {
+          const cm = new Map<string, WorldItem>();
+          for (const s of worldSeries) {
+            const pts = worldPriceMap.get(s.uuid) ?? [];
+            const lp = pts.find(p => p.price_value_dollar != null && p.price_value_dollar > 0);
+            if (!lp) continue;
+            const ex = cm.get(s.iso3_country_code);
+            if (!ex || lp.date > ex.latestDate) {
+              cm.set(s.iso3_country_code, { iso3: s.iso3_country_code, name: s.country_name, latestUsd: lp.price_value_dollar, latestDate: lp.date, marketCount: (ex?.marketCount ?? 0) + 1 });
+            } else { ex.marketCount++; }
+          }
+          return Array.from(cm.values()).sort((a, b) => b.latestUsd - a.latestUsd);
         };
 
-        const leftComms = Array.from(new Set(leftSeries.map(s => s.commodity_name)))
+        // ─── derived data ──────────────────────────────────────────────────────
+        const allComms = Array.from(new Set(faoSeries.map(s => s.commodity_name)))
           .sort((a, b) => translateCommodity(a).localeCompare(translateCommodity(b), 'tr'));
-        const rightComms = Array.from(new Set(rightSeries.map(s => s.commodity_name)))
-          .sort((a, b) => translateCommodity(a).localeCompare(translateCommodity(b), 'tr'));
+        const faoFilteredComms = faoSearch
+          ? allComms.filter(c =>
+              translateCommodity(c).toLowerCase().includes(faoSearch.toLowerCase()) ||
+              c.toLowerCase().includes(faoSearch.toLowerCase()))
+          : allComms;
 
-        const leftInfo = leftCommodity ? getInfo(leftSeries, leftPriceMap, leftCommodity) : null;
-        const rightInfo = rightCommodity ? getInfo(rightSeries, rightPriceMap, rightCommodity) : null;
+        type CardItem = NonNullable<ReturnType<typeof getCardData>> & { name: string };
+        const cards: CardItem[] = faoFilteredComms
+          .map(c => { const d = getCardData(c); return d ? { name: c, ...d } : null; })
+          .filter((c): c is CardItem => c !== null);
 
-        const leftHistory = leftCommodity ? buildHistory(leftSeries, leftPriceMap, leftCommodity).slice(-24) : [];
-        const rightHistory = rightCommodity ? buildHistory(rightSeries, rightPriceMap, rightCommodity).slice(-24) : [];
+        const sortedCards = [...cards].sort((a, b) => {
+          if (faoSort === 'price_desc') return (b.usd ?? 0) - (a.usd ?? 0);
+          if (faoSort === 'price_asc') return (a.usd ?? 0) - (b.usd ?? 0);
+          if (faoSort === 'change_desc') return (b.pct ?? -Infinity) - (a.pct ?? -Infinity);
+          if (faoSort === 'change_asc') return (a.pct ?? Infinity) - (b.pct ?? Infinity);
+          return translateCommodity(a.name).localeCompare(translateCommodity(b.name), 'tr');
+        });
 
-        // Merge histories by date for comparison chart
-        const compMap = new Map<string, { date: string; label: string; left?: number; right?: number }>();
-        for (const p of leftHistory) compMap.set(p.date, { date: p.date, label: p.label, left: p.usd });
-        for (const p of rightHistory) {
-          const ex = compMap.get(p.date) ?? { date: p.date, label: p.label };
-          ex.right = p.usd;
-          compMap.set(p.date, ex);
-        }
-        const compData = Array.from(compMap.values()).sort((a, b) => a.date.localeCompare(b.date));
-        const hasComparison = !!leftCommodity && !!rightCommodity && compData.some(d => d.left != null && d.right != null);
-
-        const lLabel = COUNTRY_TR[GIEWS_COUNTRIES.find(c => c.iso3 === leftCountry)?.name ?? ''] ?? leftCountry;
-        const rLabel = COUNTRY_TR[GIEWS_COUNTRIES.find(c => c.iso3 === rightCountry)?.name ?? ''] ?? rightCountry;
+        const faoGainers = cards.filter(c => c.pct != null && c.pct > 0).length;
+        const faoLosers = cards.filter(c => c.pct != null && c.pct < 0).length;
+        const latestFaoDate = cards.reduce<string>((l, c) => c.date > l ? c.date : l, '');
+        const faoCountryLabel = COUNTRY_TR[GIEWS_COUNTRIES.find(c => c.iso3 === faoCountry)?.name ?? ''] ?? faoCountry;
+        const detailCardData = faoDetailComm ? getCardData(faoDetailComm) : null;
+        const detailHistory = faoDetailComm ? buildDetailHistory(faoDetailComm, faoDetailRange) : [];
+        const worldRankings = worldSeries.length > 0 && !worldLoading ? computeWorldRankings() : [];
+        const turkeyRank = worldRankings.findIndex(r => r.iso3 === 'TUR') + 1;
+        const worldAvg = worldRankings.length > 0 ? worldRankings.reduce((s, r) => s + r.latestUsd, 0) / worldRankings.length : 0;
+        const worldSpread = worldRankings.length >= 2 ? worldRankings[0].latestUsd / worldRankings[worldRankings.length - 1].latestUsd : 0;
 
         const selStyle = {
-          width: '100%', padding: '0.55rem 0.75rem', borderRadius: '0.6rem',
-          border: '1px solid #e2e8f0', fontSize: '0.87rem', fontWeight: 600 as const,
-          color: '#1e293b', background: '#f8fafc', cursor: 'pointer' as const,
+          padding: '0.6rem 0.8rem', borderRadius: '0.6rem', border: '1px solid #e2e8f0',
+          fontSize: '0.87rem', fontWeight: 600 as const, color: '#1e293b',
+          background: '#f8fafc', cursor: 'pointer' as const,
         };
 
         return (
           <div>
-            {/* Info bar */}
-            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', padding: '0.6rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#1d4ed8' }}>
-              📡 <strong>FAO GIEWS</strong> — Gıda ve Tarım Örgütü Küresel Fiyat İzleme Sistemi · Ülke ve ürün seçerek iç piyasa fiyatlarını karşılaştırın
+            {/* ── Country selector ── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '0.85rem 1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>📍 Ülke</span>
+              <select
+                value={faoCountry}
+                onChange={e => { setFaoCountry(e.target.value); setFaoDetailComm(''); setWorldModalComm(''); }}
+                style={{ ...selStyle, minWidth: 200 }}
+              >
+                {GIEWS_COUNTRIES.map(c => <option key={c.iso3} value={c.iso3}>{COUNTRY_TR[c.name] ?? c.name}</option>)}
+              </select>
+              {faoLoading && <span style={{ fontSize: '0.82rem', color: '#64748b' }}>⏳ Yükleniyor...</span>}
+              {!faoLoading && !faoError && cards.length > 0 && (
+                <span style={{ fontSize: '0.82rem', color: '#10b981', fontWeight: 600 }}>{cards.length} ürün bulundu</span>
+              )}
+              <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#94a3b8' }}>📡 FAO GIEWS · Aylık iç piyasa fiyatları</div>
             </div>
 
-            {/* Two panels */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
-
-              {/* ── LEFT PANEL ── */}
-              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', borderTop: '4px solid #3b82f6', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Panel A</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <select value={leftCountry} onChange={e => { setLeftCountry(e.target.value); setLeftCommodity(''); }} style={selStyle}>
-                    {GIEWS_COUNTRIES.map(c => <option key={c.iso3} value={c.iso3}>{COUNTRY_TR[c.name] ?? c.name}</option>)}
-                  </select>
-                  <select value={leftCommodity} onChange={e => setLeftCommodity(e.target.value)} disabled={leftLoading || leftComms.length === 0} style={{ ...selStyle, opacity: leftLoading || leftComms.length === 0 ? 0.5 : 1 }}>
-                    <option value="">Ürün seçin...</option>
-                    {leftComms.map(name => <option key={name} value={name}>{getCommodityEmoji(name)} {translateCommodity(name)}</option>)}
-                  </select>
+            {/* ── KPI row ── */}
+            <div className="kpi-grid" style={{ marginBottom: '1.25rem' }}>
+              <div className="kpi-card">
+                <div className="kpi-header"><span className="kpi-title">ÜRÜN SAYISI</span></div>
+                <div className="kpi-value">{allComms.length}</div>
+                <div className="kpi-subtitle">{faoCountryLabel} iç piyasasında</div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green">📈</span></div>
+                <div className="kpi-value text-green-400">{faoGainers}</div>
+                <div className="kpi-subtitle">Ay/ay artış gösteren</div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-header"><span className="kpi-title">DÜŞENLER</span><span className="kpi-icon red">📉</span></div>
+                <div className="kpi-value text-red-400">{faoLosers}</div>
+                <div className="kpi-subtitle">Ay/ay düşüş gösteren</div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-header"><span className="kpi-title">SON VERİ</span></div>
+                <div className="kpi-value" style={{ fontSize: '1.4rem' }}>
+                  {latestFaoDate ? new Date(latestFaoDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' }) : '-'}
                 </div>
-                {leftLoading && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>⏳ Yükleniyor...</div>}
-                {leftError && !leftLoading && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>❌ {leftError}</div>}
-                {!leftLoading && !leftError && !leftCommodity && leftComms.length > 0 && (
-                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Ürün seçerek fiyat verilerini görüntüleyin</div>
-                )}
-                {leftInfo && !leftLoading && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="kpi-subtitle">FAO GIEWS son güncelleme</div>
+              </div>
+            </div>
+
+            {/* ── Search + sort bar ── */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                placeholder="🔍 Ürün ara... (buğday, mısır, pirinç...)"
+                value={faoSearch}
+                onChange={e => setFaoSearch(e.target.value)}
+                style={{ flex: 1, minWidth: 200, padding: '0.6rem 1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '0.87rem', background: '#fff', outline: 'none' }}
+              />
+              <select value={faoSort} onChange={e => setFaoSort(e.target.value as typeof faoSort)} style={selStyle}>
+                <option value="name">A → Z</option>
+                <option value="price_desc">USD Fiyat ↓</option>
+                <option value="price_asc">USD Fiyat ↑</option>
+                <option value="change_desc">Değişim ↓ (en çok yükselen)</option>
+                <option value="change_asc">Değişim ↑ (en çok düşen)</option>
+              </select>
+            </div>
+
+            {/* Error */}
+            {faoError && !faoLoading && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '1rem', color: '#dc2626', marginBottom: '1rem' }}>
+                ❌ {faoError}
+              </div>
+            )}
+
+            {/* Skeleton loading */}
+            {faoLoading && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} style={{ background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)', backgroundSize: '200% 100%', border: '1px solid #e2e8f0', borderRadius: '1rem', height: 165, animation: 'shimmer 1.5s infinite' }} />
+                ))}
+              </div>
+            )}
+
+            {/* ── Commodity cards ── */}
+            {!faoLoading && !faoError && sortedCards.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(265px, 1fr))', gap: '0.85rem' }}>
+                {sortedCards.map(card => (
+                  <div
+                    key={card.name}
+                    onClick={() => { setFaoDetailComm(card.name); setFaoDetailRange('1y'); }}
+                    style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1rem', cursor: 'pointer', transition: 'all 0.18s', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    className="hover:shadow-lg hover:border-blue-200"
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                       <div>
-                        <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
-                          {leftInfo.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
-                          <span style={{ fontSize: '0.73rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>{leftInfo.currency}/{leftInfo.unit}</span>
+                        <div style={{ fontWeight: 700, fontSize: '0.97rem', color: '#0f172a' }}>
+                          {getCommodityEmoji(card.name)} {translateCommodity(card.name)}
                         </div>
-                        {leftInfo.usd != null && <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.15rem' }}>≈ ${leftInfo.usd.toFixed(2)} USD</div>}
+                        <div style={{ fontSize: '0.67rem', color: '#94a3b8', marginTop: '0.12rem' }}>{card.market}</div>
                       </div>
-                      {leftInfo.pct != null && (
-                        <div style={{ fontSize: '1rem', fontWeight: 800, color: leftInfo.pct >= 0 ? '#16a34a' : '#dc2626', background: leftInfo.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.35rem 0.65rem', borderRadius: '0.5rem' }}>
-                          {leftInfo.pct >= 0 ? '▲' : '▼'} {Math.abs(leftInfo.pct).toFixed(1)}%
+                      {card.pct != null && (
+                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: card.pct >= 0 ? '#16a34a' : '#dc2626', background: card.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.22rem 0.5rem', borderRadius: '0.45rem', whiteSpace: 'nowrap' }}>
+                          {card.pct >= 0 ? '▲' : '▼'} {Math.abs(card.pct).toFixed(1)}%
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.4rem' }}>{leftInfo.date} · {leftInfo.market}</div>
-                    {leftHistory.length > 3 && (
-                      <div style={{ marginTop: '0.75rem' }}>
-                        <ResponsiveContainer width="100%" height={75}>
-                          <LineChart data={leftHistory}>
-                            <Line type="monotone" dataKey="usd" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                            <Tooltip contentStyle={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} labelFormatter={(l: unknown) => String(l)} />
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
+                      {card.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
+                      <span style={{ fontSize: '0.67rem', fontWeight: 500, color: '#64748b', marginLeft: '0.3rem' }}>{card.currency}/{card.unit}</span>
+                    </div>
+                    {card.usd != null && card.usd > 0 && (
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.1rem' }}>≈ ${card.usd.toFixed(2)} USD</div>
+                    )}
+                    {card.sparkline.length > 2 && (
+                      <div style={{ marginTop: '0.55rem' }}>
+                        <ResponsiveContainer width="100%" height={52}>
+                          <LineChart data={card.sparkline}>
+                            <Line type="monotone" dataKey="usd" stroke="#3b82f6" strokeWidth={1.8} dot={false} />
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
                     )}
+                    <div style={{ fontSize: '0.64rem', color: '#94a3b8', marginTop: '0.3rem' }}>
+                      {new Date(card.date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' })} · kart detayı için tıklayın
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
+            )}
 
-              {/* ── RIGHT PANEL ── */}
-              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', borderTop: '4px solid #f59e0b', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Panel B</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <select value={rightCountry} onChange={e => { setRightCountry(e.target.value); setRightCommodity(''); }} style={selStyle}>
-                    {GIEWS_COUNTRIES.map(c => <option key={c.iso3} value={c.iso3}>{COUNTRY_TR[c.name] ?? c.name}</option>)}
-                  </select>
-                  <select value={rightCommodity} onChange={e => setRightCommodity(e.target.value)} disabled={rightLoading || rightComms.length === 0} style={{ ...selStyle, opacity: rightLoading || rightComms.length === 0 ? 0.5 : 1 }}>
-                    <option value="">Ürün seçin...</option>
-                    {rightComms.map(name => <option key={name} value={name}>{getCommodityEmoji(name)} {translateCommodity(name)}</option>)}
-                  </select>
-                </div>
-                {rightLoading && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>⏳ Yükleniyor...</div>}
-                {rightError && !rightLoading && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>❌ {rightError}</div>}
-                {!rightLoading && !rightError && !rightCommodity && rightComms.length > 0 && (
-                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>Ürün seçerek fiyat verilerini görüntüleyin</div>
-                )}
-                {rightInfo && !rightLoading && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>
-                          {rightInfo.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
-                          <span style={{ fontSize: '0.73rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>{rightInfo.currency}/{rightInfo.unit}</span>
-                        </div>
-                        {rightInfo.usd != null && <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.15rem' }}>≈ ${rightInfo.usd.toFixed(2)} USD</div>}
+            {!faoLoading && !faoError && sortedCards.length === 0 && allComms.length > 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', fontSize: '0.92rem' }}>
+                🔍 &ldquo;{faoSearch}&rdquo; ile eşleşen ürün bulunamadı
+              </div>
+            )}
+
+            {/* ── Detail Modal ── */}
+            {faoDetailComm && detailCardData && (
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                onClick={() => setFaoDetailComm('')}
+              >
+                <div
+                  onClick={e => e.stopPropagation()}
+                  style={{ background: '#1e293b', borderRadius: '1.5rem', padding: '1.5rem', width: '100%', maxWidth: '820px', maxHeight: '90vh', overflow: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  {/* Modal header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#f1f5f9' }}>
+                        {getCommodityEmoji(faoDetailComm)} {translateCommodity(faoDetailComm)}
+                      </h3>
+                      <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>
+                        {faoCountryLabel} · {detailCardData.market}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>
+                        {detailCardData.price.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255,255,255,0.4)', marginLeft: '0.3rem' }}>
+                          {detailCardData.currency}/{detailCardData.unit}
+                        </span>
                       </div>
-                      {rightInfo.pct != null && (
-                        <div style={{ fontSize: '1rem', fontWeight: 800, color: rightInfo.pct >= 0 ? '#16a34a' : '#dc2626', background: rightInfo.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.35rem 0.65rem', borderRadius: '0.5rem' }}>
-                          {rightInfo.pct >= 0 ? '▲' : '▼'} {Math.abs(rightInfo.pct).toFixed(1)}%
+                      {detailCardData.usd != null && detailCardData.usd > 0 && (
+                        <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.1rem' }}>≈ ${detailCardData.usd.toFixed(2)} USD</div>
+                      )}
+                      {detailCardData.pct != null && (
+                        <div style={{ fontSize: '1rem', fontWeight: 700, color: detailCardData.pct >= 0 ? '#4ade80' : '#f87171', marginTop: '0.25rem' }}>
+                          {detailCardData.pct >= 0 ? '▲' : '▼'} {Math.abs(detailCardData.pct).toFixed(1)}% (ay/ay)
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.4rem' }}>{rightInfo.date} · {rightInfo.market}</div>
-                    {rightHistory.length > 3 && (
-                      <div style={{ marginTop: '0.75rem' }}>
-                        <ResponsiveContainer width="100%" height={75}>
-                          <LineChart data={rightHistory}>
-                            <Line type="monotone" dataKey="usd" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                            <Tooltip contentStyle={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} labelFormatter={(l: unknown) => String(l)} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )}
                   </div>
-                )}
-              </div>
-            </div>
 
-            {/* Comparison chart */}
-            {!hasComparison ? (
-              <div style={{ background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '1rem', padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
-                📊 Her iki panelden de ürün seçildiğinde karşılaştırma grafiği görünür
-              </div>
-            ) : (
-              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>📈 Fiyat Karşılaştırması</h3>
-                    <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>Son 24 ay · USD bazında normalize edilmiş aylık ortalama fiyatlar</p>
+                  {/* Range selector */}
+                  <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem' }}>
+                    {(['6mo', '1y', '2y', 'max'] as const).map(r => (
+                      <button
+                        key={r}
+                        onClick={() => setFaoDetailRange(r)}
+                        style={{ padding: '0.38rem 0.85rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, background: faoDetailRange === r ? '#3b82f6' : 'rgba(255,255,255,0.1)', color: faoDetailRange === r ? '#fff' : '#cbd5e1', transition: 'all 0.15s' }}
+                      >
+                        {r === '6mo' ? '6A' : r === '1y' ? '1Y' : r === '2y' ? '2Y' : 'Tümü'}
+                      </button>
+                    ))}
                   </div>
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <span style={{ width: 20, height: 3, background: '#3b82f6', display: 'inline-block', borderRadius: 2 }} />
-                      {lLabel} / {translateCommodity(leftCommodity)}
+
+                  {/* Chart */}
+                  {detailHistory.length > 0 ? (
+                    <div style={{ width: '100%', height: 280 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={detailHistory}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                          <XAxis dataKey="label" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
+                          <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} />
+                          <Tooltip
+                            contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '0.6rem', color: '#f1f5f9', fontSize: '0.82rem' }}
+                            formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD ort.']}
+                          />
+                          <Line type="monotone" dataKey="usd" stroke="#3b82f6" strokeWidth={2.5} dot={false} connectNulls />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <span style={{ width: 20, height: 3, background: '#f59e0b', display: 'inline-block', borderRadius: 2 }} />
-                      {rLabel} / {translateCommodity(rightCommodity)}
+                  ) : (
+                    <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>
+                      Bu dönem için veri yok
                     </div>
+                  )}
+
+                  {/* Stats row */}
+                  {detailHistory.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.6rem', marginTop: '1rem', marginBottom: '1rem' }}>
+                      {[
+                        { label: 'Min', value: `$${Math.min(...detailHistory.map(p => p.usd)).toFixed(2)}` },
+                        { label: 'Max', value: `$${Math.max(...detailHistory.map(p => p.usd)).toFixed(2)}` },
+                        { label: 'Ortalama', value: `$${(detailHistory.reduce((s, p) => s + p.usd, 0) / detailHistory.length).toFixed(2)}` },
+                        { label: 'Veri', value: `${detailHistory.length} ay` },
+                      ].map(stat => (
+                        <div key={stat.label} style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '0.7rem', padding: '0.6rem', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                          <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f1f5f9', marginTop: '0.15rem' }}>{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <button
+                      onClick={() => setWorldModalComm(faoDetailComm)}
+                      style={{ flex: 1, padding: '0.75rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', boxShadow: '0 2px 8px rgba(16,185,129,0.3)' }}
+                    >
+                      🌍 Dünya Fiyatları
+                    </button>
+                    <button
+                      onClick={() => setFaoDetailComm('')}
+                      style={{ flex: 1, padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', background: 'rgba(255,255,255,0.07)', color: '#cbd5e1' }}
+                    >
+                      Kapat
+                    </button>
                   </div>
                 </div>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={compData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} />
-                    <Tooltip
-                      contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', fontSize: '0.82rem' }}
-                      formatter={(v: number, name: string) => [
-                        `$${Number(v).toFixed(2)}`,
-                        name === 'left' ? `${lLabel} / ${translateCommodity(leftCommodity)}` : `${rLabel} / ${translateCommodity(rightCommodity)}`,
-                      ]}
-                    />
-                    <Line type="monotone" dataKey="left" stroke="#3b82f6" strokeWidth={2.5} dot={false} connectNulls name="left" />
-                    <Line type="monotone" dataKey="right" stroke="#f59e0b" strokeWidth={2.5} dot={false} connectNulls name="right" strokeDasharray="6 3" />
-                  </LineChart>
-                </ResponsiveContainer>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', textAlign: 'center', marginTop: '0.5rem' }}>
-                  Kaynak: FAO GIEWS · Birden fazla market serisi aylık ortalamalarla birleştirilmiştir
+              </div>
+            )}
+
+            {/* ── World Comparison Modal ── */}
+            {worldModalComm && (
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                onClick={() => setWorldModalComm('')}
+              >
+                <div
+                  onClick={e => e.stopPropagation()}
+                  style={{ background: '#fff', borderRadius: '1.5rem', padding: '1.5rem', width: '100%', maxWidth: '1060px', maxHeight: '92vh', overflow: 'auto', boxShadow: '0 25px 80px rgba(0,0,0,0.4)' }}
+                >
+                  {/* Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>
+                        🌍 {getCommodityEmoji(worldModalComm)} {translateCommodity(worldModalComm)} — Dünya Fiyatları
+                      </h3>
+                      <p style={{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                        Kaynak: FAO GIEWS · USD cinsinden normalize edilmiş son aylık iç piyasa fiyatları
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setWorldModalComm('')}
+                      style={{ padding: '0.5rem 1.1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', color: '#475569' }}
+                    >
+                      ✕ Kapat
+                    </button>
+                  </div>
+
+                  {/* Loading */}
+                  {worldLoading && (
+                    <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⏳</div>
+                      <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem' }}>Dünya geneli veriler yükleniyor...</div>
+                      <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                        {worldSeries.length > 0
+                          ? `${worldSeries.length} market serisi bulundu, fiyatlar alınıyor...`
+                          : 'Tüm ülkeler taranıyor...'}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {worldError && !worldLoading && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '1rem', color: '#dc2626' }}>
+                      ❌ {worldError}
+                    </div>
+                  )}
+
+                  {/* No data */}
+                  {!worldLoading && !worldError && worldRankings.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', fontSize: '0.92rem' }}>
+                      Bu ürün için dünya genelinde karşılaştırılabilir veri bulunamadı
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  {!worldLoading && worldRankings.length > 0 && (
+                    <>
+                      {/* World KPIs */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        {[
+                          { icon: '🌐', label: 'Dünya Ortalaması', value: `$${worldAvg.toFixed(2)}`, sub: `${worldRankings.length} ülke` },
+                          { icon: '🇹🇷', label: 'Türkiye Sırası', value: turkeyRank > 0 ? `#${turkeyRank}` : 'Veri yok', sub: `/ ${worldRankings.length} ülke` },
+                          { icon: '💸', label: 'En Pahalı', value: `$${worldRankings[0]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[0]?.name] ?? worldRankings[0]?.name ?? '').slice(0, 18) },
+                          { icon: '💚', label: 'En Ucuz', value: `$${worldRankings[worldRankings.length - 1]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[worldRankings.length - 1]?.name] ?? worldRankings[worldRankings.length - 1]?.name ?? '').slice(0, 18) },
+                          { icon: '📊', label: 'Fiyat Uçurumu', value: worldSpread > 0 ? `${worldSpread.toFixed(1)}x` : '-', sub: 'en pahalı / en ucuz' },
+                        ].map(kpi => (
+                          <div key={kpi.label} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '0.85rem 0.65rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.4rem' }}>{kpi.icon}</div>
+                            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0.2rem 0 0.1rem' }}>{kpi.label}</div>
+                            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>{kpi.value}</div>
+                            <div style={{ fontSize: '0.62rem', color: '#94a3b8', marginTop: '0.12rem' }}>{kpi.sub}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Bar charts */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                        {/* Most expensive */}
+                        <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: '1rem', padding: '1rem' }}>
+                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#dc2626' }}>💸 En Pahalı 10 Ülke</h4>
+                          <ResponsiveContainer width="100%" height={270}>
+                            <BarChart
+                              data={worldRankings.slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
+                              layout="vertical"
+                              margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                            >
+                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
+                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
+                              <Tooltip formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} contentStyle={{ borderRadius: '0.5rem', fontSize: '0.8rem' }} />
+                              <Bar dataKey="usd" radius={[0, 4, 4, 0]}>
+                                {worldRankings.slice(0, 10).map((r, i) => (
+                                  <Cell key={r.iso3} fill={r.iso3 === 'TUR' ? '#3b82f6' : i === 0 ? '#dc2626' : '#f87171'} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Cheapest */}
+                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '1rem', padding: '1rem' }}>
+                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#16a34a' }}>💚 En Ucuz 10 Ülke</h4>
+                          <ResponsiveContainer width="100%" height={270}>
+                            <BarChart
+                              data={[...worldRankings].reverse().slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
+                              layout="vertical"
+                              margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                            >
+                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
+                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
+                              <Tooltip formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} contentStyle={{ borderRadius: '0.5rem', fontSize: '0.8rem' }} />
+                              <Bar dataKey="usd" radius={[0, 4, 4, 0]}>
+                                {[...worldRankings].reverse().slice(0, 10).map(r => (
+                                  <Cell key={r.iso3} fill={r.iso3 === 'TUR' ? '#3b82f6' : '#22c55e'} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      {/* Full ranking table */}
+                      <div style={{ border: '1px solid #e2e8f0', borderRadius: '1rem', overflow: 'hidden' }}>
+                        <div style={{ background: '#f8fafc', padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>📋 Tam Sıralama</h4>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{worldRankings.length} ülke · USD fiyatına göre ↓</span>
+                        </div>
+                        <div style={{ maxHeight: 340, overflowY: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                            <thead style={{ position: 'sticky', top: 0, background: '#f1f5f9', zIndex: 1 }}>
+                              <tr>
+                                {['#', 'Ülke', 'USD Fiyat', 'Son Güncelleme', 'Market Sayısı'].map(h => (
+                                  <th key={h} style={{ padding: '0.55rem 0.75rem', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {worldRankings.map((r, i) => (
+                                <tr
+                                  key={r.iso3}
+                                  style={{ background: r.iso3 === 'TUR' ? '#eff6ff' : i % 2 === 0 ? '#fff' : '#f8fafc', borderBottom: '1px solid #f1f5f9', fontWeight: r.iso3 === 'TUR' ? 700 : 400 }}
+                                >
+                                  <td style={{ padding: '0.5rem 0.75rem', color: '#64748b', fontWeight: 600, fontSize: '0.82rem' }}>
+                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                                  </td>
+                                  <td style={{ padding: '0.5rem 0.75rem', color: '#0f172a' }}>
+                                    {r.iso3 === 'TUR' ? '🇹🇷 ' : ''}{COUNTRY_TR[r.name] ?? r.name}
+                                  </td>
+                                  <td style={{ padding: '0.5rem 0.75rem', fontWeight: 700, color: i < 3 ? '#dc2626' : i >= worldRankings.length - 3 ? '#16a34a' : '#0f172a' }}>
+                                    ${r.latestUsd.toFixed(2)}
+                                  </td>
+                                  <td style={{ padding: '0.5rem 0.75rem', color: '#64748b', fontSize: '0.78rem' }}>
+                                    {new Date(r.latestDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' })}
+                                  </td>
+                                  <td style={{ padding: '0.5rem 0.75rem', color: '#64748b', textAlign: 'center' }}>{r.marketCount}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', marginTop: '0.75rem' }}>
+                        Kaynak: FAO GIEWS · Her ülke için en güncel aylık iç piyasa fiyatı · Türkiye satırı mavi ile vurgulanmıştır
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+      {/* ===== Uluslararası Emtia Tab ===== */}
+      {activeTab === 'intl' && (() => {
+        const INTL_CAT_ICONS: Record<string, string> = {
+          'Tahıllar': '🌾', 'Gübre': '🧪', 'Enerji': '⚡', 'Yağlı Tohumlar': '🫘',
+          'Et': '🥩', 'Süt': '🥛', 'Şeker & Tropikal': '🍬', 'Diğer': '🔗',
+        };
+        const INTL_CAT_COLORS: Record<string, string> = {
+          'Tahıllar': '#f59e0b', 'Gübre': '#84cc16', 'Enerji': '#8b5cf6',
+          'Yağlı Tohumlar': '#22c55e', 'Et': '#ef4444', 'Süt': '#38bdf8',
+          'Şeker & Tropikal': '#f97316', 'Diğer': '#6366f1',
+        };
+        const INTL_CAT_ORDER = ['Tahıllar', 'Gübre', 'Enerji', 'Yağlı Tohumlar', 'Et', 'Süt', 'Şeker & Tropikal', 'Diğer'];
+        const getIntlCategory = (serie: GiewsSerie): string => {
+          const code = serie.commodity_code ?? '';
+          if (code.startsWith('OIL_')) return 'Enerji';
+          if (code.startsWith('FERT_')) return 'Gübre';
+          if (code.startsWith('CMM04')) return 'Süt';
+          if (code.startsWith('CMM02')) return 'Et';
+          if (code.startsWith('CMM10')) return 'Tahıllar';
+          if (code.startsWith('CMM12') || code.startsWith('CMM15')) return 'Yağlı Tohumlar';
+          if (code.startsWith('CMM17') || code.startsWith('CMM09') || code.startsWith('CMM08')) return 'Şeker & Tropikal';
+          return 'Diğer';
+        };
+        const catGroups: Record<string, { serie: GiewsSerie; history: GiewsDatapoint[] }[]> = {};
+        for (const serie of intlSeries) {
+          const cat = getIntlCategory(serie);
+          if (!catGroups[cat]) catGroups[cat] = [];
+          const history = intlPriceMap.get(serie.uuid) ?? [];
+          catGroups[cat].push({ serie, history });
+        }
+        const orderedCats = INTL_CAT_ORDER.filter(c => catGroups[c]);
+        const visibleCats = intlCategoryFilter === 'all' ? orderedCats : orderedCats.filter(c => c === intlCategoryFilter);
+        const totalSeries = intlSeries.length;
+        const rising = Array.from(intlPriceMap.values()).filter(h => h[0] && h[1] && h[0].price_value > h[1].price_value).length;
+        const latestDate = Array.from(intlPriceMap.values()).flatMap(h => h[0]?.date ? [h[0].date] : []).sort().at(-1);
+        return (
+          <div>
+            {intlLoading && (
+              <div className="loading"><div className="loading-spinner" /><p>Uluslararası emtia fiyatları yükleniyor... (90 seri)</p></div>
+            )}
+            {intlError && !intlLoading && (
+              <div style={{ color: '#ef4444', padding: '1rem', textAlign: 'center' }}>❌ {intlError}</div>
+            )}
+            {!intlLoading && !intlError && intlSeries.length > 0 && (
+              <>
+                {/* Info bar */}
+                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '0.75rem', padding: '0.6rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#0369a1' }}>
+                  🌐 <strong>FAO FPMA</strong> — Food Price Monitoring &amp; Analysis · Dünya Bankası Pink Sheet · IGC · USDA · Tümü USD bazında, aylık
+                </div>
+
+                {/* KPI Cards */}
+                <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
+                  <div className="kpi-card">
+                    <div className="kpi-header"><span className="kpi-title">TOPLAM SERİ</span></div>
+                    <div className="kpi-value">{totalSeries}</div>
+                    <div className="kpi-subtitle">Uluslararası fiyat serisi</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-header"><span className="kpi-title">KATEGORİ</span></div>
+                    <div className="kpi-value">{orderedCats.length}</div>
+                    <div className="kpi-subtitle">Emtia grubu</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green">📈</span></div>
+                    <div className="kpi-value text-green-400">{rising}</div>
+                    <div className="kpi-subtitle">Aylık bazda artan</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-header"><span className="kpi-title">SON VERİ</span></div>
+                    <div className="kpi-value" style={{ fontSize: '1.55rem' }}>
+                      {latestDate ? new Date(latestDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' }) : '-'}
+                    </div>
+                    <div className="kpi-subtitle">FAO FPMA aylık</div>
+                  </div>
+                </div>
+
+                {/* Category Filter */}
+                <div className="date-filter" style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {['all', ...orderedCats].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setIntlCategoryFilter(cat)}
+                        style={{
+                          padding: '0.5rem 1rem', borderRadius: '0.75rem',
+                          border: intlCategoryFilter === cat ? 'none' : '1px solid #e2e8f0',
+                          cursor: 'pointer', fontSize: '0.85rem',
+                          fontWeight: intlCategoryFilter === cat ? 700 : 500,
+                          background: intlCategoryFilter === cat ? 'linear-gradient(135deg, #0ea5e9, #6366f1)' : '#ffffff',
+                          color: intlCategoryFilter === cat ? '#fff' : '#475569',
+                          boxShadow: intlCategoryFilter === cat ? '0 2px 8px rgba(14,165,233,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {cat === 'all' ? '🌐 Tümü' : `${INTL_CAT_ICONS[cat] || '📦'} ${cat}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Category sections */}
+                {visibleCats.map(cat => (
+                  <div key={cat} style={{ marginBottom: '2rem' }}>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {INTL_CAT_ICONS[cat]} {cat}
+                      <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>({catGroups[cat].length} seri)</span>
+                    </h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                      {catGroups[cat].map(({ serie, history }) => {
+                        const latest = history[0];
+                        const pct = (latest && history[1] && history[1].price_value)
+                          ? ((latest.price_value - history[1].price_value) / history[1].price_value) * 100
+                          : null;
+                        const sparkData = history.slice(0, 12).reverse().map(p => ({ v: p.price_value }));
+                        return (
+                          <div
+                            key={serie.uuid}
+                            onClick={() => { setIntlSelected(serie); setIntlSelectedHistory(history); }}
+                            style={{
+                              background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem',
+                              padding: '1rem', cursor: 'pointer', transition: 'all 0.2s',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
+                              borderTop: `4px solid ${INTL_CAT_COLORS[cat] || '#6366f1'}`,
+                            }}
+                            className="hover:shadow-md"
+                          >
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.3, marginBottom: '0.2rem' }}>
+                                {serie.commodity_name.length > 48 ? serie.commodity_name.slice(0, 48) + '…' : serie.commodity_name}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{serie.market_name}</div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                              <div>
+                                {latest ? (
+                                  <>
+                                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+                                      ${latest.price_value < 100
+                                        ? latest.price_value.toFixed(2)
+                                        : Math.round(latest.price_value).toLocaleString('en-US')}
+                                    </div>
+                                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '0.15rem' }}>
+                                      /{serie.measure_unit_label} · {new Date(latest.date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' })}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Veri yok</div>
+                                )}
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                                {pct != null && (
+                                  <div style={{
+                                    fontSize: '0.8rem', fontWeight: 700,
+                                    color: pct >= 0 ? '#16a34a' : '#dc2626',
+                                    background: pct >= 0 ? '#f0fdf4' : '#fef2f2',
+                                    padding: '0.2rem 0.5rem', borderRadius: '0.4rem',
+                                  }}>
+                                    {pct >= 0 ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%
+                                  </div>
+                                )}
+                                {sparkData.length > 2 && (
+                                  <div style={{ width: 80, height: 32 }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <LineChart data={sparkData}>
+                                        <Line type="monotone" dataKey="v" stroke={pct == null || pct >= 0 ? '#22c55e' : '#ef4444'} strokeWidth={1.5} dot={false} />
+                                      </LineChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* Detail Modal */}
+            {intlSelected && (
+              <div
+                style={{
+                  position: 'fixed', inset: 0, zIndex: 1000,
+                  background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+                }}
+                onClick={() => setIntlSelected(null)}
+              >
+                <div
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    background: '#1e293b', borderRadius: '1.5rem', padding: '1.5rem',
+                    width: '100%', maxWidth: '820px', maxHeight: '90vh', overflow: 'auto',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+                    {intlSelected.commodity_name}
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1rem' }}>
+                    {intlSelected.market_name} · {intlSelected.price_type} · {intlSelected.source_name?.split(';')[0]}
+                  </p>
+
+                  {/* Stats */}
+                  {(() => {
+                    const h = intlSelectedHistory;
+                    const latest = h[0];
+                    const prev = h[1];
+                    const prevYear = h.find(p => {
+                      if (!latest?.date) return false;
+                      const d1 = new Date(latest.date);
+                      const d2 = new Date(p.date);
+                      const diffMonths = (d1.getFullYear() - d2.getFullYear()) * 12 + d1.getMonth() - d2.getMonth();
+                      return diffMonths >= 11 && diffMonths <= 13;
+                    });
+                    const avg12 = h.slice(0, 12).reduce((s, p) => s + p.price_value, 0) / Math.min(h.length, 12);
+                    const momPct = latest && prev && prev.price_value ? ((latest.price_value - prev.price_value) / prev.price_value) * 100 : null;
+                    const yoyPct = latest && prevYear && prevYear.price_value ? ((latest.price_value - prevYear.price_value) / prevYear.price_value) * 100 : null;
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1rem' }}>
+                        {[
+                          { label: 'Son Fiyat', val: latest ? `$${latest.price_value < 100 ? latest.price_value.toFixed(2) : Math.round(latest.price_value).toLocaleString('en-US')}` : '-', color: '#f8fafc' },
+                          { label: 'Aylık Değ.', val: momPct != null ? `${momPct >= 0 ? '+' : ''}${momPct.toFixed(1)}%` : '-', color: momPct == null ? '#94a3b8' : momPct >= 0 ? '#22c55e' : '#ef4444' },
+                          { label: 'Yıllık Değ.', val: yoyPct != null ? `${yoyPct >= 0 ? '+' : ''}${yoyPct.toFixed(1)}%` : '-', color: yoyPct == null ? '#94a3b8' : yoyPct >= 0 ? '#22c55e' : '#ef4444' },
+                          { label: '12A Ort.', val: h.length ? `$${avg12 < 100 ? avg12.toFixed(2) : Math.round(avg12).toLocaleString('en-US')}` : '-', color: '#94a3b8' },
+                        ].map(stat => (
+                          <div key={stat.label} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '0.75rem', padding: '0.75rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: stat.color }}>{stat.val}</div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Chart */}
+                  {intlSelectedHistory.length > 1 ? (
+                    <ResponsiveContainer width="100%" height={280}>
+                      <LineChart data={[...intlSelectedHistory].reverse().map(p => ({
+                        date: new Date(p.date).toLocaleDateString('tr-TR', { year: '2-digit', month: 'short' }),
+                        price: p.price_value,
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
+                        <YAxis
+                          stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']}
+                          tickFormatter={(v: number) => `$${Number(v) < 100 ? Number(v).toFixed(1) : Math.round(Number(v)).toLocaleString('en-US')}`}
+                        />
+                        <Tooltip
+                          contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
+                          formatter={(v: number) => [`$${Number(v) < 100 ? Number(v).toFixed(2) : Math.round(Number(v)).toLocaleString('en-US')}`, `/${intlSelected.measure_unit_label}`]}
+                        />
+                        <Line type="monotone" dataKey="price" stroke="#0ea5e9" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Grafik için yeterli veri yok</div>
+                  )}
+
+                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: '0.5rem' }}>
+                    Kaynak: FAO FPMA · {intlSelected.source_name} · {intlSelected.price_type}
+                  </div>
+                  <button
+                    onClick={() => setIntlSelected(null)}
+                    style={{
+                      marginTop: '1rem', width: '100%', padding: '0.75rem',
+                      background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '0.75rem', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.9rem',
+                    }}
+                  >
+                    Kapat
+                  </button>
                 </div>
               </div>
             )}
