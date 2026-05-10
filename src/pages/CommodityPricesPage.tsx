@@ -1479,6 +1479,11 @@ export default function CommodityPricesPage() {
             {intlError && !intlLoading && (
               <div style={{ color: '#ef4444', padding: '1rem', textAlign: 'center' }}>❌ {intlError}</div>
             )}
+            {!intlLoading && !intlError && intlSeries.length === 0 && (
+              <div style={{ color: '#94a3b8', padding: '2rem', textAlign: 'center', fontSize: '0.9rem' }}>
+                Uluslararası emtia verisi yüklenemedi. Sayfayı yenileyin.
+              </div>
+            )}
             {!intlLoading && !intlError && intlSeries.length > 0 && (
               <>
                 {/* Info bar */}
