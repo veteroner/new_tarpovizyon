@@ -25,7 +25,16 @@ export const DATASETS: Record<DatasetId, DatasetConfig> = {
 };
 
 const MONTH_COLS = `Ocak, \`Şubat\`, Mart, Nisan, \`Mayıs\`, Haziran, Temmuz, \`Ağustos\`, \`Eylül\`, Ekim, \`Kasım\`, \`Aralık\``;
-const AVG12 = `(CAST(Ocak AS DECIMAL(10,4))+CAST(\`Şubat\` AS DECIMAL(10,4))+CAST(Mart AS DECIMAL(10,4))+CAST(Nisan AS DECIMAL(10,4))+CAST(\`Mayıs\` AS DECIMAL(10,4))+CAST(Haziran AS DECIMAL(10,4))+CAST(Temmuz AS DECIMAL(10,4))+CAST(\`Ağustos\` AS DECIMAL(10,4))+CAST(\`Eylül\` AS DECIMAL(10,4))+CAST(Ekim AS DECIMAL(10,4))+CAST(\`Kasım\` AS DECIMAL(10,4))+CAST(\`Aralık\` AS DECIMAL(10,4)))/12`;
+// SQL-safe column names (backtick for Turkish special chars)
+const MONTHS_SQL = ['Ocak', '`Şubat`', 'Mart', 'Nisan', '`Mayıs`', 'Haziran', 'Temmuz', '`Ağustos`', '`Eylül`', 'Ekim', '`Kasım`', '`Aralık`'];
+
+// Average only non-zero months — correct for incomplete years
+function makeAvgNonZero(prefix = ''): string {
+  const p = prefix ? `${prefix}.` : '';
+  const sum = MONTHS_SQL.map(m => `CASE WHEN CAST(${p}${m} AS DECIMAL(10,4))>0 THEN CAST(${p}${m} AS DECIMAL(10,4)) ELSE 0 END`).join('+');
+  const cnt = MONTHS_SQL.map(m => `CASE WHEN CAST(${p}${m} AS DECIMAL(10,4))>0 THEN 1 ELSE 0 END`).join('+');
+  return `((${sum})/NULLIF(${cnt},0))`;
+}
 
 // ---------- HELPERS ----------
 export function formatIndex(v: number): string {
@@ -58,6 +67,7 @@ export function usePriceIndexData() {
   const [heatmapData, setHeatmapData] = useState<HeatmapCell[]>([]);
   const [scissorData, setScissorData] = useState<ScissorItem[]>([]);
   const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
+  const [prevSamePeriodAvg, setPrevSamePeriodAvg] = useState(0);
 
   const config = DATASETS[dataset];
 
@@ -109,17 +119,22 @@ export function usePriceIndexData() {
       const [d1, d2, d3, d4] = parts;
       const prodWhere = `endeks='${dataset}' AND d1='${d1}' AND d2='${d2}' AND d3='${d3}' AND d4='${d4}'`;
 
+      const prevYr = String(Number(yr) - 1);
+
       const monthlyQuery = `SELECT ${MONTH_COLS}
         FROM tuik_fiyatendex WHERE ${prodWhere} AND yil='${yr}' LIMIT 1`;
 
-      const yearlyQuery = `SELECT yil, ${AVG12} as avg_val
+      const prevYearMonthlyQuery = `SELECT ${MONTH_COLS}
+        FROM tuik_fiyatendex WHERE ${prodWhere} AND yil='${prevYr}' LIMIT 1`;
+
+      const yearlyQuery = `SELECT yil, ${makeAvgNonZero()} as avg_val
         FROM tuik_fiyatendex WHERE ${prodWhere}
         ORDER BY CAST(yil AS UNSIGNED)`;
 
       const topProdQuery = dataset === 'TUFE'
-        ? `SELECT urun, d1, ${AVG12} as curr_avg
+        ? `SELECT urun, d1, ${makeAvgNonZero()} as curr_avg
            FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0 AND d1>0 AND yil='${yr}'
-           ORDER BY ${AVG12} DESC LIMIT 13`
+           ORDER BY ${makeAvgNonZero()} DESC LIMIT 13`
         : '';
 
       const heatmapQuery = dataset === 'TUFE'
@@ -130,8 +145,8 @@ export function usePriceIndexData() {
 
       const scissorQuery = (dataset === 'TUFE' || dataset === 'T-GFE')
         ? `SELECT a.yil,
-             ${AVG12.replace(/Ocak/g, 'a.Ocak').replace(/\`Şubat\`/g, 'a.\`Şubat\`').replace(/Mart/g, 'a.Mart').replace(/Nisan/g, 'a.Nisan').replace(/\`Mayıs\`/g, 'a.\`Mayıs\`').replace(/Haziran/g, 'a.Haziran').replace(/Temmuz/g, 'a.Temmuz').replace(/\`Ağustos\`/g, 'a.\`Ağustos\`').replace(/\`Eylül\`/g, 'a.\`Eylül\`').replace(/Ekim/g, 'a.Ekim').replace(/\`Kasım\`/g, 'a.\`Kasım\`').replace(/\`Aralık\`/g, 'a.\`Aralık\`')} as tufe_avg,
-             (CAST(b.Ocak AS DECIMAL(10,4))+CAST(b.\`Şubat\` AS DECIMAL(10,4))+CAST(b.Mart AS DECIMAL(10,4))+CAST(b.Nisan AS DECIMAL(10,4))+CAST(b.\`Mayıs\` AS DECIMAL(10,4))+CAST(b.Haziran AS DECIMAL(10,4))+CAST(b.Temmuz AS DECIMAL(10,4))+CAST(b.\`Ağustos\` AS DECIMAL(10,4))+CAST(b.\`Eylül\` AS DECIMAL(10,4))+CAST(b.Ekim AS DECIMAL(10,4))+CAST(b.\`Kasım\` AS DECIMAL(10,4))+CAST(b.\`Aralık\` AS DECIMAL(10,4)))/12 as gfe_avg
+             ${makeAvgNonZero('a')} as tufe_avg,
+             ${makeAvgNonZero('b')} as gfe_avg
            FROM tuik_fiyatendex a
            INNER JOIN tuik_fiyatendex b ON a.yil=b.yil AND b.endeks='T-GFE' AND b.d1='0' AND b.d2='0' AND b.d3='0' AND b.d4='0'
            WHERE a.endeks='TUFE' AND a.d1='1' AND a.d2='0' AND a.d3='0' AND a.d4='0'
@@ -141,6 +156,7 @@ export function usePriceIndexData() {
       const promises: Promise<{ data?: Record<string, string | number>[] }>[] = [
         fetchQuery(monthlyQuery),
         fetchQuery(yearlyQuery),
+        fetchQuery(prevYearMonthlyQuery),
       ];
       if (topProdQuery) promises.push(fetchQuery(topProdQuery));
       if (heatmapQuery) promises.push(fetchQuery(heatmapQuery));
@@ -150,11 +166,13 @@ export function usePriceIndexData() {
       let idx = 0;
       const monthlyRes = results[idx++];
       const yearlyRes = results[idx++];
+      const prevYearMonthlyRes = results[idx++];
       const topProdRes = topProdQuery ? results[idx++] : null;
       const heatmapRes = heatmapQuery ? results[idx++] : null;
       const scissorRes = scissorQuery ? results[idx++] : null;
 
       const row = monthlyRes.data?.[0];
+      let availableMonthIndices: number[] = [];
       if (row) {
         const monthly: MonthlyItem[] = MONTHS_TR.map((m, i) => ({
           month: MONTHS_SHORT[i],
@@ -162,6 +180,7 @@ export function usePriceIndexData() {
           value: Number(row[m]) || 0,
         }));
         setMonthlyData(monthly);
+        availableMonthIndices = monthly.filter(m => m.value > 0).map(m => m.monthIdx);
         const vals = monthly.map(m => m.value).filter(v => v > 0);
         if (vals.length >= 3) {
           const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
@@ -181,15 +200,29 @@ export function usePriceIndexData() {
         setAnomalies([]);
       }
 
+      // Compute previous year same-period average for accurate YoY comparison
+      const prevRow = prevYearMonthlyRes.data?.[0];
+      if (prevRow && availableMonthIndices.length > 0) {
+        const prevVals = availableMonthIndices
+          .map(i => Number(prevRow[MONTHS_TR[i]]) || 0)
+          .filter(v => v > 0);
+        setPrevSamePeriodAvg(prevVals.length > 0 ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 0);
+      } else {
+        setPrevSamePeriodAvg(0);
+      }
+
       setYearlyData((yearlyRes.data || []).map((r: Record<string, string | number>) => ({
         year: String(r.yil),
         value: Number(r.avg_val) || 0,
       })).filter((r: YearlyItem) => r.value > 0));
 
       if (topProdRes?.data?.length) {
-        const prevYr = String(Number(selectedYear) - 1);
+        // Use same-period expression for fair YoY comparison
+        const samePeriodExpr = availableMonthIndices.length > 0
+          ? `((${availableMonthIndices.map(i => `CAST(${MONTHS_SQL[i]} AS DECIMAL(10,4))`).join('+')})/${availableMonthIndices.length})`
+          : makeAvgNonZero();
         const prevRes = await fetchQuery(
-          `SELECT d1, ${AVG12} as prev_avg
+          `SELECT d1, ${samePeriodExpr} as prev_avg
            FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0 AND d1>0 AND yil='${prevYr}'`
         );
         const prevMap = new Map((prevRes.data || []).map((r: Record<string, string | number>) => [String(r.d1), Number(r.prev_avg) || 0]));
@@ -252,10 +285,14 @@ export function usePriceIndexData() {
   }, [monthlyData]);
 
   const yearChange = useMemo(() => {
+    // Use same-period comparison when available (incomplete years)
+    if (prevSamePeriodAvg > 0 && avgIndex > 0) {
+      return ((avgIndex - prevSamePeriodAvg) / prevSamePeriodAvg) * 100;
+    }
     const curr = yearlyData.find(y => y.year === selectedYear);
     const prev = yearlyData.find(y => y.year === String(Number(selectedYear) - 1));
     return curr && prev && prev.value > 0 ? ((curr.value - prev.value) / prev.value * 100) : 0;
-  }, [yearlyData, selectedYear]);
+  }, [avgIndex, prevSamePeriodAvg, yearlyData, selectedYear]);
 
   const cagr5 = useMemo(() => {
     const currIdx = yearlyData.findIndex(y => y.year === selectedYear);
@@ -285,6 +322,6 @@ export function usePriceIndexData() {
     loading, error,
     monthlyData, yearlyData, topProducts, heatmapData, scissorData, anomalies,
     avgIndex, maxMonth, minMonth, yearChange, cagr5, volatility,
-    selectedProductName, heatmapProducts, config,
+    selectedProductName, heatmapProducts, config, prevSamePeriodAvg,
   };
 }
