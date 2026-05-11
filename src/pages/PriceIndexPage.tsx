@@ -39,7 +39,8 @@ export default function PriceIndexPage() {
         </div>
         <div className="filter-group">
           <label className="filter-label">Kategori / Ürün</label>
-          <select className="filter-select" value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)}>
+          <select className="filter-select" value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} disabled={productOptions.length === 0}>
+            {productOptions.length === 0 && <option value="">Yükleniyor…</option>}
             {productOptions.map(p => (
               <option key={p.code} value={p.code}>{p.name}</option>
             ))}
@@ -47,7 +48,8 @@ export default function PriceIndexPage() {
         </div>
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
-          <select className="filter-select" value={selectedYear} onChange={e => setSelectedYear(e.target.value)}>
+          <select className="filter-select" value={selectedYear} onChange={e => setSelectedYear(e.target.value)} disabled={yearOptions.length === 0}>
+            {yearOptions.length === 0 && <option value="">Yükleniyor…</option>}
             {yearOptions.map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
