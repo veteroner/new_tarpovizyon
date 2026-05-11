@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchQuery } from '../../services/api';
 
 // ---------- TYPES ----------
@@ -55,7 +55,7 @@ function calcStdDev(values: number[]): number {
 // ---------- HOOK ----------
 export function usePriceIndexData() {
   const [dataset, setDataset] = useState<DatasetId>('TUFE');
-  const [selectedYear, setSelectedYear] = useState('2026');
+  const [selectedYear, setSelectedYear] = useState('');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [productOptions, setProductOptions] = useState<{ code: string; name: string }[]>([]);
@@ -68,12 +68,16 @@ export function usePriceIndexData() {
   const [scissorData, setScissorData] = useState<ScissorItem[]>([]);
   const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
   const [prevSamePeriodAvg, setPrevSamePeriodAvg] = useState(0);
+  const metaRequestId = useRef(0);
 
   const config = DATASETS[dataset];
 
   const loadMeta = useCallback(async () => {
+    const reqId = ++metaRequestId.current;
     setLoading(true);
     setError('');
+    setProductOptions([]);
+    setSelectedProduct('');
     try {
       let prodSql: string;
       if (dataset === 'TUFE') {
@@ -89,9 +93,10 @@ export function usePriceIndexData() {
         fetchQuery(`SELECT DISTINCT yil FROM tuik_fiyatendex WHERE endeks='${dataset}' ORDER BY CAST(yil AS UNSIGNED) DESC`),
         fetchQuery(prodSql),
       ]);
+      if (reqId !== metaRequestId.current) return; // stale response, discard
       const years = (yearRes.data || []).map((r: Record<string, string | number>) => String(r.yil)).filter(Boolean);
       setYearOptions(years);
-      if (years.length > 0 && !years.includes(selectedYear)) setSelectedYear(years[0]);
+      if (years.length > 0) setSelectedYear(prev => (!prev || !years.includes(prev)) ? years[0] : prev);
       const prods = (prodRes.data || []).map((r: Record<string, string | number>) => ({
         code: String(r.code),
         name: String(r.urun),
@@ -106,11 +111,10 @@ export function usePriceIndexData() {
       setError('Veri kaynağı yüklenemedi');
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset]);
 
   const loadData = useCallback(async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedYear) return;
     setLoading(true);
     setError('');
     try {
@@ -179,8 +183,8 @@ export function usePriceIndexData() {
           monthIdx: i,
           value: Number(row[m]) || 0,
         }));
-        setMonthlyData(monthly);
         availableMonthIndices = monthly.filter(m => m.value > 0).map(m => m.monthIdx);
+        setMonthlyData(monthly.filter(m => m.value > 0));
         const vals = monthly.map(m => m.value).filter(v => v > 0);
         if (vals.length >= 3) {
           const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
