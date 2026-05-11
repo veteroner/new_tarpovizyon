@@ -451,43 +451,25 @@ function translateCommodity(name: string): string {
   if (COMMODITY_TR[name]) return COMMODITY_TR[name];
   // Prefix match
   for (const [key, tr] of Object.entries(COMMODITY_TR)) {
-    if (name.toLowerCase().startsWith(key.toLowerCase())) return tr;
+    if (name.toLowerCase().startsWith(key.toLowerCase())) {
+      // Preserve suffix details, e.g. "Wheat (CWRS, 13.5%)" → "Buğday (CWRS, 13.5%)"
+      return tr + name.slice(key.length);
+    }
+  }
+  // Parenthesis-aware: "Wheat (CWRS, 13.5%)" → "Buğday (CWRS, 13.5%)"
+  const parenMatch = name.match(/^([^(]+)\s*(\(.*\))?\s*$/);
+  if (parenMatch) {
+    const base = parenMatch[1].trim();
+    const detail = parenMatch[2] ? ' ' + parenMatch[2] : '';
+    if (COMMODITY_TR[base]) return COMMODITY_TR[base] + detail;
+    for (const [key, tr] of Object.entries(COMMODITY_TR)) {
+      if (base.toLowerCase().startsWith(key.toLowerCase())) return tr + detail;
+    }
+    // Try first word of base
+    const firstWord = base.split(/[\s,_]/)[0];
+    if (firstWord && COMMODITY_TR[firstWord]) return COMMODITY_TR[firstWord] + (base.slice(firstWord.length) ? base.slice(firstWord.length) : '') + detail;
   }
   return name;
-}
-
-const GIEWS_COUNTRY_COLORS = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444'];
-const MAX_GIEWS_COUNTRIES = 4;
-
-type GiewsSelectedPrice = {
-  serie: GiewsSerie;
-  history: GiewsDatapoint[];
-  countryIso: string;
-  countryName: string;
-  color: string;
-};
-
-type GiewsCountrySerie = GiewsSelectedPrice;
-
-function getCountryByIso(iso3: string) {
-  return GIEWS_COUNTRIES.find(country => country.iso3 === iso3) ?? GIEWS_COUNTRIES[0];
-}
-
-function getCountryLabel(iso3: string): string {
-  const country = getCountryByIso(iso3);
-  return COUNTRY_TR[country.name] ?? country.name;
-}
-
-function getLatestDateLabel(datapoints: GiewsDatapoint[]): string {
-  const latest = datapoints[0];
-  return latest ? new Date(latest.date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' }) : '-';
-}
-
-function getLatestPctChange(datapoints: GiewsDatapoint[]): number | null {
-  const latest = datapoints[0];
-  const prev = datapoints[1];
-  if (!latest || !prev || !prev.price_value) return null;
-  return ((latest.price_value - prev.price_value) / prev.price_value) * 100;
 }
 
 export default function CommodityPricesPage() {
@@ -1569,7 +1551,7 @@ export default function CommodityPricesPage() {
                           >
                             <div style={{ marginBottom: '0.5rem' }}>
                               <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.3, marginBottom: '0.2rem' }}>
-                                {serie.commodity_name.length > 48 ? serie.commodity_name.slice(0, 48) + '…' : serie.commodity_name}
+                                {(() => { const tr = translateCommodity(serie.commodity_name); return tr.length > 48 ? tr.slice(0, 48) + '…' : tr; })()}
                               </div>
                               <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{serie.market_name}</div>
                             </div>
@@ -1640,7 +1622,7 @@ export default function CommodityPricesPage() {
                   }}
                 >
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: '0.25rem' }}>
-                    {intlSelected.commodity_name}
+                    {translateCommodity(intlSelected.commodity_name)}
                   </h3>
                   <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1rem' }}>
                     {intlSelected.market_name} · {intlSelected.price_type} · {intlSelected.source_name?.split(';')[0]}
