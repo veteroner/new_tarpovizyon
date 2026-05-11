@@ -589,34 +589,31 @@ export async function fetchGiewsPricesBatch(uuids: string[]): Promise<GiewsPrice
   return results;
 }
 
-async function fetchAllPages<T>(url: string, pageSize = 200): Promise<T[]> {
-  const out: T[] = [];
-  let nextUrl: string | null = url.includes('page_size=')
-    ? url
-    : (url + (url.includes('?') ? '&' : '?') + `page_size=${pageSize}`);
-  for (let guard = 0; guard < 50 && nextUrl; guard++) {
-    try {
-      const res: { data?: { results?: T[]; next?: string | null } } =
-        (await axios.get(nextUrl, { timeout: 20000 })) as unknown as { data?: { results?: T[]; next?: string | null } };
-      const results = (res.data?.results ?? []) as T[];
-      out.push(...results);
-      nextUrl = (res.data?.next as string | null) ?? null;
-    } catch {
-      break;
-    }
-  }
-  return out;
-}
-
 /** Commodity bazlı (tüm ülkeler) yurtiçi seri listesi */
 export async function fetchGiewsSeriesByCommodity(commodityName: string): Promise<GiewsSerie[]> {
-  const safe = encodeURIComponent(commodityName);
-  const url = `${FAO_GIEWS_BASE}/FpmaSerieDomestic/?format=json&commodity_name=${safe}`;
-  return fetchAllPages<GiewsSerie>(url, 200);
+  try {
+    const safe = encodeURIComponent(commodityName);
+    const primaryUrl = `${FAO_GIEWS_BASE}/FpmaSerieDomestic/?format=json&commodity_name=${safe}&page_size=500`;
+    const primary = await axios.get(primaryUrl, { timeout: 20000 });
+    const primaryResults = (primary.data?.results ?? []) as GiewsSerie[];
+    if (primaryResults.length > 0) return primaryResults;
+
+    // Bazı FPMA sürümlerinde exact filter boş dönebiliyor, geniş filtreyi dene.
+    const fallbackUrl = `${FAO_GIEWS_BASE}/FpmaSerieDomestic/?format=json&commodity_name__icontains=${safe}&page_size=500`;
+    const fallback = await axios.get(fallbackUrl, { timeout: 20000 });
+    return (fallback.data?.results ?? []) as GiewsSerie[];
+  } catch {
+    return [];
+  }
 }
 
 /** Uluslararası fiyat serileri (FAO FPMA) */
 export async function fetchGiewsInternationalSeries(): Promise<GiewsSerie[]> {
-  const url = `${FAO_GIEWS_BASE}/FpmaSerieInternational/?format=json`;
-  return fetchAllPages<GiewsSerie>(url, 250);
+  try {
+    const url = `${FAO_GIEWS_BASE}/FpmaSerieInternational/?format=json&page_size=500`;
+    const res = await axios.get(url, { timeout: 20000 });
+    return (res.data?.results ?? []) as GiewsSerie[];
+  } catch {
+    return [];
+  }
 }
