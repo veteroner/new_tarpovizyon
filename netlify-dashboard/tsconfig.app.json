@@ -9,13 +9,13 @@
     "skipLibCheck": true,
 
     /* Path aliases (mirrors vite resolve.alias) */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/rasyon/*"],
-      "@sentry/react": ["src/rasyon/stubs/sentry.ts"],
-      "@sentry/aws-serverless": ["src/rasyon/stubs/sentry.ts"],
-      "@capacitor-community/admob": ["src/rasyon/stubs/capacitor-admob.ts"],
-      "@capacitor/push-notifications": ["src/rasyon/stubs/capacitor-push.ts"]
+      "*": ["./*"],
+      "@/*": ["./src/rasyon/*"],
+      "@sentry/react": ["./src/rasyon/stubs/sentry.ts"],
+      "@sentry/aws-serverless": ["./src/rasyon/stubs/sentry.ts"],
+      "@capacitor-community/admob": ["./src/rasyon/stubs/capacitor-admob.ts"],
+      "@capacitor/push-notifications": ["./src/rasyon/stubs/capacitor-push.ts"]
     },
 
     /* Bundler mode */
