@@ -44,6 +44,13 @@ export default function ProductionOverviewSection({
   worldRankings,
   importAnalytics,
 }: Props) {
+  const trendRangeLabel = useMemo(() => {
+    if (!filteredSeries.length) return '';
+    const minY = filteredSeries[0].year;
+    const maxY = filteredSeries[filteredSeries.length - 1].year;
+    return `${minY}–${maxY}`;
+  }, [filteredSeries]);
+
   const breakdown = useMemo(() => {
     if (!latest) return [];
     const items = [
@@ -188,8 +195,8 @@ export default function ProductionOverviewSection({
       <div className="chart-grid" style={{ marginTop: '30px' }}>
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kırmızı Et Üretimi Trendi (1961-2024)</h3>
-            <ChartInsightButton title="📈 Kırmızı Et Üretimi Trendi (1961-2024)" description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kırmızı Et Üretimi Trendi {trendRangeLabel && `(${trendRangeLabel})`}</h3>
+            <ChartInsightButton title={`📈 Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={filteredSeries} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>

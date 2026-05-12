@@ -73,10 +73,27 @@ export default function TurkeyRedMeatProductionPage() {
       });
 
       // 2010+ TÜİK verisini üzerine yaz (daha detaylı sığır/manda/koyun/keçi)
+      // Hist tabloda olmayan yıllar (örn. 2025) için de yeni nokta oluştur
       detailData.forEach(row => {
         const year = Number(row['yil']);
-        const point = allPoints.find(p => p.year === year);
-        if (point) {
+        let point = allPoints.find(p => p.year === year);
+        if (!point) {
+          const cattle = Number(row['sigir']) || 0;
+          const buffalo = Number(row['manda']) || 0;
+          const sheep = Number(row['koyun']) || 0;
+          const goat = Number(row['keci']) || 0;
+          point = {
+            year,
+            totalTon: Number(row['toplam']) || (cattle + buffalo + sheep + goat),
+            cattleTon: cattle,
+            buffaloTon: buffalo,
+            sheepTon: sheep,
+            goatTon: goat,
+            buyukbasToplam: Number(row['buyukbas_toplam']) || (cattle + buffalo),
+            kucukbasToplam: Number(row['kucukbas_toplam']) || (sheep + goat),
+          };
+          allPoints.push(point);
+        } else {
           point.cattleTon = Number(row['sigir']) || 0;
           point.buffaloTon = Number(row['manda']) || 0;
           point.sheepTon = Number(row['koyun']) || 0;
@@ -213,17 +230,22 @@ export default function TurkeyRedMeatProductionPage() {
 
       // 10. Dünya Sıralamaları (FAO)
       try {
+        const faoMaxYearRes = await fetchQuery(
+          `SELECT MAX(year) as max_year FROM fao_livestock_primary WHERE element='Production' AND unit='t'`
+        ).catch(() => ({ data: [{ max_year: 2023 }] }));
+        const faoMaxYear = faoMaxYearRes.data?.[0]?.max_year ?? 2023;
+
         const rankingQueries = [
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary 
-           WHERE year='2023' AND element='Production' AND unit='t' 
+          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
+           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
            AND item='Meat of cattle with the bone, fresh or chilled'
            AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary 
-           WHERE year='2023' AND element='Production' AND unit='t' 
+          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
+           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
            AND item='Meat of sheep, fresh or chilled'
            AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary 
-           WHERE year='2023' AND element='Production' AND unit='t' 
+          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
+           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
            AND item='Meat of goat, fresh or chilled'
            AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
         ];
