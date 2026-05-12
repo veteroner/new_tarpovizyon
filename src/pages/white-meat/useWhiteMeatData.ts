@@ -9,6 +9,7 @@ import type {
   MonthlyData,
   TuikTurkeyMeatData,
   PoultryMapType,
+  PoultryTradeData,
   WhiteMeatData,
 } from './whiteMeatUtils';
 
@@ -32,6 +33,7 @@ export function useWhiteMeatData(): WhiteMeatData {
   const [quailMeatData, setQuailMeatData] = useState<TuikTurkeyMeatData[]>([]);
   const [monthlyQuailMeat, setMonthlyQuailMeat] = useState<MonthlyData[]>([]);
   const [quailSlaughterData, setQuailSlaughterData] = useState<TuikTurkeyMeatData[]>([]);
+  const [tradeData, setTradeData] = useState<PoultryTradeData[]>([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -45,13 +47,34 @@ export function useWhiteMeatData(): WhiteMeatData {
       const res = await fetchQuery(productionQuery);
       const data = (res.data ?? []) as Array<Record<string, unknown>>;
 
-      const points = data
+      const points: YearPoint[] = data
         .map((row) => ({
           year: Number(row.year) || 0,
           poultryTon: Number(row.kanatli_eti_ton) || 0,
         }))
         .filter((p) => p.year > 0)
         .sort((a, b) => a.year - b.year);
+
+      // TÜİK tablosundan hist tablosunda olmayan yılları ekle (örn. 2025+)
+      const histMaxYear = points.length > 0 ? Math.max(...points.map(p => p.year)) : 2024;
+      const tuikNewRes = await fetchQuery(
+        `SELECT yil, CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as kanatlı_ton
+         FROM tuik_hayvancilik_kumeshayvanciligi
+         WHERE urun = 'Tavuk Eti' AND TOPLAM IS NOT NULL
+           AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000
+           AND yil > '${histMaxYear}'
+         ORDER BY yil`
+      ).catch(() => ({ data: [] }));
+      if (tuikNewRes.data) {
+        (tuikNewRes.data as Record<string, unknown>[]).forEach(row => {
+          const year = Number(row['yil']) || 0;
+          const kanatlı = Number(row['kanatlı_ton']) || 0;
+          if (year > 0 && kanatlı > 0 && !points.find(p => p.year === year)) {
+            points.push({ year, poultryTon: kanatlı });
+          }
+        });
+        points.sort((a, b) => a.year - b.year);
+      }
 
       setSeries(points);
 
@@ -201,6 +224,7 @@ export function useWhiteMeatData(): WhiteMeatData {
           });
           
           const tuikDataArray: TuikChickenData[] = Array.from(yearMap.values())
+            .filter(d => d.slaughtered > 0 || d.meatProduction > 0) // Boş yılları çıkar (NULL TOPLAM'lı 2026 vb.)
             .map(d => ({
               ...d,
               hatchRate: d.hatchedEggs > 0 ? (d.producedChicks / d.hatchedEggs) * 100 : 0,
@@ -212,8 +236,11 @@ export function useWhiteMeatData(): WhiteMeatData {
           console.log('TÜİK data loaded:', tuikDataArray.length, 'years');
         }
 
-        // Aylık dağılım
-        const latestYearQuery = `SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi`;
+        // Aylık dağılım — NULL TOPLAM olan yılları hariç tut (2026 gibi boş yıllar)
+        const latestYearQuery = `
+          SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi
+          WHERE urun = 'Tavuk Eti' AND TOPLAM IS NOT NULL
+            AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000`;
         const latestYearRes = await fetchQuery(latestYearQuery);
         const latestYear = String(latestYearRes.data?.[0]?.max_year || '2025');
         
@@ -254,7 +281,7 @@ export function useWhiteMeatData(): WhiteMeatData {
             Ocak, Şubat, Mart, Nisan, Mayıs, Haziran,
             Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
           FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun = 'Hindi Eti'
+          WHERE urun = 'Hindi Eti' AND TOPLAM IS NOT NULL
           ORDER BY yil DESC
         `;
         const turkeyRes = await fetchQuery(turkeyQuery);
@@ -337,7 +364,7 @@ export function useWhiteMeatData(): WhiteMeatData {
             Ocak, Şubat, Mart, Nisan, Mayıs, Haziran,
             Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
           FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun IN ('Bıldırcın Eti', 'Kesilen Bıldırcın')
+          WHERE urun IN ('Bıldırcın Eti', 'Kesilen Bıldırcın') AND TOPLAM IS NOT NULL
           ORDER BY urun, yil DESC
         `;
         const quailRes = await fetchQuery(quailQuery);
@@ -386,6 +413,27 @@ export function useWhiteMeatData(): WhiteMeatData {
       } catch (quailError) {
         console.warn('Bıldırcın eti verileri yüklenemedi:', quailError);
       }
+      // Piliç Eti Dış Ticaret Verisi
+      try {
+        const tradeRes = await fetchQuery(
+          `SELECT yil,
+             ROUND(SUM(ihracat_deger)/1000000, 1) as ihracat_musd,
+             ROUND(SUM(ithalat_deger)/1000000, 1) as ithalat_musd
+           FROM tuik_ticaret_hayvansal
+           WHERE ana_urun = 'Piliç Eti' AND yil >= 2015 AND yil < YEAR(CURDATE()) + 1
+           GROUP BY yil ORDER BY yil`
+        );
+        if (tradeRes.data && tradeRes.data.length > 0) {
+          setTradeData((tradeRes.data as Record<string, unknown>[]).map(r => ({
+            yil: Number(r['yil']) || 0,
+            ihracat_musd: Number(r['ihracat_musd']) || 0,
+            ithalat_musd: Number(r['ithalat_musd']) || 0,
+          })).filter(d => d.yil > 0));
+        }
+      } catch (tradeErr) {
+        console.warn('Piliç eti ticaret verileri yüklenemedi:', tradeErr);
+      }
+
     } catch (e) {
       console.error('Veri yüklenirken hata:', e);
       setSeries([]);
@@ -437,6 +485,7 @@ export function useWhiteMeatData(): WhiteMeatData {
     quailMeatData,
     monthlyQuailMeat,
     quailSlaughterData,
+    tradeData,
     latest,
     prev,
     yoy,

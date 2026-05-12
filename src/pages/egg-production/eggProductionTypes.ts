@@ -78,6 +78,12 @@ export function formatTL(value: number): string {
   return value.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
 
+export type EggTradeData = {
+  yil: number;
+  ihracat_musd: number;
+  ithalat_musd: number;
+};
+
 export function formatShort(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
   if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
