@@ -38,11 +38,18 @@ export default function MilkTuikSection({
     return tuikSeasonality.reduce((max, m) => m.miktar > max.miktar ? m : max, tuikSeasonality[0]);
   }, [tuikSeasonality]);
 
+  const tuikRangeLabel = useMemo(() => {
+    if (!tuikSutData.length) return '';
+    const years = tuikSutData.filter(d => d.toplam > 0).map(d => d.yil);
+    if (!years.length) return '';
+    return `${Math.min(...years)}–${Math.max(...years)}`;
+  }, [tuikSutData]);
+
   return (
     <>
       <div style={{ marginTop: '48px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          📊 TÜİK Süt ve Süt Ürünleri (2010-2025)
+          📊 TÜİK Süt ve Süt Ürünleri {tuikRangeLabel && `(${tuikRangeLabel})`}
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Sanayiye giden süt ve üretilen ürün miktarları — Yıllık ve aylık detaylı TÜİK verileri
