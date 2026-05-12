@@ -34,6 +34,13 @@ type Props = {
 };
 
 export default function ImportAnalysisSection({ importData, series, importAnalytics }: Props) {
+  const importRangeLabel = useMemo(() => {
+    if (!importData.length) return '2010-…';
+    const first = String(importData[0].yil);
+    const last = String(importData[importData.length - 1].yil);
+    return `${first}–${last}`;
+  }, [importData]);
+
   const importComposition = useMemo(() => {
     if (importData.length === 0) return [];
     const latest = importData[importData.length - 1];
@@ -126,7 +133,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
     <>
       <div style={{ marginTop: '40px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          📦 Kırmızı Et ve Canlı Hayvan İthalat Analizi (2010-2024)
+          📦 Kırmızı Et ve Canlı Hayvan İthalat Analizi ({importRangeLabel})
         </h2>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
           Türkiye'nin kırmızı et ve canlı hayvan ithalatının detaylı analizi ve etkileri
@@ -230,7 +237,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
           <div className="kpi-value" style={{ color: importAnalytics.cagr.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
             %{importAnalytics.cagr.carcass.toFixed(1)}
           </div>
-          <div className="kpi-subtitle">2010-2024 bileşik</div>
+          <div className="kpi-subtitle">{importRangeLabel} bileşik</div>
         </div>
       </div>
 
@@ -239,8 +246,8 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
         <div className="chart-grid" style={{ marginBottom: '20px' }}>
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏠 Yeterlilik (Proxy) Trendi (2010-2024)</h3>
-              <ChartInsightButton title="🏠 Yeterlilik (Proxy) Trendi (2010-2024)" description="Kırmızı et yeterlilik proxy trendi" data={ssrProxyTrend} context={{ section: 'Yeterlilik' }} />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏠 Yeterlilik (Proxy) Trendi ({importRangeLabel})</h3>
+              <ChartInsightButton title={`🏠 Yeterlilik (Proxy) Trendi (${importRangeLabel})`} description="Kırmızı et yeterlilik proxy trendi" data={ssrProxyTrend} context={{ section: 'Yeterlilik' }} />
             </div>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={ssrProxyTrend} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
@@ -414,8 +421,8 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
 
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ortalama İthalat Değlerleri (2010-2024)</h3>
-            <ChartInsightButton title="📊 Ortalama İthalat Değlerleri (2010-2024)" description="2010-2024 dönem ortalama ithalat değleri" data={importAnalytics ? [importAnalytics.averages] : []} context={{ section: 'Ortalamalar' }} compact />
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ortalama İthalat Değerleri ({importRangeLabel})</h3>
+            <ChartInsightButton title={`📊 Ortalama İthalat Değerleri (${importRangeLabel})`} description={`${importRangeLabel} dönem ortalama ithalat değerleri`} data={importAnalytics ? [importAnalytics.averages] : []} context={{ section: 'Ortalamalar' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart 
@@ -474,7 +481,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
         }}>
           <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>
-              📈 Karkas Et CAGR (2010-2024)
+              📈 Karkas Et CAGR ({importRangeLabel})
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: importAnalytics.cagr.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
               %{importAnalytics.cagr.carcass.toFixed(2)}
@@ -528,7 +535,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               {formatNumber(importAnalytics.averages.carcass)} ton
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              2010-2024 ortalaması
+              {importRangeLabel} ortalaması
             </div>
           </div>
 
