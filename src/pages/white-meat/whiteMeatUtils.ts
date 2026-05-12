@@ -40,6 +40,12 @@ export type TuikTurkeyMeatData = {
 
 export type PoultryMapType = 'total' | 'broiler' | 'layer';
 
+export type PoultryTradeData = {
+  yil: number;
+  ihracat_musd: number;
+  ithalat_musd: number;
+};
+
 export type WhiteMeatData = {
   loading: boolean;
   series: YearPoint[];
@@ -64,6 +70,7 @@ export type WhiteMeatData = {
   quailMeatData: TuikTurkeyMeatData[];
   monthlyQuailMeat: MonthlyData[];
   quailSlaughterData: TuikTurkeyMeatData[];
+  tradeData: PoultryTradeData[];
   latest: YearPoint | undefined;
   prev: YearPoint | undefined;
   yoy: number;

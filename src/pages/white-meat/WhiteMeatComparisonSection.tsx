@@ -10,7 +10,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { TuikChickenData, TuikTurkeyMeatData } from './whiteMeatUtils';
+import { useMemo } from 'react';
+import type { TuikChickenData, TuikTurkeyMeatData, PoultryTradeData } from './whiteMeatUtils';
 import { formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 
@@ -18,13 +19,80 @@ type Props = {
   tuikData: TuikChickenData[];
   turkeyMeatData: TuikTurkeyMeatData[];
   quailMeatData: TuikTurkeyMeatData[];
+  tradeData: PoultryTradeData[];
 };
 
-export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, quailMeatData }: Props) {
+export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, quailMeatData, tradeData }: Props) {
   if ((!tuikData || tuikData.length === 0) && (!turkeyMeatData || turkeyMeatData.length === 0) && (!quailMeatData || quailMeatData.length === 0)) return null;
+
+  // Ticaret intelligence hesaplamaları
+  const tradeIntelligence = useMemo(() => {
+    if (!tradeData || tradeData.length === 0) return null;
+    const latest = tradeData[tradeData.length - 1];
+    const prev = tradeData[tradeData.length - 2];
+    const totalIhracat = tradeData.reduce((s, d) => s + d.ihracat_musd, 0);
+    const totalIthalat = tradeData.reduce((s, d) => s + d.ithalat_musd, 0);
+    const exportCAGR = tradeData.length > 1
+      ? (Math.pow(latest.ihracat_musd / tradeData[0].ihracat_musd, 1 / (tradeData.length - 1)) - 1) * 100
+      : 0;
+    const yoyExport = prev ? ((latest.ihracat_musd - prev.ihracat_musd) / prev.ihracat_musd) * 100 : 0;
+    return { latest, prev, totalIhracat, totalIthalat, exportCAGR, yoyExport, netBalance: latest.ihracat_musd - latest.ithalat_musd };
+  }, [tradeData]);
 
   return (
     <>
+      {/* Ticaret Intelligence Bölümü */}
+      {tradeIntelligence && tradeData.length > 0 && (
+        <>
+          <div style={{ marginTop: '60px', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
+              🌍 Piliç Eti Dış Ticaret Analizi
+            </h2>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+              Türkiye piliç eti ihracat ve ithalat performansı — yıllık ticaret akışları ve denge analizi
+            </p>
+          </div>
+
+          {/* Ticaret KPI Kartları */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+            {[
+              { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '📤', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${tradeIntelligence.yoyExport.toFixed(1)}% YoY` },
+              { label: `İTHALAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ithalat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#ef4444', icon: '📥', sub: 'Yem hammaddesi ağırlıklı' },
+              { label: 'NET TİCARET DENGESİ', value: `$${tradeIntelligence.netBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: tradeIntelligence.netBalance > 0 ? '#10b981' : '#ef4444', icon: '⚖️', sub: tradeIntelligence.netBalance > 0 ? '✅ Net ihracatçı' : '❌ Net ithalatçı' },
+              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${tradeIntelligence.exportCAGR.toFixed(1)}%`, color: '#3b82f6', icon: '📈', sub: `${tradeData[0].yil}–${tradeIntelligence.latest.yil} bileşik` },
+            ].map(kpi => (
+              <div key={kpi.label} className="kpi-card" style={{ borderTop: `3px solid ${kpi.color}` }}>
+                <div className="kpi-header"><span className="kpi-title" style={{ fontSize: '0.7rem' }}>{kpi.label}</span><span style={{ fontSize: '1.5rem' }}>{kpi.icon}</span></div>
+                <div className="kpi-value" style={{ color: kpi.color, fontSize: '1.4rem' }}>{kpi.value}</div>
+                <div className="kpi-subtitle">{kpi.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Ticaret Trend Grafiği */}
+          <div className="chart-grid" style={{ marginBottom: '40px' }}>
+            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 İhracat vs İthalat Trendi (M$)</h3>
+                <ChartInsightButton title="📊 Piliç Eti Dış Ticaret Trendi" description="Türkiye piliç eti ihracat ve ithalat gelişimi" data={tradeData} context={{ section: 'Ticaret' }} />
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={tradeData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${formatShort(v)}M`} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(v: number, name: string) => [`$${v.toLocaleString('tr-TR')} M`, name]} />
+                  <Legend />
+                  <Bar dataKey="ihracat_musd" name="İhracat (M$)" fill="#22c55e" fillOpacity={0.85} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ithalat_musd" name="İthalat (M$)" fill="#ef4444" fillOpacity={0.85} radius={[4, 4, 0, 0]} />
+                  <Area dataKey={(d: PoultryTradeData) => d.ihracat_musd - d.ithalat_musd} name="Net Denge (M$)" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} strokeWidth={2} dot={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </>
+      )}
+
       <div style={{ marginTop: '60px', marginBottom: '30px' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
           📊 Toplam Beyaz Et Karşılaştırması

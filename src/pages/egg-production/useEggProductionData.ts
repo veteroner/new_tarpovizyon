@@ -6,6 +6,7 @@ import {
   type TuikEggData,
   type MonthlyEggData,
   type EggEconomicData,
+  type EggTradeData,
   parseTrNumber,
   extractYear,
 } from './eggProductionTypes';
@@ -25,6 +26,7 @@ export function useEggProductionData() {
   const [tuikData, setTuikData] = useState<TuikEggData[]>([]);
   const [monthlyEgg, setMonthlyEgg] = useState<MonthlyEggData[]>([]);
   const [monthlyLayer, setMonthlyLayer] = useState<MonthlyEggData[]>([]);
+  const [eggTradeData, setEggTradeData] = useState<EggTradeData[]>([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -40,6 +42,28 @@ export function useEggProductionData() {
         })
         .filter((p) => p.year > 0)
         .sort((a, b) => a.year - b.year);
+
+      // TÜİK tablosundan hist tablosunda olmayan yılları ekle (örn. 2025+)
+      const histMaxYear = points.length > 0 ? Math.max(...points.map(p => p.year)) : 2024;
+      const tuikNewRes = await fetchQuery(
+        `SELECT yil, CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as total_bin_adet
+         FROM tuik_hayvancilik_kumeshayvanciligi
+         WHERE urun = 'Tavuk Yumurtası' AND TOPLAM IS NOT NULL
+           AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000
+           AND yil > '${histMaxYear}'
+         ORDER BY yil`
+      ).catch(() => ({ data: [] }));
+      if (tuikNewRes.data) {
+        (tuikNewRes.data as Record<string, unknown>[]).forEach(row => {
+          const year = Number(row['yil']) || 0;
+          const totalBinAdet = Number(row['total_bin_adet']) || 0;
+          const eggsMillion = totalBinAdet / 1000;
+          if (year > 0 && eggsMillion > 0 && !points.find(p => p.year === year)) {
+            points.push({ year, eggsMillion });
+          }
+        });
+        points.sort((a, b) => a.year - b.year);
+      }
 
       setSeries(points);
 
@@ -133,6 +157,7 @@ export function useEggProductionData() {
           });
 
           const tuikDataArray: TuikEggData[] = Array.from(yearMap.values())
+            .filter(d => d.eggProduction > 0)
             .map((d) => ({
               ...d,
               yieldPerBird: d.layerCount > 0 ? (d.eggProduction * 1000) / (d.layerCount * 1000) : 0,
@@ -143,8 +168,11 @@ export function useEggProductionData() {
           console.log('TÜİK Yumurta data loaded:', tuikDataArray.length, 'years');
         }
 
-        // Aylık dağılım - En son yıl için
-        const latestYearQuery = `SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi`;
+        // Aylık dağılım - NULL olmayan en son yıl için
+        const latestYearQuery = `
+          SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi
+          WHERE urun = 'Tavuk Yumurtası' AND TOPLAM IS NOT NULL
+            AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000`;
         const latestYearRes = await fetchQuery(latestYearQuery);
         const latestYear = String(latestYearRes.data?.[0]?.max_year || '2025');
 
@@ -174,6 +202,27 @@ export function useEggProductionData() {
         }
       } catch (tuikError) {
         console.warn('TÜİK yumurta verileri yüklenemedi:', tuikError);
+      }
+
+      // Yumurta Dış Ticaret Verisi
+      try {
+        const eggTradeRes = await fetchQuery(
+          `SELECT yil,
+             ROUND(SUM(ihracat_deger)/1000000, 1) as ihracat_musd,
+             ROUND(SUM(ithalat_deger)/1000000, 1) as ithalat_musd
+           FROM tuik_ticaret_hayvansal
+           WHERE urun LIKE '%Yumurta%' AND yil >= 2015 AND yil < YEAR(CURDATE()) + 1
+           GROUP BY yil ORDER BY yil`
+        );
+        if (eggTradeRes.data && eggTradeRes.data.length > 0) {
+          setEggTradeData((eggTradeRes.data as Record<string, unknown>[]).map(r => ({
+            yil: Number(r['yil']) || 0,
+            ihracat_musd: Number(r['ihracat_musd']) || 0,
+            ithalat_musd: Number(r['ithalat_musd']) || 0,
+          })).filter(d => d.yil > 0));
+        }
+      } catch (tradeErr) {
+        console.warn('Yumurta ticaret verileri yüklenemedi:', tradeErr);
       }
 
       // Dünya Sıralaması
@@ -290,6 +339,7 @@ export function useEggProductionData() {
     tuikData,
     monthlyEgg,
     monthlyLayer,
+    eggTradeData,
     latest,
     prev,
     yoy,

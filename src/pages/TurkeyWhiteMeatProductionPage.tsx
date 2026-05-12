@@ -79,6 +79,7 @@ export default function TurkeyWhiteMeatProductionPage() {
           tuikData={data.tuikData}
           turkeyMeatData={data.turkeyMeatData}
           quailMeatData={data.quailMeatData}
+          tradeData={data.tradeData}
         />
       )}
     </div>
