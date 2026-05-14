@@ -15,12 +15,15 @@ export function EggIntelligencePanel({ tuikData }: EggIntelligencePanelProps) {
     ? ((Math.pow(lastYear.eggProduction / firstYear.eggProduction, 1 / years) - 1) * 100)
     : 0;
 
-  const layerCAGR = years > 0
-    ? ((Math.pow(lastYear.layerCount / firstYear.layerCount, 1 / years) - 1) * 100)
+  const validLayerData = tuikData.filter(d => d.layerCount > 0);
+  const layerCAGR = validLayerData.length >= 2
+    ? ((Math.pow(validLayerData[0].layerCount / validLayerData[validLayerData.length - 1].layerCount, 1 / (validLayerData.length - 1)) - 1) * 100)
     : 0;
 
   const yieldChange = lastYear.yieldPerBird - firstYear.yieldPerBird;
-  const hybridShare = (lastYear.hybridLayer / lastYear.layerCount) * 100;
+  const denomForHybrid = lastYear.layerCount > 0 ? lastYear.layerCount :
+    (lastYear.nativeLayer + lastYear.hybridLayer > 0 ? lastYear.nativeLayer + lastYear.hybridLayer : 0);
+  const hybridShare = denomForHybrid > 0 ? (lastYear.hybridLayer / denomForHybrid) * 100 : 0;
 
   return (
     <div style={{
