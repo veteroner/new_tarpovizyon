@@ -40,7 +40,7 @@ export function useEggProductionData() {
           const eggsMillion = parseTrNumber(row['Yumurta (Milyon Adet)']);
           return { year, eggsMillion };
         })
-        .filter((p) => p.year > 0)
+        .filter((p) => p.year > 0 && p.eggsMillion > 0)
         .sort((a, b) => a.year - b.year);
 
       // TÜİK tablosundan hist tablosunda olmayan yılları ekle (örn. 2025+)
@@ -103,13 +103,6 @@ export function useEggProductionData() {
 
       // TÜİK Yumurta Üretim Verileri
       try {
-        // Önce tablodaki gerçek ürün adlarını keşfet (debug)
-        const distinctUrunRes = await fetchQuery(
-          `SELECT DISTINCT urun FROM tuik_hayvancilik_kumeshayvanciligi WHERE urun LIKE '%avuk%' OR urun LIKE '%umurta%' ORDER BY urun`
-        ).catch(() => ({ data: [] }));
-        const availableUrunler = (distinctUrunRes.data as Record<string, string>[]).map(r => String(r.urun || ''));
-        console.log('📋 Tablodaki ürünler:', availableUrunler);
-
         const tuikQuery = `
           SELECT
             yil,
@@ -117,9 +110,6 @@ export function useEggProductionData() {
             urun
           FROM tuik_hayvancilik_kumeshayvanciligi
           WHERE urun = 'Tavuk Yumurtası'
-            OR urun LIKE 'Yumurtacı Tavuk%'
-            OR urun LIKE 'Yerli Yumurtacı%'
-            OR urun LIKE 'Hibrit Yumurtacı%'
             OR urun LIKE '%Kuluçkaya Basılan%'
           ORDER BY yil DESC, urun
         `;
@@ -141,55 +131,48 @@ export function useEggProductionData() {
                 hatchedEggs: 0,
               });
             }
-
-            const yearData = yearMap.get(year);
-            if (yearData) {
-              const urun = String(row.urun);
-              const value = Number(row.value) || 0;
-
-              if (urun === 'Tavuk Yumurtası') {
-                yearData.eggProduction = value;
-              } else if (urun.startsWith('Yumurtacı Tavuk') && !urun.includes('Yerli') && !urun.includes('Hibrit') && !urun.includes('Kuluçka')) {
-                // 'Yumurtacı Tavuk Sayısı', 'Yumurtacı Tavuk' vb. → layerCount
-                if (yearData.layerCount === 0 || value > yearData.layerCount) yearData.layerCount = value;
-              } else if (urun.startsWith('Yerli Yumurtacı')) {
-                yearData.nativeLayer = value;
-              } else if (urun.startsWith('Hibrit Yumurtacı')) {
-                yearData.hybridLayer = value;
-              } else if (urun.includes('Kuluçkaya Basılan')) {
-                yearData.hatchedEggs = value;
-              }
-            }
+            const yearData = yearMap.get(year)!;
+            const urun = String(row.urun);
+            const value = Number(row.value) || 0;
+            if (urun === 'Tavuk Yumurtası') yearData.eggProduction = value;
+            else if (urun.includes('Kuluçkaya Basılan')) yearData.hatchedEggs = value;
           });
+
+          // tuik_hayvancilik_canlihayvan tablosundan yıllık layer count çek
+          const canlihayvanRes = await fetchQuery(
+            `SELECT * FROM tuik_hayvancilik_canlihayvan
+             WHERE grup = 'Tavuk' AND kategori LIKE '%Yumurta%'
+             AND (yer = 'TÜRKİYE' OR yer = 'Türkiye' OR duzey = 'ülke' OR duzey LIKE '%lke%')
+             LIMIT 3`
+          ).catch(() => ({ data: [] }));
+
+          if (canlihayvanRes.data && canlihayvanRes.data.length > 0) {
+            const row = canlihayvanRes.data[0] as Record<string, unknown>;
+            // y2010, y2011, ..., y2025 gibi sütunları çek
+            Object.entries(row).forEach(([key, val]) => {
+              const m = key.match(/^y(\d{4})$/);
+              if (m) {
+                const yr = m[1];
+                const count = Number(String(val || '0').replace(/\./g, '')) || 0;
+                if (count > 0) {
+                  if (!yearMap.has(yr)) {
+                    yearMap.set(yr, { year: yr, eggProduction: 0, layerCount: 0, yieldPerBird: 0, nativeLayer: 0, hybridLayer: 0, hatchedEggs: 0 });
+                  }
+                  yearMap.get(yr)!.layerCount = count;
+                }
+              }
+            });
+          }
 
           const tuikDataArray: TuikEggData[] = Array.from(yearMap.values())
             .filter(d => d.eggProduction > 0)
-            .map((d) => {
-              const layerCount = d.layerCount > 0 ? d.layerCount :
-                (d.nativeLayer + d.hybridLayer > 0 ? d.nativeLayer + d.hybridLayer : 0);
-              return {
-                ...d,
-                layerCount,
-                yieldPerBird: layerCount > 0 ? d.eggProduction / layerCount : 0,
-              };
-            })
+            .map((d) => ({
+              ...d,
+              yieldPerBird: d.layerCount > 0 ? d.eggProduction / d.layerCount : 0,
+            }))
             .sort((a, b) => Number(b.year) - Number(a.year));
 
-          // Eğer layerCount hâlâ 0 ise tuik_hayvancilik_canlihayvan tablosundan tamamla
-          const missingLayerYears = tuikDataArray.filter(d => d.layerCount === 0).map(d => d.year);
-          if (missingLayerYears.length > 0) {
-            const canlihayvanRes = await fetchQuery(
-              `SELECT * FROM tuik_hayvancilik_canlihayvan
-               WHERE grup = 'Tavuk' AND kategori LIKE '%Yumurta%'
-               AND (duzey = 'ülke' OR duzey = 'ulke' OR duzey LIKE '%lke%')
-               LIMIT 5`
-            ).catch(() => ({ data: [] }));
-            console.log('📊 canlihayvan Yumurta Tavuğu örnek:', canlihayvanRes.data?.slice(0, 2));
-          }
-
           setTuikData(tuikDataArray);
-          console.log('TÜİK Yumurta data loaded:', tuikDataArray.length, 'years',
-            '| layerCount>0:', tuikDataArray.filter(d => d.layerCount > 0).length);
         }
 
         // Aylık dağılım - NULL olmayan en son yıl için
