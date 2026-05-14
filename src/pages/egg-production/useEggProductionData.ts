@@ -158,10 +158,15 @@ export function useEggProductionData() {
 
           const tuikDataArray: TuikEggData[] = Array.from(yearMap.values())
             .filter(d => d.eggProduction > 0)
-            .map((d) => ({
-              ...d,
-              yieldPerBird: d.layerCount > 0 ? (d.eggProduction * 1000) / (d.layerCount * 1000) : 0,
-            }))
+            .map((d) => {
+              const layerCount = d.layerCount > 0 ? d.layerCount :
+                (d.nativeLayer + d.hybridLayer > 0 ? d.nativeLayer + d.hybridLayer : 0);
+              return {
+                ...d,
+                layerCount,
+                yieldPerBird: layerCount > 0 ? d.eggProduction / layerCount : 0,
+              };
+            })
             .sort((a, b) => Number(b.year) - Number(a.year));
 
           setTuikData(tuikDataArray);

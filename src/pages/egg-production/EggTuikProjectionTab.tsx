@@ -24,14 +24,23 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
   const lastYear = tuikData[0];
   const years = tuikData.length - 1;
 
-  const eggGrowthRate = Math.pow(lastYear.eggProduction / firstYear.eggProduction, 1 / years) - 1;
+  const eggGrowthRate = years > 0 && firstYear.eggProduction > 0
+    ? Math.pow(lastYear.eggProduction / firstYear.eggProduction, 1 / years) - 1
+    : 0;
   const eggMonthlyGrowth = Math.pow(1 + eggGrowthRate, 1 / 12) - 1;
 
-  const layerGrowthRate = Math.pow(lastYear.layerCount / firstYear.layerCount, 1 / years) - 1;
+  const validLayerData = tuikData.filter(d => d.layerCount > 0);
+  const hasLayerData = validLayerData.length >= 2;
+  const layerFirst = hasLayerData ? validLayerData[validLayerData.length - 1] : null;
+  const layerLast = hasLayerData ? validLayerData[0] : null;
+  const layerYears = hasLayerData ? validLayerData.length - 1 : 1;
+  const layerGrowthRate = hasLayerData && layerFirst!.layerCount > 0
+    ? Math.pow(layerLast!.layerCount / layerFirst!.layerCount, 1 / layerYears) - 1
+    : 0;
   const layerMonthlyGrowth = Math.pow(1 + layerGrowthRate, 1 / 12) - 1;
 
   const baseEgg2026 = lastYear.eggProduction * (1 + eggGrowthRate);
-  const baseLayer2026 = lastYear.layerCount * (1 + layerGrowthRate);
+  const baseLayer2026 = hasLayerData && layerLast ? layerLast.layerCount * (1 + layerGrowthRate) : 0;
 
   const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
@@ -68,7 +77,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <span className="kpi-title">2026 TAVUK TAHMİNİ</span>
             <div className="kpi-icon green">🐔</div>
           </div>
-          <div className="kpi-value">{formatShort(totalProjected2026Layer)} adet</div>
+          <div className="kpi-value">{hasLayerData ? formatShort(totalProjected2026Layer) + ' adet' : 'Veri yok'}</div>
           <div className="kpi-subtitle">Ortalama tavuk sayısı</div>
         </div>
 
@@ -131,43 +140,50 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       </div>
 
       {/* 2026 Aylık Tavuk Projeksiyonu */}
-      <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu</h3>
-            <ChartInsightButton title="🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu" description="2026 yılı aylık yumurtacı tavuk sayısı projeksiyonu" data={projection2026Layer} context={{ year: 2026 }} compact />
-          </div>
-          <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={projection2026Layer}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
-              <YAxis
-                tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                tickFormatter={(v) => formatShort(v)}
-                label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
-              <Tooltip
-                contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                formatter={(value: number, name: string) => [
-                  value.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' adet',
-                  name === 'actual2025' ? '2025 Gerçek' : '2026 Projeksiyon',
-                ]}
-              />
-              <Legend />
-              <Bar dataKey="actual2025" name="2025 Gerçek" fill="#94a3b8" opacity={0.6} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="projected2026" name="2026 Projeksiyon" fill="#10b981" opacity={0.9} radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="projected2026" stroke="#dc2626" strokeWidth={2} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
-          <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            <strong>2025 Ortalama:</strong> {(monthlyLayer.reduce((sum, m) => sum + m.value, 0) / 12).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
-            {' | '}
-            <strong>2026 Tahmin:</strong> {totalProjected2026Layer.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
-            {' | '}
-            <strong>Artış:</strong> %{(layerGrowthRate * 100).toFixed(2)}
+      {!hasLayerData && (
+        <div style={{ padding: '24px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+          ⚠️ Yumurtacı tavuk sayısı (layer) verisi bulunamadı. Tavuk projeksiyon grafiği gösterilemiyor.
+        </div>
+      )}
+      {hasLayerData && (
+        <div className="chart-grid">
+          <div className="chart-card" style={{ gridColumn: 'span 2' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu</h3>
+              <ChartInsightButton title="🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu" description="2026 yılı aylık yumurtacı tavuk sayısı projeksiyonu" data={projection2026Layer} context={{ year: 2026 }} compact />
+            </div>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={projection2026Layer}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                <YAxis
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                  tickFormatter={(v) => formatShort(v)}
+                  label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                  formatter={(value: number, name: string) => [
+                    value.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' adet',
+                    name === 'actual2025' ? '2025 Gerçek' : '2026 Projeksiyon',
+                  ]}
+                />
+                <Legend />
+                <Bar dataKey="actual2025" name="2025 Gerçek" fill="#94a3b8" opacity={0.6} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="projected2026" name="2026 Projeksiyon" fill="#10b981" opacity={0.9} radius={[4, 4, 0, 0]} />
+                <Line type="monotone" dataKey="projected2026" stroke="#dc2626" strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <strong>2025 Ortalama:</strong> {(monthlyLayer.reduce((sum, m) => sum + m.value, 0) / 12).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
+              {' | '}
+              <strong>2026 Tahmin:</strong> {totalProjected2026Layer.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
+              {' | '}
+              <strong>Artış:</strong> %{(layerGrowthRate * 100).toFixed(2)}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Projeksiyon Metodolojisi */}
       <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
