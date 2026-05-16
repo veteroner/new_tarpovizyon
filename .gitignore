@@ -43,3 +43,6 @@ teknova rasyon mobil/
 
 # Local Netlify folder
 .netlify
+
+# Claude Code worktrees (local only, must not be tracked)
+.claude/worktrees/
