@@ -72,8 +72,8 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           <span>🌿 Kc: {calc.kcModeliLabel}</span>
           <span>🎯 Karşılama: %{state.sulamaKarsilamaPct}</span>
           <span>🌱 Kök: {state.kokDerinligiM.toFixed(2)} m</span>
-          <span>🌧️ Tahmin: {wxStatus === 'ready' && forecast ? 'Var' : wxStatus === 'unavailable' ? 'API anahtarı yok' : 'Yok'}</span>
-          {calc.parMol != null && <span>☀️ PAR: {calc.parMol.toFixed(1)} mol/m²/gün</span>}
+          <span title="OpenWeather API anahtarı gereklidir — Netlify ortam değişkenine ekleyin">🌧️ Tahmin: {wxStatus === 'ready' && forecast ? 'Aktif ✅' : wxStatus === 'unavailable' ? 'Bağlı değil ⚠️' : 'Yükleniyor...'}</span>
+          {calc.parMol != null && <span title="Fotosentetik Aktif Radyasyon — bitkinin büyümesi için kullanabileceği günlük ışık enerjisi">☀️ Işık: {calc.parMol.toFixed(1)} mol/m²/gün</span>}
         </div>
         {calc.ilkSulama && !calc.sulamaYok && (
           <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f8fafc' }}>
@@ -84,28 +84,49 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       </div>
 
       <div className="sp-card">
-        <h3 style={{ margin: '0 0 10px 0' }}>🌾 Stres & Verim</h3>
+        <h3 style={{ margin: '0 0 10px 0' }}>🌾 Su Stresi & Verim Analizi</h3>
         <div className="sp-kpi-grid">
           <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
             <div className="sp-kpi__label">Sezon Stres Oranı</div>
             <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>%{(calc.sezonStresOrani * 100).toFixed(0)}</div>
-            <div className="sp-kpi__unit">(defisit / talep)</div>
+            <div className="sp-kpi__unit">karşılanamayan su / toplam ihtiyaç</div>
           </div>
           <div className="sp-kpi" style={{ borderColor: '#e74c3c' }}>
             <div className="sp-kpi__label">Tahmini Verim Kaybı</div>
             <div className="sp-kpi__value" style={{ color: '#e74c3c' }}>-%{calc.verimKaybiPct.toFixed(0)}</div>
-            <div className="sp-kpi__unit">Ky (yaklaşık)</div>
+            <div className="sp-kpi__unit">su stresine bağlı (yaklaşık)</div>
           </div>
           <div className="sp-kpi">
-            <div className="sp-kpi__label">Su Açığı (mm)</div>
+            <div className="sp-kpi__label">Karşılanamayan Su</div>
             <div className="sp-kpi__value">{calc.waterDeficit.toFixed(0)}</div>
             <div className="sp-kpi__unit">mm/sezon</div>
           </div>
         </div>
         <p style={{ marginTop: 10, fontSize: '0.78rem', color: '#6b7280' }}>
-          Verim kaybı, dönem bazlı Ky çarpanları ile su stresi oranının ağırlıklı toplamından hesaplanır (resmî kalibrasyon değildir).
+          Verim kaybı tahmini, dönem bazlı verim-su tepki katsayıları (Ky) ile su stresi oranının ağırlıklı toplamından hesaplanır. Kesin değer değil, karar destek göstergesidir.
         </p>
       </div>
+
+      {wxStatus === 'unavailable' && (
+        <div className="sp-card" style={{ border: '1px solid #fed7aa', background: '#fff7ed' }}>
+          <h3 style={{ margin: '0 0 8px 0', color: '#c2410c' }}>🌤️ Hava Tahmini Aktif Değil</h3>
+          <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: '#9a3412' }}>
+            Şu an sulama planı yalnızca uzun yıl iklim ortalamalarına dayanıyor. Gerçek yağış tahminini dahil etmek için ücretsiz bir OpenWeather API anahtarı gereklidir.
+          </p>
+          <div style={{ background: '#ffedd5', border: '1px solid #fb923c', borderRadius: 8, padding: '10px 14px', fontSize: '0.82rem', color: '#7c2d12' }}>
+            <strong>Nasıl aktif edilir?</strong>
+            <ol style={{ margin: '8px 0 0 0', paddingLeft: 18, lineHeight: 1.8 }}>
+              <li><a href="https://openweathermap.org/appid" target="_blank" rel="noopener noreferrer" style={{ color: '#ea580c' }}>openweathermap.org/appid</a> adresinden ücretsiz hesap aç</li>
+              <li>API Keys bölümünden anahtarını kopyala</li>
+              <li>Netlify → Site Settings → Environment Variables → <code>VITE_OPENWEATHER_API_KEY</code> ekle</li>
+              <li>Siteyi yeniden deploy et</li>
+            </ol>
+            <p style={{ margin: '8px 0 0 0' }}>
+              ✅ Aktif olunca: 5 günlük yağış tahmini günlük plana dahil edilir, yağış günleri sulama otomatik ertelenir ve hesap güveni artar.
+            </p>
+          </div>
+        </div>
+      )}
 
       {forecast && (
         <div className="sp-card">
@@ -301,8 +322,8 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           <ChartInsightButton title="🌧️ Yağış &amp; ETo" description="Aylık yağış ve ETo alan grafiği" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
-          Toplam yağış (mavi) ve efektif yağış (açık mavi) ile referans evapotranspirasyon (ETo) trendleri.
-          Alan farkı sulama ihtiyacının yoğunluğunu gösterir.
+          Toplam yağış (mavi) ve bitkiye faydalı yağış kısmı (açık mavi) ile referans buharlaşma-terleme (ETo) trendleri.
+          Turuncu çizgi ile mavi alan arasındaki fark, sulama ihtiyacının yoğunluğunu gösterir.
         </p>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={calc.aylikDenge} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
@@ -362,12 +383,12 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <thead>
               <tr>
                 <th>Ay</th>
-                <th>ETo (mm)</th>
-                <th>ETc (mm)</th>
-                <th>Yağış (mm)</th>
-                <th>Ef. Yağış (mm)</th>
-                <th>Net Sul. (mm)</th>
-                <th>Brüt Sul. (mm)</th>
+                <th title="Referans evapotranspirasyon — sulama olmayan açık alanda ölçülen buharlaşma (mm)">Ref. Buharlaşma ETo (mm)</th>
+                <th title="Bitki su tüketimi — ETo × bitki katsayısı (Kc)">Bitki Su Tük. ETc (mm)</th>
+                <th>Toplam Yağış (mm)</th>
+                <th title="Yağışın bitkiye faydalı kısmı — yüzey akışı ve derin sızma çıkarılır">Faydalı Yağış (mm)</th>
+                <th title="Yağış karşılanamayan ve sulama ile verilmesi gereken miktar">Net Sulama (mm)</th>
+                <th title="Sulama sisteminin kayıpları dahil verilmesi gereken brüt miktar">Brüt Sulama (mm)</th>
               </tr>
             </thead>
             <tbody>
@@ -455,13 +476,13 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <thead>
               <tr>
                 <th>Gün</th>
-                <th>ETo</th>
-                <th>ETc</th>
-                <th>Yağış</th>
-                <th>Net</th>
-                <th>Brüt</th>
-                <th>Açık</th>
-                {state.fertigasyon && <th>N/P/K</th>}
+                <th title="Referans buharlaşma (mm/gün)">ETo</th>
+                <th title="Bitkinin günlük su tüketimi (mm/gün)">Bitki Tük.</th>
+                <th title="Tahmini yağış (mm)">Yağış</th>
+                <th title="Verilmesi gereken net sulama miktarı (mm)">Net Sul.</th>
+                <th title="Sistem kayıpları dahil brüt sulama miktarı (mm)">Brüt Sul.</th>
+                <th title="Toprak su açığı — bu değer sulama eşiğini (RAW) aştığında sulama önerilir">Toprak Açığı</th>
+                {state.fertigasyon && <th title="N: Azot / P: Fosfor / K: Potasyum — kg/dekar">N/P/K (kg/da)</th>}
                 <th>Not</th>
               </tr>
             </thead>
@@ -487,7 +508,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           </table>
         </div>
         <p style={{ marginTop: 10, fontSize: '0.78rem', color: '#6b7280' }}>
-          Açık (mm), kök derinliği ve toprak tipine göre hesaplanan RAW eşiğine yaklaştıkça sulama önerilir.
+          <strong>Toprak Açığı:</strong> Toprakta ne kadar su eksik olduğunu gösterir. Kök derinliği ve toprak tipine göre hesaplanan kritik eşiği (RAW — Kolayca Kullanılabilir Su) aştığında sulama önerilir.
         </p>
       </div>
 
@@ -522,13 +543,17 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       <div className="sp-schedule-card">
         <h3>📅 Sulama Takvimi — {cropData.urun}</h3>
         <div className="sp-schedule-grid">
-          {cropData.donem.map((donem, idx) => (
-            <div key={idx} className={`sp-schedule-item ${state.gelismeDonemi === idx ? 'sp-schedule-item--current' : ''}`}>
-              <div className="sp-schedule-donem">{donem}</div>
-              <div className="sp-schedule-kc">Kc: {cropData.donemKc[idx].toFixed(2)}</div>
-              <div className="sp-schedule-freq">Her {Math.ceil(cropData.sulamaSikligi * (1 - cropData.donemKc[idx] * 0.2))} gün</div>
-            </div>
-          ))}
+          {cropData.donem.map((donem, idx) => {
+            const kc = cropData.donemKc[idx];
+            const suLabel = kc < 0.6 ? '💧 Az' : kc < 1.0 ? '💧💧 Orta' : '💧💧💧 Yüksek';
+            return (
+              <div key={idx} className={`sp-schedule-item ${state.gelismeDonemi === idx ? 'sp-schedule-item--current' : ''}`}>
+                <div className="sp-schedule-donem">{donem}</div>
+                <div className="sp-schedule-kc" title={`Bitki su katsayısı (Kc): ${kc.toFixed(2)}`}>{suLabel}</div>
+                <div className="sp-schedule-freq">Her {Math.ceil(cropData.sulamaSikligi * (1 - kc * 0.2))} gün</div>
+              </div>
+            );
+          })}
         </div>
         <p className="sp-schedule-note">⚠️ <strong>Kritik dönem:</strong> {cropData.kritikDonem} — su stresinden kaçının!</p>
       </div>
