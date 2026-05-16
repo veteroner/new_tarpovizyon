@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   SOIL_TYPES, IRRIGATION_SYSTEMS, IKLIM_SENARYOLARI,
-  ETO_METOD_LISTESI, AREA_PRESETS, clamp, clampArea,
+  ETO_METOD_LISTESI, AREA_PRESETS, FERTIGASYON_DEFAULTS, clamp, clampArea,
   type WizardState, type CropWaterData, type EToMetodId,
 } from './sulamaUtils';
 
@@ -107,16 +107,26 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
 
       {cropData && (
         <div className="sp-field">
-          <label className="sp-label">Gelişme Dönemi</label>
+          <label className="sp-label">Mevcut Gelişme Dönemi</label>
+          <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: '#6b7280' }}>
+            Bitkinin şu an hangi büyüme evresinde olduğunu seçin — su ihtiyacı dönemden döneme değişir.
+          </p>
           <div className="sp-donem-select">
-            {cropData.donem.map((donem, idx) => (
-              <label key={idx} className={`sp-donem-btn ${state.gelismeDonemi === idx ? 'sp-donem-btn--active' : ''}`}>
-                <input type="radio" name="donem" value={idx} checked={state.gelismeDonemi === idx}
-                  onChange={() => setState(s => ({ ...s, gelismeDonemi: idx }))} />
-                <span>{donem}</span>
-                <span className="sp-donem-kc">Kc: {cropData.donemKc[idx].toFixed(2)}</span>
-              </label>
-            ))}
+            {cropData.donem.map((donem, idx) => {
+              const kc = cropData.donemKc[idx];
+              const suDurumu = kc < 0.6 ? '💧 Az' : kc < 1.0 ? '💧💧 Orta' : '💧💧💧 Yüksek';
+              return (
+                <label key={idx} className={`sp-donem-btn ${state.gelismeDonemi === idx ? 'sp-donem-btn--active' : ''}`}>
+                  <input type="radio" name="donem" value={idx} checked={state.gelismeDonemi === idx}
+                    onChange={() => setState(s => ({ ...s, gelismeDonemi: idx }))} />
+                  <span>{donem}</span>
+                  <span className="sp-donem-kc" title={`Bitki su katsayısı (Kc): ${kc.toFixed(2)}`}>{suDurumu}</span>
+                </label>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
+            ⚠️ <strong>Kritik dönem:</strong> {cropData.kritikDonem} — bu evrede su stresi verime en çok zarar verir.
           </div>
         </div>
       )}
@@ -171,7 +181,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
       </div>
 
       <div className="sp-field">
-        <label className="sp-label">Kc Modeli</label>
+        <label className="sp-label">Sulama Katsayısı Modeli <span style={{ fontWeight: 400, color: '#9ca3af' }}>(Kc)</span></label>
         <div className="sp-toggle-row">
           {(['tek', 'cift'] as const).map(k => (
             <button
@@ -180,12 +190,14 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
               onClick={() => setState(s => ({ ...s, kcModeli: k }))}
               type="button"
             >
-              {k === 'tek' ? 'Tek Kc' : 'Çift Kc (Kcb+Ke)'}
+              {k === 'tek' ? 'Standart (Tek Kc)' : 'Ayrıştırılmış (Çift Kc)'}
             </button>
           ))}
         </div>
         <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
-          Çift Kc: yağış/buharlaşma bileşenini (Ke) yaklaşık olarak ayırır.
+          {state.kcModeli === 'tek'
+            ? 'Standart yöntem: bitki su tüketimi tek katsayıyla hesaplanır. Çoğu durumda yeterlidir.'
+            : 'Ayrıştırılmış yöntem: bitki tüketimi (Kcb) ve toprak yüzeyi buharlaşması (Ke) ayrı hesaplanır. Daha hassas ama yaklaşık.'}
         </div>
       </div>
 
@@ -201,7 +213,8 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
           className="sp-select"
         />
         <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
-          Toplam kullanılabilir su (TAW) ve kritik açığı (RAW) etkiler.
+          Kökün ulaştığı derinlik ne kadar fazlaysa, toprak o kadar çok su depolar ve sulama aralığı uzar.
+          Toprağın depolayabileceği toplam su (TAW) ve sulama tetikleyici eşik (RAW) buradan hesaplanır.
         </div>
       </div>
 
@@ -226,7 +239,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
               <strong style={{ width: 52, textAlign: 'right' }}>%{state.sulamaKarsilamaPct}</strong>
             </div>
             <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#6b7280' }}>
-              %100: tam sulama, %60-80: defisit sulama senaryosu.
+              %100: bitkinin tüm su ihtiyacını sulama ile karşıla. %60-80: kısmi sulama — su tasarrufu yapar ama hafif stres oluşabilir.
             </div>
           </>
         )}
@@ -273,6 +286,23 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
 
       {state.fertigasyon && state.sulamaSistemi !== 'yok' && (
         <div className="sp-field" style={{ padding: '10px 12px', border: '1px solid #e5e7eb', borderRadius: 10 }}>
+          {state.urun && FERTIGASYON_DEFAULTS[state.urun] && (
+            <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                {state.urun} için önerilen doz: N={FERTIGASYON_DEFAULTS[state.urun].n}, P₂O₅={FERTIGASYON_DEFAULTS[state.urun].p}, K₂O={FERTIGASYON_DEFAULTS[state.urun].k} kg/da
+              </span>
+              <button
+                type="button"
+                style={{ fontSize: '0.78rem', padding: '3px 10px', borderRadius: 6, border: '1px solid #10b981', background: '#ecfdf5', color: '#059669', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                onClick={() => {
+                  const d = FERTIGASYON_DEFAULTS[state.urun];
+                  if (d) setState(s => ({ ...s, fertN_kgDa: d.n, fertP2O5_kgDa: d.p, fertK2O_kgDa: d.k }));
+                }}
+              >
+                ✅ Varsayılanı Uygula
+              </button>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label className="sp-label">N (kg/da)</label>

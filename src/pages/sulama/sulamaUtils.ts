@@ -154,6 +154,25 @@ export const IRRIGATION_SYSTEMS: Record<string, IrrigationSystem> = {
   yok:         { tip: 'Sulama Yok',         verimlilik: 0,  maliyet_kurulum: 0,    maliyet_isletme: 0,   emoji: '🚫' },
 };
 
+export const FERTIGASYON_DEFAULTS: Record<string, { n: number; p: number; k: number }> = {
+  'Buğday':          { n: 12, p: 6,  k: 4  },
+  'Arpa':            { n: 10, p: 5,  k: 3  },
+  'Mısır':           { n: 20, p: 8,  k: 10 },
+  'Domates':         { n: 18, p: 10, k: 20 },
+  'Biber':           { n: 15, p: 8,  k: 16 },
+  'Patates':         { n: 16, p: 10, k: 22 },
+  'Soğan':           { n: 12, p: 6,  k: 10 },
+  'Pamuk':           { n: 14, p: 6,  k: 8  },
+  'Ayçiçeği':        { n: 10, p: 5,  k: 6  },
+  'Şeker Pancarı':   { n: 14, p: 8,  k: 18 },
+  'Salatalık':       { n: 16, p: 8,  k: 18 },
+  'Kavun':           { n: 12, p: 6,  k: 14 },
+  'Karpuz':          { n: 12, p: 6,  k: 14 },
+  'Üzüm (Sofralık)': { n: 10, p: 6,  k: 12 },
+  'Elma':            { n: 10, p: 5,  k: 12 },
+  'Zeytin':          { n: 8,  p: 4,  k: 8  },
+};
+
 export const STEPS = [
   { n: 1, icon: '📍', label: 'Konum & İklim' },
   { n: 2, icon: '🌾', label: 'Ürün' },
