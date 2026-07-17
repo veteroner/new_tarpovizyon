@@ -24,11 +24,11 @@ const HAYVANSAL_SECTIONS: Section[] = [
       },
       {
         path: 'sigir-eti-uretimi', label: 'Ülkelere Göre Sığır Eti Üretimi', template: 'ranking',
-        config: { title: 'ÜLKELERE GÖRE SIĞIR ETİ ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Sığır Eti Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün' },
+        config: { title: 'ÜLKELERE GÖRE SIĞIR ETİ ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Sığır Eti Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığır Eti (Manda Hariç)' },
       },
       {
         path: 'inek-sutu-verimleri', label: 'İnek Sütü Verimleri', template: 'ranking',
-        config: { title: 'ÜLKELERE GÖRE ÇİĞ SÜT ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Çiğ Süt Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün' },
+        config: { title: 'ÜLKELERE GÖRE ÇİĞ SÜT ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Çiğ Süt Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığırların çiğ sütü' },
       },
       {
         path: 'kisi-basi-et-tuketimi', label: 'Kişi Başı Et Tüketimi', template: 'stacked-comparison',
@@ -79,9 +79,19 @@ const HAYVANSAL_SECTIONS: Section[] = [
           title: 'TÜRKİYE HAYVAN VARLIĞI', endpoint: 'tr/hayvan-varliklari', xField: 'tarih', xFormat: 'year',
           series: [
             { key: 'sigir_bas', label: 'Sığır', type: 'bar' },
+            { key: 'manda_bas', label: 'Manda', type: 'bar' },
             { key: 'koyun_bas', label: 'Koyun', type: 'bar' },
             { key: 'keci_bas', label: 'Keçi', type: 'bar' },
           ],
+          provincialRanking: {
+            title: 'Hayvan Varlığında İlk 10 İl', endpoint: 'il/hayvan-sayilari', nameField: 'il', yearField: 'tarih',
+            metrics: [
+              { field: 'sigir_varligi_bas', label: 'Sığır Varlığı (Baş)' },
+              { field: 'manda_varligi_bas', label: 'Manda Varlığı (Baş)' },
+              { field: 'koyun_varligi_bas', label: 'Koyun Varlığı (Baş)' },
+              { field: 'keci_varligi_bas', label: 'Keçi Varlığı (Baş)' },
+            ],
+          },
         },
       },
       {

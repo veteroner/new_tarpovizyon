@@ -4,6 +4,7 @@ import { KpiCard, formatNumber } from '../charts/KpiCard';
 import { GaugeChart } from '../charts/GaugeChart';
 import { YearlyChart, type SeriesConfig } from '../charts/YearlyChart';
 import { TradeTrendSection } from '../charts/TradeTrendSection';
+import { HorizontalRankBar } from '../charts/HorizontalRankBar';
 
 export type YearlyPageConfig = {
   title: string;
@@ -23,6 +24,18 @@ export type YearlyPageConfig = {
   xFormat?: 'year' | 'yearMonth';
   /** Renders a "Dış Ticaret" sub-section (KPIs + yearly trend + product table) below the main chart. */
   tradeSection?: { title: string; urunler: string[] };
+  /** Renders a "İlk 10 İl" section below the main chart — one ranking bar per
+   *  metric, computed from the endpoint's latest year (e.g. province-level
+   *  Sığır/Manda/Koyun/Keçi varlığı, matching the source Looker report's
+   *  per-species province ranking that the main yearly chart alone doesn't cover). */
+  provincialRanking?: {
+    title: string;
+    endpoint: string;
+    nameField: string;
+    yearField: string;
+    metrics: { field: string; label: string }[];
+    topN?: number;
+  };
 };
 
 type Row = Record<string, unknown>;
@@ -67,6 +80,24 @@ function latestNonZero(rows: Row[], field: string): { value: number | null; pct:
   return { value: null, pct: null };
 }
 
+function useProvincialRanking(config?: YearlyPageConfig['provincialRanking']) {
+  const { data } = useQuery({
+    queryKey: ['tvb-provincial-ranking', config?.endpoint],
+    queryFn: () => fetchRows(config!.endpoint, { limit: '3000' }),
+    enabled: Boolean(config),
+  });
+  if (!config || !data) return null;
+  const yearOf = (r: (typeof data)[number]) => extractYear(r[config.yearField]);
+  const latestYear = Math.max(...data.map(yearOf).filter((y): y is number => y !== null));
+  const latestRows = data.filter((r) => yearOf(r) === latestYear);
+  return config.metrics.map((m) => ({
+    label: m.label,
+    items: latestRows
+      .map((r) => ({ name: String(r[config.nameField] ?? ''), value: Number(r[m.field]) }))
+      .filter((i) => i.name && Number.isFinite(i.value) && i.value > 0),
+  }));
+}
+
 function useGauge(gauge?: YearlyPageConfig['gauge']) {
   const { data } = useQuery({
     queryKey: ['tvb-gauge', gauge?.endpoint],
@@ -80,7 +111,7 @@ function useGauge(gauge?: YearlyPageConfig['gauge']) {
 }
 
 export function YearlyPage({ config }: { config: YearlyPageConfig }) {
-  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection } = config;
+  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection, provincialRanking } = config;
 
   const { data, isLoading } = useQuery({
     queryKey: ['tvb-yearly', endpoint],
@@ -99,6 +130,7 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
   const kpi1 = kpiField ? latestNonZero(rows, kpiField) : null;
   const kpi2 = secondKpiField ? latestNonZero(rows, secondKpiField) : null;
   const gaugeValue = useGauge(gauge);
+  const rankings = useProvincialRanking(provincialRanking);
 
   return (
     <div className="tvb-page">
@@ -121,6 +153,20 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
           </div>
 
           {tradeSection && <TradeTrendSection title={tradeSection.title} urunler={tradeSection.urunler} />}
+
+          {rankings && (
+            <div className="tvb-section">
+              <h3>{provincialRanking?.title}</h3>
+              <div className="tvb-provincial-grid">
+                {rankings.map((r) => (
+                  <div key={r.label}>
+                    <h4>{r.label}</h4>
+                    <HorizontalRankBar items={r.items} topN={provincialRanking?.topN ?? 10} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

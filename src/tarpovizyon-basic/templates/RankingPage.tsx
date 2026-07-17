@@ -16,6 +16,12 @@ export type RankingPageConfig = {
   filterField?: string;
   filterLabel?: string;
   filterParam?: string;
+  /** Which filter option to preselect (e.g. "Sığırların çiğ sütü" for a page
+   *  titled "İnek Sütü Verimleri"). Without this the first option
+   *  alphabetically wins, which is usually the wrong product for a
+   *  page whose title promises a specific one. Falls back to the
+   *  alphabetically-first option if the value isn't present in the data. */
+  defaultFilterValue?: string;
   showMap?: boolean;
   /** 'sum' (default) totals the value across all rows into the KPI card; 'none' hides
    *  the KPI entirely — use this for per-unit yield/ratio metrics that aren't additive
@@ -36,7 +42,7 @@ export type RankingPageConfig = {
 };
 
 export function RankingPage({ config }: { config: RankingPageConfig }) {
-  const { title, endpoint, nameField, valueField, kpiLabel, kpiUnit, filterField, filterLabel, filterParam, showMap = true, kpiAggregation = 'sum', excludeNames, secondaryField, secondaryLabel, secondaryUnit, yieldField, yearField } = config;
+  const { title, endpoint, nameField, valueField, kpiLabel, kpiUnit, filterField, filterLabel, filterParam, defaultFilterValue, showMap = true, kpiAggregation = 'sum', excludeNames, secondaryField, secondaryLabel, secondaryUnit, yieldField, yearField } = config;
   const [filter, setFilter] = useState<string>('');
 
   const { data: allRows } = useQuery({
@@ -55,7 +61,8 @@ export function RankingPage({ config }: { config: RankingPageConfig }) {
     return Array.from(set).sort();
   }, [allRows, filterField]);
 
-  const activeFilter = filter || filterOptions[0] || '';
+  const preferredDefault = defaultFilterValue && filterOptions.includes(defaultFilterValue) ? defaultFilterValue : filterOptions[0];
+  const activeFilter = filter || preferredDefault || '';
 
   const { data, isLoading } = useQuery({
     queryKey: ['tvb-ranking', endpoint, filterField ? activeFilter : null],
