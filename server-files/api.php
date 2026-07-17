@@ -1,7 +1,8 @@
 <?php
 // api.php - Bu dosyayı sunucunuza yükleyin
-// GÜVENLİK: Production'da bu API key'i değiştirin!
-$API_KEY = "REDACTED_DASHBOARD_KEY";
+// GÜVENLİK: Anahtarlar sunucuda ortam değişkeni (environment variable) olarak
+// tanımlanmalıdır. Koda gömülü anahtar bırakmayın — repoya sızar.
+$API_KEY = getenv('DASHBOARD_API_KEY') ?: '';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -23,9 +24,10 @@ if ($providedKey !== $API_KEY) {
 }
 
 // ==== Tarpol AI — işlemci tanımlamaları ====
-$TARPOL_AI_KEY = "REDACTED_GOOGLE_KEY";
-$TARPOL_HF_KEY = "REDACTED_HF_KEY";
-$TARPOL_GROQ_KEY = "REDACTED_GROQ_KEY";
+// Anahtarlar sunucudaki ortam değişkenlerinden okunur (koda gömülmez).
+$TARPOL_AI_KEY = getenv('TARPOL_AI_KEY') ?: '';
+$TARPOL_HF_KEY = getenv('TARPOL_HF_KEY') ?: '';
+$TARPOL_GROQ_KEY = getenv('TARPOL_GROQ_KEY') ?: '';
 
 // Gemini model listesi — en zekiden başlayarak fallback
 // NOT: 2.5-pro kota dolu, 2.0-flash kota dolu, 1.5-* kaldırılmış (Mart 2026)
