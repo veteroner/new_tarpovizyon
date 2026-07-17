@@ -536,6 +536,88 @@
   .tvb-ranking { grid-template-columns: 1fr; }
 }
 
+/* Div-based horizontal ranking bars — label sits above each bar so the bar
+   itself gets the full container width (critical on mobile). */
+.tvb-rankbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tvb-rankbar__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tvb-rankbar__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.tvb-rankbar__name--hl {
+  color: #dc2626;
+  font-weight: 700;
+}
+.tvb-rankbar__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tvb-rankbar__track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  background: #f1f5f9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.tvb-rankbar__fill {
+  height: 100%;
+  border-radius: 5px;
+  min-width: 3px;
+  transition: width 0.3s ease;
+}
+.tvb-rankbar__stack {
+  display: flex;
+  height: 100%;
+  min-width: 3px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.tvb-rankbar__seg {
+  height: 100%;
+}
+.tvb-rankbar__value {
+  flex: 0 0 auto;
+  min-width: 40px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1f2937;
+  font-variant-numeric: tabular-nums;
+}
+.tvb-rankbar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  color: #4b5563;
+}
+.tvb-rankbar__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tvb-rankbar__swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
 .tvb-status {
   color: #6b7280;
   font-size: 13px;

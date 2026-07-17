@@ -1,9 +1,10 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useContainerWidth, wrapLabel } from './chartResponsive';
-
 const COLORS = ['#dc2626', '#f59e0b', '#16a34a', '#7c3aed', '#0ea5e9', '#db2777'];
 const numberFmt = new Intl.NumberFormat('tr-TR');
 
+/** Div-based horizontal stacked comparison bar. Like HorizontalRankBar, the
+ *  category label sits above each bar so the bar spans the full width; each
+ *  row's bar is split into colored segments per series. Rows are sorted by
+ *  their total descending (largest at top). A legend maps colors to series. */
 export function StackedComparisonBar({
   data,
   nameKey,
@@ -13,50 +14,51 @@ export function StackedComparisonBar({
   nameKey: string;
   series: { key: string; label: string }[];
 }) {
-  const [containerRef, containerWidth] = useContainerWidth(400);
-  const isNarrow = containerWidth < 480;
-  const yAxisWidth = Math.round(Math.min(150, Math.max(80, containerWidth * 0.32)));
-  const fontSize = isNarrow ? 10 : 12;
-  const maxLines = isNarrow ? 2 : 1;
-  const charsPerLine = Math.max(8, Math.floor((yAxisWidth - 8) / (fontSize * 0.58)));
+  const rows = data
+    .map((row) => {
+      const parts = series.map((s) => ({ key: s.key, label: s.label, value: Number(row[s.key]) || 0 }));
+      const total = parts.reduce((sum, p) => sum + p.value, 0);
+      return { name: String(row[nameKey] ?? ''), parts, total };
+    })
+    .filter((r) => r.name)
+    .sort((a, b) => b.total - a.total);
+
+  const maxTotal = Math.max(...rows.map((r) => r.total), 0) || 1;
 
   return (
-    <div ref={containerRef}>
-      <ResponsiveContainer width="100%" height={Math.max(280, data.length * (isNarrow ? 64 : 60))}>
-        <BarChart data={data} layout="vertical" margin={{ left: 8, right: isNarrow ? 16 : 24 }}>
-          <XAxis type="number" tickFormatter={(v) => numberFmt.format(v)} tick={{ fontSize }} />
-          <YAxis
-            type="category"
-            dataKey={nameKey}
-            width={yAxisWidth}
-            tick={(props) => {
-              const { x, y, payload } = props;
-              const lines = wrapLabel(String(payload.value), charsPerLine, maxLines);
-              const lineHeight = fontSize + 2;
-              const startY = -((lines.length - 1) * lineHeight) / 2;
-              return (
-                <g transform={`translate(${x},${y})`}>
-                  <title>{payload.value}</title>
-                  {lines.map((line, i) => (
-                    <text key={i} x={0} y={startY + i * lineHeight} dy={4} textAnchor="end" fontSize={fontSize} fill="#4b5563">
-                      {line}
-                    </text>
+    <div>
+      <div className="tvb-rankbar__legend">
+        {series.map((s, i) => (
+          <span key={s.key} className="tvb-rankbar__legend-item">
+            <span className="tvb-rankbar__swatch" style={{ background: COLORS[i % COLORS.length] }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+      <div className="tvb-rankbar">
+        {rows.map((row, i) => (
+          <div className="tvb-rankbar__row" key={`${row.name}-${i}`}>
+            <div className="tvb-rankbar__name" title={row.name}>{row.name}</div>
+            <div className="tvb-rankbar__bar">
+              <div className="tvb-rankbar__track" style={{ overflow: 'visible' }}>
+                <div className="tvb-rankbar__stack" style={{ width: `${(row.total / maxTotal) * 100}%` }}>
+                  {row.parts.map((p, j) => (
+                    p.value > 0 ? (
+                      <div
+                        key={p.key}
+                        className="tvb-rankbar__seg"
+                        style={{ width: `${(p.value / row.total) * 100}%`, background: COLORS[j % COLORS.length] }}
+                        title={`${p.label}: ${numberFmt.format(p.value)}`}
+                      />
+                    ) : null
                   ))}
-                </g>
-              );
-            }}
-          />
-          <Tooltip
-            formatter={(v: number) => numberFmt.format(v)}
-            contentStyle={{ maxWidth: 220, fontSize, whiteSpace: 'normal', wordBreak: 'break-word' }}
-            allowEscapeViewBox={{ x: false, y: false }}
-          />
-          <Legend wrapperStyle={{ fontSize }} />
-          {series.map((s, i) => (
-            <Bar key={s.key} dataKey={s.key} name={s.label} stackId="a" fill={COLORS[i % COLORS.length]} />
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="tvb-rankbar__value">{numberFmt.format(row.total)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
