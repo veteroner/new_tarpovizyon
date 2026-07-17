@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
       - run: npm run build:pages
       # GitHub Pages has no server-side rewrites for client-side routing, so a
       # 404.html copy of index.html is the standard SPA fallback trick.
