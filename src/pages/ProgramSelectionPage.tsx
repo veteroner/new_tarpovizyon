@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Calculator, Wheat, Droplets, FlaskConical, Calendar } from 'lucide-react';
+import { BarChart3, Calculator, Wheat, Droplets, FlaskConical, Calendar, Beef } from 'lucide-react';
 import './ProgramSelectionPage.css';
 
 export function ProgramSelectionPage() {
@@ -14,6 +14,15 @@ export function ProgramSelectionPage() {
       icon: BarChart3,
       color: '#667eea',
       path: '/tarpovizyon',
+    },
+    {
+      id: 'tarpovizyon-basic',
+      title: 'TarpoVizyon Basic',
+      description: 'Hayvansal ve Bitkisel Üretim Raporu (Basit Sürüm)',
+      subtitle: 'Looker Studio raporunun Cloudflare D1 tabanlı yeni arayüzü',
+      icon: Beef,
+      color: '#0891b2',
+      path: '/tarpovizyon-basic',
     },
     {
       id: 'rasyon',

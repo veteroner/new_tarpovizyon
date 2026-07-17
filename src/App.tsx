@@ -71,6 +71,7 @@ import CommodityPricesPage from './pages/CommodityPricesPage';
 import AIAssistantPage from './pages/AIAssistantPage';
 import { OverviewPage } from './pages/OverviewPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import { tarpovizyonBasicRoutes } from './tarpovizyon-basic/routes';
 
 import './styles/globals.css';
 
@@ -89,11 +90,12 @@ function AppContent() {
   const isGubrePage = location.pathname === '/gubre-hesap';
   const isTakvimPage = location.pathname === '/tarim-takvim';
   const isMobilePage = location.pathname.startsWith('/m');
+  const isTarpovizyonBasicPage = location.pathname.startsWith('/tarpovizyon-basic');
   // TarpoShell handles its own layout for all /tarpovizyon/* data pages
   const isTarpoShellRoute =
     location.pathname.startsWith('/tarpovizyon/') &&
     !isTarpovizyonHome;
-  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute;
+  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute || isTarpovizyonBasicPage;
 
   // Show persistent back+home bar when running inside Capacitor on any non-mobile route
   const showMobilePageHeader = isPlatform('capacitor') && !isMobilePage && !isProgramSelection;
@@ -130,6 +132,9 @@ function AppContent() {
           
           {/* TARPOL Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />
+
+          {/* TARPOVIZYON BASIC — Cloudflare D1 tabanlı, Looker raporu birebir kopyası */}
+          {tarpovizyonBasicRoutes()}
           
           {/* TARPOVIZYON - Giriş ve Ana Sayfalar (TarpoShell dışında) */}
           <Route path="/tarpovizyon" element={<SelectionPage />} />
@@ -221,7 +226,7 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppContent />
       </BrowserRouter>
     </QueryClientProvider>

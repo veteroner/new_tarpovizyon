@@ -1,0 +1,46 @@
+name: GitHub Pages Preview
+
+# Preview-only deploy for reviewing branch work — separate from the Netlify
+# deployment (which builds from netlify-dashboard/ and is untouched by this).
+on:
+  push:
+    branches:
+      - claude/supabase-migration-plan-a8b413
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build:pages
+      # GitHub Pages has no server-side rewrites for client-side routing, so a
+      # 404.html copy of index.html is the standard SPA fallback trick.
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,8 @@
+name = "tarpovizyon-api"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tarpovizyon-basic"
+database_id = "86c5e73d-ad8a-45ec-b4e9-1c9c2b890709"

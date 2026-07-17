@@ -46,3 +46,6 @@ teknova rasyon mobil/
 
 # Claude Code worktrees (local only, must not be tracked)
 .claude/worktrees/
+
+# Cloudflare Wrangler local cache
+.wrangler/

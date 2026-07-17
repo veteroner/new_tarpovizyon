@@ -57,9 +57,10 @@ export function CountrySilhouette({
     const target = normalizeCountryKey(countryKey);
     const feature = geo.features.find(f => normalizeCountryKey(f.properties?.name || '') === target);
     if (!feature) return null;
-    const projection = geoMercator().fitSize([width - 8, height - 8], feature as unknown as GeoJSON.GeoJsonObject);
+    const geoFeature = feature as unknown as GeoJSON.Feature;
+    const projection = geoMercator().fitSize([width - 8, height - 8], geoFeature);
     const path = geoPath(projection);
-    return path(feature as unknown as GeoJSON.GeoJsonObject);
+    return path(geoFeature);
   }, [geo, countryKey, width, height]);
 
   if (!geo) {
