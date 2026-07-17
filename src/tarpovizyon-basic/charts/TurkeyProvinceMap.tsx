@@ -34,7 +34,7 @@ export function TurkeyProvinceMap({ values }: { values: Record<string, number> }
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/turkey_districts.json')
+    fetch(`${import.meta.env.BASE_URL}turkey_districts.json`)
       .then((r) => r.json())
       .then((json) => { if (!cancelled) setGeoData(json); })
       .catch(() => { if (!cancelled) setGeoData(null); });

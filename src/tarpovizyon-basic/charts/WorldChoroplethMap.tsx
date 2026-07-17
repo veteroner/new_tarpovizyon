@@ -39,7 +39,7 @@ export function WorldChoroplethMap({ values, height = 360 }: { values: Record<st
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/world.geojson')
+    fetch(`${import.meta.env.BASE_URL}world.geojson`)
       .then((r) => r.json())
       .then((json) => { if (!cancelled) setGeoData(json); })
       .catch(() => { if (!cancelled) setGeoData(null); });
