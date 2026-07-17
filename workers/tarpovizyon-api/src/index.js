@@ -121,18 +121,39 @@ function json(data, status = 200) {
 // always bound as prepared-statement parameters, never interpolated as SQL, so an
 // arbitrary product list from the client cannot inject SQL — it can only ever
 // widen/narrow the WHERE ana_urun IN (...) match.
+//
+// A sector's product list can mix units (e.g. "Kırmızı Et ve Canlı Hayvan Dış
+// Ticareti" sums live-animal rows in ADET with meat rows in KG) — summing
+// ihracat_miktar/ithalat_miktar across those would silently produce a
+// meaningless number. Only report a `unit` (and thus only let the client show
+// the quantity) when every matched product shares exactly one miktar_birim.
+async function tradeUnit(env, table, urunler) {
+  const placeholders = urunler.map(() => '?').join(',');
+  const sql = `SELECT DISTINCT miktar_birim FROM ${table} WHERE ana_urun IN (${placeholders}) AND miktar_birim IS NOT NULL`;
+  const { results } = await env.DB.prepare(sql).bind(...urunler).all();
+  return results.length === 1 ? results[0].miktar_birim : null;
+}
+
 async function tradeYearlyTrend(env, table, urunler) {
   const placeholders = urunler.map(() => '?').join(',');
-  const sql = `SELECT yil, SUM(ihracat_deger) ihracat_deger, SUM(ithalat_deger) ithalat_deger
+  const sql = `SELECT yil, SUM(ihracat_deger) ihracat_deger, SUM(ithalat_deger) ithalat_deger,
+                      SUM(ihracat_miktar) ihracat_miktar, SUM(ithalat_miktar) ithalat_miktar
                FROM ${table} WHERE ana_urun IN (${placeholders})
                GROUP BY yil ORDER BY yil ASC`;
-  const { results } = await env.DB.prepare(sql).bind(...urunler).all();
-  return results;
+  const [{ results }, unit] = await Promise.all([
+    env.DB.prepare(sql).bind(...urunler).all(),
+    tradeUnit(env, table, urunler),
+  ]);
+  return { data: results, unit };
 }
 
 async function tradeProductBreakdown(env, table, urunler, yil) {
   const placeholders = urunler.map(() => '?').join(',');
-  const sql = `SELECT ana_urun, SUM(ihracat_deger) ihracat_deger, SUM(ithalat_deger) ithalat_deger
+  // Grouped by ana_urun, so each row is inherently single-product/single-unit —
+  // miktar here is always safe to show regardless of the sector's overall mix.
+  const sql = `SELECT ana_urun, SUM(ihracat_deger) ihracat_deger, SUM(ithalat_deger) ithalat_deger,
+                      SUM(ihracat_miktar) ihracat_miktar, SUM(ithalat_miktar) ithalat_miktar,
+                      MAX(miktar_birim) miktar_birim
                FROM ${table} WHERE yil = ? AND ana_urun IN (${placeholders})
                GROUP BY ana_urun ORDER BY ihracat_deger DESC`;
   const { results } = await env.DB.prepare(sql).bind(yil, ...urunler).all();
@@ -159,8 +180,8 @@ export default {
       if (urunler.length === 0) return json({ error: 'urunler parametresi zorunlu' }, 400);
       try {
         if (kind === 'yillik-trend') {
-          const data = await tradeYearlyTrend(env, table, urunler);
-          return json({ data, count: data.length });
+          const { data, unit } = await tradeYearlyTrend(env, table, urunler);
+          return json({ data, count: data.length, unit });
         }
         const yil = parseInt(url.searchParams.get('yil') || '', 10);
         if (!Number.isFinite(yil)) return json({ error: 'yil parametresi zorunlu' }, 400);
