@@ -1,38 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList } from 'recharts';
+import { useContainerWidth, wrapLabel } from './chartResponsive';
 
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
 export type SnapshotBarItem = { name: string; value: number };
-
-/** Greedy word-wrap into at most `maxLines` lines of ~`charsPerLine` chars;
- *  the last line gets an ellipsis if words remain unplaced. Category names
- *  in this dataset (e.g. "Tarımsal yatırıma katkı sağlayan mal ve
- *  hizmetler (Girdi 2)") are too long to fit a single line at any mobile
- *  YAxis width, so truncation is unavoidable — the full name is exposed via
- *  a native SVG <title> tooltip on the tick instead of being silently cut. */
-function wrapLabel(text: string, charsPerLine: number, maxLines: number): string[] {
-  const words = text.split(' ');
-  const lines: string[] = [];
-  let current = '';
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > charsPerLine && current) {
-      lines.push(current);
-      current = word;
-      if (lines.length === maxLines) break;
-    } else {
-      current = candidate;
-    }
-  }
-  if (lines.length < maxLines && current) lines.push(current);
-  const remainingWords = words.join(' ').length > lines.join(' ').length;
-  if (lines.length === maxLines && remainingWords) {
-    const last = lines[maxLines - 1];
-    lines[maxLines - 1] = last.length > charsPerLine - 1 ? `${last.slice(0, charsPerLine - 1)}…` : `${last}…`;
-  }
-  return lines;
-}
 
 /** Horizontal bar chart used for "Alt Gruplara Göre ... Değişim Oranı" snapshots —
  *  one bar per category, sorted descending, with the overall/reference category
@@ -51,19 +22,7 @@ export function SnapshotBarChart({
   // Fixed YAxis width worked on desktop but ate most of the plot area on
   // mobile widths (~360-400px), leaving bars a few pixels long. Track the
   // container width and scale the label column (and font) down with it.
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerWidth, setContainerWidth] = useState(400);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-      if (w) setContainerWidth(w);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const [containerRef, containerWidth] = useContainerWidth(400);
 
   const isNarrow = containerWidth < 480;
   const yAxisWidth = Math.round(Math.min(220, Math.max(110, containerWidth * 0.42)));
@@ -71,11 +30,14 @@ export function SnapshotBarChart({
   const maxLines = isNarrow ? 2 : 1;
   const charsPerLine = Math.max(8, Math.floor((yAxisWidth - 8) / (fontSize * 0.58)));
   const rowHeight = isNarrow ? 44 : 32;
+  // Touch devices have no hover, so the exact value must be readable
+  // without tapping each bar — draw it directly at the bar's end.
+  const rightMargin = isNarrow ? 36 : 48;
 
   return (
     <div ref={containerRef}>
       <ResponsiveContainer width="100%" height={height ?? Math.max(220, sorted.length * rowHeight)}>
-        <BarChart data={sorted} layout="vertical" margin={{ left: 8, right: isNarrow ? 16 : 40 }} barCategoryGap={isNarrow ? '25%' : '15%'}>
+        <BarChart data={sorted} layout="vertical" margin={{ left: 8, right: rightMargin }} barCategoryGap={isNarrow ? '25%' : '15%'}>
           <XAxis type="number" tickFormatter={(v) => numberFmt.format(v)} tick={{ fontSize }} />
           <YAxis
             type="category"
@@ -83,6 +45,11 @@ export function SnapshotBarChart({
             width={yAxisWidth}
             tick={(props) => {
               const { x, y, payload } = props;
+              // Category names in this dataset (e.g. "Tarımsal yatırıma
+              // katkı sağlayan mal ve hizmetler (Girdi 2)") don't fit a
+              // mobile-width column on one line; wrap up to 2 lines and
+              // expose the full name via a native SVG <title> so it's
+              // never silently cut with no way to read it.
               const lines = wrapLabel(String(payload.value), charsPerLine, maxLines);
               const lineHeight = fontSize + 2;
               const startY = -((lines.length - 1) * lineHeight) / 2;
@@ -109,6 +76,7 @@ export function SnapshotBarChart({
             {sorted.map((item, i) => (
               <Cell key={i} fill={item.name === referenceName ? '#dc2626' : '#2563eb'} />
             ))}
+            <LabelList dataKey="value" position="right" formatter={(v: number) => numberFmt.format(v)} fontSize={fontSize} fill="#374151" />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
