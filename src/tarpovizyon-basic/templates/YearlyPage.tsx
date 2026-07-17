@@ -5,6 +5,7 @@ import { GaugeChart } from '../charts/GaugeChart';
 import { YearlyChart, type SeriesConfig } from '../charts/YearlyChart';
 import { TradeTrendSection } from '../charts/TradeTrendSection';
 import { HorizontalRankBar } from '../charts/HorizontalRankBar';
+import { useYearRangeFilter } from '../charts/DateRangeFilter';
 
 export type YearlyPageConfig = {
   title: string;
@@ -127,8 +128,13 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
     rows = rows.map((r) => ({ ...r, [xField]: String(r[xField]).slice(0, 7) }));
   }
 
-  const kpi1 = kpiField ? latestNonZero(rows, kpiField) : null;
-  const kpi2 = secondKpiField ? latestNonZero(rows, secondKpiField) : null;
+  // Date-range filter — mirrors the "1 Oca 2024 - 30 Nis 2026" style picker
+  // the source Looker report shows above its trend charts, which our pages
+  // previously lacked entirely (always rendered full history, no narrowing).
+  const { filtered: filteredRows, control: dateControl } = useYearRangeFilter(rows, (r) => extractYear(r[xField]));
+
+  const kpi1 = kpiField ? latestNonZero(filteredRows, kpiField) : null;
+  const kpi2 = secondKpiField ? latestNonZero(filteredRows, secondKpiField) : null;
   const gaugeValue = useGauge(gauge);
   const rankings = useProvincialRanking(provincialRanking);
 
@@ -140,6 +146,8 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
 
       {!isLoading && (
         <>
+          {dateControl}
+
           {(kpi1 || kpi2 || gaugeValue !== null) && (
             <div className="tvb-page__controls">
               {gaugeValue !== null && <GaugeChart label={gauge?.label ?? 'Yeterlilik Oranı'} percent={gaugeValue} />}
@@ -149,7 +157,7 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
           )}
 
           <div className="tvb-section">
-            <YearlyChart data={rows as Record<string, number | string>[]} xKey={xField} series={series} />
+            <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} />
           </div>
 
           {tradeSection && <TradeTrendSection title={tradeSection.title} urunler={tradeSection.urunler} />}

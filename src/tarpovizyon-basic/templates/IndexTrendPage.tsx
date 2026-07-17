@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
 import { YearlyChart } from '../charts/YearlyChart';
 import { SnapshotBarChart } from '../charts/SnapshotBarChart';
+import { useYearRangeFilter } from '../charts/DateRangeFilter';
 
 const MONTH_ABBR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
@@ -32,11 +33,17 @@ export function IndexTrendPage({ config }: { config: IndexTrendPageConfig }) {
   const trendData = (trendRows ?? [])
     .map((r) => ({
       sortKey: Number(r.yil) * 100 + Number(r.ay),
+      yil: Number(r.yil),
       x: `${MONTH_ABBR[Number(r.ay) - 1]} ${r.yil}`,
       value: Number(r[trendValueField]),
     }))
     .filter((r) => Number.isFinite(r.value))
     .sort((a, b) => a.sortKey - b.sortKey);
+
+  // Date-range filter — mirrors the "1 Oca 2024 - 30 Nis 2026" style picker
+  // the source Looker report shows above its trend charts, which our index
+  // pages previously lacked entirely (always rendered full history).
+  const { filtered: filteredTrend, control: dateControl } = useYearRangeFilter(trendData, (r) => (Number.isFinite(r.yil) ? r.yil : null));
 
   return (
     <div className="tvb-page">
@@ -44,9 +51,10 @@ export function IndexTrendPage({ config }: { config: IndexTrendPageConfig }) {
 
       {trendData.length > 0 && (
         <div className="tvb-section">
+          {dateControl}
           <h3>{trendChartTitle}</h3>
           <YearlyChart
-            data={trendData as unknown as Record<string, number | string>[]}
+            data={filteredTrend as unknown as Record<string, number | string>[]}
             xKey="x"
             series={[{ key: 'value', label: trendChartTitle, type: 'line' }]}
           />
