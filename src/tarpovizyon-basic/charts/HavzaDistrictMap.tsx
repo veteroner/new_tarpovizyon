@@ -129,7 +129,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
           </span>
         ))}
         {basinNames.length > VISIBLE_LEGEND_COUNT && (
-          <button type="button" className="tvb-map__legend-toggle" onClick={() => setLegendExpanded((v) => !v)}>
+          <button type="button" className="tvb-show-more-toggle" onClick={() => setLegendExpanded((v) => !v)}>
             {legendExpanded ? 'Daha az göster' : `Tümünü göster (+${basinNames.length - VISIBLE_LEGEND_COUNT})`}
           </button>
         )}

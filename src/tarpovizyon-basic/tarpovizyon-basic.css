@@ -503,7 +503,7 @@
   border-radius: 2px;
   flex: 0 0 auto;
 }
-.tvb-map__legend-toggle {
+.tvb-show-more-toggle {
   grid-column: 1 / -1;
   margin-top: 2px;
   padding: 0;
@@ -515,7 +515,7 @@
   cursor: pointer;
   text-align: left;
 }
-.tvb-map__legend-toggle:hover {
+.tvb-show-more-toggle:hover {
   text-decoration: underline;
 }
 .tvb-map__legend-bar span {

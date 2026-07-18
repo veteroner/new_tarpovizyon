@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
+const PREVIEW_COUNT = 10;
 
 export type RankBarItem = { name: string; value: number };
 
@@ -7,7 +10,13 @@ export type RankBarItem = { name: string; value: number };
  *  column, so the bar itself gets the whole container width — critical on
  *  mobile where a long-label left column left bars only a few px wide.
  *  Sorted descending so the largest value is at the TOP. The exact value is
- *  always rendered (no hover needed, which touch devices lack). */
+ *  always rendered (no hover needed, which touch devices lack).
+ *
+ *  When `topN` is set, that's a hard cap the caller explicitly asked for
+ *  (e.g. a page titled "İlk 10") — no expand control. Without `topN`, lists
+ *  longer than PREVIEW_COUNT (some global rankings run 100+ countries)
+ *  collapse to a preview with a "Tümünü göster" toggle instead of always
+ *  rendering every row. */
 export function HorizontalRankBar({
   items,
   highlightName,
@@ -19,10 +28,18 @@ export function HorizontalRankBar({
   baseColor?: string;
   topN?: number;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   const sorted = [...items]
     .filter((i) => Number.isFinite(i.value))
     .sort((a, b) => b.value - a.value);
-  const shown = topN ? sorted.slice(0, topN) : sorted;
+
+  const collapsible = !topN && sorted.length > PREVIEW_COUNT;
+  const shown = topN
+    ? sorted.slice(0, topN)
+    : collapsible && !expanded
+      ? sorted.slice(0, PREVIEW_COUNT)
+      : sorted;
   const max = Math.max(...shown.map((i) => Math.abs(i.value)), 0) || 1;
 
   return (
@@ -46,6 +63,11 @@ export function HorizontalRankBar({
           </div>
         );
       })}
+      {collapsible && (
+        <button type="button" className="tvb-show-more-toggle" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? 'Daha az göster' : `Tümünü göster (+${sorted.length - PREVIEW_COUNT})`}
+        </button>
+      )}
     </div>
   );
 }
