@@ -44,6 +44,17 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
 
   const basinNames = useMemo(() => Array.from(new Set(rows.map((r) => r.havza).filter(Boolean))).sort(), [rows]);
 
+  // The API stores basin names with Turkish diacritics stripped ("DOGU
+  // KARADENIZ", trailing spaces) while BASIN_COLORS keys carry proper Turkish
+  // letters ("DOĞU KARADENİZ") — a direct key lookup missed ~17 of 30 basins,
+  // leaving them on the gray fallback and indistinguishable. Match on the
+  // normalized (accent-folded, trimmed) form so every basin gets its color.
+  const colorForHavza = useMemo(() => {
+    const normalized = new Map<string, string>();
+    Object.entries(BASIN_COLORS).forEach(([k, v]) => normalized.set(normalizeTurkish(k), v));
+    return (havza: string) => normalized.get(normalizeTurkish(havza)) || '#95a5a6';
+  }, []);
+
   return (
     <div ref={containerRef} className="tvb-map" onMouseLeave={() => setHover(null)}>
       <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" shapeRendering="geometricPrecision" style={{ width: '100%', height: 'auto', display: 'block' }}>
@@ -53,7 +64,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
           const provinceName = String(feat.properties?.province || '');
           const match = byKey.get(`${normalizeTurkish(provinceName)}|${normalizeTurkish(districtName)}`);
           if (!match) return null;
-          const color = BASIN_COLORS[match.havza] || '#95a5a6';
+          const color = colorForHavza(match.havza);
           return (
             <path key={`gap-${idx}`} d={d as string} fill={color} stroke={color} strokeWidth={14} strokeLinejoin="round" strokeLinecap="round" paintOrder="stroke" />
           );
@@ -63,7 +74,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
           const districtName = String(feat.properties?.name || '');
           const provinceName = String(feat.properties?.province || '');
           const match = byKey.get(`${normalizeTurkish(provinceName)}|${normalizeTurkish(districtName)}`);
-          const color = match ? BASIN_COLORS[match.havza] || '#95a5a6' : '#eef0f2';
+          const color = match ? colorForHavza(match.havza) : '#eef0f2';
           return (
             <path
               key={`border-${idx}`}
@@ -92,7 +103,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
       <div className="tvb-map__legend tvb-map__legend--swatches">
         {basinNames.map((b) => (
           <span key={b} className="tvb-map__swatch">
-            <i style={{ background: BASIN_COLORS[b] || '#95a5a6' }} />
+            <i style={{ background: colorForHavza(b) }} />
             {b}
           </span>
         ))}
