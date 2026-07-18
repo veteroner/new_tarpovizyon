@@ -17,7 +17,10 @@ type YearRow = { yil: number; deger: number };
 
 async function fetchDetayYillik(urunler: string[], unsur: string): Promise<YearRow[]> {
   const url = new URL(`${API_BASE}/api/bitkisel/uretim-detay-yillik`);
-  url.searchParams.set('urunler', urunler.join(','));
+  // '|' delimiter, not ',' — several variety names contain commas
+  // (e.g. "Buğday, Durum Buğdayı Hariç"); a comma-joined list would be
+  // re-split mid-name by the API and silently match nothing.
+  url.searchParams.set('urunler', urunler.join('|'));
   url.searchParams.set('unsur', unsur);
   const res = await fetch(url.toString());
   const json = await res.json();
@@ -67,7 +70,7 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
         <>
           <div className="tvb-page__controls">
             <KpiCard label="Üretim Miktarı" value={formatNumber(kpi1.value)} suffix="Ton" changePct={kpi1.pct} />
-            {hasAlan && <KpiCard label="Ekilen Alan" value={formatNumber(kpi2.value)} suffix="Ha" changePct={kpi2.pct} />}
+            {hasAlan && <KpiCard label="Ekilen Alan" value={formatNumber(kpi2.value)} suffix="Dekar" changePct={kpi2.pct} />}
           </div>
 
           {merged.length > 0 && (
@@ -77,7 +80,7 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
                 xKey="yil"
                 series={[
                   { key: 'uretim_ton', label: 'Üretim (Ton)', type: 'bar' },
-                  ...(hasAlan ? [{ key: 'ekilen_alan_ha', label: 'Ekilen Alan (Ha)', type: 'line' as const }] : []),
+                  ...(hasAlan ? [{ key: 'ekilen_alan_ha', label: 'Ekilen Alan (Dekar)', type: 'line' as const }] : []),
                 ]}
               />
             </div>

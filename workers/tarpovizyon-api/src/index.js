@@ -110,6 +110,17 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+// Split a product-list query param. Prefer the '|' delimiter because many
+// product names contain commas (e.g. "Buğday, Durum Buğdayı Hariç", "Fasulye,
+// Kuru") — a comma split silently tore those in two and matched nothing. Falls
+// back to comma only when no '|' is present, so older cached frontends that
+// still send comma-joined single names keep working during a rollout.
+function splitUrunler(raw) {
+  const s = raw || '';
+  const delimiter = s.includes('|') ? '|' : ',';
+  return s.split(delimiter).map((x) => x.trim()).filter(Boolean);
+}
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -176,7 +187,7 @@ export default {
     if (tradeAggMatch) {
       const [, modul, kind] = tradeAggMatch;
       const table = TRADE_TABLES[modul];
-      const urunler = (url.searchParams.get('urunler') || '').split(',').map((s) => s.trim()).filter(Boolean);
+      const urunler = splitUrunler(url.searchParams.get('urunler'));
       if (urunler.length === 0) return json({ error: 'urunler parametresi zorunlu' }, 400);
       try {
         if (kind === 'yillik-trend') {
@@ -221,7 +232,7 @@ export default {
     }
 
     if (slug === 'bitkisel/uretim-detay-yillik') {
-      const urunler = (url.searchParams.get('urunler') || '').split(',').map((s) => s.trim()).filter(Boolean);
+      const urunler = splitUrunler(url.searchParams.get('urunler'));
       const unsur = url.searchParams.get('unsur') || '';
       if (urunler.length === 0 || !unsur) return json({ error: 'urunler ve unsur parametreleri zorunlu' }, 400);
       try {

@@ -11,7 +11,7 @@ const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
 async function fetchTrend(modul: 'hayvansal' | 'bitkisel', urunler: string[]): Promise<{ rows: TradeRow[]; unit: string | null }> {
   const url = new URL(`${API_BASE}/api/${modul}/dis-ticaret/yillik-trend`);
-  url.searchParams.set('urunler', urunler.join(','));
+  url.searchParams.set('urunler', urunler.join('|'));
   const res = await fetch(url.toString());
   const json = await res.json();
   return { rows: json.data ?? [], unit: json.unit ?? null };
@@ -19,7 +19,7 @@ async function fetchTrend(modul: 'hayvansal' | 'bitkisel', urunler: string[]): P
 
 async function fetchProductBreakdown(modul: 'hayvansal' | 'bitkisel', urunler: string[], yil: number): Promise<ProductRow[]> {
   const url = new URL(`${API_BASE}/api/${modul}/dis-ticaret/urun-ozet`);
-  url.searchParams.set('urunler', urunler.join(','));
+  url.searchParams.set('urunler', urunler.join('|'));
   url.searchParams.set('yil', String(yil));
   const res = await fetch(url.toString());
   const json = await res.json();
