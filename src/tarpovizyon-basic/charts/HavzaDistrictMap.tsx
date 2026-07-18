@@ -33,6 +33,20 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
     return map;
   }, [rows]);
 
+  // The geojson names a province's central district "<İl> Merkez" (e.g.
+  // "Adıyaman Merkez"), but the API's ilçe column just says "Merkez" — a
+  // direct key lookup missed this for ~51 provinces, leaving their central
+  // (often largest) district unpainted white. Fall back to the province's
+  // own "Merkez" row when the district name is exactly "<province> Merkez".
+  const findMatch = (provinceName: string, districtName: string): HavzaIlceRow | undefined => {
+    const direct = byKey.get(`${normalizeTurkish(provinceName)}|${normalizeTurkish(districtName)}`);
+    if (direct) return direct;
+    if (normalizeTurkish(districtName) === `${normalizeTurkish(provinceName)} merkez`) {
+      return byKey.get(`${normalizeTurkish(provinceName)}|merkez`);
+    }
+    return undefined;
+  };
+
   const features = geoData?.features ?? [];
   const withPaths = useMemo(
     () => features
@@ -62,7 +76,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
         {withPaths.map(({ feat, d }, idx) => {
           const districtName = String(feat.properties?.name || '');
           const provinceName = String(feat.properties?.province || '');
-          const match = byKey.get(`${normalizeTurkish(provinceName)}|${normalizeTurkish(districtName)}`);
+          const match = findMatch(provinceName, districtName);
           if (!match) return null;
           const color = colorForHavza(match.havza);
           return (
@@ -73,7 +87,7 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
         {withPaths.map(({ feat, d }, idx) => {
           const districtName = String(feat.properties?.name || '');
           const provinceName = String(feat.properties?.province || '');
-          const match = byKey.get(`${normalizeTurkish(provinceName)}|${normalizeTurkish(districtName)}`);
+          const match = findMatch(provinceName, districtName);
           const color = match ? colorForHavza(match.havza) : '#eef0f2';
           return (
             <path
