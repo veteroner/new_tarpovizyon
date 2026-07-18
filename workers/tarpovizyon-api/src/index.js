@@ -110,15 +110,14 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Split a product-list query param. Prefer the '|' delimiter because many
-// product names contain commas (e.g. "Buğday, Durum Buğdayı Hariç", "Fasulye,
-// Kuru") — a comma split silently tore those in two and matched nothing. Falls
-// back to comma only when no '|' is present, so older cached frontends that
-// still send comma-joined single names keep working during a rollout.
+// Split a product-list query param on '|' ONLY. Many product names contain
+// commas (e.g. "Buğday, Durum Buğdayı Hariç", "Fasulye, Kuru"), so comma can
+// never be the delimiter — a single comma-name like "Fasulye, Kuru" would be
+// torn into ["Fasulye","Kuru"] and match nothing. The frontend always joins
+// with '|' (a char no product name contains), so a lone name simply has no
+// delimiter and passes through intact.
 function splitUrunler(raw) {
-  const s = raw || '';
-  const delimiter = s.includes('|') ? '|' : ',';
-  return s.split(delimiter).map((x) => x.trim()).filter(Boolean);
+  return (raw || '').split('|').map((x) => x.trim()).filter(Boolean);
 }
 
 function json(data, status = 200) {
