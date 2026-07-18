@@ -34,6 +34,7 @@ export function GaugeGridPage({ config }: { config: GaugeGridPageConfig }) {
                   percent={(raw / g.max) * 100}
                   displayText={raw.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                   scaleLabels={['0', String(g.max)]}
+                  neutral
                 />
               </div>
             );

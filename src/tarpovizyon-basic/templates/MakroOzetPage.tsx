@@ -20,9 +20,9 @@ export function MakroOzetPage({ config }: { config: MakroOzetPageConfig }) {
 
       {v && (
         <div className="tvb-gauge-row">
-          <GaugeChart label="GSYH PAY (%)" percent={Number(v.gsyh_pay)} />
-          <GaugeChart label="İHRACATTAKİ PAY (%)" percent={Number(v.ihracat_pay)} />
-          <GaugeChart label="İSTİHDAMDAKİ PAY (%)" percent={Number(v.istihdam_pay)} />
+          <GaugeChart label="GSYH PAY (%)" percent={Number(v.gsyh_pay)} neutral />
+          <GaugeChart label="İHRACATTAKİ PAY (%)" percent={Number(v.ihracat_pay)} neutral />
+          <GaugeChart label="İSTİHDAMDAKİ PAY (%)" percent={Number(v.istihdam_pay)} neutral />
         </div>
       )}
 
