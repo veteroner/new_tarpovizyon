@@ -9,6 +9,11 @@ export type CropSectorPageConfig = {
   productionUrunler: string[];
   /** ana_urun name(s) in bitkisel_tr_dis_ticaret for the trade sub-section. */
   tradeUrunler: string[];
+  /** Overrides the "Üretim" label. Needed for processed-product pages (İncir Kuru,
+   *  Zeytinyağı) whose production series is actually the RAW crop's tonnage — TÜİK
+   *  has no separate dried/oil production figure — so the generic "Üretim" label
+   *  would misrepresent fresh-fig/olive tonnage as dried-fig/oil output. */
+  productionLabel?: string;
 };
 
 const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
@@ -40,7 +45,7 @@ function latestNonZero(rows: YearRow[]): { value: number | null; pct: number | n
 }
 
 export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
-  const { title, productionUrunler, tradeUrunler } = config;
+  const { title, productionUrunler, tradeUrunler, productionLabel = 'Üretim' } = config;
 
   const { data: uretim, isLoading: l1 } = useQuery({
     queryKey: ['tvb-crop-uretim', productionUrunler],
@@ -69,7 +74,7 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
       {!isLoading && (
         <>
           <div className="tvb-page__controls">
-            <KpiCard label="Üretim Miktarı" value={formatNumber(kpi1.value)} suffix="Ton" changePct={kpi1.pct} />
+            <KpiCard label={`${productionLabel} Miktarı`} value={formatNumber(kpi1.value)} suffix="Ton" changePct={kpi1.pct} />
             {hasAlan && <KpiCard label="Ekilen Alan" value={formatNumber(kpi2.value)} suffix="Dekar" changePct={kpi2.pct} />}
           </div>
 
@@ -79,7 +84,7 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
                 data={merged as unknown as Record<string, number | string>[]}
                 xKey="yil"
                 series={[
-                  { key: 'uretim_ton', label: 'Üretim (Ton)', type: 'bar' },
+                  { key: 'uretim_ton', label: `${productionLabel} (Ton)`, type: 'bar' },
                   ...(hasAlan ? [{ key: 'ekilen_alan_ha', label: 'Ekilen Alan (Dekar)', type: 'line' as const }] : []),
                 ]}
               />

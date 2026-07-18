@@ -13,10 +13,10 @@ const FAO_REGION_AGGREGATES = [
   'Oceania', 'Australia and New Zealand', 'Melanesia', 'Micronesia', 'Polynesia',
 ];
 
-function cropPage(path: string, label: string, productionUrunler: string[], tradeUrunler: string[]): PageDef {
+function cropPage(path: string, label: string, productionUrunler: string[], tradeUrunler: string[], productionLabel?: string): PageDef {
   return {
     path, label, template: 'crop-sector',
-    config: { title: label.toUpperCase() + ' SEKTÖRÜ', productionUrunler, tradeUrunler },
+    config: { title: label.toUpperCase() + ' SEKTÖRÜ', productionUrunler, tradeUrunler, productionLabel },
   };
 }
 
@@ -49,9 +49,12 @@ const MEYVELER: PageDef[] = [
   cropPage('findik', 'Fındık', ['Fındık'], ['Fındık']),
   cropPage('greyfurt', 'Greyfurt', ['Greyfurt (Altıntop)'], ['Greyfurt']),
   cropPage('incir-yas', 'İncir (Yaş)', ['İncir (Yaş)'], ['İncir (Yaş)']),
-  cropPage('incir-kuru', 'İncir (Kuru)', ['İncir (Yaş)'], ['İncir (Kuru)']),
+  // Kuru incir için ayrı üretim rakamı yok; gösterilen, kuru incirin kaynağı olan
+  // yaş incir üretimidir — etiket bunu açıkça söylüyor (yanıltmamak için).
+  cropPage('incir-kuru', 'İncir (Kuru)', ['İncir (Yaş)'], ['İncir (Kuru)'], 'Yaş İncir Üretimi'),
   cropPage('kayisi-yas', 'Kayısı (Yaş)', ['Kayısı'], ['Kayısı (Yaş)']),
-  cropPage('kayisi-kuru', 'Kayısı (Kuru)', ['Kayısı'], ['Kayısı (Kuru)']),
+  // Kuru kayısı için ayrı üretim rakamı yok; gösterilen toplam (yaş) kayısı üretimidir.
+  cropPage('kayisi-kuru', 'Kayısı (Kuru)', ['Kayısı'], ['Kayısı (Kuru)'], 'Kayısı Üretimi (Yaş)'),
   cropPage('kiraz', 'Kiraz', ['Kiraz'], ['Kiraz']),
   cropPage('limon', 'Limon', ['Limon Ve Misket Limonu'], ['Limon']),
   cropPage('mandalina', 'Mandalina', ['Mandalina (Diğer)', 'Mandalina (King)', 'Mandalina (Klemantin)', 'Mandalina (Satsuma)'], ['Mandarin']),
@@ -61,7 +64,8 @@ const MEYVELER: PageDef[] = [
   cropPage('uzum-kuru', 'Üzüm (Kuru)', ['Kurutmalık Üzüm, Çekirdekli', 'Kurutmalık Üzüm, Çekirdeksiz'], ['Üzüm (Kuru)']),
   cropPage('portakal', 'Portakal', ['Portakal (Washington)', 'Portakal (Yafa)', 'Diğer Portakallar'], ['Portakal']),
   cropPage('zeytin', 'Zeytin', ['Sofralık Zeytinler', 'Yağlık Zeytinler (Zeytinyağı Üretimi İçin)'], ['Zeytin']),
-  cropPage('zeytinyagi', 'Zeytinyağı', ['Yağlık Zeytinler (Zeytinyağı Üretimi İçin)'], ['Zeytinyağı']),
+  // Zeytinyağı üretim rakamı detayda yok; gösterilen, yağlık zeytin tonajıdır (yağ değil).
+  cropPage('zeytinyagi', 'Zeytinyağı', ['Yağlık Zeytinler (Zeytinyağı Üretimi İçin)'], ['Zeytinyağı'], 'Yağlık Zeytin Üretimi'),
 ];
 
 const SEBZELER: PageDef[] = [
