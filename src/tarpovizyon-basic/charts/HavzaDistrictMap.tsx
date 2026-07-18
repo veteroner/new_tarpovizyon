@@ -6,6 +6,8 @@ type GeoFeatureCollection = { type: 'FeatureCollection'; features: DistrictFeatu
 
 export type HavzaIlceRow = { havza: string; il: string; ilce: string };
 
+const VISIBLE_LEGEND_COUNT = 8;
+
 /** Turkey district map colored by havza (basin), using the same district-boundary
  *  geojson and basin color palette as the main dashboard's basin feature — kept
  *  visually identical, but data-fetched from our own D1-backed Worker instead of
@@ -13,6 +15,7 @@ export type HavzaIlceRow = { havza: string; il: string; ilce: string };
 export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
   const [hover, setHover] = useState<{ ilce: string; il: string; havza: string; x: number; y: number } | null>(null);
+  const [legendExpanded, setLegendExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -115,12 +118,21 @@ export function HavzaDistrictMap({ rows }: { rows: HavzaIlceRow[] }) {
         </div>
       )}
       <div className="tvb-map__legend tvb-map__legend--swatches">
-        {basinNames.map((b) => (
-          <span key={b} className="tvb-map__swatch">
+        {/* 30 basins made this list a wall of text on mobile; a district's name
+            is already shown via hover/tap on the map, so the always-visible
+            legend only needs to name a color at a glance — collapse to a
+            preview row by default and let the user expand the full list. */}
+        {(legendExpanded ? basinNames : basinNames.slice(0, VISIBLE_LEGEND_COUNT)).map((b) => (
+          <span key={b} className="tvb-map__swatch" title={b}>
             <i style={{ background: colorForHavza(b) }} />
-            {b}
+            <span>{b}</span>
           </span>
         ))}
+        {basinNames.length > VISIBLE_LEGEND_COUNT && (
+          <button type="button" className="tvb-map__legend-toggle" onClick={() => setLegendExpanded((v) => !v)}>
+            {legendExpanded ? 'Daha az göster' : `Tümünü göster (+${basinNames.length - VISIBLE_LEGEND_COUNT})`}
+          </button>
+        )}
       </div>
     </div>
   );

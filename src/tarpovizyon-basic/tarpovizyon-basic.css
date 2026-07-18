@@ -479,20 +479,44 @@
   overflow: hidden;
 }
 .tvb-map__legend--swatches {
-  flex-wrap: wrap;
-  row-gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px 10px;
+  margin-top: 10px;
 }
 .tvb-map__swatch {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 11px;
+  min-width: 0;
+}
+.tvb-map__swatch span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tvb-map__swatch i {
   display: inline-block;
   width: 10px;
   height: 10px;
   border-radius: 2px;
+  flex: 0 0 auto;
+}
+.tvb-map__legend-toggle {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.tvb-map__legend-toggle:hover {
+  text-decoration: underline;
 }
 .tvb-map__legend-bar span {
   flex: 1;
