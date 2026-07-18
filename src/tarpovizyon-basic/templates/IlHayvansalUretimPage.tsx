@@ -7,6 +7,9 @@ import { RankingBlock } from '../charts/RankingBlock';
 
 export type IlHayvansalUretimPageConfig = { title: string };
 
+// Livestock only. Beekeeping metrics (kovan/bal/balmumu) live on the dedicated
+// "İl Düzeyinde Arıcılık Verileri" page — duplicating them here bloated this
+// page with 13 KPIs and mixed beekeeping into a livestock view.
 const KPI_FIELDS: { key: string; label: string; suffix: string }[] = [
   { key: 'sigir_varligi_bas', label: 'Sığır Varlığı', suffix: 'Baş' },
   { key: 'manda_varligi_bas', label: 'Manda Varlığı', suffix: 'Baş' },
@@ -14,12 +17,6 @@ const KPI_FIELDS: { key: string; label: string; suffix: string }[] = [
   { key: 'keci_varligi_bas', label: 'Keçi Varlığı', suffix: 'Baş' },
   { key: 'et_tavugu_sayisi', label: 'Et Tavuğu Sayısı', suffix: 'Adet' },
   { key: 'yumurta_tavugu_sayisi', label: 'Yumurta Tavuğu Sayısı', suffix: 'Adet' },
-  { key: 'kovan_varligi', label: 'Kovan Varlığı', suffix: 'Adet' },
-  { key: 'yeni_kovan_sayisi', label: 'Yeni Kovan Sayısı', suffix: 'Adet' },
-  { key: 'eski_kovan_sayisi', label: 'Eski Kovan Sayısı', suffix: 'Adet' },
-  { key: 'bal_uretimi_ton', label: 'Bal Üretimi', suffix: 'Ton' },
-  { key: 'bal_verimi_kg', label: 'Bal Verimi', suffix: 'Kg' },
-  { key: 'balmumu_uretimi_ton', label: 'Balmumu Üretimi', suffix: 'Ton' },
 ];
 
 export function IlHayvansalUretimPage({ config }: { config: IlHayvansalUretimPageConfig }) {
@@ -44,9 +41,6 @@ export function IlHayvansalUretimPage({ config }: { config: IlHayvansalUretimPag
   KPI_FIELDS.forEach((f) => {
     totals[f.key] = rows.reduce((s, r) => s + (Number.isFinite(Number(r[f.key])) ? Number(r[f.key]) : 0), 0);
   });
-  const balVerimiAvg = rows.length > 0 && Number.isFinite(totals.bal_verimi_kg)
-    ? rows.reduce((s, r) => s + (Number.isFinite(Number(r.bal_verimi_kg)) ? Number(r.bal_verimi_kg) : 0), 0) / rows.filter((r) => Number.isFinite(Number(r.bal_verimi_kg))).length
-    : null;
 
   return (
     <div className="tvb-page">
@@ -72,7 +66,7 @@ export function IlHayvansalUretimPage({ config }: { config: IlHayvansalUretimPag
           <KpiCard
             key={f.key}
             label={f.label}
-            value={formatNumber(f.key === 'bal_verimi_kg' ? balVerimiAvg : totals[f.key])}
+            value={formatNumber(totals[f.key])}
             suffix={f.suffix}
           />
         ))}
