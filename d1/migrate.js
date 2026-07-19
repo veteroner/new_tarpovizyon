@@ -4,7 +4,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-const API = 'https://dersbende.com/api.php?action=query&api_key=REDACTED_DASHBOARD_KEY&sql=';
+const API = 'https://dersbende.com/api.php?action=query&api_key=dashboard_secret_key_2024&sql=';
 async function q(sql) {
   const r = await axios.get(API + encodeURIComponent(sql));
   if (r.data.error) throw new Error(r.data.error + ' :: ' + sql);

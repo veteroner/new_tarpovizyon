@@ -1,5 +1,5 @@
 const axios = require('axios');
-const API = 'https://dersbende.com/api.php?action=query&api_key=REDACTED_DASHBOARD_KEY&sql=';
+const API = 'https://dersbende.com/api.php?action=query&api_key=dashboard_secret_key_2024&sql=';
 async function q(sql) { const r = await axios.get(API + encodeURIComponent(sql)); return r.data; }
 
 async function main() {

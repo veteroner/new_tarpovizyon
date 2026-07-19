@@ -102,7 +102,7 @@ app.get('/api.php', async (req, res) => {
         const { action, api_key, sql } = req.query;
         
         // Validate API key
-        if (api_key !== 'REDACTED_DASHBOARD_KEY') {
+        if (api_key !== 'dashboard_secret_key_2024') {
             return res.status(401).json({ success: false, error: 'Invalid API key' });
         }
         

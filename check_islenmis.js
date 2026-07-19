@@ -1,4 +1,4 @@
-const API_KEY = 'REDACTED_DASHBOARD_KEY';
+const API_KEY = 'dashboard_secret_key_2024';
 const BASE = 'https://dersbende.com';
 
 async function q(sql) {

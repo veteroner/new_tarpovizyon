@@ -89,7 +89,7 @@ export const COMMODITY_META: Record<string, {
 
 // Backend PHP proxy URL — çalışır hem web hem Capacitor native'de
 const BACKEND_COMMODITY_URL =
-  'https://dersbende.com/api.php?action=commodity_prices&api_key=REDACTED_DASHBOARD_KEY';
+  'https://dersbende.com/api.php?action=commodity_prices&api_key=dashboard_secret_key_2024';
 
 function mapBackendCategory(cat: string): CommodityQuote['category'] {
   if (cat === 'Hayvancılık') return 'hayvancilik';

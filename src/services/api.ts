@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)
   ?? (import.meta.env.DEV ? '' : 'https://dersbende.com');
-const API_KEY = 'REDACTED_DASHBOARD_KEY';
+const API_KEY = 'dashboard_secret_key_2024';
 
 const IS_DEV = import.meta.env.DEV;
 

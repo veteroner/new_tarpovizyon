@@ -10,7 +10,7 @@ import axios from 'axios';
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const API_BASE = 'https://dersbende.com';
-const API_KEY = 'REDACTED_DASHBOARD_KEY';
+const API_KEY = 'dashboard_secret_key_2024';
 const IS_DEV = import.meta.env.DEV;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
