@@ -1,0 +1,38 @@
+name: TÜİK → D1 senkron
+
+# TÜİK bültenleri TR saatiyle ~10:00'da yayımlanıyor. 08:00 UTC = 11:00 TR.
+# Yayın takvimini tahmin etmek yerine her gün bakıyoruz: senkron idempotent,
+# yeni dönem yoksa hiçbir şey yazmıyor. Bir gün kaçarsa ertesi gün toparlar.
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Sadece rapor et, veritabanına yazma'
+        type: boolean
+        default: false
+
+concurrency:
+  group: tuik-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Senkronu çalıştır
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: node scripts/tuik-sync/sync.mjs
