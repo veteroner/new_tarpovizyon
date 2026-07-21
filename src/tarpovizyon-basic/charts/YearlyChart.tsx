@@ -16,10 +16,18 @@ export function YearlyChart({
   data,
   xKey,
   series,
+  yDomain = 'zero',
 }: {
   data: Record<string, number | string>[];
   xKey: string;
   series: SeriesConfig[];
+  /**
+   * 'zero' (default) anchors the Y-axis at 0 — correct for bars, whose length
+   * must encode magnitude. 'auto' scales to the data range with a little
+   * padding — for index/level or %-change line charts (e.g. FAO ~90-160,
+   * TÜFE-change ±%) a 0-baseline flattens the line into a meaningless band.
+   */
+  yDomain?: 'zero' | 'auto';
 }) {
   // A single-series chart's legend just repeats the section's <h3> title
   // above it verbatim — on mobile that long label wraps to 2 lines and,
@@ -39,6 +47,18 @@ export function YearlyChart({
   const maxTicks = Math.max(3, Math.floor(containerWidth / (isNarrow ? 60 : 80)));
   const tickInterval = Math.max(0, Math.ceil(data.length / maxTicks) - 1);
 
+  // For 'auto', derive a padded [min,max] from the actual series values so the
+  // line fills the plot area. Recharts' default number domain anchors at 0.
+  const domain = (() => {
+    if (yDomain !== 'auto') return undefined;
+    const vals = data.flatMap((d) => series.map((s) => Number(d[s.key]))).filter((n) => Number.isFinite(n));
+    if (!vals.length) return undefined;
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const pad = (max - min || Math.abs(max) || 1) * 0.08;
+    return [Math.floor(min - pad), Math.ceil(max + pad)] as [number, number];
+  })();
+
   return (
     <div ref={containerRef}>
       <ResponsiveContainer width="100%" height={(isNarrow ? 280 : 340) + legendHeight}>
@@ -49,6 +69,8 @@ export function YearlyChart({
             tickFormatter={axisTick}
             tick={{ fontSize }}
             width={isNarrow ? 44 : 56}
+            domain={domain}
+            allowDataOverflow={false}
           />
           <Tooltip
             formatter={(v: number) => numberFmt.format(v)}

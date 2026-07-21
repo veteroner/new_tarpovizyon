@@ -45,6 +45,11 @@ export function IndexTrendPage({ config }: { config: IndexTrendPageConfig }) {
   // pages previously lacked entirely (always rendered full history).
   const { filtered: filteredTrend, control: dateControl } = useYearRangeFilter(trendData, (r) => (Number.isFinite(r.yil) ? r.yil : null));
 
+  // Latest available period ("May 2026") — sparse X-axis ticks mean the most
+  // recent month is often unlabeled, so the reader can't tell how current the
+  // series is; surface it explicitly above the chart.
+  const latestPeriod = trendData.length ? trendData[trendData.length - 1].x : null;
+
   return (
     <div className="tvb-page">
       <div className="tvb-page__banner">{title}</div>
@@ -52,11 +57,15 @@ export function IndexTrendPage({ config }: { config: IndexTrendPageConfig }) {
       {trendData.length > 0 && (
         <div className="tvb-section">
           {dateControl}
-          <h3>{trendChartTitle}</h3>
+          <div className="tvb-section__head">
+            <h3>{trendChartTitle}</h3>
+            {latestPeriod && <span className="tvb-badge">Son dönem: {latestPeriod}</span>}
+          </div>
           <YearlyChart
             data={filteredTrend as unknown as Record<string, number | string>[]}
             xKey="x"
             series={[{ key: 'value', label: trendChartTitle, type: 'line' }]}
+            yDomain="auto"
           />
         </div>
       )}
