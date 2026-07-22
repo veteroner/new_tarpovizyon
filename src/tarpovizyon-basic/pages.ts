@@ -98,11 +98,13 @@ const HAYVANSAL_SECTIONS: Section[] = [
         path: 'hayvansal-urunlerde-verim', label: 'Hayvansal Ürünlerde Verim', template: 'yearly',
         config: {
           title: 'HAYVANSAL ÜRETİMDE VERİM', endpoint: 'tr/verimlilikler', xField: 'yil', xFormat: 'year',
+          // İnek sütü verimi (~3.000 Lt) sol eksende; karkas ve bal verimleri
+          // (Kg mertebesi) sağ eksende — tek eksende kg değerleri düz kalıyordu.
           series: [
             { key: 'cig_sut_verimi_lt', label: 'İnek Sütü Verimi (Lt/Baş)', type: 'bar' },
-            { key: 'buyukbas_karkas_et_verimi_kg', label: 'Büyükbaş Karkas Et Verimi (Kg)', type: 'line' },
-            { key: 'kucukbas_karkas_et_verimi_kg', label: 'Küçükbaş Karkas Et Verimi (Kg)', type: 'line' },
-            { key: 'bal_verimi_kg', label: 'Bal Verimi (Kg/Kovan)', type: 'line' },
+            { key: 'buyukbas_karkas_et_verimi_kg', label: 'Büyükbaş Karkas Et Verimi (Kg)', type: 'line', axis: 'right' },
+            { key: 'kucukbas_karkas_et_verimi_kg', label: 'Küçükbaş Karkas Et Verimi (Kg)', type: 'line', axis: 'right' },
+            { key: 'bal_verimi_kg', label: 'Bal Verimi (Kg/Kovan)', type: 'line', axis: 'right' },
           ],
         },
       },
@@ -138,8 +140,8 @@ const HAYVANSAL_SECTIONS: Section[] = [
         config: {
           title: 'ÇİĞ SÜT SEKTÖRÜ', endpoint: 'cig-sut/uretim-miktari', xField: 'yil',
           series: [
-            { key: 'buyukbas_sut_uretimi_ton', label: 'Büyükbaş Süt Üretimi (Ton)', type: 'bar' },
-            { key: 'kucukbas_sutu_uretimi_ton', label: 'Küçükbaş Süt Üretimi (Ton)', type: 'bar' },
+            { key: 'buyukbas_sut_uretimi_ton', label: 'Büyükbaş Süt Üretimi (Ton)', type: 'bar', stack: 'sut' },
+            { key: 'kucukbas_sutu_uretimi_ton', label: 'Küçükbaş Süt Üretimi (Ton)', type: 'bar', stack: 'sut' },
           ],
           kpiField: 'buyukbas_sut_uretimi_ton', kpiLabel: 'Büyükbaş Süt Üretimi', kpiUnit: 'Ton',
           secondKpiField: 'kucukbas_sutu_uretimi_ton', secondKpiLabel: 'Küçükbaş Süt Üretimi',
@@ -201,8 +203,8 @@ const HAYVANSAL_SECTIONS: Section[] = [
         config: {
           title: 'KIRMIZI ET SEKTÖRÜ', endpoint: 'kirmizi-et/uretim-miktari', xField: 'yil',
           series: [
-            { key: 'buyukbas_et_uretimi_ton', label: 'Büyükbaş Et Üretimi (Ton)', type: 'bar' },
-            { key: 'kucukbas_et_uretimi_ton', label: 'Küçükbaş Et Üretimi (Ton)', type: 'bar' },
+            { key: 'buyukbas_et_uretimi_ton', label: 'Büyükbaş Et Üretimi (Ton)', type: 'bar', stack: 'et' },
+            { key: 'kucukbas_et_uretimi_ton', label: 'Küçükbaş Et Üretimi (Ton)', type: 'bar', stack: 'et' },
           ],
           kpiField: 'buyukbas_et_uretimi_ton', kpiLabel: 'Büyükbaş Et Üretimi', kpiUnit: 'Ton',
           secondKpiField: 'kucukbas_et_uretimi_ton', secondKpiLabel: 'Küçükbaş Et Üretimi',
@@ -248,82 +250,38 @@ const HAYVANSAL_SECTIONS: Section[] = [
             { key: 'dana_karkas_fiyati_tl_kg', label: 'Dana Karkas Fiyatı', type: 'line' },
             { key: 'kuzu_karkas_fiyati_tl_kg', label: 'Kuzu Karkas Fiyatı', type: 'line' },
           ],
+          extraCharts: [
+            { title: 'Dana Karkas Fiyatı (TL/Kg)', series: [{ key: 'dana_karkas_fiyati_tl_kg', label: 'Dana Karkas Fiyatı', type: 'bar' }] },
+            { title: 'Kuzu Karkas Fiyatı (TL/Kg)', series: [{ key: 'kuzu_karkas_fiyati_tl_kg', label: 'Kuzu Karkas Fiyatı', type: 'bar' }] },
+          ],
         },
       },
     ],
   },
   {
-    label: 'Piliç Eti Sektörü',
-    path: 'pilic-eti',
+    // Piliç eti ve yumurta tek "Kanatlı" sektöründe birleştirildi; maliyet /
+    // ekonomik gösterge sayfaları kaldırıldı, odak üretim + ihracatta.
+    label: 'Kanatlı Sektörü (Piliç Eti ve Yumurta)',
+    path: 'kanatli',
     pages: [
       {
-        path: 'uretim-yeterlilik', label: 'Üretim, İhracat ve Yeterlilik Düzeyi', template: 'yearly',
+        path: 'pilic-eti-uretim', label: 'Piliç Eti — Üretim, İhracat ve Yeterlilik', template: 'yearly',
         config: {
-          title: 'KANATLI ETİ SEKTÖRÜ', endpoint: 'kanatli/uretimleri', xField: 'tarih', aggregateYearly: true,
-          series: [{ key: 'tavuk_eti_ton', label: 'Tavuk Eti (Ton)', type: 'bar' }],
+          title: 'PİLİÇ ETİ SEKTÖRÜ', endpoint: 'kanatli/uretimleri', xField: 'tarih', aggregateYearly: true,
+          series: [{ key: 'tavuk_eti_ton', label: 'Tavuk Eti Üretimi (Ton)', type: 'bar' }],
           kpiField: 'tavuk_eti_ton', kpiLabel: 'Tavuk Eti Üretimi', kpiUnit: 'Ton',
           gauge: { endpoint: 'tr/yeterlilikler', field: 'beyaz_et_ton', label: 'Yeterlilik Oranı' },
-          tradeSection: { title: 'Piliç Eti Dış Ticareti', urunler: ['Piliç Eti'] },
+          tradeSection: { title: 'Yıllara Göre Piliç Eti Dış Ticareti', urunler: ['Piliç Eti'] },
         },
       },
       {
-        path: 'ekonomik-gostergeler', label: 'Ekonomik Göstergeler ve Maliyet Unsurları', template: 'stat-tiles',
+        path: 'yumurta-uretim', label: 'Yumurta — Üretim, İhracat ve Yeterlilik', template: 'yearly',
         config: {
-          title: 'EKONOMİK GÖSTERGELER VE MALİYET UNSURLARI', endpoint: 'kanatli/maliyet-fiyat', dateField: 'tarih',
-          tiles: [
-            { field: 'maliyet_tl_kg', label: 'Üretim Maliyeti', unit: 'TL/Kg' },
-            { field: 'uretici_fiyati_tl_kg', label: 'Üretici Fiyatı', unit: 'TL/Kg' },
-            { field: 'yem_fiyati_tl_kg', label: 'Etlik Piliç Yemi', unit: 'TL/Kg' },
-            { field: 'yem_paritesi', label: 'Piliç/Yem Paritesi' },
-          ],
-        },
-      },
-      {
-        path: 'fiyat-maliyet-durumu', label: 'Fiyat ve Maliyet Durumu', template: 'yearly',
-        config: {
-          title: 'PİLİÇ ETİ FİYAT VE MALİYET DURUMU', endpoint: 'kanatli/maliyet-fiyat', xField: 'tarih', xFormat: 'yearMonth',
-          series: [
-            { key: 'maliyet_tl_kg', label: 'Maliyet (TL/Kg)', type: 'bar' },
-            { key: 'uretici_fiyati_tl_kg', label: 'Üretici Fiyatı (TL/Kg)', type: 'line' },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    label: 'Sofralık Yumurta Sektörü',
-    path: 'yumurta',
-    pages: [
-      {
-        path: 'uretim-yeterlilik', label: 'Üretim, İhracat ve Yeterlilik Düzeyi', template: 'yearly',
-        config: {
-          title: 'SOFRALIK YUMURTA SEKTÖRÜ', endpoint: 'yumurta/maliyet-fiyat', xField: 'tarih', aggregateYearly: true,
-          series: [{ key: 'toplam_ihracat_miktari_bin_adet', label: 'Toplam İhracat (Bin Adet)', type: 'bar' }],
-          kpiField: 'toplam_ihracat_miktari_bin_adet', kpiLabel: 'Toplam Yumurta İhracatı', kpiUnit: 'Bin Adet',
+          title: 'SOFRALIK YUMURTA SEKTÖRÜ', endpoint: 'kanatli/uretimleri', xField: 'tarih', aggregateYearly: true,
+          series: [{ key: 'tavuk_yumurtasi_bin_adet', label: 'Tavuk Yumurtası Üretimi (Bin Adet)', type: 'bar' }],
+          kpiField: 'tavuk_yumurtasi_bin_adet', kpiLabel: 'Yumurta Üretimi', kpiUnit: 'Bin Adet',
           gauge: { endpoint: 'tr/yeterlilikler', field: 'yumurta_milyon_adet', label: 'Yeterlilik Oranı' },
-          tradeSection: { title: 'Yumurta Dış Ticareti', urunler: ['Sofralik Tavuk Yumurtası (1000 Adet)', 'Kuluçkalık Tavuk Yumurtası (Adet)'] },
-        },
-      },
-      {
-        path: 'ekonomik-gostergeler', label: 'Ekonomik Göstergeler ve Maliyet Unsurları', template: 'stat-tiles',
-        config: {
-          title: 'EKONOMİK GÖSTERGELER VE MALİYET UNSURLARI', endpoint: 'yumurta/maliyet-fiyat', dateField: 'tarih',
-          tiles: [
-            { field: 'maliyet_tl_kg', label: 'Üretim Maliyeti', unit: 'TL/Kg' },
-            { field: 'uretici_fiyati_tl_kg', label: 'Üretici Fiyatı', unit: 'TL/Kg' },
-            { field: 'yem_paritesi', label: 'Yumurta/Yem Paritesi' },
-            { field: 'karlilik', label: 'Karlılık' },
-          ],
-        },
-      },
-      {
-        path: 'fiyat-maliyet-durumu', label: 'Fiyat ve Maliyet Durumu', template: 'yearly',
-        config: {
-          title: 'YUMURTA FİYAT VE MALİYET DURUMU', endpoint: 'yumurta/maliyet-fiyat', xField: 'tarih', xFormat: 'yearMonth',
-          series: [
-            { key: 'maliyet_tl_kg', label: 'Maliyet (TL/Kg)', type: 'bar' },
-            { key: 'uretici_fiyati_tl_kg', label: 'Üretici Fiyatı (TL/Kg)', type: 'line' },
-          ],
+          tradeSection: { title: 'Yıllara Göre Yumurta Dış Ticareti', urunler: ['Sofralik Tavuk Yumurtası (1000 Adet)', 'Kuluçkalık Tavuk Yumurtası (Adet)'] },
         },
       },
     ],

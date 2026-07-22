@@ -18,6 +18,9 @@ export type SeriesConfig = {
    *  whose scales differ by orders of magnitude (e.g. toplam vs. tarım GSYH, or
    *  ihracat adedi vs. birim fiyat) so neither gets flattened. */
   axis?: 'left' | 'right';
+  /** Bars sharing a stack id stack on top of each other (e.g. büyükbaş +
+   *  küçükbaş süt → total production composition) instead of standing apart. */
+  stack?: string;
 };
 
 export function YearlyChart({
@@ -117,7 +120,7 @@ export function YearlyChart({
                 activeDot={{ r: 4 }}
               />
             ) : (
-              <Bar key={s.key} yAxisId={s.axis ?? 'left'} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
+              <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
             )
           )}
         </ComposedChart>
