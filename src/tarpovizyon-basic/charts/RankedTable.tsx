@@ -13,18 +13,26 @@ export function RankedTable({
   nameLabel = 'Ülke',
   valueLabel = 'Değer',
   secondaryLabel,
+  sort = true,
+  rankColumn = true,
 }: {
   items: RankedTableItem[];
   nameLabel?: string;
   valueLabel?: string;
   /** When set, renders a second numeric column (e.g. quantity alongside value). */
   secondaryLabel?: string;
+  /** false keeps the given order (e.g. a chronological year table) instead of ranking by value. */
+  sort?: boolean;
+  /** false hides the "#" rank column (a year table isn't a ranking). */
+  rankColumn?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const sorted = [...items].filter((i) => Number.isFinite(i.value)).sort((a, b) => b.value - a.value);
-  const collapsible = sorted.length > PREVIEW_COUNT;
-  const shown = collapsible && !expanded ? sorted.slice(0, PREVIEW_COUNT) : sorted;
+  const ordered = sort
+    ? [...items].filter((i) => Number.isFinite(i.value)).sort((a, b) => b.value - a.value)
+    : items.filter((i) => Number.isFinite(i.value));
+  const collapsible = ordered.length > PREVIEW_COUNT;
+  const shown = collapsible && !expanded ? ordered.slice(0, PREVIEW_COUNT) : ordered;
 
   return (
     <div>
@@ -32,7 +40,7 @@ export function RankedTable({
         <table className="tvb-table">
           <thead>
             <tr>
-              <th>#</th>
+              {rankColumn && <th>#</th>}
               <th>{nameLabel}</th>
               {secondaryLabel && <th>{secondaryLabel}</th>}
               <th>{valueLabel}</th>
@@ -41,7 +49,7 @@ export function RankedTable({
           <tbody>
             {shown.map((item, i) => (
               <tr key={`${item.name}-${i}`}>
-                <td>{i + 1}</td>
+                {rankColumn && <td>{i + 1}</td>}
                 <td>{item.name}</td>
                 {secondaryLabel && <td>{Number.isFinite(item.secondary) ? numberFmt.format(item.secondary as number) : '—'}</td>}
                 <td>{numberFmt.format(item.value)}</td>
@@ -52,7 +60,7 @@ export function RankedTable({
       </div>
       {collapsible && (
         <button type="button" className="tvb-show-more-toggle" onClick={() => setExpanded((v) => !v)}>
-          {expanded ? 'Daha az göster' : `Tümünü göster (+${sorted.length - PREVIEW_COUNT})`}
+          {expanded ? 'Daha az göster' : `Tümünü göster (+${ordered.length - PREVIEW_COUNT})`}
         </button>
       )}
     </div>

@@ -77,6 +77,17 @@ export function TradeTrendSection({ title, urunler, modul = 'hayvansal' }: { tit
               { key: 'ithalat_deger', label: 'İthalat ($)', type: 'bar' },
             ]}
           />
+
+          <div style={{ marginTop: 16 }}>
+            <RankedTable
+              items={[...rows].reverse().map((r) => ({ name: String(r.yil), value: r.ihracat_deger, secondary: r.ithalat_deger }))}
+              nameLabel="Yıl"
+              valueLabel="İhracat ($)"
+              secondaryLabel="İthalat ($)"
+              sort={false}
+              rankColumn={false}
+            />
+          </div>
         </>
       )}
 

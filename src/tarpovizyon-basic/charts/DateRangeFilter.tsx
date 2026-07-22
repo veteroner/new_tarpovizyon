@@ -5,15 +5,24 @@ import { useState } from 'react';
  *  30 Nis 2026"), which our charts previously always rendered at full range
  *  with no way to narrow it. Filters by year (not exact month/day) since
  *  that's the granularity `yıl`/xField data actually carries here. */
-export function useYearRangeFilter<T>(rows: T[], getYear: (row: T) => number | null) {
+export function useYearRangeFilter<T>(
+  rows: T[],
+  getYear: (row: T) => number | null,
+  opts?: { defaultFrom?: number | null; defaultTo?: number | null },
+) {
   const years = rows.map(getYear).filter((y): y is number => y !== null && Number.isFinite(y));
   const minYear = years.length ? Math.min(...years) : null;
   const maxYear = years.length ? Math.max(...years) : null;
 
   const [from, setFrom] = useState<number | null>(null);
   const [to, setTo] = useState<number | null>(null);
-  const activeFrom = from ?? minYear;
-  const activeTo = to ?? maxYear;
+  // A caller-supplied defaultFrom (e.g. the year the Turkish indices start, so
+  // FAO's 1991 tail doesn't stretch a comparison chart) seeds the initial range
+  // but is clamped to the data and still fully overridable by the user.
+  const seededFrom = from ?? (opts?.defaultFrom != null && minYear != null ? Math.max(opts.defaultFrom, minYear) : null);
+  const seededTo = to ?? (opts?.defaultTo != null && maxYear != null ? Math.min(opts.defaultTo, maxYear) : null);
+  const activeFrom = seededFrom ?? minYear;
+  const activeTo = seededTo ?? maxYear;
 
   const filtered = rows.filter((r) => {
     const y = getYear(r);
