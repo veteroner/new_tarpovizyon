@@ -172,6 +172,7 @@ const HAYVANSAL_SECTIONS: Section[] = [
             { field: 'tereyagi_ton', label: 'Tereyağı Üretimi', unit: 'Ton' },
             { field: 'kaymak_ton', label: 'Kaymak Üretimi', unit: 'Ton' },
           ],
+          comparison: { field: 'inek_sutu_ton', label: 'Sanayiye Giden İnek Sütü', unit: 'Ton' },
         },
       },
       {

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { KpiCard, formatNumber } from '../charts/KpiCard';
 import { YearlyChart } from './YearlyChart';
 import { RankedTable } from './RankedTable';
+import { useYearRangeFilter } from './DateRangeFilter';
 
 type TradeRow = { yil: number; ihracat_deger: number; ithalat_deger: number; ihracat_miktar?: number; ithalat_miktar?: number };
 type ProductRow = { ana_urun: string; ihracat_deger: number; ithalat_deger: number; ihracat_miktar?: number; ithalat_miktar?: number; miktar_birim?: string };
@@ -51,6 +52,14 @@ export function TradeTrendSection({ title, urunler, modul = 'hayvansal' }: { tit
   const pctChange = (curr?: number, prior?: number) =>
     curr !== undefined && prior !== undefined && prior !== 0 ? ((curr - prior) / prior) * 100 : null;
 
+  // Unit price ($/birim) — only meaningful when the group shares one unit.
+  const enriched = rows.map((r) => ({
+    ...r,
+    ihracat_birim_fiyat: unit && r.ihracat_miktar ? r.ihracat_deger / r.ihracat_miktar : null,
+  }));
+  // Year filter so a 25-year span doesn't crush the bars into hairlines.
+  const { filtered: filteredRows, control: yearControl } = useYearRangeFilter(enriched, (r) => Number(r.yil));
+
   return (
     <div className="tvb-section">
       <h3>{title}</h3>
@@ -69,8 +78,10 @@ export function TradeTrendSection({ title, urunler, modul = 'hayvansal' }: { tit
             )}
           </div>
 
+          {yearControl}
+
           <YearlyChart
-            data={rows as unknown as Record<string, number | string>[]}
+            data={filteredRows as unknown as Record<string, number | string>[]}
             xKey="yil"
             series={[
               { key: 'ihracat_deger', label: 'İhracat ($)', type: 'bar' },
@@ -78,9 +89,25 @@ export function TradeTrendSection({ title, urunler, modul = 'hayvansal' }: { tit
             ]}
           />
 
+          {/* İhracat miktarı (sol) + birim fiyat (sağ) — yalnızca tek birimli
+              gruplarda; ör. piliç eti için adet/kg başına $ değeri. */}
+          {unit && filteredRows.some((r) => r.ihracat_birim_fiyat !== null) && (
+            <div style={{ marginTop: 20 }}>
+              <h3>Yıllara Göre İhracat Miktarı ve Birim Fiyatı</h3>
+              <YearlyChart
+                data={filteredRows as unknown as Record<string, number | string>[]}
+                xKey="yil"
+                series={[
+                  { key: 'ihracat_miktar', label: `İhracat Miktarı (${unit})`, type: 'bar' },
+                  { key: 'ihracat_birim_fiyat', label: 'Birim Fiyat ($/' + unit + ')', type: 'line', axis: 'right' },
+                ]}
+              />
+            </div>
+          )}
+
           <div style={{ marginTop: 16 }}>
             <RankedTable
-              items={[...rows].reverse().map((r) => ({ name: String(r.yil), value: r.ihracat_deger, secondary: r.ithalat_deger }))}
+              items={[...filteredRows].reverse().map((r) => ({ name: String(r.yil), value: r.ihracat_deger, secondary: r.ithalat_deger }))}
               nameLabel="Yıl"
               valueLabel="İhracat ($)"
               secondaryLabel="İthalat ($)"
