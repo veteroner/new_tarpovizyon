@@ -179,4 +179,3 @@ export default async (req) => {
   return json({ success: true, reply: answer, model: 'Tarpol AI' })
 }
 
-export const config = { path: '/api/ai-chat' }
