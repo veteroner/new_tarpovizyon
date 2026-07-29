@@ -38,14 +38,19 @@ const MODELS = [
   // ── Katman 2: ölçülen EN İYİ KALİTE. Gemini flash'lar Türkçe agronomide
   // belirgin biçimde daha doğru; gpt-oss-120b hızlı ama halüsinasyon yaptı
   // ("Buğday (Kırmızı Çeltik)" gibi), o yüzden kaliteliler önce gelir.
-  { p: 'gemini', id: 'gemini-3.6-flash', tokens: 4096, ms: 12000, think: 'low' },
-  { p: 'gemini', id: 'gemini-3.5-flash', tokens: 4096, ms: 6000, think: 'low' },
-  { p: 'gemini', id: 'gemini-2.5-flash', tokens: 4096, ms: 8000 },
+  { p: 'gemini', id: 'gemini-3.6-flash', tokens: 4096, ms: 8000, think: 'low' },
 
-  // ── Katman 3: hızlı ve güvenilir fallback'ler ──
-  { p: 'groq', id: 'openai/gpt-oss-120b', tokens: 4096, ms: 5000 },
+  // ── Katman 3: GÜVENİLİR YAKALAYICI. 3.6-flash yavaşlarsa (canlıda 12 sn'yi
+  // aşabiliyor) zincir buraya düşer: ~2 sn'de, kaliteli Türkçe yanıt. Bu model
+  // yukarıda olmasaydı bütçe tükenip son çare 8B modele kalıyordu (20.8 sn +
+  // zayıf cevap). Ölçümle doğrulandı.
   { p: 'gemini', id: 'gemini-3.1-flash-lite', tokens: 4096, ms: 4000 },
-  { p: 'groq', id: 'qwen/qwen3.6-27b', tokens: 4096, ms: 4000 },
+  { p: 'groq', id: 'openai/gpt-oss-120b', tokens: 4096, ms: 4000 },
+
+  // ── Katman 4: yoğunluk/kota durumuna göre devreye girenler ──
+  { p: 'gemini', id: 'gemini-3.5-flash', tokens: 4096, ms: 3000, think: 'low' },
+  { p: 'gemini', id: 'gemini-2.5-flash', tokens: 4096, ms: 4000 },
+  { p: 'groq', id: 'qwen/qwen3.6-27b', tokens: 4096, ms: 3500 },
   { p: 'groq', id: 'llama-3.3-70b-versatile', tokens: 4096, ms: 3000 },
 
   // ── Katman 4: en basit ──
@@ -61,10 +66,10 @@ const LAST_RESORT = { p: 'groq', id: 'llama-3.1-8b-instant', tokens: 4096, ms: 4
 // sorunsuz kabul etti, yani eski 10 sn varsayımı yanlıştı ve gereksiz 502'lere
 // yol açıyordu. 22 sn, gerçek limitin altında kalırken uzun/kaliteli yanıtlara
 // yer bırakıyor.
-const TOTAL_BUDGET_MS = 22000
+const TOTAL_BUDGET_MS = 16000
 // Zincir sonundaki hızlı denemeler için saklanan süre; tek bir yavaş model
 // bütçeyi tüketip kullanıcıyı cevapsız bırakamasın.
-const TAIL_RESERVE_MS = 3500
+const TAIL_RESERVE_MS = 3000
 // Bir modele bundan az süre kalıyorsa denemeye değmez — atla, sırayı koru.
 const MIN_VIABLE_MS = 1500
 
