@@ -62,7 +62,48 @@ const ROUTES = {
   'il-duzeyinde/havza-ilce': { table: 'havza_ilce', filters: ['havza', 'il'], order: 'havza ASC, il ASC, ilce ASC', maxLimit: 1500 },
   'il-duzeyinde/havza-urun-deseni': { table: 'havza_urun_deseni', filters: ['havza', 'il', 'ilce'], order: 'havza ASC, il ASC, ilce ASC', maxLimit: 6000 },
   'il-duzeyinde/cografi-isaret': { table: 'il_cografi_isaret', filters: ['il'], order: 'il ASC, cografi_isaret_adi ASC', maxLimit: 2000 },
+
+  // ─── TarpoVizyon ana modülü: MySQL'den taşınan TÜİK tabloları ──────────────
+  // Bunlar `tuik_*` adlarını koruyor; MySQL şemasının birebir kopyası olduğu
+  // için sayfa sorguları yeniden yazılırken alan adları değişmiyor.
+  'tuik/bitkisel-uretim': { table: 'tuik_bitkisel_uretim', filters: ['duzeykod', 'yerkod', 'ili', 'urun', 'urunkod', 'urun_grup', 'ugkod', 'unsur', 'duzey'], order: 'urun ASC', maxLimit: 10000 },
+  'tuik/urundenge': { table: 'tuik_urundenge', filters: ['urun'], order: 'urun ASC', maxLimit: 2000 },
+  'tuik/fiyatendex': { table: 'tuik_fiyatendex', filters: ['endeks', 'maddekod', 'urun', 'yil', 'alan', 'd1', 'd2', 'd3', 'd4'], order: 'yil ASC', maxLimit: 10000 },
+  'tuik/gsyh-a21': { table: 'tuik_gsyh_a21', filters: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], order: 'yil ASC', maxLimit: 10000 },
+  'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', filters: ['yil', 'yer', 'yerkod', 'duzey'], order: 'yil ASC', maxLimit: 5000 },
+  'tuik/hayvancilik-canlihayvan': { table: 'tuik_hayvancilik_canlihayvan', filters: ['duzeykod', 'yerkod', 'il', 'ilkod', 'hayvankod', 'grup', 'kategori', 'tip'], order: 'id ASC', maxLimit: 10000 },
+  'tuik/hayvancilik-hayvansaluretim': { table: 'tuik_hayvancilik_hayvansaluretim', filters: [], order: 'id ASC', maxLimit: 10000 },
+  'tuik/hayvancilik-kumeshayvanciligi': { table: 'tuik_hayvancilik_kumeshayvanciligi', filters: [], order: 'id ASC', maxLimit: 2000 },
+  'tuik/sutvesuturunleri': { table: 'tuik_hayavancilik_sutvesuturunleri', filters: [], order: 'id ASC', maxLimit: 2000 },
+  'tuik/ticaret-bitkisel': { table: 'tuik_ticaret_bitkisel', filters: ['yil', 'ay', 'ana_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'alt_urun'], order: 'yil DESC', maxLimit: 5000 },
+  'tuik/ticaret-hayvansal': { table: 'tuik_ticaret_hayvansal', filters: ['yil', 'ay', 'ana_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'alt_urun'], order: 'yil DESC', maxLimit: 5000 },
+
+  // Havza / coğrafi işaret ham tabloları (MySQL'deki hâlleriyle)
+  'tuik/havza': { table: 'havza', filters: [], order: 'id ASC', maxLimit: 2000 },
+  'tuik/havzalist': { table: 'havzalist', filters: [], order: 'id ASC', maxLimit: 2000 },
+
+  // ─── Dünya / FAO verileri (DUNYA veritabanı) ───────────────────────────────
+  'fao/uretim-bitkisel-birincil': { db: 'DUNYA', table: 'fao_uretim_bitkisel_birincil', filters: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], order: 'year ASC', maxLimit: 10000 },
+  'fao/uretim-bitkisel-islenmis': { db: 'DUNYA', table: 'fao_uretim_bitkisel_islenmis', filters: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], order: 'year ASC', maxLimit: 10000 },
+  'fao/uretim-hayvansal-birincil': { db: 'DUNYA', table: 'fao_uretim_hayvansal_birincil', filters: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], order: 'year ASC', maxLimit: 10000 },
+  'fao/uretim-hayvansal-islenmis': { db: 'DUNYA', table: 'fao_uretim_hayvansal_islenmis', filters: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], order: 'year ASC', maxLimit: 10000 },
+  'fao/uretim-hayvansal-canlihayvan': { db: 'DUNYA', table: 'fao_uretim_hayvansal_canlihayvan', filters: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], order: 'year ASC', maxLimit: 10000 },
+  'fao/livestock-primary': { db: 'DUNYA', table: 'fao_livestock_primary', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/balans': { db: 'DUNYA', table: 'fao_balans', filters: ['ulke', 'ulkead', 'urun', 'urunad', 'yil'], order: 'yil ASC', maxLimit: 10000 },
+  'fao/land-use': { db: 'DUNYA', table: 'fao_land_use', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/land-cover': { db: 'DUNYA', table: 'fao_land_cover', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/input-gubre-ticari': { db: 'DUNYA', table: 'fao_input_gubre_ticari', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/input-pestisit-use': { db: 'DUNYA', table: 'fao_input_pestisit_use', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/nufus': { db: 'DUNYA', table: 'fao_nufus', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/nufus-istihdam-tarim': { db: 'DUNYA', table: 'fao_nufus_istihdam_tarim', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/me-indicator': { db: 'DUNYA', table: 'fao_ME_indicator', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  'fao/tahmin-sonuclari': { db: 'DUNYA', table: 'fao_tahmin_sonuclari', filters: [], order: 'rowid ASC', maxLimit: 10000 },
 };
+
+/** Bir rotanın hangi D1 bağlantısını kullanacağını çözer (varsayılan: DB). */
+function dbFor(env, route) {
+  return route.db === 'DUNYA' ? env.DUNYA : env.DB;
+}
 
 // Trade tables keyed by module prefix, used by the generic yillik-trend / urun-ozet
 // aggregate endpoints below (dış ticaret ürün karşılaştırma bölümleri için).
@@ -265,7 +306,7 @@ export default {
     const sql = `SELECT * FROM ${route.table} ${whereSql} ORDER BY ${route.order} LIMIT ? OFFSET ?`;
 
     try {
-      const stmt = env.DB.prepare(sql).bind(...params, limit, offset);
+      const stmt = dbFor(env, route).prepare(sql).bind(...params, limit, offset);
       const { results } = await stmt.all();
       return json({ data: results, count: results.length });
     } catch (err) {

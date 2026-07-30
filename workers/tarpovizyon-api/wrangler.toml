@@ -2,7 +2,15 @@ name = "tarpovizyon-api"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
 
+# Türkiye verileri (TÜİK, sektör tabloları, il düzeyi)
 [[d1_databases]]
 binding = "DB"
 database_name = "tarpovizyon-basic"
 database_id = "86c5e73d-ad8a-45ec-b4e9-1c9c2b890709"
+
+# Dünya/FAO referans verileri — ayrı veritabanı: FAO seti ~450MB, aynı
+# veritabanına konsa Türkiye verisiyle birlikte tek DB limitini zorlar.
+[[d1_databases]]
+binding = "DUNYA"
+database_name = "tarpovizyon-dunya"
+database_id = "e022515c-86ea-4f18-808a-0ea9ca3c79b3"
