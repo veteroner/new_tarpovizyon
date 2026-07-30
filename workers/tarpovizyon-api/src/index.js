@@ -196,6 +196,16 @@ const EXCLUDE_PRESETS = {
 
 const qi = (n) => `"${n}"`;
 
+// MySQL'in varsayılan collation'ı (utf8_general_ci) büyük/küçük harf DUYARSIZ,
+// SQLite ise duyarlı. Kaynak veride aynı etiket iki yazımla bulunabiliyor
+// (ör. fao_input_gubre_ticari'de 'İthalat Miktarı' 66.171 satır ve
+// 'İthalat miktarı' 3.126 satır — 2023 verisinin tamamı küçük harfli).
+// Eski sorgular ikisini de yakalıyordu; aynı davranışı korumak için metin
+// karşılaştırmalarına COLLATE NOCASE ekleniyor. Sayısal değerlerde eklenmiyor,
+// çünkü orada karşılaştırmayı metne çevirip sonucu bozardı.
+const isNumericValue = (v) => v !== '' && Number.isFinite(Number(v));
+const coll = (v) => (isNumericValue(v) ? '' : ' COLLATE NOCASE');
+
 /**
  * İstemcinin yapılandırılmış parametrelerinden SQL kurar. Her tanımlayıcı
  * cfg.dims / cfg.nums içinde olup olmadığına göre doğrulanır; olmayan bir ad
@@ -239,7 +249,9 @@ function buildAgg(cfg, sp) {
       if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
       const list = v.split('|').map((x) => x.trim()).filter(Boolean);
       if (!list.length) continue;
-      where.push(`${qi(col)} IN (${list.map(() => '?').join(',')})`);
+      // Liste tamamen sayısalsa NOCASE gereksiz; değilse MySQL davranışı için eklenir.
+      const nocase = list.every(isNumericValue) ? '' : ' COLLATE NOCASE';
+      where.push(`${qi(col)}${nocase} IN (${list.map(() => '?').join(',')})`);
       params.push(...list);
       continue;
     }
@@ -247,7 +259,7 @@ function buildAgg(cfg, sp) {
     if (!prefix) continue;
     const col = k.slice(prefix.length);
     if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
-    where.push(`${qi(col)} ${OPS[prefix]} ?`); params.push(v);
+    where.push(`${qi(col)}${coll(v)} ${OPS[prefix]} ?`); params.push(v);
   }
   // positive=<sütun>: MySQL sorgularındaki "CAST(x) > 0" koşulunun karşılığı.
   for (const c of pick('positive', cfg.nums)) where.push(`CAST(${qi(c)} AS REAL) > 0`);
@@ -258,7 +270,7 @@ function buildAgg(cfg, sp) {
     const list = EXCLUDE_PRESETS[preset];
     if (!list) throw new Error(`bilinmeyen exclude preset: ${preset}`);
     if (!cfg.dims.includes(col)) throw new Error(`izin verilmeyen exclude sütunu: ${col}`);
-    where.push(`${qi(col)} NOT IN (${list.map(() => '?').join(',')})`);
+    where.push(`${qi(col)} COLLATE NOCASE NOT IN (${list.map(() => '?').join(',')})`);
     params.push(...list);
   }
 

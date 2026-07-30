@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, calculateHHI, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS
+  analyzeTrend
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
 import type { Insight } from '../../components/InsightCard';
@@ -12,6 +12,15 @@ import type { Insight } from '../../components/InsightCard';
 export type Tab = 'overview' | 'trade' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
 export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
+
+// D1 toplama rotası — sayfanın tüm sorguları tek tabloya dayanıyor.
+const R = 'fao/input-gubre-ticari';
+const EX = { preset: 'v1' as const, col: 'area' };
+const ITHALAT = 'İthalat Miktarı';
+const IHRACAT = 'İhracat Miktarı';
+const DEGER_ELEMENTLERI = [ITHALAT, IHRACAT, 'İthalat Değeri', 'İhracat Değeri'];
+// area alanında Türkiye TEK bir değerle geçiyor; eski OR zincirine gerek yok.
+const TR = 'Türkiye';
 
 export const FERTILIZER_ITEMS = [
   'Üre', 'Diamonyum fosfat (DAP)', 'NPK gübreleri', 'Amonyum nitrat (AN)',
@@ -69,36 +78,35 @@ export function useFertilizerData(activeTab: Tab) {
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [byTypeRes, topImportersRes, topExportersRes, trendRes, prevYearRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) GROUP BY item_tr ORDER BY total DESC`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND element_tr='İhracat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 10`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2022' AND element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS}`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2023, element_tr: ITHALAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2023, element_tr: ITHALAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2023, element_tr: IHRACAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 10 }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: ITHALAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: ['value'], where: { year: 2022, element_tr: ITHALAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, exclude: EX }),
       ]);
 
-      const byType = (byTypeRes.data || []).map((r: any, i: number) => ({
-        name: String(r.item_tr), value: Number(r.total) || 0, fill: CHART_COLORS[i % CHART_COLORS.length],
+      const byType = byTypeRes.map((r: any, i: number) => ({
+        name: String(r.item_tr), value: num(r.sum_value), fill: CHART_COLORS[i % CHART_COLORS.length],
       }));
       setOverviewByType(byType);
 
-      const topCountries = (topImportersRes.data || []).map((r: any, i: number) => {
+      const topCountries = topImportersRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey') || name.includes('Turkiye');
-        return { name: translateCountry(name), value: Number(r.total) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+        return { name: translateCountry(name), value: num(r.sum_value), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setOverviewTopCountries(topCountries);
 
       const worldTotal = byType.reduce((s: number, b: any) => s + b.value, 0);
-      const prevTotal = Number(prevYearRes.data?.[0]?.total) || 0;
+      const prevTotal = num(prevYearRes[0]?.sum_value);
       const yoy = calculateYoY(worldTotal, prevTotal);
       const turkeyData = topCountries.find((c: any) => c.isTurkey);
       const turkeyRank = topCountries.findIndex((c: any) => c.isTurkey) + 1;
-      const trendData = (trendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const trendData = trendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
       setOverviewTrend(trendData);
       const worldCAGR = calculateCAGR(trendData as YearValue[]);
-      const topExporter = (topExportersRes.data || [])[0];
+      const topExporter = topExportersRes[0];
 
       setOverviewKPIs({
         worldTotal, yoy, turkeyImport: turkeyData?.value || 0, turkeyRank: turkeyRank || 'N/A',
@@ -120,18 +128,17 @@ export function useFertilizerData(activeTab: Tab) {
   const loadTrade = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [tradeByTypeRes, turkeyTradeRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, element_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('İthalat Miktarı','İhracat Miktarı') AND item_tr IN (${itemList}) GROUP BY item_tr, element_tr`),
-        fetchQuery(`SELECT year, element_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('İthalat Miktarı','İhracat Miktarı') AND item_tr IN (${itemList}) AND CAST(year AS SIGNED) >= 2000 GROUP BY year, element_tr ORDER BY year`),
+        fetchAgg(R, { groupBy: ['item_tr', 'element_tr'], sum: ['value'], where: { year: 2023, area: TR }, whereIn: { element_tr: [ITHALAT, IHRACAT], item_tr: FERTILIZER_ITEMS } }),
+        fetchAgg(R, { groupBy: ['year', 'element_tr'], sum: ['value'], where: { area: TR }, whereIn: { element_tr: [ITHALAT, IHRACAT], item_tr: FERTILIZER_ITEMS }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
       ]);
 
       const tradeByType: Record<string, { imp: number; exp: number }> = {};
-      (tradeByTypeRes.data || []).forEach((r: any) => {
+      tradeByTypeRes.forEach((r: any) => {
         const item = String(r.item_tr);
         if (!tradeByType[item]) tradeByType[item] = { imp: 0, exp: 0 };
-        if (String(r.element_tr).includes('thalat')) tradeByType[item].imp = Number(r.total) || 0;
-        else tradeByType[item].exp = Number(r.total) || 0;
+        if (String(r.element_tr).includes('thalat')) tradeByType[item].imp = num(r.sum_value);
+        else tradeByType[item].exp = num(r.sum_value);
       });
       const balanceData = Object.entries(tradeByType).map(([name, vals]) => ({
         name, import: vals.imp, export: vals.exp, balance: vals.imp - vals.exp,
@@ -140,11 +147,11 @@ export function useFertilizerData(activeTab: Tab) {
       setTradeBalance(balanceData);
 
       const timeByYear: Record<string, { imp: number; exp: number }> = {};
-      (turkeyTradeRes.data || []).forEach((r: any) => {
+      turkeyTradeRes.forEach((r: any) => {
         const yr = String(r.year);
         if (!timeByYear[yr]) timeByYear[yr] = { imp: 0, exp: 0 };
-        if (String(r.element_tr).includes('thalat')) timeByYear[yr].imp = Number(r.total) || 0;
-        else timeByYear[yr].exp = Number(r.total) || 0;
+        if (String(r.element_tr).includes('thalat')) timeByYear[yr].imp = num(r.sum_value);
+        else timeByYear[yr].exp = num(r.sum_value);
       });
       const timeSeries = Object.entries(timeByYear).sort(([a], [b]) => a.localeCompare(b)).map(([year, vals]) => ({
         year, import: vals.imp, export: vals.exp, balance: vals.imp - vals.exp,
@@ -167,14 +174,13 @@ export function useFertilizerData(activeTab: Tab) {
   const loadConcentration = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [countryShareRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND element_tr='İhracat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY area ORDER BY total DESC LIMIT 50`),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2023, element_tr: IHRACAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, positive: ['value'], exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 50 }),
       ]);
-      const data = (countryShareRes.data || []).map((r: any, i: number) => {
+      const data = countryShareRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey');
-        return { rank: i + 1, country: translateCountry(name), rawName: name, value: Number(r.total) || 0, isTurkey };
+        return { rank: i + 1, country: translateCountry(name), rawName: name, value: num(r.sum_value), isTurkey };
       });
       setConcData(data);
       const shares = data.map((c: any) => c.value);
@@ -195,20 +201,19 @@ export function useFertilizerData(activeTab: Tab) {
   const loadTurkeyProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [turkeyByTypeRes, turkeyTrendRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, element_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_input_gubre_ticari WHERE year='2023' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('İthalat Miktarı','İhracat Miktarı','İthalat Değeri','İhracat Değeri') AND item_tr IN (${itemList})`),
-        fetchQuery(`SELECT year, SUM(CASE WHEN element_tr='İthalat Miktarı' THEN CAST(value AS DECIMAL(20,2)) ELSE 0 END) as imp, SUM(CASE WHEN element_tr='İhracat Miktarı' THEN CAST(value AS DECIMAL(20,2)) ELSE 0 END) as exp FROM fao_input_gubre_ticari WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND item_tr IN (${itemList}) AND CAST(year AS SIGNED) >= 2000 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT element_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_input_gubre_ticari WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr IN ('İthalat Miktarı','İhracat Miktarı') AND item_tr IN (${itemList}) AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY element_tr`),
+        fetchAgg(R, { groupBy: ['item_tr', 'element_tr'], sum: ['value'], where: { year: 2023, area: TR }, whereIn: { element_tr: DEGER_ELEMENTLERI, item_tr: FERTILIZER_ITEMS } }),
+        fetchAgg(R, { groupBy: ['year', 'element_tr'], sum: ['value'], where: { area: TR }, whereIn: { item_tr: FERTILIZER_ITEMS }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['element_tr'], avg: ['value'], where: { year: 2023 }, whereIn: { element_tr: [ITHALAT, IHRACAT], item_tr: FERTILIZER_ITEMS }, positive: ['value'], exclude: EX }),
       ]);
       const turkeyData: Record<string, Record<string, number>> = {};
-      (turkeyByTypeRes.data || []).forEach((r: any) => {
+      turkeyByTypeRes.forEach((r: any) => {
         const item = String(r.item_tr); const elem = String(r.element_tr);
         if (!turkeyData[item]) turkeyData[item] = {};
-        turkeyData[item][elem] = Number(r.val) || 0;
+        turkeyData[item][elem] = num(r.sum_value);
       });
       const worldAvgs: Record<string, number> = {};
-      (worldAvgRes.data || []).forEach((r: any) => { worldAvgs[String(r.element_tr)] = Number(r.avg_val) || 0; });
+      worldAvgRes.forEach((r: any) => { worldAvgs[String(r.element_tr)] = num(r.avg_value); });
       let totalImp = 0, totalExp = 0, totalImpVal = 0, totalExpVal = 0;
       const byProduct = Object.entries(turkeyData).map(([name, vals]) => {
         const imp = vals['İthalat Miktarı'] || 0; const exp = vals['İhracat Miktarı'] || 0;
@@ -216,7 +221,16 @@ export function useFertilizerData(activeTab: Tab) {
         totalImp += imp; totalExp += exp; totalImpVal += impVal; totalExpVal += expVal;
         return { name, import: imp, export: exp, importValue: impVal, exportValue: expVal, balance: imp - exp };
       }).sort((a, b) => b.import - a.import);
-      const trendData = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), import: Number(r.imp) || 0, export: Number(r.exp) || 0 }));
+      // Eski sorgudaki SUM(CASE WHEN element_tr=…) koşullu toplaması burada
+      // yapılıyor: uç yıl × element_tr döndürüyor, ithalat/ihracat pivotlanıyor.
+      const trendByYear: Record<string, { import: number; export: number }> = {};
+      turkeyTrendRes.forEach((r: any) => {
+        const y = String(r.year);
+        if (!trendByYear[y]) trendByYear[y] = { import: 0, export: 0 };
+        if (String(r.element_tr).includes('thalat')) trendByYear[y].import += num(r.sum_value);
+        else if (String(r.element_tr).includes('hracat')) trendByYear[y].export += num(r.sum_value);
+      });
+      const trendData = Object.keys(trendByYear).sort().map((year) => ({ year, ...trendByYear[year] }));
       setTurkeyTrends(trendData);
       const impTrend: YearValue[] = trendData.map(t => ({ year: t.year, value: t.import }));
       const impCAGR = calculateCAGR(impTrend);
@@ -238,13 +252,12 @@ export function useFertilizerData(activeTab: Tab) {
   const loadForecast = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE element_tr='İthalat Miktarı' AND item_tr IN (${itemList}) AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: ITHALAT }, whereIn: { item_tr: FERTILIZER_ITEMS }, whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: ITHALAT, area: TR }, whereIn: { item_tr: FERTILIZER_ITEMS }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
       ]);
-      const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
-      const turkeyData: YearValue[] = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const worldData: YearValue[] = worldTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
+      const turkeyData: YearValue[] = turkeyTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
       const worldForecast = forecastLinear(worldData, 5);
       const turkeyForecast = forecastLinear(turkeyData, 5);
       const worldTrend = analyzeTrend(worldData);
@@ -274,18 +287,17 @@ export function useFertilizerData(activeTab: Tab) {
   const loadAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      const itemList = FERTILIZER_ITEMS.map(i => `'${i}'`).join(',');
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT element_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2023' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('İthalat Miktarı','İhracat Miktarı','İthalat Değeri','İhracat Değeri') AND item_tr IN (${itemList}) GROUP BY element_tr`),
-        fetchQuery(`SELECT element_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_input_gubre_ticari WHERE year='2015' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('İthalat Miktarı','İhracat Miktarı','İthalat Değeri','İhracat Değeri') AND item_tr IN (${itemList}) GROUP BY element_tr`),
-        fetchQuery(`SELECT element_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_input_gubre_ticari WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr IN ('İthalat Miktarı','İhracat Miktarı') AND item_tr IN (${itemList}) AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY element_tr`),
+        fetchAgg(R, { groupBy: ['element_tr'], sum: ['value'], where: { year: 2023, area: TR }, whereIn: { element_tr: DEGER_ELEMENTLERI, item_tr: FERTILIZER_ITEMS } }),
+        fetchAgg(R, { groupBy: ['element_tr'], sum: ['value'], where: { year: 2015, area: TR }, whereIn: { element_tr: DEGER_ELEMENTLERI, item_tr: FERTILIZER_ITEMS } }),
+        fetchAgg(R, { groupBy: ['element_tr'], avg: ['value'], where: { year: 2023 }, whereIn: { element_tr: [ITHALAT, IHRACAT], item_tr: FERTILIZER_ITEMS }, positive: ['value'], exclude: EX }),
       ]);
       const now: Record<string, number> = {};
-      (turkeyNowRes.data || []).forEach((r: any) => now[String(r.element_tr)] = Number(r.total) || 0);
+      turkeyNowRes.forEach((r: any) => now[String(r.element_tr)] = num(r.sum_value));
       const before: Record<string, number> = {};
-      (turkeyBeforeRes.data || []).forEach((r: any) => before[String(r.element_tr)] = Number(r.total) || 0);
+      turkeyBeforeRes.forEach((r: any) => before[String(r.element_tr)] = num(r.sum_value));
       const worldAvg: Record<string, number> = {};
-      (worldAvgRes.data || []).forEach((r: any) => worldAvg[String(r.element_tr)] = Number(r.avg_val) || 0);
+      worldAvgRes.forEach((r: any) => worldAvg[String(r.element_tr)] = num(r.avg_value));
 
       const alerts: IntelligenceAlert[] = [];
       const impNow = now['İthalat Miktarı'] || 0;
