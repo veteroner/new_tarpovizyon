@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import type { Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, calculateHHI, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS
+  analyzeTrend
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
+
+// D1 toplama rotası — bu sayfanın tüm sorguları tek tabloya dayanıyor.
+// Kıta/gelir grubu satırları sunucudaki 'v1' hazır listesiyle dışlanıyor
+// (eski koddaki EXCLUDED_AREAS sabitinin birebir karşılığı).
+const R = 'fao/nufus-istihdam-tarim';
 
 export type Tab = 'overview' | 'gender' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
@@ -69,23 +74,26 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
-      const [countriesRes, trendRes, prevRes] = await Promise.all([
-        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam, SUM(CAST(e.male AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND e.area NOT IN ${EXCLUDED_AREAS} GROUP BY e.area ORDER BY toplam DESC LIMIT 25`),
-        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam, SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim GROUP BY yearcode ORDER BY yearcode`),
-        fetchQuery(`SELECT SUM(CAST(total AS DECIMAL(20,2))) as total FROM fao_nufus_istihdam_tarim WHERE yearcode='2022' AND indicatorcode='21066'`)
+      const [countriesRows, trendRows, prevRows] = await Promise.all([
+        fetchAgg(R, { groupBy: ['area'], sum: ['total', 'male', 'female'],
+          where: { yearcode: 2023, indicatorcode: 21066 }, exclude: { preset: 'v1', col: 'area' },
+          orderBy: 'sum_total', dir: 'desc', limit: 25 }),
+        // Not: bu seride (eski sorguda olduğu gibi) indicatorcode filtresi yok.
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['total', 'male', 'female'], orderBy: 'yearcode', dir: 'asc' }),
+        fetchAgg(R, { sum: ['total'], where: { yearcode: 2022, indicatorcode: 21066 } }),
       ]);
-      const countries = (countriesRes.data || []).map((r: any, i: number) => {
+      const countries = countriesRows.map((r: any, i: number) => {
         const name = translateCountry(String(r.area || ''));
         const isTurkey = name.includes('Türkiye') || name.includes('Turkiye') || name.toLowerCase().includes('turkey');
-        return { name, total: Number(r.toplam) || 0, male: Number(r.erkek) || 0, female: Number(r.kadin) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+        return { name, total: num(r.sum_total), male: num(r.sum_male), female: num(r.sum_female), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setTopCountries(countries);
-      const trend = (trendRes.data || []).map((r: any) => ({ year: String(r.year), total: Number(r.toplam) || 0, male: Number(r.erkek) || 0, female: Number(r.kadin) || 0 }));
+      const trend = trendRows.map((r: any) => ({ year: String(r.yearcode), total: num(r.sum_total), male: num(r.sum_male), female: num(r.sum_female) }));
       setYearlyTrend(trend);
       const worldTotal = countries.reduce((s: number, c: any) => s + c.total, 0);
       const worldMale = countries.reduce((s: number, c: any) => s + c.male, 0);
       const worldFemale = countries.reduce((s: number, c: any) => s + c.female, 0);
-      const prevTotal = Number(prevRes.data?.[0]?.total) || 0;
+      const prevTotal = num(prevRows[0]?.sum_total);
       const yoy = calculateYoY(worldTotal, prevTotal);
       const trendYV: YearValue[] = trend.map(t => ({ year: t.year, value: t.total }));
       const cagr = calculateCAGR(trendYV);
@@ -103,21 +111,24 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadGender = useCallback(async () => {
     setLoading(true);
     try {
-      const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT e.area, SUM(CAST(e.male AS DECIMAL(20,2))) as erkek, SUM(CAST(e.female AS DECIMAL(20,2))) as kadin, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND e.area NOT IN ${EXCLUDED_AREAS} GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT yearcode as year, SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim GROUP BY yearcode ORDER BY yearcode`)
+      const [byCountryRows, trendRows] = await Promise.all([
+        // Eski sorgudaki HAVING toplam > 0 istemcide uygulanıyor (uç HAVING desteklemiyor).
+        fetchAgg(R, { groupBy: ['area'], sum: ['male', 'female', 'total'],
+          where: { yearcode: 2023, indicatorcode: 21066 }, exclude: { preset: 'v1', col: 'area' },
+          orderBy: 'sum_total', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['male', 'female'], orderBy: 'yearcode', dir: 'asc' }),
       ]);
-      const byCountry = (byCountryRes.data || []).map((r: any) => {
-        const m = Number(r.erkek) || 0;
-        const f = Number(r.kadin) || 0;
-        const t = Number(r.toplam) || 0;
+      const byCountry = byCountryRows.filter((r: any) => num(r.sum_total) > 0).slice(0, 20).map((r: any) => {
+        const m = num(r.sum_male);
+        const f = num(r.sum_female);
+        const t = num(r.sum_total);
         return { name: translateCountry(String(r.area || '')), male: m, female: f, total: t, femaleRatio: t > 0 ? (f / t * 100) : 0 };
       });
       setGenderByCountry(byCountry);
-      const trend = (trendRes.data || []).map((r: any) => {
-        const m = Number(r.erkek) || 0;
-        const f = Number(r.kadin) || 0;
-        return { year: String(r.year), male: m, female: f, femaleRatio: (m + f) > 0 ? (f / (m + f) * 100) : 0 };
+      const trend = trendRows.map((r: any) => {
+        const m = num(r.sum_male);
+        const f = num(r.sum_female);
+        return { year: String(r.yearcode), male: m, female: f, femaleRatio: (m + f) > 0 ? (f / (m + f) * 100) : 0 };
       });
       setGenderTrend(trend);
       const totalM = byCountry.reduce((s: number, c: any) => s + c.male, 0);
@@ -140,11 +151,17 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadConcentration = useCallback(async () => {
     setLoading(true);
     try {
-      const [shareRes, historicRes] = await Promise.all([
-        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND e.area NOT IN ${EXCLUDED_AREAS} GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT e.yearcode as year, e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.indicatorcode='21066' AND e.area NOT IN ${EXCLUDED_AREAS} AND e.yearcode IN ('2000','2005','2010','2015','2023') GROUP BY e.yearcode, e.area HAVING toplam > 0`)
+      const HIST_YEARS = ['2000', '2005', '2010', '2015', '2023'];
+      const [shareRows, historicRows] = await Promise.all([
+        fetchAgg(R, { groupBy: ['area'], sum: ['total'],
+          where: { yearcode: 2023, indicatorcode: 21066 }, exclude: { preset: 'v1', col: 'area' },
+          orderBy: 'sum_total', dir: 'desc' }),
+        // Eski sorgudaki yearcode IN (...) ve HAVING > 0 istemcide uygulanıyor.
+        fetchAgg(R, { groupBy: ['yearcode', 'area'], sum: ['total'],
+          where: { indicatorcode: 21066 }, exclude: { preset: 'v1', col: 'area' } }),
       ]);
-      const countries = (shareRes.data || []).map((r: any) => ({ name: translateCountry(String(r.area || '')), value: Number(r.toplam) || 0 }));
+      const countries = shareRows.filter((r: any) => num(r.sum_total) > 0)
+        .map((r: any) => ({ name: translateCountry(String(r.area || '')), value: num(r.sum_total) }));
       const worldTotal = countries.reduce((s: number, c: any) => s + c.value, 0);
       const shares = countries.map((c: any) => c.value / worldTotal);
       const hhiResult = calculateHHI(shares);
@@ -152,10 +169,11 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       const top5Share = countries.slice(0, 5).reduce((s: number, c: any) => s + c.value, 0) / worldTotal * 100;
       const top10Share = countries.slice(0, 10).reduce((s: number, c: any) => s + c.value, 0) / worldTotal * 100;
       const byYear: Record<string, any[]> = {};
-      (historicRes.data || []).forEach((r: any) => {
-        const y = String(r.year);
+      historicRows.forEach((r: any) => {
+        const y = String(r.yearcode);
+        if (!HIST_YEARS.includes(y) || num(r.sum_total) <= 0) return;
         if (!byYear[y]) byYear[y] = [];
-        byYear[y].push({ name: String(r.area || ''), value: Number(r.toplam) || 0 });
+        byYear[y].push({ name: String(r.area || ''), value: num(r.sum_total) });
       });
       const hhiHistory = Object.entries(byYear).map(([year, items]) => {
         const t = items.reduce((s: number, i: any) => s + i.value, 0);
@@ -177,21 +195,25 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadTurkey = useCallback(async () => {
     setLoading(true);
     try {
-      const [turkeyNowRes, worldRankRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT e.yearcode as year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT e.area, SUM(CAST(e.total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND e.area NOT IN ${EXCLUDED_AREAS} GROUP BY e.area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT e.yearcode as year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%') AND CAST(e.yearcode AS SIGNED) >= 1990 ORDER BY e.yearcode`)
+      const [turkeyNowRows, worldRankRows, turkeyTrendRows] = await Promise.all([
+        fetchAgg(R, { sum: ['total', 'male', 'female'],
+          where: { yearcode: 2023, indicatorcode: 21066, area: 'Türkiye' } }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['total'],
+          where: { yearcode: 2023, indicatorcode: 21066 }, exclude: { preset: 'v1', col: 'area' },
+          orderBy: 'sum_total', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['total', 'male', 'female'],
+          where: { area: 'Türkiye' }, whereGte: { yearcode: 1990 }, orderBy: 'yearcode', dir: 'asc' }),
       ]);
-      const now = turkeyNowRes.data?.[0];
-      const totalNow = Number(now?.toplam) || 0;
-      const maleNow = Number(now?.erkek) || 0;
-      const femaleNow = Number(now?.kadin) || 0;
+      const now = turkeyNowRows[0];
+      const totalNow = num(now?.sum_total);
+      const maleNow = num(now?.sum_male);
+      const femaleNow = num(now?.sum_female);
       const femaleRatio = totalNow > 0 ? (femaleNow / totalNow * 100) : 0;
-      const allCountries = (worldRankRes.data || []).map((r: any) => String(r.area || ''));
+      const allCountries = worldRankRows.filter((r: any) => num(r.sum_total) > 0).map((r: any) => String(r.area || ''));
       const turkeyIdx = allCountries.findIndex(n => n.includes('Türkiye') || n.includes('Turkey'));
-      const trend = (turkeyTrendRes.data || []).map((r: any) => ({
-        year: String(r.year), total: Number(r.toplam) || 0, male: Number(r.erkek) || 0, female: Number(r.kadin) || 0,
-        femaleRatio: (Number(r.toplam) || 0) > 0 ? (Number(r.kadin) || 0) / (Number(r.toplam) || 0) * 100 : 0
+      const trend = turkeyTrendRows.map((r: any) => ({
+        year: String(r.yearcode), total: num(r.sum_total), male: num(r.sum_male), female: num(r.sum_female),
+        femaleRatio: num(r.sum_total) > 0 ? num(r.sum_female) / num(r.sum_total) * 100 : 0
       }));
       setTurkeyTrend(trend);
       const trendYV: YearValue[] = trend.map(t => ({ year: t.year, value: t.total }));
@@ -209,12 +231,14 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadForecast = useCallback(async () => {
     setLoading(true);
     try {
-      const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim WHERE indicatorcode='21066' AND CAST(yearcode AS SIGNED) >= 1990 GROUP BY yearcode ORDER BY yearcode`),
-        fetchQuery(`SELECT e.yearcode as year, CAST(e.total AS DECIMAL(20,2)) as toplam FROM fao_nufus_istihdam_tarim e WHERE (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%') AND CAST(e.yearcode AS SIGNED) >= 1990 ORDER BY e.yearcode`)
+      const [worldTrendRows, turkeyTrendRows] = await Promise.all([
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['total'],
+          where: { indicatorcode: 21066 }, whereGte: { yearcode: 1990 }, orderBy: 'yearcode', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['total'],
+          where: { area: 'Türkiye' }, whereGte: { yearcode: 1990 }, orderBy: 'yearcode', dir: 'asc' }),
       ]);
-      const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
-      const turkeyData: YearValue[] = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
+      const worldData: YearValue[] = worldTrendRows.map((r: any) => ({ year: String(r.yearcode), value: num(r.sum_total) }));
+      const turkeyData: YearValue[] = turkeyTrendRows.map((r: any) => ({ year: String(r.yearcode), value: num(r.sum_total) }));
       const worldForecast = forecastLinear(worldData, 5);
       const turkeyForecast = forecastLinear(turkeyData, 5);
       const worldTrend = analyzeTrend(worldData);
@@ -240,30 +264,31 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
   const loadAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      const [turkeyNowRes, turkeyBeforeRes, worldGenderRes, worldTotalRes] = await Promise.all([
-        fetchQuery(`SELECT e.yearcode as year, CAST(e.total AS DECIMAL(20,2)) as toplam, CAST(e.male AS DECIMAL(20,2)) as erkek, CAST(e.female AS DECIMAL(20,2)) as kadin FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2023' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT e.yearcode as year, CAST(e.total AS DECIMAL(20,2)) as toplam FROM fao_nufus_istihdam_tarim e WHERE e.yearcode='2010' AND e.indicatorcode='21066' AND (e.area LIKE '%T_rkiye%' OR e.area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT SUM(CAST(male AS DECIMAL(20,2))) as erkek, SUM(CAST(female AS DECIMAL(20,2))) as kadin FROM fao_nufus_istihdam_tarim WHERE yearcode='2023' AND indicatorcode='21066'`),
-        fetchQuery(`SELECT yearcode as year, SUM(CAST(total AS DECIMAL(20,2))) as toplam FROM fao_nufus_istihdam_tarim WHERE indicatorcode='21066' AND yearcode IN ('2023','2010') GROUP BY yearcode`)
+      const [turkeyNowRows, turkeyBeforeRows, worldGenderRows, worldTotalRows] = await Promise.all([
+        fetchAgg(R, { sum: ['total', 'male', 'female'], where: { yearcode: 2023, indicatorcode: 21066, area: 'Türkiye' } }),
+        fetchAgg(R, { sum: ['total'], where: { yearcode: 2010, indicatorcode: 21066, area: 'Türkiye' } }),
+        fetchAgg(R, { sum: ['male', 'female'], where: { yearcode: 2023, indicatorcode: 21066 } }),
+        // Eski sorgu yalnızca 2023 ve 2010'u çekiyordu; aynı iki yıl korunuyor.
+        fetchAgg(R, { groupBy: ['yearcode'], sum: ['total'], where: { indicatorcode: 21066 } }),
       ]);
       const alerts: IntelligenceAlert[] = [];
-      const now = turkeyNowRes.data?.[0];
-      const before = turkeyBeforeRes.data?.[0];
-      const totalNow = Number(now?.toplam) || 0;
-      const femaleNow = Number(now?.kadin) || 0;
-      const totalBefore = Number(before?.toplam) || 0;
+      const now = turkeyNowRows[0];
+      const before = turkeyBeforeRows[0];
+      const totalNow = num(now?.sum_total);
+      const femaleNow = num(now?.sum_female);
+      const totalBefore = num(before?.sum_total);
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
         alerts.push({ id: 'emp-change', severity: Math.abs(change) > 15 ? (change < 0 ? 'critical' : 'positive') : 'info', title: `Turkiye Istihdam ${change > 0 ? 'Artisi' : 'Dususu'}`, message: `2010-2022 doneminde %${change.toFixed(1)} degisim (${formatPop(totalNow)})`, metric: 'Istihdam Degisimi', value: change });
       }
       const femaleRatio = totalNow > 0 ? (femaleNow / totalNow * 100) : 0;
-      const worldM = Number(worldGenderRes.data?.[0]?.erkek) || 0;
-      const worldF = Number(worldGenderRes.data?.[0]?.kadin) || 0;
+      const worldM = num(worldGenderRows[0]?.sum_male);
+      const worldF = num(worldGenderRows[0]?.sum_female);
       const worldFemaleRatio = (worldM + worldF) > 0 ? (worldF / (worldM + worldF) * 100) : 0;
       alerts.push({ id: 'gender-gap', severity: femaleRatio < worldFemaleRatio * 0.8 ? 'warning' : 'positive', title: 'Cinsiyet Esitligi', message: `Turkiye kadin payi: %${femaleRatio.toFixed(1)} vs Dunya: %${worldFemaleRatio.toFixed(1)}`, metric: 'Kadin Orani', value: femaleRatio });
-      const worldData = (worldTotalRes.data || []);
-      const world2022 = Number(worldData.find((r: any) => r.year === '2022')?.toplam) || 0;
-      const world2010 = Number(worldData.find((r: any) => r.year === '2010')?.toplam) || 0;
+      const worldData = worldTotalRows;
+      const world2022 = num(worldData.find((r: any) => String(r.yearcode) === '2022')?.sum_total);
+      const world2010 = num(worldData.find((r: any) => String(r.yearcode) === '2010')?.sum_total);
       if (world2010 > 0) {
         const globalChange = ((world2022 - world2010) / world2010) * 100;
         alerts.push({ id: 'global-emp', severity: globalChange < -5 ? 'warning' : 'info', title: 'Dunya Tarim Istihdami', message: `2010-2022 doneminde %${globalChange.toFixed(1)} degisim`, metric: 'Global Trend', value: globalChange });
