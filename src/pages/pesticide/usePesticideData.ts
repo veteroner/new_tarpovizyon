@@ -1,15 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import type { Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, calculateHHI, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS,
+  analyzeTrend,
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
 
 // ---------- TYPES ----------
+// D1 toplama rotası — sayfanın tüm sorguları tek tabloya dayanıyor.
+// Kıta/toplam satırları sunucudaki 'v1' hazır listesiyle dışlanıyor.
+const R = 'fao/input-pestisit-use';
+const EX = { preset: 'v1' as const, col: 'area' };
+const KULLANIM = 'Tarımsal Kullanım';
+const YOGUNLUK = 'Ekili alan başına kullanım';
+const PEST_TOPLAM = 'Pestisitler (toplam)';
+const ANA_TURLER = ['Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler', 'Rodentisitler'];
+// area alanında Türkiye TEK bir değerle geçiyor; eski OR listesine gerek yok.
+const TR = 'Türkiye';
+
 export type Tab = 'overview' | 'composition' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
 // ---------- CONSTANTS ----------
@@ -80,31 +91,31 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [byTypeRes, topCountriesRes, trendRes, prevYearRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') GROUP BY item_tr ORDER BY total DESC`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2020' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS}`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, ...ANA_TURLER] }, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: ['value'], where: { year: 2020, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX }),
       ]);
 
-      const byType = (byTypeRes.data || []).map((r: any, i: number) => ({
-        name: String(r.item_tr), value: Number(r.total) || 0, fill: CHART_COLORS[i % CHART_COLORS.length],
+      const byType = byTypeRes.map((r: any, i: number) => ({
+        name: String(r.item_tr), value: num(r.sum_value), fill: CHART_COLORS[i % CHART_COLORS.length],
       }));
       setOverviewByType(byType);
 
-      const topCountries = (topCountriesRes.data || []).map((r: any, i: number) => {
+      const topCountries = topCountriesRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey') || name.includes('Turkiye');
-        return { name: translateCountry(name), value: Number(r.total) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+        return { name: translateCountry(name), value: num(r.sum_value), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setOverviewTopCountries(topCountries);
 
       const worldTotal = topCountries.reduce((s: number, c: any) => s + c.value, 0);
-      const prevTotal = Number(prevYearRes.data?.[0]?.total) || 0;
+      const prevTotal = num(prevYearRes[0]?.sum_value);
       const yoy = calculateYoY(worldTotal, prevTotal);
       const turkeyData = topCountries.find((c: any) => c.isTurkey);
       const turkeyRank = topCountries.findIndex((c: any) => c.isTurkey) + 1;
 
-      const trendData = (trendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const trendData = trendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
       setOverviewTrend(trendData);
       const worldCAGR = calculateCAGR(trendData as YearValue[]);
 
@@ -132,34 +143,34 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [typeByCountryRes, typeTrendRes, intensityRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} GROUP BY item_tr, area ORDER BY total DESC`),
-        fetchQuery(`SELECT year, item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr IN ('Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler') AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 2000 GROUP BY year, item_tr ORDER BY year`),
-        fetchQuery(`SELECT area, AVG(CAST(value AS DECIMAL(20,4))) as avg_intensity FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY avg_intensity DESC LIMIT 20`),
+        fetchAgg(R, { groupBy: ['item_tr', 'area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM }, whereIn: { item_tr: ANA_TURLER }, exclude: EX, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['year', 'item_tr'], sum: ['value'], where: { element_tr: KULLANIM }, whereIn: { item_tr: ANA_TURLER }, whereGte: { year: 2000 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['area'], avg: ['value'], where: { year: 2022, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'avg_value', dir: 'desc', limit: 20 }),
       ]);
 
       const typeMap: Record<string, { name: string; countries: { country: string; value: number }[] }> = {};
-      (typeByCountryRes.data || []).forEach((r: any) => {
+      typeByCountryRes.forEach((r: any) => {
         const type = String(r.item_tr);
         if (!typeMap[type]) typeMap[type] = { name: type, countries: [] };
         if (typeMap[type].countries.length < 5) {
-          typeMap[type].countries.push({ country: translateCountry(String(r.area || '')), value: Number(r.total) || 0 });
+          typeMap[type].countries.push({ country: translateCountry(String(r.area || '')), value: num(r.sum_value) });
         }
       });
       setCompData(Object.values(typeMap));
 
       const yearMap: Record<string, Record<string, number>> = {};
-      (typeTrendRes.data || []).forEach((r: any) => {
+      typeTrendRes.forEach((r: any) => {
         const yr = String(r.year);
         if (!yearMap[yr]) yearMap[yr] = {};
-        yearMap[yr][String(r.item_tr)] = Number(r.total) || 0;
+        yearMap[yr][String(r.item_tr)] = num(r.sum_value);
       });
       const trendData = Object.entries(yearMap).sort(([a], [b]) => a.localeCompare(b)).map(([year, types]) => ({ year, ...types }));
       setCompTrends(trendData);
 
-      const intensityData = (intensityRes.data || []).map((r: any) => {
+      const intensityData = intensityRes.map((r: any) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey');
-        return { name: translateCountry(name), value: Number(r.avg_intensity) || 0, isTurkey };
+        return { name: translateCountry(name), value: num(r.avg_value), isTurkey };
       });
 
       const ins: Insight[] = [];
@@ -181,13 +192,13 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [countryShareRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,4)) > 0 GROUP BY area ORDER BY total DESC LIMIT 50`),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 50 }),
       ]);
 
-      const data = (countryShareRes.data || []).map((r: any, i: number) => {
+      const data = countryShareRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey');
-        return { rank: i + 1, country: translateCountry(name), rawName: name, value: Number(r.total) || 0, isTurkey };
+        return { rank: i + 1, country: translateCountry(name), rawName: name, value: num(r.sum_value), isTurkey };
       });
       setConcData(data);
 
@@ -214,23 +225,23 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [turkeyByTypeRes, turkeyTrendRes, turkeyIntensityRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, element_tr, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr IN ('Tarımsal Kullanım','Ekili alan başına kullanım','Kişi başına kullanım') AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler','Rodentisitler')`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(year AS SIGNED) >= 2000 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)'`),
-        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(value AS DECIMAL(20,4)) > 0`),
+        fetchAgg(R, { groupBy: ['item_tr', 'element_tr'], sum: ['value'], where: { year: 2022, area: TR }, whereIn: { element_tr: [KULLANIM, YOGUNLUK, 'Kişi başına kullanım'], item_tr: [PEST_TOPLAM, ...ANA_TURLER] } }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { area: TR, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: ['value'], where: { year: 2022, area: TR, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM } }),
+        fetchAgg(R, { avg: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX }),
       ]);
 
       const byType: Record<string, Record<string, number>> = {};
-      (turkeyByTypeRes.data || []).forEach((r: any) => {
+      turkeyByTypeRes.forEach((r: any) => {
         const item = String(r.item_tr);
         const elem = String(r.element_tr);
         if (!byType[item]) byType[item] = {};
-        byType[item][elem] = Number(r.val) || 0;
+        byType[item][elem] = num(r.sum_value);
       });
 
       const totalUsage = byType['Pestisitler (toplam)']?.['Tarımsal Kullanım'] || 0;
-      const kgHa = Number(turkeyIntensityRes.data?.[0]?.val) || 0;
-      const worldAvg = Number(worldAvgRes.data?.[0]?.avg_val) || 0;
+      const kgHa = num(turkeyIntensityRes[0]?.sum_value);
+      const worldAvg = num(worldAvgRes[0]?.avg_value);
 
       const composition = Object.entries(byType).filter(([name]) => name !== 'Pestisitler (toplam)').map(([name, vals]) => ({
         name, tonaj: vals['Tarımsal Kullanım'] || 0,
@@ -239,7 +250,7 @@ export function usePesticideData(activeTab: Tab) {
         share: totalUsage > 0 ? ((vals['Tarımsal Kullanım'] || 0) / totalUsage * 100) : 0,
       })).sort((a, b) => b.tonaj - a.tonaj);
 
-      const trendData = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const trendData = turkeyTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
       setTurkeyTrends(trendData);
       const trendAnalysis = analyzeTrend(trendData as YearValue[]);
 
@@ -268,12 +279,12 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM }, whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM, area: TR }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
       ]);
 
-      const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
-      const turkeyData: YearValue[] = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const worldData: YearValue[] = worldTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
+      const turkeyData: YearValue[] = turkeyTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
 
       const worldForecast = forecastLinear(worldData, 5);
       const turkeyForecast = forecastLinear(turkeyData, 5);
@@ -310,18 +321,18 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes, intensityRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2022' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,4))) as total FROM fao_input_pestisit_use WHERE year='2015' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND element_tr='Tarımsal Kullanım' AND item_tr IN ('Pestisitler (toplam)','Herbisitler','İnsektisitler','Fungisitler ve Bakterisitler') GROUP BY item_tr`),
-        fetchQuery(`SELECT AVG(CAST(value AS DECIMAL(20,4))) as avg_val FROM fao_input_pestisit_use WHERE year='2022' AND area NOT IN ${EXCLUDED_AREAS} AND element_tr='Tarımsal Kullanım' AND item_tr='Pestisitler (toplam)' AND CAST(value AS DECIMAL(20,4)) > 0`),
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,4)) as val FROM fao_input_pestisit_use WHERE year='2022' AND element_tr='Ekili alan başına kullanım' AND item_tr='Pestisitler (toplam)' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye')`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, area: TR, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, 'Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'] } }),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2015, area: TR, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, 'Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'] } }),
+        fetchAgg(R, { avg: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM, area: TR } }),
       ]);
 
       const now: Record<string, number> = {};
-      (turkeyNowRes.data || []).forEach((r: any) => now[String(r.item_tr)] = Number(r.total) || 0);
+      turkeyNowRes.forEach((r: any) => now[String(r.item_tr)] = num(r.sum_value));
       const before: Record<string, number> = {};
-      (turkeyBeforeRes.data || []).forEach((r: any) => before[String(r.item_tr)] = Number(r.total) || 0);
-      const worldAvg = Number(worldAvgRes.data?.[0]?.avg_val) || 0;
-      const turkeyIntensity = Number(intensityRes.data?.[0]?.val) || 0;
+      turkeyBeforeRes.forEach((r: any) => before[String(r.item_tr)] = num(r.sum_value));
+      const worldAvg = num(worldAvgRes[0]?.avg_value);
+      const turkeyIntensity = num(intensityRes[0]?.sum_value);
 
       const alerts: IntelligenceAlert[] = [];
       const totalNow = now['Pestisitler (toplam)'] || 0;

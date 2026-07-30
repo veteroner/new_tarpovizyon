@@ -54,6 +54,8 @@ export type AggQuery = {
   where?: Record<string, ParamValue>;
   /** Eşit-değil filtreleri: { sektorkod: 'C' } → sektorkod != 'C'. */
   whereNot?: Record<string, ParamValue>;
+  /** IN listeleri: { item_tr: ['Herbisitler', 'Fungisitler'] }. */
+  whereIn?: Record<string, (string | number)[]>;
   /** Büyük-eşit / küçük-eşit filtreleri: { yil: 2010 }. */
   whereGte?: Record<string, ParamValue>;
   whereLte?: Record<string, ParamValue>;
@@ -90,6 +92,8 @@ export async function fetchAgg(route: string, q: AggQuery): Promise<Row[]> {
   };
   for (const [k, v] of Object.entries(q.where ?? {})) params[`f_${k}`] = v;
   for (const [k, v] of Object.entries(q.whereNot ?? {})) params[`fn_${k}`] = v;
+  // '|' ayırıcı: değerlerin içinde virgül olabiliyor.
+  for (const [k, v] of Object.entries(q.whereIn ?? {})) params[`in_${k}`] = v.join('|');
   for (const [k, v] of Object.entries(q.whereGte ?? {})) params[`fge_${k}`] = v;
   for (const [k, v] of Object.entries(q.whereLte ?? {})) params[`fle_${k}`] = v;
   const body = await getJson(buildUrl(`agg/${route}`, params));

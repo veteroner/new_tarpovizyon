@@ -232,6 +232,17 @@ function buildAgg(cfg, sp) {
   const OPS = { f_: '=', fn_: '!=', fge_: '>=', fle_: '<=' };
   for (const [k, v] of sp.entries()) {
     if (v === '') continue;
+    // in_<sütun>=a|b|c — '|' ayırıcı, çünkü değerlerin içinde virgül olabiliyor
+    // ("Buğday, Durum Buğdayı Hariç" gibi). Değerlerin tamamı bind edilir.
+    if (k.startsWith('in_')) {
+      const col = k.slice(3);
+      if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+      const list = v.split('|').map((x) => x.trim()).filter(Boolean);
+      if (!list.length) continue;
+      where.push(`${qi(col)} IN (${list.map(() => '?').join(',')})`);
+      params.push(...list);
+      continue;
+    }
     const prefix = Object.keys(OPS).find((p) => k.startsWith(p));
     if (!prefix) continue;
     const col = k.slice(prefix.length);
