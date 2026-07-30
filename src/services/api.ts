@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)
-  ?? (import.meta.env.DEV ? '' : 'https://dersbende.com');
+// Prod'da varsayılan olarak AYNI ORİJİN (''): böylece istekler netlify.toml'daki
+// /api.php redirect'lerinden geçer — action=ai_chat kendi Netlify Function'ımıza,
+// diğer tüm action'lar dersbende.com'a yönlenir. Doğrudan 'https://dersbende.com'
+// hardcode edilirse (eski davranış) tarayıcı proxy'yi tamamen atlar ve ai_chat
+// isteği hiçbir zaman bizim function'a uğramaz.
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 const API_KEY = 'dashboard_secret_key_2024';
 
 const IS_DEV = import.meta.env.DEV;
