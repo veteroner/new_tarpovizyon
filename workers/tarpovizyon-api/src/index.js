@@ -136,6 +136,40 @@ const AGG = {
   'tuik/gsyh-a21': { table: 'tuik_gsyh_a21',
     dims: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], nums: ['zincir_endeks', 'zincir', 'zincir_degisim', 'cari'] },
   'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', dims: ['yil', 'yer', 'yerkod', 'duzey'], nums: ['USD', 'TR'] },
+
+  // Kimlik benzeri sayısal alanlar (year, *code) gruplanabilsin diye dims'te;
+  // nums yalnızca gerçek ölçüleri içerir.
+  'fao/balans': { db: 'DUNYA', table: 'fao_balans',
+    dims: ['domain', 'ulke', 'ulkead', 'urun', 'urunad', 'yil'],
+    nums: ['nuf_v', 'uretim_v', 'imp_v', 'stok_v', 'exp_v', 'arz_v', 'yem_v', 'tohum_v', 'kayip_v'] },
+  'fao/land-use': { db: 'DUNYA', table: 'fao_land_use',
+    dims: ['domain', 'area', 'areacode', 'hesap', 'Element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'yearcode', 'unit'],
+    nums: ['value'] },
+  'fao/land-cover': { db: 'DUNYA', table: 'fao_land_cover',
+    dims: ['domain', 'area', 'areacode', 'element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'unit'],
+    nums: ['value'] },
+  'fao/input-gubre-ticari': { db: 'DUNYA', table: 'fao_input_gubre_ticari',
+    dims: ['domaincode', 'area', 'areacode', 'element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'unit'],
+    nums: ['value'] },
+  'fao/input-pestisit-use': { db: 'DUNYA', table: 'fao_input_pestisit_use',
+    dims: ['domaincode', 'area', 'areacode', 'element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'unit'],
+    nums: ['value'] },
+  'fao/me-indicator': { db: 'DUNYA', table: 'fao_ME_indicator',
+    dims: ['domain', 'area', 'areacode', 'element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'unit'],
+    nums: ['value'] },
+  // fao_livestock_primary'de `value` metin olarak saklanıyor; CAST ile toplanır.
+  'fao/livestock-primary': { db: 'DUNYA', table: 'fao_livestock_primary',
+    dims: ['domain', 'area', 'areacode', 'element', 'elementcode', 'item', 'itemcode', 'year', 'unit'],
+    nums: ['value'] },
+  'fao/nufus': { db: 'DUNYA', table: 'fao_nufus',
+    dims: ['domain', 'area', 'areacode', 'item', 'itemcode', 'year', 'unit'],
+    nums: ['TOPLAM', 'erkek/T', 'kadın/T', 'kirsal', 'sehir'] },
+  'fao/nufus-istihdam-tarim': { db: 'DUNYA', table: 'fao_nufus_istihdam_tarim',
+    dims: ['domaincode', 'area', 'areacode', 'indicator', 'indicator_tr', 'indicatorcode', 'element', 'elementcode', 'yearcode', 'unit'],
+    nums: ['total', 'male', 'female'] },
+  'fao/tahmin-sonuclari': { db: 'DUNYA', table: 'fao_tahmin_sonuclari',
+    dims: ['urunad', 'ulkead', 'veri_tipi', 'trend', 'model_tarihi', 'tahmin_yil'],
+    nums: ['tahmin_deger', 'alt_sinir', 'ust_sinir', 'r2_cv', 'mae_cv', 'mape_cv'] },
 };
 
 // FAO "ülke" sütununda kıta/gelir grubu gibi toplam satırları da var; ülke
