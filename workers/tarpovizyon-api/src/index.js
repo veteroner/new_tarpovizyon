@@ -192,12 +192,17 @@ function buildAgg(cfg, sp) {
 
   const where = [];
   const params = [];
-  // Filtreler: f_<sütun>=değer (eşitlik). Değerler bind edilir.
+  // Filtreler: f_<sütun>=değer (eşitlik), fn_<sütun>=değer (eşit değil),
+  // fge_/fle_<sütun> (>= / <=). Değerler her zaman bind edilir.
+  const allCols = [...cfg.dims, ...cfg.nums];
+  const OPS = { f_: '=', fn_: '!=', fge_: '>=', fle_: '<=' };
   for (const [k, v] of sp.entries()) {
-    if (!k.startsWith('f_') || v === '') continue;
-    const col = k.slice(2);
-    if (![...cfg.dims, ...cfg.nums].includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
-    where.push(`${qi(col)} = ?`); params.push(v);
+    if (v === '') continue;
+    const prefix = Object.keys(OPS).find((p) => k.startsWith(p));
+    if (!prefix) continue;
+    const col = k.slice(prefix.length);
+    if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+    where.push(`${qi(col)} ${OPS[prefix]} ?`); params.push(v);
   }
   // positive=<sütun>: MySQL sorgularındaki "CAST(x) > 0" koşulunun karşılığı.
   for (const c of pick('positive', cfg.nums)) where.push(`CAST(${qi(c)} AS REAL) > 0`);

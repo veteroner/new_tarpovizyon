@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, fetchRows, num } from '../services/d1';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 
 /* ─── Constants ─── */
@@ -72,78 +72,77 @@ export default function TurkeyMacroPage() {
       setLoading(true);
       setError(false);
       try {
-        const [sectorRes, agriRes, incTopRes, incBotRes, incTrendRes] = await Promise.all([
-          // Latest year sectors
-          fetchQuery(`
-            SELECT sektorkod, sektor, cari, zincir_degisim
-            FROM tuik_gsyh_a21 WHERE yerkod='TR' AND yil='2024'
-            ORDER BY CAST(cari AS DECIMAL(20,2)) DESC
-          `),
-          // Agriculture share trend (25 years)
-          fetchQuery(`
-            SELECT a.yil,
-                   CAST(a.cari AS DECIMAL(20,2)) as agri,
-                   (SELECT SUM(CAST(b.cari AS DECIMAL(20,2)))
-                    FROM tuik_gsyh_a21 b
-                    WHERE b.yerkod='TR' AND b.yil=a.yil AND b.sektorkod != 'C') as total,
-                   CAST(a.zincir_degisim AS DECIMAL(10,4)) as growth
-            FROM tuik_gsyh_a21 a
-            WHERE a.yerkod='TR' AND a.sektorkod='A'
-            ORDER BY a.yil
-          `),
-          // Top 10 provinces by income
-          fetchQuery(`
-            SELECT yer, USD, TR FROM tuik_kisibasigelir
-            WHERE yil='2024' AND duzey='1'
-            ORDER BY CAST(USD AS UNSIGNED) DESC LIMIT 10
-          `),
-          // Bottom 10 provinces
-          fetchQuery(`
-            SELECT yer, USD, TR FROM tuik_kisibasigelir
-            WHERE yil='2024' AND duzey='1'
-            ORDER BY CAST(USD AS UNSIGNED) ASC LIMIT 10
-          `),
-          // Income inequality trend (top5 avg vs bottom5 avg per year)
-          fetchQuery(`
-            SELECT yil, yer, CAST(USD AS UNSIGNED) as usd_val
-            FROM tuik_kisibasigelir
-            WHERE duzey='1' AND yil >= '2010'
-            ORDER BY yil, CAST(USD AS UNSIGNED) DESC
-          `),
+        // Veri MySQL'den D1'e taşındı; sayfa artık tarayıcıdan SQL göndermiyor,
+        // Worker'ın izin verdiği rota/sütunlarla çalışıyor (bkz. services/d1.ts).
+        // tuik_gsyh_a21'de (yerkod, yil, sektorkod) ve tuik_kisibasigelir'de
+        // (yil, yer, duzey) tekil olduğu için MAX(...) alanın kendi değerini verir.
+        const [sectorRows, agriRows, totalRows, incTopRows, incBotRows, incTrendRows] = await Promise.all([
+          // Son yıl sektörleri
+          fetchRows('tuik/gsyh-a21', { yerkod: 'TR', yil: 2024, limit: 200 }),
+          // Tarım (sektör A) yıllık serisi
+          fetchAgg('tuik/gsyh-a21', {
+            groupBy: ['yil'], max: ['cari', 'zincir_degisim'],
+            where: { yerkod: 'TR', sektorkod: 'A' }, orderBy: 'yil', dir: 'asc',
+          }),
+          // Yıllık toplam GSYH — sektorkod 'C' hariç (eski sorgudaki alt sorgunun karşılığı)
+          fetchAgg('tuik/gsyh-a21', {
+            groupBy: ['yil'], sum: ['cari'],
+            where: { yerkod: 'TR' }, whereNot: { sektorkod: 'C' }, orderBy: 'yil', dir: 'asc',
+          }),
+          // Kişi başı gelirde ilk 10 il
+          fetchAgg('tuik/kisibasigelir', {
+            groupBy: ['yer'], max: ['USD', 'TR'], where: { yil: 2024, duzey: '1' },
+            orderBy: 'max_USD', dir: 'desc', limit: 10,
+          }),
+          // Son 10 il
+          fetchAgg('tuik/kisibasigelir', {
+            groupBy: ['yer'], max: ['USD', 'TR'], where: { yil: 2024, duzey: '1' },
+            orderBy: 'max_USD', dir: 'asc', limit: 10,
+          }),
+          // Gelir eşitsizliği trendi (yıl × il)
+          fetchAgg('tuik/kisibasigelir', {
+            groupBy: ['yil', 'yer'], max: ['USD'], where: { duzey: '1' }, whereGte: { yil: 2010 },
+          }),
         ]);
 
-        setSectorData((sectorRes.data || []).map((r: Record<string, unknown>) => ({
-          sektorkod: String(r.sektorkod),
-          sektor: String(r.sektor),
-          yil: '2024',
-          cari: Number(r.cari) / 1e6, // → Milyar TL
-          zincir_degisim: Number(r.zincir_degisim),
-        })));
+        setSectorData(
+          sectorRows
+            .map((r) => ({
+              sektorkod: String(r.sektorkod),
+              sektor: String(r.sektor),
+              yil: '2024',
+              cari: num(r.cari) / 1e6, // → Milyar TL
+              zincir_degisim: num(r.zincir_degisim),
+            }))
+            .sort((a, b) => b.cari - a.cari)
+        );
 
-        setAgriShareTrend((agriRes.data || []).map((r: Record<string, unknown>) => {
-          const agri = Number(r.agri);
-          const total = Number(r.total);
+        const totalByYear = new Map(totalRows.map((r) => [String(r.yil), num(r.sum_cari)]));
+        setAgriShareTrend(agriRows.map((r) => {
+          const yil = String(r.yil);
+          const agri = num(r.max_cari);
+          const total = totalByYear.get(yil) ?? 0;
           return {
-            yil: String(r.yil),
+            yil,
             agri: agri / 1e6,
             total: total / 1e6,
             share: total > 0 ? (agri / total) * 100 : 0,
-            growth: Number(r.growth),
+            growth: num(r.max_zincir_degisim),
           };
         }));
 
-        setIncomeTop((incTopRes.data || []).map((r: Record<string, unknown>) => ({
-          yer: String(r.yer), USD: Number(r.USD), TR: Number(r.TR),
+        setIncomeTop(incTopRows.map((r) => ({
+          yer: String(r.yer), USD: num(r.max_USD), TR: num(r.max_TR),
         })));
-        setIncomeBottom((incBotRes.data || []).map((r: Record<string, unknown>) => ({
-          yer: String(r.yer), USD: Number(r.USD), TR: Number(r.TR),
+        setIncomeBottom(incBotRows.map((r) => ({
+          yer: String(r.yer), USD: num(r.max_USD), TR: num(r.max_TR),
         })));
-        
+
         // Process income trend data - calculate top5 and bottom5 averages per year
         const yearMap: Record<string, number[]> = {};
-        for (const r of (incTrendRes.data || [])) {
+        for (const r of incTrendRows) {
           const year = String(r.yil);
-          const val = Number(r.usd_val) || 0;
+          const val = num(r.max_USD);
           if (!yearMap[year]) yearMap[year] = [];
           yearMap[year].push(val);
         }
