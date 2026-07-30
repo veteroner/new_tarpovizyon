@@ -105,6 +105,135 @@ function dbFor(env, route) {
   return route.db === 'DUNYA' ? env.DUNYA : env.DB;
 }
 
+// ─── Kısıtlı toplama (aggregate) uçları ──────────────────────────────────────
+//
+// TarpoVizyon sayfaları tarayıcıdan ham SQL gönderiyordu (SUM/AVG/COUNT DISTINCT
+// + GROUP BY + dışlanan bölgeler). Her sorgu için ayrı uç yazmak ~200 endpoint
+// demek olurdu; bunun yerine tablo başına İZİN VERİLEN sütun/işlem listesi
+// tanımlanıyor ve istemci yalnızca yapılandırılmış parametre gönderiyor.
+//
+// GÜVENLİK: tablo ve sütun adları YALNIZCA aşağıdaki listelerden seçilir —
+// istekten gelen hiçbir tanımlayıcı SQL'e doğrudan yazılmaz. Filtre DEĞERLERİ
+// her zaman prepared statement parametresi olarak bağlanır. Yani istemci
+// sorgunun şeklini değiştiremez, sadece izin verilen alanlar arasından seçer.
+const AGG = {
+  'fao/uretim-bitkisel-birincil': { db: 'DUNYA', table: 'fao_uretim_bitkisel_birincil',
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+  'fao/uretim-bitkisel-islenmis': { db: 'DUNYA', table: 'fao_uretim_bitkisel_islenmis',
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+  'fao/uretim-hayvansal-birincil': { db: 'DUNYA', table: 'fao_uretim_hayvansal_birincil',
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+  'fao/uretim-hayvansal-islenmis': { db: 'DUNYA', table: 'fao_uretim_hayvansal_islenmis',
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+  'fao/uretim-hayvansal-canlihayvan': { db: 'DUNYA', table: 'fao_uretim_hayvansal_canlihayvan',
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+  'tuik/ticaret-bitkisel': { table: 'tuik_ticaret_bitkisel',
+    dims: ['yil', 'ay', 'ana_urun', 'alt_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'miktar_birim'],
+    nums: ['ihracat_mik', 'ithalat_mik', 'ihracat_deger', 'ithalat_deger'] },
+  'tuik/ticaret-hayvansal': { table: 'tuik_ticaret_hayvansal',
+    dims: ['yil', 'ay', 'ana_urun', 'alt_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'miktar_birim'],
+    nums: ['ihracat_mik', 'ithalat_mik', 'ihracat_deger', 'ithalat_deger'] },
+  'tuik/gsyh-a21': { table: 'tuik_gsyh_a21',
+    dims: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], nums: ['zincir_endeks', 'zincir', 'zincir_degisim', 'cari'] },
+  'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', dims: ['yil', 'yer', 'yerkod', 'duzey'], nums: ['USD', 'TR'] },
+};
+
+// FAO "ülke" sütununda kıta/gelir grubu gibi toplam satırları da var; ülke
+// sıralaması yapılırken bunlar dışlanmalı. Frontend'de İKİ AYRI liste vardı
+// (içerikleri farklı) — davranışı bire bir korumak için ikisi de burada ayrı
+// hazır liste olarak tutuluyor, sayfa hangisini kullanıyorsa onu seçer.
+const EXCLUDE_PRESETS = {
+  v1: ['World', 'WORLD', 'Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Northern Africa', 'Eastern Africa',
+    'Middle Africa', 'Southern Africa', 'Western Africa', 'Northern America', 'Central America', 'Caribbean',
+    'South America', 'Central Asia', 'Eastern Asia', 'South-eastern Asia', 'Southern Asia', 'Western Asia',
+    'Eastern Europe', 'Northern Europe', 'Southern Europe', 'Western Europe', 'Australia and New Zealand',
+    'Melanesia', 'Micronesia', 'Polynesia', 'Least Developed Countries', 'Land Locked Developing Countries',
+    'Small Island Developing States', 'Low Income Food Deficit Countries', 'Net Food Importing Developing Countries',
+    'European Union (27)', 'China, mainland', 'China, Taiwan Province of'],
+  v2: ['World', 'WORLD', 'Europe', 'Americas', 'Asia', 'Africa', 'Northern America', 'Southern America',
+    'Eastern Europe', 'Western Europe', 'Northern Europe', 'Southern Europe', 'Southern Asia', 'Eastern Asia',
+    'South-eastern Asia', 'Central Asia', 'Western Asia', 'Northern Africa', 'Eastern Africa', 'Western Africa',
+    'Middle Africa', 'Southern Africa', 'Caribbean', 'Central America', 'South America', 'Oceania',
+    'European Union (27)', 'European Union', 'Melanesia', 'Polynesia', 'Micronesia', 'Aggregate',
+    'Least Developed Countries', 'Small Island Developing States', 'Low Income Food Deficit Countries',
+    'Net Food Importing Developing Countries', 'Land Locked Developing Countries', 'Dünya', 'DÜNYA', 'Dunya',
+    'Total', 'TOTAL', 'Toplam', 'TOPLAM'],
+};
+
+const qi = (n) => `"${n}"`;
+
+/**
+ * İstemcinin yapılandırılmış parametrelerinden SQL kurar. Her tanımlayıcı
+ * cfg.dims / cfg.nums içinde olup olmadığına göre doğrulanır; olmayan bir ad
+ * gelirse istek 400 ile reddedilir.
+ */
+function buildAgg(cfg, sp) {
+  const pick = (name, allowed) => (sp.get(name) || '').split(',').map((s) => s.trim()).filter(Boolean)
+    .map((c) => { if (!allowed.includes(c)) throw new Error(`izin verilmeyen sütun: ${c}`); return c; });
+
+  const groupBy = pick('groupBy', cfg.dims);
+  const select = pick('select', cfg.dims);
+  const sums = pick('sum', cfg.nums);
+  const avgs = pick('avg', cfg.nums);
+  const mins = pick('min', cfg.nums);
+  const maxs = pick('max', cfg.nums);
+  const distincts = pick('countDistinct', [...cfg.dims, ...cfg.nums]);
+
+  const cols = [];
+  for (const c of new Set([...groupBy, ...select])) cols.push(`${qi(c)} AS ${qi(c)}`);
+  // MySQL'deki CAST(x AS DECIMAL(20,2)) yerine SQLite'ta REAL.
+  for (const c of sums) cols.push(`SUM(CAST(${qi(c)} AS REAL)) AS ${qi('sum_' + c)}`);
+  for (const c of avgs) cols.push(`AVG(CAST(${qi(c)} AS REAL)) AS ${qi('avg_' + c)}`);
+  for (const c of mins) cols.push(`MIN(CAST(${qi(c)} AS REAL)) AS ${qi('min_' + c)}`);
+  for (const c of maxs) cols.push(`MAX(CAST(${qi(c)} AS REAL)) AS ${qi('max_' + c)}`);
+  for (const c of distincts) cols.push(`COUNT(DISTINCT ${qi(c)}) AS ${qi('cd_' + c)}`);
+  if (sp.get('count') === '1') cols.push('COUNT(*) AS "cnt"');
+  if (cols.length === 0) throw new Error('en az bir select/groupBy/toplama alanı gerekli');
+
+  const where = [];
+  const params = [];
+  // Filtreler: f_<sütun>=değer (eşitlik). Değerler bind edilir.
+  for (const [k, v] of sp.entries()) {
+    if (!k.startsWith('f_') || v === '') continue;
+    const col = k.slice(2);
+    if (![...cfg.dims, ...cfg.nums].includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+    where.push(`${qi(col)} = ?`); params.push(v);
+  }
+  // positive=<sütun>: MySQL sorgularındaki "CAST(x) > 0" koşulunun karşılığı.
+  for (const c of pick('positive', cfg.nums)) where.push(`CAST(${qi(c)} AS REAL) > 0`);
+  // exclude=<preset>:<sütun> — kıta/toplam satırlarını dışla.
+  const ex = sp.get('exclude');
+  if (ex) {
+    const [preset, col] = ex.split(':');
+    const list = EXCLUDE_PRESETS[preset];
+    if (!list) throw new Error(`bilinmeyen exclude preset: ${preset}`);
+    if (!cfg.dims.includes(col)) throw new Error(`izin verilmeyen exclude sütunu: ${col}`);
+    where.push(`${qi(col)} NOT IN (${list.map(() => '?').join(',')})`);
+    params.push(...list);
+  }
+
+  // orderBy, üretilen takma adlar (sum_x, cd_y…) veya boyut sütunları arasından.
+  const aliases = [...groupBy, ...select, ...sums.map((c) => 'sum_' + c), ...avgs.map((c) => 'avg_' + c),
+    ...mins.map((c) => 'min_' + c), ...maxs.map((c) => 'max_' + c), ...distincts.map((c) => 'cd_' + c), 'cnt'];
+  let orderSql = '';
+  const ob = sp.get('orderBy');
+  if (ob) {
+    if (!aliases.includes(ob)) throw new Error(`izin verilmeyen orderBy: ${ob}`);
+    orderSql = `ORDER BY ${qi(ob)} ${sp.get('dir') === 'asc' ? 'ASC' : 'DESC'}`;
+  } else if (groupBy.length) {
+    orderSql = `ORDER BY ${groupBy.map(qi).join(', ')} ASC`;
+  }
+
+  let limit = parseInt(sp.get('limit') || '', 10);
+  if (!Number.isFinite(limit) || limit <= 0 || limit > 20000) limit = 20000;
+
+  const sql = `SELECT ${cols.join(', ')} FROM ${qi(cfg.table)}`
+    + (where.length ? ` WHERE ${where.join(' AND ')}` : '')
+    + (groupBy.length ? ` GROUP BY ${groupBy.map(qi).join(', ')}` : '')
+    + (orderSql ? ` ${orderSql}` : '') + ` LIMIT ${limit}`;
+  return { sql, params };
+}
+
 // Trade tables keyed by module prefix, used by the generic yillik-trend / urun-ozet
 // aggregate endpoints below (dış ticaret ürün karşılaştırma bölümleri için).
 const TRADE_TABLES = {
@@ -282,6 +411,25 @@ export default {
         return json({ error: String(err) }, 500);
       }
     }
+
+    // Kısıtlı toplama ucu: /api/agg/<rota>?groupBy=…&sum=…&f_<sütun>=…
+    if (slug.startsWith('agg/')) {
+      const key = slug.slice(4);
+      const cfg = AGG[key];
+      if (!cfg) return json({ error: 'Not found', available: Object.keys(AGG).map((k) => `/api/agg/${k}`) }, 404);
+      try {
+        const { sql, params } = buildAgg(cfg, url.searchParams);
+        const { results } = await dbFor(env, cfg).prepare(sql).bind(...params).all();
+        return json({ data: results, count: results.length });
+      } catch (err) {
+        // Doğrulama hataları istemci hatasıdır (izin verilmeyen sütun vb.).
+        const msg = String(err.message || err);
+        const bad = /izin verilmeyen|gerekli|bilinmeyen/.test(msg);
+        return json({ error: msg }, bad ? 400 : 500);
+      }
+    }
+
+    if (slug === 'agg') return json({ routes: Object.keys(AGG).map((k) => `/api/agg/${k}`) });
 
     const route = ROUTES[slug];
     if (!route) return json({ error: 'Not found', available: Object.keys(ROUTES) }, 404);
