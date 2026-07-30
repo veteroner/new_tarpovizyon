@@ -28,12 +28,14 @@ export function MakroOzetPage({ config }: { config: MakroOzetPageConfig }) {
 
       {gsyhData.length > 0 && (
         <div className="tvb-section">
+          {/* Toplam GSYH (~1000 Mr$) dwarfs tarım GSYH (~60 Mr$); a shared axis
+              flattens the farm line, so tarım rides its own right axis. */}
           <YearlyChart
             data={gsyhData as unknown as Record<string, number | string>[]}
             xKey="yil"
             series={[
               { key: 'toplam', label: 'Türkiye Toplam GSYH (Milyar-$)', type: 'bar' },
-              { key: 'tarim', label: 'Türkiye Tarım GSYH (Milyar-$)', type: 'line' },
+              { key: 'tarim', label: 'Türkiye Tarım GSYH (Milyar-$)', type: 'bar', axis: 'right' },
             ]}
           />
         </div>

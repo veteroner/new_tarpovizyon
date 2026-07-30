@@ -47,6 +47,8 @@ export function GfeBreakdownPage({ config }: { config: GfeBreakdownPageConfig })
   const hayvansal = useMergedSeries(HAYVANSAL_SERIES);
 
   const colorSeries = (names: string[]): SeriesConfig[] => names.map((n) => ({ key: n, label: n, type: 'line' }));
+  const lastPeriod = (rows: { x?: unknown }[]) => (rows.length ? String(rows[rows.length - 1].x ?? '') : null);
+  const trendPeriod = trendData.length ? trendData[trendData.length - 1].x : null;
 
   return (
     <div className="tvb-page">
@@ -54,26 +56,36 @@ export function GfeBreakdownPage({ config }: { config: GfeBreakdownPageConfig })
 
       {trendData.length > 0 && (
         <div className="tvb-section">
-          <h3>Tarımsal Girdi Fiyat Endeksi Yıllık Değişim Oranı (%)</h3>
+          <div className="tvb-section__head">
+            <h3>Tarımsal Girdi Fiyat Endeksi Yıllık Değişim Oranı (%)</h3>
+            {trendPeriod && <span className="tvb-badge">Son dönem: {trendPeriod}</span>}
+          </div>
           <YearlyChart
             data={trendData as unknown as Record<string, number | string>[]}
             xKey="x"
             series={[{ key: 'value', label: 'Tarımsal Girdi Fiyat Endeksi', type: 'line' }]}
+            yDomain="auto"
           />
         </div>
       )}
 
       {bitkisel.data.length > 0 && (
         <div className="tvb-section">
-          <h3>Bitkisel Üretim-GFE Yıllık Değişim Oranı (%)</h3>
-          <YearlyChart data={bitkisel.data} xKey="x" series={colorSeries(BITKISEL_SERIES)} />
+          <div className="tvb-section__head">
+            <h3>Bitkisel Üretim-GFE Yıllık Değişim Oranı (%)</h3>
+            {lastPeriod(bitkisel.data) && <span className="tvb-badge">Son dönem: {lastPeriod(bitkisel.data)}</span>}
+          </div>
+          <YearlyChart data={bitkisel.data} xKey="x" series={colorSeries(BITKISEL_SERIES)} yDomain="auto" />
         </div>
       )}
 
       {hayvansal.data.length > 0 && (
         <div className="tvb-section">
-          <h3>Hayvansal Üretim-GFE Yıllık Değişim Oranı (%)</h3>
-          <YearlyChart data={hayvansal.data} xKey="x" series={colorSeries(HAYVANSAL_SERIES)} />
+          <div className="tvb-section__head">
+            <h3>Hayvansal Üretim-GFE Yıllık Değişim Oranı (%)</h3>
+            {lastPeriod(hayvansal.data) && <span className="tvb-badge">Son dönem: {lastPeriod(hayvansal.data)}</span>}
+          </div>
+          <YearlyChart data={hayvansal.data} xKey="x" series={colorSeries(HAYVANSAL_SERIES)} yDomain="auto" />
         </div>
       )}
     </div>

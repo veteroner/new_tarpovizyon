@@ -55,15 +55,27 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
     queryKey: ['tvb-crop-alan', productionUrunler],
     queryFn: () => fetchDetayYillik(productionUrunler, 'Ekilen Alan'),
   });
+  const { data: verim, isLoading: l3 } = useQuery({
+    queryKey: ['tvb-crop-verim', productionUrunler],
+    queryFn: () => fetchDetayYillik(productionUrunler, 'Verim'),
+  });
 
-  const isLoading = l1 || l2;
+  const isLoading = l1 || l2 || l3;
   const uretimRows = uretim ?? [];
   const alanByYear = new Map((alan ?? []).map((r) => [r.yil, r.deger]));
-  const merged = uretimRows.map((r) => ({ yil: r.yil, uretim_ton: r.deger, ekilen_alan_ha: alanByYear.get(r.yil) ?? null }));
+  const verimByYear = new Map((verim ?? []).map((r) => [r.yil, r.deger]));
+  const merged = uretimRows.map((r) => ({
+    yil: r.yil,
+    uretim_ton: r.deger,
+    ekilen_alan_da: alanByYear.get(r.yil) ?? null,
+    verim_kg_da: verimByYear.get(r.yil) ?? null,
+  }));
 
   const kpi1 = latestNonZero(uretimRows);
   const kpi2 = latestNonZero(alan ?? []);
+  const kpi3 = latestNonZero(verim ?? []);
   const hasAlan = (alan ?? []).length > 0;
+  const hasVerim = (verim ?? []).length > 0;
 
   return (
     <div className="tvb-page">
@@ -76,16 +88,21 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
           <div className="tvb-page__controls">
             <KpiCard label={`${productionLabel} Miktarı`} value={formatNumber(kpi1.value)} suffix="Ton" changePct={kpi1.pct} />
             {hasAlan && <KpiCard label="Ekilen Alan" value={formatNumber(kpi2.value)} suffix="Dekar" changePct={kpi2.pct} />}
+            {hasVerim && <KpiCard label="Verim" value={formatNumber(kpi3.value)} suffix="Kg/Dekar" changePct={kpi3.pct} />}
           </div>
 
           {merged.length > 0 && (
             <div className="tvb-section">
+              {/* Üretim + ekilen alan share the left axis (both large quantities,
+                  zero-based bars); verim (kg/dekar, ~hundreds) rides the right
+                  axis so it isn't flattened against the millions on the left. */}
               <YearlyChart
                 data={merged as unknown as Record<string, number | string>[]}
                 xKey="yil"
                 series={[
                   { key: 'uretim_ton', label: `${productionLabel} (Ton)`, type: 'bar' },
-                  ...(hasAlan ? [{ key: 'ekilen_alan_ha', label: 'Ekilen Alan (Dekar)', type: 'line' as const }] : []),
+                  ...(hasAlan ? [{ key: 'ekilen_alan_da', label: 'Ekilen Alan (Dekar)', type: 'bar' as const }] : []),
+                  ...(hasVerim ? [{ key: 'verim_kg_da', label: 'Verim (Kg/Dekar)', type: 'line' as const, axis: 'right' as const }] : []),
                 ]}
               />
             </div>

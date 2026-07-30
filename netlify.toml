@@ -1,7 +1,14 @@
+# Kök uygulama build edilir (netlify-dashboard/ artık kullanılmıyor — TarpoVizyon
+# Basic modülü yalnızca kök src/'de). build:netlify, git'te olmayan "tarpol rasyon
+# mobil" submodülüne bağımlı rasyon-embed adımını atlar; /rasyon/ varlıkları zaten
+# public/rasyon/ altında commit'li.
 [build]
-  base = "netlify-dashboard"
   publish = "dist"
-  command = "npm run build"
+  command = "npm run build:netlify"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[redirects]]
   from = "/api.php"

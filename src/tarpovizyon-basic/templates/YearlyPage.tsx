@@ -19,6 +19,9 @@ export type YearlyPageConfig = {
   secondKpiLabel?: string;
   /** Self-sufficiency gauge sourced from its own endpoint (tr/yeterlilikler holds a ratio, e.g. 1.17 = 117%). */
   gauge?: { endpoint: string; field: string; label: string; asRatio?: boolean };
+  /** Additional charts rendered below the main one from the same rows — e.g. a
+   *  comparison page that also wants each series broken out on its own. */
+  extraCharts?: { title: string; series: SeriesConfig[] }[];
   /** Aggregate monthly/date rows into yearly sums for a cleaner trend chart. */
   aggregateYearly?: boolean;
   /** Reformats a datetime xField into a compact axis label. */
@@ -112,7 +115,7 @@ function useGauge(gauge?: YearlyPageConfig['gauge']) {
 }
 
 export function YearlyPage({ config }: { config: YearlyPageConfig }) {
-  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection, provincialRanking } = config;
+  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection, provincialRanking, extraCharts } = config;
 
   const { data, isLoading } = useQuery({
     queryKey: ['tvb-yearly', endpoint],
@@ -159,6 +162,13 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
           <div className="tvb-section">
             <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} />
           </div>
+
+          {extraCharts?.map((c) => (
+            <div className="tvb-section" key={c.title}>
+              <h3>{c.title}</h3>
+              <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={c.series} />
+            </div>
+          ))}
 
           {tradeSection && <TradeTrendSection title={tradeSection.title} urunler={tradeSection.urunler} />}
 

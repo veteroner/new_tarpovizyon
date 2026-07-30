@@ -1,6 +1,6 @@
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
-export type StatTile = { label: string; value: number | null; unit?: string; changePct?: number | null };
+export type StatTile = { label: string; value: number | null; unit?: string; changePct?: number | null; period?: string };
 
 export function StatTileGrid({ tiles }: { tiles: StatTile[] }) {
   return (
@@ -11,6 +11,7 @@ export function StatTileGrid({ tiles }: { tiles: StatTile[] }) {
         return (
           <div key={t.label} className="tvb-tile">
             <div className="tvb-tile__label">{t.label}</div>
+            {t.period && <div className="tvb-tile__period">{t.period}</div>}
             <div className="tvb-tile__value">
               {t.value === null || t.value === undefined ? '—' : numberFmt.format(t.value)}
               {t.unit && <span className="tvb-tile__unit"> {t.unit}</span>}
