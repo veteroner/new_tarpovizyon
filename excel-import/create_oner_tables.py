@@ -15,11 +15,11 @@ import re
 
 # Veritabanı bağlantı bilgileri
 DB_CONFIG = {
-    'host': '77.245.149.60',
-    'port': 3306,
-    'database': 'ist',
-    'user': 'ist_172505',
-    'password': 'ist_172505'
+    'host': os.environ['MYSQL_HOST'],
+    'port': int(os.environ.get('MYSQL_PORT', 3306)),
+    'database': os.environ.get('MYSQL_DATABASE', 'ist'),
+    'user': os.environ['MYSQL_USER'],
+    'password': os.environ['MYSQL_PASSWORD']
 }
 
 # Excel dosyası yolu

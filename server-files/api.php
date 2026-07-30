@@ -258,8 +258,8 @@ YANITLAMA KURALLARI:
 // ---- /AI Chat ----
 
 $servername = "localhost";
-$username = "ist_172505";
-$password = "ist_172505";
+$username = getenv("MYSQL_USER");
+$password = getenv("MYSQL_PASSWORD");
 $dbname = "ist";
 
 try {

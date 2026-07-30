@@ -4,11 +4,11 @@ const path = require('path');
 
 // Veritabanı bağlantı ayarları
 const config = {
-    host: '77.245.149.60',
-    port: 3306,
-    user: 'ist_172505',
-    password: 'ist_172505',
-    database: 'ist'
+    host: process.env.MYSQL_HOST,
+    port: Number(process.env.MYSQL_PORT) || 3306,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE || 'ist'
 };
 
 async function executeSqlFile(connection, filePath) {

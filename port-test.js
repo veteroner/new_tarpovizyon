@@ -7,10 +7,10 @@ async function tryConnect() {
         console.log(`Port ${port} deneniyor...`);
         try {
             const connection = await mysql.createConnection({
-                host: '77.245.149.60',
+                host: process.env.MYSQL_HOST,
                 port: port,
-                user: 'ist_172505',
-                password: 'ist_172505',
+                user: process.env.MYSQL_USER,
+                password: process.env.MYSQL_PASSWORD,
                 database: 'ist',
                 connectTimeout: 5000
             });

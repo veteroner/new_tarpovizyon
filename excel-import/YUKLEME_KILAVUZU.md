@@ -30,7 +30,7 @@ Toplam **39 tablo** için SQL dosyaları oluşturuldu. Her tablo "oner_" prefix'
 
 **Yöntem 2: Terminal ile (SSH erişiminiz varsa)**
 ```bash
-mysql -h 77.245.149.60 -P 3306 -u ist_172505 -p ist < dosya_adi.sql
+mysql -h "$MYSQL_HOST" -P 3306 -u "$MYSQL_USER" -p ist < dosya_adi.sql
 ```
 
 ## 📋 Oluşturulan Tablolar

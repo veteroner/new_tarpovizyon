@@ -211,7 +211,7 @@ def main():
         print(f"📁 Dosyalar: {OUTPUT_DIR}")
         print('='*80)
         print(f"\n💡 SQL dosyalarını veritabanına yüklemek için:")
-        print(f"   mysql -h 77.245.149.60 -P 3306 -u ist_172505 -p ist < {OUTPUT_DIR}/XX_tablo_adi.sql")
+        print(f"   mysql -h "$MYSQL_HOST" -P 3306 -u "$MYSQL_USER" -p ist < {OUTPUT_DIR}/XX_tablo_adi.sql")
         
     except FileNotFoundError:
         print(f"❌ Hata: '{EXCEL_FILE}' dosyası bulunamadı!")
