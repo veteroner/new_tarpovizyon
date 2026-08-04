@@ -1,13 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import { translateCountry } from '../../utils/countryTranslations';
 import type { Insight } from '../../components/InsightCard';
 import {
   calculateCAGR, calculateHHI, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS
+  analyzeTrend,
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
+
+// D1 toplama rotası; kıta/toplam satırları sunucudaki 'v1' listesiyle dışlanır.
+const R = 'fao/land-use';
+const EX = { preset: 'v1' as const, col: 'area' };
+// area alanında Türkiye TEK bir değerle geçiyor; eski OR zincirine gerek yok.
+const TR = 'Türkiye';
+const TARIM = 'Tarım arazisi';
+const SULAMA = 'Sulama altyapısı bulunan arazi';
+const ITEMS = ['Tarım arazisi', 'İşlenebilir arazi', 'Sürekli çayırlar ve meralar', 'Orman alanı', 'Geçici nadas alanı', 'Sulama altyapısı bulunan arazi', 'Ekili alan', 'Çok yıllık ürünler'];
+const TREND_ITEMS = ['Tarım arazisi', 'İşlenebilir arazi', 'Orman alanı', 'Sulama altyapısı bulunan arazi'];
+const RADAR_ITEMS = ['Tarım arazisi', 'İşlenebilir arazi', 'Sürekli çayırlar ve meralar', 'Orman alanı', 'Sulama altyapısı bulunan arazi', 'Geçici nadas alanı'];
+const ALERT_ITEMS = ['Tarım arazisi', 'İşlenebilir arazi', 'Sürekli çayırlar ve meralar', 'Orman alanı', 'Sulama altyapısı bulunan arazi', 'Geçici nadas alanı', 'Ekili alan'];
 
 /* ── Types ─────────────────────────────────────────────────── */
 export type Tab = 'overview' | 'transformation' | 'benchmark' | 'turkey' | 'forecast' | 'alerts';
@@ -302,27 +314,26 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
     try {
       const latestYear = '2023';
       const prevYear = '2021';
-      const ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Geçici nadas alanı','Sulama altyapısı bulunan arazi','Ekili alan','Çok yıllık ürünler')";
 
       const [worldLandRes, turkeyLandRes, prevWorldRes, topCountriesRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ${ITEMS} GROUP BY item_tr ORDER BY total DESC`),
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='${latestYear}' AND (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND item_tr IN ${ITEMS}`),
-        fetchQuery(`SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${prevYear}' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarım arazisi' GROUP BY item_tr`),
-        fetchQuery(`SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE year='${latestYear}' AND item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY total DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as total FROM fao_land_use WHERE item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: latestYear }, whereIn: { item_tr: ITEMS }, exclude: EX, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: latestYear, area: TR }, whereIn: { item_tr: ITEMS } }),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: prevYear, item_tr: TARIM }, exclude: EX }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: latestYear, item_tr: TARIM }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { item_tr: TARIM }, exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
 
-      const landTypes = (worldLandRes.data || []).map((r: any, i: number) => ({
-        name: String(r.item_tr), value: Number(r.total) || 0,
+      const landTypes = worldLandRes.map((r: any, i: number) => ({
+        name: String(r.item_tr), value: num(r.sum_value),
         fill: CHART_COLORS[i % CHART_COLORS.length]
       }));
       setOverviewLandTypes(landTypes);
 
       const turkeyMap: Record<string, number> = {};
-      (turkeyLandRes.data || []).forEach((r: any) => { turkeyMap[String(r.item_tr)] = Number(r.val) || 0; });
+      turkeyLandRes.forEach((r: any) => { turkeyMap[String(r.item_tr)] = num(r.sum_value); });
 
       const worldAg = landTypes.find((l: any) => l.name === 'Tarım arazisi')?.value || 0;
-      const prevWorldAg = Number(prevWorldRes.data?.[0]?.total) || 0;
+      const prevWorldAg = num(prevWorldRes[0]?.sum_value);
       const turkeyAg = turkeyMap['Tarım arazisi'] || 0;
       const turkeyArable = turkeyMap['İşlenebilir arazi'] || 0;
       const turkeyIrrigation = turkeyMap['Sulama altyapısı bulunan arazi'] || 0;
@@ -333,15 +344,15 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
       const irrigationRate = turkeyAg > 0 ? (turkeyIrrigation / turkeyAg) * 100 : 0;
       const fallowRate = turkeyArable > 0 ? (turkeyFallow / turkeyArable) * 100 : 0;
 
-      const topCountries = (topCountriesRes.data || []).map((r: any, i: number) => {
+      const topCountries = topCountriesRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey') || name.includes('Turkiye');
-        return { name: translateCountry(name), rawName: name, value: Number(r.total) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+        return { name: translateCountry(name), rawName: name, value: num(r.sum_value), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setOverviewTopCountries(topCountries);
       const turkeyRank = topCountries.findIndex((c: any) => c.isTurkey) + 1;
 
-      const trendData = (trendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.total) || 0 }));
+      const trendData = trendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
       setOverviewTrend(trendData);
 
       const worldTrendYV: YearValue[] = trendData.map((t: any) => ({ year: t.year, value: t.value }));
@@ -372,18 +383,17 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
   const loadTransformationData = useCallback(async () => {
     setLoading(true);
     try {
-      const ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı','Ekili alan','Çok yıllık ürünler')";
       const [turkeyTimeRes] = await Promise.all([
-        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND item_tr IN ${ITEMS} AND CAST(year AS SIGNED) >= 2000 ORDER BY year`),
+        fetchAgg(R, { groupBy: ['year', 'item_tr'], sum: ['value'], where: { area: TR }, whereIn: { item_tr: ITEMS }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
       ]);
       const overridePayload = await loadTransitionMatrixOverrides();
       const effectiveCrosswalkRules = overridePayload?.rules || LAND_USE_CROSSWALK_RULES;
 
       const turkeyByType: Record<string, YearValue[]> = {};
-      (turkeyTimeRes.data || []).forEach((r: any) => {
+      turkeyTimeRes.forEach((r: any) => {
         const type = String(r.item_tr);
         if (!turkeyByType[type]) turkeyByType[type] = [];
-        turkeyByType[type].push({ year: String(r.year), value: Number(r.val) || 0 });
+        turkeyByType[type].push({ year: String(r.year), value: num(r.sum_value) });
       });
 
       const transformComp: any[] = [];
@@ -522,13 +532,13 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
     setLoading(true);
     try {
       const [agCountryRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND item_tr='Tarım arazisi' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 100 ORDER BY val DESC LIMIT 50`),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2023, item_tr: TARIM }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 200 }),
       ]);
 
-      const agData = (agCountryRes.data || []).map((r: any, i: number) => {
+      const agData = agCountryRes.map((r: any, i: number) => {
         const name = String(r.area || '');
         const isTurkey = name.includes('Türkiye') || name.includes('Turkey');
-        return { rank: i + 1, country: translateCountry(name), rawName: name, agLand: Number(r.val) || 0, isTurkey };
+        return { rank: i + 1, country: translateCountry(name), rawName: name, agLand: num(r.sum_value), isTurkey };
       });
       setBenchmarkData(agData);
 
@@ -552,31 +562,29 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
   const loadTurkeyProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const TREND_ITEMS = "('Tarım arazisi','İşlenebilir arazi','Orman alanı','Sulama altyapısı bulunan arazi')";
-      const RADAR_ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı')";
-      const TR_COND = "(area='Turkiye' OR area='Turkey' OR area='Türkiye')";
+      
 
       const [turkeyAllRes, turkeyTrendRes, worldAvgRes, topIrrigRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND ${TR_COND}`),
-        fetchQuery(`SELECT year, item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE ${TR_COND} AND item_tr IN ${TREND_ITEMS} AND CAST(year AS SIGNED) >= 2000 ORDER BY year`),
-        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND item_tr IN ${RADAR_ITEMS} AND CAST(value AS DECIMAL(20,2)) > 0 GROUP BY item_tr`),
-        fetchQuery(`SELECT area, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND item_tr='Sulama altyapısı bulunan arazi' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 ORDER BY val DESC LIMIT 20`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2023, area: TR } }),
+        fetchAgg(R, { groupBy: ['year', 'item_tr'], sum: ['value'], where: { area: TR }, whereIn: { item_tr: TREND_ITEMS }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['item_tr'], avg: ['value'], where: { year: 2023 }, whereIn: { item_tr: RADAR_ITEMS }, positive: ['value'], exclude: EX }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2023, item_tr: SULAMA }, positive: ['value'], exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
       ]);
 
       const turkeyData: Record<string, number> = {};
-      (turkeyAllRes.data || []).forEach((r: any) => { turkeyData[String(r.item_tr)] = Number(r.val) || 0; });
+      turkeyAllRes.forEach((r: any) => { turkeyData[String(r.item_tr)] = num(r.sum_value); });
       const worldAvgs: Record<string, number> = {};
-      (worldAvgRes.data || []).forEach((r: any) => { worldAvgs[String(r.item_tr)] = Number(r.avg_val) || 0; });
+      worldAvgRes.forEach((r: any) => { worldAvgs[String(r.item_tr)] = num(r.avg_value); });
 
       const turkeyByType: Record<string, YearValue[]> = {};
-      (turkeyTrendRes.data || []).forEach((r: any) => {
+      turkeyTrendRes.forEach((r: any) => {
         const type = String(r.item_tr);
         if (!turkeyByType[type]) turkeyByType[type] = [];
-        turkeyByType[type].push({ year: String(r.year), value: Number(r.val) || 0 });
+        turkeyByType[type].push({ year: String(r.year), value: num(r.sum_value) });
       });
 
-      const irrigData = (topIrrigRes.data || []).map((r: any) => ({
-        country: translateCountry(String(r.area || '')), value: Number(r.val) || 0,
+      const irrigData = topIrrigRes.map((r: any) => ({
+        country: translateCountry(String(r.area || '')), value: num(r.sum_value),
         isTurkey: String(r.area).includes('Türkiye') || String(r.area).includes('Turkey')
       }));
 
@@ -629,12 +637,12 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
     setLoading(true);
     try {
       const [turkeyForecastRes, worldForecastRes] = await Promise.all([
-        fetchQuery(`SELECT year, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE (area='Turkiye' OR area='Turkey' OR area='Türkiye') AND item_tr='Tarım arazisi' AND CAST(year AS SIGNED) >= 1990 ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as val FROM fao_land_use WHERE area NOT IN ${EXCLUDED_AREAS} AND item_tr='Tarım arazisi' AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { area: TR, item_tr: TARIM }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { item_tr: TARIM }, whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
 
-      const turkeyForecastInput: YearValue[] = (turkeyForecastRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.val) || 0 }));
-      const worldForecastInput: YearValue[] = (worldForecastRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.val) || 0 }));
+      const turkeyForecastInput: YearValue[] = turkeyForecastRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
+      const worldForecastInput: YearValue[] = worldForecastRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
 
       const turkeyForecast = forecastLinear(turkeyForecastInput, 5);
       const worldForecast = forecastLinear(worldForecastInput, 5);
@@ -674,21 +682,20 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
   const loadIntelligenceAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      const ALERT_ITEMS = "('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı','Ekili alan')";
-      const TR_COND = "(area='Turkiye' OR area='Turkey' OR area='Türkiye')";
+      
 
       const [turkeyLatestRes, turkeyOlderRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2023' AND ${TR_COND} AND item_tr IN ${ALERT_ITEMS}`),
-        fetchQuery(`SELECT item_tr, CAST(value AS DECIMAL(20,2)) as val FROM fao_land_use WHERE year='2010' AND ${TR_COND} AND item_tr IN ${ALERT_ITEMS}`),
-        fetchQuery(`SELECT item_tr, AVG(CAST(value AS DECIMAL(20,2))) as avg_val FROM fao_land_use WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} AND CAST(value AS DECIMAL(20,2)) > 0 AND item_tr IN ('Tarım arazisi','İşlenebilir arazi','Sürekli çayırlar ve meralar','Orman alanı','Sulama altyapısı bulunan arazi','Geçici nadas alanı') GROUP BY item_tr`),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2023, area: TR }, whereIn: { item_tr: ALERT_ITEMS } }),
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2010, area: TR }, whereIn: { item_tr: ALERT_ITEMS } }),
+        fetchAgg(R, { groupBy: ['item_tr'], avg: ['value'], where: { year: 2023 }, whereIn: { item_tr: RADAR_ITEMS }, positive: ['value'], exclude: EX }),
       ]);
 
       const turkeyNow: Record<string, number> = {};
-      (turkeyLatestRes.data || []).forEach((r: any) => turkeyNow[String(r.item_tr)] = Number(r.val) || 0);
+      turkeyLatestRes.forEach((r: any) => turkeyNow[String(r.item_tr)] = num(r.sum_value));
       const turkeyBefore: Record<string, number> = {};
-      (turkeyOlderRes.data || []).forEach((r: any) => turkeyBefore[String(r.item_tr)] = Number(r.val) || 0);
+      turkeyOlderRes.forEach((r: any) => turkeyBefore[String(r.item_tr)] = num(r.sum_value));
       const worldAvg: Record<string, number> = {};
-      (worldAvgRes.data || []).forEach((r: any) => worldAvg[String(r.item_tr)] = Number(r.avg_val) || 0);
+      worldAvgRes.forEach((r: any) => worldAvg[String(r.item_tr)] = num(r.avg_value));
 
       const alerts: IntelligenceAlert[] = [];
       const agNow = turkeyNow['Tarım arazisi'] || 0;
