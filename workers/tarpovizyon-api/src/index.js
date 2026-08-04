@@ -136,6 +136,10 @@ const AGG = {
   'tuik/gsyh-a21': { table: 'tuik_gsyh_a21',
     dims: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], nums: ['zincir_endeks', 'zincir', 'zincir_degisim', 'cari'] },
   'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', dims: ['yil', 'yer', 'yerkod', 'duzey'], nums: ['USD', 'TR'] },
+  // Geniş format: yıllar y2004…y2025 sütunlarında.
+  'tuik/hayvancilik-canlihayvan': { table: 'tuik_hayvancilik_canlihayvan',
+    dims: ['duzeykod', 'duzey', 'yerkod', 'yer', 'ilkod', 'il', 'hayvankod', 'grup', 'kategori', 'tip', 'yas', 'durum', 'cinsiyet'],
+    nums: ['y2004', 'y2005', 'y2006', 'y2007', 'y2008', 'y2009', 'y2010', 'y2011', 'y2012', 'y2013', 'y2014', 'y2015', 'y2016', 'y2017', 'y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024', 'y2025'] },
 
   // Kimlik benzeri sayısal alanlar (year, *code) gruplanabilsin diye dims'te;
   // nums yalnızca gerçek ölçüleri içerir.
@@ -160,7 +164,7 @@ const AGG = {
   // fao_livestock_primary'de `value` metin olarak saklanıyor; CAST ile toplanır.
   'fao/livestock-primary': { db: 'DUNYA', table: 'fao_livestock_primary',
     dims: ['domain', 'area', 'areacode', 'element', 'elementcode', 'item', 'itemcode', 'year', 'unit'],
-    nums: ['value'] },
+    nums: ['value'], commaDecimal: ['value'] },
   'fao/nufus': { db: 'DUNYA', table: 'fao_nufus',
     dims: ['domain', 'area', 'areacode', 'item', 'itemcode', 'year', 'unit'],
     nums: ['TOPLAM', 'erkek/T', 'kadın/T', 'kirsal', 'sehir'] },
@@ -204,6 +208,15 @@ const qi = (n) => `"${n}"`;
 // karşılaştırmalarına COLLATE NOCASE ekleniyor. Sayısal değerlerde eklenmiyor,
 // çünkü orada karşılaştırmayı metne çevirip sonucu bozardı.
 const isNumericValue = (v) => v !== '' && Number.isFinite(Number(v));
+
+// Bazı tablolarda sayılar METİN ve ondalık ayırıcı VİRGÜL ('2173,8' gibi;
+// fao_livestock_primary bütünüyle böyle). Düz CAST(... AS REAL) virgülde
+// kesip ondalığı kaybediyor — eski SQL'deki REPLACE(value,',','.')*1'in
+// karşılığı olarak bu sütunlarda önce nokta'ya çeviriyoruz.
+const numExpr = (cfg, col) =>
+  (cfg.commaDecimal || []).includes(col)
+    ? `CAST(REPLACE(${qi(col)}, ',', '.') AS REAL)`
+    : `CAST(${qi(col)} AS REAL)`;
 const coll = (v) => (isNumericValue(v) ? '' : ' COLLATE NOCASE');
 
 /**
@@ -226,10 +239,10 @@ function buildAgg(cfg, sp) {
   const cols = [];
   for (const c of new Set([...groupBy, ...select])) cols.push(`${qi(c)} AS ${qi(c)}`);
   // MySQL'deki CAST(x AS DECIMAL(20,2)) yerine SQLite'ta REAL.
-  for (const c of sums) cols.push(`SUM(CAST(${qi(c)} AS REAL)) AS ${qi('sum_' + c)}`);
-  for (const c of avgs) cols.push(`AVG(CAST(${qi(c)} AS REAL)) AS ${qi('avg_' + c)}`);
-  for (const c of mins) cols.push(`MIN(CAST(${qi(c)} AS REAL)) AS ${qi('min_' + c)}`);
-  for (const c of maxs) cols.push(`MAX(CAST(${qi(c)} AS REAL)) AS ${qi('max_' + c)}`);
+  for (const c of sums) cols.push(`SUM(${numExpr(cfg, c)}) AS ${qi('sum_' + c)}`);
+  for (const c of avgs) cols.push(`AVG(${numExpr(cfg, c)}) AS ${qi('avg_' + c)}`);
+  for (const c of mins) cols.push(`MIN(${numExpr(cfg, c)}) AS ${qi('min_' + c)}`);
+  for (const c of maxs) cols.push(`MAX(${numExpr(cfg, c)}) AS ${qi('max_' + c)}`);
   for (const c of distincts) cols.push(`COUNT(DISTINCT ${qi(c)}) AS ${qi('cd_' + c)}`);
   if (sp.get('count') === '1') cols.push('COUNT(*) AS "cnt"');
   if (cols.length === 0) throw new Error('en az bir select/groupBy/toplama alanı gerekli');
@@ -244,6 +257,13 @@ function buildAgg(cfg, sp) {
     if (v === '') continue;
     // in_<sütun>=a|b|c — '|' ayırıcı, çünkü değerlerin içinde virgül olabiliyor
     // ("Buğday, Durum Buğdayı Hariç" gibi). Değerlerin tamamı bind edilir.
+    // like_<sütun>=%desen% — eski sorgulardaki LIKE koşullarının karşılığı.
+    if (k.startsWith('like_')) {
+      const col = k.slice(5);
+      if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+      where.push(`${qi(col)} LIKE ? COLLATE NOCASE`); params.push(v);
+      continue;
+    }
     if (k.startsWith('in_')) {
       const col = k.slice(3);
       if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
@@ -262,7 +282,7 @@ function buildAgg(cfg, sp) {
     where.push(`${qi(col)}${coll(v)} ${OPS[prefix]} ?`); params.push(v);
   }
   // positive=<sütun>: MySQL sorgularındaki "CAST(x) > 0" koşulunun karşılığı.
-  for (const c of pick('positive', cfg.nums)) where.push(`CAST(${qi(c)} AS REAL) > 0`);
+  for (const c of pick('positive', cfg.nums)) where.push(`${numExpr(cfg, c)} > 0`);
   // exclude=<preset>:<sütun> — kıta/toplam satırlarını dışla.
   const ex = sp.get('exclude');
   if (ex) {

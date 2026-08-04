@@ -1,10 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num, type Row } from '../../services/d1';
 import {
   COLORS,
   translateMilkItem, translateMeatItem, translateEggItem,
 } from './overviewTypes';
 import type { OverviewData, DataItem, YearlyData } from './overviewTypes';
+
+// D1 toplama rotaları. fao_livestock_primary'de `value` METİN ve ondalık
+// ayırıcısı VİRGÜL ('2173,8'); uç bu sütunu commaDecimal olarak biliyor ve
+// eski REPLACE(value,',','.')*1 ile aynı sonucu üretiyor.
+const R_LIVESTOCK = 'fao/livestock-primary';
+const R_ME = 'fao/me-indicator';
+const R_LAND = 'fao/land-use';
+const R_NUFUS = 'fao/nufus';
+const R_ISTIHDAM = 'fao/nufus-istihdam-tarim';
+const R_CANLI = 'tuik/hayvancilik-canlihayvan';
+const TR = 'Türkiye';
+const KIRMIZI_ET = [
+  'Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled',
+  'Meat of goat, fresh or chilled', 'Meat of buffalo, fresh or chilled',
+];
+const KANATLI_ET = ['Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled'];
+
+// FAO makroekonomik gösterge kodları. Eski sorgular 6110/6119/6103 arıyordu;
+// veri setinde bu kodlar YOK (sorgular hem MySQL'de hem D1'de boş dönüyordu ve
+// sayfada 4 KPI "—" görünüyordu). Güncel kodlar aşağıdaki gibi ve tutarlı:
+// 68.111,78 / 1.226.292,17 = %5,55 → EC_PAY_GSYH ile birebir uyuşuyor.
+const EC_MILYON_USD = 6184;   // toplam değer (million USD)
+const EC_KISI_BASI = 6185;    // kişi başı (USD)
+const EC_PAY_GSYH = 6187;     // GSYH içindeki pay (%)
 
 export interface UseOverviewDataReturn {
   data: OverviewData | null;
@@ -26,55 +50,55 @@ export function useOverviewData(): UseOverviewDataReturn {
         agriGdpRes, agriGdpShareRes, agriEmpRes, agriEmpShareRes,
         livestockStocksRes, regionalCattleRes, regionalSheepRes, regionalGoatRes, regionalPoultryRes,
       ] = await Promise.all([
-        fetchQuery(`SELECT total_v, kirsal_v, sehir_v FROM fao_nufus WHERE year=2023 AND area='Türkiye' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6110 AND unit='million USD' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Gross Domestic Product' AND elementcode=6119 AND unit='USD' LIMIT 1`),
-        fetchQuery(`SELECT item_tr, value FROM fao_land_use WHERE year=2022 AND area='Türkiye'`),
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%'`),
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' GROUP BY item ORDER BY total DESC`),
-        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%milk%' AND year >= 2010 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of cattle with the bone, fresh or chilled', 'Meat of sheep, fresh or chilled', 'Meat of goat, fresh or chilled', 'Meat of buffalo, fresh or chilled') GROUP BY item`),
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='t' AND item IN ('Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled') GROUP BY item`),
-        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='t' AND item LIKE '%meat%' AND year >= 2010 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%'`),
-        fetchQuery(`SELECT item, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE year=2023 AND area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' GROUP BY item`),
-        fetchQuery(`SELECT year, SUM(REPLACE(value,',','.') * 1000) as total FROM fao_livestock_primary WHERE area='Türkiye' AND element='Production' AND unit='1000 No' AND item LIKE '%egg%' AND year >= 2010 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND elementcode=6110 AND unit='million USD' LIMIT 1`),
-        fetchQuery(`SELECT value FROM fao_ME_indicator WHERE year='2023' AND area='Türkiye' AND item='Value Added (Agriculture, Forestry and Fishing)' AND elementcode=6103 AND unit='%' LIMIT 1`),
-        fetchQuery(`SELECT total as value FROM fao_nufus_istihdam_tarim WHERE area='Türkiye' AND yearcode='2023' AND indicator='Employment in agriculture by age, total (15+)' LIMIT 1`),
-        fetchQuery(`SELECT total as value FROM fao_nufus_istihdam_tarim WHERE area='Türkiye' AND yearcode='2023' AND indicator='Share of employment in agriculture in total employment' LIMIT 1`),
-        fetchQuery(`SELECT grup, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey='ülke' AND yer='TÜRKİYE' AND grup IN ('Sığır','Koyun','Keçi','Tavuk','Hindi') GROUP BY grup`),
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Sığır' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Koyun' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(COALESCE(y2024,0)) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup='Keçi' GROUP BY yer ORDER BY total DESC LIMIT 12`),
-        fetchQuery(`SELECT yer, SUM(CASE WHEN grup='Tavuk' THEN COALESCE(y2024,0) WHEN grup='Hindi' THEN COALESCE(y2024,0) ELSE 0 END) as total FROM tuik_hayvancilik_canlihayvan WHERE duzey IN ('bölge','bolge') AND grup IN ('Tavuk','Hindi') GROUP BY yer ORDER BY total DESC LIMIT 12`),
+        fetchAgg(R_NUFUS, { sum: ['TOPLAM', 'kirsal', 'sehir'], where: { year: 2023, area: TR } }),
+        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Gross Domestic Product', elementcode: EC_MILYON_USD, unit: 'million USD' } }),
+        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Gross Domestic Product', elementcode: EC_KISI_BASI, unit: 'USD' } }),
+        fetchAgg(R_LAND, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, area: TR } }),
+        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' }, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KIRMIZI_ET } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KANATLI_ET } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: 't' }, like: { item: '%meat%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_MILYON_USD, unit: 'million USD' } }),
+        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_PAY_GSYH, unit: '%' } }),
+        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: 2023, indicator: 'Employment in agriculture by age, total (15+)' } }),
+        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: 2023, indicator: 'Share of employment in agriculture in total employment' } }),
+        fetchAgg(R_CANLI, { groupBy: ['grup'], sum: ['y2024'], where: { duzey: 'ülke', yer: 'TÜRKİYE' }, whereIn: { grup: ['Sığır', 'Koyun', 'Keçi', 'Tavuk', 'Hindi'] } }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Sığır' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Keçi' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], whereIn: { duzey: ['bölge', 'bolge'], grup: ['Tavuk', 'Hindi'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
       ]);
 
       // Nüfus
-      const popData = populationRes.data?.[0];
-      const population = Number(popData?.total_v) * 1000 || 0;
-      const ruralPopulation = Number(popData?.kirsal_v) * 1000 || 0;
-      const urbanPopulation = Number(popData?.sehir_v) * 1000 || 0;
+      const popData = populationRes[0];
+      const population = num(popData?.sum_TOPLAM) * 1000;
+      const ruralPopulation = num(popData?.sum_kirsal) * 1000;
+      const urbanPopulation = num(popData?.sum_sehir) * 1000;
 
       // GSYİH
-      const gdp = (Number(gdpRes.data?.[0]?.value) || 0) * 1e6;
-      const gdpPerCapita = Number(gdpPerCapitaRes.data?.[0]?.value) || 0;
+      const gdp = (num(gdpRes[0]?.sum_value)) * 1e6;
+      const gdpPerCapita = num(gdpPerCapitaRes[0]?.sum_value);
 
       // Tarımsal katma değer
-      const agriculturalGDP = (Number(agriGdpRes.data?.[0]?.value) || 0) * 1e6;
-      const agriculturalGDPShare = Number(agriGdpShareRes.data?.[0]?.value) || 0;
+      const agriculturalGDP = (num(agriGdpRes[0]?.sum_value)) * 1e6;
+      const agriculturalGDPShare = num(agriGdpShareRes[0]?.sum_value);
 
       // Tarım istihdamı
-      const agriculturalEmployment = (Number(agriEmpRes.data?.[0]?.value) || 0) * 1000;
-      const agriculturalEmploymentShare = Number(agriEmpShareRes.data?.[0]?.value) || 0;
+      const agriculturalEmployment = (num(agriEmpRes[0]?.sum_total)) * 1000;
+      const agriculturalEmploymentShare = num(agriEmpShareRes[0]?.sum_total);
       const totalEmployment = agriculturalEmploymentShare > 0
         ? agriculturalEmployment / (agriculturalEmploymentShare / 100)
         : 0;
 
       // Arazi
       const landMap: Record<string, number> = {};
-      landRes.data?.forEach(item => {
-        landMap[String(item.item_tr)] = Number(item.value) * 1000 || 0;
+      landRes.forEach((item) => {
+        landMap[String(item.item_tr)] = num(item.sum_value) * 1000;
       });
       const agriculturalLand = landMap['Tarım'] || 0;
       const totalLand = landMap['Kara alanı'] || landMap['Ülke yüzölçümü'] || 0;
@@ -87,28 +111,28 @@ export function useOverviewData(): UseOverviewDataReturn {
       ].filter(item => item.value > 0);
 
       // Süt üretimi
-      const milkTotal = Number(milkTotalRes.data?.[0]?.total) || 0;
-      const milkBreakdown: DataItem[] = (milkBreakdownRes.data || []).map((item, idx) => ({
+      const milkTotal = num(milkTotalRes[0]?.sum_value);
+      const milkBreakdown: DataItem[] = milkBreakdownRes.map((item, idx) => ({
         name: translateMilkItem(String(item.item)),
-        value: Number(item.total) || 0,
+        value: num(item.sum_value),
         fill: COLORS.milk[idx % COLORS.milk.length],
         unit: 'ton',
       }));
-      const milkYearly: YearlyData[] = (milkYearlyRes.data || []).map(item => ({
+      const milkYearly: YearlyData[] = milkYearlyRes.map(item => ({
         year: String(item.year),
-        milk: Number(item.total) || 0,
+        milk: num(item.sum_value),
       }));
 
       // Et üretimi
-      const redMeatBreakdown: DataItem[] = (redMeatBreakdownRes.data || []).map((item, idx) => ({
+      const redMeatBreakdown: DataItem[] = redMeatBreakdownRes.map((item, idx) => ({
         name: translateMeatItem(String(item.item)),
-        value: Number(item.total) || 0,
+        value: num(item.sum_value),
         fill: COLORS.meat[idx % COLORS.meat.length],
         unit: 'ton',
       }));
-      const whiteMeatBreakdown: DataItem[] = (whiteMeatBreakdownRes.data || []).map((item, idx) => ({
+      const whiteMeatBreakdown: DataItem[] = whiteMeatBreakdownRes.map((item, idx) => ({
         name: translateMeatItem(String(item.item)),
-        value: Number(item.total) || 0,
+        value: num(item.sum_value),
         fill: COLORS.meat[(idx + 2) % COLORS.meat.length],
         unit: 'ton',
       }));
@@ -122,28 +146,30 @@ export function useOverviewData(): UseOverviewDataReturn {
       const whiteMeat = chicken + turkey;
       const meatTotal = redMeat + whiteMeat;
       const meatBreakdown: DataItem[] = [...redMeatBreakdown, ...whiteMeatBreakdown];
-      const meatYearly: YearlyData[] = (meatYearlyRes.data || []).map(item => ({
+      const meatYearly: YearlyData[] = meatYearlyRes.map(item => ({
         year: String(item.year),
-        meat: Number(item.total) || 0,
+        meat: num(item.sum_value),
       }));
 
-      // Yumurta
-      const eggTotal = Number(eggTotalRes.data?.[0]?.total) || 0;
-      const eggBreakdown: DataItem[] = (eggBreakdownRes.data || []).map((item, idx) => ({
+      // Yumurta — kaynak birim '1000 No', eski sorgu SUM(... * 1000) ile adede
+      // çeviriyordu; toplama ucu çarpan almadığı için burada uygulanıyor.
+      const BIN_ADET = 1000;
+      const eggTotal = num(eggTotalRes[0]?.sum_value) * BIN_ADET;
+      const eggBreakdown: DataItem[] = eggBreakdownRes.map((item, idx) => ({
         name: translateEggItem(String(item.item)),
-        value: Number(item.total) || 0,
+        value: num(item.sum_value) * BIN_ADET,
         fill: COLORS.egg[idx % COLORS.egg.length],
         unit: 'adet',
       }));
-      const eggYearly: YearlyData[] = (eggYearlyRes.data || []).map(item => ({
+      const eggYearly: YearlyData[] = eggYearlyRes.map(item => ({
         year: String(item.year),
-        egg: Number(item.total) || 0,
+        egg: num(item.sum_value) * BIN_ADET,
       }));
 
       // Hayvan varlığı
-      const livestockStocksBreakdown: DataItem[] = (livestockStocksRes.data || []).map((row, idx) => ({
-        name: String((row as Record<string, unknown>).grup ?? ''),
-        value: Number((row as Record<string, unknown>).total) || 0,
+      const livestockStocksBreakdown: DataItem[] = livestockStocksRes.map((row, idx) => ({
+        name: String(row.grup ?? ''),
+        value: num(row.sum_y2024),
         fill: COLORS.general[idx % COLORS.general.length],
         unit: 'baş',
       }));
@@ -153,10 +179,10 @@ export function useOverviewData(): UseOverviewDataReturn {
       const livestockPoultry = (livestockStocksBreakdown.find(l => l.name.includes('Tavuk'))?.value || 0)
         + (livestockStocksBreakdown.find(l => l.name.includes('Hindi'))?.value || 0);
 
-      const mapRegional = (res: { data?: Record<string, string | number>[] }, palette: string[]): DataItem[] =>
-        (res?.data || []).map((row, idx) => ({
+      const mapRegional = (rows: Row[], palette: string[]): DataItem[] =>
+        rows.map((row, idx) => ({
           name: String(row.yer || ''),
-          value: Number(row.total) || 0,
+          value: num(row.sum_y2024),
           fill: palette[idx % palette.length],
           unit: 'baş',
         }));
