@@ -141,7 +141,7 @@ const AGG = {
   // nums yalnızca gerçek ölçüleri içerir.
   'fao/balans': { db: 'DUNYA', table: 'fao_balans',
     dims: ['domain', 'ulke', 'ulkead', 'urun', 'urunad', 'yil'],
-    nums: ['nuf_v', 'uretim_v', 'imp_v', 'stok_v', 'exp_v', 'arz_v', 'yem_v', 'tohum_v', 'kayip_v'] },
+    nums: ['nuf_v', 'uretim_v', 'imp_v', 'stok_v', 'exp_v', 'arz_v', 'yem_v', 'tohum_v', 'kayip_v', 'islem_v', 'diger_v', 'turist_v', 'kalinti_v', 'gida_v', 'kbyt_v', 'kbgtcal_v', 'arzkcal_v', 'kbgpro_v', 'arzpro_v', 'kbgyag_v', 'arzyag_v', 'yeterlilik'] },
   'fao/land-use': { db: 'DUNYA', table: 'fao_land_use',
     dims: ['domain', 'area', 'areacode', 'hesap', 'Element', 'element_tr', 'elementcode', 'item', 'item_tr', 'itemcode', 'year', 'yearcode', 'unit'],
     nums: ['value'] },

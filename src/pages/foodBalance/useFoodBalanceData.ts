@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, forecastLinear, detectAnomalies, calculateYoY,
@@ -27,6 +27,14 @@ export const FOOD_ITEMS: { id: string; name: string; nameTR: string }[] = [
   { id: '2744', name: 'Eggs', nameTR: 'Yumurta' },
   { id: '2532', name: 'Cassava', nameTR: 'Manyok' },
 ];
+
+// D1 toplama rotası. fao_balans'ta ulkead sütunu dolu olduğu için eski
+// fao_nufus JOIN'ine gerek yok — isimlerin birebir aynı olduğu doğrulandı.
+const R = 'fao/balans';
+// DİKKAT: 223 = Türkiye, 351 = China. Bu ikili filtre göçten ÖNCE de böyleydi;
+// "Türkiye" sekmesi aslında Türkiye + Çin toplamını gösteriyor. Davranış
+// bilerek korundu (göç saf refactor kalsın diye) — düzeltilmesi ayrı bir karar.
+const TR_KODLARI = ['223', '351'];
 
 const MAIN_ITEMS = ['2511', '2514', '2515', '2513', '2731', '2734', '2848'];
 
@@ -94,29 +102,27 @@ export function useFoodBalanceData(activeTab: Tab) {
   const [intelligenceAlerts, setIntelligenceAlerts] = useState<IntelligenceAlert[]>([]);
   const [allInsights, setAllInsights] = useState<Insight[]>([]);
 
-  const itemList = MAIN_ITEMS.join(',');
-
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
       const [byProductRes, topCountriesRes, trendRes, prevYearRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as uretim, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat, AVG(CAST(b.kbgtcal_v AS DECIMAL(10,2))) as kalori FROM fao_balans b WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY uretim DESC`),
-        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim FROM fao_balans WHERE urun IN (${itemList}) GROUP BY yil ORDER BY yil`),
-        fetchQuery(`SELECT SUM(CAST(uretim_v AS DECIMAL(20,2))) as total FROM fao_balans WHERE yil='2022' AND urun IN (${itemList})`)
+        fetchAgg(R, { groupBy: ['urun'], sum: ['uretim_v', 'imp_v', 'exp_v'], avg: ['kbgtcal_v'], where: { yil: 2023 }, whereIn: { urun: MAIN_ITEMS }, orderBy: 'sum_uretim_v', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['ulke', 'ulkead'], sum: ['uretim_v'], where: { yil: 2023 }, whereIn: { urun: MAIN_ITEMS }, orderBy: 'sum_uretim_v', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['yil'], sum: ['uretim_v'], whereIn: { urun: MAIN_ITEMS }, orderBy: 'yil', dir: 'asc' }),
+        fetchAgg(R, { sum: ['uretim_v'], where: { yil: 2022 }, whereIn: { urun: MAIN_ITEMS } })
       ]);
 
-      const byProduct = (byProductRes.data || []).map((r: any, i: number) => ({
+      const byProduct = byProductRes.map((r: any, i: number) => ({
         name: getProductName(String(r.urun)), id: String(r.urun),
-        production: Number(r.uretim) || 0, imports: Number(r.ithalat) || 0, exports: Number(r.ihracat) || 0,
-        calories: Number(r.kalori) || 0, fill: CHART_COLORS[i % CHART_COLORS.length]
+        production: num(r.sum_uretim_v), imports: num(r.sum_imp_v), exports: num(r.sum_exp_v),
+        calories: num(r.avg_kbgtcal_v ?? r.sum_kbgtcal_v), fill: CHART_COLORS[i % CHART_COLORS.length]
       }));
       setOverviewByProduct(byProduct);
 
-      const topCountries = (topCountriesRes.data || []).map((r: any, i: number) => {
-        const name = String(r.area || '');
+      const topCountries = topCountriesRes.map((r: any, i: number) => {
+        const name = String(r.ulkead || '');
         const isTurkey = name.includes('T\u00FCrkiye') || name.includes('Turkey') || name.includes('Turkiye');
-        return { name: translateCountry(name) || `Ulke ${r.ulke}`, value: Number(r.toplam) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+        return { name: translateCountry(name) || `Ulke ${r.ulke}`, value: num(r.sum_uretim_v), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setOverviewTopCountries(topCountries);
 
@@ -124,10 +130,10 @@ export function useFoodBalanceData(activeTab: Tab) {
       const worldImp = byProduct.reduce((s: number, p: any) => s + p.imports, 0);
       const worldExp = byProduct.reduce((s: number, p: any) => s + p.exports, 0);
       const avgCal = byProduct.length > 0 ? byProduct.reduce((s: number, p: any) => s + p.calories, 0) / byProduct.length : 0;
-      const prevTotal = Number(prevYearRes.data?.[0]?.total) || 0;
+      const prevTotal = num(prevYearRes[0]?.sum_uretim_v);
       const yoy = calculateYoY(worldProd, prevTotal);
 
-      const trendData = (trendRes.data || []).map((r: any) => ({ year: String(r.yil), value: Number(r.uretim) || 0 }));
+      const trendData = trendRes.map((r: any) => ({ year: String(r.yil), value: num(r.sum_uretim_v) }));
       setOverviewTrend(trendData);
       const worldCAGR = calculateCAGR(trendData as YearValue[]);
 
@@ -143,26 +149,26 @@ export function useFoodBalanceData(activeTab: Tab) {
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
     finally { setLoading(false); }
-  }, [itemList]);
+  }, []);
 
   const loadSecurity = useCallback(async () => {
     setLoading(true);
     try {
       const [turkeyBalanceRes, worldAvgCalRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${FOOD_ITEMS.map(f => f.id).join(',')})`),
-        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2023' AND kbgtcal_v > 0 AND urun='2511'`)
+        fetchAgg(R, { groupBy: ['urun'], sum: ['uretim_v', 'imp_v', 'exp_v', 'gida_v', 'kbgtcal_v'], where: { yil: 2023 }, whereIn: { ulke: TR_KODLARI, urun: FOOD_ITEMS.map(f => f.id) } }),
+        fetchAgg(R, { avg: ['kbgtcal_v'], where: { yil: 2023, urun: '2511' }, positive: ['kbgtcal_v'] })
       ]);
 
-      const products = (turkeyBalanceRes.data || []).map((r: any) => {
-        const prod = Number(r.uretim) || 0;
-        const imp = Number(r.ithalat) || 0;
-        const exp = Number(r.ihracat) || 0;
-        const food = Number(r.gida) || 0;
+      const products = turkeyBalanceRes.map((r: any) => {
+        const prod = num(r.sum_uretim_v);
+        const imp = num(r.sum_imp_v);
+        const exp = num(r.sum_exp_v);
+        const food = num(r.sum_gida_v);
         const domestic = prod + imp - exp;
         const sufficiency = domestic > 0 ? (prod / domestic * 100) : 0;
         return {
           name: getProductName(String(r.urun)), id: String(r.urun),
-          production: prod, imports: imp, exports: exp, food, calories: Number(r.kalori) || 0,
+          production: prod, imports: imp, exports: exp, food, calories: num(r.avg_kbgtcal_v ?? r.sum_kbgtcal_v),
           sufficiency, sufficiencyColor: getSufficiencyColor(sufficiency),
           label: getSufficiencyLabel(sufficiency), dependency: Math.max(0, 100 - sufficiency)
         };
@@ -172,7 +178,7 @@ export function useFoodBalanceData(activeTab: Tab) {
       const avgSufficiency = products.length > 0 ? products.reduce((s: number, p: any) => s + p.sufficiency, 0) / products.length : 0;
       const selfSufficient = products.filter((p: any) => p.sufficiency >= 100).length;
       const dependent = products.filter((p: any) => p.sufficiency < 80).length;
-      const worldAvgCal = Number(worldAvgCalRes.data?.[0]?.avg_cal) || 0;
+      const worldAvgCal = num(worldAvgCalRes[0]?.avg_kbgtcal_v);
       setSecurityKPIs({ avgSufficiency, selfSufficient, dependent, productCount: products.length, worldAvgCal });
 
       const ins: Insight[] = [];
@@ -191,20 +197,20 @@ export function useFoodBalanceData(activeTab: Tab) {
     setLoading(true);
     try {
       const [tradeByProductRes, tradeTrendRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, SUM(CAST(b.imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(b.exp_v AS DECIMAL(20,2))) as ihracat FROM fao_balans b WHERE b.yil='2023' AND b.urun IN (${itemList}) GROUP BY b.urun ORDER BY ithalat DESC`),
-        fetchQuery(`SELECT yil, SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim FROM fao_balans WHERE urun IN (${itemList}) GROUP BY yil ORDER BY yil`)
+        fetchAgg(R, { groupBy: ['urun'], sum: ['imp_v', 'exp_v'], where: { yil: 2023 }, whereIn: { urun: MAIN_ITEMS }, orderBy: 'sum_imp_v', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['yil'], sum: ['imp_v', 'exp_v', 'uretim_v'], whereIn: { urun: MAIN_ITEMS }, orderBy: 'yil', dir: 'asc' })
       ]);
 
-      const tradeByProduct = (tradeByProductRes.data || []).map((r: any) => {
-        const imp = Number(r.ithalat) || 0;
-        const exp = Number(r.ihracat) || 0;
+      const tradeByProduct = tradeByProductRes.map((r: any) => {
+        const imp = num(r.sum_imp_v);
+        const exp = num(r.sum_exp_v);
         return { name: getProductName(String(r.urun)), imports: imp, exports: exp, balance: imp - exp, netExporter: exp > imp };
       });
       setTradeData(tradeByProduct);
 
-      const trendData = (tradeTrendRes.data || []).map((r: any) => ({
-        year: String(r.yil), imports: Number(r.ithalat) || 0, exports: Number(r.ihracat) || 0,
-        production: Number(r.uretim) || 0
+      const trendData = tradeTrendRes.map((r: any) => ({
+        year: String(r.yil), imports: num(r.sum_imp_v), exports: num(r.sum_exp_v),
+        production: num(r.sum_uretim_v)
       }));
       setTradeTrend(trendData);
 
@@ -217,26 +223,25 @@ export function useFoodBalanceData(activeTab: Tab) {
       setTradeInsights(ins);
     } catch (e) { console.error('Trade hatasi:', e); }
     finally { setLoading(false); }
-  }, [itemList]);
+  }, []);
 
   const loadTurkeyProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const allItemIds = FOOD_ITEMS.map(f => f.id).join(',');
       const [turkeyRes, turkeyTrendRes, worldRankRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.gida_v AS DECIMAL(20,2)) as gida, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
-        fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as uretim, SUM(CAST(imp_v AS DECIMAL(20,2))) as ithalat, SUM(CAST(exp_v AS DECIMAL(20,2))) as ihracat, AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as kalori FROM fao_balans WHERE (ulke='223' OR ulke='351') AND urun IN (${allItemIds}) AND CAST(yil AS SIGNED) >= 2000 GROUP BY yil ORDER BY yil`),
-        fetchQuery(`SELECT b.ulke, n.area, SUM(CAST(b.uretim_v AS DECIMAL(20,2))) as toplam FROM fao_balans b LEFT JOIN (SELECT DISTINCT areacode, area FROM fao_nufus) n ON b.ulke = n.areacode WHERE b.yil='2023' AND b.urun IN (${allItemIds}) GROUP BY b.ulke, n.area ORDER BY toplam DESC LIMIT 30`)
+        fetchAgg(R, { groupBy: ['urun'], sum: ['uretim_v', 'imp_v', 'exp_v', 'gida_v', 'kbgtcal_v'], where: { yil: 2023 }, whereIn: { ulke: TR_KODLARI, urun: FOOD_ITEMS.map(f => f.id) } }),
+        fetchAgg(R, { groupBy: ['yil'], sum: ['uretim_v', 'imp_v', 'exp_v'], avg: ['kbgtcal_v'], whereIn: { ulke: TR_KODLARI, urun: FOOD_ITEMS.map(f => f.id) }, whereGte: { yil: 2000 }, orderBy: 'yil', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['ulke', 'ulkead'], sum: ['uretim_v'], where: { yil: 2023 }, whereIn: { urun: FOOD_ITEMS.map(f => f.id) }, orderBy: 'sum_uretim_v', dir: 'desc', limit: 30 })
       ]);
 
-      const products = (turkeyRes.data || []).map((r: any) => {
-        const prod = Number(r.uretim) || 0;
-        const imp = Number(r.ithalat) || 0;
-        const exp = Number(r.ihracat) || 0;
+      const products = turkeyRes.map((r: any) => {
+        const prod = num(r.sum_uretim_v);
+        const imp = num(r.sum_imp_v);
+        const exp = num(r.sum_exp_v);
         const sufficiency = (prod + imp - exp) > 0 ? (prod / (prod + imp - exp) * 100) : 0;
         return {
           name: getProductName(String(r.urun)), production: prod, imports: imp, exports: exp,
-          food: Number(r.gida) || 0, calories: Number(r.kalori) || 0, sufficiency
+          food: num(r.sum_gida_v), calories: num(r.avg_kbgtcal_v ?? r.sum_kbgtcal_v), sufficiency
         };
       }).sort((a: any, b: any) => b.production - a.production);
 
@@ -245,16 +250,16 @@ export function useFoodBalanceData(activeTab: Tab) {
       const totalExp = products.reduce((s: number, p: any) => s + p.exports, 0);
       const avgCal = products.length > 0 ? products.reduce((s: number, p: any) => s + p.calories, 0) / products.length : 0;
 
-      const trendData = (turkeyTrendRes.data || []).map((r: any) => ({
-        year: String(r.yil), production: Number(r.uretim) || 0, imports: Number(r.ithalat) || 0,
-        exports: Number(r.ihracat) || 0, calories: Number(r.kalori) || 0
+      const trendData = turkeyTrendRes.map((r: any) => ({
+        year: String(r.yil), production: num(r.sum_uretim_v), imports: num(r.sum_imp_v),
+        exports: num(r.sum_exp_v), calories: num(r.avg_kbgtcal_v ?? r.sum_kbgtcal_v)
       }));
       setTurkeyTrends(trendData);
 
       const prodTrend: YearValue[] = trendData.map((t: any) => ({ year: t.year, value: t.production }));
       const prodCAGR = calculateCAGR(prodTrend);
 
-      const allCountries = (worldRankRes.data || []).map((r: any) => String(r.area || ''));
+      const allCountries = worldRankRes.map((r: any) => String(r.ulkead || ''));
       const turkeyIdx = allCountries.findIndex((n: string) => n.includes('T\u00FCrkiye') || n.includes('Turkey'));
 
       setTurkeyProfile({
@@ -275,12 +280,12 @@ export function useFoodBalanceData(activeTab: Tab) {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as total FROM fao_balans WHERE urun IN (${itemList}) AND CAST(yil AS SIGNED) >= 1990 GROUP BY yil ORDER BY yil`),
-        fetchQuery(`SELECT yil, SUM(CAST(uretim_v AS DECIMAL(20,2))) as total FROM fao_balans WHERE urun IN (${itemList}) AND (ulke='223' OR ulke='351') AND CAST(yil AS SIGNED) >= 1990 GROUP BY yil ORDER BY yil`)
+        fetchAgg(R, { groupBy: ['yil'], sum: ['uretim_v'], whereIn: { urun: MAIN_ITEMS }, whereGte: { yil: 1990 }, orderBy: 'yil', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['yil'], sum: ['uretim_v'], whereIn: { urun: MAIN_ITEMS, ulke: TR_KODLARI }, whereGte: { yil: 1990 }, orderBy: 'yil', dir: 'asc' })
       ]);
 
-      const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.yil), value: Number(r.total) || 0 }));
-      const turkeyData: YearValue[] = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.yil), value: Number(r.total) || 0 }));
+      const worldData: YearValue[] = worldTrendRes.map((r: any) => ({ year: String(r.yil), value: num(r.sum_uretim_v) }));
+      const turkeyData: YearValue[] = turkeyTrendRes.map((r: any) => ({ year: String(r.yil), value: num(r.sum_uretim_v) }));
 
       const worldForecast = forecastLinear(worldData, 5);
       const turkeyForecast = forecastLinear(turkeyData, 5);
@@ -309,27 +314,26 @@ export function useFoodBalanceData(activeTab: Tab) {
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
-  }, [itemList]);
+  }, []);
 
   const loadAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      const allItemIds = FOOD_ITEMS.map(f => f.id).join(',');
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes] = await Promise.all([
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat, CAST(b.exp_v AS DECIMAL(20,2)) as ihracat, CAST(b.kbgtcal_v AS DECIMAL(10,2)) as kalori FROM fao_balans b WHERE b.yil='2023' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
-        fetchQuery(`SELECT b.urun, CAST(b.uretim_v AS DECIMAL(20,2)) as uretim, CAST(b.imp_v AS DECIMAL(20,2)) as ithalat FROM fao_balans b WHERE b.yil='2015' AND (b.ulke='223' OR b.ulke='351') AND b.urun IN (${allItemIds})`),
-        fetchQuery(`SELECT AVG(CAST(kbgtcal_v AS DECIMAL(10,2))) as avg_cal FROM fao_balans WHERE yil='2023' AND kbgtcal_v > 0 AND urun='2511'`)
+        fetchAgg(R, { groupBy: ['urun'], sum: ['uretim_v', 'imp_v', 'exp_v', 'kbgtcal_v'], where: { yil: 2023 }, whereIn: { ulke: TR_KODLARI, urun: FOOD_ITEMS.map(f => f.id) } }),
+        fetchAgg(R, { groupBy: ['urun'], sum: ['uretim_v', 'imp_v'], where: { yil: 2015 }, whereIn: { ulke: TR_KODLARI, urun: FOOD_ITEMS.map(f => f.id) } }),
+        fetchAgg(R, { avg: ['kbgtcal_v'], where: { yil: 2023, urun: '2511' }, positive: ['kbgtcal_v'] })
       ]);
 
       const now: Record<string, any> = {};
-      (turkeyNowRes.data || []).forEach((r: any) => {
-        now[String(r.urun)] = { prod: Number(r.uretim) || 0, imp: Number(r.ithalat) || 0, exp: Number(r.ihracat) || 0, cal: Number(r.kalori) || 0 };
+      turkeyNowRes.forEach((r: any) => {
+        now[String(r.urun)] = { prod: num(r.sum_uretim_v), imp: num(r.sum_imp_v), exp: num(r.sum_exp_v), cal: num(r.avg_kbgtcal_v ?? r.sum_kbgtcal_v) };
       });
       const before: Record<string, any> = {};
-      (turkeyBeforeRes.data || []).forEach((r: any) => {
-        before[String(r.urun)] = { prod: Number(r.uretim) || 0, imp: Number(r.ithalat) || 0 };
+      turkeyBeforeRes.forEach((r: any) => {
+        before[String(r.urun)] = { prod: num(r.sum_uretim_v), imp: num(r.sum_imp_v) };
       });
-      const worldAvgCal = Number(worldAvgRes.data?.[0]?.avg_cal) || 0;
+      const worldAvgCal = num(worldAvgRes[0]?.avg_kbgtcal_v);
 
       const alerts: IntelligenceAlert[] = [];
 
