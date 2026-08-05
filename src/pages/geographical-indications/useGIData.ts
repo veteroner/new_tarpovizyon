@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import * as XLSX from 'xlsx';
-import { fetchQuery } from '../../services/api';
+import { fetchRows } from '../../services/d1';
+
+// Coğrafi işaret listesinden çıkarılan gıda dışı ürün grupları.
+const HARIC_URUN_GRUPLARI = [
+  'Halılar, kilimler ve dokumalar dışında kalan el sanatı ürünleri',
+  'Dokumalar',
+  'Halılar ve kilimler',
+  'Tütün',
+];
 import { getRegionByProvince } from '../../utils/productionCategories';
 import type { GIProduct, ProvinceData, ProductGroupData, YearlyTrend, GIMetrics } from './giTypes';
 
@@ -24,34 +32,27 @@ export function useGIData() {
   const loadAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const query = `
-        SELECT 
-          id,
-          \`Coğrafi Işaretin Adı\` as name,
-          \`Dosya Numarası\` as fileNumber,
-          \`Başvuru Tarihi\` as applicationDate,
-          \`Tescil Numarası\` as registrationNumber,
-          \`Tescil Tarihi\` as registrationDate,
-          \`Türü\` as type,
-          \`Ürün grubu\` as productGroup,
-          \`İl\` as province,
-          \`Başvuru Yapan/Tescil Ettiren\` as applicant,
-          Durumu as status
-        FROM TPE_cografiisaret
-        WHERE \`Ürün grubu\` NOT IN (
-          'Halılar, kilimler ve dokumalar dışında kalan el sanatı ürünleri',
-          'Dokumalar',
-          'Halılar ve kilimler',
-          'Tütün'
-        )
-        AND \`Ürün grubu\` IS NOT NULL
-        AND \`Ürün grubu\` != ''
-        AND \`İl\` != 'Yurtdışı'
-        ORDER BY \`Coğrafi Işaretin Adı\`
-      `;
+      // Sütun adlarında Türkçe karakter ve boşluk var; takma adlar ve
+      // NOT IN / IS NOT NULL süzgeçleri istemcide.
+      const satirlar = (await fetchRows('tr/cografi-isaret', { limit: 10000 }))
+        .map((r) => ({
+          id: r.id,
+          name: String(r['Coğrafi Işaretin Adı'] ?? ''),
+          fileNumber: String(r['Dosya Numarası'] ?? ''),
+          applicationDate: String(r['Başvuru Tarihi'] ?? ''),
+          registrationNumber: String(r['Tescil Numarası'] ?? ''),
+          registrationDate: String(r['Tescil Tarihi'] ?? ''),
+          type: String(r['Türü'] ?? ''),
+          productGroup: String(r['Ürün grubu'] ?? ''),
+          province: String(r['İl'] ?? ''),
+          applicant: String(r['Başvuru Yapan/Tescil Ettiren'] ?? ''),
+          status: String(r['Durumu'] ?? ''),
+        }))
+        .filter((r) => r.productGroup !== '' && !HARIC_URUN_GRUPLARI.includes(r.productGroup)
+          && r.province !== 'Yurtdışı')
+        .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
-      const response = await fetchQuery(query);
-      const products: GIProduct[] = (response.data || []).map((row: Record<string, string | number>) => {
+      const products: GIProduct[] = satirlar.map((row) => {
         let province = String(row.province || '');
         if (province === 'Zinguldak') province = 'Zonguldak';
 

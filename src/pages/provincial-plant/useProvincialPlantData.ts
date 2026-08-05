@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+
+const R = 'tuik/bitkisel-uretim';
+// Toplam/ülke satırları (eski sorgulardaki NOT IN listeleri).
+const TOPLAM_IL = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
+const TOPLAM_ILCE = ['TOPLAM', 'Toplam'];
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -12,7 +17,6 @@ import type {
   AggregatedMetrics,
 } from './provincialPlantUtils';
 import {
-  TABLE_NAME,
   YEARS,
   DEFAULT_PRODUCTS,
   REGION_COLORS,
@@ -72,21 +76,21 @@ export function useProvincialPlantData(): ProvincialPlantData {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const query = `
-          SELECT DISTINCT urun, 
-                 SUM(CAST(y2024 AS DECIMAL(20,2))) as total_production
-          FROM ${TABLE_NAME}
-          WHERE duzeykod='3' 
-            AND unsur='Üretim'
-            AND yer NOT IN ('TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye')
-          GROUP BY urun
-          HAVING total_production > 0
-          ORDER BY total_production DESC
-          LIMIT 50
-        `;
-
-        const response = await fetchQuery(query);
-        const products = (response.data || []).map((row: Record<string, string | number>) => String(row.urun));
+        // HAVING total_production > 0 ve NOT IN (…) süzgeçleri istemcide.
+        const satirlar = (await fetchAgg(R, {
+          groupBy: ['urun', 'yer'], sum: ['y2024'],
+          where: { duzeykod: 3, unsur: 'Üretim' },
+        })).filter((r) => !TOPLAM_IL.includes(String(r.yer ?? '')));
+        const urunToplam = new Map<string, number>();
+        for (const r of satirlar) {
+          const u = String(r.urun ?? '');
+          urunToplam.set(u, (urunToplam.get(u) ?? 0) + num(r.sum_y2024));
+        }
+        const products = [...urunToplam.entries()]
+          .filter(([, v]) => v > 0)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 50)
+          .map(([u]) => u);
 
         setProductList(products);
 
@@ -117,28 +121,22 @@ export function useProvincialPlantData(): ProvincialPlantData {
 
     setLoading(true);
     try {
-      const productFilter = selectedProducts.map(p => `'${p}'`).join(',');
       const prevYear = `y${parseInt(selectedYear.substring(1)) - 1}`;
 
-      const query = `
-        SELECT 
-          yer as province,
-          SUM(CAST(${selectedYear} AS DECIMAL(20,2))) as current_value,
-          SUM(CAST(${prevYear} AS DECIMAL(20,2))) as prev_value
-        FROM ${TABLE_NAME}
-        WHERE unsur='${selectedUnsur}' 
-          AND urun IN (${productFilter})
-          AND duzeykod='3'
-          AND yer NOT IN ('TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye')
-        GROUP BY yer
-        HAVING current_value > 0
-        ORDER BY current_value DESC
-      `;
-
-      const response = await fetchQuery(query);
+      const response = { data: (await fetchAgg(R, {
+        groupBy: ['yer'], sum: [selectedYear, prevYear],
+        where: { unsur: selectedUnsur, duzeykod: 3 }, whereIn: { urun: selectedProducts },
+      }))
+        .map((r) => ({
+          province: String(r.yer ?? ''),
+          current_value: num(r[`sum_${selectedYear}`]),
+          prev_value: num(r[`sum_${prevYear}`]),
+        }))
+        .filter((r) => !TOPLAM_IL.includes(r.province) && r.current_value > 0)
+        .sort((a, b) => b.current_value - a.current_value) };
       const data = response.data || [];
 
-      const total = data.reduce((sum: number, row: Record<string, string | number>) => sum + (parseFloat(String(row.current_value)) || 0), 0);
+      const total = data.reduce((sum: number, row) => sum + (parseFloat(String(row.current_value)) || 0), 0);
 
       const processed: ProvincialData[] = data.map((row: Record<string, string | number>, idx: number) => {
         const currentVal = parseFloat(String(row.current_value)) || 0;
@@ -208,33 +206,25 @@ export function useProvincialPlantData(): ProvincialPlantData {
 
     setLoading(true);
     try {
-      const productFilter = selectedProducts.map(p => `'${p}'`).join(',');
       const prevYear = `y${parseInt(selectedYear.substring(1)) - 1}`;
 
-      const query = `
-        SELECT 
-          yer as district,
-          SUM(CAST(${selectedYear} AS DECIMAL(20,2))) as current_value,
-          SUM(CAST(${prevYear} AS DECIMAL(20,2))) as prev_value
-        FROM ${TABLE_NAME}
-        WHERE unsur='${selectedUnsur}'
-          AND urun IN (${productFilter})
-          AND duzeykod='4'
-          AND ili='${selectedProvince}'
-          AND yer IS NOT NULL
-          AND yer != ''
-          AND yer NOT IN ('TOPLAM', 'Toplam')
-        GROUP BY yer
-        HAVING current_value > 0
-        ORDER BY current_value DESC
-      `;
-
-      const response = await fetchQuery(query);
+      const response = { data: (await fetchAgg(R, {
+        groupBy: ['yer'], sum: [selectedYear, prevYear],
+        where: { unsur: selectedUnsur, duzeykod: 4, ili: selectedProvince },
+        whereIn: { urun: selectedProducts },
+      }))
+        .map((r) => ({
+          district: String(r.yer ?? ''),
+          current_value: num(r[`sum_${selectedYear}`]),
+          prev_value: num(r[`sum_${prevYear}`]),
+        }))
+        .filter((r) => r.district !== '' && !TOPLAM_ILCE.includes(r.district) && r.current_value > 0)
+        .sort((a, b) => b.current_value - a.current_value) };
       const data = response.data || [];
 
-      const provinceTotal = data.reduce((sum: number, row: Record<string, string | number>) => sum + (parseFloat(String(row.current_value)) || 0), 0);
+      const provinceTotal = data.reduce((sum: number, row) => sum + (parseFloat(String(row.current_value)) || 0), 0);
 
-      const processed: DistrictData[] = data.map((row: Record<string, string | number>) => {
+      const processed: DistrictData[] = data.map((row) => {
         const currentVal = parseFloat(String(row.current_value)) || 0;
         const prevVal = parseFloat(String(row.prev_value)) || 0;
         const growth = prevVal > 0 ? ((currentVal - prevVal) / prevVal) * 100 : 0;
@@ -271,24 +261,15 @@ export function useProvincialPlantData(): ProvincialPlantData {
 
     setLoading(true);
     try {
-      const productFilter = selectedProducts.map(p => `'${p}'`).join(',');
-      const yearCols = YEARS.map(y => `SUM(CAST(y${y} AS DECIMAL(20,2))) as y${y}`).join(', ');
-
-      const query = `
-        SELECT ${yearCols}
-        FROM ${TABLE_NAME}
-        WHERE unsur='${selectedUnsur}'
-          AND urun IN (${productFilter})
-          AND duzeykod='3'
-          AND yer NOT IN ('TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye')
-      `;
-
-      const response = await fetchQuery(query);
-      if (response.data && response.data.length > 0) {
-        const row = response.data[0];
+      const yilSutunlari = YEARS.map((y) => `y${y}`);
+      const satirlar = (await fetchAgg(R, {
+        groupBy: ['yer'], sum: yilSutunlari,
+        where: { unsur: selectedUnsur, duzeykod: 3 }, whereIn: { urun: selectedProducts },
+      })).filter((r) => !TOPLAM_IL.includes(String(r.yer ?? '')));
+      {
         const trendData: YearlyTrendData[] = YEARS.map(year => ({
           year,
-          value: parseFloat(String(row[`y${year}`])) || 0
+          value: satirlar.reduce((acc, r) => acc + num(r[`sum_y${year}`]), 0),
         }));
 
         setYearlyTrendData(trendData);
