@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchQuery } from '../services/api';
+import { fetchAgg } from '../services/d1';
 import type { Tab, PrimaryTab } from './livestock/livestockUtils';
 import LivestockOverviewSection from './livestock/LivestockOverviewSection';
 import LivestockStocksSection from './livestock/LivestockStocksSection';
@@ -20,14 +20,11 @@ export default function LivestockStocksPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [maxRes, yearsRes] = await Promise.all([
-        fetchQuery("SELECT MAX(year) as max_year FROM fao_uretim_hayvansal_canlihayvan"),
-        fetchQuery("SELECT DISTINCT year FROM fao_uretim_hayvansal_canlihayvan ORDER BY year DESC LIMIT 25"),
-      ]);
-      const maxYear = String(maxRes.data?.[0]?.max_year ?? '').trim();
-      const years = (yearsRes.data ?? [])
-        .map((r: Record<string, string | number>) => String(r.year ?? '').trim())
-        .filter(Boolean);
+      const yearsRes = await fetchAgg('fao/uretim-hayvansal-canlihayvan', {
+        groupBy: ['year'], orderBy: 'year', dir: 'desc', limit: 25,
+      });
+      const years = yearsRes.map((r) => String(r.year ?? '').trim()).filter(Boolean);
+      const maxYear = years[0] ?? '';
 
       if (!cancelled && years.length) setAvailableYears(years);
       if (!cancelled && maxYear) setSelectedYear(maxYear);
@@ -98,9 +95,14 @@ export default function LivestockStocksPage() {
         </div>
       </div>
 
-      {loading ? (
+      {/* Yükleniyor göstergesi bölümlerin YERİNE değil, ÜSTÜNE geliyor.
+          Eskiden bölüm setLoading(true) deyince üst sayfa bölümü söküyor,
+          bölüm yeniden bağlanınca effect tekrar çalışıp yine true diyordu —
+          sayfa sonsuz "Veriler yükleniyor..." döngüsünde kalıyordu. */}
+      {loading && (
         <div className="loading"><div className="loading-spinner"></div><p>Veriler yükleniyor...</p></div>
-      ) : (
+      )}
+      <div style={{ display: loading ? 'none' : undefined }}>
         <>
           {activeTab === 'overview' && (
             <LivestockOverviewSection selectedYear={selectedYear} setActiveTab={setActiveTab} setLoading={setLoading} />
@@ -121,7 +123,7 @@ export default function LivestockStocksPage() {
             <LivestockProcessedSection selectedYear={selectedYear} setLoading={setLoading} />
           )}
         </>
-      )}
+      </div>
     </div>
   );
 }

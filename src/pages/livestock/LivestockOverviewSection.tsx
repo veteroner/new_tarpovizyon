@@ -3,7 +3,26 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis, Cell, Legend
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num } from '../../services/d1';
+
+const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
+const R_BIR = 'fao/uretim-hayvansal-birincil';
+const R_ISL = 'fao/uretim-hayvansal-islenmis';
+// Kıta/toplam satırları için TAM liste. Eskiden yalnızca 'World'/'Total'
+// çıkarılıyordu; oysa tabloda Asya, Afrika, Southern Asia gibi bölge satırları
+// da var ve dünya hayvan varlığı 3 katına çıkıyordu (103,9 Mr baş; FAO'nun
+// kendi 'World' satırı 34,8 Mr).
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+
+/**
+ * Canlı hayvan sayısı iki birimde geliyor: '1000 An' (bin baş) ve 'An'/'No'.
+ * Eski SQL bunu SUM içinde CASE WHEN ile ölçekliyordu; toplama ucunda böyle bir
+ * ifade kurulamadığı için birime göre gruplanıp çarpan burada uygulanıyor.
+ */
+const basCarpani = (birim: unknown) => (String(birim ?? '') === '1000 An' ? 1000 : 1);
+function basaCevir(satirlar: { miktar_birim?: unknown; sum_miktar_deger?: unknown }[]): number {
+  return satirlar.reduce((acc, r) => acc + num(r.sum_miktar_deger) * basCarpani(r.miktar_birim), 0);
+}
 import { TurkeyHeatMap, type RegionTotal } from '../../components/TurkeyHeatMap';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
@@ -12,7 +31,7 @@ import {
   calculateCAGR, calculateHHI, calculateYoY, calculateVolatility,
   type YearValue
 } from '../../utils/livestockCalculations';
-import { type Tab, type DataItem, formatNumber, formatShort, EXCLUDED_FULL } from './livestockUtils';
+import { type Tab, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
@@ -49,19 +68,23 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
     let cancelled = false;
     (async () => {
       try {
-        const provincialQuery = `
-          SELECT 
-            il as province,
-            (CAST(sigir_varligi_bas AS UNSIGNED) + CAST(manda_varligi_bas AS UNSIGNED)) as cattle_count,
-            CAST(koyun_varligi_bas AS UNSIGNED) as sheep_count,
-            CAST(keci_varligi_bas AS UNSIGNED) as goat_count,
-            (CAST(sigir_varligi_bas AS UNSIGNED) + CAST(manda_varligi_bas AS UNSIGNED) + 
-             CAST(koyun_varligi_bas AS UNSIGNED) + CAST(keci_varligi_bas AS UNSIGNED)) as total_livestock
-          FROM oner_i_llerin_hayvan_sayisi
-          WHERE tarih = (SELECT MAX(tarih) FROM oner_i_llerin_hayvan_sayisi)
-          ORDER BY il
-        `;
-        const provincialRes = await fetchQuery(provincialQuery);
+        // WHERE tarih = (SELECT MAX(tarih) …) karşılığı istemcide.
+        const ilHayvan = await fetchRows('oner/illerin-hayvan-sayisi', { limit: 2000 });
+        const sonTarih = ilHayvan.reduce((en, r) => {
+          const t = String(r.tarih ?? '');
+          return t > en ? t : en;
+        }, '');
+        const provincialRes = { data: ilHayvan
+          .filter((r) => String(r.tarih ?? '') === sonTarih)
+          .sort((a, b) => String(a.il).localeCompare(String(b.il), 'tr'))
+          .map((r) => ({
+            province: String(r.il ?? ''),
+            cattle_count: num(r.sigir_varligi_bas) + num(r.manda_varligi_bas),
+            sheep_count: num(r.koyun_varligi_bas),
+            goat_count: num(r.keci_varligi_bas),
+            total_livestock: num(r.sigir_varligi_bas) + num(r.manda_varligi_bas)
+              + num(r.koyun_varligi_bas) + num(r.keci_varligi_bas),
+          })) };
         if (!cancelled && provincialRes.data && provincialRes.data.length > 0) {
           const mapped: RegionTotal[] = provincialRes.data.map((row: Record<string, string | number>) => ({
             name: String(row.province || ''),
@@ -83,61 +106,39 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
   const loadOverviewData = useCallback(async () => {
     setLoading(true);
     try {
-      const excludedAreas = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
-      const stockValueExpr = "CASE WHEN miktar_birim='1000 An' THEN CAST(miktar_deger AS DECIMAL(20,2)) * 1000 ELSE CAST(miktar_deger AS DECIMAL(20,2)) END";
-      
-      const stocksQuery = `SELECT SUM(${stockValueExpr}) as total 
-        FROM fao_uretim_hayvansal_canlihayvan 
-        WHERE year='${selectedYear}' AND ulkead NOT IN ${excludedAreas}`;
-      
-      const meatQuery = `SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE year='${selectedYear}' AND uretim_birim='t'
-          AND (
-            urunad LIKE '%Meat%' OR urunad LIKE '%meat%' OR
-            urunad LIKE '%offal%' OR urunad LIKE '%Offal%' OR
-            urunad LIKE '%fat%' OR urunad LIKE '%Fat%'
-          )
-          AND ulkead NOT IN ${excludedAreas}`;
-      
-      const milkQuery = `SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE year='${selectedYear}' AND uretim_birim='t'
-          AND (
-            urunad LIKE '%Milk%' OR urunad LIKE '%milk%' OR
-            urunad LIKE '%Cheese%' OR urunad LIKE '%cheese%' OR
-            urunad LIKE '%Butter%' OR urunad LIKE '%butter%' OR
-            urunad LIKE '%Cream%' OR urunad LIKE '%cream%'
-          )
-          AND ulkead NOT IN ${excludedAreas}`;
-      
-      const eggsQuery = `SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE year='${selectedYear}'
-          AND (
-            urunad LIKE '%Egg%' OR urunad LIKE '%egg%'
-          )
-          AND ulkead NOT IN ${excludedAreas}`;
-      
-      const trendQuery = `SELECT year, 
-        SUM(${stockValueExpr}) as stocks
-        FROM fao_uretim_hayvansal_canlihayvan 
-        WHERE ulkead NOT IN ${excludedAreas}
-        GROUP BY year ORDER BY year DESC LIMIT 20`;
-
-      const [stocksRes, meatRes, milkRes, eggsRes, trendRes] = await Promise.all([
-        fetchQuery(stocksQuery),
-        fetchQuery(meatQuery),
-        fetchQuery(milkQuery),
-        fetchQuery(eggsQuery),
-        fetchQuery(trendQuery)
+      const [stocksRows, meatRes, milkRes, eggsRes, trendRows] = await Promise.all([
+        fetchAgg(R_CANLI, { groupBy: ['miktar_birim'], sum: ['miktar_deger'],
+          where: { year: selectedYear }, exclude: EX }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'],
+          where: { year: selectedYear, uretim_birim: 't' },
+          likeAny: { urunad: ['%meat%', '%offal%', '%fat%'] }, exclude: EX }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'],
+          where: { year: selectedYear, uretim_birim: 't' },
+          likeAny: { urunad: ['%milk%', '%cheese%', '%butter%', '%cream%'] }, exclude: EX }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { year: selectedYear },
+          likeAny: { urunad: ['%egg%'] }, exclude: EX }),
+        fetchAgg(R_CANLI, { groupBy: ['year', 'miktar_birim'], sum: ['miktar_deger'],
+          exclude: EX, orderBy: 'year', dir: 'desc' }),
       ]);
+
+      const stocksRes = { data: [{ total: basaCevir(stocksRows) }] };
+      // Yıl bazında birim çevrimi sonrası tek satıra indir.
+      const yilHaritasi = new Map<string, number>();
+      trendRows.forEach((r) => {
+        const y = String(r.year);
+        yilHaritasi.set(y, (yilHaritasi.get(y) ?? 0)
+          + num(r.sum_miktar_deger) * basCarpani(r.miktar_birim));
+      });
+      const trendRes = { data: [...yilHaritasi.entries()]
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+        .slice(0, 20)
+        .map(([year, stocks]) => ({ year, stocks })) };
 
       setOverviewKPIs({
         totalStocks: Number(stocksRes.data?.[0]?.total || 0),
-        totalMeat: Number(meatRes.data?.[0]?.total || 0),
-        totalMilk: Number(milkRes.data?.[0]?.total || 0),
-        totalEggs: Number(eggsRes.data?.[0]?.total || 0),
+        totalMeat: num(meatRes[0]?.sum_uretim_deger),
+        totalMilk: num(milkRes[0]?.sum_uretim_deger),
+        totalEggs: num(eggsRes[0]?.sum_uretim_deger),
       });
 
       if (trendRes.data) {
@@ -164,14 +165,22 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
 
         const volatility = calculateVolatility(yearValues);
 
-        const countryGrowthQuery = `
-          SELECT ulkead, year, SUM(${stockValueExpr}) as total
-          FROM fao_uretim_hayvansal_canlihayvan
-          WHERE ulkead NOT IN ${excludedAreas} AND year >= ${parseInt(selectedYear) - 5}
-          GROUP BY ulkead, year
-          ORDER BY ulkead, year
-        `;
-        const countryGrowthRes = await fetchQuery(countryGrowthQuery);
+        const ulkeSatirlari = await fetchAgg(R_CANLI, {
+          groupBy: ['ulkead', 'year', 'miktar_birim'], sum: ['miktar_deger'],
+          exclude: EX, whereGte: { year: parseInt(selectedYear) - 5 },
+        });
+        const ulkeYilHaritasi = new Map<string, Map<string, number>>();
+        ulkeSatirlari.forEach((r) => {
+          const ulke = String(r.ulkead ?? '');
+          const yil = String(r.year);
+          if (!ulkeYilHaritasi.has(ulke)) ulkeYilHaritasi.set(ulke, new Map());
+          const ic = ulkeYilHaritasi.get(ulke)!;
+          ic.set(yil, (ic.get(yil) ?? 0) + num(r.sum_miktar_deger) * basCarpani(r.miktar_birim));
+        });
+        const countryGrowthRes = { data: [...ulkeYilHaritasi.entries()]
+          .flatMap(([ulkead, yillar]) => [...yillar.entries()]
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .map(([year, total]) => ({ ulkead, year, total }))) };
 
         if (countryGrowthRes.data) {
           const countryMap = new Map<string, YearValue[]>();
@@ -243,16 +252,18 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
         const yr = parseInt(selectedYear);
 
         const [primaryTotalRes, processedTotalRes, turkeyPrimaryRes] = await Promise.all([
-          fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total FROM fao_uretim_hayvansal_birincil WHERE year='${yr}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_FULL}`),
-          fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total FROM fao_uretim_hayvansal_islenmis WHERE year='${yr}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_FULL}`),
-          fetchQuery(`SELECT ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total FROM fao_uretim_hayvansal_birincil WHERE year='${yr}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_FULL} GROUP BY ulkead ORDER BY total DESC`),
+          fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { year: yr, uretim_birim: 't' }, exclude: EX }),
+          fetchAgg(R_ISL, { sum: ['uretim_deger'], where: { year: yr, uretim_birim: 't' }, exclude: EX }),
+          fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger'],
+            where: { year: yr, uretim_birim: 't' }, exclude: EX,
+            orderBy: 'sum_uretim_deger', dir: 'desc' }),
         ]);
 
-        const pTotal = Number(primaryTotalRes.data?.[0]?.total || 0);
-        const prTotal = Number(processedTotalRes.data?.[0]?.total || 0);
+        const pTotal = num(primaryTotalRes[0]?.sum_uretim_deger);
+        const prTotal = num(processedTotalRes[0]?.sum_uretim_deger);
         const ratio = pTotal > 0 ? (prTotal / pTotal) * 100 : 0;
 
-        const pRanks = (turkeyPrimaryRes.data || []) as Array<Record<string, string | number>>;
+        const pRanks = turkeyPrimaryRes;
         const trPrimaryRank = pRanks.findIndex(r => String(r.ulkead) === 'Türkiye') + 1 || 0;
 
         const xIns: Insight[] = [];

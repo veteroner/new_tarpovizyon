@@ -152,15 +152,25 @@ function dbFor(env, route) {
 // sorgunun şeklini değiştiremez, sadece izin verilen alanlar arasından seçer.
 const AGG = {
   'fao/uretim-bitkisel-birincil': { db: 'DUNYA', table: 'fao_uretim_bitkisel_birincil',
-    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
+      'miktar_birim', 'uretim_birim', 'verim_birim'],
+    nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
   'fao/uretim-bitkisel-islenmis': { db: 'DUNYA', table: 'fao_uretim_bitkisel_islenmis',
-    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
+      'miktar_birim', 'uretim_birim', 'verim_birim'],
+    nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
   'fao/uretim-hayvansal-birincil': { db: 'DUNYA', table: 'fao_uretim_hayvansal_birincil',
-    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
+      'miktar_birim', 'uretim_birim', 'verim_birim'],
+    nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
   'fao/uretim-hayvansal-islenmis': { db: 'DUNYA', table: 'fao_uretim_hayvansal_islenmis',
-    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
+      'miktar_birim', 'uretim_birim', 'verim_birim'],
+    nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
   'fao/uretim-hayvansal-canlihayvan': { db: 'DUNYA', table: 'fao_uretim_hayvansal_canlihayvan',
-    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year'], nums: ['miktar_deger', 'uretim_deger', 'verim_deger'] },
+    dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
+      'miktar_birim', 'uretim_birim', 'verim_birim'],
+    nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
   'tuik/ticaret-bitkisel': { table: 'tuik_ticaret_bitkisel',
     dims: ['yil', 'ay', 'ana_urun', 'alt_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'miktar_birim'],
     nums: ['ihracat_mik', 'ithalat_mik', 'ihracat_deger', 'ithalat_deger'] },
@@ -305,6 +315,18 @@ function buildAgg(cfg, sp) {
     // in_<sütun>=a|b|c — '|' ayırıcı, çünkü değerlerin içinde virgül olabiliyor
     // ("Buğday, Durum Buğdayı Hariç" gibi). Değerlerin tamamı bind edilir.
     // like_<sütun>=%desen% — eski sorgulardaki LIKE koşullarının karşılığı.
+    // likeAny_<sütun>=p1|p2 — birden çok LIKE deseni OR'lanır. Eski sorgulardaki
+    // "urunad LIKE '%Meat%' OR urunad LIKE '%offal%' OR …" zincirlerinin
+    // karşılığı. COLLATE NOCASE olduğu için büyük/küçük varyantlar gereksiz.
+    if (k.startsWith('likeAny_')) {
+      const col = k.slice(8);
+      if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+      const list = v.split('|').map((x) => x.trim()).filter(Boolean);
+      if (!list.length) continue;
+      where.push(`(${list.map(() => `${qi(col)} LIKE ? COLLATE NOCASE`).join(' OR ')})`);
+      params.push(...list);
+      continue;
+    }
     if (k.startsWith('like_')) {
       const col = k.slice(5);
       if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
