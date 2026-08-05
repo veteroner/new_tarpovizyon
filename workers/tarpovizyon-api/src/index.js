@@ -288,6 +288,14 @@ function buildAgg(cfg, sp) {
     if (!prefix) continue;
     const col = k.slice(prefix.length);
     if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+    // Sayısal sütunlar TEXT olarak saklanıyor; düz karşılaştırma metin
+    // sıralaması yapar ('9' > '1000'). Onları CAST üzerinden karşılaştır.
+    if (cfg.nums.includes(col)) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) throw new Error(`sayısal filtre değeri geçersiz: ${col}=${v}`);
+      where.push(`${numExpr(cfg, col)} ${OPS[prefix]} ?`); params.push(n);
+      continue;
+    }
     where.push(`${qi(col)}${coll(v)} ${OPS[prefix]} ?`); params.push(v);
   }
   // positive=<sütun>: MySQL sorgularındaki "CAST(x) > 0" koşulunun karşılığı.

@@ -1,18 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useCallback } from 'react';
 import type { Insight } from '../../components/InsightCard';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, latestYear, num } from '../../services/d1';
 import { translateProduct } from '../../utils/productTranslations';
+import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, calculateHHI, calculateYoY, calculateVolatility,
   detectAnomalies, forecastLinear,
 } from '../../utils/livestockCalculations';
 import type { YearValue, HHIResult } from '../../utils/livestockCalculations';
 import {
-  EXCLUDED_AREAS, CROP_CATEGORIES, TURKEY_COLOR, DEVELOPED_COUNTRIES,
+  CROP_CATEGORIES, TURKEY_COLOR, DEVELOPED_COUNTRIES,
   getCropCategory, formatValue, formatYield,
   type Tab,
 } from './productionTypes';
+
+// D1 toplama rotaları. Kıta/toplam satırları sunucudaki 'v1' hazır listesiyle
+// dışlanıyor — frontend'deki EXCLUDED_AREAS ile aynı içerik.
+const R_BIR = 'fao/uretim-bitkisel-birincil';
+const R_ISL = 'fao/uretim-bitkisel-islenmis';
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+const TR = 'Türkiye';
 
 export interface UseProductionDataReturn {
   // core
@@ -138,37 +146,41 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
   const loadOverviewData = useCallback(async () => {
     setLoading(true);
     try {
-      const latestYear = '2023';
-      const prevYear = '2022';
+      const [yil, islenmisYil] = await Promise.all([
+        latestYear(R_BIR, 'year'), latestYear(R_ISL, 'year'),
+      ]);
+      const oncekiYil = (yil ?? 0) - 1;
 
       const [worldTotalRes, turkeyRes, trendRes, categoryRes, processedTotalRes] = await Promise.all([
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_production, SUM(CAST(miktar_deger AS DECIMAL(20,2))) as total_area, AVG(CAST(verim_deger AS DECIMAL(20,2))) as avg_yield, COUNT(DISTINCT ulkead) as country_count, COUNT(DISTINCT urunad) as product_count FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`),
-        fetchQuery(`SELECT b.total_production, b.total_area, b.avg_yield, b.product_count, (SELECT COUNT(DISTINCT a.ulkead) + 1 FROM (SELECT ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as tot FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY ulkead HAVING tot > (SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead='Türkiye')) a) as turkey_rank FROM (SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_production, SUM(CAST(miktar_deger AS DECIMAL(20,2))) as total_area, AVG(CAST(verim_deger AS DECIMAL(20,2))) as avg_yield, COUNT(DISTINCT urunad) as product_count FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0) b`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_production, SUM(CAST(miktar_deger AS DECIMAL(20,2))) as world_area, AVG(CAST(verim_deger AS DECIMAL(20,2))) as world_yield FROM fao_uretim_bitkisel_birincil WHERE ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT urunad, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as production, SUM(CAST(miktar_deger AS DECIMAL(20,2))) as area, AVG(CAST(verim_deger AS DECIMAL(20,2))) as yield_val FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY urunad ORDER BY production DESC`),
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_processed, COUNT(DISTINCT urunad) as product_count, COUNT(DISTINCT ulkead) as country_count FROM fao_uretim_bitkisel_islenmis WHERE year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`)
+        fetchAgg(R_BIR, { sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], countDistinct: ['ulkead', 'urunad'], where: { year: yil }, positive: ['uretim_deger'], exclude: EX }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], countDistinct: ['urunad'], where: { year: yil, ulkead: TR }, positive: ['uretim_deger'] }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], positive: ['uretim_deger'], exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['urunad'], sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], where: { year: yil, ulkead: TR }, positive: ['uretim_deger'], orderBy: 'sum_uretim_deger', dir: 'desc' }),
+        fetchAgg(R_ISL, { sum: ['uretim_deger'], countDistinct: ['urunad', 'ulkead'], where: { year: islenmisYil }, positive: ['uretim_deger'], exclude: EX }),
       ]);
 
-      const [prevWorldRes, prevTurkeyRes, topCountriesRes, turkeyProcessedRes] = await Promise.all([
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_production FROM fao_uretim_bitkisel_birincil WHERE year='${prevYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`),
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_production FROM fao_uretim_bitkisel_birincil WHERE year='${prevYear}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`),
-        fetchQuery(`SELECT ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_production FROM fao_uretim_bitkisel_birincil WHERE year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY ulkead ORDER BY total_production DESC LIMIT 15`),
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_processed FROM fao_uretim_bitkisel_islenmis WHERE year='${latestYear}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`)
+      const [prevWorldRes, prevTurkeyRes, siralamaRes, turkeyProcessedRes] = await Promise.all([
+        fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { year: oncekiYil }, positive: ['uretim_deger'], exclude: EX }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { year: oncekiYil, ulkead: TR }, positive: ['uretim_deger'] }),
+        // Türkiye'nin sırası eskiden iç içe alt sorgu + HAVING ile bulunuyordu.
+        // Tam ülke listesi tek seferde çekilip hem sıra hem ilk 15 buradan.
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger'], where: { year: yil }, positive: ['uretim_deger'], exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
+        fetchAgg(R_ISL, { sum: ['uretim_deger'], where: { year: islenmisYil, ulkead: TR }, positive: ['uretim_deger'] }),
       ]);
 
-      const worldRow = worldTotalRes.data?.[0];
-      const turkeyRow = turkeyRes.data?.[0];
-      const worldTotal = parseFloat(String(worldRow?.total_production ?? 0)) || 0;
-      const worldArea = parseFloat(String(worldRow?.total_area ?? 0)) || 0;
-      const worldYield = parseFloat(String(worldRow?.avg_yield ?? 0)) || 0;
-      const turkeyTotal = parseFloat(String(turkeyRow?.total_production ?? 0)) || 0;
-      const turkeyArea = parseFloat(String(turkeyRow?.total_area ?? 0)) || 0;
-      const turkeyYield = parseFloat(String(turkeyRow?.avg_yield ?? 0)) || 0;
-      const turkeyRank = parseInt(String(turkeyRow?.turkey_rank ?? 0)) || 0;
-      const processedTotal = parseFloat(String(processedTotalRes.data?.[0]?.total_processed ?? 0)) || 0;
-      const turkeyProcessedTotal = parseFloat(String(turkeyProcessedRes.data?.[0]?.total_processed ?? 0)) || 0;
-      const prevWorldTotal = parseFloat(String(prevWorldRes.data?.[0]?.total_production ?? 0)) || 0;
-      const prevTurkeyTotal = parseFloat(String(prevTurkeyRes.data?.[0]?.total_production ?? 0)) || 0;
+      const worldRow = worldTotalRes[0];
+      const turkeyRow = turkeyRes[0];
+      const worldTotal = num(worldRow?.sum_uretim_deger);
+      const worldArea = num(worldRow?.sum_miktar_deger);
+      const worldYield = num(worldRow?.avg_verim_deger);
+      const turkeyTotal = num(turkeyRow?.sum_uretim_deger);
+      const turkeyArea = num(turkeyRow?.sum_miktar_deger);
+      const turkeyYield = num(turkeyRow?.avg_verim_deger);
+      const turkeyRank = siralamaRes.findIndex((r) => r.ulkead === TR) + 1;
+      const processedTotal = num(processedTotalRes[0]?.sum_uretim_deger);
+      const turkeyProcessedTotal = num(turkeyProcessedRes[0]?.sum_uretim_deger);
+      const prevWorldTotal = num(prevWorldRes[0]?.sum_uretim_deger);
+      const prevTurkeyTotal = num(prevTurkeyRes[0]?.sum_uretim_deger);
 
       const worldYoY = calculateYoY(worldTotal, prevWorldTotal);
       const turkeyYoY = calculateYoY(turkeyTotal, prevTurkeyTotal);
@@ -179,30 +191,31 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         worldTotal, worldArea, worldYield, worldYoY,
         turkeyTotal, turkeyArea, turkeyYield, turkeyYoY, turkeyRank, turkeyShare,
         processedTotal, turkeyProcessedTotal, processingRatio,
-        countryCount: parseInt(String(worldRow?.country_count ?? 0)) || 0,
-        productCount: parseInt(String(worldRow?.product_count ?? 0)) || 0,
-        turkeyProductCount: parseInt(String(turkeyRow?.product_count ?? 0)) || 0,
+        countryCount: num(worldRow?.cd_ulkead),
+        productCount: num(worldRow?.cd_urunad),
+        turkeyProductCount: num(turkeyRow?.cd_urunad),
+        yil,
       });
 
-      const trends = (trendRes.data || []).map((r: any) => ({
-        year: r.year,
-        worldProduction: parseFloat(String(r.world_production ?? 0)) || 0,
-        worldArea: parseFloat(String(r.world_area ?? 0)) || 0,
-        worldYield: parseFloat(String(r.world_yield ?? 0)) || 0,
+      const trends = trendRes.map((r) => ({
+        year: String(r.year),
+        worldProduction: num(r.sum_uretim_deger),
+        worldArea: num(r.sum_miktar_deger),
+        worldYield: num(r.avg_verim_deger),
       }));
       setOverviewTrends(trends);
 
       const catMap = new Map<string, { name: string; value: number; color: string }>();
-      (categoryRes.data || []).forEach((r: any) => {
-        const cat = getCropCategory(r.urunad);
-        const val = parseFloat(String(r.production ?? 0)) || 0;
+      categoryRes.forEach((r) => {
+        const cat = getCropCategory(String(r.urunad ?? ''));
+        const val = num(r.sum_uretim_deger);
         if (catMap.has(cat.key)) { catMap.get(cat.key)!.value += val; }
         else { catMap.set(cat.key, { name: cat.name, value: val, color: cat.color }); }
       });
       setOverviewCategoryData(Array.from(catMap.values()).sort((a, b) => b.value - a.value));
 
-      setOverviewTopCountries((topCountriesRes.data || []).map((r: any) => ({
-        name: r.ulkead, value: parseFloat(String(r.total_production ?? 0)) || 0, isTurkey: r.ulkead === 'Türkiye',
+      setOverviewTopCountries(siralamaRes.slice(0, 15).map((r) => ({
+        name: translateCountry(String(r.ulkead ?? '')), value: num(r.sum_uretim_deger), isTurkey: r.ulkead === TR,
       })));
 
       setOverviewSupplyChain({
@@ -213,7 +226,7 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
 
       const insights: Insight[] = [];
       if (turkeyRank <= 10) insights.push({ id: 'ov1', type: 'achievement', message: `Türkiye dünya bitkisel üretiminde ${turkeyRank}. sırada — ${formatValue(turkeyTotal)} ile dünya üretiminin %${turkeyShare.toFixed(1)}'ini karşılıyor`, severity: 'high', category: 'Genel' });
-      if (worldYoY > 2) insights.push({ id: 'ov2', type: 'growth', message: `Dünya bitkisel üretimi yıllık %${worldYoY.toFixed(1)} büyüdü — ${latestYear} yılı rekor üretim`, severity: 'medium', category: 'Trend' });
+      if (worldYoY > 2) insights.push({ id: 'ov2', type: 'growth', message: `Dünya bitkisel üretimi yıllık %${worldYoY.toFixed(1)} büyüdü — ${yil} yılı rekor üretim`, severity: 'medium', category: 'Trend' });
       else if (worldYoY < -2) insights.push({ id: 'ov2', type: 'decline', message: `Dünya bitkisel üretimi yıllık %${Math.abs(worldYoY).toFixed(1)} geriledi`, severity: 'high', category: 'Risk' });
       if (turkeyYoY > 3) insights.push({ id: 'ov3', type: 'growth', message: `Türkiye üretimi %${turkeyYoY.toFixed(1)} arttı — dünya ortalamasının ${(turkeyYoY / Math.max(worldYoY, 0.1)).toFixed(1)}x üzerinde`, severity: 'high', category: 'Türkiye' });
       else if (turkeyYoY < -3) insights.push({ id: 'ov3', type: 'warning', message: `Türkiye üretimi %${Math.abs(turkeyYoY).toFixed(1)} azaldı — ciddi düşüş`, severity: 'high', category: 'Risk' });
@@ -226,7 +239,7 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         const worldCAGR = calculateCAGR(worldTrendData);
         if (worldCAGR) insights.push({ id: 'ov7', type: worldCAGR.cagr > 0 ? 'growth' : 'decline', message: `Dünya bitkisel üretimi ${trends[0].year}-${trends[trends.length - 1].year} döneminde yıllık %${worldCAGR.cagr.toFixed(2)} CAGR ile ${worldCAGR.trend === 'GROWTH' ? 'büyüdü' : 'geriledi'}`, severity: 'medium', category: 'Uzun Vadeli' });
       }
-      insights.push({ id: 'ov8', type: 'info', message: `FAO veritabanında ${parseInt(String(worldRow?.country_count ?? 0)) || 0} ülke, ${parseInt(String(worldRow?.product_count ?? 0)) || 0} birincil ürün takip ediliyor — Türkiye ${parseInt(String(turkeyRow?.product_count ?? 0)) || 0} üründe üretim yapıyor`, severity: 'low', category: 'Kapsam' });
+      insights.push({ id: 'ov8', type: 'info', message: `FAO veritabanında ${num(worldRow?.cd_ulkead)} ülke, ${num(worldRow?.cd_urunad)} birincil ürün takip ediliyor — Türkiye ${num(turkeyRow?.cd_urunad)} üründe üretim yapıyor`, severity: 'low', category: 'Kapsam' });
       setOverviewInsights(insights);
     } catch (error) { console.error('Overview veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -239,8 +252,8 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
     setLoading(true);
     try {
       if (primaryProducts.length === 0) {
-        const prodRes = await fetchQuery(`SELECT DISTINCT urunad FROM fao_uretim_bitkisel_birincil WHERE ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY urunad`);
-        let prods = (prodRes.data || []).map((r: any) => r.urunad);
+        const prodRes = await fetchAgg(R_BIR, { groupBy: ['urunad'], where: { ulkead: TR }, positive: ['uretim_deger'], orderBy: 'urunad', dir: 'asc' });
+        let prods = prodRes.map((r) => String(r.urunad ?? ''));
         if (categoryFilter && CROP_CATEGORIES[categoryFilter]) {
           const kws = CROP_CATEGORIES[categoryFilter].keywords;
           prods = prods.filter((p: string) => kws.some(kw => p.toLowerCase().includes(kw.toLowerCase())));
@@ -249,28 +262,27 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         if (prods.length > 0 && !prods.includes(primaryProduct)) setPrimaryProduct(prods[0]);
       }
       const product = primaryProduct;
-      const latestYear = '2023';
-      const safeProduct = product.replace(/'/g, "''");
+      const yil = await latestYear(R_BIR, 'year', { where: { urunad: product } });
 
       const [topRes, trendRes, turkeyTrendRes, worldTotalRes] = await Promise.all([
-        fetchQuery(`SELECT ulkead, CAST(uretim_deger AS DECIMAL(20,2)) as production, CAST(miktar_deger AS DECIMAL(20,2)) as area, CAST(verim_deger AS DECIMAL(20,2)) as yield_val FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY production DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_total, COUNT(DISTINCT ulkead) as producer_count FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(uretim_deger AS DECIMAL(20,2)) as production, CAST(miktar_deger AS DECIMAL(20,2)) as area, CAST(verim_deger AS DECIMAL(20,2)) as yield_val FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_total FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`)
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], where: { urunad: product, year: yil }, positive: ['uretim_deger'], exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 20 }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger'], countDistinct: ['ulkead'], where: { urunad: product }, positive: ['uretim_deger'], exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], where: { urunad: product, ulkead: TR }, positive: ['uretim_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { urunad: product, year: yil }, positive: ['uretim_deger'], exclude: EX }),
       ]);
 
-      const worldTotal = parseFloat(String(worldTotalRes.data?.[0]?.world_total ?? 0)) || 0;
-      const topCountries = (topRes.data || []).map((r: any, i: number) => ({
-        rank: i + 1, country: r.ulkead, production: parseFloat(String(r.production ?? 0)) || 0,
-        area: parseFloat(String(r.area ?? 0)) || 0, yieldVal: parseFloat(String(r.yield_val ?? 0)) || 0,
-        isTurkey: r.ulkead === 'Türkiye',
-        share: worldTotal > 0 ? ((parseFloat(String(r.production ?? 0)) || 0) / worldTotal) * 100 : 0,
+      const worldTotal = num(worldTotalRes[0]?.sum_uretim_deger);
+      const topCountries = topRes.map((r, i: number) => ({
+        rank: i + 1, country: translateCountry(String(r.ulkead ?? '')), countryRaw: String(r.ulkead ?? ''), production: num(r.sum_uretim_deger),
+        area: num(r.sum_miktar_deger), yieldVal: num(r.avg_verim_deger),
+        isTurkey: r.ulkead === TR,
+        share: worldTotal > 0 ? (num(r.sum_uretim_deger) / worldTotal) * 100 : 0,
       }));
       setPrimaryTopCountries(topCountries);
 
       const turkeyInTop = topCountries.find((c: any) => c.isTurkey);
-      const worldTrend = (trendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.world_total ?? 0)) || 0 }));
-      const turkeyTrend = (turkeyTrendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.production ?? 0)) || 0 }));
+      const worldTrend = trendRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
+      const turkeyTrend = turkeyTrendRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
       const mergedTrends = worldTrend.map((w: any) => { const t = turkeyTrend.find((t: any) => t.year === w.year); return { year: w.year, world: w.value, turkey: t?.value || 0 }; });
       setPrimaryTrends(mergedTrends);
 
@@ -287,7 +299,7 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
       setPrimaryKPIs({
         worldTotal, turkeyProduction: turkeyInTop?.production || 0, turkeyRank: turkeyInTop?.rank || topCountries.length + 1,
         turkeyShare: turkeyInTop?.share || 0, worldCAGR: worldCAGR?.cagr || 0, turkeyCAGR: turkeyCAGR?.cagr || 0,
-        turkeyVolatility: turkeyVol, producerCount: parseInt(String(trendRes.data?.[trendRes.data.length - 1]?.producer_count ?? 0)) || 0,
+        turkeyVolatility: turkeyVol, producerCount: num(trendRes[trendRes.length - 1]?.cd_ulkead), yil,
         leader: topCountries[0]?.country || '-', leaderProduction: topCountries[0]?.production || 0, leaderShare: topCountries[0]?.share || 0,
       });
 
@@ -313,30 +325,29 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
     setLoading(true);
     try {
       if (processedProducts.length === 0) {
-        const prodRes = await fetchQuery(`SELECT DISTINCT urunad FROM fao_uretim_bitkisel_islenmis WHERE CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY urunad`);
-        setProcessedProducts((prodRes.data || []).map((r: any) => r.urunad));
+        const prodRes = await fetchAgg(R_ISL, { groupBy: ['urunad'], positive: ['uretim_deger'], orderBy: 'urunad', dir: 'asc' });
+        setProcessedProducts(prodRes.map((r) => String(r.urunad ?? '')));
       }
       const product = processedProduct;
-      const safeProduct = product.replace(/'/g, "''");
-      const latestYear = '2023';
+      const yil = await latestYear(R_ISL, 'year', { where: { urunad: product } });
 
       const [topRes, trendRes, turkeyTrendRes, worldTotalRes] = await Promise.all([
-        fetchQuery(`SELECT ulkead, CAST(uretim_deger AS DECIMAL(20,2)) as production FROM fao_uretim_bitkisel_islenmis WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY production DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_total FROM fao_uretim_bitkisel_islenmis WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(uretim_deger AS DECIMAL(20,2)) as production FROM fao_uretim_bitkisel_islenmis WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_total FROM fao_uretim_bitkisel_islenmis WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0`)
+        fetchAgg(R_ISL, { groupBy: ['ulkead'], sum: ['uretim_deger'], where: { urunad: product, year: yil }, positive: ['uretim_deger'], exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 20 }),
+        fetchAgg(R_ISL, { groupBy: ['year'], sum: ['uretim_deger'], where: { urunad: product }, positive: ['uretim_deger'], exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_ISL, { groupBy: ['year'], sum: ['uretim_deger'], where: { urunad: product, ulkead: TR }, positive: ['uretim_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_ISL, { sum: ['uretim_deger'], where: { urunad: product, year: yil }, positive: ['uretim_deger'], exclude: EX }),
       ]);
 
-      const worldTotal = parseFloat(String(worldTotalRes.data?.[0]?.world_total ?? 0)) || 0;
-      const topCountries = (topRes.data || []).map((r: any, i: number) => ({
-        rank: i + 1, country: r.ulkead, production: parseFloat(String(r.production ?? 0)) || 0,
-        share: worldTotal > 0 ? (parseFloat(String(r.production ?? 0)) / worldTotal) * 100 : 0,
-        isTurkey: r.ulkead === 'Türkiye',
+      const worldTotal = num(worldTotalRes[0]?.sum_uretim_deger);
+      const topCountries = topRes.map((r, i: number) => ({
+        rank: i + 1, country: translateCountry(String(r.ulkead ?? '')), production: num(r.sum_uretim_deger),
+        share: worldTotal > 0 ? (num(r.sum_uretim_deger) / worldTotal) * 100 : 0,
+        isTurkey: r.ulkead === TR,
       }));
       setProcessedTopCountries(topCountries);
 
-      const worldTrend = (trendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.world_total ?? 0)) || 0 }));
-      const turkeyTrend = (turkeyTrendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.production ?? 0)) || 0 }));
+      const worldTrend = trendRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
+      const turkeyTrend = turkeyTrendRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
       const mergedTrends = worldTrend.map((w: any) => { const t = turkeyTrend.find((t: any) => t.year === w.year); return { year: w.year, world: w.value, turkey: t?.value || 0 }; });
       setProcessedTrends(mergedTrends);
 
@@ -368,19 +379,18 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
     setLoading(true);
     try {
       const product = yieldProduct;
-      const safeProduct = product.replace(/'/g, "''");
-      const latestYear = '2023';
+      const yil = await latestYear(R_BIR, 'year', { where: { urunad: product } });
 
       const [yieldRankRes, yieldTrendRes, turkeyYieldTrendRes, scatterRes] = await Promise.all([
-        fetchQuery(`SELECT ulkead, CAST(verim_deger AS DECIMAL(20,2)) as yield_val, CAST(uretim_deger AS DECIMAL(20,2)) as production, CAST(miktar_deger AS DECIMAL(20,2)) as area FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(verim_deger AS DECIMAL(20,2)) > 0 AND CAST(miktar_deger AS DECIMAL(20,2)) > 1000 ORDER BY yield_val DESC LIMIT 30`),
-        fetchQuery(`SELECT year, AVG(CAST(verim_deger AS DECIMAL(20,2))) as avg_yield FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(verim_deger AS DECIMAL(20,2)) > 0 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(verim_deger AS DECIMAL(20,2)) as yield_val, CAST(uretim_deger AS DECIMAL(20,2)) as production, CAST(miktar_deger AS DECIMAL(20,2)) as area FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(verim_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT ulkead, CAST(verim_deger AS DECIMAL(20,2)) as yield_val, CAST(miktar_deger AS DECIMAL(20,2)) as area, CAST(uretim_deger AS DECIMAL(20,2)) as production FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(verim_deger AS DECIMAL(20,2)) > 0 AND CAST(miktar_deger AS DECIMAL(20,2)) > 500 ORDER BY production DESC LIMIT 50`)
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], avg: ['verim_deger'], sum: ['uretim_deger', 'miktar_deger'], where: { urunad: product, year: yil }, positive: ['verim_deger'], whereGte: { miktar_deger: 1000 }, exclude: EX, orderBy: 'avg_verim_deger', dir: 'desc', limit: 30 }),
+        fetchAgg(R_BIR, { groupBy: ['year'], avg: ['verim_deger'], where: { urunad: product }, positive: ['verim_deger'], exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['year'], avg: ['verim_deger'], sum: ['uretim_deger', 'miktar_deger'], where: { urunad: product, ulkead: TR }, positive: ['verim_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], avg: ['verim_deger'], sum: ['miktar_deger', 'uretim_deger'], where: { urunad: product, year: yil }, positive: ['verim_deger'], whereGte: { miktar_deger: 500 }, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 50 }),
       ]);
 
-      const yieldRanking = (yieldRankRes.data || []).map((r: any, i: number) => ({
-        rank: i + 1, country: r.ulkead, yieldVal: parseFloat(String(r.yield_val ?? 0)) || 0,
-        production: parseFloat(String(r.production ?? 0)) || 0, area: parseFloat(String(r.area ?? 0)) || 0, isTurkey: r.ulkead === 'Türkiye',
+      const yieldRanking = yieldRankRes.map((r, i: number) => ({
+        rank: i + 1, country: translateCountry(String(r.ulkead ?? '')), countryRaw: String(r.ulkead ?? ''), yieldVal: num(r.avg_verim_deger),
+        production: num(r.sum_uretim_deger), area: num(r.sum_miktar_deger), isTurkey: r.ulkead === TR,
       }));
       setYieldBestPractices(yieldRanking.slice(0, 10));
 
@@ -398,14 +408,14 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         { name: 'Türkiye', value: turkeyYield, fill: TURKEY_COLOR },
       ]);
 
-      const scatter = (scatterRes.data || []).map((r: any) => ({
-        name: r.ulkead, x: parseFloat(String(r.area ?? 0)) || 0, y: parseFloat(String(r.yield_val ?? 0)) || 0,
-        z: parseFloat(String(r.production ?? 0)) || 0, isTurkey: r.ulkead === 'Türkiye',
+      const scatter = scatterRes.map((r) => ({
+        name: translateCountry(String(r.ulkead ?? '')), x: num(r.sum_miktar_deger), y: num(r.avg_verim_deger),
+        z: num(r.sum_uretim_deger), isTurkey: r.ulkead === TR,
       }));
       setYieldScatter(scatter);
 
-      const worldYieldTrend = (yieldTrendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.avg_yield ?? 0)) || 0 }));
-      const turkeyYieldTrend = (turkeyYieldTrendRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.yield_val ?? 0)) || 0 }));
+      const worldYieldTrend = yieldTrendRes.map((r) => ({ year: String(r.year), value: num(r.avg_verim_deger) }));
+      const turkeyYieldTrend = turkeyYieldTrendRes.map((r) => ({ year: String(r.year), value: num(r.avg_verim_deger) }));
       const mergedYieldTrends = worldYieldTrend.map((w: any) => { const t = turkeyYieldTrend.find((t: any) => t.year === w.year); return { year: w.year, world: w.value, turkey: t?.value || 0 }; });
       setYieldTrends(mergedYieldTrends);
 
@@ -416,8 +426,8 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         catchUpYears = years < 500 ? years : null;
       }
 
-      const developed = yieldRanking.filter((r: any) => DEVELOPED_COUNTRIES.includes(r.country));
-      const developing = yieldRanking.filter((r: any) => !DEVELOPED_COUNTRIES.includes(r.country) && !r.isTurkey);
+      const developed = yieldRanking.filter((r: any) => DEVELOPED_COUNTRIES.includes(r.countryRaw));
+      const developing = yieldRanking.filter((r: any) => !DEVELOPED_COUNTRIES.includes(r.countryRaw) && !r.isTurkey);
       const devAvg = developed.length > 0 ? developed.reduce((s: number, r: any) => s + r.yieldVal, 0) / developed.length : 0;
       const devingAvg = developing.length > 0 ? developing.reduce((s: number, r: any) => s + r.yieldVal, 0) / developing.length : 0;
       setYieldSegmented([
@@ -430,7 +440,7 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         turkeyYield, worldAvgYield, leaderYield, leader: leader?.country || '-',
         turkeyRank: yieldRanking.findIndex((r: any) => r.isTurkey) + 1 || 0, totalRanked: yieldRanking.length,
         gapToLeader, gapToWorld, catchUpYears,
-        turkeyCAGR: turkeyYieldCAGR?.cagr || 0,
+        turkeyCAGR: turkeyYieldCAGR?.cagr || 0, yil,
       });
 
       const yIns: Insight[] = [];
@@ -452,28 +462,43 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
     setLoading(true);
     try {
       const product = compProduct;
-      const safeProduct = product.replace(/'/g, "''");
-      const latestYear = '2023';
+      const yil = await latestYear(R_BIR, 'year', { where: { urunad: product } }) ?? 0;
+      // HHI zaman çizelgesi eskiden '…2020','2023' diye sabitti; son nokta
+      // artık verinin gerçek son yılı.
+      const hhiYillari = Array.from(new Set([2005, 2010, 2015, 2020, yil])).filter((y) => y > 0);
 
-      const [topRes, cagrRes, hhiTimelineRes] = await Promise.all([
-        fetchQuery(`SELECT ulkead, CAST(uretim_deger AS DECIMAL(20,2)) as production, CAST(miktar_deger AS DECIMAL(20,2)) as area, CAST(verim_deger AS DECIMAL(20,2)) as yield_val FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND year='${latestYear}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY production DESC LIMIT 20`),
-        fetchQuery(`SELECT ulkead, SUM(CASE WHEN year='${latestYear}' THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as prod_now, SUM(CASE WHEN year=CAST(CAST('${latestYear}' AS SIGNED) - 5 AS CHAR) THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as prod_5y FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY ulkead HAVING prod_now > 0 ORDER BY prod_now DESC LIMIT 30`),
-        fetchQuery(`SELECT year, GROUP_CONCAT(CONCAT(ulkead,':',production) ORDER BY production DESC SEPARATOR '|') as data_str FROM (SELECT year, ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as production FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY year, ulkead) t WHERE year IN ('2005','2010','2015','2020','2023') GROUP BY year ORDER BY year`)
+      const [topRes, moverRes, hhiRes] = await Promise.all([
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger', 'miktar_deger'], avg: ['verim_deger'], where: { urunad: product, year: yil }, positive: ['uretim_deger'], exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 20 }),
+        // Eski SUM(CASE WHEN…) pivotu + HAVING; iki yıl çekilip JS'te pivotlanıyor.
+        fetchAgg(R_BIR, { groupBy: ['ulkead', 'year'], sum: ['uretim_deger'], where: { urunad: product }, whereIn: { year: [yil, yil - 5] }, positive: ['uretim_deger'], exclude: EX }),
+        fetchAgg(R_BIR, { groupBy: ['year', 'ulkead'], sum: ['uretim_deger'], where: { urunad: product }, whereIn: { year: hhiYillari }, positive: ['uretim_deger'], exclude: EX }),
       ]);
 
-      const worldTotalComp = (topRes.data || []).reduce((s: number, r: any) => s + (parseFloat(String(r.production ?? 0)) || 0), 0);
-      const topCountries = (topRes.data || []).map((r: any, i: number) => ({
-        rank: i + 1, country: r.ulkead, production: parseFloat(String(r.production ?? 0)) || 0,
-        area: parseFloat(String(r.area ?? 0)) || 0, yieldVal: parseFloat(String(r.yield_val ?? 0)) || 0,
-        share: worldTotalComp > 0 ? ((parseFloat(String(r.production ?? 0)) || 0) / worldTotalComp) * 100 : 0,
-        isTurkey: r.ulkead === 'Türkiye',
+      const worldTotalComp = topRes.reduce((acc: number, r) => acc + num(r.sum_uretim_deger), 0);
+      const topCountries = topRes.map((r, i: number) => ({
+        rank: i + 1, country: String(r.ulkead ?? ''), production: num(r.sum_uretim_deger),
+        area: num(r.sum_miktar_deger), yieldVal: num(r.avg_verim_deger),
+        share: worldTotalComp > 0 ? (num(r.sum_uretim_deger) / worldTotalComp) * 100 : 0,
+        isTurkey: r.ulkead === TR,
       }));
 
-      const movers = (cagrRes.data || []).map((r: any) => {
-        const now = parseFloat(String(r.prod_now ?? 0)) || 0;
-        const prev = parseFloat(String(r.prod_5y ?? 0)) || 0;
-        return { country: r.ulkead, production: now, growth: prev > 0 ? ((now - prev) / prev) * 100 : 0, isTurkey: r.ulkead === 'Türkiye' };
+      const moverMap = new Map<string, { now: number; prev: number }>();
+      moverRes.forEach((r) => {
+        const ulke = String(r.ulkead ?? '');
+        const kayit = moverMap.get(ulke) ?? { now: 0, prev: 0 };
+        if (Number(r.year) === yil) kayit.now += num(r.sum_uretim_deger);
+        else kayit.prev += num(r.sum_uretim_deger);
+        moverMap.set(ulke, kayit);
       });
+      const movers = [...moverMap.entries()]
+        .filter(([, v]) => v.now > 0)
+        .sort((a, b) => b[1].now - a[1].now)
+        .slice(0, 30)
+        .map(([country, v]) => ({
+          country: translateCountry(country), production: v.now,
+          growth: v.prev > 0 ? ((v.now - v.prev) / v.prev) * 100 : 0,
+          isTurkey: country === TR,
+        }));
       const topGainers = [...movers].sort((a, b) => b.growth - a.growth).slice(0, 8);
       const topDecliners = [...movers].sort((a, b) => a.growth - b.growth).slice(0, 8);
       setCompTopMovers({ gainers: topGainers, decliners: topDecliners });
@@ -484,13 +509,21 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
       const rivals = topCountries.filter((c: any) => !c.isTurkey).slice(0, 5);
       setCompMatrix([...(turkeyData ? [turkeyData] : []), ...rivals]);
 
-      const hhiTimeline = (hhiTimelineRes.data || []).map((r: any) => {
-        const pairs = (r.data_str || '').split('|').map((p: string) => { const parts = p.split(':'); return parseFloat(parts[parts.length - 1]) || 0; });
-        const total = pairs.reduce((s: number, v: number) => s + v, 0);
-        const shares = total > 0 ? pairs.map((v: number) => (v / total) * 100) : [];
-        const hhi = calculateHHI(shares);
-        return { year: r.year, hhi: hhi.hhi, concentration: hhi.concentration };
+      // Eskiden GROUP_CONCAT ile tek metne sıkıştırılıp ayrıştırılıyordu.
+      const yilBazli = new Map<string, number[]>();
+      hhiRes.forEach((r) => {
+        const y = String(r.year);
+        if (!yilBazli.has(y)) yilBazli.set(y, []);
+        yilBazli.get(y)!.push(num(r.sum_uretim_deger));
       });
+      const hhiTimeline = [...yilBazli.entries()]
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .map(([year, degerler]) => {
+          const total = degerler.reduce((acc, v) => acc + v, 0);
+          const shares = total > 0 ? degerler.map((v) => (v / total) * 100) : [];
+          const hhi = calculateHHI(shares);
+          return { year, hhi: hhi.hhi, concentration: hhi.concentration };
+        });
       setCompHHITimeline(hhiTimeline);
 
       const turkeyInComp = topCountries.find((c: any) => c.isTurkey);
@@ -498,7 +531,7 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
         turkeyRank: turkeyInComp?.rank || 0, turkeyShare: turkeyInComp?.share || 0,
         leader: topCountries[0]?.country || '-', leaderShare: topCountries[0]?.share || 0,
         totalProducers: topCountries.length,
-        latestHHI: hhiTimeline.length > 0 ? hhiTimeline[hhiTimeline.length - 1].hhi : 0,
+        latestHHI: hhiTimeline.length > 0 ? hhiTimeline[hhiTimeline.length - 1].hhi : 0, yil,
       });
 
       const cIns: Insight[] = [];
@@ -520,19 +553,18 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
     setLoading(true);
     try {
       const product = predProduct;
-      const safeProduct = product.replace(/'/g, "''");
-
+      const trYil = { urunad: product, ulkead: TR };
       const [turkeyProdRes, turkeyYieldRes, turkeyAreaRes, worldProdRes] = await Promise.all([
-        fetchQuery(`SELECT year, CAST(uretim_deger AS DECIMAL(20,2)) as production FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(verim_deger AS DECIMAL(20,2)) as yield_val FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(verim_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(miktar_deger AS DECIMAL(20,2)) as area FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead='Türkiye' AND CAST(miktar_deger AS DECIMAL(20,2)) > 0 ORDER BY year`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as world_total FROM fao_uretim_bitkisel_birincil WHERE urunad='${safeProduct}' AND ulkead NOT IN ${EXCLUDED_AREAS} AND CAST(uretim_deger AS DECIMAL(20,2)) > 0 GROUP BY year ORDER BY year`)
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger'], where: trYil, positive: ['uretim_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['year'], avg: ['verim_deger'], where: trYil, positive: ['verim_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['miktar_deger'], where: trYil, positive: ['miktar_deger'], orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger'], where: { urunad: product }, positive: ['uretim_deger'], exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
 
-      const turkeyProd: YearValue[] = (turkeyProdRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.production ?? 0)) || 0 }));
-      const turkeyYieldArr: YearValue[] = (turkeyYieldRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.yield_val ?? 0)) || 0 }));
-      const turkeyAreaArr: YearValue[] = (turkeyAreaRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.area ?? 0)) || 0 }));
-      const worldProd: YearValue[] = (worldProdRes.data || []).map((r: any) => ({ year: r.year, value: parseFloat(String(r.world_total ?? 0)) || 0 }));
+      const turkeyProd: YearValue[] = turkeyProdRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
+      const turkeyYieldArr: YearValue[] = turkeyYieldRes.map((r) => ({ year: String(r.year), value: num(r.avg_verim_deger) }));
+      const turkeyAreaArr: YearValue[] = turkeyAreaRes.map((r) => ({ year: String(r.year), value: num(r.sum_miktar_deger) }));
+      const worldProd: YearValue[] = worldProdRes.map((r) => ({ year: String(r.year), value: num(r.sum_uretim_deger) }));
 
       const prodForecast = forecastLinear(turkeyProd, 3);
       const yieldForecast = forecastLinear(turkeyYieldArr, 3);
