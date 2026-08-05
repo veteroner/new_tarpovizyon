@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, num, type Row } from '../../services/d1';
 import {
   type YearPoint,
   type MilkEconomicData,
@@ -33,8 +33,7 @@ export function useMilkData() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetchQuery('SELECT * FROM o_sur_uretimi_veri');
-      const data = (res.data ?? []) as Record<string, unknown>[];
+      const data = await fetchRows('oner/sut-uretimi-veri') as Record<string, unknown>[];
 
       const points = data
         .map((row) => {
@@ -52,18 +51,13 @@ export function useMilkData() {
 
       // Ekonomik göstergeleri yükle
       try {
-        const economicQuery = `SELECT 
-          DATE_FORMAT(tarih, '%Y-%m') as tarih,
-          misir_silaji, yonca, saman, sut_yemi_19_hp,
-          cig_sut_uretim_maliyeti_tl_lt, usk_cig_sut_tavsiye_fiyati_tl_lt,
-          sut_yem_paritesi, litre_basina_cig_sut_destegi_tl,
-          sut_yem_paritesi_destek_dahil, fiyat_maliyet_farki_tl_lt,
-          fiyat_maliyet_farki_tl_lt_destek_dahil, karlilik
-          FROM oner_cig_sut_ekonomik_gostergeler 
-          ORDER BY tarih DESC LIMIT 60`;
-        const economicRes = await fetchQuery(economicQuery);
-        if (economicRes.data && economicRes.data.length > 0) {
-          const mapped = economicRes.data.map((item: Record<string, string | number>) => ({
+        // DATE_FORMAT(tarih,'%Y-%m') karşılığı: 'YYYY-MM-DD ...' dizisinin ilk
+        // 7 karakteri. Eski sorgu en yeni 60 kaydı azalan sırada veriyordu.
+        const economicRows = (await fetchRows('oner/cig-sut-ekonomik-gostergeler'))
+          .slice(-60).reverse()
+          .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
+        if (economicRows.length > 0) {
+          const mapped = economicRows.map((item) => ({
             tarih: String(item['tarih'] || ''),
             misir_silaji: Number(item['misir_silaji']) || 0,
             yonca: Number(item['yonca']) || 0,
@@ -91,15 +85,11 @@ export function useMilkData() {
 
       // Sanayiye Giden Süt
       try {
-        const industryQuery = `SELECT 
-          DATE_FORMAT(yil, '%Y-%m') as yil,
-          inek_sutu_ton, yagsiz_sut_tozu_ton, tereyag_ton, inek_peyniri_ton,
-          yogurt_ton, ayran_ton, icme_sutu_pastorize_uht_vb_ton
-          FROM oner_sanayiye_giden_sut_ve_sut_urunu 
-          ORDER BY yil DESC LIMIT 24`;
-        const industryRes = await fetchQuery(industryQuery);
-        if (industryRes.data && industryRes.data.length > 0) {
-          const mapped = industryRes.data.map((item: Record<string, string | number>) => ({
+        const industryRows = (await fetchRows('oner/sanayiye-giden-sut'))
+          .slice(-24).reverse()
+          .map((r): Row => ({ ...r, yil: String(r.yil ?? '').slice(0, 7) }));
+        if (industryRows.length > 0) {
+          const mapped = industryRows.map((item) => ({
             yil: String(item['yil'] || ''),
             inek_sutu_ton: Number(item['inek_sutu_ton']) || 0,
             yagsiz_sut_tozu_ton: Number(item['yagsiz_sut_tozu_ton']) || 0,
@@ -117,10 +107,9 @@ export function useMilkData() {
 
       // Dünya Süt Fiyatları
       try {
-        const worldPricesQuery = 'SELECT * FROM oner_dunya_sut_fiyatlari LIMIT 1';
-        const worldRes = await fetchQuery(worldPricesQuery);
-        if (worldRes.data && worldRes.data.length > 0) {
-          const item = worldRes.data[0];
+        const worldRows = await fetchRows('oner/dunya-sut-fiyatlari', { limit: 1 });
+        if (worldRows.length > 0) {
+          const item = worldRows[0];
           setWorldMilkPrices({
             abd_class_3: Number(item['abd_class_3']) || 0,
             ab_27: Number(item['ab_27']) || 0,
@@ -136,14 +125,10 @@ export function useMilkData() {
 
       // Verimlilik verileri
       try {
-        const productivityQuery = `SELECT 
-          DATE_FORMAT(yil, '%Y') as yil,
-          cig_sut_verimi_lt 
-          FROM oner_verimlilikler 
-          ORDER BY yil ASC`;
-        const prodRes = await fetchQuery(productivityQuery);
-        if (prodRes.data && prodRes.data.length > 0) {
-          const mapped = prodRes.data.map((item: Record<string, string | number>) => ({
+        const prodRows = (await fetchRows('oner/verimlilikler'))
+          .map((r): Row => ({ ...r, yil: String(r.yil ?? '').slice(0, 4) }));
+        if (prodRows.length > 0) {
+          const mapped = prodRows.map((item) => ({
             yil: String(item['yil'] || ''),
             cig_sut_verimi_lt: Number(item['cig_sut_verimi_lt']) || 0,
           }));
@@ -155,15 +140,16 @@ export function useMilkData() {
 
       // Verimlilik Karşılaştırması
       try {
-        const compQuery = 'SELECT `Ülke` as ulke, REPLACE(`Karkas Verimi (Kg)`, \',\', \'.\') * 1 as karkas_verimi FROM o_dunya_kaarkas_veri ORDER BY karkas_verimi DESC';
-        const compRes = await fetchQuery(compQuery);
-        if (compRes.data && compRes.data.length > 0) {
-          const mapped = compRes.data
-            .map((item: Record<string, string | number>) => ({
-              ulke: String(item['ulke'] || ''),
-              karkas_verimi: Number(item['karkas_verimi']) || 0,
+        // Değerler '99,5' gibi virgüllü metin; REPLACE(...)*1 karşılığı istemcide.
+        const compRows = await fetchRows('oner/dunya-karkas-veri');
+        if (compRows.length > 0) {
+          const mapped = compRows
+            .map((item) => ({
+              ulke: String(item['Ülke'] ?? ''),
+              karkas_verimi: Number(String(item['Karkas Verimi (Kg)'] ?? '').replace(',', '.')) || 0,
             }))
-            .filter(d => d.ulke && d.ulke.trim().length > 0);
+            .filter(d => d.ulke && d.ulke.trim().length > 0)
+            .sort((a, b) => b.karkas_verimi - a.karkas_verimi);
           setProductivityComparison(mapped);
         }
       } catch (err) {
@@ -172,10 +158,9 @@ export function useMilkData() {
 
       // Yeterlilikler
       try {
-        const suffQuery = 'SELECT * FROM oner_yeterlilikler LIMIT 1';
-        const suffRes = await fetchQuery(suffQuery);
-        if (suffRes.data && suffRes.data.length > 0) {
-          setSufficiency(suffRes.data[0]);
+        const suffRows = await fetchRows('oner/yeterlilikler', { limit: 1 });
+        if (suffRows.length > 0) {
+          setSufficiency(suffRows[0] as Record<string, string | number>);
         }
       } catch (err) {
         console.warn('Yeterlilik verileri yüklenemedi:', err);
@@ -184,70 +169,40 @@ export function useMilkData() {
       // Dünya Sıralamaları
       try {
         const euCountries = ['Almanya', 'Fransa', 'İtalya', 'İspanya', 'Hollanda', 'Belçika', 'Polonya', 'Romanya', 'Avusturya', 'Bulgaristan', 'Hırvatistan', 'Çekya', 'Danimarka', 'Estonya', 'Finlandiya', 'Yunanistan', 'Macaristan', 'İrlanda', 'Letonya', 'Litvanya', 'Portekiz', 'Slovakya', 'Slovenya', 'İsveç'];
-        const euList = euCountries.map(c => `'${c}'`).join(',');
 
-        const cattleQuery = `
-          SELECT 
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Sığırların çiğ sütü' 
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Sığırların çiğ sütü')) as world_rank,
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Sığırların çiğ sütü' 
-             AND ulke IN (${euList}, 'Türkiye')
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Sığırların çiğ sütü')) as eu_rank
-        `;
-        const cattleRes = await fetchQuery(cattleQuery);
+        // Eskiden her ürün için iç içe COUNT(*)+1 alt sorgularıyla sıralama
+        // hesaplanıyordu. Tablo küçük: tek seferde çekilip sıra istemcide.
+        const dunyaUretim = await fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 });
+        const siraHesapla = (urun: string) => {
+          const satirlar = dunyaUretim.filter((r) => String(r.urun ?? '') === urun);
+          const turkiye = satirlar.find((r) => String(r.ulke ?? '') === 'Türkiye');
+          if (!turkiye) return { world: 0, eu: 0 };
+          const trDeger = num(turkiye.uretim_miktari_ton);
+          const ustunde = (liste: typeof satirlar) =>
+            liste.filter((r) => num(r.uretim_miktari_ton) > trDeger).length + 1;
+          return {
+            world: ustunde(satirlar),
+            eu: ustunde(satirlar.filter((r) => {
+              const u = String(r.ulke ?? '');
+              return euCountries.includes(u) || u === 'Türkiye';
+            })),
+          };
+        };
+        const cattleRank = siraHesapla('Sığırların çiğ sütü');
+        const sheepRank = siraHesapla('Koyunların çiğ sütü');
+        const goatRank = siraHesapla('Keçilerin çiğ sütü');
 
-        const sheepQuery = `
-          SELECT 
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Koyunların çiğ sütü' 
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Koyunların çiğ sütü')) as world_rank,
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Koyunların çiğ sütü' 
-             AND ulke IN (${euList}, 'Türkiye')
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Koyunların çiğ sütü')) as eu_rank
-        `;
-        const sheepRes = await fetchQuery(sheepQuery);
-
-        const goatQuery = `
-          SELECT 
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Keçilerin çiğ sütü' 
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Keçilerin çiğ sütü')) as world_rank,
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Keçilerin çiğ sütü' 
-             AND ulke IN (${euList}, 'Türkiye')
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Keçilerin çiğ sütü')) as eu_rank
-        `;
-        const goatRes = await fetchQuery(goatQuery);
-
-        if (cattleRes.data && sheepRes.data && goatRes.data) {
-          setWorldRankings({
-            cattle: {
-              world: Number(cattleRes.data[0]?.world_rank) || 0,
-              eu: Number(cattleRes.data[0]?.eu_rank) || 0,
-            },
-            sheep: {
-              world: Number(sheepRes.data[0]?.world_rank) || 0,
-              eu: Number(sheepRes.data[0]?.eu_rank) || 0,
-            },
-            goat: {
-              world: Number(goatRes.data[0]?.world_rank) || 0,
-              eu: Number(goatRes.data[0]?.eu_rank) || 0,
-            },
-          });
-        }
+        setWorldRankings({ cattle: cattleRank, sheep: sheepRank, goat: goatRank });
       } catch (err) {
         console.warn('Dünya sıralaması verileri yüklenemedi:', err);
       }
 
       // TÜİK Süt ve Süt Ürünleri
       try {
-        const tuikSutQuery = `SELECT * FROM tuik_hayavancilik_sutvesuturunleri ORDER BY urun, yil`;
-        const tuikSutRes = await fetchQuery(tuikSutQuery);
-        if (tuikSutRes.data && tuikSutRes.data.length > 0) {
-          const mapped: TuikSutUrunData[] = tuikSutRes.data.map((item: Record<string, string | number>) => ({
+        const tuikSutRows = (await fetchRows('tuik/sutvesuturunleri', { limit: 2000 }))
+          .sort((a, b) => String(a.urun).localeCompare(String(b.urun), 'tr') || Number(a.yil) - Number(b.yil));
+        if (tuikSutRows.length > 0) {
+          const mapped: TuikSutUrunData[] = tuikSutRows.map((item) => ({
             urun: String(item['urun'] || ''),
             birim: String(item['birim'] || ''),
             yil: Number(item['yil']) || 0,
