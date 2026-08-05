@@ -3,10 +3,60 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, ScatterChart, Scatter, ZAxis, Legend, LineChart, Line
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num, type Row } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+
+const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
+const R_BIR = 'fao/uretim-hayvansal-birincil';
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+const STOK_SIGIR = ['Cattle', 'Sığır'];
+const STOK_TAVUK = ['Chickens', 'Tavuk'];
+
+/**
+ * Ülke(-yıl) bazında stok ve üretim toplamlarını çıkarır.
+ *
+ * Eski SQL stok tablosunu üretim tablosuna `ON ulkead=ulkead AND year=year`
+ * ile LEFT JOIN ediyordu. Bu bir kartezyen çarpım: her stok satırı o
+ * ülke-yılın HER üretim satırıyla eşleşiyor, dolayısıyla stok toplamları
+ * üretim satırı sayısıyla, üretim toplamları da stok satırı sayısıyla
+ * katlanıyordu — verimlilik oranları anlamsız çıkıyordu. İki taraf ayrı
+ * toplanıp burada eşleştiriliyor.
+ */
+function birlestirVerim(
+  stokSatirlari: Row[], uretimSatirlari: Row[], yilBazli: boolean,
+): Row[] {
+  const anahtar = (r: Row) => (yilBazli ? `${String(r.ulkead)}|${String(r.year)}` : String(r.ulkead));
+  const harita = new Map<string, Row>();
+  const al = (r: Row) => {
+    const k = anahtar(r);
+    if (!harita.has(k)) {
+      harita.set(k, { ulkead: r.ulkead ?? '', year: r.year ?? '', cattle_stock: 0,
+        chicken_stock: 0, meat_prod: 0, milk_prod: 0, egg_prod: 0 });
+    }
+    return harita.get(k)!;
+  };
+  for (const r of stokSatirlari) {
+    const kayit = al(r);
+    const urun = String(r.urunad ?? '');
+    // Stok sayıları '1000 An' biriminde bin baş olarak geliyor.
+    const bas = num(r.sum_miktar_deger) * (String(r.miktar_birim ?? '') === '1000 An' ? 1000 : 1);
+    if (STOK_SIGIR.includes(urun)) kayit.cattle_stock = num(kayit.cattle_stock) + bas;
+    if (STOK_TAVUK.includes(urun)) kayit.chicken_stock = num(kayit.chicken_stock) + bas;
+  }
+  for (const r of uretimSatirlari) {
+    const k = anahtar(r);
+    if (!harita.has(k)) continue;
+    const kayit = harita.get(k)!;
+    const ad = String(r.urunad ?? '').toLowerCase();
+    const v = num(r.sum_uretim_deger);
+    if (ad.includes('meat')) kayit.meat_prod = num(kayit.meat_prod) + v;
+    if (ad.includes('milk') && !ad.includes('powder')) kayit.milk_prod = num(kayit.milk_prod) + v;
+    if (ad.includes('egg')) kayit.egg_prod = num(kayit.egg_prod) + v;
+  }
+  return [...harita.values()];
+}
 
 interface Props {
   selectedYear: string;
@@ -48,47 +98,29 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
   const loadEfficiencyData = useCallback(async () => {
     setLoading(true);
     try {
-      // Çin: üretim tablolarında düz 'China' satırı yok, yalnızca mainland/Taiwan/HK/Macao
-      // var; mainland'i dışlamak dünyanın en büyük üreticisini siliyordu. Toplamı olan
-      // tablolarda ise hem 'China' hem bileşenleri kalıp mükerrer sayılıyordu. Doğrusu:
-      // bileşenleri tut, TOPLAMI ('China') dışla.
-      const excludedAreas = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM','Africa','Americas','Asia','Europe','Oceania','Northern Africa','Eastern Africa','Middle Africa','Southern Africa','Western Africa','Northern America','Central America','Caribbean','South America','Central Asia','Eastern Asia','South-eastern Asia','Southern Asia','Western Asia','Eastern Europe','Northern Europe','Southern Europe','Western Europe','Australia and New Zealand','Melanesia','Micronesia','Polynesia','Least Developed Countries','Land Locked Developing Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','European Union (27)','Sub-Saharan Africa','Latin America and the Caribbean','China')";
       const yr = parseInt(selectedYear);
+      const TON = { uretim_birim: 't' };
 
-      const q1 = `
-        SELECT stocks.ulkead,
-          SUM(CASE WHEN stocks.urunad IN ('Cattle','Sığır') THEN stocks.miktar_deger ELSE 0 END) as cattle_stock,
-          SUM(CASE WHEN stocks.urunad IN ('Chickens','Tavuk') THEN stocks.miktar_deger ELSE 0 END) as chicken_stock,
-          SUM(CASE WHEN prod.urunad LIKE '%Meat%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as meat_prod,
-          SUM(CASE WHEN prod.urunad LIKE '%Milk%' AND prod.urunad NOT LIKE '%powder%' AND prod.urunad NOT LIKE '%Powder%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as milk_prod,
-          SUM(CASE WHEN prod.urunad LIKE '%Egg%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as egg_prod
-        FROM fao_uretim_hayvansal_canlihayvan stocks
-        LEFT JOIN fao_uretim_hayvansal_birincil prod ON stocks.ulkead=prod.ulkead AND stocks.year=prod.year
-        WHERE stocks.year='${yr}' AND stocks.ulkead NOT IN ${excludedAreas} AND prod.uretim_birim='t'
-        GROUP BY stocks.ulkead HAVING cattle_stock>0 OR chicken_stock>0`;
+      const [stokYil, uretimYil, stokSeri, uretimSeri, toplamUretim] = await Promise.all([
+        fetchAgg(R_CANLI, { groupBy: ['ulkead', 'urunad', 'miktar_birim'], sum: ['miktar_deger'],
+          where: { year: yr }, whereIn: { urunad: [...STOK_SIGIR, ...STOK_TAVUK] }, exclude: EX }),
+        fetchAgg(R_BIR, { groupBy: ['ulkead', 'urunad'], sum: ['uretim_deger'],
+          where: { year: yr, ...TON }, likeAny: { urunad: ['%meat%', '%milk%', '%egg%'] }, exclude: EX }),
+        fetchAgg(R_CANLI, { groupBy: ['ulkead', 'year', 'urunad', 'miktar_birim'], sum: ['miktar_deger'],
+          whereGte: { year: yr - 14 }, whereIn: { urunad: [...STOK_SIGIR, ...STOK_TAVUK] }, exclude: EX }),
+        fetchAgg(R_BIR, { groupBy: ['ulkead', 'year', 'urunad'], sum: ['uretim_deger'],
+          where: TON, whereGte: { year: yr - 14 }, likeAny: { urunad: ['%meat%', '%milk%', '%egg%'] }, exclude: EX }),
+        fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger'],
+          where: { year: yr, ...TON }, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
+      ]);
 
-      const q2 = `
-        SELECT stocks.ulkead, stocks.year,
-          SUM(CASE WHEN stocks.urunad IN ('Cattle','Sığır') THEN stocks.miktar_deger ELSE 0 END) as cattle_stock,
-          SUM(CASE WHEN stocks.urunad IN ('Chickens','Tavuk') THEN stocks.miktar_deger ELSE 0 END) as chicken_stock,
-          SUM(CASE WHEN prod.urunad LIKE '%Meat%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as meat_prod,
-          SUM(CASE WHEN prod.urunad LIKE '%Milk%' AND prod.urunad NOT LIKE '%powder%' AND prod.urunad NOT LIKE '%Powder%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as milk_prod,
-          SUM(CASE WHEN prod.urunad LIKE '%Egg%' THEN CAST(prod.uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as egg_prod
-        FROM fao_uretim_hayvansal_canlihayvan stocks
-        LEFT JOIN fao_uretim_hayvansal_birincil prod ON stocks.ulkead=prod.ulkead AND stocks.year=prod.year
-        WHERE stocks.year>=${yr - 14} AND stocks.ulkead NOT IN ${excludedAreas} AND prod.uretim_birim='t'
-        GROUP BY stocks.ulkead, stocks.year ORDER BY stocks.year`;
+      const r1 = { data: birlestirVerim(stokYil, uretimYil, false)
+        .filter((r) => num(r.cattle_stock) > 0 || num(r.chicken_stock) > 0) };
+      const r2 = { data: birlestirVerim(stokSeri, uretimSeri, true)
+        .sort((a, b) => Number(a.year) - Number(b.year)) };
+      const r3 = { data: toplamUretim.map((r) => ({ ulkead: r.ulkead, total_prod: num(r.sum_uretim_deger) })) };
 
-      const q3 = `
-        SELECT ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total_prod
-        FROM fao_uretim_hayvansal_birincil
-        WHERE year='${yr}' AND ulkead NOT IN ${excludedAreas} AND uretim_birim='t'
-        GROUP BY ulkead ORDER BY total_prod DESC`;
-
-      const [r1, r2, r3] = await Promise.all([fetchQuery(q1), fetchQuery(q2), fetchQuery(q3)]);
-
-      type R = Record<string, string | number>;
-      const calcEff = (row: R) => {
+      const calcEff = (row: Row) => {
         const cs = Number(row.cattle_stock) || 0;
         const chs = Number(row.chicken_stock) || 0;
         const mp = Number(row.meat_prod) || 0;
@@ -101,7 +133,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
         };
       };
 
-      const allCountries = (r1.data || []).map((row: R) => {
+      const allCountries = (r1.data || []).map((row) => {
         const name = translateCountry(String(row.ulkead || ''));
         const eff = calcEff(row);
         return { country: name, raw: String(row.ulkead || ''), ...eff };
@@ -142,7 +174,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
       });
 
       // Turkey trend CAGR
-      const trendRows = (r2.data || []) as R[];
+      const trendRows = (r2.data || []) as Row[];
       const trTrendRows = trendRows.filter(r => String(r.ulkead) === 'Türkiye');
       const trByYear: Record<number, { meatEff: number; milkEff: number; eggEff: number }> = {};
       trTrendRows.forEach(row => {
@@ -201,7 +233,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       // Scatter data
       const prodMap: Record<string, number> = {};
-      (r3.data || []).forEach((row: R) => {
+      (r3.data || []).forEach((row) => {
         prodMap[String(row.ulkead)] = Number(row.total_prod) || 0;
       });
       const scatter = allCountries.map(d => ({

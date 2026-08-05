@@ -4,13 +4,16 @@ import {
   Cell, AreaChart, Area,
   ScatterChart, Scatter, ZAxis, Legend
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '../../utils/livestockCalculations';
-import { EXCLUDED_FULL, formatNumber, formatShort } from './livestockUtils';
+import { formatNumber, formatShort } from './livestockUtils';
+
+const R_BIR = 'fao/uretim-hayvansal-birincil';
+const EX = { preset: 'v1' as const, col: 'ulkead' };
 
 interface Props {
   selectedYear: string;
@@ -51,20 +54,37 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
   const loadPredictionsData = useCallback(async () => {
     setLoading(true);
     try {
-      const excludedAreas = EXCLUDED_FULL;
       const currentYear = parseInt(selectedYear);
+      const ANA_URUNLER = { urunad: ['%meat%', '%milk%', '%egg%'] };
+      const DONEM = { uretim_birim: 't' };
 
-      const [prophetRes, histRes, globalYearlyRes] = await Promise.all([
-        fetchQuery(`SELECT urunad, ulkead, tahmin_yil, tahmin_deger, alt_sinir, ust_sinir, trend, r2_cv, mae_cv, mape_cv FROM fao_tahmin_sonuclari WHERE veri_tipi = 'birincil' ORDER BY ulkead, urunad, tahmin_yil`),
-        fetchQuery(`SELECT year, ulkead, urunad, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total FROM fao_uretim_hayvansal_birincil WHERE year >= ${currentYear - 14} AND year <= ${currentYear} AND uretim_birim='t' AND ulkead NOT IN ${excludedAreas} AND (urunad LIKE '%Meat%' OR urunad LIKE '%Milk%' OR urunad LIKE '%Egg%') GROUP BY year, ulkead, urunad HAVING total > 10000 ORDER BY year, total DESC`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total FROM fao_uretim_hayvansal_birincil WHERE year >= ${currentYear - 14} AND year <= ${currentYear} AND uretim_birim='t' AND ulkead NOT IN ${excludedAreas} AND (urunad LIKE '%Meat%' OR urunad LIKE '%Milk%' OR urunad LIKE '%Egg%') GROUP BY year ORDER BY year`)
+      const [prophetRows, histRaw, globalYearlyRaw] = await Promise.all([
+        fetchRows('fao/tahmin-sonuclari', { veri_tipi: 'birincil', limit: 10000 }),
+        fetchAgg(R_BIR, { groupBy: ['year', 'ulkead', 'urunad'], sum: ['uretim_deger'],
+          where: DONEM, whereGte: { year: currentYear - 14 }, whereLte: { year: currentYear },
+          likeAny: ANA_URUNLER, exclude: EX }),
+        fetchAgg(R_BIR, { groupBy: ['year'], sum: ['uretim_deger'],
+          where: DONEM, whereGte: { year: currentYear - 14 }, whereLte: { year: currentYear },
+          likeAny: ANA_URUNLER, exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
+
+      const prophetRes = { data: [...prophetRows].sort((a, b) =>
+        String(a.ulkead).localeCompare(String(b.ulkead))
+        || String(a.urunad).localeCompare(String(b.urunad))
+        || Number(a.tahmin_yil) - Number(b.tahmin_yil)) };
+      // HAVING total > 10000 karşılığı istemcide.
+      const histRes = { data: histRaw
+        .map((r) => ({ year: r.year, ulkead: r.ulkead, urunad: r.urunad, total: num(r.sum_uretim_deger) }))
+        .filter((r) => r.total > 10000)
+        .sort((a, b) => Number(a.year) - Number(b.year) || b.total - a.total) };
+      const globalYearlyRes = { data: globalYearlyRaw
+        .map((r) => ({ year: r.year, total: num(r.sum_uretim_deger) })) };
 
       const prophetData = prophetRes.data || [];
       const hasProphet = prophetData.length > 0;
 
       const grouped = new Map<string, YearValue[]>();
-      (histRes.data || []).forEach((item: Record<string, string | number>) => {
+      (histRes.data || []).forEach((item) => {
         const country = String(item.ulkead || '');
         const product = String(item.urunad || '');
         const key = `${country}|||${product}`;
@@ -94,7 +114,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       if (hasProphet) {
         const prophetGrouped = new Map<string, { forecasts: Array<{year: number; value: number; lower: number; upper: number}>; trend: string; r2: number }>();
-        prophetData.forEach((row: Record<string, string | number>) => {
+        prophetData.forEach((row) => {
           const key = `${row.ulkead}|||${row.urunad}`;
           if (!prophetGrouped.has(key)) {
             prophetGrouped.set(key, { forecasts: [], trend: String(row.trend || 'STABLE'), r2: Number(row.r2_cv) || 0 });
@@ -143,7 +163,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       setRiskAlerts(risks.sort((a, b) => a.decline - b.decline).slice(0, 15));
 
       // Global forecast chart
-      const globalYearly = (globalYearlyRes.data || []).map((d: Record<string, string | number>) => ({
+      const globalYearly = (globalYearlyRes.data || []).map((d) => ({
         year: String(d.year), value: Number(d.total) || 0
       }));
       const chartData: Array<{year: string; actual?: number; forecast?: number; upper?: number; lower?: number}> = [];
@@ -216,7 +236,14 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       const highConf = forecasts.filter(f => f.r2 > 0.8).length;
       const upTrend = forecasts.filter(f => f.trend.includes('UP') || f.trend === 'ACCELERATING').length;
       const downTrend = forecasts.filter(f => f.trend === 'DOWN' || f.trend === 'DECLINING').length;
-      const avgR2 = forecasts.length > 0 ? forecasts.reduce((s, f) => s + f.r2, 0) / forecasts.length : 0;
+      // R² MEDYANI, ortalaması değil. Kaynak veride bozuk model uyumları
+      // -1,16 milyara kadar iniyor (ör. 'Silk-worm cocoons'); düz ortalama
+      // "-349383.100" gibi anlamsız bir sayı üretiyordu. Medyan bu uç
+      // değerlerden etkilenmiyor.
+      const r2Sirali = forecasts.map((f) => f.r2).filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
+      const avgR2 = r2Sirali.length === 0 ? 0
+        : r2Sirali.length % 2 === 1 ? r2Sirali[(r2Sirali.length - 1) / 2]
+        : (r2Sirali[r2Sirali.length / 2 - 1] + r2Sirali[r2Sirali.length / 2]) / 2;
       setPredKPIs({
         totalForecasts: forecasts.length, highConfidence: highConf,
         anomalyCount: anomalies.length, riskCount: risks.length,
@@ -229,7 +256,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       const ins: Insight[] = [];
       let iid = 1;
       ins.push({ id: `pr${iid++}`, type: avgR2 > 0.7 ? 'achievement' : 'info',
-        message: `${forecasts.length} ${modelType} tahmin modeli. Ortalama ${cvLabel}: ${avgR2.toFixed(3)}. ${highConf} model yüksek güvenilirlikte (>${hasProphet ? 'CV ' : ''}R²>0.8).`,
+        message: `${forecasts.length} ${modelType} tahmin modeli. Medyan ${cvLabel}: ${avgR2.toFixed(3)}. ${highConf} model yüksek güvenilirlikte (>${hasProphet ? 'CV ' : ''}R²>0.8).`,
         severity: 'medium', category: 'MODEL' });
       ins.push({ id: `pr${iid++}`, type: upTrend > downTrend ? 'growth' : 'decline',
         message: `Trend dağılımı: ${upTrend} yükselen, ${downTrend} düşen, ${forecasts.length - upTrend - downTrend} stabil. ${upTrend > downTrend ? 'Genel görünüm pozitif.' : 'Dikkat: düşüş trendi baskın!'}`,
@@ -278,7 +305,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <div className="kpi-subtitle">Prophet / 3Y projeksiyon ({parseInt(selectedYear) + 1}-{parseInt(selectedYear) + 3})</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">ORTALAMA R²</span><div className="kpi-icon" style={{background: predKPIs.avgR2 > 0.7 ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)', color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}>📐</div></div>
+            <div className="kpi-header"><span className="kpi-title">MEDYAN R²</span><div className="kpi-icon" style={{background: predKPIs.avgR2 > 0.7 ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)', color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}>📐</div></div>
             <div className="kpi-value" style={{color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}>{predKPIs.avgR2.toFixed(3)}</div>
             <div className="kpi-subtitle">{predKPIs.highConfidence} yüksek güvenilir (R²&gt;0.8)</div>
           </div>
