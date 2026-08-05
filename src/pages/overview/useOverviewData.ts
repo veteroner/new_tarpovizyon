@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchAgg, num, type Row } from '../../services/d1';
+import { fetchAgg, latestYear, num, type Row } from '../../services/d1';
 import {
   COLORS,
   translateMilkItem, translateMeatItem, translateEggItem,
@@ -22,13 +22,16 @@ const KIRMIZI_ET = [
 ];
 const KANATLI_ET = ['Meat of chickens, fresh or chilled', 'Meat of turkeys, fresh or chilled'];
 
-// FAO makroekonomik gösterge kodları. Eski sorgular 6110/6119/6103 arıyordu;
-// veri setinde bu kodlar YOK (sorgular hem MySQL'de hem D1'de boş dönüyordu ve
-// sayfada 4 KPI "—" görünüyordu). Güncel kodlar aşağıdaki gibi ve tutarlı:
-// 68.111,78 / 1.226.292,17 = %5,55 → EC_PAY_GSYH ile birebir uyuşuyor.
-const EC_MILYON_USD = 6184;   // toplam değer (million USD)
-const EC_KISI_BASI = 6185;    // kişi başı (USD)
-const EC_PAY_GSYH = 6187;     // GSYH içindeki pay (%)
+// FAO makroekonomik gösterge kodları — orijinal kodlar DOĞRU; sorunlu olan
+// sabit yıldı. 2023 satırlarında bu kodlar yok, 2024'te var; sayfa 2023'e
+// sabitlendiği için 4 KPI "—" görünüyordu. Artık yıl latestYear ile dinamik.
+//
+// DİKKAT: fao_ME_indicator'ın 2024 satırları veri setinde ÇİFT (aynı değer iki
+// kez, cnt=2). SUM iki katına çıkarıyor, bu yüzden tekil gösterge okumalarında
+// `max` kullanılıyor. Tutarlılık: 74.003,70 / 1.323.254,72 = %5,593 = kod 6103.
+const EC_TOPLAM_USD = 6110;   // toplam değer (million USD)
+const EC_KISI_BASI = 6119;    // kişi başı (USD)
+const EC_PAY_GSYH = 6103;     // GSYH içindeki pay (%)
 
 export interface UseOverviewDataReturn {
   data: OverviewData | null;
@@ -42,6 +45,15 @@ export function useOverviewData(): UseOverviewDataReturn {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      // Yıllar artık sabit değil: her tablonun en güncel DOLU yılı seçiliyor
+      // (kısmi girilmiş yıllara atlamamak için latestYear doluluk bakıyor).
+      const [meYil, araziYil, hayvanYil, nufusYil, istihdamYil] = await Promise.all([
+        latestYear(R_ME, 'year'),
+        latestYear(R_LAND, 'year'),
+        latestYear(R_LIVESTOCK, 'year'),
+        latestYear(R_NUFUS, 'year'),
+        latestYear(R_ISTIHDAM, 'yearcode'),
+      ]);
       const [
         populationRes, gdpRes, gdpPerCapitaRes, landRes,
         milkTotalRes, milkBreakdownRes, milkYearlyRes,
@@ -50,23 +62,23 @@ export function useOverviewData(): UseOverviewDataReturn {
         agriGdpRes, agriGdpShareRes, agriEmpRes, agriEmpShareRes,
         livestockStocksRes, regionalCattleRes, regionalSheepRes, regionalGoatRes, regionalPoultryRes,
       ] = await Promise.all([
-        fetchAgg(R_NUFUS, { sum: ['TOPLAM', 'kirsal', 'sehir'], where: { year: 2023, area: TR } }),
-        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Gross Domestic Product', elementcode: EC_MILYON_USD, unit: 'million USD' } }),
-        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Gross Domestic Product', elementcode: EC_KISI_BASI, unit: 'USD' } }),
-        fetchAgg(R_LAND, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, area: TR } }),
-        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' } }),
-        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' }, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R_NUFUS, { max: ['TOPLAM', 'kirsal', 'sehir'], where: { year: nufusYil, area: TR } }),
+        fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Gross Domestic Product', elementcode: EC_TOPLAM_USD, unit: 'million USD' } }),
+        fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Gross Domestic Product', elementcode: EC_KISI_BASI, unit: 'USD' } }),
+        fetchAgg(R_LAND, { groupBy: ['item_tr'], sum: ['value'], where: { year: araziYil, area: TR } }),
+        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' }, orderBy: 'sum_value', dir: 'desc' }),
         fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: 't' }, like: { item: '%milk%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KIRMIZI_ET } }),
-        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KANATLI_ET } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KIRMIZI_ET } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: 't' }, whereIn: { item: KANATLI_ET } }),
         fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: 't' }, like: { item: '%meat%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
-        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: 2023, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
+        fetchAgg(R_LIVESTOCK, { sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
+        fetchAgg(R_LIVESTOCK, { groupBy: ['item'], sum: ['value'], where: { year: hayvanYil, area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' } }),
         fetchAgg(R_LIVESTOCK, { groupBy: ['year'], sum: ['value'], where: { area: TR, element: 'Production', unit: '1000 No' }, like: { item: '%egg%' }, whereGte: { year: 2010 }, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_MILYON_USD, unit: 'million USD' } }),
-        fetchAgg(R_ME, { sum: ['value'], where: { year: 2023, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_PAY_GSYH, unit: '%' } }),
-        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: 2023, indicator: 'Employment in agriculture by age, total (15+)' } }),
-        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: 2023, indicator: 'Share of employment in agriculture in total employment' } }),
+        fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_TOPLAM_USD, unit: 'million USD' } }),
+        fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_PAY_GSYH, unit: '%' } }),
+        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Employment in agriculture by age, total (15+)' } }),
+        fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Share of employment in agriculture in total employment' } }),
         fetchAgg(R_CANLI, { groupBy: ['grup'], sum: ['y2024'], where: { duzey: 'ülke', yer: 'TÜRKİYE' }, whereIn: { grup: ['Sığır', 'Koyun', 'Keçi', 'Tavuk', 'Hindi'] } }),
         fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Sığır' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
         fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
@@ -76,17 +88,17 @@ export function useOverviewData(): UseOverviewDataReturn {
 
       // Nüfus
       const popData = populationRes[0];
-      const population = num(popData?.sum_TOPLAM) * 1000;
-      const ruralPopulation = num(popData?.sum_kirsal) * 1000;
-      const urbanPopulation = num(popData?.sum_sehir) * 1000;
+      const population = num(popData?.max_TOPLAM) * 1000;
+      const ruralPopulation = num(popData?.max_kirsal) * 1000;
+      const urbanPopulation = num(popData?.max_sehir) * 1000;
 
       // GSYİH
-      const gdp = (num(gdpRes[0]?.sum_value)) * 1e6;
-      const gdpPerCapita = num(gdpPerCapitaRes[0]?.sum_value);
+      const gdp = (num(gdpRes[0]?.max_value)) * 1e6;
+      const gdpPerCapita = num(gdpPerCapitaRes[0]?.max_value);
 
       // Tarımsal katma değer
-      const agriculturalGDP = (num(agriGdpRes[0]?.sum_value)) * 1e6;
-      const agriculturalGDPShare = num(agriGdpShareRes[0]?.sum_value);
+      const agriculturalGDP = (num(agriGdpRes[0]?.max_value)) * 1e6;
+      const agriculturalGDPShare = num(agriGdpShareRes[0]?.max_value);
 
       // Tarım istihdamı
       const agriculturalEmployment = (num(agriEmpRes[0]?.sum_total)) * 1000;
@@ -188,6 +200,10 @@ export function useOverviewData(): UseOverviewDataReturn {
         }));
 
       setData({
+        years: {
+          macro: meYil, population: nufusYil, land: araziYil,
+          employment: istihdamYil, livestock: hayvanYil,
+        },
         population, ruralPopulation, urbanPopulation,
         gdp, gdpPerCapita, agriculturalGDP, agriculturalGDPShare,
         agriculturalEmployment, agriculturalEmploymentShare, totalEmployment,

@@ -14,6 +14,10 @@ interface Props {
 }
 
 export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLandPercent }: Props) {
+  // Etiketlerdeki yıllar veriden gelir — sabit yazınca veri ilerledikçe
+  // "2024 rakamı, (2022) başlığı" gibi çelişkili ekranlar çıkıyordu.
+  const y = data.years;
+  const yl = (v: number | null) => (v == null ? '—' : String(v));
   return (
     <>
       <div className="section-header" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
@@ -24,22 +28,22 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         <div className="kpi-card large">
           <div className="kpi-header"><span className="kpi-title">NÜFUS</span><div className="kpi-icon blue">👥</div></div>
           <div className="kpi-value">{formatNumber(data.population)}</div>
-          <div className="kpi-subtitle">2023 Yılı</div>
+          <div className="kpi-subtitle">{yl(y.population)} Yılı</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">GSYİH</span><div className="kpi-icon green">💰</div></div>
           <div className="kpi-value">{data.gdp ? `$${formatNumber(data.gdp)}` : '—'}</div>
-          <div className="kpi-subtitle">USD (2023)</div>
+          <div className="kpi-subtitle">USD ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI GSYİH</span><div className="kpi-icon blue">📊</div></div>
           <div className="kpi-value">{data.gdpPerCapita ? `$${formatNumber(data.gdpPerCapita)}` : '—'}</div>
-          <div className="kpi-subtitle">USD/kişi</div>
+          <div className="kpi-subtitle">USD/kişi ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM ARAZİSİ</span><div className="kpi-icon green">🌾</div></div>
           <div className="kpi-value">{formatNumber(data.agriculturalLand)} ha</div>
-          <div className="kpi-subtitle">Toplam alanın %{agriLandPercent}'i</div>
+          <div className="kpi-subtitle">Toplam alanın %{agriLandPercent}'i ({yl(y.land)})</div>
         </div>
       </div>
 
@@ -47,30 +51,30 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIMSAL KATMA DEĞER</span><div className="kpi-icon green">🌱</div></div>
           <div className="kpi-value">{data.agriculturalGDP ? `$${formatNumber(data.agriculturalGDP)}` : '—'}</div>
-          <div className="kpi-subtitle">Tarım+Orman+Balıkçılık (2023)</div>
+          <div className="kpi-subtitle">Tarım+Orman+Balıkçılık ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM PAYI (GSYİH)</span><div className="kpi-icon blue">📌</div></div>
           <div className="kpi-value">{data.agriculturalGDPShare ? `%${data.agriculturalGDPShare.toFixed(1)}` : '—'}</div>
-          <div className="kpi-subtitle">GSYİH içindeki pay</div>
+          <div className="kpi-subtitle">GSYİH içindeki pay ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM İSTİHDAMI</span><div className="kpi-icon orange">👨‍🌾</div></div>
           <div className="kpi-value">{data.agriculturalEmployment ? formatNumber(data.agriculturalEmployment) : '—'}</div>
-          <div className="kpi-subtitle">Kişi (15+), 2023</div>
+          <div className="kpi-subtitle">Kişi (15+), {yl(y.employment)}</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM PAYI (İSTİHDAM)</span><div className="kpi-icon pink">%</div></div>
           <div className="kpi-value">{data.agriculturalEmploymentShare ? `%${data.agriculturalEmploymentShare.toFixed(1)}` : '—'}</div>
-          <div className="kpi-subtitle">Toplam istihdam içindeki pay</div>
+          <div className="kpi-subtitle">Toplam istihdam içindeki pay ({yl(y.employment)})</div>
         </div>
       </div>
 
       <div className="chart-grid">
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>👥 Nüfus Dağılımı (2023)</h3>
-            <ChartInsightButton title="Nüfus Dağılımı (2023)" description="Kentsel ve kırsal nüfus dağılımı" data={[{name:'Kentsel', value: data.urbanPopulation},{name:'Kırsal', value: data.ruralPopulation}]} context={{ nüfus: formatNumber(data.population), kentselOran: urbanPercent+'%', kırsalOran: ruralPercent+'%' }} />
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>👥 Nüfus Dağılımı ({yl(y.population)})</h3>
+            <ChartInsightButton title={`Nüfus Dağılımı (${yl(y.population)})`} description="Kentsel ve kırsal nüfus dağılımı" data={[{name:'Kentsel', value: data.urbanPopulation},{name:'Kırsal', value: data.ruralPopulation}]} context={{ nüfus: formatNumber(data.population), kentselOran: urbanPercent+'%', kırsalOran: ruralPercent+'%' }} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -94,8 +98,8 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
 
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Arazi Kullanımı (2022)</h3>
-            <ChartInsightButton title="Arazi Kullanımı (2022)" description="Türkiye arazi kullanım kategorileri" data={data.landUseData} context={{ tarımArazisi: formatNumber(data.agriculturalLand)+' ha', tarımPayı: agriLandPercent+'%' }} />
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Arazi Kullanımı ({yl(y.land)})</h3>
+            <ChartInsightButton title={`Arazi Kullanımı (${yl(y.land)})`} description="Türkiye arazi kullanım kategorileri" data={data.landUseData} context={{ tarımArazisi: formatNumber(data.agriculturalLand)+' ha', tarımPayı: agriLandPercent+'%' }} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.landUseData} layout="vertical">

@@ -68,6 +68,18 @@ export interface YearlyData {
 }
 
 export interface OverviewData {
+  /**
+   * Verinin GERÇEKTEN geldiği yıllar. Başlıklardaki yıllar eskiden sabit
+   * yazılıydı; veri ilerleyince "2024 rakamı, (2022) başlığı" gibi tutarsız
+   * ekranlar çıkıyordu. Artık etiketler bu alandan besleniyor.
+   */
+  years: {
+    macro: number | null;
+    population: number | null;
+    land: number | null;
+    employment: number | null;
+    livestock: number | null;
+  };
   population: number;
   ruralPopulation: number;
   urbanPopulation: number;

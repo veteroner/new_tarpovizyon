@@ -108,3 +108,30 @@ export function num(v: unknown): number {
   const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''));
   return Number.isFinite(n) ? n : 0;
 }
+
+/**
+ * Bir tablodaki "en güncel ama DOLU" yılı bulur.
+ *
+ * Sayfalarda yıllar sabit yazılıydı (year: 2022 gibi) ve veri ilerledikçe
+ * bayatlıyordu. Ama körlemesine en büyük yılı almak da yanlış: bazı yıllar
+ * kısmi giriliyor (ör. fao_land_use'da 2025 → 1.627 satır, 2023 → 9.276).
+ * Bu yüzden son yıllara bakıp, satır sayısı en dolu yılın `minShare` oranına
+ * ulaşan EN YENİ yılı seçiyoruz.
+ */
+export async function latestYear(
+  route: string,
+  yearCol: string,
+  opts: { where?: Record<string, ParamValue>; minShare?: number; lookback?: number } = {},
+): Promise<number | null> {
+  const { where, minShare = 0.5, lookback = 6 } = opts;
+  const rows = await fetchAgg(route, {
+    groupBy: [yearCol], count: true, where, orderBy: yearCol, dir: 'desc', limit: lookback,
+  });
+  const years = rows
+    .map((r) => ({ year: Number(r[yearCol]), cnt: num(r.cnt) }))
+    .filter((r) => Number.isFinite(r.year) && r.cnt > 0);
+  if (!years.length) return null;
+  const peak = Math.max(...years.map((y) => y.cnt));
+  const full = years.find((y) => y.cnt >= peak * minShare);
+  return (full ?? years[0]).year;
+}
