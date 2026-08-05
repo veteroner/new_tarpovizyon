@@ -4,13 +4,34 @@ import {
   PieChart, Pie, Cell, AreaChart, Area,
   ScatterChart, Scatter, ZAxis, Legend
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num, type Row } from '../../services/d1';
 import ProductSelector from '../../components/ProductSelector';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
-import { COLORS, ANIMAL_ITEMS, EXCLUDED_FULL, type DataItem, formatNumber, formatShort } from './livestockUtils';
+import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
+
+const R = 'fao/uretim-hayvansal-canlihayvan';
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+/**
+ * Canlı hayvan sayısı iki birimde: '1000 An' (bin baş) ve 'An'/'No'. Eski SQL
+ * bunu SUM içinde CASE WHEN ile ölçekliyordu; toplama ucunda böyle bir ifade
+ * kurulamadığı için birime göre gruplanıp çarpan burada uygulanıyor.
+ */
+const basCarpani = (birim: unknown) => (String(birim ?? '') === '1000 An' ? 1000 : 1);
+/** Birim kırılımlı satırları, verilen anahtar sütunlarına göre baş sayısına indirger. */
+function basaIndirge(satirlar: Row[], anahtarlar: string[]): Row[] {
+  const harita = new Map<string, Row>();
+  for (const r of satirlar) {
+    const k = anahtarlar.map((a) => String(r[a] ?? '')).join('\u0001');
+    const mevcut = harita.get(k);
+    const deger = num(r.sum_miktar_deger) * basCarpani(r.miktar_birim);
+    if (mevcut) mevcut.toplam = num(mevcut.toplam) + deger;
+    else harita.set(k, { ...Object.fromEntries(anahtarlar.map((a) => [a, r[a] ?? null])), toplam: deger });
+  }
+  return [...harita.values()];
+}
 
 interface Props {
   selectedYear: string;
@@ -52,23 +73,50 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
     if (selectedItems.length === 0) return;
     setLoading(true);
     try {
-      const EXCLUDED = EXCLUDED_FULL;
-      const SV = "CASE WHEN miktar_birim='1000 An' THEN CAST(miktar_deger AS DECIMAL(20,2))*1000 ELSE CAST(miktar_deger AS DECIMAL(20,2)) END";
       const selNames = selectedItems.map(id => ANIMAL_ITEMS.find(a => a.id === id)?.name).filter((v): v is string => Boolean(v));
-      const itemList = selNames.map(p => `'${p.replace(/'/g, "''")}'`).join(',');
-      if (!itemList) { setStocksData([]); setStocksCountryData([]); setStocksYearlyData([]); return; }
+      if (!selNames.length) { setStocksData([]); setStocksCountryData([]); setStocksYearlyData([]); return; }
       const yr = parseInt(selectedYear);
+      const urunF = { urunad: selNames };
+      const NUM = ['miktar_deger'];
+      const BIRIM = 'miktar_birim';
 
-      const [animalRes, countryAllRes, yearlyRes, turkeyRes, animalYearRes, countryCAGRRes, deepTrendRes, riskRes] = await Promise.all([
-        fetchQuery(`SELECT urunad, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE year='${selectedYear}' AND urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY urunad ORDER BY toplam DESC`),
-        fetchQuery(`SELECT ulkead, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE year='${selectedYear}' AND urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY ulkead ORDER BY toplam DESC`),
-        fetchQuery(`SELECT year, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT urunad, year, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE ulkead='Türkiye' AND urunad IN (${itemList}) AND year IN ('${yr}','${yr-5}','${yr-10}') GROUP BY urunad, year`),
-        fetchQuery(`SELECT urunad, year, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} AND year IN ('${yr}','${yr-5}','${yr-10}') GROUP BY urunad, year`),
-        fetchQuery(`SELECT ulkead, year, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} AND year IN ('${yr}','${yr-5}') GROUP BY ulkead, year ORDER BY ulkead`),
-        fetchQuery(`SELECT urunad, year, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY urunad, year ORDER BY year, urunad`),
-        fetchQuery(`SELECT a.ulkead, a.urunad, a.toplam as current_val, b.toplam as old_val FROM (SELECT ulkead, urunad, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE year='${yr}' AND urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY ulkead, urunad HAVING toplam > 100000) a JOIN (SELECT ulkead, urunad, SUM(${SV}) as toplam FROM fao_uretim_hayvansal_canlihayvan WHERE year='${yr-10}' AND urunad IN (${itemList}) AND ulkead NOT IN ${EXCLUDED} GROUP BY ulkead, urunad HAVING toplam > 100000) b ON a.ulkead=b.ulkead AND a.urunad=b.urunad WHERE (a.toplam - b.toplam)/b.toplam < -0.2 OR (a.toplam - b.toplam)/b.toplam > 1.0 ORDER BY (a.toplam - b.toplam)/b.toplam ASC LIMIT 30`)
+      const [animalRaw, countryAllRaw, yearlyRaw, turkeyRaw, animalYearRaw, countryCAGRRaw, deepTrendRaw, riskNowRaw, riskOldRaw] = await Promise.all([
+        fetchAgg(R, { groupBy: ['urunad', BIRIM], sum: NUM, where: { year: selectedYear }, whereIn: urunF, exclude: EX }),
+        fetchAgg(R, { groupBy: ['ulkead', BIRIM], sum: NUM, where: { year: selectedYear }, whereIn: urunF, exclude: EX }),
+        fetchAgg(R, { groupBy: ['year', BIRIM], sum: NUM, whereIn: urunF, exclude: EX }),
+        fetchAgg(R, { groupBy: ['urunad', 'year', BIRIM], sum: NUM, where: { ulkead: 'Türkiye' }, whereIn: { ...urunF, year: [yr, yr - 5, yr - 10] } }),
+        fetchAgg(R, { groupBy: ['urunad', 'year', BIRIM], sum: NUM, whereIn: { ...urunF, year: [yr, yr - 5, yr - 10] }, exclude: EX }),
+        fetchAgg(R, { groupBy: ['ulkead', 'year', BIRIM], sum: NUM, whereIn: { ...urunF, year: [yr, yr - 5] }, exclude: EX }),
+        fetchAgg(R, { groupBy: ['urunad', 'year', BIRIM], sum: NUM, whereIn: urunF, exclude: EX }),
+        // Risk tablosu eskiden iki alt sorgunun JOIN'iydi (HAVING toplam > 100000);
+        // iki yıl ayrı çekilip eşleştirme ve eşik istemcide uygulanıyor.
+        fetchAgg(R, { groupBy: ['ulkead', 'urunad', BIRIM], sum: NUM, where: { year: yr }, whereIn: urunF, exclude: EX }),
+        fetchAgg(R, { groupBy: ['ulkead', 'urunad', BIRIM], sum: NUM, where: { year: yr - 10 }, whereIn: urunF, exclude: EX }),
       ]);
+
+      const animalRes = { data: basaIndirge(animalRaw, ['urunad']).sort((a, b) => num(b.toplam) - num(a.toplam)) };
+      const countryAllRes = { data: basaIndirge(countryAllRaw, ['ulkead']).sort((a, b) => num(b.toplam) - num(a.toplam)) };
+      const yearlyRes = { data: basaIndirge(yearlyRaw, ['year']).sort((a, b) => Number(a.year) - Number(b.year)) };
+      const turkeyRes = { data: basaIndirge(turkeyRaw, ['urunad', 'year']) };
+      const animalYearRes = { data: basaIndirge(animalYearRaw, ['urunad', 'year']) };
+      const countryCAGRRes = { data: basaIndirge(countryCAGRRaw, ['ulkead', 'year']).sort((a, b) => String(a.ulkead).localeCompare(String(b.ulkead))) };
+      const deepTrendRes = { data: basaIndirge(deepTrendRaw, ['urunad', 'year']).sort((a, b) => Number(a.year) - Number(b.year) || String(a.urunad).localeCompare(String(b.urunad))) };
+
+      const ESIK = 100000;
+      const eskiHarita = new Map(basaIndirge(riskOldRaw, ['ulkead', 'urunad'])
+        .filter((r) => num(r.toplam) > ESIK)
+        .map((r) => [`${r.ulkead}|${r.urunad}`, num(r.toplam)]));
+      const riskRes = { data: basaIndirge(riskNowRaw, ['ulkead', 'urunad'])
+        .filter((r) => num(r.toplam) > ESIK)
+        .map((r) => {
+          const eski = eskiHarita.get(`${r.ulkead}|${r.urunad}`);
+          if (eski === undefined) return null;
+          return { ulkead: r.ulkead, urunad: r.urunad, current_val: num(r.toplam), old_val: eski,
+            degisim: (num(r.toplam) - eski) / eski };
+        })
+        .filter((x): x is NonNullable<typeof x> => x !== null && (x.degisim < -0.2 || x.degisim > 1.0))
+        .sort((a, b) => a.degisim - b.degisim)
+        .slice(0, 30) };
 
       if (animalRes.data) {
         setStocksData(animalRes.data.map((item: Record<string, string | number>, index: number) => ({
@@ -197,7 +245,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       }).sort((a, b) => String(a.year).localeCompare(String(b.year)));
       setStocksDeepTrend(deepArr);
 
-      const risks = (riskRes.data || []).map((d: Record<string, string | number>) => {
+      const risks = riskRes.data.map((d) => {
         const cur = Number(d.current_val) || 0;
         const old = Number(d.old_val) || 0;
         const change = old > 0 ? ((cur - old) / old) * 100 : 0;
