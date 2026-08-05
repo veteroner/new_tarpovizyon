@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, Legend
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, latestYear, num } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
@@ -15,10 +15,23 @@ interface Props {
   setLoading: (v: boolean) => void;
 }
 
-const EXCLUDED_AREAS = "('World','WORLD','Europe','Americas','Asia','Africa','Northern America','Southern America','Eastern Europe','Western Europe','Northern Europe','Southern Europe','Southern Asia','Eastern Asia','South-eastern Asia','Central Asia','Western Asia','Northern Africa','Eastern Africa','Western Africa','Middle Africa','Southern Africa','Caribbean','Central America','South America','Oceania','European Union (27)','European Union','Melanesia','Polynesia','Micronesia','Aggregate','Least Developed Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','Land Locked Developing Countries','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
+// Kıta/toplam satırları sunucudaki 'v2' hazır listesiyle dışlanıyor (bu
+// sayfanın eski listesiyle aynı içerik + 'China' toplamı).
+const R_ISL = 'fao/uretim-hayvansal-islenmis';
+const R_BIR = 'fao/uretim-hayvansal-birincil';
+const EX = { preset: 'v2' as const, col: 'ulkead' };
 
-const DAIRY_COND = "(urunad LIKE '%Cheese%' OR urunad LIKE '%Butter%' OR urunad LIKE '%milk%' OR urunad LIKE '%Milk%' OR urunad LIKE '%Yoghurt%' OR urunad LIKE '%Cream%' OR urunad LIKE '%Whey%' OR urunad LIKE '%Buttermilk%' OR urunad LIKE '%Ghee%')";
-const FATS_COND = "(urunad LIKE '%Tallow%' OR urunad LIKE '%fat%' OR urunad LIKE '%Fat%' OR urunad LIKE '%Lard%')";
+// LIKE desenleri COLLATE NOCASE; büyük/küçük varyantlara gerek yok.
+const SUT_DESENLERI = ['cheese', 'butter', 'milk', 'yoghurt', 'cream', 'whey', 'buttermilk', 'ghee'];
+const YAG_DESENLERI = ['tallow', 'fat', 'lard'];
+const esles = (ad: string, desenler: string[]) => {
+  const k = ad.toLowerCase();
+  return desenler.some((d) => k.includes(d));
+};
+/** Ürün adını süt / yağ / diğer kategorisine ayırır (eski CASE WHEN karşılığı). */
+const kategori = (ad: string): 'dairy' | 'fats' | 'other' =>
+  esles(ad, SUT_DESENLERI) ? 'dairy' : esles(ad, YAG_DESENLERI) ? 'fats' : 'other';
+
 
 export default function LivestockProcessedSection({ selectedYear, setLoading }: Props) {
   const [processedKPIs, setProcessedKPIs] = useState<{
@@ -43,52 +56,44 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
     setLoading(true);
     try {
       const yr = selectedYear;
-      const pastYr = String(Math.min(parseInt(yr), 2023) - 5);
-      const safeYear = String(Math.min(parseInt(yr), 2023));
+      // Yıl üst sınırı '2023' diye sabitti; işlenmiş ürün tablosunun son DOLU
+      // yılı veriden çözülüyor.
+      const sonIslenmisYil = (await latestYear(R_ISL, 'year')) ?? 2023;
+      const safeYear = String(Math.min(parseInt(yr), sonIslenmisYil));
+      const pastYr = String(parseInt(safeYear) - 5);
+      const TON = { uretim_birim: 't' };
 
-      const [countryRes, turkeyTrendRes, productRes, pastProductRes, rawMilkRes] = await Promise.all([
-        fetchQuery(`
-          SELECT ulkead,
-            SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total,
-            SUM(CASE WHEN ${DAIRY_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as dairy,
-            SUM(CASE WHEN ${FATS_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as fats,
-            SUM(CASE WHEN NOT ${DAIRY_COND} AND NOT ${FATS_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as other
-          FROM fao_uretim_hayvansal_islenmis
-          WHERE year='${safeYear}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_AREAS}
-          GROUP BY ulkead ORDER BY total DESC
-        `),
-        fetchQuery(`
-          SELECT year,
-            SUM(CASE WHEN ${DAIRY_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as dairy,
-            SUM(CASE WHEN ${FATS_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as fats,
-            SUM(CASE WHEN NOT ${DAIRY_COND} AND NOT ${FATS_COND} THEN CAST(uretim_deger AS DECIMAL(20,2)) ELSE 0 END) as other
-          FROM fao_uretim_hayvansal_islenmis
-          WHERE ulkead='Türkiye' AND uretim_birim='t'
-          GROUP BY year ORDER BY year
-        `),
-        fetchQuery(`
-          SELECT urunad, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total
-          FROM fao_uretim_hayvansal_islenmis
-          WHERE year='${safeYear}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_AREAS}
-          GROUP BY urunad ORDER BY total DESC
-        `),
-        fetchQuery(`
-          SELECT urunad, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total
-          FROM fao_uretim_hayvansal_islenmis
-          WHERE year='${pastYr}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_AREAS}
-          GROUP BY urunad ORDER BY total DESC
-        `),
-        fetchQuery(`
-          SELECT SUM(CAST(uretim_deger AS DECIMAL(20,2))) as total
-          FROM fao_uretim_hayvansal_birincil
-          WHERE ulkead='Türkiye' AND year='${safeYear}' AND uretim_birim='t'
-            AND (urunad LIKE '%milk%' OR urunad LIKE '%Milk%')
-        `),
+      const [ulkeUrunRaw, trYilRaw, productRaw, pastProductRaw, rawMilkRaw] = await Promise.all([
+        fetchAgg(R_ISL, { groupBy: ['ulkead', 'urunad'], sum: ['uretim_deger'], where: { year: safeYear, ...TON }, exclude: EX }),
+        fetchAgg(R_ISL, { groupBy: ['year', 'urunad'], sum: ['uretim_deger'], where: { ulkead: 'Türkiye', ...TON } }),
+        fetchAgg(R_ISL, { groupBy: ['urunad'], sum: ['uretim_deger'], where: { year: safeYear, ...TON }, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
+        fetchAgg(R_ISL, { groupBy: ['urunad'], sum: ['uretim_deger'], where: { year: pastYr, ...TON }, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
+        fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { ulkead: 'Türkiye', year: safeYear, ...TON }, likeAny: { urunad: ['%milk%'] } }),
       ]);
 
-      type R = Record<string, string | number>;
+      // SUM(CASE WHEN …) pivotlarının karşılığı: ürün adına göre sınıflandırıp topla.
+      const pivotla = <K extends string>(satirlar: typeof ulkeUrunRaw, anahtar: K) => {
+        const harita = new Map<string, { total: number; dairy: number; fats: number; other: number }>();
+        for (const r of satirlar) {
+          const k = String(r[anahtar] ?? '');
+          const kayit = harita.get(k) ?? { total: 0, dairy: 0, fats: 0, other: 0 };
+          const v = num(r.sum_uretim_deger);
+          kayit.total += v;
+          kayit[kategori(String(r.urunad ?? ''))] += v;
+          harita.set(k, kayit);
+        }
+        return [...harita.entries()].map(([ad, v]) => ({ ...v, [anahtar]: ad })) as Array<
+          { total: number; dairy: number; fats: number; other: number } & Record<string, string | number>>;
+      };
 
-      const countries = (countryRes.data || []).map((d: R) => ({
+      const countryRes = { data: pivotla(ulkeUrunRaw, 'ulkead').sort((a, b) => b.total - a.total) };
+      const turkeyTrendRes = { data: pivotla(trYilRaw, 'year').sort((a, b) => Number(a.year) - Number(b.year)) };
+      const productRes = { data: productRaw.map((r) => ({ urunad: r.urunad, total: num(r.sum_uretim_deger) })) };
+      const pastProductRes = { data: pastProductRaw.map((r) => ({ urunad: r.urunad, total: num(r.sum_uretim_deger) })) };
+      const rawMilkRes = { data: [{ total: num(rawMilkRaw[0]?.sum_uretim_deger) }] };
+
+
+      const countries = (countryRes.data || []).map((d) => ({
         country: translateCountry(String(d.ulkead || '')),
         total: parseFloat(String(d.total || 0)),
         dairy: parseFloat(String(d.dairy || 0)),
@@ -113,7 +118,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
         processingRate,
       });
 
-      const trend = (turkeyTrendRes.data || []).map((d: R) => ({
+      const trend = (turkeyTrendRes.data || []).map((d) => ({
         year: String(d.year),
         dairy: parseFloat(String(d.dairy || 0)),
         fats: parseFloat(String(d.fats || 0)),
@@ -121,31 +126,27 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       }));
       setProcessedTurkeyTrend(trend);
 
-      const turkeyProducts = await fetchQuery(`
-        SELECT urunad, CAST(uretim_deger AS DECIMAL(20,2)) as val
-        FROM fao_uretim_hayvansal_islenmis
-        WHERE ulkead='Türkiye' AND year='${safeYear}' AND uretim_birim='t'
-      `);
+      const turkeyProducts = { data: (await fetchAgg(R_ISL, {
+        groupBy: ['urunad'], sum: ['uretim_deger'],
+        where: { ulkead: 'Türkiye', year: safeYear, ...TON },
+      })).map((r) => ({ urunad: r.urunad, val: num(r.sum_uretim_deger) })) };
       const trProdMap: Record<string, number> = {};
-      (turkeyProducts.data || []).forEach((d: R) => {
+      turkeyProducts.data.forEach((d) => {
         trProdMap[String(d.urunad)] = parseFloat(String(d.val || 0));
       });
 
-      const topPerProduct = await fetchQuery(`
-        SELECT urunad, ulkead, CAST(uretim_deger AS DECIMAL(20,2)) as val
-        FROM fao_uretim_hayvansal_islenmis
-        WHERE year='${safeYear}' AND uretim_birim='t' AND ulkead NOT IN ${EXCLUDED_AREAS}
-        ORDER BY urunad, val DESC
-      `);
+      const topPerProduct = { data: ulkeUrunRaw
+        .map((r) => ({ urunad: r.urunad, ulkead: r.ulkead, val: num(r.sum_uretim_deger) }))
+        .sort((a, b) => String(a.urunad).localeCompare(String(b.urunad)) || b.val - a.val) };
       const topMap: Record<string, string> = {};
-      (topPerProduct.data || []).forEach((d: R) => {
+      topPerProduct.data.forEach((d) => {
         const pn = String(d.urunad);
         if (!topMap[pn]) topMap[pn] = translateCountry(String(d.ulkead || ''));
       });
 
       const trRankMap: Record<string, number> = {};
       const allByProduct: Record<string, Array<{ country: string; val: number }>> = {};
-      (topPerProduct.data || []).forEach((d: R) => {
+      topPerProduct.data.forEach((d) => {
         const pn = String(d.urunad);
         if (!allByProduct[pn]) allByProduct[pn] = [];
         allByProduct[pn].push({ country: String(d.ulkead), val: parseFloat(String(d.val || 0)) });
@@ -156,7 +157,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
         trRankMap[pn] = idx >= 0 ? idx + 1 : 999;
       });
 
-      const products = (productRes.data || []).map((d: R) => ({
+      const products = (productRes.data || []).map((d) => ({
         product: String(d.urunad),
         total: parseFloat(String(d.total || 0)),
         turkeyVal: trProdMap[String(d.urunad)] || 0,
@@ -166,7 +167,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       setProcessedProductData(products);
 
       const pastMap: Record<string, number> = {};
-      (pastProductRes.data || []).forEach((d: R) => {
+      (pastProductRes.data || []).forEach((d) => {
         pastMap[String(d.urunad)] = parseFloat(String(d.total || 0));
       });
       const growths = products.map(p => {
