@@ -13,6 +13,14 @@ const R_BIR = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
 const STOK_SIGIR = ['Cattle', 'Sığır'];
 const STOK_TAVUK = ['Chickens', 'Tavuk'];
+// Verimlilik oranlarında pay ve payda aynı hayvana ait olmalı.
+/** Ortalama tavuk yumurtası ağırlığı (kg) — ton → adet çevriminde kullanılıyor. */
+const ORT_YUMURTA_KG = 0.06;
+const URETIM_URUNLERI = [
+  'Meat of cattle with the bone, fresh or chilled',
+  'Raw milk of cattle',
+  'Hen eggs in shell, fresh',
+];
 
 /**
  * Ülke(-yıl) bazında stok ve üretim toplamlarını çıkarır.
@@ -51,9 +59,12 @@ function birlestirVerim(
     const kayit = harita.get(k)!;
     const ad = String(r.urunad ?? '').toLowerCase();
     const v = num(r.sum_uretim_deger);
-    if (ad.includes('meat')) kayit.meat_prod = num(kayit.meat_prod) + v;
-    if (ad.includes('milk') && !ad.includes('powder')) kayit.milk_prod = num(kayit.milk_prod) + v;
-    if (ad.includes('egg')) kayit.egg_prod = num(kayit.egg_prod) + v;
+    // Pay ile payda aynı hayvanı göstermeli. Eski sorgu TÜM eti sığır
+    // varlığına bölüyordu; eti çoğunlukla domuz/kanatlı olan ülkeler
+    // (Tayvan 10.094 kg/hayvan) listenin başına geçiyordu.
+    if (ad === 'meat of cattle with the bone, fresh or chilled') kayit.meat_prod = num(kayit.meat_prod) + v;
+    if (ad === 'raw milk of cattle') kayit.milk_prod = num(kayit.milk_prod) + v;
+    if (ad === 'hen eggs in shell, fresh') kayit.egg_prod = num(kayit.egg_prod) + v;
   }
   return [...harita.values()];
 }
@@ -105,11 +116,11 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
         fetchAgg(R_CANLI, { groupBy: ['ulkead', 'urunad', 'miktar_birim'], sum: ['miktar_deger'],
           where: { year: yr }, whereIn: { urunad: [...STOK_SIGIR, ...STOK_TAVUK] }, exclude: EX }),
         fetchAgg(R_BIR, { groupBy: ['ulkead', 'urunad'], sum: ['uretim_deger'],
-          where: { year: yr, ...TON }, likeAny: { urunad: ['%meat%', '%milk%', '%egg%'] }, exclude: EX }),
+          where: { year: yr, ...TON }, whereIn: { urunad: URETIM_URUNLERI }, exclude: EX }),
         fetchAgg(R_CANLI, { groupBy: ['ulkead', 'year', 'urunad', 'miktar_birim'], sum: ['miktar_deger'],
           whereGte: { year: yr - 14 }, whereIn: { urunad: [...STOK_SIGIR, ...STOK_TAVUK] }, exclude: EX }),
         fetchAgg(R_BIR, { groupBy: ['ulkead', 'year', 'urunad'], sum: ['uretim_deger'],
-          where: TON, whereGte: { year: yr - 14 }, likeAny: { urunad: ['%meat%', '%milk%', '%egg%'] }, exclude: EX }),
+          where: TON, whereGte: { year: yr - 14 }, whereIn: { urunad: URETIM_URUNLERI }, exclude: EX }),
         fetchAgg(R_BIR, { groupBy: ['ulkead'], sum: ['uretim_deger'],
           where: { year: yr, ...TON }, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
       ]);
@@ -129,14 +140,31 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
         return {
           meatEff: cs > 0 ? (mp * 1000) / cs : 0,
           milkEff: cs > 0 ? (mlp * 1000) / cs : 0,
-          eggEff: chs > 0 ? (ep * 1000000) / chs : 0,
+          // FAO yumurta üretimi TON cinsinden. Eski formül tonu 1.000.000 ile
+          // çarpıyordu, yani bir yumurtayı 1 grama eşitliyordu; Türkiye için
+          // "3.483 adet/tavuk" gibi fiziksel olarak imkânsız bir değer
+          // çıkıyordu (bir tavuk yılda en çok ~330 yumurta verir).
+          // 1 ton = 1.000 kg, ortalama yumurta 60 g → ton başına ~16.667 adet.
+          eggEff: chs > 0 ? (ep * (1000 / ORT_YUMURTA_KG)) / chs : 0,
         };
       };
 
+      // Payda çok küçük olan ülkeler oranı uçuruyordu: Singapur'un sığır
+      // varlığı yok denecek kadar az olduğu için "319.271 kg et/hayvan" gibi
+      // saçma bir lider çıkıyordu. Anlamlı bir sürü büyüklüğü şart koşuluyor.
+      const ASGARI_SIGIR = 50_000;   // baş
+      const ASGARI_TAVUK = 1_000_000; // baş
       const allCountries = (r1.data || []).map((row) => {
         const name = translateCountry(String(row.ulkead || ''));
         const eff = calcEff(row);
-        return { country: name, raw: String(row.ulkead || ''), ...eff };
+        const sigir = num(row.cattle_stock);
+        const tavuk = num(row.chicken_stock);
+        return {
+          country: name, raw: String(row.ulkead || ''),
+          meatEff: sigir >= ASGARI_SIGIR ? eff.meatEff : 0,
+          milkEff: sigir >= ASGARI_SIGIR ? eff.milkEff : 0,
+          eggEff: tavuk >= ASGARI_TAVUK ? eff.eggEff : 0,
+        };
       }).filter(d => d.meatEff > 0 || d.milkEff > 0 || d.eggEff > 0);
 
       setEfficiencyData(allCountries.map(d => ({
