@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { translateCountry } from '../../utils/countryTranslations';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num, type Row } from '../../services/d1';
 import type { Insight } from '../../components/InsightCard';
 import { calculateHHI } from '../../utils/livestockCalculations';
 
@@ -21,21 +21,32 @@ export const isTR = (name: string) =>
 const cagr5 = (cur: number, past: number) =>
   past > 0 ? (Math.pow(cur / past, 1 / 5) - 1) * 100 : 0;
 
-/* ── SQL fragments ─────────────────────────────────────────── */
-const MEAT_COND = "(urunad LIKE '%Meat%' OR urunad LIKE '%meat%')";
-const MILK_COND = "(urunad LIKE '%milk%' OR urunad LIKE '%Milk%')";
-const EGG_COND  = "(urunad LIKE '%egg%' OR urunad LIKE '%Egg%')";
+/* ── D1 rotası ve ürün sınıflandırması ─────────────────────── */
+const R = 'fao/uretim-hayvansal-birincil';
+// Kıta/toplam satırlarını dışla. Eski sorgular hiç dışlama yapmıyordu; World,
+// Asia, Africa gibi satırlar ülke sıralamasının başına yerleşiyordu.
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+const TON = { uretim_birim: 't' };
+const ANA_DESENLER = ['%meat%', '%milk%', '%egg%'];
 
-function rankingSQL(year: string) {
-  return `
-    SELECT ulkead,
-      SUM(CASE WHEN ${MEAT_COND} THEN uretim_deger ELSE 0 END) as meat,
-      SUM(CASE WHEN ${MILK_COND} THEN uretim_deger ELSE 0 END) as milk,
-      SUM(CASE WHEN ${EGG_COND}  THEN uretim_deger ELSE 0 END) as eggs,
-      SUM(uretim_deger) as total
-    FROM fao_uretim_hayvansal_birincil
-    WHERE uretim_birim='t' AND year='${year}'
-    GROUP BY ulkead ORDER BY total DESC`;
+/** SUM(CASE WHEN urunad LIKE …) pivotlarının karşılığı. */
+function pivotla(satirlar: Row[], anahtarlar: string[]) {
+  const harita = new Map<string, Record<string, number | string>>();
+  for (const r of satirlar) {
+    const k = anahtarlar.map((a) => String(r[a] ?? '')).join('|');
+    const kayit = harita.get(k) ?? {
+      ...Object.fromEntries(anahtarlar.map((a) => [a, String(r[a] ?? '')])),
+      meat: 0, milk: 0, eggs: 0, total: 0,
+    };
+    const ad = String(r.urunad ?? '').toLowerCase();
+    const v = num(r.sum_uretim_deger);
+    if (ad.includes('meat')) kayit.meat = (kayit.meat as number) + v;
+    if (ad.includes('milk')) kayit.milk = (kayit.milk as number) + v;
+    if (ad.includes('egg')) kayit.eggs = (kayit.eggs as number) + v;
+    kayit.total = (kayit.total as number) + v;
+    harita.set(k, kayit);
+  }
+  return [...harita.values()];
 }
 
 /* ── Hook ──────────────────────────────────────────────────── */
@@ -53,8 +64,10 @@ export function useLivestockCompetitionData() {
   useEffect(() => {
     (async () => {
       const [maxRes, yrsRes] = await Promise.all([
-        fetchQuery("SELECT MAX(year) as mx FROM fao_uretim_hayvansal_birincil"),
-        fetchQuery("SELECT DISTINCT year FROM fao_uretim_hayvansal_birincil ORDER BY year DESC LIMIT 25"),
+        fetchAgg(R, { max: [], groupBy: ['year'], orderBy: 'year', dir: 'desc', limit: 1 })
+          .then((rows) => ({ data: [{ mx: rows[0]?.year }] })),
+        fetchAgg(R, { groupBy: ['year'], orderBy: 'year', dir: 'desc', limit: 25 })
+          .then((rows) => ({ data: rows })),
       ]);
       const mx = String(maxRes.data?.[0]?.mx || '2022');
       setAvailableYears((yrsRes.data || []).map((d: Record<string, unknown>) => String(d.year)));
@@ -68,22 +81,23 @@ export function useLivestockCompetitionData() {
     setLoading(true);
     try {
       const pastYear = String(parseInt(selectedYear) - 5);
+      // Toplam (total) sütunu eskiden TÜM ürünleri kapsıyordu; burada da
+      // et/süt/yumurta dışındaki kalemler dahil edilsin diye desen süzgeci
+      // yalnızca pivot sınıflandırmasında kullanılıyor, toplamada değil.
+      const siralama = (yil: string) => fetchAgg(R, {
+        groupBy: ['ulkead', 'urunad'], sum: ['uretim_deger'],
+        where: { ...TON, year: yil }, exclude: EX,
+      }).then((rows) => ({ data: pivotla(rows, ['ulkead']).sort((a, b) => (b.total as number) - (a.total as number)) }));
+
       const [curRes, pastRes, trendRes, evoRes] = await Promise.all([
-        fetchQuery(rankingSQL(selectedYear)),
-        fetchQuery(rankingSQL(pastYear)),
-        fetchQuery(`
-          SELECT year,
-            SUM(CASE WHEN ${MEAT_COND} THEN uretim_deger ELSE 0 END) as meat,
-            SUM(CASE WHEN ${MILK_COND} THEN uretim_deger ELSE 0 END) as milk,
-            SUM(CASE WHEN ${EGG_COND}  THEN uretim_deger ELSE 0 END) as eggs
-          FROM fao_uretim_hayvansal_birincil
-          WHERE ulkead='Türkiye' AND uretim_birim='t'
-          GROUP BY year ORDER BY year`),
-        fetchQuery(`
-          SELECT year, ulkead, SUM(uretim_deger) as toplam
-          FROM fao_uretim_hayvansal_birincil
-          WHERE uretim_birim='t' AND year >= '2010'
-          GROUP BY year, ulkead ORDER BY year`),
+        siralama(selectedYear),
+        siralama(pastYear),
+        fetchAgg(R, { groupBy: ['year', 'urunad'], sum: ['uretim_deger'],
+          where: { ...TON, ulkead: 'Türkiye' }, likeAny: { urunad: ANA_DESENLER } })
+          .then((rows) => ({ data: pivotla(rows, ['year']).sort((a, b) => Number(a.year) - Number(b.year)) })),
+        fetchAgg(R, { groupBy: ['year', 'ulkead'], sum: ['uretim_deger'],
+          where: TON, whereGte: { year: 2010 }, exclude: EX })
+          .then((rows) => ({ data: rows.map((r) => ({ year: r.year, ulkead: r.ulkead, toplam: num(r.sum_uretim_deger) })) })),
       ]);
 
       const parse = (rows: Record<string, string | number>[]): CountryProduction[] =>

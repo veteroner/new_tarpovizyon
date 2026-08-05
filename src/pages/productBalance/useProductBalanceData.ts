@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchQuery } from '../../services/api';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { fetchRows, num, type Row } from '../../services/d1';
+
+const R = 'tuik/urundenge';
+/** TRIM(urun) karşılığı — kaynak veride ürün adlarında boşluk artıkları var. */
+const urunAdi = (r: Row) => String(r.urun ?? '').trim();
 
 /* ─── Year columns ─── */
 export const YEAR_KEYS = [
@@ -69,11 +73,18 @@ export function useProductBalanceData() {
   const [heatmapData, setHeatmapData] = useState<{ urun: string; values: number[] }[]>([]);
   const [importRanking, setImportRanking] = useState<{ urun: string; ratio: number }[]>([]);
   const [perCapitaData, setPerCapitaData] = useState<{ urun: string; values: number[] }[]>([]);
+  // Tablo tek seferde okunup burada tutuluyor; detay sekmesi de aynı veriyi
+  // kullanıyor, her ürün seçiminde yeniden sorgu atılmıyor.
+  const tumSatirlarRef = useRef<Row[]>([]);
 
   useEffect(() => {
     (async () => {
-      const res = await fetchQuery(`SELECT DISTINCT TRIM(urun) as urun FROM tuik_urundenge ORDER BY urun`);
-      const list = (res.data || []).map((r: Record<string, unknown>) => String(r.urun).trim());
+      // Tablo küçük: tek okumayla çekilip fasıl/ürün süzmeleri istemcide.
+      // (Eskiden aynı tablo 5 ayrı sorguyla taranıyordu.)
+      const tumSatirlar = await fetchRows(R, { limit: 2000 });
+      tumSatirlarRef.current = tumSatirlar;
+      const list = [...new Set(tumSatirlar.map(urunAdi))].filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, 'tr'));
       setProducts(list);
       if (list.length > 0) setSelectedProduct(list.find((p: string) => p.includes('Buğday (toplam)')) || list[0]);
     })();
@@ -81,17 +92,25 @@ export function useProductBalanceData() {
 
   useEffect(() => {
     (async () => {
-      const [yetRes, impDepRes, pcRes] = await Promise.all([
-        fetchQuery(`SELECT TRIM(urun) as urun, ${YEAR_COLS_SQL} FROM tuik_urundenge WHERE fasıl='Yeterlilik derecesi' ORDER BY urun`),
-        fetchQuery(`
-          SELECT a.urun, a.imp, b.arz,
-                 CASE WHEN b.arz > 0 THEN (a.imp / b.arz * 100) ELSE 0 END as ratio
-          FROM (SELECT TRIM(urun) as urun, \`y2023/24\` as imp FROM tuik_urundenge WHERE fasıl='İthalat') a
-          JOIN (SELECT TRIM(urun) as urun, \`y2023/24\` as arz FROM tuik_urundenge WHERE fasıl='Arz= Kullanım') b ON a.urun = b.urun
-          WHERE a.imp > 0 ORDER BY ratio DESC LIMIT 20
-        `),
-        fetchQuery(`SELECT TRIM(urun) as urun, ${YEAR_COLS_SQL} FROM tuik_urundenge WHERE fasıl='Kişi başına tüketim' ORDER BY urun`),
-      ]);
+      const fasilListesi = (fasil: string) => tumSatirlarRef.current
+        .filter((r) => String(r['fasıl'] ?? '') === fasil)
+        .sort((a, b) => urunAdi(a).localeCompare(urunAdi(b), 'tr'));
+
+      const yetRes = { data: fasilListesi('Yeterlilik derecesi') };
+      const pcRes = { data: fasilListesi('Kişi başına tüketim') };
+      // Eskiden iki alt sorgunun JOIN'iydi; eşleştirme istemcide.
+      const arzHaritasi = new Map(fasilListesi('Arz= Kullanım')
+        .map((r) => [urunAdi(r), num(r['y2023/24'])] as const));
+      const impDepRes = { data: fasilListesi('İthalat')
+        .map((r) => {
+          const imp = num(r['y2023/24']);
+          const arz = arzHaritasi.get(urunAdi(r));
+          if (arz === undefined || imp <= 0) return null;
+          return { urun: urunAdi(r), ratio: arz > 0 ? (imp / arz) * 100 : 0 };
+        })
+        .filter((x): x is { urun: string; ratio: number } => x !== null)
+        .sort((a, b) => b.ratio - a.ratio)
+        .slice(0, 20) };
       setHeatmapData((yetRes.data || []).map((r: Record<string, unknown>) => ({
         urun: String(r.urun).trim(), values: YEAR_KEYS.map((_, i) => yearVal(r, i)),
       })));
@@ -109,13 +128,14 @@ export function useProductBalanceData() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetchQuery(`
-        SELECT fasıl, birim, ${YEAR_COLS_SQL}
-        FROM tuik_urundenge WHERE TRIM(urun)='${product.replace(/'/g, "''")}'
-        ORDER BY fasıl
-      `);
+      const kaynak = tumSatirlarRef.current.length
+        ? tumSatirlarRef.current
+        : (tumSatirlarRef.current = await fetchRows(R, { limit: 2000 }));
+      const satirlar = kaynak
+        .filter((r) => urunAdi(r) === product)
+        .sort((a, b) => String(a['fasıl']).localeCompare(String(b['fasıl']), 'tr'));
       const map: Record<string, { birim: string; values: number[] }> = {};
-      for (const r of (res.data || [])) {
+      for (const r of satirlar) {
         const f = String(r['fasıl']);
         map[f] = { birim: String(r.birim || ''), values: YEAR_KEYS.map((_, i) => yearVal(r as Record<string, unknown>, i)) };
       }
