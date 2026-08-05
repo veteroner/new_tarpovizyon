@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchQuery } from '../services/api';
+import { fetchRows, fetchAgg, num } from '../services/d1';
+
+const R_URETIM = 'tuik/bitkisel-uretim';
+// İlçe düzeyinde üretim (Ton) — havza sorgularının ortak süzgeci.
+const ILCE_URETIM = { duzey: 'ilçe', unsur: 'Üretim', birim: 'Ton' };
+const SON_YIL = 'y2024';
+const buyuk = (v: unknown) => String(v ?? '').toLocaleUpperCase('tr');
 import {
   BASIN_COLORS, formatNumber
 } from './basin/basinUtils';
@@ -29,28 +35,18 @@ export default function BasinProductionPage() {
   const loadBasinData = useCallback(async () => {
     try {
       setLoading(true);
-      const query = `
-        SELECT 
-          id,
-          havid as basinId,
-          havad as basinName,
-          ilid as provinceId,
-          ilad as provinceName,
-          ilceid as districtId,
-          ilcead as districtName
-        FROM havza
-        ORDER BY havad, ilad, ilcead
-      `;
-      
-      const response = await fetchQuery(query);
-      const data: BasinData[] = (response.data || []).map((row: Record<string, string | number>) => ({
+      const havzaSatirlari = (await fetchRows('tr/havza', { limit: 10000 }))
+        .sort((a, b) => String(a.havad).localeCompare(String(b.havad), 'tr')
+          || String(a.ilad).localeCompare(String(b.ilad), 'tr')
+          || String(a.ilcead).localeCompare(String(b.ilcead), 'tr'));
+      const data: BasinData[] = havzaSatirlari.map((row) => ({
         id: String(row.id),
-        basinId: String(row.basinId),
-        basinName: String(row.basinName || '').trim(),
-        provinceId: String(row.provinceId),
-        provinceName: String(row.provinceName || ''),
-        districtId: String(row.districtId),
-        districtName: String(row.districtName || '')
+        basinId: String(row.havid),
+        basinName: String(row.havad || '').trim(),
+        provinceId: String(row.ilid),
+        provinceName: String(row.ilad || ''),
+        districtId: String(row.ilceid),
+        districtName: String(row.ilcead || '')
       }));
       
       setAllBasinData(data);
@@ -64,9 +60,12 @@ export default function BasinProductionPage() {
   const loadTopProducts = useCallback(async () => {
     setLoadingTopProducts(true);
     try {
-      const query = `SELECT urun, SUM(y2024+0) as toplam_ton FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND unsur='Üretim' AND birim='Ton' AND (y2024+0) > 0 GROUP BY urun ORDER BY toplam_ton DESC LIMIT 12`;
-      const response = await fetchQuery(query);
-      setTopProducts((response.data || []).map((r: Record<string, string | number>) => ({
+      const response = { data: (await fetchAgg(R_URETIM, {
+        groupBy: ['urun'], sum: [SON_YIL], where: ILCE_URETIM,
+        orderBy: `sum_${SON_YIL}`, dir: 'desc', limit: 30,
+      })).filter((r) => num(r[`sum_${SON_YIL}`]) > 0).slice(0, 12)
+        .map((r) => ({ urun: r.urun, toplam_ton: num(r[`sum_${SON_YIL}`]) })) };
+      setTopProducts((response.data || []).map((r) => ({
         urun: String(r.urun || ''),
         toplam_ton: String(r.toplam_ton || '0')
       })));
@@ -80,9 +79,22 @@ export default function BasinProductionPage() {
   const loadProvinceDiversity = useCallback(async () => {
     setLoadingDiversity(true);
     try {
-      const query = `SELECT ili, COUNT(DISTINCT urun) as cesit_sayisi FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND unsur='Üretim' AND (y2024+0) > 0 GROUP BY ili ORDER BY cesit_sayisi DESC`;
-      const response = await fetchQuery(query);
-      setProvinceDiversity((response.data || []).map((r: Record<string, string | number>) => ({
+      // COUNT(DISTINCT urun) yalnızca (y2024+0)>0 satırlar için; üretimi sıfır
+      // olan ürünler çeşitliliğe sayılmamalı, bu yüzden ürün kırılımı çekilip
+      // istemcide sayılıyor.
+      const ilUrun = await fetchAgg(R_URETIM, {
+        groupBy: ['ili', 'urun'], sum: [SON_YIL], where: { duzey: 'ilçe', unsur: 'Üretim' },
+      });
+      const cesitHaritasi = new Map<string, number>();
+      for (const r of ilUrun) {
+        if (num(r[`sum_${SON_YIL}`]) <= 0) continue;
+        const il = String(r.ili ?? '');
+        cesitHaritasi.set(il, (cesitHaritasi.get(il) ?? 0) + 1);
+      }
+      const response = { data: [...cesitHaritasi.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([ili, cesit_sayisi]) => ({ ili, cesit_sayisi })) };
+      setProvinceDiversity((response.data || []).map((r) => ({
         ili: String(r.ili || ''),
         cesit_sayisi: String(r.cesit_sayisi || '0')
       })));
@@ -97,7 +109,29 @@ export default function BasinProductionPage() {
     setLoadingBasinStats(true);
     try {
       const stats: BasinProductionStats[] = [];
-      
+
+      // Eskiden her havza için AYRI bir sorgu atılıyordu (30 istek). İlçe×ürün
+      // kırılımı bir kez çekilip havzalara istemcide dağıtılıyor. Tek istek
+      // toplama ucunun 20.000 satır sınırını aşıyor (~45.500 grup), bu yüzden
+      // 3 ürün grubuna bölünüyor — her biri sınırın altında kalıyor.
+      const urunGruplari = (await fetchAgg(R_URETIM, {
+        groupBy: ['urun_grup'], where: ILCE_URETIM, positive: [SON_YIL],
+      })).map((r) => String(r.urun_grup ?? ''));
+      const ilceUretim = (await Promise.all(urunGruplari.map((g) => fetchAgg(R_URETIM, {
+        groupBy: ['ili', 'yer', 'urun'], sum: [SON_YIL],
+        where: { ...ILCE_URETIM, urun_grup: g }, positive: [SON_YIL],
+      })))).flat();
+      const ilceHaritasi = new Map<string, { toplam: number; urunler: Set<string> }>();
+      for (const r of ilceUretim) {
+        const v = num(r[`sum_${SON_YIL}`]);
+        if (v <= 0) continue;
+        const k = `${buyuk(r.ili)}|${buyuk(r.yer)}`;
+        const kayit = ilceHaritasi.get(k) ?? { toplam: 0, urunler: new Set<string>() };
+        kayit.toplam += v;
+        kayit.urunler.add(String(r.urun ?? ''));
+        ilceHaritasi.set(k, kayit);
+      }
+
       for (const basin of basinSummary) {
         const basinDistricts = allBasinData.filter(d => d.basinName === basin.basinName);
         const byProvince = new Map<string, Set<string>>();
@@ -108,31 +142,19 @@ export default function BasinProductionPage() {
           }
           byProvince.get(d.provinceName)!.add(cleanDistrict);
         });
+        if (byProvince.size === 0) continue;
 
-        const conditions: string[] = [];
-        byProvince.forEach((districts, province) => {
-          const districtList = Array.from(districts)
-            .map(d => `UPPER('${d.replace(/'/g, "''")}')`)
-            .join(', ');
-          conditions.push(`(UPPER(ili)=UPPER('${province.replace(/'/g, "''")}') AND UPPER(yer) IN (${districtList}))`);
+        let toplam = 0;
+        const urunler = new Set<string>();
+        byProvince.forEach((ilceler, il) => {
+          ilceler.forEach((ilce) => {
+            const kayit = ilceHaritasi.get(`${buyuk(il)}|${buyuk(ilce)}`);
+            if (!kayit) return;
+            toplam += kayit.toplam;
+            kayit.urunler.forEach((u) => urunler.add(u));
+          });
         });
-
-        if (conditions.length === 0) continue;
-
-        const whereClause = conditions.join(' OR ');
-        const query = `
-          SELECT 
-            SUM(y2024+0) as toplam_uretim,
-            COUNT(DISTINCT urun) as urun_cesit
-          FROM tuik_bitkisel_uretim
-          WHERE duzey='ilçe' 
-            AND unsur='Üretim' 
-            AND birim='Ton'
-            AND (y2024+0) > 0
-            AND (${whereClause})
-        `;
-        
-        const response = await fetchQuery(query);
+        const response = { data: [{ toplam_uretim: toplam, urun_cesit: urunler.size }] };
         const row = (response.data || [])[0];
         
         if (row) {

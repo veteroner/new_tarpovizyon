@@ -3,7 +3,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Legend, Treemap
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+const R_URETIM = 'tuik/bitkisel-uretim';
+// İlçe düzeyinde üretim (Ton) — tüm havza sorgularının ortak süzgeci.
+const ILCE_URETIM = { duzey: 'ilçe', unsur: 'Üretim', birim: 'Ton' };
+const YIL_SUTUNLARI = ['y2004', 'y2005', 'y2006', 'y2007', 'y2008', 'y2009', 'y2010', 'y2011', 'y2012', 'y2013', 'y2014', 'y2015', 'y2016', 'y2017', 'y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024'];
+const SON_YIL = 'y2024';
+
 import { formatNumber } from './basinUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type {
@@ -33,41 +39,25 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
     if (!productName) return;
     setLoadingLeaders(true);
     try {
-      const provinceQuery = `
-        SELECT ili, SUM(y2024+0) as toplam_ton
-        FROM tuik_bitkisel_uretim
-        WHERE duzey='ilçe' 
-          AND unsur='Üretim' 
-          AND birim='Ton'
-          AND UPPER(urun) = UPPER('${productName.replace(/'/g, "''")}')
-          AND (y2024+0) > 0
-        GROUP BY ili
-        ORDER BY toplam_ton DESC
-        LIMIT 10
-      `;
-      const provinceResp = await fetchQuery(provinceQuery);
-      setProvinceLeaders((provinceResp.data || []).map((r: Record<string, string | number>) => ({
+      // UPPER(urun)=UPPER(…) karşılığı: sunucudaki eşitlik zaten COLLATE NOCASE.
+      // (y2024+0) > 0 süzgeci istemcide.
+      const provinceRows = (await fetchAgg(R_URETIM, {
+        groupBy: ['ili'], sum: [SON_YIL], where: { ...ILCE_URETIM, urun: productName },
+        orderBy: `sum_${SON_YIL}`, dir: 'desc', limit: 30,
+      })).filter((r) => num(r[`sum_${SON_YIL}`]) > 0).slice(0, 10);
+      setProvinceLeaders(provinceRows.map((r) => ({
         ili: String(r.ili || ''),
-        toplam_ton: String(r.toplam_ton || '0')
+        toplam_ton: String(num(r[`sum_${SON_YIL}`]))
       })));
 
-      const districtQuery = `
-        SELECT ili, yer, SUM(y2024+0) as toplam_ton
-        FROM tuik_bitkisel_uretim
-        WHERE duzey='ilçe' 
-          AND unsur='Üretim' 
-          AND birim='Ton'
-          AND UPPER(urun) = UPPER('${productName.replace(/'/g, "''")}')
-          AND (y2024+0) > 0
-        GROUP BY ili, yer
-        ORDER BY toplam_ton DESC
-        LIMIT 10
-      `;
-      const districtResp = await fetchQuery(districtQuery);
-      setDistrictLeaders((districtResp.data || []).map((r: Record<string, string | number>) => ({
+      const districtRows = (await fetchAgg(R_URETIM, {
+        groupBy: ['ili', 'yer'], sum: [SON_YIL], where: { ...ILCE_URETIM, urun: productName },
+        orderBy: `sum_${SON_YIL}`, dir: 'desc', limit: 30,
+      })).filter((r) => num(r[`sum_${SON_YIL}`]) > 0).slice(0, 10);
+      setDistrictLeaders(districtRows.map((r) => ({
         ili: String(r.ili || ''),
         yer: String(r.yer || ''),
-        toplam_ton: String(r.toplam_ton || '0')
+        toplam_ton: String(num(r[`sum_${SON_YIL}`]))
       })));
     } catch (e) {
       console.error('Product leaders load error:', e);
@@ -80,36 +70,19 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
     if (productNames.length === 0) return;
     setLoadingTrend(true);
     try {
-      const productConditions = productNames
-        .map(p => `UPPER(urun) = UPPER('${p.replace(/'/g, "''")}')`)
-        .join(' OR ');
-
-      const query = `
-        SELECT 
-          urun,
-          SUM(y2004+0) as y2004, SUM(y2005+0) as y2005, SUM(y2006+0) as y2006, SUM(y2007+0) as y2007,
-          SUM(y2008+0) as y2008, SUM(y2009+0) as y2009, SUM(y2010+0) as y2010, SUM(y2011+0) as y2011,
-          SUM(y2012+0) as y2012, SUM(y2013+0) as y2013, SUM(y2014+0) as y2014, SUM(y2015+0) as y2015,
-          SUM(y2016+0) as y2016, SUM(y2017+0) as y2017, SUM(y2018+0) as y2018, SUM(y2019+0) as y2019,
-          SUM(y2020+0) as y2020, SUM(y2021+0) as y2021, SUM(y2022+0) as y2022, SUM(y2023+0) as y2023,
-          SUM(y2024+0) as y2024
-        FROM tuik_bitkisel_uretim
-        WHERE duzey='ilçe' 
-          AND unsur='Üretim' 
-          AND birim='Ton'
-          AND (${productConditions})
-        GROUP BY urun
-      `;
-      
-      const response = await fetchQuery(query);
-      const rawData = response.data || [];
+      // Eskiden 21 ayrı SUM(yNNNN+0) sütunu tek sorguda toplanıyordu;
+      // toplama ucu aynı işi sum listesiyle yapıyor.
+      const rawData = await fetchAgg(R_URETIM, {
+        groupBy: ['urun'], sum: YIL_SUTUNLARI,
+        where: ILCE_URETIM, whereIn: { urun: productNames },
+      });
       
       const years = Array.from({ length: 21 }, (_, i) => 2004 + i);
       const transformed: TrendDataPoint[] = years.map(year => {
         const dataPoint: TrendDataPoint = { year: String(year) };
-        rawData.forEach((row: Record<string, string | number>) => {
+        rawData.forEach((row) => {
           const productName = String(row.urun || '');
-          dataPoint[productName] = Number(row[`y${year}`] || 0);
+          dataPoint[productName] = num(row[`sum_y${year}`]);
         });
         return dataPoint;
       });

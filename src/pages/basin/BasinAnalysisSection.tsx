@@ -3,7 +3,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Treemap
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+const R_URETIM = 'tuik/bitkisel-uretim';
+// İlçe düzeyinde üretim (Ton) — havza sorgularının ortak süzgeci.
+const ILCE_URETIM = { duzey: 'ilçe', unsur: 'Üretim', birim: 'Ton' };
+const SON_YIL = 'y2024';
+
 import { 
   BASIN_COLORS, formatNumber 
 } from './basinUtils';
@@ -35,21 +40,38 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
         byProvince.get(d.provinceName)!.add(d.districtName);
       });
 
-      const conditions: string[] = [];
-      byProvince.forEach((districts, province) => {
-        conditions.push(`(UPPER(ili)=UPPER('${province.replace(/'/g, "''")}') AND UPPER(yer) IN (${Array.from(districts).map(d => `UPPER('${d.replace(/'/g, "''")}')`).join(',')}))`);
-      });
-
-      if (conditions.length === 0) {
+      if (byProvince.size === 0) {
         setLoadingBasinProducts(false);
         return;
       }
-
-      const whereClause = conditions.join(' OR ');
-      const query = `SELECT urun, SUM(y2024+0) as toplam_ton FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND unsur='Üretim' AND birim='Ton' AND (y2024+0) > 0 AND (${whereClause}) GROUP BY urun ORDER BY toplam_ton DESC LIMIT 15`;
+      // Eski sorgu her il için "(ili=X AND yer IN (…))" bloklarını OR'luyordu.
+      // Toplama ucunda böyle bir yapı kurulamadığı için havzanın illeri tek
+      // seferde çekiliyor, ilçe eşleşmesi istemcide yapılıyor.
+      const havzaIlleri = [...byProvince.keys()];
+      const buyuk = (v: unknown) => String(v ?? '').toLocaleUpperCase('tr');
+      const ilceHaritasi = new Map(
+        [...byProvince.entries()].map(([il, ilceler]) =>
+          [buyuk(il), new Set([...ilceler].map(buyuk))]),
+      );
+      const ilceEslesir = (r: { ili?: unknown; yer?: unknown }) =>
+        ilceHaritasi.get(buyuk(r.ili))?.has(buyuk(r.yer)) ?? false;
       
-      const response = await fetchQuery(query);
-      setBasinProducts((response.data || []).map((r: Record<string, string | number>) => ({
+      const satirlar = await fetchAgg(R_URETIM, {
+        groupBy: ['urun', 'ili', 'yer'], sum: [SON_YIL],
+        where: ILCE_URETIM, whereIn: { ili: havzaIlleri }, positive: [SON_YIL],
+      });
+      const urunToplam = new Map<string, number>();
+      for (const r of satirlar) {
+        if (!ilceEslesir(r)) continue;
+        const v = num(r[`sum_${SON_YIL}`]);
+        if (v <= 0) continue;
+        const u = String(r.urun ?? '');
+        urunToplam.set(u, (urunToplam.get(u) ?? 0) + v);
+      }
+      const response = { data: [...urunToplam.entries()]
+        .sort((a, b) => b[1] - a[1]).slice(0, 15)
+        .map(([urun, toplam_ton]) => ({ urun, toplam_ton })) };
+      setBasinProducts((response.data || []).map((r) => ({
         urun: String(r.urun || ''),
         toplam_ton: String(r.toplam_ton || '0')
       })));

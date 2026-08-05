@@ -1,5 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num } from '../../services/d1';
+const R_URETIM = 'tuik/bitkisel-uretim';
+const SON_YIL = 'y2024';
+
 import { BASIN_COLORS } from './basinUtils';
 import type { BasinData, BasinSummary, DistrictProduct, DistrictProductionItem } from './basinUtils';
 import DistrictMap from './DistrictMap';
@@ -37,9 +40,10 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
     setLoadingProducts(true);
     setDistrictProducts([]);
     try {
-      const query = `SELECT desen FROM havzalist WHERE UPPER(ilad) = UPPER('${provinceName}') AND UPPER(ilcead) = UPPER('${districtName}') LIMIT 1`;
-      const response = await fetchQuery(query);
-      const row = (response.data || [])[0];
+      // havzalist'te il/ilçe adları büyük harfli; sunucu eşitliği COLLATE NOCASE.
+      const row = (await fetchRows('tr/havzalist', {
+        ilad: provinceName, ilcead: districtName, limit: 1,
+      }))[0];
       if (row?.desen) {
         const urunler = String(row.desen)
           .split(',')
@@ -59,12 +63,16 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
     setLoadingProduction(true);
     setDistrictProduction([]);
     try {
-      const q = `SELECT urun, urun_grup, y2024 FROM tuik_bitkisel_uretim WHERE duzey='ilçe' AND UPPER(ili)=UPPER('${provinceName}') AND UPPER(yer)=UPPER('${districtName}') AND unsur='Üretim' AND (y2024+0) > 0 ORDER BY (y2024+0) DESC LIMIT 20`;
-      const resp = await fetchQuery(q);
-      setDistrictProduction((resp.data || []).map((r: Record<string, string | number>) => ({
+      // (y2024+0) > 0 süzgeci istemcide; sıralama toplama ucunda.
+      const satirlar = (await fetchAgg(R_URETIM, {
+        groupBy: ['urun', 'urun_grup'], sum: [SON_YIL],
+        where: { duzey: 'ilçe', unsur: 'Üretim', ili: provinceName, yer: districtName },
+        orderBy: `sum_${SON_YIL}`, dir: 'desc', limit: 40,
+      })).filter((r) => num(r[`sum_${SON_YIL}`]) > 0).slice(0, 20);
+      setDistrictProduction(satirlar.map((r) => ({
         urun: String(r.urun || ''),
         urun_grup: String(r.urun_grup || ''),
-        y2024: String(r.y2024 || '0')
+        y2024: String(num(r[`sum_${SON_YIL}`]))
       })));
     } catch (e) {
       console.error('District production load error:', e);

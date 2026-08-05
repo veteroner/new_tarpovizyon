@@ -1,5 +1,10 @@
 import { useState, useCallback } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+const R_URETIM = 'tuik/bitkisel-uretim';
+// İlçe düzeyinde üretim (Ton) — havza sorgularının ortak süzgeci.
+const ILCE_URETIM = { duzey: 'ilçe', unsur: 'Üretim', birim: 'Ton' };
+const SON_YIL = 'y2024';
+
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { formatNumber } from './basinUtils';
 import type { ProvinceBasinData, ProvinceDiversity, ProvinceProductDistribution } from './basinUtils';
@@ -20,21 +25,14 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
     if (!productName) return;
     setLoadingDistribution(true);
     try {
-      const query = `
-        SELECT ili, SUM(y2024+0) as toplam_ton
-        FROM tuik_bitkisel_uretim
-        WHERE duzey='ilçe' 
-          AND unsur='Üretim' 
-          AND birim='Ton'
-          AND UPPER(urun) = UPPER('${productName.replace(/'/g, "''")}')
-          AND (y2024+0) > 0
-        GROUP BY ili
-        ORDER BY toplam_ton DESC
-      `;
-      const response = await fetchQuery(query);
-      setProductDistribution((response.data || []).map((r: Record<string, string | number>) => ({
+      // UPPER(...)=UPPER(...) karşılığı: sunucu eşitliği zaten COLLATE NOCASE.
+      const rows = (await fetchAgg(R_URETIM, {
+        groupBy: ['ili'], sum: [SON_YIL], where: { ...ILCE_URETIM, urun: productName },
+        orderBy: `sum_${SON_YIL}`, dir: 'desc',
+      })).filter((r) => num(r[`sum_${SON_YIL}`]) > 0);
+      setProductDistribution(rows.map((r) => ({
         ili: String(r.ili || ''),
-        toplam_ton: String(r.toplam_ton || '0')
+        toplam_ton: String(num(r[`sum_${SON_YIL}`]))
       })));
     } catch (e) {
       console.error('Product distribution load error:', e);
