@@ -12,7 +12,11 @@ export const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'predictions', label: 'Tahminler', icon: '🔮', desc: 'Üretim & verim projeksiyonları' },
 ];
 
-export const EXCLUDED_AREAS = "('World','WORLD','Africa','Americas','Asia','Europe','Oceania','Northern Africa','Eastern Africa','Middle Africa','Southern Africa','Western Africa','Northern America','Central America','Caribbean','South America','Central Asia','Eastern Asia','South-eastern Asia','Southern Asia','Western Asia','Eastern Europe','Northern Europe','Southern Europe','Western Europe','Australia and New Zealand','Melanesia','Micronesia','Polynesia','Least Developed Countries','Land Locked Developing Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','European Union (27)','China, mainland','China, Taiwan Province of')";
+// Çin: üretim tablolarında düz 'China' satırı yok, yalnızca mainland/Taiwan/HK/Macao
+// var; mainland'i dışlamak dünyanın en büyük üreticisini siliyordu. Toplamı olan
+// tablolarda ise hem 'China' hem bileşenleri kalıp mükerrer sayılıyordu. Doğrusu:
+// bileşenleri tut, TOPLAMI ('China') dışla.
+export const EXCLUDED_AREAS = "('World','WORLD','Africa','Americas','Asia','Europe','Oceania','Northern Africa','Eastern Africa','Middle Africa','Southern Africa','Western Africa','Northern America','Central America','Caribbean','South America','Central Asia','Eastern Asia','South-eastern Asia','Southern Asia','Western Asia','Eastern Europe','Northern Europe','Southern Europe','Western Europe','Australia and New Zealand','Melanesia','Micronesia','Polynesia','Least Developed Countries','Land Locked Developing Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','European Union (27)','Sub-Saharan Africa','Latin America and the Caribbean','China')";
 
 export const CHART_COLORS = [
   '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7',

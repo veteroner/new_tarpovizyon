@@ -180,6 +180,15 @@ const AGG = {
 // sıralaması yapılırken bunlar dışlanmalı. Frontend'de İKİ AYRI liste vardı
 // (içerikleri farklı) — davranışı bire bir korumak için ikisi de burada ayrı
 // hazır liste olarak tutuluyor, sayfa hangisini kullanıyorsa onu seçer.
+// ÇİN NOTU: listeler eskiden 'China, mainland' ve 'China, Taiwan Province of'
+// dışlıyordu. Ama üretim tablolarında ('fao_uretim_*') düz 'China' satırı YOK —
+// yalnızca mainland/Taiwan/Hong Kong/Macao var. Sonuç: dünyanın en büyük
+// üreticisi (1,89 milyar ton bitkisel üretim) tüm sıralamalardan siliniyordu.
+// land_use / balans / pestisit tablolarında ise HEM 'China' toplamı HEM
+// bileşenleri duruyor, yani Çin mükerrer sayılıyordu. Doğrusu bileşenleri
+// tutup TOPLAMI dışlamak: 'China' her iki durumda da güvenle çıkarılabiliyor
+// (toplamı olan her tabloda mainland de var). 'China, mainland' zaten
+// countryTranslations'ta 'Çin' olarak gösteriliyor.
 const EXCLUDE_PRESETS = {
   v1: ['World', 'WORLD', 'Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Northern Africa', 'Eastern Africa',
     'Middle Africa', 'Southern Africa', 'Western Africa', 'Northern America', 'Central America', 'Caribbean',
@@ -187,7 +196,7 @@ const EXCLUDE_PRESETS = {
     'Eastern Europe', 'Northern Europe', 'Southern Europe', 'Western Europe', 'Australia and New Zealand',
     'Melanesia', 'Micronesia', 'Polynesia', 'Least Developed Countries', 'Land Locked Developing Countries',
     'Small Island Developing States', 'Low Income Food Deficit Countries', 'Net Food Importing Developing Countries',
-    'European Union (27)', 'China, mainland', 'China, Taiwan Province of'],
+    'European Union (27)', 'Sub-Saharan Africa', 'Latin America and the Caribbean', 'China'],
   v2: ['World', 'WORLD', 'Europe', 'Americas', 'Asia', 'Africa', 'Northern America', 'Southern America',
     'Eastern Europe', 'Western Europe', 'Northern Europe', 'Southern Europe', 'Southern Asia', 'Eastern Asia',
     'South-eastern Asia', 'Central Asia', 'Western Asia', 'Northern Africa', 'Eastern Africa', 'Western Africa',
@@ -195,7 +204,7 @@ const EXCLUDE_PRESETS = {
     'European Union (27)', 'European Union', 'Melanesia', 'Polynesia', 'Micronesia', 'Aggregate',
     'Least Developed Countries', 'Small Island Developing States', 'Low Income Food Deficit Countries',
     'Net Food Importing Developing Countries', 'Land Locked Developing Countries', 'Dünya', 'DÜNYA', 'Dunya',
-    'Total', 'TOTAL', 'Toplam', 'TOPLAM'],
+    'Total', 'TOTAL', 'Toplam', 'TOPLAM', 'Sub-Saharan Africa', 'Latin America and the Caribbean', 'China'],
 };
 
 const qi = (n) => `"${n}"`;

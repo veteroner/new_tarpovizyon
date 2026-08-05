@@ -19,8 +19,12 @@ export const ANIMAL_ITEMS = [
   { id: 'Ördek', name: 'Ducks', nameTR: 'Ördek' },
 ];
 
+// Çin: üretim tablolarında düz 'China' satırı yok, yalnızca mainland/Taiwan/HK/Macao
+// var; mainland'i dışlamak dünyanın en büyük üreticisini siliyordu. Toplamı olan
+// tablolarda ise hem 'China' hem bileşenleri kalıp mükerrer sayılıyordu. Doğrusu:
+// bileşenleri tut, TOPLAMI ('China') dışla.
 export const EXCLUDED_AREAS = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
-export const EXCLUDED_FULL = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM','Africa','Americas','Asia','Europe','Oceania','Northern Africa','Eastern Africa','Middle Africa','Southern Africa','Western Africa','Northern America','Central America','Caribbean','South America','Central Asia','Eastern Asia','South-eastern Asia','Southern Asia','Western Asia','Eastern Europe','Northern Europe','Southern Europe','Western Europe','Australia and New Zealand','Melanesia','Micronesia','Polynesia','Least Developed Countries','Land Locked Developing Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','European Union (27)','China, mainland','China, Taiwan Province of')";
+export const EXCLUDED_FULL = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM','Africa','Americas','Asia','Europe','Oceania','Northern Africa','Eastern Africa','Middle Africa','Southern Africa','Western Africa','Northern America','Central America','Caribbean','South America','Central Asia','Eastern Asia','South-eastern Asia','Southern Asia','Western Asia','Eastern Europe','Northern Europe','Southern Europe','Western Europe','Australia and New Zealand','Melanesia','Micronesia','Polynesia','Least Developed Countries','Land Locked Developing Countries','Small Island Developing States','Low Income Food Deficit Countries','Net Food Importing Developing Countries','European Union (27)','Sub-Saharan Africa','Latin America and the Caribbean','China')";
 
 export function formatNumber(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
