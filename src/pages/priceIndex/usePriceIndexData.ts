@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, num, type Row } from '../../services/d1';
+
+const R = 'tuik/fiyatendex';
 
 // ---------- TYPES ----------
 export type DatasetId = 'TUFE' | 'T-UFE' | 'T-GFE' | 'FAO';
@@ -24,17 +26,16 @@ export const DATASETS: Record<DatasetId, DatasetConfig> = {
   'FAO':   { title: 'FAO Gıda Fiyat Endeksi',                  subtitle: 'FAO Global Endeks',         color: '#3b82f6' },
 };
 
-const MONTH_COLS = `Ocak, \`Şubat\`, Mart, Nisan, \`Mayıs\`, Haziran, Temmuz, \`Ağustos\`, \`Eylül\`, Ekim, \`Kasım\`, \`Aralık\``;
-// SQL-safe column names (backtick for Turkish special chars)
-const MONTHS_SQL = ['Ocak', '`Şubat`', 'Mart', 'Nisan', '`Mayıs`', 'Haziran', 'Temmuz', '`Ağustos`', '`Eylül`', 'Ekim', '`Kasım`', '`Aralık`'];
-
-// Average only non-zero months — correct for incomplete years
-function makeAvgNonZero(prefix = ''): string {
-  const p = prefix ? `${prefix}.` : '';
-  const sum = MONTHS_SQL.map(m => `CASE WHEN CAST(${p}${m} AS DECIMAL(10,4))>0 THEN CAST(${p}${m} AS DECIMAL(10,4)) ELSE 0 END`).join('+');
-  const cnt = MONTHS_SQL.map(m => `CASE WHEN CAST(${p}${m} AS DECIMAL(10,4))>0 THEN 1 ELSE 0 END`).join('+');
-  return `((${sum})/NULLIF(${cnt},0))`;
+/**
+ * Yalnızca DOLU ayların ortalaması — yarım kalan yıllar için doğrusu bu.
+ * Eskiden dev bir SQL CASE WHEN ifadesiyle hesaplanıyordu.
+ */
+function ortalamaDoluAylar(satir: Row, aylar: string[] = MONTHS_TR): number {
+  const degerler = aylar.map((m) => num(satir[m])).filter((v) => v > 0);
+  return degerler.length ? degerler.reduce((a, b) => a + b, 0) / degerler.length : 0;
 }
+/** d1.d2.d3.d4 → tek kod dizisi (eski CONCAT karşılığı). */
+const urunKodu = (r: Row) => `${r.d1}.${r.d2}.${r.d3}.${r.d4}`;
 
 // ---------- HELPERS ----------
 export function formatIndex(v: number): string {
@@ -79,25 +80,29 @@ export function usePriceIndexData() {
     setProductOptions([]);
     setSelectedProduct('');
     try {
-      let prodSql: string;
-      if (dataset === 'TUFE') {
-        prodSql = `SELECT DISTINCT CONCAT(d1,'.',d2,'.',d3,'.',d4) AS code, urun
-                   FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0
-                   ORDER BY CAST(d1 AS UNSIGNED)`;
-      } else {
-        prodSql = `SELECT DISTINCT CONCAT(d1,'.',d2,'.',d3,'.',d4) AS code, urun
-                   FROM tuik_fiyatendex WHERE endeks='${dataset}'
-                   GROUP BY urun ORDER BY urun`;
-      }
-      const [yearRes, prodRes] = await Promise.all([
-        fetchQuery(`SELECT DISTINCT yil FROM tuik_fiyatendex WHERE endeks='${dataset}' ORDER BY CAST(yil AS UNSIGNED) DESC`),
-        fetchQuery(prodSql),
-      ]);
+      // Ürün listesi ve yıllar tek okumadan çıkarılıyor; DISTINCT/CONCAT
+      // karşılıkları istemcide.
+      const tumSatirlar = await fetchRows(R, { endeks: dataset, limit: 10000 });
       if (reqId !== metaRequestId.current) return; // stale response, discard
-      const years = (yearRes.data || []).map((r: Record<string, string | number>) => String(r.yil)).filter(Boolean);
+      const years = [...new Set(tumSatirlar.map((r) => String(r.yil)))]
+        .filter(Boolean).sort((a, b) => Number(b) - Number(a));
+      const prodRes = { data: (() => {
+        const secilenler = dataset === 'TUFE'
+          ? tumSatirlar.filter((r) => Number(r.d2) === 0 && Number(r.d3) === 0 && Number(r.d4) === 0)
+          : tumSatirlar;
+        const harita = new Map<string, { code: string; urun: string }>();
+        for (const r of secilenler) {
+          const code = urunKodu(r);
+          if (!harita.has(code)) harita.set(code, { code, urun: String(r.urun ?? '') });
+        }
+        const liste = [...harita.values()];
+        return dataset === 'TUFE'
+          ? liste.sort((a, b) => Number(a.code.split('.')[0]) - Number(b.code.split('.')[0]))
+          : liste.sort((a, b) => a.urun.localeCompare(b.urun, 'tr'));
+      })() };
       setYearOptions(years);
       if (years.length > 0) setSelectedYear(prev => (!prev || !years.includes(prev)) ? years[0] : prev);
-      const prods = (prodRes.data || []).map((r: Record<string, string | number>) => ({
+      const prods = (prodRes.data || []).map((r) => ({
         code: String(r.code),
         name: String(r.urun),
       }));
@@ -119,61 +124,54 @@ export function usePriceIndexData() {
     setError('');
     try {
       const yr = selectedYear;
-      const parts = selectedProduct.split('.');
-      const [d1, d2, d3, d4] = parts;
-      const prodWhere = `endeks='${dataset}' AND d1='${d1}' AND d2='${d2}' AND d3='${d3}' AND d4='${d4}'`;
-
+      const [d1, d2, d3, d4] = selectedProduct.split('.');
       const prevYr = String(Number(yr) - 1);
+      const urunF = { endeks: dataset, d1, d2, d3, d4 };
 
-      const monthlyQuery = `SELECT ${MONTH_COLS}
-        FROM tuik_fiyatendex WHERE ${prodWhere} AND yil='${yr}' LIMIT 1`;
+      // Tüm hesaplar (dolu-ay ortalaması, aylık seri, ısı haritası, makas)
+      // eskiden dev SQL ifadeleriyle yapılıyordu; satırlar çekilip istemcide.
+      const [urunSatirlari, tufeAnaYil, tufeOncekiYil, gfeSatirlari] = await Promise.all([
+        fetchRows(R, { ...urunF, limit: 200 }),
+        dataset === 'TUFE'
+          ? fetchRows(R, { endeks: 'TUFE', d2: 0, d3: 0, d4: 0, yil: yr, limit: 500 })
+          : Promise.resolve([]),
+        dataset === 'TUFE'
+          ? fetchRows(R, { endeks: 'TUFE', d2: 0, d3: 0, d4: 0, yil: prevYr, limit: 500 })
+          : Promise.resolve([]),
+        (dataset === 'TUFE' || dataset === 'T-GFE')
+          ? Promise.all([
+              fetchRows(R, { endeks: 'TUFE', d1: 1, d2: 0, d3: 0, d4: 0, limit: 200 }),
+              fetchRows(R, { endeks: 'T-GFE', d1: 0, d2: 0, d3: 0, d4: 0, limit: 200 }),
+            ])
+          : Promise.resolve([[], []] as [Row[], Row[]]),
+      ]);
 
-      const prevYearMonthlyQuery = `SELECT ${MONTH_COLS}
-        FROM tuik_fiyatendex WHERE ${prodWhere} AND yil='${prevYr}' LIMIT 1`;
+      const monthlyRes = { data: urunSatirlari.filter((r) => String(r.yil) === yr).slice(0, 1) };
+      const prevYearMonthlyRes = { data: urunSatirlari.filter((r) => String(r.yil) === prevYr).slice(0, 1) };
+      const yearlyRes = { data: [...urunSatirlari]
+        .sort((a, b) => Number(a.yil) - Number(b.yil))
+        .map((r) => ({ yil: r.yil, avg_val: ortalamaDoluAylar(r) })) };
 
-      const yearlyQuery = `SELECT yil, ${makeAvgNonZero()} as avg_val
-        FROM tuik_fiyatendex WHERE ${prodWhere}
-        ORDER BY CAST(yil AS UNSIGNED)`;
+      // d1 > 0: '0.x' genel endeks satırını dışla.
+      const anaGruplar = tufeAnaYil.filter((r) => Number(r.d1) > 0);
+      const topProdRes = dataset === 'TUFE'
+        ? { data: [...anaGruplar]
+            .map((r) => ({ urun: r.urun, d1: r.d1, curr_avg: ortalamaDoluAylar(r) }))
+            .sort((a, b) => b.curr_avg - a.curr_avg).slice(0, 13) }
+        : null;
+      const heatmapRes = dataset === 'TUFE'
+        ? { data: [...anaGruplar].sort((a, b) => Number(a.d1) - Number(b.d1)).slice(0, 13) }
+        : null;
 
-      const topProdQuery = dataset === 'TUFE'
-        ? `SELECT urun, d1, ${makeAvgNonZero()} as curr_avg
-           FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0 AND d1>0 AND yil='${yr}'
-           ORDER BY ${makeAvgNonZero()} DESC LIMIT 13`
-        : '';
-
-      const heatmapQuery = dataset === 'TUFE'
-        ? `SELECT urun, d1, ${MONTH_COLS}
-           FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0 AND d1>0 AND yil='${yr}'
-           ORDER BY CAST(d1 AS UNSIGNED) LIMIT 13`
-        : '';
-
-      const scissorQuery = (dataset === 'TUFE' || dataset === 'T-GFE')
-        ? `SELECT a.yil,
-             ${makeAvgNonZero('a')} as tufe_avg,
-             ${makeAvgNonZero('b')} as gfe_avg
-           FROM tuik_fiyatendex a
-           INNER JOIN tuik_fiyatendex b ON a.yil=b.yil AND b.endeks='T-GFE' AND b.d1='0' AND b.d2='0' AND b.d3='0' AND b.d4='0'
-           WHERE a.endeks='TUFE' AND a.d1='1' AND a.d2='0' AND a.d3='0' AND a.d4='0'
-           ORDER BY CAST(a.yil AS UNSIGNED)`
-        : '';
-
-      const promises: Promise<{ data?: Record<string, string | number>[] }>[] = [
-        fetchQuery(monthlyQuery),
-        fetchQuery(yearlyQuery),
-        fetchQuery(prevYearMonthlyQuery),
-      ];
-      if (topProdQuery) promises.push(fetchQuery(topProdQuery));
-      if (heatmapQuery) promises.push(fetchQuery(heatmapQuery));
-      if (scissorQuery) promises.push(fetchQuery(scissorQuery));
-
-      const results = await Promise.all(promises);
-      let idx = 0;
-      const monthlyRes = results[idx++];
-      const yearlyRes = results[idx++];
-      const prevYearMonthlyRes = results[idx++];
-      const topProdRes = topProdQuery ? results[idx++] : null;
-      const heatmapRes = heatmapQuery ? results[idx++] : null;
-      const scissorRes = scissorQuery ? results[idx++] : null;
+      const [tufeSeri, gfeSeri] = gfeSatirlari as [Row[], Row[]];
+      const gfeYilHaritasi = new Map(gfeSeri.map((r) => [String(r.yil), r]));
+      const scissorRes = (dataset === 'TUFE' || dataset === 'T-GFE')
+        ? { data: tufeSeri
+            .filter((r) => gfeYilHaritasi.has(String(r.yil)))
+            .sort((a, b) => Number(a.yil) - Number(b.yil))
+            .map((r) => ({ yil: r.yil, tufe_avg: ortalamaDoluAylar(r),
+              gfe_avg: ortalamaDoluAylar(gfeYilHaritasi.get(String(r.yil))!) })) }
+        : null;
 
       const row = monthlyRes.data?.[0];
       let availableMonthIndices: number[] = [];
@@ -215,22 +213,21 @@ export function usePriceIndexData() {
         setPrevSamePeriodAvg(0);
       }
 
-      setYearlyData((yearlyRes.data || []).map((r: Record<string, string | number>) => ({
+      setYearlyData((yearlyRes.data || []).map((r) => ({
         year: String(r.yil),
         value: Number(r.avg_val) || 0,
       })).filter((r: YearlyItem) => r.value > 0));
 
       if (topProdRes?.data?.length) {
         // Use same-period expression for fair YoY comparison
-        const samePeriodExpr = availableMonthIndices.length > 0
-          ? `((${availableMonthIndices.map(i => `CAST(${MONTHS_SQL[i]} AS DECIMAL(10,4))`).join('+')})/${availableMonthIndices.length})`
-          : makeAvgNonZero();
-        const prevRes = await fetchQuery(
-          `SELECT d1, ${samePeriodExpr} as prev_avg
-           FROM tuik_fiyatendex WHERE endeks='TUFE' AND d2=0 AND d3=0 AND d4=0 AND d1>0 AND yil='${prevYr}'`
-        );
-        const prevMap = new Map((prevRes.data || []).map((r: Record<string, string | number>) => [String(r.d1), Number(r.prev_avg) || 0]));
-        setTopProducts(topProdRes.data.map((r: Record<string, string | number>, i: number) => {
+        // Adil YoY için önceki yılın AYNI aylarının ortalaması.
+        const ayAdlari = availableMonthIndices.length > 0
+          ? availableMonthIndices.map((i) => MONTHS_TR[i])
+          : MONTHS_TR;
+        const prevMap = new Map(tufeOncekiYil
+          .filter((r) => Number(r.d1) > 0)
+          .map((r) => [String(r.d1), ortalamaDoluAylar(r, ayAdlari)]));
+        setTopProducts(topProdRes.data.map((r, i) => {
           const curr = Number(r.curr_avg) || 0;
           const prev = prevMap.get(String(r.d1)) || 0;
           const change = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
@@ -242,7 +239,7 @@ export function usePriceIndexData() {
 
       if (heatmapRes?.data?.length) {
         const cells: HeatmapCell[] = [];
-        heatmapRes.data.forEach((r: Record<string, string | number>) => {
+        heatmapRes.data.forEach((r) => {
           MONTHS_TR.forEach((m, i) => {
             cells.push({ product: String(r.urun), month: MONTHS_SHORT[i], value: Number(r[m]) || 0, monthIdx: i });
           });
@@ -253,7 +250,7 @@ export function usePriceIndexData() {
       }
 
       if (scissorRes?.data?.length) {
-        setScissorData(scissorRes.data.map((r: Record<string, string | number>) => ({
+        setScissorData(scissorRes.data.map((r) => ({
           year: String(r.yil),
           tufe: Number(r.tufe_avg) || 0,
           gfe: Number(r.gfe_avg) || 0,
