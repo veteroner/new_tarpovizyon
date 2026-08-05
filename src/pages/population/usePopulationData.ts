@@ -1,13 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, latestYear, num } from '../../services/d1';
 import type { Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
   calculateCAGR, forecastLinear, detectAnomalies, calculateYoY,
-  analyzeTrend, EXCLUDED_AREAS
+  analyzeTrend,
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
+
+// D1 toplama rotası. Kıta/toplam satırları sunucudaki 'v1' listesiyle dışlanıyor.
+const R = 'fao/nufus';
+const EX = { preset: 'v1' as const, col: 'area' };
+// area alanında Türkiye TEK bir değerle geçiyor; eski LIKE '%T_rkiye%' zinciri
+// artık tam eşleşme.
+const TR = 'Türkiye';
+const NUM = ['TOPLAM', 'kirsal', 'sehir'];
+const CINSIYET = ['erkek/T', 'kadın/T'];
+
+// Yıl kodda '2023' diye sabitti; veri ilerledikçe bayatlıyordu.
+let sonYilCache: Promise<number> | null = null;
+const sonYil = () => (sonYilCache ??= latestYear(R, 'year').then((y) => y ?? 2023));
 
 export type Tab = 'overview' | 'urbanization' | 'demographics' | 'turkey' | 'forecast' | 'alerts';
 
@@ -71,30 +84,35 @@ export function usePopulationData(activeTab: Tab) {
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
-      const [countriesRes, trendRes, prevRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area ORDER BY toplam DESC LIMIT 25`),
-        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT SUM(CAST(TOPLAM AS DECIMAL(20,2))) as total FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS}`)
+      const yil = await sonYil();
+      const [countriesRes, trendRes, dunyaRes, prevRes] = await Promise.all([
+        fetchAgg(R, { groupBy: ['area'], sum: [...NUM, ...CINSIYET], where: { year: yil }, exclude: EX, orderBy: 'sum_TOPLAM', dir: 'desc', limit: 25 }),
+        fetchAgg(R, { groupBy: ['year'], sum: NUM, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: NUM, where: { year: yil }, exclude: EX }),
+        fetchAgg(R, { sum: ['TOPLAM'], where: { year: yil - 1 }, exclude: EX }),
       ]);
-      const countries = (countriesRes.data || []).map((r: any, i: number) => {
-        const name = translateCountry(String(r.area || ''));
-        const isTurkey = name.includes('Türkiye') || name.includes('Turkiye') || name.toLowerCase().includes('turkey');
-        return { name, total: Number(r.toplam) || 0, rural: Number(r.kirsal) || 0, urban: Number(r.sehir) || 0, male: Number(r.erkek) || 0, female: Number(r.kadin) || 0, isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
+      const countries = countriesRes.map((r, i: number) => {
+        const ham = String(r.area || '');
+        const isTurkey = ham === TR;
+        return { name: translateCountry(ham), total: num(r.sum_TOPLAM), rural: num(r.sum_kirsal), urban: num(r.sum_sehir), male: num(r['sum_erkek/T']), female: num(r['sum_kadın/T']), isTurkey, fill: isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length] };
       });
       setTopCountries(countries);
-      const trend = (trendRes.data || []).map((r: any) => ({ year: String(r.year), total: Number(r.toplam) || 0, rural: Number(r.kirsal) || 0, urban: Number(r.sehir) || 0 }));
+      const trend = trendRes.map((r) => ({ year: String(r.year), total: num(r.sum_TOPLAM), rural: num(r.sum_kirsal), urban: num(r.sum_sehir) }));
       setYearlyTrend(trend);
-      const worldTotal = countries.reduce((s: number, c: any) => s + c.total, 0);
-      const worldUrban = countries.reduce((s: number, c: any) => s + c.urban, 0);
-      const worldRural = countries.reduce((s: number, c: any) => s + c.rural, 0);
-      const prevTotal = Number(prevRes.data?.[0]?.total) || 0;
+      // Eskiden "DÜNYA NÜFUSU" yalnızca ilk 25 ülkenin toplamıydı (5,97 Mr) ve
+      // yıllık değişim bunu TÜM dünyanın önceki yıl toplamıyla kıyaslıyordu —
+      // her zaman devasa eksi bir oran çıkıyordu. Artık iki taraf da tüm dünya.
+      const worldTotal = num(dunyaRes[0]?.sum_TOPLAM);
+      const worldUrban = num(dunyaRes[0]?.sum_sehir);
+      const worldRural = num(dunyaRes[0]?.sum_kirsal);
+      const prevTotal = num(prevRes[0]?.sum_TOPLAM);
       const yoy = calculateYoY(worldTotal, prevTotal);
       const urbanRate = worldTotal > 0 ? (worldUrban / worldTotal * 100) : 0;
-      const trendYV: YearValue[] = trend.map(t => ({ year: t.year, value: t.total }));
+      const trendYV: YearValue[] = trend.map((t) => ({ year: t.year, value: t.total }));
       const cagr = calculateCAGR(trendYV);
       setOverviewKPIs({ worldTotal, worldUrban, worldRural, urbanRate, yoy, cagr: cagr?.cagr || 0, topCountry: countries[0]?.name || '-', topCountryValue: countries[0]?.total || 0 });
       const ins: Insight[] = [];
-      ins.push({ id: 'ov1', type: 'info', message: `Dunya nufusu: ${formatPop(worldTotal)} (Top 25 ulke)`, severity: 'low', category: 'Genel' });
+      ins.push({ id: 'ov1', type: 'info', message: `Dunya nufusu: ${formatPop(worldTotal)} (${yil})`, severity: 'low', category: 'Genel' });
       ins.push({ id: 'ov2', type: urbanRate > 55 ? 'achievement' : 'info', message: `Kentlesme orani: %${urbanRate.toFixed(1)} — ${urbanRate > 55 ? 'Dunya cogunlugu sehirlerde' : 'Kirsal agirlikli'}`, severity: 'medium', category: 'Kentlesme' });
       if (cagr) ins.push({ id: 'ov3', type: 'growth', message: `Nufus artis CAGR: %${cagr.cagr.toFixed(2)}`, severity: 'medium', category: 'Buyume' });
       setOverviewInsights(ins);
@@ -105,21 +123,22 @@ export function usePopulationData(activeTab: Tab) {
   const loadUrbanization = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(sehir AS DECIMAL(20,2))) as sehir, SUM(CAST(kirsal AS DECIMAL(20,2))) as kirsal, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
+        // HAVING toplam > 0 karşılığı: sonuç dizisi istemcide süzülüyor.
+        fetchAgg(R, { groupBy: ['area'], sum: NUM, where: { year: yil }, exclude: EX, orderBy: 'sum_TOPLAM', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['year'], sum: NUM, exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
-      const byCountry = (byCountryRes.data || []).map((r: any) => {
-        const t = Number(r.toplam) || 0;
-        const u = Number(r.sehir) || 0;
-        const ru = Number(r.kirsal) || 0;
-        return { name: translateCountry(String(r.area || '')), total: t, urban: u, rural: ru, urbanRate: t > 0 ? (u / t * 100) : 0 };
+      const byCountry = byCountryRes.filter((r) => num(r.sum_TOPLAM) > 0).map((r) => {
+        const t = num(r.sum_TOPLAM);
+        const u = num(r.sum_sehir);
+        return { name: translateCountry(String(r.area || '')), total: t, urban: u, rural: num(r.sum_kirsal), urbanRate: t > 0 ? (u / t * 100) : 0 };
       });
       setUrbanData(byCountry);
-      const trend = (trendRes.data || []).map((r: any) => {
-        const t = Number(r.toplam) || 0;
-        const u = Number(r.sehir) || 0;
-        return { year: String(r.year), urban: u, rural: Number(r.kirsal) || 0, total: t, urbanRate: t > 0 ? (u / t * 100) : 0 };
+      const trend = trendRes.map((r) => {
+        const t = num(r.sum_TOPLAM);
+        const u = num(r.sum_sehir);
+        return { year: String(r.year), urban: u, rural: num(r.sum_kirsal), total: t, urbanRate: t > 0 ? (u / t * 100) : 0 };
       });
       setUrbanTrend(trend);
       const avgUrban = byCountry.length > 0 ? byCountry.reduce((s: number, c: any) => s + c.urbanRate, 0) / byCountry.length : 0;
@@ -141,21 +160,22 @@ export function usePopulationData(activeTab: Tab) {
   const loadDemographics = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [byCountryRes, trendRes] = await Promise.all([
-        fetchQuery(`SELECT area, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`),
-        fetchQuery(`SELECT year, SUM(CAST(\`erkek/T\` AS DECIMAL(20,2))) as erkek, SUM(CAST(\`kadın/T\` AS DECIMAL(20,2))) as kadin, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} GROUP BY year ORDER BY year`)
+        fetchAgg(R, { groupBy: ['area'], sum: [...CINSIYET, 'TOPLAM'], where: { year: yil }, exclude: EX, orderBy: 'sum_TOPLAM', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['year'], sum: [...CINSIYET, 'TOPLAM'], exclude: EX, orderBy: 'year', dir: 'asc' }),
       ]);
-      const byCountry = (byCountryRes.data || []).map((r: any) => {
-        const m = Number(r.erkek) || 0;
-        const f = Number(r.kadin) || 0;
-        const t = Number(r.toplam) || 0;
+      const byCountry = byCountryRes.filter((r) => num(r.sum_TOPLAM) > 0).map((r) => {
+        const m = num(r['sum_erkek/T']);
+        const f = num(r['sum_kadın/T']);
+        const t = num(r.sum_TOPLAM);
         return { name: translateCountry(String(r.area || '')), male: m, female: f, total: t, sexRatio: f > 0 ? (m / f * 100) : 0, femaleShare: t > 0 ? (f / t * 100) : 0 };
       });
       setDemoByCountry(byCountry);
-      const trend = (trendRes.data || []).map((r: any) => {
-        const m = Number(r.erkek) || 0;
-        const f = Number(r.kadin) || 0;
-        const t = Number(r.toplam) || 0;
+      const trend = trendRes.map((r) => {
+        const m = num(r['sum_erkek/T']);
+        const f = num(r['sum_kadın/T']);
+        const t = num(r.sum_TOPLAM);
         return { year: String(r.year), male: m, female: f, total: t, sexRatio: f > 0 ? (m / f * 100) : 0 };
       });
       setDemoTrend(trend);
@@ -176,27 +196,28 @@ export function usePopulationData(activeTab: Tab) {
   const loadTurkey = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [turkeyNowRes, worldRankRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir, CAST(\`erkek/T\` AS DECIMAL(20,2)) as erkek, CAST(\`kadın/T\` AS DECIMAL(20,2)) as kadin FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT area, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE year='2023' AND area NOT IN ${EXCLUDED_AREAS} GROUP BY area HAVING toplam > 0 ORDER BY toplam DESC`),
-        fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1960 ORDER BY year`)
+        fetchAgg(R, { sum: [...NUM, ...CINSIYET], where: { year: yil, area: TR } }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['TOPLAM'], where: { year: yil }, exclude: EX, orderBy: 'sum_TOPLAM', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: NUM, where: { area: TR }, whereGte: { year: 1960 }, orderBy: 'year', dir: 'asc' }),
       ]);
-      const now = turkeyNowRes.data?.[0];
-      const totalNow = Number(now?.toplam) || 0;
-      const ruralNow = Number(now?.kirsal) || 0;
-      const urbanNow = Number(now?.sehir) || 0;
-      const maleNow = Number(now?.erkek) || 0;
-      const femaleNow = Number(now?.kadin) || 0;
+      const now = turkeyNowRes[0];
+      const totalNow = num(now?.sum_TOPLAM);
+      const ruralNow = num(now?.sum_kirsal);
+      const urbanNow = num(now?.sum_sehir);
+      const maleNow = num(now?.['sum_erkek/T']);
+      const femaleNow = num(now?.['sum_kadın/T']);
       const urbanRate = totalNow > 0 ? (urbanNow / totalNow * 100) : 0;
-      const allCountries = (worldRankRes.data || []).map((r: any) => String(r.area || ''));
-      const turkeyIdx = allCountries.findIndex(n => n.includes('Türkiye') || n.includes('Turkey'));
-      const trend = (turkeyTrendRes.data || []).map((r: any) => {
-        const t = Number(r.toplam) || 0;
-        const u = Number(r.sehir) || 0;
-        return { year: String(r.year), total: t, rural: Number(r.kirsal) || 0, urban: u, urbanRate: t > 0 ? (u / t * 100) : 0 };
+      const allCountries = worldRankRes.filter((r) => num(r.sum_TOPLAM) > 0).map((r) => String(r.area || ''));
+      const turkeyIdx = allCountries.indexOf(TR);
+      const trend = turkeyTrendRes.map((r) => {
+        const t = num(r.sum_TOPLAM);
+        const u = num(r.sum_sehir);
+        return { year: String(r.year), total: t, rural: num(r.sum_kirsal), urban: u, urbanRate: t > 0 ? (u / t * 100) : 0 };
       });
       setTurkeyTrend(trend);
-      const trendYV: YearValue[] = trend.map(t => ({ year: t.year, value: t.total }));
+      const trendYV: YearValue[] = trend.map((t) => ({ year: t.year, value: t.total }));
       const cagr = calculateCAGR(trendYV);
       setTurkeyProfile({ totalNow, ruralNow, urbanNow, maleNow, femaleNow, urbanRate, rank: turkeyIdx >= 0 ? turkeyIdx + 1 : 'N/A', cagr: cagr?.cagr || 0 });
       const ins: Insight[] = [];
@@ -212,11 +233,11 @@ export function usePopulationData(activeTab: Tab) {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchQuery(`SELECT year, SUM(CAST(TOPLAM AS DECIMAL(20,2))) as toplam FROM fao_nufus WHERE area NOT IN ${EXCLUDED_AREAS} AND CAST(year AS SIGNED) >= 1990 GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT year, CAST(TOPLAM AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND CAST(year AS SIGNED) >= 1990 ORDER BY year`)
+        fetchAgg(R, { groupBy: ['year'], sum: ['TOPLAM'], whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['TOPLAM'], where: { area: TR }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
       ]);
-      const worldData: YearValue[] = (worldTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
-      const turkeyData: YearValue[] = (turkeyTrendRes.data || []).map((r: any) => ({ year: String(r.year), value: Number(r.toplam) || 0 }));
+      const worldData: YearValue[] = worldTrendRes.map((r) => ({ year: String(r.year), value: num(r.sum_TOPLAM) }));
+      const turkeyData: YearValue[] = turkeyTrendRes.map((r) => ({ year: String(r.year), value: num(r.sum_TOPLAM) }));
       const worldForecast = forecastLinear(worldData, 5);
       const turkeyForecast = forecastLinear(turkeyData, 5);
       const worldTrend = analyzeTrend(worldData);
@@ -242,23 +263,24 @@ export function usePopulationData(activeTab: Tab) {
   const loadAlerts = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [turkeyNowRes, turkeyBeforeRes, urbanTrendRes] = await Promise.all([
-        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal, CAST(sehir AS DECIMAL(20,2)) as sehir FROM fao_nufus WHERE year='2023' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT area, CAST(TOPLAM AS DECIMAL(20,2)) as toplam, CAST(kirsal AS DECIMAL(20,2)) as kirsal FROM fao_nufus WHERE year='2000' AND (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%')`),
-        fetchQuery(`SELECT year, CAST(sehir AS DECIMAL(20,2)) as sehir, CAST(TOPLAM AS DECIMAL(20,2)) as toplam FROM fao_nufus WHERE (area LIKE '%T_rkiye%' OR area LIKE '%Turkey%') AND year IN ('1960','1980','2000','2023') ORDER BY year`)
+        fetchAgg(R, { sum: NUM, where: { year: yil, area: TR } }),
+        fetchAgg(R, { sum: ['TOPLAM', 'kirsal'], where: { year: 2000, area: TR } }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['sehir', 'TOPLAM'], where: { area: TR }, whereIn: { year: [1960, 1980, 2000, yil] }, orderBy: 'year', dir: 'asc' }),
       ]);
       const alerts: IntelligenceAlert[] = [];
-      const now = turkeyNowRes.data?.[0];
-      const before = turkeyBeforeRes.data?.[0];
-      const totalNow = Number(now?.toplam) || 0;
-      const urbanNow = Number(now?.sehir) || 0;
-      const ruralNow = Number(now?.kirsal) || 0;
-      const totalBefore = Number(before?.toplam) || 0;
-      const ruralBefore = Number(before?.kirsal) || 0;
+      const now = turkeyNowRes[0];
+      const before = turkeyBeforeRes[0];
+      const totalNow = num(now?.sum_TOPLAM);
+      const urbanNow = num(now?.sum_sehir);
+      const ruralNow = num(now?.sum_kirsal);
+      const totalBefore = num(before?.sum_TOPLAM);
+      const ruralBefore = num(before?.sum_kirsal);
       const urbanRate = totalNow > 0 ? (urbanNow / totalNow * 100) : 0;
       if (totalBefore > 0) {
         const growth = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'pop-growth', severity: growth > 30 ? 'warning' : 'info', title: 'Turkiye Nufus Artisi', message: `2000-2023 doneminde %${growth.toFixed(1)} artis (${formatPop(totalNow)})`, metric: 'Nufus Buyumesi', value: growth });
+        alerts.push({ id: 'pop-growth', severity: growth > 30 ? 'warning' : 'info', title: 'Turkiye Nufus Artisi', message: `2000-${yil} doneminde %${growth.toFixed(1)} artis (${formatPop(totalNow)})`, metric: 'Nufus Buyumesi', value: growth });
       }
       alerts.push({ id: 'urban-rate', severity: urbanRate > 80 ? 'warning' : 'positive', title: 'Kentlesme Seviyesi', message: `Turkiye kentlesme: %${urbanRate.toFixed(1)} — ${urbanRate > 80 ? 'asiri kentsel yogunluk riski' : 'dengeli'}`, metric: 'Kentlesme', value: urbanRate });
       if (ruralBefore > 0) {
@@ -267,7 +289,7 @@ export function usePopulationData(activeTab: Tab) {
           alerts.push({ id: 'rural-decline', severity: 'critical', title: 'Kirsal Nufus Erimesi', message: `Kirsal nufus 2000'den bu yana %${Math.abs(ruralChange).toFixed(0)} azaldi — tarim iscisi kriteri`, metric: 'Kirsal Goc', value: ruralChange });
         }
       }
-      const urbanHistory = (urbanTrendRes.data || []).map((r: any) => ({ year: String(r.year), rate: Number(r.toplam) > 0 ? (Number(r.sehir) / Number(r.toplam) * 100) : 0 }));
+      const urbanHistory = urbanTrendRes.map((r) => ({ year: String(r.year), rate: num(r.sum_TOPLAM) > 0 ? (num(r.sum_sehir) / num(r.sum_TOPLAM) * 100) : 0 }));
       if (urbanHistory.length >= 2) {
         const first = urbanHistory[0];
         const last = urbanHistory[urbanHistory.length - 1];
