@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+
+const R = 'tuik/hayvancilik-canlihayvan';
+// Toplam/ülke satırlarını dışla (eski sorgudaki NOT IN listesi).
+const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye', 'TOTAL', 'Total'];
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -13,7 +17,6 @@ import type {
   AggregatedMetrics,
 } from './provincialLivestockUtils';
 import {
-  TABLE_NAME,
   YEAR_COLUMNS,
   REGION_COLORS,
   DEFAULT_METRICS,
@@ -71,35 +74,25 @@ export function useProvincialLivestockData(): ProvincialLivestockData {
     try {
       const yearCol = selectedYear;
       const prevYearCol = `y${parseInt(selectedYear.substring(1)) - 1}`;
-      const animalFilter = selectedAnimals.length > 0
-        ? `AND grup IN (${selectedAnimals.map(a => `'${a}'`).join(',')})`
-        : '';
 
-      const provincialQuery = `
-        SELECT 
-          yer as province,
-          grup as animal,
-          SUM(CAST(COALESCE(${yearCol}, 0) AS DECIMAL(20,2))) as current_value,
-          SUM(CAST(COALESCE(${prevYearCol}, 0) AS DECIMAL(20,2))) as prev_value
-        FROM ${TABLE_NAME}
-        WHERE duzeykod = '3'
-          AND yer IS NOT NULL 
-          AND yer != ''
-          AND yer NOT IN ('TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye', 'TOTAL', 'Total')
-          ${animalFilter}
-        GROUP BY yer, grup
-        ORDER BY current_value DESC
-      `;
+      // yer IS NOT NULL / != '' / NOT IN (…) süzgeçleri istemcide.
+      const provincialRes = { data: (await fetchAgg(R, {
+        groupBy: ['yer', 'grup'], sum: [yearCol, prevYearCol],
+        where: { duzeykod: 3 },
+        ...(selectedAnimals.length ? { whereIn: { grup: selectedAnimals } } : {}),
+      }))
+        .map((r) => ({
+          province: String(r.yer ?? ''), animal: String(r.grup ?? ''),
+          current_value: num(r[`sum_${yearCol}`]), prev_value: num(r[`sum_${prevYearCol}`]),
+        }))
+        .filter((r) => r.province !== '' && !TOPLAM_SATIRLARI.includes(r.province))
+        .sort((a, b) => b.current_value - a.current_value) };
 
-      const [provincialRes] = await Promise.all([
-        fetchQuery(provincialQuery)
-      ]);
-
-      if (provincialRes.data) {
+      {
         const provinceMap = new Map<string, ProvincialData>();
         let totalNational = 0;
 
-        provincialRes.data.forEach((row: Record<string, string | number>) => {
+        provincialRes.data.forEach((row) => {
           const province = String(row.province);
           const animal = String(row.animal);
           const currentVal = Number(row.current_value) || 0;
@@ -207,27 +200,21 @@ export function useProvincialLivestockData(): ProvincialLivestockData {
     try {
       const yearCol = selectedYear;
       const prevYearCol = `y${parseInt(selectedYear.substring(1)) - 1}`;
-      const animalFilter = selectedAnimals.length > 0
-        ? `AND grup IN (${selectedAnimals.map(a => `'${a}'`).join(',')})`
-        : '';
 
-      const districtQuery = `
-        SELECT 
-          ilce as district,
-          grup as animal,
-          SUM(CAST(COALESCE(${yearCol}, 0) AS DECIMAL(20,2))) as current_value,
-          SUM(CAST(COALESCE(${prevYearCol}, 0) AS DECIMAL(20,2))) as prev_value
-        FROM ${TABLE_NAME}
-        WHERE il = '${selectedProvince}'
-          AND ilce IS NOT NULL
-          AND ilce != ''
-          AND ilce NOT IN ('TOPLAM', 'Toplam')
-          ${animalFilter}
-        GROUP BY ilce, grup
-        ORDER BY current_value DESC
-      `;
-
-      const districtRes = await fetchQuery(districtQuery);
+      // Tabloda `ilce` diye bir sütun YOK — eski sorgu MySQL'de de
+      // "Unknown column 'ilce'" ile hata veriyordu, ilçe kırılımı hiç
+      // görünmüyordu. İlçe satırları duzeykod=4 ve ilçe adı `yer` sütununda.
+      const districtRes = { data: (await fetchAgg(R, {
+        groupBy: ['yer', 'grup'], sum: [yearCol, prevYearCol],
+        where: { duzeykod: 4, il: selectedProvince },
+        ...(selectedAnimals.length ? { whereIn: { grup: selectedAnimals } } : {}),
+      }))
+        .map((r) => ({
+          district: String(r.yer ?? ''), animal: String(r.grup ?? ''),
+          current_value: num(r[`sum_${yearCol}`]), prev_value: num(r[`sum_${prevYearCol}`]),
+        }))
+        .filter((r) => r.district !== '' && !['TOPLAM', 'Toplam'].includes(r.district))
+        .sort((a, b) => b.current_value - a.current_value) };
 
       if (districtRes.data) {
         const districtMap = new Map<string, DistrictData>();
@@ -283,33 +270,25 @@ export function useProvincialLivestockData(): ProvincialLivestockData {
   // Load Yearly Trend
   const loadYearlyTrend = useCallback(async () => {
     try {
-      const animalFilter = selectedAnimals.length > 0
-        ? `AND grup IN (${selectedAnimals.map(a => `'${a}'`).join(',')})`
-        : '';
 
       const yearColumns = YEAR_COLUMNS.filter(yc => {
         const year = parseInt(yc.substring(1));
         return year >= yearRange[0] && year <= yearRange[1];
       });
 
-      const yearSelects = yearColumns.map(yc => `SUM(CAST(COALESCE(${yc}, 0) AS DECIMAL(20,2))) as ${yc}`).join(', ');
-
-      const trendQuery = `
-        SELECT ${yearSelects}
-        FROM ${TABLE_NAME}
-        WHERE duzeykod = '3'
-          AND yer IS NOT NULL 
-          AND yer NOT IN ('TOPLAM', 'TÜRKİYE')
-          ${animalFilter}
-      `;
-
-      const trendRes = await fetchQuery(trendQuery);
-
-      if (trendRes.data && trendRes.data.length > 0) {
-        const row = trendRes.data[0];
+      // NOT IN ('TOPLAM','TÜRKİYE') süzgeci il kırılımı üzerinden istemcide.
+      const trendRows = await fetchAgg(R, {
+        groupBy: ['yer'], sum: yearColumns, where: { duzeykod: 3 },
+        ...(selectedAnimals.length ? { whereIn: { grup: selectedAnimals } } : {}),
+      });
+      {
+        const gecerli = trendRows.filter((r) => {
+          const yer = String(r.yer ?? '');
+          return yer !== '' && !['TOPLAM', 'TÜRKİYE'].includes(yer);
+        });
         const trendData: YearlyTrendData[] = yearColumns.map(yc => ({
           year: parseInt(yc.substring(1)),
-          value: Number(row[yc]) || 0
+          value: gecerli.reduce((acc, r) => acc + num(r[`sum_${yc}`]), 0),
         }));
         setYearlyTrendData(trendData);
       }
