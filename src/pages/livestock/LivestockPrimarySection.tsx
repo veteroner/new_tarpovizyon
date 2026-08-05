@@ -4,12 +4,23 @@ import {
   Cell, AreaChart, Area,
   ScatterChart, Scatter, ZAxis
 } from 'recharts';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { COLORS, EXCLUDED_FULL, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
+import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
+
+const R = 'fao/uretim-hayvansal-birincil';
+const EX = { preset: 'v1' as const, col: 'ulkead' };
+// Ürün grubu filtreleri: LIKE zincirleri COLLATE NOCASE olduğu için
+// büyük/küçük harf varyantlarına gerek yok.
+const URUN_FILTRELERI: Record<string, { likeAny?: string[]; notLikeAll?: string[] }> = {
+  meat: { likeAny: ['%meat%', '%offal%', '%fat%'] },
+  milk: { likeAny: ['%milk%'] },
+  eggs: { likeAny: ['%egg%'] },
+  other: { notLikeAll: ['%meat%', '%milk%', '%egg%', '%cheese%', '%butter%'] },
+};
 
 interface Props {
   selectedYear: string;
@@ -63,28 +74,22 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
   const loadPrimaryData = useCallback(async () => {
     setLoading(true);
     try {
-      const EXCLUDED = EXCLUDED_FULL;
       const yr = parseInt(selectedYear);
-      let itemFilter = '';
-      if (activePrimaryTab === 'meat') {
-        itemFilter = "(urunad LIKE '%Meat%' OR urunad LIKE '%meat%' OR urunad LIKE '%offal%' OR urunad LIKE '%Offal%' OR urunad LIKE '%fat%' OR urunad LIKE '%Fat%')";
-      } else if (activePrimaryTab === 'milk') {
-        itemFilter = "(urunad LIKE '%Milk%' OR urunad LIKE '%milk%')";
-      } else if (activePrimaryTab === 'eggs') {
-        itemFilter = "(urunad LIKE '%Egg%' OR urunad LIKE '%egg%')";
-      } else {
-        itemFilter = "(urunad NOT LIKE '%Meat%' AND urunad NOT LIKE '%meat%' AND urunad NOT LIKE '%Milk%' AND urunad NOT LIKE '%milk%' AND urunad NOT LIKE '%Egg%' AND urunad NOT LIKE '%egg%' AND urunad NOT LIKE '%Cheese%' AND urunad NOT LIKE '%Butter%')";
-      }
-      const W = `AND ${itemFilter}`;
+      const uf = URUN_FILTRELERI[activePrimaryTab] ?? URUN_FILTRELERI.other;
+      const urunKosulu = {
+        ...(uf.likeAny ? { likeAny: { urunad: uf.likeAny } } : {}),
+        ...(uf.notLikeAll ? { notLikeAll: { urunad: uf.notLikeAll } } : {}),
+      };
+      const TON = { uretim_birim: 't' };
 
       const [productRes, countryAllRes, yearlyRes, productCAGRRes, countryCAGRRes, turkeyProdRes] = await Promise.all([
-        fetchQuery(`SELECT urunad, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE year='${selectedYear}' AND uretim_birim='t' ${W} AND ulkead NOT IN ${EXCLUDED} GROUP BY urunad ORDER BY toplam DESC LIMIT 15`),
-        fetchQuery(`SELECT ulkead, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE year='${selectedYear}' AND uretim_birim='t' ${W} AND ulkead NOT IN ${EXCLUDED} GROUP BY ulkead ORDER BY toplam DESC`),
-        fetchQuery(`SELECT year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE uretim_birim='t' ${W} AND ulkead NOT IN ${EXCLUDED} GROUP BY year ORDER BY year`),
-        fetchQuery(`SELECT urunad, year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE uretim_birim='t' ${W} AND ulkead NOT IN ${EXCLUDED} AND year IN ('${yr}','${yr-5}') GROUP BY urunad, year`),
-        fetchQuery(`SELECT ulkead, year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE uretim_birim='t' ${W} AND ulkead NOT IN ${EXCLUDED} AND year IN ('${yr}','${yr-5}') GROUP BY ulkead, year`),
-        fetchQuery(`SELECT urunad, year, SUM(CAST(uretim_deger AS DECIMAL(20,2))) as toplam FROM fao_uretim_hayvansal_birincil WHERE uretim_birim='t' ${W} AND ulkead='Türkiye' AND year IN ('${yr}','${yr-5}') GROUP BY urunad, year`)
-      ]);
+        fetchAgg(R, { groupBy: ['urunad'], sum: ['uretim_deger'], where: { year: selectedYear, ...TON }, ...urunKosulu, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 15 }),
+        fetchAgg(R, { groupBy: ['ulkead'], sum: ['uretim_deger'], where: { year: selectedYear, ...TON }, ...urunKosulu, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['uretim_deger'], where: TON, ...urunKosulu, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['urunad', 'year'], sum: ['uretim_deger'], where: TON, whereIn: { year: [yr, yr - 5] }, ...urunKosulu, exclude: EX }),
+        fetchAgg(R, { groupBy: ['ulkead', 'year'], sum: ['uretim_deger'], where: TON, whereIn: { year: [yr, yr - 5] }, ...urunKosulu, exclude: EX }),
+        fetchAgg(R, { groupBy: ['urunad', 'year'], sum: ['uretim_deger'], where: { ...TON, ulkead: 'Türkiye' }, whereIn: { year: [yr, yr - 5] }, ...urunKosulu }),
+      ].map((pr) => pr.then((rows) => ({ data: rows.map((r) => ({ ...r, toplam: num(r.sum_uretim_deger) })) }))));
 
       // Products
       const primaryData = productRes.data ? productRes.data.map((item: Record<string, string | number>, index: number) => ({

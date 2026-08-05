@@ -327,6 +327,17 @@ function buildAgg(cfg, sp) {
       params.push(...list);
       continue;
     }
+    // notLikeAll_<sütun>=p1|p2 — hepsi AND'lenen NOT LIKE. Eski sorgulardaki
+    // "urunad NOT LIKE '%Meat%' AND urunad NOT LIKE '%Milk%' AND …" karşılığı.
+    if (k.startsWith('notLikeAll_')) {
+      const col = k.slice(11);
+      if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);
+      const list = v.split('|').map((x) => x.trim()).filter(Boolean);
+      if (!list.length) continue;
+      where.push(`(${list.map(() => `${qi(col)} NOT LIKE ? COLLATE NOCASE`).join(' AND ')})`);
+      params.push(...list);
+      continue;
+    }
     if (k.startsWith('like_')) {
       const col = k.slice(5);
       if (!allCols.includes(col)) throw new Error(`izin verilmeyen filtre: ${col}`);

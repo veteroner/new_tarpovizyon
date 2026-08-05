@@ -62,6 +62,8 @@ export type AggQuery = {
   like?: Record<string, string>;
   /** Aynı sütun için OR'lanan LIKE desenleri: { urunad: ['%meat%', '%offal%'] }. */
   likeAny?: Record<string, string[]>;
+  /** Hepsi AND'lenen NOT LIKE desenleri: { urunad: ['%meat%', '%milk%'] }. */
+  notLikeAll?: Record<string, string[]>;
   /** Büyük-eşit / küçük-eşit filtreleri: { yil: 2010 }. */
   whereGte?: Record<string, ParamValue>;
   whereLte?: Record<string, ParamValue>;
@@ -103,6 +105,7 @@ export async function fetchAgg(route: string, q: AggQuery): Promise<Row[]> {
   for (const [k, v] of Object.entries(q.whereIn ?? {})) params[`in_${k}`] = v.join('|');
   for (const [k, v] of Object.entries(q.like ?? {})) params[`like_${k}`] = v;
   for (const [k, v] of Object.entries(q.likeAny ?? {})) params[`likeAny_${k}`] = v.join('|');
+  for (const [k, v] of Object.entries(q.notLikeAll ?? {})) params[`notLikeAll_${k}`] = v.join('|');
   for (const [k, v] of Object.entries(q.whereGte ?? {})) params[`fge_${k}`] = v;
   for (const [k, v] of Object.entries(q.whereLte ?? {})) params[`fle_${k}`] = v;
   const body = await getJson(buildUrl(`agg/${route}`, params));
