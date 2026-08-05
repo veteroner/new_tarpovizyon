@@ -28,15 +28,23 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
   // Ticaret intelligence hesaplamaları
   const tradeIntelligence = useMemo(() => {
     if (!tradeData || tradeData.length === 0) return null;
-    const latest = tradeData[tradeData.length - 1];
-    const prev = tradeData[tradeData.length - 2];
-    const totalIhracat = tradeData.reduce((s, d) => s + d.ihracat_musd, 0);
-    const totalIthalat = tradeData.reduce((s, d) => s + d.ithalat_musd, 0);
-    const exportCAGR = tradeData.length > 1
-      ? (Math.pow(latest.ihracat_musd / tradeData[0].ihracat_musd, 1 / (tradeData.length - 1)) - 1) * 100
+    // İçinde bulunulan yıl henüz dolmadı (ör. Ağustos'ta 7 aylık veri). KPI ve
+    // CAGR'ı bunun üzerinden hesaplamak "%-28,8 YoY" gibi uydurma bir düşüş
+    // üretiyordu; hesaplar son TAM yıl üzerinden, kısmi yıl grafikte kalıyor.
+    const buYil = new Date().getFullYear();
+    const tamYillar = tradeData.filter(d => d.yil < buYil);
+    const kaynak = tamYillar.length >= 2 ? tamYillar : tradeData;
+    const latest = kaynak[kaynak.length - 1];
+    const prev = kaynak[kaynak.length - 2];
+    const totalIhracat = kaynak.reduce((s, d) => s + d.ihracat_musd, 0);
+    const totalIthalat = kaynak.reduce((s, d) => s + d.ithalat_musd, 0);
+    const exportCAGR = kaynak.length > 1
+      ? (Math.pow(latest.ihracat_musd / kaynak[0].ihracat_musd, 1 / (kaynak.length - 1)) - 1) * 100
       : 0;
     const yoyExport = prev ? ((latest.ihracat_musd - prev.ihracat_musd) / prev.ihracat_musd) * 100 : 0;
-    return { latest, prev, totalIhracat, totalIthalat, exportCAGR, yoyExport, netBalance: latest.ihracat_musd - latest.ithalat_musd };
+    const kismiYil = tradeData.some(d => d.yil >= buYil) ? buYil : null;
+    return { latest, prev, totalIhracat, totalIthalat, exportCAGR, yoyExport, kismiYil,
+      ilkYil: kaynak[0].yil, netBalance: latest.ihracat_musd - latest.ithalat_musd };
   }, [tradeData]);
 
   return (
@@ -59,7 +67,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
               { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '📤', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${tradeIntelligence.yoyExport.toFixed(1)}% YoY` },
               { label: `İTHALAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ithalat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#ef4444', icon: '📥', sub: 'Yem hammaddesi ağırlıklı' },
               { label: 'NET TİCARET DENGESİ', value: `$${tradeIntelligence.netBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: tradeIntelligence.netBalance > 0 ? '#10b981' : '#ef4444', icon: '⚖️', sub: tradeIntelligence.netBalance > 0 ? '✅ Net ihracatçı' : '❌ Net ithalatçı' },
-              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${tradeIntelligence.exportCAGR.toFixed(1)}%`, color: '#3b82f6', icon: '📈', sub: `${tradeData[0].yil}–${tradeIntelligence.latest.yil} bileşik` },
+              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${tradeIntelligence.exportCAGR.toFixed(1)}%`, color: '#3b82f6', icon: '📈', sub: `${tradeIntelligence.ilkYil}–${tradeIntelligence.latest.yil} bileşik` },
             ].map(kpi => (
               <div key={kpi.label} className="kpi-card" style={{ borderTop: `3px solid ${kpi.color}` }}>
                 <div className="kpi-header"><span className="kpi-title" style={{ fontSize: '0.7rem' }}>{kpi.label}</span><span style={{ fontSize: '1.5rem' }}>{kpi.icon}</span></div>
@@ -68,6 +76,13 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
               </div>
             ))}
           </div>
+
+          {tradeIntelligence.kismiYil !== null && (
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: -16, marginBottom: 20 }}>
+              ⓘ {tradeIntelligence.kismiYil} yılı henüz tamamlanmadı; grafikte yıl içi toplam olarak
+              görünüyor. Yukarıdaki kartlar son tam yıl ({tradeIntelligence.latest.yil}) verisidir.
+            </div>
+          )}
 
           {/* Ticaret Trend Grafiği */}
           <div className="chart-grid" style={{ marginBottom: '40px' }}>

@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num, type Row } from '../../services/d1';
+
+const R_KUMES = 'tuik/hayvancilik-kumeshayvanciligi';
+// TÜİK kümes tablosu 209 satır — bir kez çekilip tüm bölümlerde süzülüyor.
+// NOT: MySQL'de sayılar '2.345.678' biçiminde METİNDİ ve sorgular
+// REPLACE(TOPLAM,'.','') uyguluyordu. D1'de sütunlar sayısal; nokta silmek
+// ondalıklı bir değeri bozardı, bu yüzden doğrudan sayıya çevriliyor.
 import type { RegionTotal } from '../../components/TurkeyHeatMap';
 import type {
   YearPoint,
@@ -38,37 +44,27 @@ export function useWhiteMeatData(): WhiteMeatData {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const productionQuery = `SELECT
-        DATE_FORMAT(yillar, '%Y') as year,
-        kanatli_eti_ton
-      FROM oner_hayvansal_urun_uretimi
-      ORDER BY yillar`;
-
-      const res = await fetchQuery(productionQuery);
-      const data = (res.data ?? []) as Array<Record<string, unknown>>;
+      const data = await fetchRows('oner/hayvansal-urun-uretimi');
+      const kumesTum = await fetchRows(R_KUMES, { limit: 2000 });
 
       const points: YearPoint[] = data
         .map((row) => ({
-          year: Number(row.year) || 0,
-          poultryTon: Number(row.kanatli_eti_ton) || 0,
+          year: Number(String(row.yillar ?? '').slice(0, 4)) || 0,
+          poultryTon: num(row.kanatli_eti_ton),
         }))
         .filter((p) => p.year > 0)
         .sort((a, b) => a.year - b.year);
 
       // TÜİK tablosundan hist tablosunda olmayan yılları ekle (örn. 2025+)
       const histMaxYear = points.length > 0 ? Math.max(...points.map(p => p.year)) : 2024;
-      const tuikNewRes = await fetchQuery(
-        `SELECT yil, CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as kanatlı_ton
-         FROM tuik_hayvancilik_kumeshayvanciligi
-         WHERE urun = 'Tavuk Eti' AND TOPLAM IS NOT NULL
-           AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000
-           AND yil > '${histMaxYear}'
-         ORDER BY yil`
-      ).catch(() => ({ data: [] }));
-      if (tuikNewRes.data) {
-        (tuikNewRes.data as Record<string, unknown>[]).forEach(row => {
+      const tuikNewRows = kumesTum
+        .filter((r) => r.urun === 'Tavuk Eti' && r.TOPLAM != null && num(r.TOPLAM) > 1000
+          && Number(r.yil) > histMaxYear)
+        .sort((a, b) => Number(a.yil) - Number(b.yil));
+      {
+        tuikNewRows.forEach(row => {
           const year = Number(row['yil']) || 0;
-          const kanatlı = Number(row['kanatlı_ton']) || 0;
+          const kanatlı = num(row['TOPLAM']);
           if (year > 0 && kanatlı > 0 && !points.find(p => p.year === year)) {
             points.push({ year, poultryTon: kanatlı });
           }
@@ -80,18 +76,11 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // Ekonomik göstergeleri yükle
       try {
-        const economicQuery = `SELECT 
-          DATE_FORMAT(tarih, '%Y-%m') as tarih,
-          etlik_pilic_maliyet_tl_kg, uretici_fiyati_tl_kg,
-          etlik_pilic_yemi_tl_kg, tuketici_fiyati_tl_kg,
-          karlilik, uretici_fiyati_maliyet_farki_tl_kg,
-          parite_etlik_pilic_yem_paritesi
-          FROM oner_kanatli_eti_maliyeti_fiyati 
-          ORDER BY tarih DESC LIMIT 60`;
-        
-        const economicRes = await fetchQuery(economicQuery);
+        const economicRes = { data: (await fetchRows('oner/kanatli-eti-maliyeti-fiyati'))
+          .slice(-60).reverse()
+          .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
         if (economicRes.data && economicRes.data.length > 0) {
-          const mapped = economicRes.data.map((item: Record<string, string | number>) => ({
+          const mapped = economicRes.data.map((item) => ({
             tarih: String(item['tarih'] || ''),
             etlik_pilic_maliyet_tl_kg: Number(item['etlik_pilic_maliyet_tl_kg']) || 0,
             uretici_fiyati_tl_kg: Number(item['uretici_fiyati_tl_kg']) || 0,
@@ -115,19 +104,20 @@ export function useWhiteMeatData(): WhiteMeatData {
       // Dünya Sıralaması
       try {
         const euCountries = ['Almanya', 'Fransa', 'İtalya', 'İspanya', 'Hollanda', 'Belçika', 'Polonya', 'Romanya', 'Avusturya', 'Bulgaristan', 'Hırvatistan', 'Çekya', 'Danimarka', 'Estonya', 'Finlandiya', 'Yunanistan', 'Macaristan', 'İrlanda', 'Letonya', 'Litvanya', 'Portekiz', 'Slovakya', 'Slovenya', 'İsveç'];
-        const euList = euCountries.map(c => `'${c}'`).join(',');
 
-        const chickenQuery = `
-          SELECT 
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Tavuk eti' 
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Tavuk eti')) as world_rank,
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun = 'Tavuk eti' 
-             AND ulke IN (${euList}, 'Türkiye')
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND urun = 'Tavuk eti')) as eu_rank
-        `;
-        const chickenRes = await fetchQuery(chickenQuery);
+        // Eskiden iç içe COUNT(*)+1 alt sorgularıyla; tablo küçük, sıra istemcide.
+        const dunyaUretim = await fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 });
+        const tavuk = dunyaUretim.filter((r) => String(r.urun ?? '') === 'Tavuk eti');
+        const trDeger = num(tavuk.find((r) => String(r.ulke ?? '') === 'Türkiye')?.uretim_miktari_ton);
+        const ustunde = (liste: typeof tavuk) =>
+          liste.filter((r) => num(r.uretim_miktari_ton) > trDeger).length + 1;
+        const chickenRes = { data: [{
+          world_rank: ustunde(tavuk),
+          eu_rank: ustunde(tavuk.filter((r) => {
+            const u = String(r.ulke ?? '');
+            return euCountries.includes(u) || u === 'Türkiye';
+          })),
+        }] };
         if (chickenRes.data && chickenRes.data.length > 0) {
           setWorldRanking({
             world: Number(chickenRes.data[0]?.world_rank) || 0,
@@ -140,19 +130,23 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // İl bazlı kanatlı hayvan varlığı
       try {
-        const provincialQuery = `
-          SELECT 
-            il as province,
-            CAST(et_tavugu_sayisi AS UNSIGNED) as broiler_count,
-            CAST(yumurta_tavugu_sayisi AS UNSIGNED) as layer_count,
-            (CAST(et_tavugu_sayisi AS UNSIGNED) + CAST(yumurta_tavugu_sayisi AS UNSIGNED)) as total_poultry
-          FROM oner_i_llerin_hayvan_sayisi
-          WHERE tarih = (SELECT MAX(tarih) FROM oner_i_llerin_hayvan_sayisi)
-          ORDER BY il
-        `;
-        const provincialRes = await fetchQuery(provincialQuery);
+        // WHERE tarih = (SELECT MAX(tarih) …) karşılığı: en yeni tarih istemcide.
+        const ilHayvan = await fetchRows('oner/illerin-hayvan-sayisi', { limit: 2000 });
+        const sonTarih = ilHayvan.reduce((en, r) => {
+          const t = String(r.tarih ?? '');
+          return t > en ? t : en;
+        }, '');
+        const provincialRes = { data: ilHayvan
+          .filter((r) => String(r.tarih ?? '') === sonTarih)
+          .sort((a, b) => String(a.il).localeCompare(String(b.il), 'tr'))
+          .map((r) => ({
+            province: String(r.il ?? ''),
+            broiler_count: num(r.et_tavugu_sayisi),
+            layer_count: num(r.yumurta_tavugu_sayisi),
+            total_poultry: num(r.et_tavugu_sayisi) + num(r.yumurta_tavugu_sayisi),
+          })) };
         if (provincialRes.data && provincialRes.data.length > 0) {
-          const totalMapped: RegionTotal[] = provincialRes.data.map((row: Record<string, string | number>) => ({
+          const totalMapped: RegionTotal[] = provincialRes.data.map((row) => ({
             name: String(row.province || ''),
             value: Number(row.total_poultry) || 0,
             unit: 'baş'
@@ -178,21 +172,18 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // TÜİK Kümes Hayvancılığı Verileri
       try {
-        const tuikQuery = `
-          SELECT
-            yil,
-            CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as value,
-            urun
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun IN ('Kesilen Tavuk', 'Tavuk Eti', 'Etlik Piliç (Broiler) civivi Üretimi İçin Kuluçkaya Basılan Yumurta', 'Üretilen Broiler civivi')
-          ORDER BY yil DESC, urun
-        `;
-        const tuikRes = await fetchQuery(tuikQuery);
+        const TUIK_URUNLER = ['Kesilen Tavuk', 'Tavuk Eti',
+          'Etlik Piliç (Broiler) civivi Üretimi İçin Kuluçkaya Basılan Yumurta', 'Üretilen Broiler civivi'];
+        const tuikRes = { data: kumesTum
+          .filter((r) => TUIK_URUNLER.includes(String(r.urun ?? '')))
+          .map((r): Row => ({ yil: r.yil, value: num(r.TOPLAM), urun: r.urun }))
+          .sort((a, b) => Number(b.yil) - Number(a.yil)
+            || String(a.urun).localeCompare(String(b.urun), 'tr')) };
         
         if (tuikRes.data && tuikRes.data.length > 0) {
           const yearMap = new Map<string, Omit<TuikChickenData, 'year'> & { year: string }>();
           
-          tuikRes.data.forEach((row: Record<string, string | number>) => {
+          tuikRes.data.forEach((row) => {
             const year = String(row.yil);
             if (!yearMap.has(year)) {
               yearMap.set(year, {
@@ -237,24 +228,19 @@ export function useWhiteMeatData(): WhiteMeatData {
         }
 
         // Aylık dağılım — NULL TOPLAM olan yılları hariç tut (2026 gibi boş yıllar)
-        const latestYearQuery = `
-          SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun = 'Tavuk Eti' AND TOPLAM IS NOT NULL
-            AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000`;
-        const latestYearRes = await fetchQuery(latestYearQuery);
-        const latestYear = String(latestYearRes.data?.[0]?.max_year || '2025');
-        
-        const monthlyQuery = `
-          SELECT urun, birim, Ocak, Şubat, Mart, Nisan, Mayıs, Haziran, Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE yil = '${latestYear}' AND urun IN ('Kesilen Tavuk', 'Tavuk Eti')
-        `;
-        const monthlyRes = await fetchQuery(monthlyQuery);
+        // TOPLAM'ı boş/çok küçük olan yıllar (henüz dolmamış) elenir.
+        const doluTavukYillari = kumesTum
+          .filter((r) => r.urun === 'Tavuk Eti' && r.TOPLAM != null && num(r.TOPLAM) > 1000)
+          .map((r) => Number(r.yil));
+        const latestYear = String(doluTavukYillari.length ? Math.max(...doluTavukYillari) : 2025);
+
+        const monthlyRes = { data: kumesTum.filter((r) =>
+          String(r.yil) === latestYear && ['Kesilen Tavuk', 'Tavuk Eti'].includes(String(r.urun ?? ''))) };
         
         if (monthlyRes.data && monthlyRes.data.length > 0) {
           const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
           
-          monthlyRes.data.forEach((row: Record<string, string | number>) => {
+          monthlyRes.data.forEach((row) => {
             const urun = String(row.urun);
             const monthlyValues = months.map(month => ({
               month,
@@ -274,22 +260,15 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // Hindi Eti Verileri
       try {
-        const turkeyQuery = `
-          SELECT
-            yil,
-            CAST(REPLACE(IFNULL(TOPLAM, '0'), '.', '') AS UNSIGNED) as total_production,
-            Ocak, Şubat, Mart, Nisan, Mayıs, Haziran,
-            Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun = 'Hindi Eti' AND TOPLAM IS NOT NULL
-          ORDER BY yil DESC
-        `;
-        const turkeyRes = await fetchQuery(turkeyQuery);
+        const turkeyRes = { data: kumesTum
+          .filter((r) => r.urun === 'Hindi Eti' && r.TOPLAM != null)
+          .map((r): Row => ({ ...r, total_production: num(r.TOPLAM) }))
+          .sort((a, b) => Number(b.yil) - Number(a.yil)) };
         
         if (turkeyRes.data && turkeyRes.data.length > 0) {
           const turkeyYearData: TuikTurkeyMeatData[] = [];
           
-          turkeyRes.data.forEach((row: Record<string, string | number>) => {
+          turkeyRes.data.forEach((row) => {
             const year = String(row.yil);
             let production = Number(row.total_production) || 0;
             
@@ -358,16 +337,10 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // Bıldırcın Eti Verileri
       try {
-        const quailQuery = `
-          SELECT yil, urun,
-            CAST(REPLACE(IFNULL(TOPLAM, '0'), '.', '') AS UNSIGNED) as total_val,
-            Ocak, Şubat, Mart, Nisan, Mayıs, Haziran,
-            Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun IN ('Bıldırcın Eti', 'Kesilen Bıldırcın') AND TOPLAM IS NOT NULL
-          ORDER BY urun, yil DESC
-        `;
-        const quailRes = await fetchQuery(quailQuery);
+        const quailRes = { data: kumesTum
+          .filter((r) => ['Bıldırcın Eti', 'Kesilen Bıldırcın'].includes(String(r.urun ?? '')) && r.TOPLAM != null)
+          .map((r): Row => ({ ...r, total_val: num(r.TOPLAM) }))
+          .sort((a, b) => String(a.urun).localeCompare(String(b.urun), 'tr') || Number(b.yil) - Number(a.yil)) };
         
         if (quailRes.data && quailRes.data.length > 0) {
           const quailMeat: TuikTurkeyMeatData[] = [];
@@ -375,7 +348,7 @@ export function useWhiteMeatData(): WhiteMeatData {
           const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
                          'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
           
-          quailRes.data.forEach((row: Record<string, string | number>) => {
+          quailRes.data.forEach((row) => {
             const urun = String(row.urun || '');
             const year = String(row.yil);
             let production = Number(row.total_val) || 0;
@@ -415,14 +388,17 @@ export function useWhiteMeatData(): WhiteMeatData {
       }
       // Piliç Eti Dış Ticaret Verisi
       try {
-        const tradeRes = await fetchQuery(
-          `SELECT yil,
-             ROUND(SUM(ihracat_deger)/1000000, 1) as ihracat_musd,
-             ROUND(SUM(ithalat_deger)/1000000, 1) as ithalat_musd
-           FROM tuik_ticaret_hayvansal
-           WHERE ana_urun = 'Piliç Eti' AND yil >= 2015 AND yil < YEAR(CURDATE()) + 1
-           GROUP BY yil ORDER BY yil`
-        );
+        // yil >= 2015 ve içinde bulunulan yıla kadar (eski: yil < YEAR(CURDATE())+1).
+        const buYil = new Date().getFullYear();
+        const tradeRes = { data: (await fetchAgg('tuik/ticaret-hayvansal', {
+          groupBy: ['yil'], sum: ['ihracat_deger', 'ithalat_deger'],
+          where: { ana_urun: 'Piliç Eti', duzey_1: 'tüm', duzey_2: 'ürün', duzey_3: 'yil' },
+          whereGte: { yil: 2015 }, whereLte: { yil: buYil }, orderBy: 'yil', dir: 'asc',
+        })).map((r) => ({
+          yil: r.yil,
+          ihracat_musd: Math.round(num(r.sum_ihracat_deger) / 1e5) / 10,
+          ithalat_musd: Math.round(num(r.sum_ithalat_deger) / 1e5) / 10,
+        })) };
         if (tradeRes.data && tradeRes.data.length > 0) {
           setTradeData((tradeRes.data as Record<string, unknown>[]).map(r => ({
             yil: Number(r['yil']) || 0,
