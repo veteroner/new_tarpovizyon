@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num, type Row } from '../../services/d1';
+
+const R = 'tuik/bitkisel-uretim';
 import {
-  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, buildSumCols, pct,
+  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct,
 } from './plantTypes';
 import type {
   CityRow, YearRow, RegionRow, ProductRow, ScatterRow, DistrictRow, YieldTrendRow,
@@ -85,11 +87,11 @@ export function usePlantData({
   useEffect(() => {
     (async () => {
       try {
-        const filter = urunFilter
-          ? `urun IN (${urunFilter.map(u => `'${u}'`).join(',')})`
-          : `urun_grup = '${urunGrup}'`;
-        const sql = `SELECT DISTINCT urun FROM tuik_bitkisel_uretim WHERE ${filter} ORDER BY urun`;
-        const res = await fetchQuery(sql);
+        // Sayfa ya belirli ürünlerle ya da bir ürün grubuyla sınırlanıyor.
+        const res = { data: await fetchAgg(R, {
+          groupBy: ['urun'], orderBy: 'urun', dir: 'asc',
+          ...(urunFilter ? { whereIn: { urun: urunFilter } } : { where: { urun_grup: urunGrup } }),
+        }) };
         if (res.data) {
           const list = res.data.map(r => ({ id: String(r.urun), name: String(r.urun), nameTR: String(r.urun) }));
           setProductList(list);
@@ -114,79 +116,98 @@ export function usePlantData({
     }
     setLoading(true);
     try {
-      const prods = selectedProducts.map(p => `'${p.replace(/'/g, "''")}'`).join(',');
       const yCol = `y${selectedYear}`;
 
-      let geoFilter = '';
-      let geoFilterIl = '';
-      if (selectedProvince) {
-        geoFilter = ` AND yer='${selectedProvince}'`;
-        geoFilterIl = ` AND ili='${selectedProvince}'`;
-      } else if (selectedRegion && TURKEY_REGIONS[selectedRegion]) {
-        const iller = TURKEY_REGIONS[selectedRegion].map(i => `'${i}'`).join(',');
-        geoFilter = ` AND yer IN (${iller})`;
-        geoFilterIl = ` AND ili IN (${iller})`;
+
+      // Tüm paneller aynı il×unsur×ürün kırılımından türetiliyor; eskiden 8
+      // ayrı sorgu (biri LEFT JOIN'li, biri 63 CASE WHEN sütunlu) atılıyordu.
+      const YIL_SUTUNLARI = YEARS.map((y) => `y${y}`);
+      const ilKosulu = {
+        where: { duzeykod: 3, ...(selectedProvince ? { yer: selectedProvince } : {}) },
+        whereIn: {
+          urun: selectedProducts,
+          ...(!selectedProvince && selectedRegion && TURKEY_REGIONS[selectedRegion]
+            ? { yer: TURKEY_REGIONS[selectedRegion] } : {}),
+        },
+      };
+
+      const [ilSatirlari, ilceSatirlari, bolgeSatirlari] = await Promise.all([
+        fetchAgg(R, { groupBy: ['yer', 'unsur', 'urun'], sum: YIL_SUTUNLARI, ...ilKosulu }),
+        selectedProvince
+          ? fetchAgg(R, { groupBy: ['yer'], sum: [yCol],
+              where: { duzeykod: 4, unsur: selectedUnsur, ili: selectedProvince },
+              whereIn: { urun: selectedProducts } })
+          : Promise.resolve([] as Row[]),
+        // Bölge dağılımı coğrafi süzgeçten bağımsız (eski q3 de öyleydi).
+        fetchAgg(R, { groupBy: ['ili'], sum: [yCol],
+          where: { duzeykod: 3, unsur: selectedUnsur }, whereIn: { urun: selectedProducts } }),
+      ]);
+
+      const topla = (satirlar: Row[], alan: string) =>
+        satirlar.reduce((acc, r) => acc + num(r[`sum_${alan}`]), 0);
+      const grupla = (satirlar: Row[], anahtar: string, alan: string) => {
+        const h = new Map<string, number>();
+        for (const r of satirlar) {
+          const k = String(r[anahtar] ?? '');
+          h.set(k, (h.get(k) ?? 0) + num(r[`sum_${alan}`]));
+        }
+        return [...h.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      };
+
+      const secilenUnsur = ilSatirlari.filter((r) => String(r.unsur ?? '') === selectedUnsur);
+      const uretimSatirlari = ilSatirlari.filter((r) => String(r.unsur ?? '') === 'Üretim');
+      const alanSatirlari = ilSatirlari.filter((r) => String(r.unsur ?? '') === 'Ekilen Alan');
+      const verimSatirlari = ilSatirlari.filter((r) => String(r.unsur ?? '') === 'Verim');
+
+      const r1 = { data: grupla(secilenUnsur, 'yer', yCol).slice(0, 20)
+        .map(([yer, toplam]) => ({ yer, toplam })) };
+
+      const r2 = { data: [Object.fromEntries(
+        YEARS.map((y) => [`v${y}`, topla(secilenUnsur, `y${y}`)])) as Row] };
+
+      const r3 = { data: [Object.fromEntries(Object.entries(TURKEY_REGIONS).map(([ad, iller]) => [
+        ad, bolgeSatirlari.filter((r) => iller.includes(String(r.ili ?? '')))
+          .reduce((acc, r) => acc + num(r[`sum_${yCol}`]), 0),
+      ])) as Row] };
+
+      const r4 = { data: grupla(secilenUnsur, 'urun', yCol).map(([urun, toplam]) => ({ urun, toplam })) };
+
+      // Eski q5 üç alt sorgunun LEFT JOIN'iydi; unsur'a göre süzülüp eşleştiriliyor.
+      const alanHaritasi = new Map(grupla(alanSatirlari, 'yer', yCol));
+      const verimIlSayisi = new Map<string, { toplam: number; adet: number }>();
+      for (const r of verimSatirlari) {
+        const k = String(r.yer ?? '');
+        const kayit = verimIlSayisi.get(k) ?? { toplam: 0, adet: 0 };
+        kayit.toplam += num(r[`sum_${yCol}`]); kayit.adet += 1;
+        verimIlSayisi.set(k, kayit);
       }
+      const r5 = { data: grupla(uretimSatirlari, 'yer', yCol).slice(0, 30).map(([yer, uretim]) => ({
+        yer, uretim,
+        alan: alanHaritasi.get(yer) ?? 0,
+        verim: (() => { const v = verimIlSayisi.get(yer); return v && v.adet ? v.toplam / v.adet : 0; })(),
+      })) };
 
-      const q1 = `SELECT yer, SUM(CAST(${yCol} AS DECIMAL(20,2))) as toplam
-        FROM tuik_bitkisel_uretim
-        WHERE unsur='${selectedUnsur}' AND urun IN (${prods}) AND duzeykod='3'${geoFilter}
-        GROUP BY yer HAVING toplam > 0 ORDER BY toplam DESC LIMIT 20`;
+      const r6 = { data: grupla(ilceSatirlari, 'yer', yCol).slice(0, 15)
+        .map(([yer, toplam]) => ({ yer, toplam })) };
 
-      const q2 = `SELECT ${buildSumCols()}
-        FROM tuik_bitkisel_uretim
-        WHERE unsur='${selectedUnsur}' AND urun IN (${prods}) AND duzeykod='3'${geoFilter}`;
-
-      const regionCases = Object.entries(TURKEY_REGIONS)
-        .map(([name, iller]) => {
-          const inList = iller.map(i => `'${i}'`).join(',');
-          return `SUM(CASE WHEN ili IN (${inList}) THEN CAST(${yCol} AS DECIMAL(20,2)) ELSE 0 END) as '${name}'`;
-        }).join(',');
-      const q3 = `SELECT ${regionCases}
-        FROM tuik_bitkisel_uretim
-        WHERE unsur='${selectedUnsur}' AND urun IN (${prods}) AND duzeykod='3'`;
-
-      const q4 = `SELECT urun, SUM(CAST(${yCol} AS DECIMAL(20,2))) as toplam
-        FROM tuik_bitkisel_uretim
-        WHERE unsur='${selectedUnsur}' AND urun IN (${prods}) AND duzeykod='3'${geoFilter}
-        GROUP BY urun HAVING toplam > 0 ORDER BY toplam DESC`;
-
-      const q5 = `SELECT a.yer,
-        SUM(CAST(a.${yCol} AS DECIMAL(20,2))) as uretim,
-        IFNULL(b.alan, 0) as alan,
-        IFNULL(c.verim, 0) as verim
-        FROM tuik_bitkisel_uretim a
-        LEFT JOIN (SELECT yer, SUM(CAST(${yCol} AS DECIMAL(20,2))) as alan FROM tuik_bitkisel_uretim WHERE unsur='Ekilen Alan' AND urun IN (${prods}) AND duzeykod='3'${geoFilter} GROUP BY yer) b ON a.yer=b.yer
-        LEFT JOIN (SELECT yer, AVG(CAST(${yCol} AS DECIMAL(20,2))) as verim FROM tuik_bitkisel_uretim WHERE unsur='Verim' AND urun IN (${prods}) AND duzeykod='3'${geoFilter} GROUP BY yer) c ON a.yer=c.yer
-        WHERE a.unsur='Üretim' AND a.urun IN (${prods}) AND a.duzeykod='3'${geoFilter}
-        GROUP BY a.yer HAVING uretim > 0
-        ORDER BY uretim DESC LIMIT 30`;
-
-      const q6Promise = selectedProvince
-        ? fetchQuery(`SELECT yer, SUM(CAST(${yCol} AS DECIMAL(20,2))) as toplam
-            FROM tuik_bitkisel_uretim
-            WHERE unsur='${selectedUnsur}' AND urun IN (${prods}) AND duzeykod='4'${geoFilterIl}
-            GROUP BY yer HAVING toplam > 0 ORDER BY toplam DESC LIMIT 15`)
-        : Promise.resolve({ data: [] as Record<string, unknown>[] });
-
-      const uretimCols = YEARS.map(y => `SUM(CASE WHEN unsur='Üretim' THEN CAST(y${y} AS DECIMAL(20,2)) END) as uretim${y}`).join(',');
-      const ekilenCols = YEARS.map(y => `SUM(CASE WHEN unsur='Ekilen Alan' THEN CAST(y${y} AS DECIMAL(20,2)) END) as ekilen${y}`).join(',');
-      const verimCols = YEARS.map(y => `AVG(CASE WHEN unsur='Verim' THEN CAST(y${y} AS DECIMAL(20,2)) END) as verim${y}`).join(',');
-      const q7 = `SELECT ${uretimCols}, ${ekilenCols}, ${verimCols}
-        FROM tuik_bitkisel_uretim
-        WHERE urun IN (${prods}) AND duzeykod='3'${geoFilter}`;
+      const r7 = { data: [Object.fromEntries(YEARS.flatMap((y) => {
+        const verimAdet = verimSatirlari.filter((r) => num(r[`sum_y${y}`]) !== 0).length;
+        return [
+          [`uretim${y}`, topla(uretimSatirlari, `y${y}`)],
+          [`ekilen${y}`, topla(alanSatirlari, `y${y}`)],
+          [`verim${y}`, verimAdet ? topla(verimSatirlari, `y${y}`) / verimAdet : 0],
+        ];
+      })) as Row] };
 
       const radarYears = [selectedYear, Math.max(selectedYear - 5, 2004), Math.max(selectedYear - 10, 2004)];
-      const radarCols = radarYears.map(y => `SUM(CAST(y${y} AS DECIMAL(20,2))) as v${y}`).join(',');
-      const q8 = `SELECT yer, ${radarCols}
-        FROM tuik_bitkisel_uretim
-        WHERE unsur='Üretim' AND urun IN (${prods}) AND duzeykod='3'${geoFilter}
-        GROUP BY yer ORDER BY SUM(CAST(${yCol} AS DECIMAL(20,2))) DESC LIMIT 6`;
-
-      const [r1, r2, r3, r4, r5, r6, r7, r8] = await Promise.all([
-        fetchQuery(q1), fetchQuery(q2), fetchQuery(q3), fetchQuery(q4),
-        fetchQuery(q5), q6Promise, fetchQuery(q7), fetchQuery(q8)
-      ]);
+      const r8 = { data: grupla(uretimSatirlari, 'yer', yCol).slice(0, 6).map(([yer]) => {
+        const satir: Row = { yer };
+        radarYears.forEach((y) => {
+          satir[`v${y}`] = uretimSatirlari.filter((r) => String(r.yer ?? '') === yer)
+            .reduce((acc, r) => acc + num(r[`sum_y${y}`]), 0);
+        });
+        return satir;
+      }) };
 
       if (r1.data) {
         const total = r1.data.reduce((s, r) => s + (Number(r.toplam) || 0), 0);
