@@ -1,5 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../services/api';
+import { fetchRows, fetchAgg, latestYear, num } from '../services/d1';
+
+const R_FAO = 'fao/livestock-primary';
+// Kıta/toplam satırlarını dışla. Eski SQL yalnızca 'World'/'WORLD' çıkarıyordu;
+// oysa tabloda hem 'China' toplamı hem 'China, mainland' var ve Çin iki kez
+// sayılıp Türkiye'nin dünya sırasını bir basamak aşağı itiyordu.
+const EX_FAO = { preset: 'v1' as const, col: 'area' };
 import {
   type YearPoint,
   type EconomicData,
@@ -35,18 +41,16 @@ export default function TurkeyRedMeatProductionPage() {
     setLoading(true);
     try {
       // 1. Ana Üretim Verisi (1961-2024)
-      const histRes = await fetchQuery('SELECT * FROM oner_hayvansal_urun_uretimi ORDER BY yillar');
-      const histData = (histRes.data ?? []) as Record<string, string | number>[];
+      const histData = await fetchRows('oner/hayvansal-urun-uretimi') as Record<string, string | number>[];
 
       // 2a. Türlere Göre Kırılım - Tarihsel (1986-2009): büyükbaş+koyun+keçi
-      const histSpeciesRes = await fetchQuery(
-        'SELECT YEAR(yil) as yil, buyukbas_et_uretimi_ton, koyun_et_uretimi_ton, keci_et_uretimi_ton FROM oner_kirmizi_et_uretim_miktari ORDER BY yil'
-      );
-      const histSpeciesData = (histSpeciesRes.data ?? []) as Record<string, string | number>[];
+      // MySQL'deki YEAR(yil) karşılığı: yil '1986-01-01 00:00:00' biçiminde
+      // saklanıyor, yıl istemcide ayrıştırılıyor.
+      const histSpeciesData = (await fetchRows('oner/kirmizi-et-uretim-miktari'))
+        .map((r) => ({ ...r, yil: extractYear(r.yil) })) as Record<string, string | number>[];
 
       // 2b. Türlere Göre Kırılım - Güncel (2010-2024): sığır/manda/koyun/keçi ayrı
-      const detailRes = await fetchQuery('SELECT * FROM oner_kirmizi_et_uretimi ORDER BY yil');
-      const detailData = (detailRes.data ?? []) as Record<string, string | number>[];
+      const detailData = await fetchRows('oner/kirmizi-et-uretimi') as Record<string, string | number>[];
 
       const allPoints = histData.map(row => ({
         year: extractYear(row['yillar']),
@@ -106,17 +110,14 @@ export default function TurkeyRedMeatProductionPage() {
       setSeries(allPoints.filter(p => p.year > 0).sort((a, b) => a.year - b.year));
 
       // 3. Ekonomik Göstergeler
-      const economicQuery = `SELECT 
-        DATE_FORMAT(tarih, '%Y-%m') as tarih,
-        karkas_paritesi, besi_yemi_fiyatlari_tl_kg, dolar_kuru_tl,
-        besilik_dana_fiyatlari_tl_kg, dana_karkas_maliyet_tl_kg,
-        dana_karkas_fiyati_tl_kg, karlilik, kuzu_karkas_fiyati_tl_kg,
-        besilik_kucukbas_fiyatlari_tl_kg, dana_karkas_fiyat_maliyet_farki_tl_kg
-        FROM oner_kirmizi_et_ekonomik_gostergeler 
-        ORDER BY tarih DESC LIMIT 60`;
-      const economicRes = await fetchQuery(economicQuery);
-      if (economicRes.data && economicRes.data.length > 0) {
-        setEconomicData(economicRes.data.map((item: Record<string, string | number>) => ({
+      // DATE_FORMAT(tarih,'%Y-%m') karşılığı: tarih 'YYYY-MM-DD HH:MM:SS'
+      // biçiminde; ilk 7 karakter alınıyor. LIMIT 60 en yeni 60 kayıt.
+      const economicRows = (await fetchRows('oner/kirmizi-et-ekonomik-gostergeler'))
+        .slice(-60)
+        .reverse()
+        .map((r) => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
+      if (economicRows.length > 0) {
+        setEconomicData(economicRows.map((item: Record<string, string | number>) => ({
           tarih: String(item['tarih'] || ''),
           karkas_paritesi: Number(item['karkas_paritesi']) || 0,
           besi_yemi_fiyatlari_tl_kg: Number(item['besi_yemi_fiyatlari_tl_kg']) || 0,
@@ -132,9 +133,9 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 4. Dünya Karkas Fiyatları
-      const pricesRes = await fetchQuery('SELECT * FROM oner_dunya_karkas_fiyatlari LIMIT 1');
-      if (pricesRes.data && pricesRes.data.length > 0) {
-        const row = pricesRes.data[0];
+      const pricesRows = await fetchRows('oner/dunya-karkas-fiyatlari', { limit: 1 });
+      if (pricesRows.length > 0) {
+        const row = pricesRows[0];
         setWorldCarcassPrices({
           ingiltere: Number(row['ingiltere']) || 0,
           abd: Number(row['abd']) || 0,
@@ -150,24 +151,24 @@ export default function TurkeyRedMeatProductionPage() {
 
       // 5. Verimlilik Karşılaştırma
       try {
-        const prodRes = await fetchQuery('SELECT `Ülke` as ulke, REPLACE(`Karkas Verimi (Kg)`, \',\', \'.\') * 1 as karkas_verimi FROM o_dunya_kaarkas_veri ORDER BY karkas_verimi DESC');
-        if (prodRes.data) {
-          setProductivityComparison(prodRes.data
-            .map((r: Record<string, string | number>) => ({
-              ulke: String(r['ulke'] || ''),
-              karkas_verimi: Number(r['karkas_verimi']) || 0,
-            }))
-            .filter(d => d.ulke && d.ulke.trim().length > 0));
-        }
+        // Değerler '99,5' gibi virgüllü metin; REPLACE(...)*1 karşılığı istemcide.
+        const prodRows = await fetchRows('oner/dunya-karkas-veri');
+        setProductivityComparison(prodRows
+          .map((r) => ({
+            ulke: String(r['Ülke'] ?? ''),
+            karkas_verimi: Number(String(r['Karkas Verimi (Kg)'] ?? '').replace(',', '.')) || 0,
+          }))
+          .filter(d => d.ulke && d.ulke.trim().length > 0)
+          .sort((a, b) => b.karkas_verimi - a.karkas_verimi));
       } catch (err) {
         console.warn('Verimlilik karşılaştırma tablosu yok:', err);
       }
 
       // 6. Karkas Ağırlığı Verileri (193 ülke)
-      const carcassRes = await fetchQuery('SELECT * FROM oner_dunya_karkas_agirligi_verileri ORDER BY karkas_verimi_kg DESC');
-      if (carcassRes.data) {
-        setCarcassWeightData(carcassRes.data
-          .map((r: Record<string, string | number>) => ({
+      const carcassRows = await fetchRows('oner/dunya-karkas-agirligi');
+      {
+        setCarcassWeightData(carcassRows
+          .map((r) => ({
             ulke: String(r['ulke'] || ''),
             karkas_verimi_kg: Number(r['karkas_verimi_kg']) || 0,
           }))
@@ -175,9 +176,9 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 7. Türkiye Tüketim Verileri
-      const consRes = await fetchQuery('SELECT * FROM oner_kisi_basina_guncel_tuketimler LIMIT 1');
-      if (consRes.data && consRes.data.length > 0) {
-        const row = consRes.data[0];
+      const consRows = await fetchRows('oner/kisi-basina-tuketimler', { limit: 1 });
+      if (consRows.length > 0) {
+        const row = consRows[0];
         setConsumptionData({
           kirmizi_et_tuketimi_kg: Number(row['kirmizi_et_tuketimi_kg']) || 0,
           yumurta_tuketimi_adet: Number(row['yumurta_tuketimi_adet']) || 0,
@@ -187,10 +188,10 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 8. Dünya Et Tüketimi Karşılaştırma
-      const compRes = await fetchQuery('SELECT * FROM oner_karsilastirma_et_tuketimi');
-      if (compRes.data) {
-        setConsumptionComparison(compRes.data
-          .map((r: Record<string, string | number>) => ({
+      const compRows = await fetchRows('oner/karsilastirma-et-tuketimi');
+      {
+        setConsumptionComparison(compRows
+          .map((r) => ({
             ulke: String(r['ulke'] || ''),
             kanatli_eti: Number(r['kanatli_eti']) || 0,
             sigir_eti: Number(r['sigir_eti']) || 0,
@@ -203,60 +204,43 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 9. İthalat Verileri
-      const importRes = await fetchQuery(`SELECT 
-        ithalat as yil,
-        COALESCE(column_11, 0) as karkas_et_ithalati_ton,
-        COALESCE(column_5, 0) as besilik_sigir_bas,
-        COALESCE(column_1, 0) as besilik_kesimlik_kucukbas_sayisi_bas,
-        (
-          COALESCE(column_2, 0) +
-          COALESCE(column_4, 0) +
-          COALESCE(column_6, 0) +
-          COALESCE(column_8, 0) +
-          COALESCE(column_10, 0)
-        ) as toplam_ithalata_odenen_dolar
-        FROM oner_canli_hayvan_ve_et_ithalati 
-        WHERE ithalat >= 2010 
-        ORDER BY ithalat`);
-      if (importRes.data && importRes.data.length > 0) {
-        setImportData(importRes.data.map((r: Record<string, string | number>) => ({
-          yil: String(r['yil'] || ''),
-          karkas_et_ithalati_ton: Number(r['karkas_et_ithalati_ton']) || 0,
-          besilik_sigir_bas: Number(r['besilik_sigir_bas']) || 0,
-          besilik_kesimlik_kucukbas_sayisi_bas: Number(r['besilik_kesimlik_kucukbas_sayisi_bas']) || 0,
-          toplam_ithalata_odenen_dolar: Number(r['toplam_ithalata_odenen_dolar']) || 0,
+      // Tabloda ilk satır başlık metni (ithalat = null); eski SQL bunu
+      // "WHERE ithalat >= 2010" ile eliyordu. Sütun toplamı da istemcide.
+      const importRows = (await fetchRows('oner/canli-hayvan-et-ithalati'))
+        .filter((r) => Number(r.ithalat) >= 2010)
+        .sort((a, b) => Number(a.ithalat) - Number(b.ithalat));
+      if (importRows.length > 0) {
+        setImportData(importRows.map((r) => ({
+          yil: String(r.ithalat ?? ''),
+          karkas_et_ithalati_ton: num(r.column_11),
+          besilik_sigir_bas: num(r.column_5),
+          besilik_kesimlik_kucukbas_sayisi_bas: num(r.column_1),
+          toplam_ithalata_odenen_dolar:
+            num(r.column_2) + num(r.column_4) + num(r.column_6) + num(r.column_8) + num(r.column_10),
         })));
       }
 
       // 10. Dünya Sıralamaları (FAO)
       try {
-        const faoMaxYearRes = await fetchQuery(
-          `SELECT MAX(year) as max_year FROM fao_livestock_primary WHERE element='Production' AND unit='t'`
-        ).catch(() => ({ data: [{ max_year: 2023 }] }));
-        const faoMaxYear = faoMaxYearRes.data?.[0]?.max_year ?? 2023;
+        const faoMaxYear = await latestYear(R_FAO, 'year', {
+          where: { element: 'Production', unit: 't' },
+        }) ?? 2023;
 
-        const rankingQueries = [
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
-           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
-           AND item='Meat of cattle with the bone, fresh or chilled'
-           AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
-           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
-           AND item='Meat of sheep, fresh or chilled'
-           AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
-          `SELECT area, SUM(REPLACE(value,',','.') * 1) as total FROM fao_livestock_primary
-           WHERE year='${faoMaxYear}' AND element='Production' AND unit='t'
-           AND item='Meat of goat, fresh or chilled'
-           AND area NOT IN ('World','WORLD') GROUP BY area ORDER BY total DESC`,
-        ];
+        const siralama = (item: string) => fetchAgg(R_FAO, {
+          groupBy: ['area'], sum: ['value'],
+          where: { year: faoMaxYear, element: 'Production', unit: 't', item },
+          exclude: EX_FAO, orderBy: 'sum_value', dir: 'desc',
+        }).catch(() => []);
 
-        const [cattleRes, sheepRes, goatRes] = await Promise.all(
-          rankingQueries.map(q => fetchQuery(q).catch(() => ({ data: [] })))
-        );
+        const [cattleRes, sheepRes, goatRes] = await Promise.all([
+          siralama('Meat of cattle with the bone, fresh or chilled'),
+          siralama('Meat of sheep, fresh or chilled'),
+          siralama('Meat of goat, fresh or chilled'),
+        ]);
 
-        const findRank = (data: Record<string, string | number>[], isEU: boolean) => {
+        const findRank = (data: { area?: unknown }[], isEU: boolean) => {
           if (!data || data.length === 0) return 0;
-          const areas = data.map((r: Record<string, string | number>) => String(r.area || ''));
+          const areas = data.map((r) => String(r.area ?? ''));
           const turkeyIndex = areas.findIndex(a => a === 'Türkiye' || a === 'Turkey');
           if (turkeyIndex === -1) return 0;
 
@@ -272,9 +256,9 @@ export default function TurkeyRedMeatProductionPage() {
         };
 
         setWorldRankings({
-          cattle: { world: findRank(cattleRes.data || [], false), eu: findRank(cattleRes.data || [], true) },
-          sheep: { world: findRank(sheepRes.data || [], false), eu: findRank(sheepRes.data || [], true) },
-          goat: { world: findRank(goatRes.data || [], false), eu: findRank(goatRes.data || [], true) },
+          cattle: { world: findRank(cattleRes, false), eu: findRank(cattleRes, true) },
+          sheep: { world: findRank(sheepRes, false), eu: findRank(sheepRes, true) },
+          goat: { world: findRank(goatRes, false), eu: findRank(goatRes, true) },
         });
       } catch (e) {
         console.warn('Dünya sıralamaları yüklenemedi:', e);
