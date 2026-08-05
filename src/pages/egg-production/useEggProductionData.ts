@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchEggPrices, fetchQuery } from '../../services/api';
+import { fetchEggPrices } from '../../services/api';
+import { fetchRows, fetchAgg, latestYear, num, type Row } from '../../services/d1';
+
+const R_KUMES = 'tuik/hayvancilik-kumeshayvanciligi';
+const R_FAO_HAY = 'fao/uretim-hayvansal-birincil';
+const FAO_YUMURTA = 'Hen eggs in shell, fresh';
+// FAO ülke adları İngilizce; AB-27 listesi de İngilizce olmalı.
+const AB27_EN = ['Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark',
+  'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia',
+  'Lithuania', 'Luxembourg', 'Malta', 'Netherlands (Kingdom of the)', 'Poland', 'Portugal',
+  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden'];
 import {
   type YearPoint,
   type TuikTab,
@@ -31,8 +41,10 @@ export function useEggProductionData() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetchQuery('SELECT * FROM o_toplam_uretim_veri');
-      const data = (res.data ?? []) as Record<string, unknown>[];
+      const [data, kumesTum] = await Promise.all([
+        fetchRows('oner/toplam-uretim-veri'),
+        fetchRows(R_KUMES, { limit: 2000 }),
+      ]);
 
       const points = data
         .map((row) => {
@@ -43,23 +55,23 @@ export function useEggProductionData() {
         .filter((p) => p.year > 0 && p.eggsMillion > 0)
         .sort((a, b) => a.year - b.year);
 
-      // TÜİK tablosundan hist tablosunda olmayan yılları ekle (örn. 2025+)
-      const histMaxYear = points.length > 0 ? Math.max(...points.map(p => p.year)) : 2024;
-      const tuikNewRes = await fetchQuery(
-        `SELECT yil, CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as total_bin_adet
-         FROM tuik_hayvancilik_kumeshayvanciligi
-         WHERE urun = 'Tavuk Yumurtası' AND TOPLAM IS NOT NULL
-           AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000
-           AND yil > '${histMaxYear}'
-         ORDER BY yil`
-      ).catch(() => ({ data: [] }));
-      if (tuikNewRes.data) {
-        (tuikNewRes.data as Record<string, unknown>[]).forEach(row => {
+      // TÜİK'i özet tablonun ÜZERİNE yaz. Eskiden yalnızca özet tabloda
+      // olmayan yıllar ekleniyordu; ama o_toplam_uretim_veri'nin son satırı
+      // yarım kalmış oluyor (2025: 14,6 Mr adet — TÜİK'in tam değeri 19,9 Mr)
+      // ve sayfa uydurma bir "%-24,9 düşüş" gösteriyordu. TÜİK'te TOPLAM'ı
+      // dolu olan her yıl için yetkili kaynak TÜİK.
+      const tuikNewRows = kumesTum
+        .filter((r) => r.urun === 'Tavuk Yumurtası' && r.TOPLAM != null && num(r.TOPLAM) > 1000)
+        .sort((a, b) => Number(a.yil) - Number(b.yil));
+      {
+        tuikNewRows.forEach(row => {
           const year = Number(row['yil']) || 0;
-          const totalBinAdet = Number(row['total_bin_adet']) || 0;
+          const totalBinAdet = num(row['TOPLAM']);
           const eggsMillion = totalBinAdet / 1000;
-          if (year > 0 && eggsMillion > 0 && !points.find(p => p.year === year)) {
-            points.push({ year, eggsMillion });
+          if (year > 0 && eggsMillion > 0) {
+            const mevcut = points.find(p => p.year === year);
+            if (mevcut) mevcut.eggsMillion = eggsMillion;
+            else points.push({ year, eggsMillion });
           }
         });
         points.sort((a, b) => a.year - b.year);
@@ -69,16 +81,9 @@ export function useEggProductionData() {
 
       // Ekonomik göstergeleri yükle
       try {
-        const economicQuery = `SELECT 
-          DATE_FORMAT(tarih, '%Y-%m') as tarih,
-          yumurta_maliyet_tl_kg, yumurta_uretici_fiyati_tl_kg,
-          yumurtaci_tavuk_yemi_tl_kg, tuketici_fiyati_tl,
-          karlilik, uretici_fiyati_maliyet_farki_tl_kg,
-          parite_yumurta_yem_paritesi
-          FROM oner_yumurta_maliyeti_fiyati 
-          ORDER BY tarih DESC LIMIT 60`;
-
-        const economicRes = await fetchQuery(economicQuery);
+        const economicRes = { data: (await fetchRows('oner/yumurta-maliyeti-fiyati'))
+          .slice(-60).reverse()
+          .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
         if (economicRes.data && economicRes.data.length > 0) {
           const mapped = economicRes.data.map((item: Record<string, string | number>) => ({
             tarih: String(item['tarih'] || ''),
@@ -103,17 +108,10 @@ export function useEggProductionData() {
 
       // TÜİK Yumurta Üretim Verileri
       try {
-        const tuikQuery = `
-          SELECT
-            yil,
-            CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) as value,
-            urun
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun = 'Tavuk Yumurtası'
-            OR urun LIKE '%Kuluçkaya Basılan%'
-          ORDER BY yil DESC, urun
-        `;
-        const tuikRes = await fetchQuery(tuikQuery);
+        const tuikRes = { data: kumesTum
+          .filter((r) => r.urun === 'Tavuk Yumurtası' && r.TOPLAM != null)
+          .map((r): Row => ({ yil: r.yil, value: num(r.TOPLAM), urun: r.urun }))
+          .sort((a, b) => Number(b.yil) - Number(a.yil)) };
 
         if (tuikRes.data && tuikRes.data.length > 0) {
           const yearMap = new Map<string, Omit<TuikEggData, 'year'> & { year: string }>();
@@ -139,12 +137,13 @@ export function useEggProductionData() {
           });
 
           // tuik_hayvancilik_canlihayvan tablosundan yıllık layer count çek
-          const canlihayvanRes = await fetchQuery(
-            `SELECT * FROM tuik_hayvancilik_canlihayvan
-             WHERE grup = 'Tavuk' AND kategori LIKE '%Yumurta%'
-             AND (yer = 'TÜRKİYE' OR yer = 'Türkiye' OR duzey = 'ülke' OR duzey LIKE '%lke%')
-             LIMIT 3`
-          ).catch(() => ({ data: [] }));
+          const canlihayvanRes = { data: (await fetchRows('tuik/hayvancilik-canlihayvan', { limit: 5000 })
+            .catch(() => []))
+            .filter((r) => String(r.grup ?? '') === 'Tavuk'
+              && /Yumurta/i.test(String(r.kategori ?? ''))
+              && (['TÜRKİYE', 'Türkiye'].includes(String(r.yer ?? ''))
+                || /lke/i.test(String(r.duzey ?? ''))))
+            .slice(0, 3) };
 
           if (canlihayvanRes.data && canlihayvanRes.data.length > 0) {
             const row = canlihayvanRes.data[0] as Record<string, unknown>;
@@ -176,19 +175,15 @@ export function useEggProductionData() {
         }
 
         // Aylık dağılım - NULL olmayan en son yıl için
-        const latestYearQuery = `
-          SELECT MAX(yil) as max_year FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE urun = 'Tavuk Yumurtası' AND TOPLAM IS NOT NULL
-            AND CAST(REPLACE(TOPLAM, '.', '') AS UNSIGNED) > 1000`;
-        const latestYearRes = await fetchQuery(latestYearQuery);
-        const latestYear = String(latestYearRes.data?.[0]?.max_year || '2025');
+        // TOPLAM'ı boş olan yıl (henüz dolmamış) elenir.
+        const doluYumurtaYillari = kumesTum
+          .filter((r) => r.urun === 'Tavuk Yumurtası' && r.TOPLAM != null && num(r.TOPLAM) > 1000)
+          .map((r) => Number(r.yil));
+        const latestYear = String(doluYumurtaYillari.length ? Math.max(...doluYumurtaYillari) : 2025);
 
-        const monthlyQuery = `
-          SELECT urun, birim, Ocak, Şubat, Mart, Nisan, Mayıs, Haziran, Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık
-          FROM tuik_hayvancilik_kumeshayvanciligi
-          WHERE yil = '${latestYear}' AND urun IN ('Tavuk Yumurtası', 'Yumurtacı Tavuk Sayısı')
-        `;
-        const monthlyRes = await fetchQuery(monthlyQuery);
+        const monthlyRes = { data: kumesTum.filter((r) =>
+          String(r.yil) === latestYear
+          && ['Tavuk Yumurtası', 'Yumurtacı Tavuk Sayısı'].includes(String(r.urun ?? ''))) };
 
         if (monthlyRes.data && monthlyRes.data.length > 0) {
           const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
@@ -213,14 +208,17 @@ export function useEggProductionData() {
 
       // Yumurta Dış Ticaret Verisi
       try {
-        const eggTradeRes = await fetchQuery(
-          `SELECT yil,
-             ROUND(SUM(ihracat_deger)/1000000, 1) as ihracat_musd,
-             ROUND(SUM(ithalat_deger)/1000000, 1) as ithalat_musd
-           FROM tuik_ticaret_hayvansal
-           WHERE urun LIKE '%Yumurta%' AND yil >= 2015 AND yil < YEAR(CURDATE()) + 1
-           GROUP BY yil ORDER BY yil`
-        );
+        const buYil = new Date().getFullYear();
+        const eggTradeRes = { data: (await fetchAgg('tuik/ticaret-hayvansal', {
+          groupBy: ['yil'], sum: ['ihracat_deger', 'ithalat_deger'],
+          where: { duzey_1: 'tüm', duzey_2: 'ürün', duzey_3: 'yil' },
+          like: { ana_urun: '%Yumurta%' },
+          whereGte: { yil: 2015 }, whereLte: { yil: buYil }, orderBy: 'yil', dir: 'asc',
+        })).map((r): Row => ({
+          yil: r.yil,
+          ihracat_musd: Math.round(num(r.sum_ihracat_deger) / 1e5) / 10,
+          ithalat_musd: Math.round(num(r.sum_ithalat_deger) / 1e5) / 10,
+        })) };
         if (eggTradeRes.data && eggTradeRes.data.length > 0) {
           setEggTradeData((eggTradeRes.data as Record<string, unknown>[]).map(r => ({
             yil: Number(r['yil']) || 0,
@@ -234,20 +232,24 @@ export function useEggProductionData() {
 
       // Dünya Sıralaması
       try {
-        const euCountries = ['Almanya', 'Fransa', 'İtalya', 'İspanya', 'Hollanda', 'Belçika', 'Polonya', 'Romanya', 'Avusturya', 'Bulgaristan', 'Hırvatistan', 'Çekya', 'Danimarka', 'Estonya', 'Finlandiya', 'Yunanistan', 'Macaristan', 'İrlanda', 'Letonya', 'Litvanya', 'Portekiz', 'Slovakya', 'Slovenya', 'İsveç'];
-        const euList = euCountries.map((c) => `'${c}'`).join(',');
-
-        const eggQuery = `
-          SELECT 
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE urun LIKE '%umurta%' OR urun LIKE 'Egg%'
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND (urun LIKE '%umurta%' OR urun LIKE 'Egg%') LIMIT 1)) as world_rank,
-            (SELECT COUNT(*) + 1 FROM oner_dunya_hayvansal_uretim_miktarla 
-             WHERE (urun LIKE '%umurta%' OR urun LIKE 'Egg%') 
-             AND ulke IN (${euList}, 'Türkiye')
-             AND uretim_miktari_ton > (SELECT uretim_miktari_ton FROM oner_dunya_hayvansal_uretim_miktarla WHERE ulke = 'Türkiye' AND (urun LIKE '%umurta%' OR urun LIKE 'Egg%') LIMIT 1)) as eu_rank
-        `;
-        const eggRes = await fetchQuery(eggQuery);
+        // Eski sorgu oner_dunya_hayvansal_uretim_miktarla'ya bakıyordu; o tabloda
+        // YUMURTA HİÇ YOK. Üstelik parantezleme hatalıydı
+        // (… LIKE '%umurta%' OR … AND uretim > X), bu yüzden COUNT(*)+1 daima 1
+        // dönüyor ve sayfa Türkiye'yi "Dünya #1" gösteriyordu. Gerçek kaynak
+        // FAO tavuk yumurtası üretimi; Türkiye 2024'te 9. sırada.
+        const faoYil = await latestYear(R_FAO_HAY, 'year', { where: { urunad: FAO_YUMURTA } });
+        const faoSira = await fetchAgg(R_FAO_HAY, {
+          groupBy: ['ulkead'], sum: ['uretim_deger'],
+          where: { year: faoYil, urunad: FAO_YUMURTA },
+          positive: ['uretim_deger'], exclude: { preset: 'v1', col: 'ulkead' },
+          orderBy: 'sum_uretim_deger', dir: 'desc',
+        });
+        const ulkeler = faoSira.map((r) => String(r.ulkead ?? ''));
+        const dunyaSira = ulkeler.indexOf('Türkiye') + 1;
+        const abSira = ulkeler
+          .filter((u) => AB27_EN.includes(u) || u === 'Türkiye')
+          .indexOf('Türkiye') + 1;
+        const eggRes = { data: dunyaSira > 0 ? [{ world_rank: dunyaSira, eu_rank: abSira }] : [] };
 
         if (eggRes.data && eggRes.data.length > 0 && eggRes.data[0]?.world_rank) {
           setWorldRanking({
