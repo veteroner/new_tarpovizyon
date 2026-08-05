@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, num, type Row } from '../../services/d1';
+
+const R_DENGE = 'tuik/urundenge';
+const R_ENDEKS = 'tuik/fiyatendex';
+const AY_ADLARI = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+/** TRIM(urun) karşılığı — kaynak veride ürün adlarında boşluk artıkları var. */
+const urunAdi = (r: Row) => String(r.urun ?? '').trim();
 
 export const YEAR_COLS = [
   'y2015/16', 'y2016/17', 'y2017/18', 'y2018/19', 'y2019/20',
   'y2020/21', 'y2021/22', 'y2022/23', 'y2023/24',
 ];
 export const YEAR_LABELS = YEAR_COLS.map(c => c.replace('y', '').split('/')[0]);
-const YEAR_SQL = YEAR_COLS.map(c => `\`${c}\``).join(', ');
 
-const MONTH_COLS = [
-  '`Ocak`', '`Şubat`', '`Mart`', '`Nisan`', '`Mayıs`', '`Haziran`',
-  '`Temmuz`', '`Ağustos`', '`Eylül`', '`Ekim`', '`Kasım`', '`Aralık`',
-];
 
 export const CROSS_PRODUCTS = [
   { label: 'Buğday', urundenge: 'Buğday (toplam)', trade: 'Buğday', priceKey: 'Buğday' },
@@ -57,16 +59,19 @@ export function useCrossIntelligenceData() {
     setError(false);
     const p = CROSS_PRODUCTS[pIdx];
     try {
-      const [prodRes, impRes, expRes, suffRes] = await Promise.all([
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='Üretim'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='İthalat'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='İhracat'`),
-        fetchQuery(`SELECT ${YEAR_SQL} FROM tuik_urundenge WHERE TRIM(urun)='${p.urundenge}' AND \`fasıl\`='Yeterlilik derecesi'`),
-      ]);
+      // Tablo küçük: tek okumayla çekilip fasıl/ürün süzmeleri istemcide.
+      // (Eskiden aynı tablo 10 ayrı sorguyla taranıyordu.)
+      const dengeSatirlari = await fetchRows(R_DENGE, { limit: 2000 });
+      const fasilSatiri = (fasil: string, urun: string) =>
+        dengeSatirlari.find((r) => String(r['fasıl'] ?? '') === fasil && urunAdi(r) === urun);
+      const prodRes = { data: [fasilSatiri('Üretim', p.urundenge)].filter(Boolean) as Row[] };
+      const impRes = { data: [fasilSatiri('İthalat', p.urundenge)].filter(Boolean) as Row[] };
+      const expRes = { data: [fasilSatiri('İhracat', p.urundenge)].filter(Boolean) as Row[] };
+      const suffRes = { data: [fasilSatiri('Yeterlilik derecesi', p.urundenge)].filter(Boolean) as Row[] };
 
-      const getYearVals = (res: typeof prodRes) => {
-        if (!res.data?.[0]) return YEAR_COLS.map(() => 0);
-        return YEAR_COLS.map(c => Number(res.data![0][c]) || 0);
+      const getYearVals = (res: { data: Row[] }) => {
+        if (!res.data[0]) return YEAR_COLS.map(() => 0);
+        return YEAR_COLS.map(c => num(res.data[0][c]));
       };
 
       const productions = getYearVals(prodRes);
@@ -76,16 +81,28 @@ export function useCrossIntelligenceData() {
 
       let priceIndices = YEAR_LABELS.map(() => 100);
       if (p.priceKey) {
-        const priceRes = await fetchQuery(`
-          SELECT yil, AVG((${MONTH_COLS.join('+')}) / 12) as avg_idx
-          FROM tuik_fiyatendex
-          WHERE endeks='T-GFE' AND (d2 LIKE '%${p.priceKey}%' OR d3 LIKE '%${p.priceKey}%')
-          AND yil >= 2015 AND yil <= 2024
-          GROUP BY yil ORDER BY yil
-        `);
-        if (priceRes.data?.length) {
+        // Eski sorgu T-GFE'de d2/d3 sütunlarına LIKE '%Buğday%' uyguluyordu.
+        // d2/d3 SAYISAL sütunlar (0,1,2…), üstelik T-GFE tarımsal GİRDİ fiyat
+        // endeksi — içinde ürün satırı hiç yok. Yani eşleşme asla olmuyor ve
+        // "FİYAT ENDEKSİ" her ürün için sabit 100 kalıyordu. Doğru kaynak
+        // T-UFE (Tarım Üretici Fiyat Endeksi); eşleşme `urun` adı üzerinden.
+        const tumEndeks = await fetchRows(R_ENDEKS, { endeks: 'T-UFE', limit: 10000 });
+        const anahtar = p.priceKey!.toLocaleLowerCase('tr');
+        const tamEslesme = tumEndeks.filter((r) => String(r.urun ?? '').toLocaleLowerCase('tr') === anahtar);
+        const endeksSatirlari = (tamEslesme.length ? tamEslesme
+          : tumEndeks.filter((r) => String(r.urun ?? '').toLocaleLowerCase('tr').includes(anahtar)))
+          .filter((r) => Number(r.yil) >= 2015 && Number(r.yil) <= 2024);
+        const yilToplamlari = new Map<string, { toplam: number; adet: number }>();
+        for (const r of endeksSatirlari) {
+          const y = String(r.yil);
+          const ortalama = AY_ADLARI.reduce((a, m) => a + num(r[m]), 0) / 12;
+          const kayit = yilToplamlari.get(y) ?? { toplam: 0, adet: 0 };
+          kayit.toplam += ortalama; kayit.adet += 1;
+          yilToplamlari.set(y, kayit);
+        }
+        if (yilToplamlari.size) {
           const priceMap: Record<string, number> = {};
-          for (const r of priceRes.data) priceMap[String(r.yil)] = Number(r.avg_idx) || 100;
+          for (const [y, v] of yilToplamlari) priceMap[y] = v.adet ? v.toplam / v.adet : 100;
           priceIndices = YEAR_LABELS.map(y => priceMap[y] || 100);
         }
       }
@@ -163,10 +180,15 @@ export function useCrossIntelligenceData() {
         ]);
       }
 
-      const [allSuff, allProd2] = await Promise.all([
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Yeterlilik derecesi' AND \`y2023/24\` > 0`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Üretim' AND \`y2023/24\` > 0`),
-      ]);
+      const fasilListesi = (fasil: string) => dengeSatirlari
+        .filter((r) => String(r['fasıl'] ?? '') === fasil);
+      const allSuff = { data: fasilListesi('Yeterlilik derecesi')
+        .filter((r) => num(r['y2023/24']) > 0)
+        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) })) };
+      const allProd2 = { data: fasilListesi('Üretim')
+        .filter((r) => num(r['y2023/24']) > 0)
+        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) })) };
+
 
       const suffMap: Record<string, number> = {};
       for (const r of (allSuff.data || [])) suffMap[String(r.urun).trim()] = Number(r.val) || 0;
@@ -179,12 +201,16 @@ export function useCrossIntelligenceData() {
       }
       setScatterData(scatter.sort((a, b) => b.x - a.x).slice(0, 30));
 
-      const [fsTable, fsCons, fsImp, fsProd] = await Promise.all([
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Yeterlilik derecesi' ORDER BY CAST(\`y2023/24\` AS DECIMAL) ASC`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as val FROM tuik_urundenge WHERE \`fasıl\`='Kişi başına tüketim' ORDER BY urun`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as imp, \`y2022/23\` as imp_prev FROM tuik_urundenge WHERE \`fasıl\`='İthalat'`),
-        fetchQuery(`SELECT TRIM(urun) as urun, \`y2023/24\` as prod FROM tuik_urundenge WHERE \`fasıl\`='Üretim'`),
-      ]);
+      const fsTable = { data: fasilListesi('Yeterlilik derecesi')
+        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) }))
+        .sort((a, b) => a.val - b.val) };
+      const fsCons = { data: fasilListesi('Kişi başına tüketim')
+        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) }))
+        .sort((a, b) => a.urun.localeCompare(b.urun, 'tr')) };
+      const fsImp = { data: fasilListesi('İthalat')
+        .map((r) => ({ urun: urunAdi(r), imp: num(r['y2023/24']), imp_prev: num(r['y2022/23']) })) };
+      const fsProd = { data: fasilListesi('Üretim')
+        .map((r) => ({ urun: urunAdi(r), prod: num(r['y2023/24']) })) };
 
       const consMap: Record<string, number> = {};
       for (const r of (fsCons.data || [])) consMap[String(r.urun).trim()] = Number(r.val) || 0;
