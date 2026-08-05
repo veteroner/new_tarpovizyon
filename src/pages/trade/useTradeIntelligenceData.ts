@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchQuery, sqlEsc, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { fetchAgg, latestYear, num } from '../../services/d1';
+
+const R_BIT = 'tuik/ticaret-bitkisel';
+const R_HAY = 'tuik/ticaret-hayvansal';
+// Her tablonun kendi kırılım düzeyi: bitkiselde ülke×ürün AYLIK, hayvansalda
+// YILLIK satırlarda tutuluyor. Eski SQL'deki filtreler birebir korundu.
+const BIT_ULKE_AY = { duzey_1: 'ülke', duzey_2: 'ürün', duzey_3: 'ay' };
+const HAY_TUM_AY = { duzey_1: 'tüm', duzey_2: 'ürün', duzey_3: 'ay' };
+const HAY_TUM_YIL = { duzey_1: 'tüm', duzey_2: 'ürün', duzey_3: 'yil' };
+const HAY_ULKE_YIL = { duzey_1: 'ülke', duzey_2: 'ürün', duzey_3: 'yil' };
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -16,7 +25,9 @@ export interface RadarRow { dimension: string; value: number; fullMark: number }
 
 export function useTradeIntelligenceData() {
   const [loading, setLoading] = useState(true);
-  const [year, setYear] = useState(DEFAULT_TRADE_YEAR);
+  // Yıl kodda sabitti; son TAM yıl veriden seçiliyor (içinde bulunulan yıl
+  // yarım olduğu için minShare 0.9 ile eleniyor).
+  const [year, setYear] = useState('');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [seasonalData, setSeasonalData] = useState<SeasonalRow[]>([]);
   const [hhiExport, setHhiExport] = useState<HHIResult | null>(null);
@@ -30,10 +41,13 @@ export function useTradeIntelligenceData() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetchQuery(`SELECT DISTINCT yil FROM ${TRADE_TABLES.ANIMAL} ORDER BY yil DESC`);
-      const yrs = (res.data || []).map((r: any) => String(r.yil));
+      const [rows, tamYil] = await Promise.all([
+        fetchAgg(R_HAY, { groupBy: ['yil'], orderBy: 'yil', dir: 'desc' }),
+        latestYear(R_HAY, 'yil', { minShare: 0.9 }),
+      ]);
+      const yrs = rows.map((r) => String(r.yil));
       setYearOptions(yrs);
-      if (yrs.length) setYear(yrs[0]);
+      if (yrs.length) setYear(tamYil ? String(tamYil) : yrs[0]);
     })();
   }, []);
 
@@ -41,8 +55,10 @@ export function useTradeIntelligenceData() {
     setLoading(true);
     try {
       const [sPlant, sAnimal] = await Promise.all([
-        fetchQuery(`SELECT ana_urun, ay, SUM(ihracat_deger) as exp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' GROUP BY ana_urun, ay`),
-        fetchQuery(`SELECT ana_urun, ay, SUM(ihracat_deger) as exp FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' GROUP BY ana_urun, ay`),
+        fetchAgg(R_BIT, { groupBy: ['ana_urun', 'ay'], sum: ['ihracat_deger'], where: { ...BIT_ULKE_AY, yil: yr } })
+          .then((rows) => ({ data: rows.map((r) => ({ ana_urun: r.ana_urun, ay: r.ay, exp: num(r.sum_ihracat_deger) })) })),
+        fetchAgg(R_HAY, { groupBy: ['ana_urun', 'ay'], sum: ['ihracat_deger'], where: { ...HAY_TUM_AY, yil: yr } })
+          .then((rows) => ({ data: rows.map((r) => ({ ana_urun: r.ana_urun, ay: r.ay, exp: num(r.sum_ihracat_deger) })) })),
       ]);
 
       const productMonths: Record<string, number[]> = {};
@@ -69,10 +85,18 @@ export function useTradeIntelligenceData() {
       setSeasonalData(seasonal);
 
       const [hExp, hImp, hExpP, hImpP] = await Promise.all([
-        fetchQuery(`SELECT ulke, SUM(ihracat_deger) as val FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' AND ihracat_deger > 0 AND ulke != '' GROUP BY ulke ORDER BY val DESC`),
-        fetchQuery(`SELECT ulke, SUM(ithalat_deger) as val FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' AND ithalat_deger > 0 AND ulke != '' GROUP BY ulke ORDER BY val DESC`),
-        fetchQuery(`SELECT ulke, SUM(ihracat_deger) as val FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ihracat_deger > 0 AND ulke != '' GROUP BY ulke ORDER BY val DESC`),
-        fetchQuery(`SELECT ulke, SUM(ithalat_deger) as val FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ithalat_deger > 0 AND ulke != '' GROUP BY ulke ORDER BY val DESC`),
+        fetchAgg(R_HAY, { groupBy: ['ulke'], sum: ['ihracat_deger'], where: { ...HAY_ULKE_YIL, yil: yr }, positive: ['ihracat_deger'], orderBy: 'sum_ihracat_deger', dir: 'desc' })
+          .then((rows) => ({ data: rows.filter((r) => String(r.ulke ?? '') !== '')
+            .map((r) => ({ ulke: r.ulke, val: num(r.sum_ihracat_deger) })) })),
+        fetchAgg(R_HAY, { groupBy: ['ulke'], sum: ['ithalat_deger'], where: { ...HAY_ULKE_YIL, yil: yr }, positive: ['ithalat_deger'], orderBy: 'sum_ithalat_deger', dir: 'desc' })
+          .then((rows) => ({ data: rows.filter((r) => String(r.ulke ?? '') !== '')
+            .map((r) => ({ ulke: r.ulke, val: num(r.sum_ithalat_deger) })) })),
+        fetchAgg(R_BIT, { groupBy: ['ulke'], sum: ['ihracat_deger'], where: { ...BIT_ULKE_AY, yil: yr }, positive: ['ihracat_deger'], orderBy: 'sum_ihracat_deger', dir: 'desc' })
+          .then((rows) => ({ data: rows.filter((r) => String(r.ulke ?? '') !== '')
+            .map((r) => ({ ulke: r.ulke, val: num(r.sum_ihracat_deger) })) })),
+        fetchAgg(R_BIT, { groupBy: ['ulke'], sum: ['ithalat_deger'], where: { ...BIT_ULKE_AY, yil: yr }, positive: ['ithalat_deger'], orderBy: 'sum_ithalat_deger', dir: 'desc' })
+          .then((rows) => ({ data: rows.filter((r) => String(r.ulke ?? '') !== '')
+            .map((r) => ({ ulke: r.ulke, val: num(r.sum_ithalat_deger) })) })),
       ]);
 
       const calcHHI = (rows1: any[], rows2: any[]): HHIResult => {
@@ -95,8 +119,10 @@ export function useTradeIntelligenceData() {
       setHhiImport({ ...calcHHI(hImp.data ?? [], hImpP.data ?? []), type: 'İthalat' });
 
       const [imb1, imb2] = await Promise.all([
-        fetchQuery(`SELECT ana_urun, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' GROUP BY ana_urun`),
-        fetchQuery(`SELECT ana_urun, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' GROUP BY ana_urun`),
+        fetchAgg(R_HAY, { groupBy: ['ana_urun'], sum: ['ihracat_deger', 'ithalat_deger'], where: { ...HAY_TUM_YIL, yil: yr } })
+          .then((rows) => ({ data: rows.map((r) => ({ ana_urun: r.ana_urun, exp: num(r.sum_ihracat_deger), imp: num(r.sum_ithalat_deger) })) })),
+        fetchAgg(R_BIT, { groupBy: ['ana_urun'], sum: ['ihracat_deger', 'ithalat_deger'], where: { ...BIT_ULKE_AY, yil: yr } })
+          .then((rows) => ({ data: rows.map((r) => ({ ana_urun: r.ana_urun, exp: num(r.sum_ihracat_deger), imp: num(r.sum_ithalat_deger) })) })),
       ]);
 
       const imbRows: ImbalanceRow[] = [];
@@ -114,12 +140,23 @@ export function useTradeIntelligenceData() {
       imbRows.sort((a, b) => b.ratio - a.ratio);
       setImbalanced(imbRows.slice(0, 20));
 
-      const topProdsRes = await fetchQuery(`SELECT ana_urun, SUM(ihracat_mik) as vol FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ihracat_mik > 0 GROUP BY ana_urun ORDER BY vol DESC LIMIT 5`);
-      const topProds = (topProdsRes.data || []).map((r: any) => String(r.ana_urun));
+      const topProdsRows = await fetchAgg(R_HAY, {
+        groupBy: ['ana_urun'], sum: ['ihracat_mik'], where: HAY_TUM_YIL,
+        positive: ['ihracat_mik'], orderBy: 'sum_ihracat_mik', dir: 'desc', limit: 5,
+      });
+      const topProds = topProdsRows.map((r) => String(r.ana_urun));
       const upData: { product: string; data: UnitPriceRow[] }[] = [];
       for (const p of topProds) {
-        const res = await fetchQuery(`SELECT yil, CASE WHEN SUM(ihracat_mik) > 0 THEN SUM(ihracat_deger) / SUM(ihracat_mik) ELSE 0 END as exp_up, CASE WHEN SUM(ithalat_mik) > 0 THEN SUM(ithalat_deger) / SUM(ithalat_mik) ELSE 0 END as imp_up FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='tüm' AND duzey_2='ürün' AND duzey_3='yil' AND ana_urun='${sqlEsc(p)}' GROUP BY yil ORDER BY yil`);
-        upData.push({ product: p, data: (res.data || []).map((r: any) => ({ yil: String(r.yil), exp_usd_ton: Number(r.exp_up) || 0, imp_usd_ton: Number(r.imp_up) || 0 })) });
+        // Birim fiyat = değer / miktar; CASE WHEN sıfır koruması istemcide.
+        const rows = await fetchAgg(R_HAY, {
+          groupBy: ['yil'], sum: ['ihracat_deger', 'ithalat_deger', 'ihracat_mik', 'ithalat_mik'],
+          where: { ...HAY_TUM_YIL, ana_urun: p }, orderBy: 'yil', dir: 'asc',
+        });
+        upData.push({ product: p, data: rows.map((r) => ({
+          yil: String(r.yil),
+          exp_usd_ton: num(r.sum_ihracat_mik) > 0 ? num(r.sum_ihracat_deger) / num(r.sum_ihracat_mik) : 0,
+          imp_usd_ton: num(r.sum_ithalat_mik) > 0 ? num(r.sum_ithalat_deger) / num(r.sum_ithalat_mik) : 0,
+        })) });
       }
       setUnitPrices(upData);
 

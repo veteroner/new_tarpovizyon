@@ -11,7 +11,33 @@ import { Loading } from '../../components/Loading';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { WorldTradeMap } from '../../components/WorldTradeMap';
 import { CountrySilhouette } from '../../components/CountrySilhouette';
-import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { formatMoney } from '../../services/api';
+import { fetchAgg, latestYear, num, type Row } from '../../services/d1';
+
+const R_BIT = 'tuik/ticaret-bitkisel';
+const R_HAY = 'tuik/ticaret-hayvansal';
+// Bitkiselde ülke×ürün kırılımı AYLIK, hayvansalda YILLIK satırlarda tutuluyor.
+const BIT_ULKE = { duzey_1: 'ülke', duzey_2: 'ürün', duzey_3: 'ay' };
+const HAY_ULKE = { duzey_1: 'ülke', duzey_2: 'ürün', duzey_3: 'yil' };
+const NUM_DEGER = ['ihracat_deger', 'ithalat_deger'];
+
+/** İki tabloyu anahtar sütuna göre birleştirir (eski UNION ALL karşılığı). */
+function birlestir(parcalar: { satirlar: Row[]; kategori?: string }[], anahtar: string) {
+  const harita = new Map<string, { ad: string; exp: number; imp: number; kategori: string }>();
+  for (const { satirlar, kategori } of parcalar) {
+    for (const r of satirlar) {
+      const ad = String(r[anahtar] ?? '');
+      const kayit = harita.get(ad) ?? { ad, exp: 0, imp: 0, kategori: kategori ?? '' };
+      kayit.exp += num(r.sum_ihracat_deger);
+      kayit.imp += num(r.sum_ithalat_deger);
+      harita.set(ad, kayit);
+    }
+  }
+  return [...harita.values()];
+}
+/** Son TAM yıl — içinde bulunulan yıl henüz dolmadığı için elenir. */
+const sonTamYil = async () =>
+  String((await latestYear(R_BIT, 'yil', { minShare: 0.9 })) ?? new Date().getFullYear() - 1);
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import countryProfilesData from '../../data/countryProfiles.json';
 
@@ -69,7 +95,8 @@ export default function CountryIntelligenceTab() {
   const [products, setProducts] = useState<ProductDetail[]>([]);
   const [yearlyData, setYearlyData] = useState<YearDetail[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthDetail[]>([]);
-  const [yearForMonthly, setYearForMonthly] = useState(DEFAULT_TRADE_YEAR);
+  // Yıl kodda sabitti; veriden çözülüyor (loadCountry içinde set ediliyor).
+  const [yearForMonthly, setYearForMonthly] = useState('');
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetail | null>(null);
   const [selectedProductYearlyData, setSelectedProductYearlyData] = useState<ProductYearDetail[]>([]);
   const [worldCountryMetrics, setWorldCountryMetrics] = useState<Record<string, { exportValue: number; importValue: number; balanceValue: number }>>({});
@@ -77,23 +104,20 @@ export default function CountryIntelligenceTab() {
   // Load country list
   useEffect(() => {
     (async () => {
-      const [res, metricsRes] = await Promise.all([fetchQuery(`
-        SELECT DISTINCT ulke FROM (
-          SELECT ulke FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND ulke != ''
-          UNION SELECT ulke FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND ulke != ''
-        ) t ORDER BY ulke
-      `), fetchQuery(`
-        SELECT ulke, SUM(exp) as exp, SUM(imp) as imp FROM (
-          SELECT ulke, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${DEFAULT_TRADE_YEAR}' AND ulke != ''
-          UNION ALL SELECT ulke, ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${DEFAULT_TRADE_YEAR}' AND ulke != ''
-        ) t GROUP BY ulke
-      `)]);
-      setCountryOptions((res.data || []).map(r => String(r.ulke)));
+      const yil = await sonTamYil();
+      const [bitUlke, hayUlke] = await Promise.all([
+        fetchAgg(R_BIT, { groupBy: ['ulke'], sum: NUM_DEGER, where: { ...BIT_ULKE, yil } }),
+        fetchAgg(R_HAY, { groupBy: ['ulke'], sum: NUM_DEGER, where: { ...HAY_ULKE, yil } }),
+      ]);
+      const ulkeToplamlari = birlestir(
+        [{ satirlar: bitUlke }, { satirlar: hayUlke }], 'ulke',
+      ).filter((r) => r.ad !== '');
+      setCountryOptions(ulkeToplamlari.map((r) => r.ad).sort((a, b) => a.localeCompare(b, 'tr')));
       const metrics: Record<string, { exportValue: number; importValue: number; balanceValue: number }> = {};
-      (metricsRes.data || []).forEach(row => {
-        const exportValue = Number(row.exp) || 0;
-        const importValue = Number(row.imp) || 0;
-        metrics[toWorldGeoCountryKey(String(row.ulke))] = { exportValue, importValue, balanceValue: exportValue - importValue };
+      ulkeToplamlari.forEach(row => {
+        metrics[toWorldGeoCountryKey(row.ad)] = {
+          exportValue: row.exp, importValue: row.imp, balanceValue: row.exp - row.imp,
+        };
       });
       setWorldCountryMetrics(metrics);
     })();
@@ -103,80 +127,48 @@ export default function CountryIntelligenceTab() {
     if (!country) return;
     setLoading(true);
     try {
-      const yr = DEFAULT_TRADE_YEAR;
+      const yr = await sonTamYil();
       const prevYr = String(Number(yr) - 1);
-      const esc = country.replace(/'/g, "''");
+      const bitF = { ...BIT_ULKE, ulke: country };
+      const hayF = { ...HAY_ULKE, ulke: country };
 
-      // KPIs — combine plant + animal for this country
-      const [kpi, kpiPrev, pcnt] = await Promise.all([
-        fetchQuery(`
-          SELECT SUM(exp) as exp, SUM(imp) as imp FROM (
-            SELECT ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ulke='${esc}'
-            UNION ALL SELECT ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' AND ulke='${esc}'
-          ) t
-        `),
-        fetchQuery(`
-          SELECT SUM(exp) as exp, SUM(imp) as imp FROM (
-            SELECT ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${prevYr}' AND ulke='${esc}'
-            UNION ALL SELECT ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${prevYr}' AND ulke='${esc}'
-          ) t
-        `),
-        fetchQuery(`
-          SELECT COUNT(DISTINCT ana_urun) as cnt FROM (
-            SELECT ana_urun FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ulke='${esc}' AND (ihracat_deger > 0 OR ithalat_deger > 0)
-            UNION SELECT ana_urun FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' AND ulke='${esc}' AND (ihracat_deger > 0 OR ithalat_deger > 0)
-          ) t
-        `),
+      const [bitYil, hayYil, bitOnceki, hayOnceki, bitUrun, hayUrun,
+             bitSeri, haySeri, bitAy, hayAy] = await Promise.all([
+        fetchAgg(R_BIT, { sum: NUM_DEGER, where: { ...bitF, yil: yr } }),
+        fetchAgg(R_HAY, { sum: NUM_DEGER, where: { ...hayF, yil: yr } }),
+        fetchAgg(R_BIT, { sum: NUM_DEGER, where: { ...bitF, yil: prevYr } }),
+        fetchAgg(R_HAY, { sum: NUM_DEGER, where: { ...hayF, yil: prevYr } }),
+        fetchAgg(R_BIT, { groupBy: ['ana_urun'], sum: NUM_DEGER, where: { ...bitF, yil: yr } }),
+        fetchAgg(R_HAY, { groupBy: ['ana_urun'], sum: NUM_DEGER, where: { ...hayF, yil: yr } }),
+        fetchAgg(R_BIT, { groupBy: ['yil'], sum: NUM_DEGER, where: bitF }),
+        fetchAgg(R_HAY, { groupBy: ['yil'], sum: NUM_DEGER, where: hayF }),
+        fetchAgg(R_BIT, { groupBy: ['ay'], sum: NUM_DEGER, where: { ...bitF, yil: yr } }),
+        // Hayvansalda aylık kırılım 'ay' düzeyinde.
+        fetchAgg(R_HAY, { groupBy: ['ay'], sum: NUM_DEGER, where: { ...HAY_ULKE, duzey_3: 'ay', ulke: country, yil: yr } }),
       ]);
 
-      setTotalExp(Number(kpi.data?.[0]?.exp) || 0);
-      setTotalImp(Number(kpi.data?.[0]?.imp) || 0);
-      setPrevExp(Number(kpiPrev.data?.[0]?.exp) || 0);
-      setPrevImp(Number(kpiPrev.data?.[0]?.imp) || 0);
-      setProductCount(Number(pcnt.data?.[0]?.cnt) || 0);
+      setTotalExp(num(bitYil[0]?.sum_ihracat_deger) + num(hayYil[0]?.sum_ihracat_deger));
+      setTotalImp(num(bitYil[0]?.sum_ithalat_deger) + num(hayYil[0]?.sum_ithalat_deger));
+      setPrevExp(num(bitOnceki[0]?.sum_ihracat_deger) + num(hayOnceki[0]?.sum_ihracat_deger));
+      setPrevImp(num(bitOnceki[0]?.sum_ithalat_deger) + num(hayOnceki[0]?.sum_ithalat_deger));
 
-      // Products for this country
-      const prodRes = await fetchQuery(`
-        SELECT ana_urun, SUM(exp) as exp, SUM(imp) as imp, kategori FROM (
-          SELECT ana_urun, ihracat_deger as exp, ithalat_deger as imp, 'bitkisel' as kategori FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ulke='${esc}'
-          UNION ALL SELECT ana_urun, ihracat_deger, ithalat_deger, 'hayvansal' FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND yil='${yr}' AND ulke='${esc}'
-        ) t GROUP BY ana_urun, kategori ORDER BY exp DESC
-      `);
-      const pData = (prodRes.data || []).map(r => ({
-        name: String(r.ana_urun),
-        exp: Number(r.exp) || 0,
-        imp: Number(r.imp) || 0,
-        balance: (Number(r.exp) || 0) - (Number(r.imp) || 0),
-        category: String(r.kategori),
-      }));
+      const pData = birlestir(
+        [{ satirlar: bitUrun, kategori: 'bitkisel' }, { satirlar: hayUrun, kategori: 'hayvansal' }], 'ana_urun',
+      ).map((r) => ({ name: r.ad, exp: r.exp, imp: r.imp, balance: r.exp - r.imp, category: r.kategori }))
+        .sort((a, b) => b.exp - a.exp);
+      // COUNT(DISTINCT ana_urun) … (ihracat > 0 OR ithalat > 0) karşılığı.
+      setProductCount(pData.filter((r) => r.exp > 0 || r.imp > 0).length);
       setProducts(pData);
       setTopProduct(pData[0]?.name || '-');
       setSelectedProductDetail(null);
 
-      // Yearly trend
-      const yearRes = await fetchQuery(`
-        SELECT yil, SUM(exp) as exp, SUM(imp) as imp FROM (
-          SELECT yil, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND ulke='${esc}'
-          UNION ALL SELECT yil, ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND ulke='${esc}'
-        ) t GROUP BY yil ORDER BY yil
-      `);
-      setYearlyData((yearRes.data || []).map(r => {
-        const e = Number(r.exp) || 0; const i = Number(r.imp) || 0;
-        return { yil: String(r.yil), exp: e, imp: i, denge: e - i };
-      }));
+      setYearlyData(birlestir([{ satirlar: bitSeri }, { satirlar: haySeri }], 'yil')
+        .sort((a, b) => Number(a.ad) - Number(b.ad))
+        .map((r) => ({ yil: r.ad, exp: r.exp, imp: r.imp, denge: r.exp - r.imp })));
 
-      // Monthly
-      const monthRes = await fetchQuery(`
-        SELECT ay, SUM(exp) as exp, SUM(imp) as imp FROM (
-          SELECT ay, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ulke='${esc}'
-          UNION ALL SELECT ay, ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ulke='${esc}'
-        ) t GROUP BY ay ORDER BY CAST(ay AS UNSIGNED)
-      `);
-      setMonthlyData((monthRes.data || []).map(r => ({
-        ay: MONTHS_TR[String(r.ay)] || String(r.ay),
-        exp: Number(r.exp) || 0,
-        imp: Number(r.imp) || 0,
-      })));
+      setMonthlyData(birlestir([{ satirlar: bitAy }, { satirlar: hayAy }], 'ay')
+        .sort((a, b) => Number(a.ad) - Number(b.ad))
+        .map((r) => ({ ay: MONTHS_TR[r.ad] || r.ad, exp: r.exp, imp: r.imp })));
       setYearForMonthly(yr);
     } catch (e) {
       console.error('CountryIntelligence error:', e);
@@ -196,20 +188,16 @@ export default function CountryIntelligenceTab() {
     let ignore = false;
     (async () => {
       try {
-        const escCountry = selectedCountry.replace(/'/g, "''");
-        const escProduct = selectedProductDetail.name.replace(/'/g, "''");
-        const yearRes = await fetchQuery(`
-          SELECT yil, SUM(exp) as exp, SUM(imp) as imp FROM (
-            SELECT yil, ihracat_deger as exp, ithalat_deger as imp FROM ${TRADE_TABLES.PLANT} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='ay' AND ulke='${escCountry}' AND ana_urun='${escProduct}'
-            UNION ALL SELECT yil, ihracat_deger, ithalat_deger FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='yil' AND ulke='${escCountry}' AND ana_urun='${escProduct}'
-          ) t GROUP BY yil ORDER BY yil
-        `);
+        const urun = selectedProductDetail.name;
+        const [bitRows, hayRows] = await Promise.all([
+          fetchAgg(R_BIT, { groupBy: ['yil'], sum: NUM_DEGER, where: { ...BIT_ULKE, ulke: selectedCountry, ana_urun: urun } }),
+          fetchAgg(R_HAY, { groupBy: ['yil'], sum: NUM_DEGER, where: { ...HAY_ULKE, ulke: selectedCountry, ana_urun: urun } }),
+        ]);
         if (ignore) return;
-        setSelectedProductYearlyData((yearRes.data || []).map((row: any) => {
-          const exp = Number(row.exp) || 0;
-          const imp = Number(row.imp) || 0;
-          return { yil: String(row.yil), exp, imp, denge: exp - imp };
-        }));
+        setSelectedProductYearlyData(
+          birlestir([{ satirlar: bitRows }, { satirlar: hayRows }], 'yil')
+            .sort((a, b) => Number(a.ad) - Number(b.ad))
+            .map((r) => ({ yil: r.ad, exp: r.exp, imp: r.imp, denge: r.exp - r.imp })));
       } catch (error) {
         if (!ignore) {
           console.error('CountryIntelligence product yearly detail error:', error);

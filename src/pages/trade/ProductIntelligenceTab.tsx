@@ -9,7 +9,11 @@ import { Search, TrendingUp, TrendingDown, Scale, Package, Globe } from 'lucide-
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { fetchQuery, formatMoney, TRADE_TABLES, DEFAULT_TRADE_YEAR } from '../../services/api';
+import { formatMoney } from '../../services/api';
+import { fetchAgg, latestYear, num } from '../../services/d1';
+
+const R_BIT = 'tuik/ticaret-bitkisel';
+const R_HAY = 'tuik/ticaret-hayvansal';
 
 const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
@@ -50,14 +54,18 @@ export default function ProductIntelligenceTab() {
   const [countries, setCountries] = useState<CountryDetail[]>([]);
   const [yearlyData, setYearlyData] = useState<YearDetail[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthDetail[]>([]);
-  const [yearForMonthly, setYearForMonthly] = useState(DEFAULT_TRADE_YEAR);
+  // Yıl kodda sabitti; son TAM yıl veriden çözülüyor (içinde bulunulan yıl
+  // yarım olduğu için minShare 0.9 ile eleniyor).
+  const [yearForMonthly, setYearForMonthly] = useState('');
 
   // Load product list
   useEffect(() => {
     (async () => {
       const [pRes, aRes] = await Promise.all([
-        fetchQuery(`SELECT DISTINCT ana_urun FROM ${TRADE_TABLES.PLANT} WHERE duzey_2='ürün' ORDER BY ana_urun`),
-        fetchQuery(`SELECT DISTINCT ana_urun FROM ${TRADE_TABLES.ANIMAL} WHERE duzey_2='ürün' ORDER BY ana_urun`),
+        fetchAgg(R_BIT, { groupBy: ['ana_urun'], where: { duzey_2: 'ürün' }, orderBy: 'ana_urun', dir: 'asc' })
+          .then((rows) => ({ data: rows })),
+        fetchAgg(R_HAY, { groupBy: ['ana_urun'], where: { duzey_2: 'ürün' }, orderBy: 'ana_urun', dir: 'asc' })
+          .then((rows) => ({ data: rows })),
       ]);
       const plantP = (pRes.data || []).map(r => ({ name: String(r.ana_urun), category: 'bitkisel' }));
       const animalP = (aRes.data || []).map(r => ({ name: String(r.ana_urun), category: 'hayvansal' }));
@@ -71,17 +79,27 @@ export default function ProductIntelligenceTab() {
     try {
       const cat = productOptions.find(p => p.name === product)?.category;
       setProductCategory(cat || '');
-      const table = cat === 'hayvansal' ? TRADE_TABLES.ANIMAL : TRADE_TABLES.PLANT;
+      const R = cat === 'hayvansal' ? R_HAY : R_BIT;
       // bitkisel tablosunda duzey_1='tüm' ve duzey_3='yil' verisi yok
       const d1Agg = cat === 'bitkisel' ? 'ülke' : 'tüm';
       const d3Year = cat === 'bitkisel' ? 'ay' : 'yil';
-      const yr = DEFAULT_TRADE_YEAR;
+      const yr = String((await latestYear(R, 'yil', { minShare: 0.9 })) ?? new Date().getFullYear() - 1);
       const prevYr = String(Number(yr) - 1);
+      const F_AGG = { duzey_1: d1Agg, duzey_2: 'ürün', duzey_3: d3Year, ana_urun: product };
+      const F_ULKE = { duzey_1: 'ülke', duzey_2: 'ürün', duzey_3: d3Year, ana_urun: product };
+      const NUM = ['ihracat_deger', 'ithalat_deger'];
 
       const [kpi, kpiPrev, ccnt] = await Promise.all([
-        fetchQuery(`SELECT SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${table} WHERE duzey_1='${d1Agg}' AND duzey_2='ürün' AND duzey_3='${d3Year}' AND yil='${yr}' AND ana_urun='${product}'`),
-        fetchQuery(`SELECT SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp FROM ${table} WHERE duzey_1='${d1Agg}' AND duzey_2='ürün' AND duzey_3='${d3Year}' AND yil='${prevYr}' AND ana_urun='${product}'`),
-        fetchQuery(`SELECT COUNT(DISTINCT ulke) as cnt FROM ${table} WHERE duzey_1='ülke' AND duzey_3='${d3Year}' AND yil='${yr}' AND ana_urun='${product}' AND (ihracat_deger > 0 OR ithalat_deger > 0)`),
+        fetchAgg(R, { sum: NUM, where: { ...F_AGG, yil: yr } })
+          .then((rows) => ({ data: [{ exp: num(rows[0]?.sum_ihracat_deger), imp: num(rows[0]?.sum_ithalat_deger) }] })),
+        fetchAgg(R, { sum: NUM, where: { ...F_AGG, yil: prevYr } })
+          .then((rows) => ({ data: [{ exp: num(rows[0]?.sum_ihracat_deger), imp: num(rows[0]?.sum_ithalat_deger) }] })),
+        // (ihracat_deger > 0 OR ithalat_deger > 0) karşılığı: ülke kırılımı
+        // çekilip istemcide sayılıyor.
+        fetchAgg(R, { groupBy: ['ulke'], sum: NUM,
+          where: { duzey_1: 'ülke', duzey_3: d3Year, ana_urun: product, yil: yr } })
+          .then((rows) => ({ data: [{ cnt: rows.filter((r) =>
+            num(r.sum_ihracat_deger) > 0 || num(r.sum_ithalat_deger) > 0).length }] })),
       ]);
 
       setTotalExp(Number(kpi.data?.[0]?.exp) || 0);
@@ -91,41 +109,33 @@ export default function ProductIntelligenceTab() {
       setCountryCount(Number(ccnt.data?.[0]?.cnt) || 0);
 
       // Countries
-      const cntryRes = await fetchQuery(`
-        SELECT ulke, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp
-        FROM ${table} WHERE duzey_1='ülke' AND duzey_2='ürün' AND duzey_3='${d3Year}' AND yil='${yr}' AND ana_urun='${product}'
-        AND ulke != '' GROUP BY ulke ORDER BY exp DESC LIMIT 20
-      `);
-      const cData = (cntryRes.data || []).map(r => ({
+      // WHERE ulke != '' karşılığı istemcide.
+      const cntryRows = (await fetchAgg(R, { groupBy: ['ulke'], sum: NUM,
+        where: { ...F_ULKE, yil: yr }, orderBy: 'sum_ihracat_deger', dir: 'desc', limit: 25 }))
+        .filter((r) => String(r.ulke ?? '') !== '').slice(0, 20);
+      const cData = cntryRows.map(r => ({
         name: String(r.ulke),
-        exp: Number(r.exp) || 0,
-        imp: Number(r.imp) || 0,
-        balance: (Number(r.exp) || 0) - (Number(r.imp) || 0),
+        exp: num(r.sum_ihracat_deger),
+        imp: num(r.sum_ithalat_deger),
+        balance: num(r.sum_ihracat_deger) - num(r.sum_ithalat_deger),
       }));
       setCountries(cData);
       setTopCountry(cData[0]?.name || '-');
 
       // Yearly trend
-      const yearRes = await fetchQuery(`
-        SELECT yil, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp
-        FROM ${table} WHERE duzey_1='${d1Agg}' AND duzey_2='ürün' AND duzey_3='${d3Year}' AND ana_urun='${product}'
-        GROUP BY yil ORDER BY yil
-      `);
-      setYearlyData((yearRes.data || []).map(r => {
-        const e = Number(r.exp) || 0; const i = Number(r.imp) || 0;
+      const yearRows = await fetchAgg(R, { groupBy: ['yil'], sum: NUM, where: F_AGG, orderBy: 'yil', dir: 'asc' });
+      setYearlyData(yearRows.map(r => {
+        const e = num(r.sum_ihracat_deger); const i = num(r.sum_ithalat_deger);
         return { yil: String(r.yil), exp: e, imp: i, denge: e - i };
       }));
 
       // Monthly for selected year
-      const monthRes = await fetchQuery(`
-        SELECT ay, SUM(ihracat_deger) as exp, SUM(ithalat_deger) as imp
-        FROM ${table} WHERE duzey_1='${d1Agg}' AND duzey_2='ürün' AND duzey_3='ay' AND yil='${yr}' AND ana_urun='${product}'
-        GROUP BY ay ORDER BY CAST(ay AS UNSIGNED)
-      `);
-      setMonthlyData((monthRes.data || []).map(r => ({
+      const monthRows = await fetchAgg(R, { groupBy: ['ay'], sum: NUM,
+        where: { duzey_1: d1Agg, duzey_2: 'ürün', duzey_3: 'ay', ana_urun: product, yil: yr } });
+      setMonthlyData([...monthRows].sort((a, b) => Number(a.ay) - Number(b.ay)).map(r => ({
         ay: MONTHS_TR[String(r.ay)] || String(r.ay),
-        exp: Number(r.exp) || 0,
-        imp: Number(r.imp) || 0,
+        exp: num(r.sum_ihracat_deger),
+        imp: num(r.sum_ithalat_deger),
       })));
       setYearForMonthly(yr);
     } catch (e) {

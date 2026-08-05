@@ -117,7 +117,10 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
           likeAny: { urunad: ['%milk%', '%cheese%', '%butter%', '%cream%'] }, exclude: EX }),
         fetchAgg(R_BIR, { sum: ['uretim_deger'], where: { year: selectedYear },
           likeAny: { urunad: ['%egg%'] }, exclude: EX }),
+        // Grafikte yalnızca son 20 yıl gösteriliyor; tüm seriyi çekmek D1'i
+        // gereksiz yere zorluyordu ("DB is overloaded").
         fetchAgg(R_CANLI, { groupBy: ['year', 'miktar_birim'], sum: ['miktar_deger'],
+          whereGte: { year: parseInt(selectedYear) - 20 },
           exclude: EX, orderBy: 'year', dir: 'desc' }),
       ]);
 
