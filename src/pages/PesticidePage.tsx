@@ -52,9 +52,9 @@ export default function PesticidePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`${overviewKPIs.yil} | Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
                 <KPICard title="TÜRKİYE KULLANIMI" value={formatTon(overviewKPIs.turkeyUsage)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
-                <KPICard title="EN BÜYÜK KULLANICI" value={overviewKPIs.topUser} subtitle="2021" icon={Award} color="blue" />
+                <KPICard title="EN BÜYÜK KULLANICI" value={overviewKPIs.topUser} subtitle={String(overviewKPIs.yil ?? '')} icon={Award} color="blue" />
                 <KPICard title="PESTİSİT TÜRÜ" value={String(overviewKPIs.typeCount)} subtitle="Aktif tür" icon={Bug} color="red" />
               </div>
               <div className="chart-grid">
@@ -74,7 +74,7 @@ export default function PesticidePage() {
                 </div>
                 <div className="chart-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Pestisit Kullanıcısı Üke</h3>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Pestisit Kullanıcısı Ülke</h3>
                   <ChartInsightButton title="Top 15 Pestisit Kullanıcısı" description="Top 15 pestisit kullanıcı ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Pestisit Genel' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
@@ -165,8 +165,8 @@ export default function PesticidePage() {
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Pestisit Kullanımı — Üke Sıralaması</h3>
-                  <ChartInsightButton title="Pestisit Üke Sıralaması" description="Pestisit kullanımı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Pestisit Kullanımı — Ülke Sıralaması</h3>
+                  <ChartInsightButton title="Pestisit Ülke Sıralaması" description="Pestisit kullanımı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">

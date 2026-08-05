@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
-import { fetchAgg, num } from '../../services/d1';
+import { fetchAgg, latestYear, num } from '../../services/d1';
 import type { Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import {
@@ -14,12 +14,41 @@ import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalcu
 // Kıta/toplam satırları sunucudaki 'v1' hazır listesiyle dışlanıyor.
 const R = 'fao/input-pestisit-use';
 const EX = { preset: 'v1' as const, col: 'area' };
-const KULLANIM = 'Tarımsal Kullanım';
-const YOGUNLUK = 'Ekili alan başına kullanım';
-const PEST_TOPLAM = 'Pestisitler (toplam)';
-const ANA_TURLER = ['Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler', 'Rodentisitler'];
+// Filtreler FAO KODLARINA dayanır, Türkçe etiketlere değil: element_tr yıllar
+// arasında kayıyor (2022 'Tarımsal Kullanım' → 2023 'Tarımda kullanım',
+// 'Ekili alan başına' → 'Ekim alanı başına'). Kod aynı kaldığı için 2023
+// verisi etiketle sorulunca boş dönüyordu. Ekranda gösterilecek adlar
+// aşağıdaki sabit sözlükten geliyor.
+const EC_KULLANIM = 5157;   // Agricultural Use
+const EC_YOGUNLUK = 5159;   // Use per area of cropland
+const EC_KISI_BASI = 5172;  // Use per capita
+const IC_TOPLAM = 1357;     // Pesticides (total)
+const IC_HERBISIT = 1320;
+const IC_INSEKTISIT = 1309;
+const IC_FUNGISIT = 1331;
+const IC_RODENTISIT = 1345;
+const ANA_TUR_KODLARI = [IC_HERBISIT, IC_INSEKTISIT, IC_FUNGISIT, IC_RODENTISIT];
+const PEST_ADI: Record<number, string> = {
+  [IC_TOPLAM]: 'Pestisitler (toplam)',
+  [IC_HERBISIT]: 'Herbisitler',
+  [IC_INSEKTISIT]: 'İnsektisitler',
+  [IC_FUNGISIT]: 'Fungisitler ve Bakterisitler',
+  [IC_RODENTISIT]: 'Rodentisitler',
+};
+const ELEMENT_ADI: Record<number, string> = {
+  [EC_KULLANIM]: 'Tarımsal Kullanım',
+  [EC_YOGUNLUK]: 'Ekili alan başına kullanım',
+  [EC_KISI_BASI]: 'Kişi başına kullanım',
+};
+const pestAdi = (v: unknown) => PEST_ADI[Number(v)] ?? String(v ?? '');
 // area alanında Türkiye TEK bir değerle geçiyor; eski OR listesine gerek yok.
 const TR = 'Türkiye';
+
+// Yıl kodda sabit (2022) yazılıydı; FAO 2023'ü yayınlayınca sayfa bir yıl
+// geriden geliyordu. Artık son DOLU yıl veriden çözülüyor, sonuç modül
+// düzeyinde bir kez önbelleğe alınıp tüm sekmelerde paylaşılıyor.
+let sonYilCache: Promise<number> | null = null;
+const sonYil = () => (sonYilCache ??= latestYear(R, 'year').then((y) => y ?? 2022));
 
 export type Tab = 'overview' | 'composition' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
@@ -90,15 +119,17 @@ export function usePesticideData(activeTab: Tab) {
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
-      const [byTypeRes, topCountriesRes, trendRes, prevYearRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, ...ANA_TURLER] }, orderBy: 'sum_value', dir: 'desc' }),
-        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
-        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R, { sum: ['value'], where: { year: 2020, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, exclude: EX }),
+      const yil = await sonYil();
+      const [byTypeRes, topCountriesRes, trendRes, prevYearRes, worldTotalRes] = await Promise.all([
+        fetchAgg(R, { groupBy: ['itemcode'], sum: ['value'], where: { year: yil, elementcode: EC_KULLANIM }, whereIn: { itemcode: [IC_TOPLAM, ...ANA_TUR_KODLARI] }, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: yil, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: ['value'], where: { year: yil - 1, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, exclude: EX }),
+        fetchAgg(R, { sum: ['value'], where: { year: yil, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, exclude: EX }),
       ]);
 
       const byType = byTypeRes.map((r: any, i: number) => ({
-        name: String(r.item_tr), value: num(r.sum_value), fill: CHART_COLORS[i % CHART_COLORS.length],
+        name: pestAdi(r.itemcode), value: num(r.sum_value), fill: CHART_COLORS[i % CHART_COLORS.length],
       }));
       setOverviewByType(byType);
 
@@ -109,7 +140,9 @@ export function usePesticideData(activeTab: Tab) {
       });
       setOverviewTopCountries(topCountries);
 
-      const worldTotal = topCountries.reduce((s: number, c: any) => s + c.value, 0);
+      // Eskiden bu yıl için top-20 toplamı alınıp geçen yılın TÜM dünya
+      // toplamıyla kıyaslanıyordu; yıllık değişim bu yüzden uydurma çıkıyordu.
+      const worldTotal = num(worldTotalRes[0]?.sum_value);
       const prevTotal = num(prevYearRes[0]?.sum_value);
       const yoy = calculateYoY(worldTotal, prevTotal);
       const turkeyData = topCountries.find((c: any) => c.isTurkey);
@@ -122,7 +155,7 @@ export function usePesticideData(activeTab: Tab) {
       setOverviewKPIs({
         worldTotal, yoy, turkeyUsage: turkeyData?.value || 0, turkeyRank: turkeyRank || 'N/A',
         topUser: topCountries[0]?.name || '-', typeCount: byType.filter((b: any) => b.value > 0).length,
-        worldCAGR: worldCAGR?.cagr || 0,
+        worldCAGR: worldCAGR?.cagr || 0, yil,
       });
 
       const ins: Insight[] = [];
@@ -142,15 +175,16 @@ export function usePesticideData(activeTab: Tab) {
   const loadComposition = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [typeByCountryRes, typeTrendRes, intensityRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['item_tr', 'area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM }, whereIn: { item_tr: ANA_TURLER }, exclude: EX, orderBy: 'sum_value', dir: 'desc' }),
-        fetchAgg(R, { groupBy: ['year', 'item_tr'], sum: ['value'], where: { element_tr: KULLANIM }, whereIn: { item_tr: ANA_TURLER }, whereGte: { year: 2000 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R, { groupBy: ['area'], avg: ['value'], where: { year: 2022, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'avg_value', dir: 'desc', limit: 20 }),
+        fetchAgg(R, { groupBy: ['itemcode', 'area'], sum: ['value'], where: { year: yil, elementcode: EC_KULLANIM }, whereIn: { itemcode: ANA_TUR_KODLARI }, exclude: EX, orderBy: 'sum_value', dir: 'desc' }),
+        fetchAgg(R, { groupBy: ['year', 'itemcode'], sum: ['value'], where: { elementcode: EC_KULLANIM }, whereIn: { itemcode: ANA_TUR_KODLARI }, whereGte: { year: 2000 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['area'], avg: ['value'], where: { year: yil, elementcode: EC_YOGUNLUK, itemcode: IC_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'avg_value', dir: 'desc', limit: 20 }),
       ]);
 
       const typeMap: Record<string, { name: string; countries: { country: string; value: number }[] }> = {};
       typeByCountryRes.forEach((r: any) => {
-        const type = String(r.item_tr);
+        const type = pestAdi(r.itemcode);
         if (!typeMap[type]) typeMap[type] = { name: type, countries: [] };
         if (typeMap[type].countries.length < 5) {
           typeMap[type].countries.push({ country: translateCountry(String(r.area || '')), value: num(r.sum_value) });
@@ -162,7 +196,7 @@ export function usePesticideData(activeTab: Tab) {
       typeTrendRes.forEach((r: any) => {
         const yr = String(r.year);
         if (!yearMap[yr]) yearMap[yr] = {};
-        yearMap[yr][String(r.item_tr)] = num(r.sum_value);
+        yearMap[yr][pestAdi(r.itemcode)] = num(r.sum_value);
       });
       const trendData = Object.entries(yearMap).sort(([a], [b]) => a.localeCompare(b)).map(([year, types]) => ({ year, ...types }));
       setCompTrends(trendData);
@@ -191,8 +225,9 @@ export function usePesticideData(activeTab: Tab) {
   const loadConcentration = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [countryShareRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 50 }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: yil, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, positive: ['value'], exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 50 }),
       ]);
 
       const data = countryShareRes.map((r: any, i: number) => {
@@ -224,17 +259,18 @@ export function usePesticideData(activeTab: Tab) {
   const loadTurkeyProfile = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [turkeyByTypeRes, turkeyTrendRes, turkeyIntensityRes, worldAvgRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['item_tr', 'element_tr'], sum: ['value'], where: { year: 2022, area: TR }, whereIn: { element_tr: [KULLANIM, YOGUNLUK, 'Kişi başına kullanım'], item_tr: [PEST_TOPLAM, ...ANA_TURLER] } }),
-        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { area: TR, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R, { sum: ['value'], where: { year: 2022, area: TR, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM } }),
-        fetchAgg(R, { avg: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX }),
+        fetchAgg(R, { groupBy: ['itemcode', 'elementcode'], sum: ['value'], where: { year: yil, area: TR }, whereIn: { elementcode: [EC_KULLANIM, EC_YOGUNLUK, EC_KISI_BASI], itemcode: [IC_TOPLAM, ...ANA_TUR_KODLARI] } }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { area: TR, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, whereGte: { year: 2000 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { sum: ['value'], where: { year: yil, area: TR, elementcode: EC_YOGUNLUK, itemcode: IC_TOPLAM } }),
+        fetchAgg(R, { avg: ['value'], where: { year: yil, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, positive: ['value'], exclude: EX }),
       ]);
 
       const byType: Record<string, Record<string, number>> = {};
       turkeyByTypeRes.forEach((r: any) => {
-        const item = String(r.item_tr);
-        const elem = String(r.element_tr);
+        const item = pestAdi(r.itemcode);
+        const elem = (ELEMENT_ADI[Number(r.elementcode)] ?? '');
         if (!byType[item]) byType[item] = {};
         byType[item][elem] = num(r.sum_value);
       });
@@ -279,8 +315,8 @@ export function usePesticideData(activeTab: Tab) {
     setLoading(true);
     try {
       const [worldTrendRes, turkeyTrendRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM }, whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
-        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { element_tr: KULLANIM, item_tr: PEST_TOPLAM, area: TR }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, whereGte: { year: 1990 }, exclude: EX, orderBy: 'year', dir: 'asc' }),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], where: { elementcode: EC_KULLANIM, itemcode: IC_TOPLAM, area: TR }, whereGte: { year: 1990 }, orderBy: 'year', dir: 'asc' }),
       ]);
 
       const worldData: YearValue[] = worldTrendRes.map((r: any) => ({ year: String(r.year), value: num(r.sum_value) }));
@@ -320,17 +356,18 @@ export function usePesticideData(activeTab: Tab) {
   const loadAlerts = useCallback(async () => {
     setLoading(true);
     try {
+      const yil = await sonYil();
       const [turkeyNowRes, turkeyBeforeRes, worldAvgRes, intensityRes] = await Promise.all([
-        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2022, area: TR, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, 'Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'] } }),
-        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: 2015, area: TR, element_tr: KULLANIM }, whereIn: { item_tr: [PEST_TOPLAM, 'Herbisitler', 'İnsektisitler', 'Fungisitler ve Bakterisitler'] } }),
-        fetchAgg(R, { avg: ['value'], where: { year: 2022, element_tr: KULLANIM, item_tr: PEST_TOPLAM }, positive: ['value'], exclude: EX }),
-        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: 2022, element_tr: YOGUNLUK, item_tr: PEST_TOPLAM, area: TR } }),
+        fetchAgg(R, { groupBy: ['itemcode'], sum: ['value'], where: { year: yil, area: TR, elementcode: EC_KULLANIM }, whereIn: { itemcode: [IC_TOPLAM, IC_HERBISIT, IC_INSEKTISIT, IC_FUNGISIT] } }),
+        fetchAgg(R, { groupBy: ['itemcode'], sum: ['value'], where: { year: 2015, area: TR, elementcode: EC_KULLANIM }, whereIn: { itemcode: [IC_TOPLAM, IC_HERBISIT, IC_INSEKTISIT, IC_FUNGISIT] } }),
+        fetchAgg(R, { avg: ['value'], where: { year: yil, elementcode: EC_KULLANIM, itemcode: IC_TOPLAM }, positive: ['value'], exclude: EX }),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: yil, elementcode: EC_YOGUNLUK, itemcode: IC_TOPLAM, area: TR } }),
       ]);
 
       const now: Record<string, number> = {};
-      turkeyNowRes.forEach((r: any) => now[String(r.item_tr)] = num(r.sum_value));
+      turkeyNowRes.forEach((r: any) => now[pestAdi(r.itemcode)] = num(r.sum_value));
       const before: Record<string, number> = {};
-      turkeyBeforeRes.forEach((r: any) => before[String(r.item_tr)] = num(r.sum_value));
+      turkeyBeforeRes.forEach((r: any) => before[pestAdi(r.itemcode)] = num(r.sum_value));
       const worldAvg = num(worldAvgRes[0]?.avg_value);
       const turkeyIntensity = num(intensityRes[0]?.sum_value);
 
@@ -339,7 +376,7 @@ export function usePesticideData(activeTab: Tab) {
       const totalBefore = before['Pestisitler (toplam)'] || 0;
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'Pestisit Kullanım Değişimi (2015-2021)', message: `Toplam pestisit kullanımı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanım trendi', value: change });
+        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: `Pestisit Kullanım Değişimi (2015-${yil})`, message: `Toplam pestisit kullanımı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanım trendi', value: change });
       }
       if (worldAvg > 0 && totalNow > 0) {
         const vsAvg = totalNow / worldAvg;
@@ -353,7 +390,7 @@ export function usePesticideData(activeTab: Tab) {
         if (b > 0) {
           const ch = ((n - b) / b) * 100;
           if (Math.abs(ch) > 20) {
-            alerts.push({ id: `int-${type}`, severity: ch > 30 ? 'warning' : ch < -20 ? 'positive' : 'info', title: `${type} Degisimi`, message: `${type}: %${ch.toFixed(1)} ${ch > 0 ? 'artis' : 'azalis'} (2015-2021)`, metric: type, value: ch });
+            alerts.push({ id: `int-${type}`, severity: ch > 30 ? 'warning' : ch < -20 ? 'positive' : 'info', title: `${type} Degisimi`, message: `${type}: %${ch.toFixed(1)} ${ch > 0 ? 'artis' : 'azalis'} (2015-${yil})`, metric: type, value: ch });
           }
         }
       });
