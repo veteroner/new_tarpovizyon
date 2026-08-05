@@ -243,6 +243,9 @@ function buildAgg(cfg, sp) {
   const avgs = pick('avg', cfg.nums);
   const mins = pick('min', cfg.nums);
   const maxs = pick('max', cfg.nums);
+  // Metin sütunları için MAX — MySQL'de MAX(miktar_birim) gibi kullanımların
+  // karşılığı. Sayısal max CAST uyguladığı için metinde çalışmıyordu.
+  const textMaxs = pick('maxText', cfg.dims);
   const distincts = pick('countDistinct', [...cfg.dims, ...cfg.nums]);
 
   const cols = [];
@@ -252,6 +255,7 @@ function buildAgg(cfg, sp) {
   for (const c of avgs) cols.push(`AVG(${numExpr(cfg, c)}) AS ${qi('avg_' + c)}`);
   for (const c of mins) cols.push(`MIN(${numExpr(cfg, c)}) AS ${qi('min_' + c)}`);
   for (const c of maxs) cols.push(`MAX(${numExpr(cfg, c)}) AS ${qi('max_' + c)}`);
+  for (const c of textMaxs) cols.push(`MAX(${qi(c)}) AS ${qi('maxt_' + c)}`);
   for (const c of distincts) cols.push(`COUNT(DISTINCT ${qi(c)}) AS ${qi('cd_' + c)}`);
   if (sp.get('count') === '1') cols.push('COUNT(*) AS "cnt"');
   if (cols.length === 0) throw new Error('en az bir select/groupBy/toplama alanı gerekli');
@@ -313,7 +317,8 @@ function buildAgg(cfg, sp) {
 
   // orderBy, üretilen takma adlar (sum_x, cd_y…) veya boyut sütunları arasından.
   const aliases = [...groupBy, ...select, ...sums.map((c) => 'sum_' + c), ...avgs.map((c) => 'avg_' + c),
-    ...mins.map((c) => 'min_' + c), ...maxs.map((c) => 'max_' + c), ...distincts.map((c) => 'cd_' + c), 'cnt'];
+    ...mins.map((c) => 'min_' + c), ...maxs.map((c) => 'max_' + c),
+    ...textMaxs.map((c) => 'maxt_' + c), ...distincts.map((c) => 'cd_' + c), 'cnt'];
   let orderSql = '';
   const ob = sp.get('orderBy');
   if (ob) {

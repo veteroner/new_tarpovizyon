@@ -47,6 +47,8 @@ export type AggQuery = {
   avg?: string[];
   min?: string[];
   max?: string[];
+  /** Metin sütunları için MAX — sonuç alanı 'maxt_<sütun>'. */
+  maxText?: string[];
   countDistinct?: string[];
   /** COUNT(*) sütunu ("cnt") ekler. */
   count?: boolean;
@@ -75,7 +77,7 @@ export type AggQuery = {
   limit?: number;
 };
 
-/** Toplama ucu. Sonuç alanları: sum_/avg_/min_/max_/cd_ önekli + boyut sütunları. */
+/** Toplama ucu. Sonuç alanları: sum_/avg_/min_/max_/maxt_/cd_ önekli + boyut sütunları. */
 export async function fetchAgg(route: string, q: AggQuery): Promise<Row[]> {
   const params: Record<string, ParamValue> = {
     select: q.select?.join(','),
@@ -84,6 +86,7 @@ export async function fetchAgg(route: string, q: AggQuery): Promise<Row[]> {
     avg: q.avg?.join(','),
     min: q.min?.join(','),
     max: q.max?.join(','),
+    maxText: q.maxText?.join(','),
     countDistinct: q.countDistinct?.join(','),
     count: q.count ? '1' : undefined,
     positive: q.positive?.join(','),
