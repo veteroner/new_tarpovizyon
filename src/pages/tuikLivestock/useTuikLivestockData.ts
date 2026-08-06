@@ -1,7 +1,15 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchAgg, num } from '../../services/d1';
+
+const R = 'tuik/hayvancilik-canlihayvan';
+// Toplam/ülke satırları (eski sorgulardaki NOT IN listesi).
+const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye', 'TOTAL', 'Total'];
+const gecerliIl = (yer: unknown) => {
+  const v = String(yer ?? '');
+  return v !== '' && !TOPLAM_SATIRLARI.includes(v);
+};
 import {
-  COLORS, TABLE_NAME, YEARS, YEAR_COLUMNS,
+  COLORS, YEARS, YEAR_COLUMNS,
   formatShort, calculateCAGR, linearRegression, detectAnomalies, getRegion,
 } from './tuikLivestockTypes';
 import type { CityDataItem, YearlyDataItem, CategoryDataItem, RegionalData, CorrelationData } from './tuikLivestockTypes';
@@ -58,17 +66,20 @@ export function useTuikLivestockData(): UseTuikLivestockDataReturn {
   useEffect(() => {
     const loadGroupTotals = async () => {
       try {
-        const res = await fetchQuery(`
-          SELECT grup, SUM(CAST(COALESCE(${selectedYear},0) AS DECIMAL(20,2))) as total
-          FROM ${TABLE_NAME}
-          WHERE duzeykod='3'
-            AND yer IS NOT NULL AND yer != ''
-            AND yer NOT IN ('TOPLAM','Toplam','TÜRKİYE','Türkiye','TOTAL','Total')
-            AND grup != ''
-          GROUP BY grup ORDER BY total DESC
-        `);
-        if (res.data) {
-          setGroupTotals(res.data.map((r: Record<string, string | number>) => ({
+        // yer NOT IN (…) / boş süzgeci istemcide; grup toplamı sonra alınıyor.
+        const satirlar = await fetchAgg(R, {
+          groupBy: ['grup', 'yer'], sum: [selectedYear], where: { duzeykod: 3 },
+        });
+        const grupToplam = new Map<string, number>();
+        for (const r of satirlar) {
+          const grup = String(r.grup ?? '');
+          if (!grup || !gecerliIl(r.yer)) continue;
+          grupToplam.set(grup, (grupToplam.get(grup) ?? 0) + num(r[`sum_${selectedYear}`]));
+        }
+        const res = { data: [...grupToplam.entries()].sort((a, b) => b[1] - a[1])
+          .map(([grup, total]) => ({ grup, total })) };
+        {
+          setGroupTotals(res.data.map((r) => ({
             grup: String(r.grup), total: Number(r.total) || 0
           })));
         }
@@ -80,7 +91,9 @@ export function useTuikLivestockData(): UseTuikLivestockDataReturn {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const res = await fetchQuery(`SELECT DISTINCT kategori FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND kategori IS NOT NULL AND kategori != '' ORDER BY kategori`);
+        const res = { data: (await fetchAgg(R, {
+          groupBy: ['kategori'], where: { grup: selectedAnimal }, orderBy: 'kategori', dir: 'asc',
+        })).filter((r) => String(r.kategori ?? '') !== '') };
         if (res.data) {
           const cats = res.data.map((r: Record<string, string | number>) => String(r.kategori)).filter((c: string) => c.length > 0);
           setCategories(cats);
@@ -95,20 +108,43 @@ export function useTuikLivestockData(): UseTuikLivestockDataReturn {
     setLoading(true);
     try {
       const yearCol = selectedYear;
-      const excludedIlList = "('TOPLAM','Toplam','TÜRKİYE','Türkiye','TOTAL','Total')";
-      const categoryFilter = selectedCategory !== 'Tümü' ? ` AND kategori='${selectedCategory}'` : '';
+      const kategoriKosulu = selectedCategory !== 'Tümü' ? { kategori: selectedCategory } : {};
+      const yilSutunlari = YEAR_COLUMNS;
 
-      const cityQuery = `SELECT yer as il, SUM(CAST(COALESCE(${yearCol},0) AS DECIMAL(20,2))) as toplam FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND duzeykod='3' AND yer IS NOT NULL AND yer != '' AND yer NOT IN ${excludedIlList}${categoryFilter} GROUP BY yer ORDER BY toplam DESC`;
-      const totalQuery = `SELECT SUM(CAST(COALESCE(${yearCol},0) AS DECIMAL(20,2))) as toplam FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND duzeykod='3' AND yer IS NOT NULL AND yer != '' AND yer NOT IN ${excludedIlList}${categoryFilter}`;
-      const countQuery = `SELECT COUNT(DISTINCT yer) as cnt FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND duzeykod='3' AND yer IS NOT NULL AND yer != '' AND yer NOT IN ${excludedIlList}${categoryFilter}`;
-      const yearSums = YEAR_COLUMNS.map(yc => `SUM(CAST(COALESCE(${yc},0) AS DECIMAL(20,2))) as v${yc.slice(1)}`).join(',\n        ');
-      const yearlyQuery = `SELECT ${yearSums} FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND duzeykod='3' AND yer IS NOT NULL AND yer != '' AND yer NOT IN ${excludedIlList}${categoryFilter}`;
-      const catQuery = `SELECT CASE WHEN kategori IS NULL OR kategori = '' THEN 'Genel' ELSE kategori END as kat, SUM(CAST(COALESCE(${yearCol},0) AS DECIMAL(20,2))) as toplam FROM ${TABLE_NAME} WHERE grup='${selectedAnimal}' AND duzeykod='3' AND yer IS NOT NULL AND yer != '' AND yer NOT IN ${excludedIlList} GROUP BY kat HAVING toplam > 0 ORDER BY toplam DESC`;
+      // Tüm paneller aynı il×kategori kırılımından türetiliyor (eskiden 5 sorgu).
+      const satirlar = (await fetchAgg(R, {
+        groupBy: ['yer', 'kategori'], sum: yilSutunlari,
+        where: { grup: selectedAnimal, duzeykod: 3, ...kategoriKosulu },
+      })).filter((r) => gecerliIl(r.yer));
+      // Kategori kırılımı, kategori süzgecinden BAĞIMSIZ (eski catQuery de öyleydi).
+      const kategoriSatirlari = selectedCategory !== 'Tümü'
+        ? (await fetchAgg(R, {
+            groupBy: ['yer', 'kategori'], sum: [yearCol],
+            where: { grup: selectedAnimal, duzeykod: 3 },
+          })).filter((r) => gecerliIl(r.yer))
+        : satirlar;
 
-      const [cityRes, totalRes, countRes, yearlyRes, catRes] = await Promise.all([
-        fetchQuery(cityQuery), fetchQuery(totalQuery), fetchQuery(countQuery),
-        fetchQuery(yearlyQuery), fetchQuery(catQuery)
-      ]);
+      const ilToplam = new Map<string, number>();
+      for (const r of satirlar) {
+        const il = String(r.yer ?? '');
+        ilToplam.set(il, (ilToplam.get(il) ?? 0) + num(r[`sum_${yearCol}`]));
+      }
+      const cityRes = { data: [...ilToplam.entries()].sort((a, b) => b[1] - a[1])
+        .map(([il, toplam]) => ({ il, toplam })) };
+      const totalRes = { data: [{ toplam: [...ilToplam.values()].reduce((a, b) => a + b, 0) }] };
+      const countRes = { data: [{ cnt: ilToplam.size }] };
+      const yearlyRes = { data: [Object.fromEntries(yilSutunlari.map((yc) => [
+        `v${yc.slice(1)}`, satirlar.reduce((acc, r) => acc + num(r[`sum_${yc}`]), 0),
+      ]))] };
+
+      // CASE WHEN kategori IS NULL OR '' THEN 'Genel' karşılığı.
+      const katToplam = new Map<string, number>();
+      for (const r of kategoriSatirlari) {
+        const kat = String(r.kategori ?? '') || 'Genel';
+        katToplam.set(kat, (katToplam.get(kat) ?? 0) + num(r[`sum_${yearCol}`]));
+      }
+      const catRes = { data: [...katToplam.entries()].filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1]).map(([kat, toplam]) => ({ kat, toplam })) };
 
       const turkeyTotal = Number(totalRes.data?.[0]?.toplam) || 0;
       const provinces = Number(countRes.data?.[0]?.cnt) || 0;

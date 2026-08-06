@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num } from '../../services/d1';
+
+const R_CANLI = 'tuik/hayvancilik-canlihayvan';
+const R_URETIM = 'tuik/hayvancilik-hayvansaluretim';
+const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { getRegionByProvince } from '../../utils/productionCategories';
 import {
   COLORS, formatValue
@@ -74,29 +78,60 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [histRes, worldRes, redMeatRes, poultryRes, cityRes, kovanRes] = await Promise.all([
-        fetchQuery(`SELECT * FROM oner_hayvansal_urun_uretimi ORDER BY yillar`),
-        fetchQuery(`SELECT * FROM oner_dunya_hayvansal_uretim_miktarla`),
-        fetchQuery(`SELECT * FROM oner_kirmizi_et_uretimi ORDER BY yil`),
-        fetchQuery(`SELECT * FROM oner_kanatli_uretimleri WHERE tarih >= DATE_SUB(NOW(), INTERVAL 24 MONTH) ORDER BY tarih`),
-        fetchQuery(`SELECT il,
-          SUM(CASE WHEN grup='Sığır' THEN COALESCE(y2024,0) ELSE 0 END) as sigir,
-          SUM(CASE WHEN grup='Manda' THEN COALESCE(y2024,0) ELSE 0 END) as manda,
-          SUM(CASE WHEN grup='Koyun' THEN COALESCE(y2024,0) ELSE 0 END) as koyun,
-          SUM(CASE WHEN grup='Keçi' THEN COALESCE(y2024,0) ELSE 0 END) as keci,
-          SUM(CASE WHEN grup='Tavuk' AND kategori='Et Tavuğu' THEN COALESCE(y2024,0) ELSE 0 END) as etTavugu,
-          SUM(CASE WHEN grup='Tavuk' AND kategori='Yumurta Tavuğu' THEN COALESCE(y2024,0) ELSE 0 END) as yumurtaTavugu
-          FROM tuik_hayvancilik_canlihayvan
-          WHERE duzeykod='3' AND il IS NOT NULL AND il != '' 
-            AND il NOT IN ('TOPLAM','Toplam','TÜRKİYE','Türkiye')
-          GROUP BY il`),
-        fetchQuery(`SELECT yer,
-          SUM(CASE WHEN urun='Kovan' THEN CAST(REPLACE(\`2024\`, '.', '') AS UNSIGNED) ELSE 0 END) as kovan,
-          SUM(CASE WHEN urun='Balmumu' THEN CAST(\`2024\` AS DECIMAL(10,3)) ELSE 0 END) as balmumu
-          FROM tuik_hayvancilik_hayvansaluretim
-          WHERE urun IN ('Kovan', 'Balmumu') AND duzeykod = 3
-          GROUP BY yer`),
+      const [histRows, worldRows, redMeatRows, poultryRows, cityRaw, kovanRaw] = await Promise.all([
+        fetchRows('oner/hayvansal-urun-uretimi', { limit: 200 }),
+        fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 }),
+        fetchRows('oner/kirmizi-et-uretimi', { limit: 200 }),
+        fetchRows('oner/kanatli-uretimleri', { limit: 500 }),
+        // SUM(CASE WHEN grup=… ) pivotu: grup/kategori kırılımı çekilip
+        // istemcide pivotlanıyor.
+        fetchAgg(R_CANLI, { groupBy: ['il', 'grup', 'kategori'], sum: ['y2024'], where: { duzeykod: 3 } }),
+        // NOT: MySQL'de Kovan sayıları '487.085' gibi METİNDİ ve sorgu
+        // REPLACE(…,'.','') uyguluyordu. D1'de sayısal — nokta silmek ondalıklı
+        // Balmumu değerini bozardı, doğrudan toplanıyor.
+        fetchAgg(R_URETIM, { groupBy: ['yer', 'urun'], sum: ['2024'],
+          where: { duzeykod: 3 }, whereIn: { urun: ['Kovan', 'Balmumu'] } }),
       ]);
+
+      const histRes = { data: [...histRows].sort((a, b) => String(a.yillar).localeCompare(String(b.yillar))) };
+      const worldRes = { data: worldRows };
+      const redMeatRes = { data: [...redMeatRows].sort((a, b) => Number(a.yil) - Number(b.yil)) };
+      // DATE_SUB(NOW(), INTERVAL 24 MONTH) karşılığı.
+      const yirmiDortAyOnce = new Date();
+      yirmiDortAyOnce.setMonth(yirmiDortAyOnce.getMonth() - 24);
+      const esik = yirmiDortAyOnce.toISOString().slice(0, 10);
+      const poultryRes = { data: poultryRows
+        .filter((r) => String(r.tarih ?? '').slice(0, 10) >= esik)
+        .sort((a, b) => String(a.tarih).localeCompare(String(b.tarih))) };
+
+      const ilHaritasi = new Map<string, Record<string, number | string>>();
+      for (const r of cityRaw) {
+        const il = String(r.il ?? '');
+        if (!il || TOPLAM_SATIRLARI.includes(il)) continue;
+        const kayit = ilHaritasi.get(il) ?? { il, sigir: 0, manda: 0, koyun: 0, keci: 0, etTavugu: 0, yumurtaTavugu: 0 };
+        const grup = String(r.grup ?? '');
+        const kategori = String(r.kategori ?? '');
+        const v = num(r.sum_y2024);
+        if (grup === 'Sığır') kayit.sigir = (kayit.sigir as number) + v;
+        else if (grup === 'Manda') kayit.manda = (kayit.manda as number) + v;
+        else if (grup === 'Koyun') kayit.koyun = (kayit.koyun as number) + v;
+        else if (grup === 'Keçi') kayit.keci = (kayit.keci as number) + v;
+        else if (grup === 'Tavuk' && kategori === 'Et Tavuğu') kayit.etTavugu = (kayit.etTavugu as number) + v;
+        else if (grup === 'Tavuk' && kategori === 'Yumurta Tavuğu') kayit.yumurtaTavugu = (kayit.yumurtaTavugu as number) + v;
+        ilHaritasi.set(il, kayit);
+      }
+      const cityRes = { data: [...ilHaritasi.values()] };
+
+      const kovanHaritasi = new Map<string, Record<string, number | string>>();
+      for (const r of kovanRaw) {
+        const yer = String(r.yer ?? '');
+        const kayit = kovanHaritasi.get(yer) ?? { yer, kovan: 0, balmumu: 0 };
+        const v = num(r['sum_2024']);
+        if (String(r.urun ?? '') === 'Kovan') kayit.kovan = (kayit.kovan as number) + v;
+        else kayit.balmumu = (kayit.balmumu as number) + v;
+        kovanHaritasi.set(yer, kayit);
+      }
+      const kovanRes = { data: [...kovanHaritasi.values()] };
 
       if ((histRes.data?.length ?? 0) > 0) {
         setHistoricalData((histRes.data as Record<string, string | number>[]).map(row => ({
@@ -195,6 +230,8 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
     return {
       redMeat: { value: latestHistorical.kirmizi_et_uretimi, change: calc(latestHistorical.kirmizi_et_uretimi, previousHistorical.kirmizi_et_uretimi) },
       milk: { value: latestHistorical.cig_sut_uretimi, change: calc(latestHistorical.cig_sut_uretimi, previousHistorical.cig_sut_uretimi) },
+      // Kaynak sütun MİLYON adet cinsinden; kart 'Milyar adet' yazdığı için
+      // gösterimde 1000'e bölünüyor (19.892,7 milyon = 19,89 milyar).
       egg: { value: latestHistorical.yumurta_milyon_adet, change: calc(latestHistorical.yumurta_milyon_adet, previousHistorical.yumurta_milyon_adet) },
       honey: { value: latestHistorical.bal_uretimi, change: calc(latestHistorical.bal_uretimi, previousHistorical.bal_uretimi) },
     };

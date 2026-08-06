@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchQuery } from '../../services/api';
+import { fetchRows, fetchAgg, num } from '../../services/d1';
+
+const R_URETIM = 'tuik/hayvancilik-hayvansaluretim';
 import {
   type BeekeeperYearData,
   type ProvinceData,
@@ -22,8 +24,7 @@ export function useBeekeepingData() {
     setLoading(true);
     try {
       // Load beekeeper trend data (2013-2023)
-      const res1 = await fetchQuery('SELECT * FROM oner_i_llere_gore_arici_sayisi');
-      const yearData = (res1.data ?? []) as Record<string, unknown>[];
+      const yearData = await fetchRows('oner/illere-gore-arici-sayisi', { limit: 200 }) as Record<string, unknown>[];
       
       const parsedYearData = yearData.map(row => ({
         il: String(row['il'] || ''),
@@ -42,8 +43,7 @@ export function useBeekeepingData() {
       setBeekeeperYearData(parsedYearData);
 
       // Load province detailed data
-      const res2 = await fetchQuery('SELECT * FROM oner_i_llerin_bal_cesitleri');
-      const provData = (res2.data ?? []) as Record<string, unknown>[];
+      const provData = await fetchRows('oner/illerin-bal-cesitleri', { limit: 2000 }) as Record<string, unknown>[];
       
       const parsedProvData = provData.map(row => ({
         il: String(row['il'] || ''),
@@ -61,9 +61,8 @@ export function useBeekeepingData() {
       // TÜİK Kovan & Balmumu Verileri - Ülke Düzeyi (2004-2025)
       try {
         const tuikYears = ['2004','2005','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
-        const yearCols = tuikYears.map(y => '`' + y + '`').join(', ');
-        const tuikQuery = `SELECT urun, tur, birim, ${yearCols} FROM tuik_hayvancilik_hayvansaluretim WHERE urun IN ('Balmumu', 'Kovan') AND duzeykod = 1`;
-        const tuikRes = await fetchQuery(tuikQuery);
+        const tuikRes = { data: await fetchRows(R_URETIM, { duzeykod: 1, limit: 500 })
+          .then((rows) => rows.filter((r) => ['Balmumu', 'Kovan'].includes(String(r.urun ?? '')))) };
         
         if (tuikRes.data && tuikRes.data.length > 0) {
           const findRow = (urun: string, tur: string) => 
@@ -75,9 +74,12 @@ export function useBeekeepingData() {
           
           const tuikYearData: TuikKovanYearData[] = tuikYears
             .map(year => {
-              const eski = Number(String(eskiRow?.[year] || '0').replace(/\./g, '')) || 0;
-              const yeni = Number(String(yeniRow?.[year] || '0').replace(/\./g, '')) || 0;
-              const balmumu = parseFloat(String(balmumuRow?.[year] || '0')) || 0;
+              // NOT: MySQL'de kovan sayıları '1.234.567' biçiminde METİNDİ,
+              // sorgular nokta siliyordu. D1'de sayısal — silmek ondalıklı
+              // değeri bozardı.
+              const eski = num(eskiRow?.[year]);
+              const yeni = num(yeniRow?.[year]);
+              const balmumu = num(balmumuRow?.[year]);
               return {
                 year,
                 eskiTip: eski,
@@ -92,18 +94,28 @@ export function useBeekeepingData() {
         }
 
         // İl bazlı kovan & balmumu (en güncel yıl)
-        const provQuery = `SELECT yer, 
-          SUM(CASE WHEN urun='Kovan' AND tur='Eski Tip' THEN CAST(REPLACE(\`2024\`, '.', '') AS UNSIGNED) ELSE 0 END) as eskiTip,
-          SUM(CASE WHEN urun='Kovan' AND tur='Yeni Tip' THEN CAST(REPLACE(\`2024\`, '.', '') AS UNSIGNED) ELSE 0 END) as yeniTip,
-          SUM(CASE WHEN urun='Balmumu' THEN CAST(\`2024\` AS DECIMAL(10,3)) ELSE 0 END) as balmumu
-          FROM tuik_hayvancilik_hayvansaluretim 
-          WHERE urun IN ('Balmumu', 'Kovan') AND duzeykod = 3
-          GROUP BY yer
-          ORDER BY (SUM(CASE WHEN urun='Kovan' THEN CAST(REPLACE(\`2024\`, '.', '') AS UNSIGNED) ELSE 0 END)) DESC`;
-        const provRes = await fetchQuery(provQuery);
+        // SUM(CASE WHEN …) pivotu istemcide; sıralama toplam kovana göre.
+        const provRaw = await fetchAgg(R_URETIM, {
+          groupBy: ['yer', 'urun', 'tur'], sum: ['2024'],
+          where: { duzeykod: 3 }, whereIn: { urun: ['Balmumu', 'Kovan'] },
+        });
+        const ilHaritasi = new Map<string, { yer: string; eskiTip: number; yeniTip: number; balmumu: number }>();
+        for (const r of provRaw) {
+          const yer = String(r.yer ?? '');
+          const kayit = ilHaritasi.get(yer) ?? { yer, eskiTip: 0, yeniTip: 0, balmumu: 0 };
+          const v = num(r['sum_2024']);
+          const urun = String(r.urun ?? '');
+          const tur = String(r.tur ?? '');
+          if (urun === 'Kovan' && tur === 'Eski Tip') kayit.eskiTip += v;
+          else if (urun === 'Kovan' && tur === 'Yeni Tip') kayit.yeniTip += v;
+          else if (urun === 'Balmumu') kayit.balmumu += v;
+          ilHaritasi.set(yer, kayit);
+        }
+        const provRes = { data: [...ilHaritasi.values()]
+          .sort((a, b) => (b.eskiTip + b.yeniTip) - (a.eskiTip + a.yeniTip)) };
         
         if (provRes.data && provRes.data.length > 0) {
-          const provKovan: TuikProvinceKovan[] = provRes.data.map((row: Record<string, string | number>) => ({
+          const provKovan: TuikProvinceKovan[] = provRes.data.map((row) => ({
             il: String(row.yer || ''),
             eskiTip: Number(row.eskiTip) || 0,
             yeniTip: Number(row.yeniTip) || 0,

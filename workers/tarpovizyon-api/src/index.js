@@ -72,7 +72,7 @@ const ROUTES = {
   'tuik/gsyh-a21': { table: 'tuik_gsyh_a21', filters: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], order: 'yil ASC', maxLimit: 10000 },
   'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', filters: ['yil', 'yer', 'yerkod', 'duzey'], order: 'yil ASC', maxLimit: 5000 },
   'tuik/hayvancilik-canlihayvan': { table: 'tuik_hayvancilik_canlihayvan', filters: ['duzeykod', 'yerkod', 'il', 'ilkod', 'hayvankod', 'grup', 'kategori', 'tip'], order: 'id ASC', maxLimit: 10000 },
-  'tuik/hayvancilik-hayvansaluretim': { table: 'tuik_hayvancilik_hayvansaluretim', filters: [], order: 'id ASC', maxLimit: 10000 },
+  'tuik/hayvancilik-hayvansaluretim': { table: 'tuik_hayvancilik_hayvansaluretim', filters: ['duzeykod', 'duzey', 'yerkod', 'yer', 'ilkod', 'il', 'hayvankod', 'hayvan', 'urun', 'tur', 'birim'], order: 'id ASC', maxLimit: 10000 },
   'tuik/hayvancilik-kumeshayvanciligi': { table: 'tuik_hayvancilik_kumeshayvanciligi', filters: [], order: 'id ASC', maxLimit: 2000 },
   'tuik/sutvesuturunleri': { table: 'tuik_hayavancilik_sutvesuturunleri', filters: [], order: 'id ASC', maxLimit: 2000 },
   'tuik/ticaret-bitkisel': { table: 'tuik_ticaret_bitkisel', filters: ['yil', 'ay', 'ana_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'alt_urun'], order: 'yil DESC', maxLimit: 5000 },
@@ -185,6 +185,10 @@ const AGG = {
     dims: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], nums: ['zincir_endeks', 'zincir', 'zincir_degisim', 'cari'] },
   'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', dims: ['yil', 'yer', 'yerkod', 'duzey'], nums: ['USD', 'TR'] },
   // Geniş format: yıllar y2004…y2025 sütunlarında.
+  // Geniş format: yıl sütunları çıplak sayı adlarıyla ('2004'…'2025').
+  'tuik/hayvancilik-hayvansaluretim': { table: 'tuik_hayvancilik_hayvansaluretim',
+    dims: ['duzeykod', 'duzey', 'yerkod', 'yer', 'ilkod', 'il', 'hayvankod', 'hayvan', 'urun', 'tur', 'birim'],
+    nums: ['2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'] },
   'tuik/hayvancilik-canlihayvan': { table: 'tuik_hayvancilik_canlihayvan',
     dims: ['duzeykod', 'duzey', 'yerkod', 'yer', 'ilkod', 'il', 'hayvankod', 'grup', 'kategori', 'tip', 'yas', 'durum', 'cinsiyet'],
     nums: ['y2004', 'y2005', 'y2006', 'y2007', 'y2008', 'y2009', 'y2010', 'y2011', 'y2012', 'y2013', 'y2014', 'y2015', 'y2016', 'y2017', 'y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024', 'y2025'] },
