@@ -49,3 +49,7 @@ teknova rasyon mobil/
 
 # Cloudflare Wrangler local cache
 .wrangler/
+
+# Düzenleyici/refactor artıkları
+*.bak
+*.backup
