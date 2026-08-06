@@ -1,117 +1,84 @@
 import axios from 'axios';
+import { fetchAgg, num, type Row } from './d1';
 
-// Prod'da varsayılan olarak AYNI ORİJİN (''): böylece istekler netlify.toml'daki
-// /api.php redirect'lerinden geçer — action=ai_chat kendi Netlify Function'ımıza,
-// diğer tüm action'lar dersbende.com'a yönlenir. Doğrudan 'https://dersbende.com'
-// hardcode edilirse (eski davranış) tarayıcı proxy'yi tamamen atlar ve ai_chat
-// isteği hiçbir zaman bizim function'a uğramaz.
+// Veri artık Cloudflare D1'den (services/d1.ts) geliyor; burada kalan tek
+// api.php kullanımı AI sohbet ucu. Aynı orijin ('') kullanılıyor ki istek
+// netlify.toml'daki /api.php redirect'inden geçip kendi Netlify Function'ımıza
+// düşsün.
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-const API_KEY = 'dashboard_secret_key_2024';
+// api.php'nin uygulama anahtarı. Depoda sabit yazılıydı; ortam değişkeni
+// tanımlıysa o kullanılıyor. Kalan tek kullanım emtia fiyatları / AI sohbet.
+const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? 'dashboard_secret_key_2024';
 
 const IS_DEV = import.meta.env.DEV;
 
 export interface QueryResult {
   success?: boolean;
-  data?: Record<string, string | number>[];
+  data?: Row[];
   error?: string;
 }
 
-export const DEFAULT_TRADE_YEAR = '2025';
+// ─── Hasat Tahmini — veri katmanı ────────────────────────────────────────────
+// Eskiden burada ham SQL kuruluyordu; artık D1 toplama ucu kullanılıyor.
 
-export async function fetchQuery(sql: string): Promise<QueryResult> {
-  try {
-    const url = `${API_BASE}/api.php?action=query&api_key=${API_KEY}&sql=${encodeURIComponent(sql)}`;
-    const response = await axios.get(url);
-    const payload = response.data as QueryResult;
-    if (payload?.error) {
-      if (IS_DEV) console.error('API Query Error:', payload.error);
-      return { data: [], error: payload.error };
-    }
-    return payload;
-  } catch (error) {
-    if (IS_DEV) console.error('API Error:', error);
-    return { data: [], error: 'API bağlantı hatası' };
-  }
-}
-
-// ─── SQL Escaping (internal use only) ────────────────────────────────────────
-
-function _sqlEsc(value: string): string {
-  return value
-    .replace(/\\/g, '')
-    .replace(/"/g, '')
-    .replace(/;/g, '')
-    .replace(/-{2,}/g, '')
-    .replace(/'/g, "''");
-}
-
-export function sqlEsc(value: string): string {
-  return _sqlEsc(value);
-}
-
-// ─── Hasat Tahmini — Safe API Layer ──────────────────────────────────────────
-// SQL'ler burada izole edilmiştir; page bileşenleri asla doğrudan SQL oluşturmaz.
-
-const BITKISEL_TABLE = 'tuik_bitkisel_uretim';
-const YIELD_COLS = 'y2018,y2019,y2020,y2021,y2022,y2023,y2024';
+const R_BITKISEL = 'tuik/bitkisel-uretim';
+const YIELD_YEARS = ['y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024'];
 
 /** İl listesi (il bazlı kayıtlara sahip tüm iller) */
 export async function fetchProvinces(): Promise<QueryResult> {
-  return fetchQuery(
-    `SELECT DISTINCT ili FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' ORDER BY ili`
-  );
+  return { data: await fetchAgg(R_BITKISEL, {
+    groupBy: ['ili'], where: { duzey: 'ilçe' }, orderBy: 'ili', dir: 'asc',
+  }) };
 }
 
 /** Belirli bir ilin ilçe listesi */
 export async function fetchDistricts(il: string): Promise<QueryResult> {
-  const safeIl = _sqlEsc(il);
-  return fetchQuery(
-    `SELECT DISTINCT yer FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' ORDER BY yer`
-  );
+  return { data: await fetchAgg(R_BITKISEL, {
+    groupBy: ['yer'], where: { duzey: 'ilçe', ili: il }, orderBy: 'yer', dir: 'asc',
+  }) };
 }
 
 /** Belirli il/ilçe'de yetiştirilen ürünler (son 3 yılda verimi >0 olanlar) */
 export async function fetchCrops(il: string, ilce: string): Promise<QueryResult> {
-  const safeIl = _sqlEsc(il);
-  const safeIlce = _sqlEsc(ilce);
-  return fetchQuery(
-    `SELECT DISTINCT urun FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' AND yer='${safeIlce}' AND unsur='Verim' AND birim='Kg/Dekar' AND (y2022+y2023+y2024) > 0 ORDER BY urun`
-  );
+  // (y2022+y2023+y2024) > 0 koşulu istemcide.
+  const rows = await fetchAgg(R_BITKISEL, {
+    groupBy: ['urun'], sum: ['y2022', 'y2023', 'y2024'],
+    where: { duzey: 'ilçe', ili: il, yer: ilce, unsur: 'Verim', birim: 'Kg/Dekar' },
+    orderBy: 'urun', dir: 'asc',
+  });
+  return { data: rows.filter((r) =>
+    num(r.sum_y2022) + num(r.sum_y2023) + num(r.sum_y2024) > 0) };
 }
 
-/** Verim verisi (7 yıllık) — level: 'ilçe' | 'il' | 'Turkey' */
+/** Verim serisi — ilçe / il / Türkiye düzeyinde */
 export async function fetchYieldData(
   il: string,
   ilce: string,
   urun: string,
   level: 'ilçe' | 'il' | 'Turkey',
 ): Promise<QueryResult> {
-  const safeIl = _sqlEsc(il);
-  const safeIlce = _sqlEsc(ilce);
-  const safeUrun = _sqlEsc(urun);
-
-  if (level === 'ilçe') {
-    return fetchQuery(
-      `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='ilçe' AND ili='${safeIl}' AND yer='${safeIlce}' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
-    );
-  }
-  if (level === 'il') {
-    return fetchQuery(
-      `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='il' AND ili='${safeIl}' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
-    );
-  }
-  // Turkey
-  return fetchQuery(
-    `SELECT ${YIELD_COLS} FROM ${BITKISEL_TABLE} WHERE duzey='Turkey' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar'`
-  );
+  const kosul = level === 'ilçe'
+    ? { duzey: 'ilçe', ili: il, yer: ilce }
+    : level === 'il'
+      ? { duzey: 'il', ili: il }
+      : { duzey: 'Turkey' };
+  const rows = await fetchAgg(R_BITKISEL, {
+    sum: YIELD_YEARS,
+    where: { ...kosul, urun, unsur: 'Verim', birim: 'Kg/Dekar' },
+  });
+  // Çağıranlar y2018… adlarını bekliyor; sum_ önekini kaldır.
+  return { data: [Object.fromEntries(YIELD_YEARS.map((y) => [y, num(rows[0]?.[`sum_${y}`])]))] };
 }
 
 /** İl bazlı verim sıralaması (en son yıl) */
 export async function fetchProvinceRanking(urun: string): Promise<QueryResult> {
-  const safeUrun = _sqlEsc(urun);
-  return fetchQuery(
-    `SELECT ili, y2024 FROM ${BITKISEL_TABLE} WHERE duzey='il' AND urun='${safeUrun}' AND unsur='Verim' AND birim='Kg/Dekar' AND y2024 > 0 ORDER BY y2024 DESC`
-  );
+  const rows = await fetchAgg(R_BITKISEL, {
+    groupBy: ['ili'], sum: ['y2024'],
+    where: { duzey: 'il', urun, unsur: 'Verim', birim: 'Kg/Dekar' },
+    orderBy: 'sum_y2024', dir: 'desc',
+  });
+  return { data: rows.filter((r) => num(r.sum_y2024) > 0)
+    .map((r) => ({ ili: r.ili, y2024: num(r.sum_y2024) })) };
 }
 
 export type EggPriceKey = 'double' | 'eski_ana' | 'yeni_ana' | 'yarka' | 'pilic' | 'kilavuz';
@@ -157,32 +124,6 @@ export async function fetchEggPrices(): Promise<EggPricesResult> {
   }
 }
 
-// Year filter helper - adds WHERE or AND clause
-export function addYearFilter(sql: string, year: string, table: 'trade' | 'production' = 'trade'): string {
-  if (year === 'all') return sql;
-  
-  const yearColumn = table === 'trade' ? 'yil' : 'yil';
-  const hasWhere = sql.toLowerCase().includes('where');
-  const yearCondition = `${yearColumn} = '${year}'`;
-  
-  if (hasWhere) {
-    // Add AND before GROUP BY if exists, otherwise at the end
-    if (sql.toLowerCase().includes('group by')) {
-      return sql.replace(/group by/i, `AND ${yearCondition} GROUP BY`);
-    }
-    return sql + ` AND ${yearCondition}`;
-  } else {
-    // Add WHERE before GROUP BY if exists
-    if (sql.toLowerCase().includes('group by')) {
-      return sql.replace(/group by/i, `WHERE ${yearCondition} GROUP BY`);
-    }
-    if (sql.toLowerCase().includes('order by')) {
-      return sql.replace(/order by/i, `WHERE ${yearCondition} ORDER BY`);
-    }
-    return sql + ` WHERE ${yearCondition}`;
-  }
-}
-
 // Format helpers
 export function formatMoney(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
@@ -199,202 +140,11 @@ export function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-// Available years for filters
-export const TRADE_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', '2006', '2005', '2004', '2003', '2002', '2001', '2000'];
-export const PRODUCTION_YEARS = ['2021'];
+// NOT: burada ham SQL'e dayalı bir yardımcı yığını vardı — `queries` sözlüğü
+// (yct_20 tablosuna gidiyordu; o tablo veritabanında hiç yok, sorgular her
+// zaman hata dönüyordu), addYearFilter, duzeyFilter, TRADE_TABLES ve sabit yıl
+// listeleri. Sayfalar D1'e taşındığı için hiçbiri kullanılmıyor; kaldırıldı.
 
-// Correct table names
-export const TRADE_TABLES = {
-  PLANT: 'tuik_ticaret_bitkisel',
-  ANIMAL: 'tuik_ticaret_hayvansal',
-} as const;
-
-// Duzey filter helper — prevents data duplication
-export function duzeyFilter(level1: 'tüm' | 'ülke', level3: 'ay' | 'yil'): string {
-  return `duzey_1 = '${level1}' AND duzey_3 = '${level3}'`;
-}
-
-// Predefined SQL queries - yct_20 kolonları: primaryValue, fobvalue, cifvalue, flowCode, partnerCode, motDesc, qty, netWgt
-// üretimindex kolonları: ürün, deger, birim, yil, ülke, grup
-export const queries = {
-  // Trade queries - primaryValue kullanıyoruz (ana değer)
-  totalTrade: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20`,
-  totalExport: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('X', 'DX', 'RX')`,
-  totalImport: `SELECT SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt FROM yct_20 WHERE flowCode IN ('M', 'FM', 'RM')`,
-  
-  flowDistribution: `SELECT flowCode, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam FROM yct_20 GROUP BY flowCode ORDER BY toplam DESC`,
-  monthlyTrend: `SELECT ay, 
-    SUM(CASE WHEN flowCode IN ('X','DX','RX') THEN CAST(primaryValue AS DECIMAL(20,2)) ELSE 0 END) as ihracat,
-    SUM(CASE WHEN flowCode IN ('M','FM','RM') THEN CAST(primaryValue AS DECIMAL(20,2)) ELSE 0 END) as ithalat
-    FROM yct_20 GROUP BY ay ORDER BY ay`,
-  
-  // partnerCode yerine motDesc veya başka alanlar kullanabiliriz
-  topExportCountries: `SELECT partnerCode as ulke, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
-    FROM yct_20 WHERE flowCode IN ('X','DX','RX') 
-    GROUP BY partnerCode ORDER BY toplam DESC LIMIT 10`,
-  topImportCountries: `SELECT partnerCode as ulke, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
-    FROM yct_20 WHERE flowCode IN ('M','FM','RM') 
-    GROUP BY partnerCode ORDER BY toplam DESC LIMIT 10`,
-  
-  // motDesc = Mode of Transport Description
-  transportModes: `SELECT motDesc as tasimaSekli, SUM(CAST(primaryValue AS DECIMAL(20,2))) as toplam, COUNT(*) as cnt 
-    FROM yct_20 WHERE motDesc IS NOT NULL AND motDesc != '' 
-    GROUP BY motDesc ORDER BY toplam DESC`,
-  
-  // Production queries - üretimindex tablosu (birim filtresi kaldırıldı)
-  productionStats: `SELECT SUM(deger) as toplamUretim, COUNT(DISTINCT ürün) as toplamUrun FROM üretimindex`,
-  topProducts: `SELECT ürün as ad, SUM(deger) as miktar, birim FROM üretimindex GROUP BY ürün, birim ORDER BY miktar DESC LIMIT 10`,
-  yearlyProduction: `SELECT yil, SUM(deger) as toplam FROM üretimindex GROUP BY yil ORDER BY yil`,
-  
-  // DETAILED TRADE QUERIES - Plant (Bitkisel)
-  plantExportDetail: `
-    SELECT 
-      ana_urun,
-      ulke,
-      yil,
-      SUM(ihracat_mik) as miktar,
-      SUM(ihracat_deger) as deger,
-      miktar_birim as birim,
-      COUNT(*) as islem_sayisi,
-      (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret_bitkisel
-    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
-    GROUP BY ana_urun, ulke, yil, miktar_birim
-    ORDER BY deger DESC
-  `,
-  
-  plantImportDetail: `
-    SELECT 
-      ana_urun,
-      ulke,
-      yil,
-      SUM(ithalat_mik) as miktar,
-      SUM(ithalat_deger) as deger,
-      miktar_birim as birim,
-      COUNT(*) as islem_sayisi,
-      (SUM(ithalat_deger) / NULLIF(SUM(ithalat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret_bitkisel
-    WHERE ithalat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
-    GROUP BY ana_urun, ulke, yil, miktar_birim
-    ORDER BY deger DESC
-  `,
-  
-  // DETAILED TRADE QUERIES - Animal (Hayvansal)
-  animalExportDetail: `
-    SELECT 
-      ana_urun,
-      ulke,
-      yil,
-      SUM(ihracat_mik) as miktar,
-      SUM(ihracat_deger) as deger,
-      miktar_birim as birim,
-      COUNT(*) as islem_sayisi,
-      (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret_hayvansal
-    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
-    GROUP BY ana_urun, ulke, yil, miktar_birim
-    ORDER BY deger DESC
-  `,
-  
-  animalImportDetail: `
-    SELECT 
-      ana_urun,
-      ulke,
-      yil,
-      SUM(ithalat_mik) as miktar,
-      SUM(ithalat_deger) as deger,
-      miktar_birim as birim,
-      COUNT(*) as islem_sayisi,
-      (SUM(ithalat_deger) / NULLIF(SUM(ithalat_mik), 0)) as birim_fiyat
-    FROM tuik_ticaret_hayvansal
-    WHERE ithalat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
-    GROUP BY ana_urun, ulke, yil, miktar_birim
-    ORDER BY deger DESC
-  `,
-  
-  // SUMMARY QUERIES
-  plantExportSummary: `
-    SELECT 
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ana_urun) as urun_sayisi,
-      COUNT(DISTINCT ulke) as ulke_sayisi,
-      COUNT(*) as islem_sayisi
-    FROM tuik_ticaret_bitkisel
-    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
-  `,
-  
-  animalExportSummary: `
-    SELECT 
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ana_urun) as urun_sayisi,
-      COUNT(DISTINCT ulke) as ulke_sayisi,
-      COUNT(*) as islem_sayisi
-    FROM tuik_ticaret_hayvansal
-    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
-  `,
-  
-  // TOP PRODUCTS BY VALUE
-  topPlantExports: `
-    SELECT 
-      ana_urun,
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ulke) as ulke_sayisi,
-      (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticaret_bitkisel
-    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
-    GROUP BY ana_urun
-    ORDER BY toplam_deger DESC
-    LIMIT 20
-  `,
-  
-  topAnimalExports: `
-    SELECT 
-      ana_urun,
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ulke) as ulke_sayisi,
-      (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticaret_hayvansal
-    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
-    GROUP BY ana_urun
-    ORDER BY toplam_deger DESC
-    LIMIT 20
-  `,
-  
-  // YEARLY TREND
-  plantExportYearlyTrend: `
-    SELECT 
-      yil,
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ana_urun) as urun_sayisi,
-      COUNT(DISTINCT ulke) as ulke_sayisi
-    FROM tuik_ticaret_bitkisel
-    WHERE ihracat_deger > 0 AND duzey_1 = 'tüm' AND duzey_2 = 'ürün' AND duzey_3 = 'yil'
-    GROUP BY yil
-    ORDER BY yil
-  `,
-  
-  // TOP COUNTRIES
-  topPlantExportCountries: `
-    SELECT 
-      ulke,
-      SUM(ihracat_deger) as toplam_deger,
-      SUM(ihracat_mik) as toplam_miktar,
-      COUNT(DISTINCT ana_urun) as urun_sayisi,
-      (SUM(ihracat_deger) / NULLIF(SUM(ihracat_mik), 0)) as ort_birim_fiyat
-    FROM tuik_ticaret_bitkisel
-    WHERE ihracat_deger > 0 AND duzey_1 = 'ülke' AND duzey_3 = 'yil'
-    GROUP BY ulke
-    ORDER BY toplam_deger DESC
-    LIMIT 20
-  `,
-};
-
-// ========== EMTİA FİYATLARI (Yahoo Finance via Backend) ==========
 export interface CommodityItem {
   symbol: string;
   name: string;

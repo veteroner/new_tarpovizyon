@@ -447,7 +447,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ il: st
 
 // ─── Row → YearData ───────────────────────────────────────────────────────────
 
-export function toYD(res: { data?: Record<string, string | number>[] }): YearData | null {
+export function toYD(res: { data?: Record<string, string | number | null>[] }): YearData | null {
   const row = res.data?.[0];
   if (!row) return null;
   const n = (k: string) => Number(row[k] ?? 0);
