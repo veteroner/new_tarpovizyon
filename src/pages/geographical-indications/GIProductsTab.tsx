@@ -44,7 +44,7 @@ export function GIProductsTab({ productGroupData }: Props) {
               type="category"
               dataKey="group"
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              width={110} tickFormatter={truncTick} />
+              width={110} tickFormatter={truncTick} interval={0} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

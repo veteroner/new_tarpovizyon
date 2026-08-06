@@ -1,5 +1,6 @@
 import {
   Bar,
+  LabelList,
   BarChart,
   CartesianGrid,
   Cell,
@@ -18,6 +19,7 @@ import {
 } from 'recharts';
 import { COLORS, HONEY_COLORS, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 type Props = {
   topBeekeepers: { il: string; count: number }[];
@@ -61,8 +63,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topBeekeepers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
-              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
+              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} domain={VALUE_HEADROOM} />
+              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
               <Tooltip 
                 formatter={(value: number) => [formatNumber(value) + ' arıcı']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -71,6 +73,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
                 {topBeekeepers.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={index < 3 ? COLORS.accent : COLORS.primary} />
                 ))}
+              
+                <LabelList dataKey="count" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -93,8 +97,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topProducers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
-              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
+              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} domain={VALUE_HEADROOM} />
+              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
               <Tooltip 
                 formatter={(value: number) => [formatNumber(value) + ' ton']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -103,6 +107,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
                 {topProducers.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={index < 3 ? '#059669' : COLORS.success} />
                 ))}
+              
+                <LabelList dataKey="production" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -125,8 +131,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
+              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
               <Tooltip 
                 formatter={(value: number) => [value.toFixed(1) + ' kg/kovan']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -135,6 +141,8 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
                 {topYield.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={index < 3 ? '#2563eb' : COLORS.blue} />
                 ))}
+              
+                <LabelList dataKey="yield" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

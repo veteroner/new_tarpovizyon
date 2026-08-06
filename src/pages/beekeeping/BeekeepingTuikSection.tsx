@@ -2,6 +2,7 @@ import {
   Area,
   AreaChart,
   Bar,
+  LabelList,
   BarChart,
   CartesianGrid,
   Cell,
@@ -16,7 +17,7 @@ import {
 } from 'recharts';
 import { type TuikKovanYearData, type TuikKovanKpi, type TuikProvinceKovan, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 type Props = {
   tuikKovanYear: TuikKovanYearData[];
@@ -393,7 +394,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <BarChart data={tuikTopKovan} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
-                <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
+                <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
                 <Tooltip 
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                   formatter={(value: number, name: string) => [
@@ -424,8 +425,8 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
+                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
                 <Tooltip 
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                   formatter={(value: number) => [value.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' ton', 'Balmumu']}
@@ -434,7 +435,9 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
                   {tuikTopBalmumu.map((_, index) => (
                     <Cell key={`cell-bm-${index}`} fill={index < 3 ? '#2563eb' : '#3b82f6'} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="balmumu" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

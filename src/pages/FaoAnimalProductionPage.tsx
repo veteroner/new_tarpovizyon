@@ -6,6 +6,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ComposedChart, Line,
   AreaChart, Area,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, latestYear, num } from '../services/d1';
 
@@ -16,7 +17,7 @@ const EX = { preset: 'v1' as const, col: 'ulkead' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 
 // --------------- Types ---------------
 export interface FaoProduct {
@@ -270,8 +271,8 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} domain={VALUE_HEADROOM} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} interval={0} />
                   <Tooltip 
                     formatter={(value: number) => [formatValue(value), 'Üretim']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -280,7 +281,9 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                     {productData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
-                  </Bar>
+                  
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

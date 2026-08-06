@@ -485,7 +485,7 @@ export default function CountryIntelligenceTab() {
               <BarChart data={productBarData} layout="vertical" onClick={(state: any) => openProductDetail(state?.activePayload?.[0]?.payload?.fullName || '')}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
-                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={truncTick} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
                 <Legend />
                 <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[0, 4, 4, 0]} />

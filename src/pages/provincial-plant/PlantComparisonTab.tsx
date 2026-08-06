@@ -1,10 +1,12 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell
+  Cell,
+  LabelList,
 } from 'recharts';
 import type { ProvincialData, RegionalSummary } from './provincialPlantUtils';
 import { REGION_COLORS, formatNumber, formatShort } from './provincialPlantUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 interface Props {
   filteredProvincialData: ProvincialData[];
@@ -43,14 +45,12 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
             <XAxis 
               type="number"
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => formatShort(value)}
-            />
+              tickFormatter={(value) => formatShort(value)} domain={VALUE_HEADROOM} />
             <YAxis 
               type="category"
               dataKey="province" 
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              width={110}
-            />
+              width={110} interval={0} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',
@@ -70,7 +70,9 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
               {filteredProvincialData.slice(0, 20).map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={REGION_COLORS[entry.region] || '#3b82f6'} />
               ))}
-            </Bar>
+            
+                <LabelList dataKey="totalProduction" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

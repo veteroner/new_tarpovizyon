@@ -327,7 +327,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(0)}M`} />
-              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={95} />
+              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={95} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`${(v as number).toFixed(2)}M ton`, n === 'dairy' ? '🧀 Süt Ürünleri' : n === 'fats' ? '🫒 Yağlar' : '📦 Diğer']} />
               <Legend formatter={(v: string) => v === 'dairy' ? '🧀 Süt Ürünleri' : v === 'fats' ? '🫒 Yağlar' : '📦 Diğer'} />
@@ -355,7 +355,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(1)}%`} />
-              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={110} tickFormatter={truncTick} />
+              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number) => [`%${(v as number).toFixed(2)} CAGR`, 'Büyüme']} />
               {processedGrowthData.slice(0, 15).map((g, i) => (

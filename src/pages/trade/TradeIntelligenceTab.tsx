@@ -2,6 +2,7 @@ import {
   Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar, Area, AreaChart,
+  LabelList,
 } from 'recharts';
 import {
   AlertTriangle, BarChart3, Calendar, Globe, Shield, TrendingDown, TrendingUp, Zap,
@@ -11,7 +12,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { useTradeIntelligenceData, MONTHS_TR } from './useTradeIntelligenceData';
 import type { HHIResult } from './useTradeIntelligenceData';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 
 const RISK_COLORS = { low: '#10b981', medium: '#f59e0b', high: '#ef4444', critical: '#991b1b' };
 
@@ -318,14 +319,16 @@ export default function TradeIntelligenceTab() {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={opportunities.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis type="number" fontSize={10} tickFormatter={v => `${v.toFixed(1)}x`} />
-                <YAxis type="category" dataKey="product" fontSize={10} width={110} tick={{ fontSize: 10 }} tickFormatter={truncTick} />
+                <XAxis type="number" fontSize={10} tickFormatter={v => `${v.toFixed(1)}x`} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="product" fontSize={10} width={110} tick={{ fontSize: 10 }} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(v: number) => [`${v.toFixed(2)}x`, 'Mevsimsel Endeks']} />
                 <Bar dataKey="seasonalIndex" name="Mevsimsel Endeks" radius={[0, 4, 4, 0]}>
                   {opportunities.slice(0, 10).map((_, i) => (
                     <Cell key={i} fill={i < 3 ? '#7c3aed' : i < 6 ? '#a78bfa' : '#c4b5fd'} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="seasonalIndex" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">

@@ -2,11 +2,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell,
   ComposedChart, Line,
+  LabelList,
 } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
-import { pctTick, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 interface PlantMainChartsProps {
@@ -64,12 +65,14 @@ export default function PlantMainCharts({
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" width={90} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" width={90} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={0} />
               <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
               <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
                 {cityData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -129,13 +132,15 @@ export default function PlantMainCharts({
             <ResponsiveContainer width="100%" height={Math.max(250, productCompareData.length * 32)}>
               <BarChart data={productCompareData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} />
+                <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
                   {productCompareData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
-                </Bar>
+                
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -313,7 +313,7 @@ export default function AnimalTradeTab() {
           <BarChart data={liveProcChart} layout="vertical" margin={{ top: 8, right: 8, left: 4, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e6).toFixed(0)}M`} />
-            <YAxis type="category" dataKey="yon" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} width={80} />
+            <YAxis type="category" dataKey="yon" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} width={80} interval={0} />
             <Tooltip formatter={(v: number) => formatMoney(v)} />
             <Legend />
             <Bar dataKey="Canlı" stackId="a" fill="#6366f1" />

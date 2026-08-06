@@ -4,11 +4,12 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ComposedChart, Line,
   ScatterChart, Scatter, ZAxis, Cell,
+  LabelList,
 } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 interface PlantAnalysisChartsProps {
@@ -86,13 +87,15 @@ export default function PlantAnalysisCharts({
             <ResponsiveContainer width="100%" height={Math.max(250, districtData.length * 30)}>
               <BarChart data={districtData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} />
+                <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
                   {districtData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
-                </Bar>
+                
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

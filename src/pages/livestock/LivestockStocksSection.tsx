@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area,
-  ScatterChart, Scatter, ZAxis, Legend
+  ScatterChart, Scatter, ZAxis, Legend,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, num, type Row } from '../../services/d1';
 import ProductSelector from '../../components/ProductSelector';
@@ -11,7 +12,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 const R = 'fao/uretim-hayvansal-canlihayvan';
@@ -433,7 +434,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             }))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tickFormatter={(v: number) => `${v}%`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={80} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={80} interval={0} />
               <Tooltip formatter={(value: number, name: string) => [`%${value.toFixed(2)}`, name === 'cagr5' ? '5Y CAGR' : '10Y CAGR']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend formatter={(v: string) => v === 'cagr5' ? '5 Yıl CAGR' : '10 Yıl CAGR'} />
               <Bar dataKey="cagr5" fill="#3b82f6" radius={[0, 4, 4, 0]} />
@@ -514,14 +515,16 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           <ResponsiveContainer width="100%" height={500}>
             <BarChart data={stocksCountryData.slice(0, 20)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+              <XAxis type="number" tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Stok']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {stocksCountryData.slice(0, 20).map((item, idx) => (
                   <Cell key={`cc-${idx}`} fill={String(item.name).includes('Türkiye') ? '#ef4444' : BAR_COLOR} />
                 ))}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

@@ -288,8 +288,7 @@ export function LivestockCompetitionPage() {
                   return <text x={px} y={py} dy={4} textAnchor="end" fill={t ? TURKEY_COLOR : 'var(--text-secondary)'} fontWeight={t ? 700 : 400} fontSize={11}>
                     {t ? '🇹🇷 ' : ''}{val}
                   </text>;
-                }}
-              />
+                }} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`${(v as number).toFixed(2)}M ton`, n === 'meat' ? 'Et' : n === 'milk' ? 'Süt' : 'Yumurta']} />
               <Legend formatter={v => v === 'meat' ? '🥩 Et' : v === 'milk' ? '🥛 Süt' : '🥚 Yumurta'} />

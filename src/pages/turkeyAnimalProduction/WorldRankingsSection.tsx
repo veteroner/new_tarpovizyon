@@ -1,11 +1,13 @@
 import React from 'react';
 import { Award } from 'lucide-react';
 import {
-  ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell
+  ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell,
+  LabelList,
 } from 'recharts';
 import type { WorldRankingItem } from './useTurkeyAnimalProductionData';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 interface WorldRankingsSectionProps {
   worldBeefRanking: WorldRankingItem[];
@@ -41,14 +43,16 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldBeefRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
-                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} interval={0} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Bar dataKey="uretim" radius={[0, 6, 6, 0]}>
                   {worldBeefRanking.slice(0, 10).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.isTurkey ? '#ef4444' : '#6b7280'} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="uretim" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -65,14 +69,16 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldMilkRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
-                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} interval={0} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Bar dataKey="uretim" radius={[0, 6, 6, 0]}>
                   {worldMilkRanking.slice(0, 10).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.isTurkey ? '#3b82f6' : '#6b7280'} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="uretim" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -89,14 +95,16 @@ const WorldRankingsSection: React.FC<WorldRankingsSectionProps> = ({
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={worldChickenRanking.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
-                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="ulke" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} interval={0} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Bar dataKey="uretim" radius={[0, 6, 6, 0]}>
                   {worldChickenRanking.slice(0, 10).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.isTurkey ? '#10b981' : '#6b7280'} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="uretim" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

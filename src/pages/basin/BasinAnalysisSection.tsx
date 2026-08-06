@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Treemap
+  Treemap,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, num } from '../../services/d1';
 const R_URETIM = 'tuik/bitkisel-uretim';
@@ -14,7 +15,7 @@ import {
 } from './basinUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { BasinSummary, BasinProductionStats, BasinData, BasinProduct } from './basinUtils';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 
 interface BasinAnalysisSectionProps {
   basinSummary: BasinSummary[];
@@ -515,12 +516,12 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={basinProducts} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} />
+                  <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} />
                   <YAxis 
                     type="category" 
                     dataKey="urun" 
                     width={110}
-                    tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} />
+                    tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} interval={0} />
                   <Tooltip 
                     contentStyle={{ 
                       background: 'rgba(30, 41, 59, 0.95)',
@@ -534,8 +535,9 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                     dataKey="toplam_ton" 
                     name="Toplam Üretim" 
                     fill={BASIN_COLORS[selectedBasinForAnalysis] || '#10b981'} 
-                    radius={[0, 8, 8, 0]} 
-                  />
+                    radius={[0, 8, 8, 0]}>
+                <LabelList dataKey="toplam_ton" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 </BarChart>
               </ResponsiveContainer>
               <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>

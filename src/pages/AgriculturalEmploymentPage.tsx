@@ -70,7 +70,7 @@ export default function AgriculturalEmploymentPage() {
                     <BarChart data={topCountries.slice(0, 20)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} interval={0} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Bar dataKey="male" name="Erkek" stackId="a" fill="#3b82f6" />

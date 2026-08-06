@@ -3,6 +3,7 @@ import {
   Area,
   AreaChart,
   Bar,
+  LabelList,
   BarChart,
   CartesianGrid,
   Cell,
@@ -19,6 +20,7 @@ const R = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
+import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef'];
@@ -355,14 +357,16 @@ export default function TurkeyOtherAnimalProductsPage() {
                 <ResponsiveContainer width="100%" height={450}>
                   <BarChart data={cityData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
+                    <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} interval={0} />
                     <Tooltip formatter={(value: number) => [`${formatNumber(value)} ${currentProduct.birim}`, currentProduct.label]} />
                     <Bar dataKey="value" name={currentProduct.label} radius={[0, 4, 4, 0]}>
                       {cityData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                       ))}
-                    </Bar>
+                    
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>

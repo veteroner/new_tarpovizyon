@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Line, Scatter,
+  LabelList,
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Award, AlertTriangle, Layers, BarChart2, Activity, Zap, Bug, Leaf, Droplets, Target } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
@@ -10,7 +11,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { usePesticideData, TABS, CHART_COLORS, formatTon, formatKgHa, formatShort } from './pesticide/usePesticideData';
 import type { Tab } from './pesticide/usePesticideData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 export default function PesticidePage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -172,12 +173,14 @@ export default function PesticidePage() {
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -204,12 +207,14 @@ export default function PesticidePage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={turkeyProfile.composition} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="tonaj" radius={[0, 4, 4, 0]}>
                         {turkeyProfile.composition.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="tonaj" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

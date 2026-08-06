@@ -1,6 +1,7 @@
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine,
+  LabelList,
 } from 'recharts';
 import {
   Wheat, TrendingUp, AlertTriangle, ShieldCheck, ShieldAlert,
@@ -16,7 +17,7 @@ import {
   GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
 } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, compactValue } from '../utils/chartTicks';
 
 const CYAN = '#06b6d4';
 const PURPLE = '#8b5cf6';
@@ -369,13 +370,15 @@ export default function ProductBalancePage() {
               <BarChart data={importRanking} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" domain={[0, 100]} tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} />
-                <YAxis type="category" dataKey="urun" tick={{ fontSize: 10 }} width={95} />
+                <YAxis type="category" dataKey="urun" tick={{ fontSize: 10 }} width={95} interval={0} />
                 <Tooltip formatter={(v: number) => [v.toFixed(1) + '%', 'İthalat/Arz']} />
                 <Bar dataKey="ratio" radius={[0, 4, 4, 0]}>
                   {importRanking.map((d, i) => (
                     <Cell key={i} fill={d.ratio > 50 ? RED : d.ratio > 30 ? ORANGE : GREEN} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="ratio" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 <ReferenceLine x={50} stroke={RED} strokeDasharray="5 5"
                                label={{ value: 'Kritik %50', fontSize: 9, fill: RED }} />
               </BarChart>

@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   LineChart, Line, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LabelList,
 } from 'recharts';
 import { fetchCommodityPrices, fetchCommodityChart, fetchGiewsSeries, fetchGiewsPricesBatch, fetchGiewsSeriesByCommodity, fetchGiewsInternationalSeries } from '../services/api';
 import type { CommodityItem, ChartPoint, GiewsSerie, GiewsDatapoint, GiewsPriceResult } from '../services/api';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Tahıllar': '🌾',
@@ -1333,14 +1334,16 @@ export default function CommodityPricesPage() {
                               layout="vertical"
                               margin={{ left: 0, right: 8, top: 4, bottom: 4 }}
                             >
-                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
-                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
+                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" domain={VALUE_HEADROOM} />
+                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" interval={0} />
                               <Tooltip formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} contentStyle={{ borderRadius: '0.5rem', fontSize: '0.8rem' }} />
                               <Bar dataKey="usd" radius={[0, 4, 4, 0]}>
                                 {worldRankings.slice(0, 10).map((r, i) => (
                                   <Cell key={r.iso3} fill={r.iso3 === 'TUR' ? '#3b82f6' : i === 0 ? '#dc2626' : '#f87171'} />
                                 ))}
-                              </Bar>
+                              
+                <LabelList dataKey="usd" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1354,14 +1357,16 @@ export default function CommodityPricesPage() {
                               layout="vertical"
                               margin={{ left: 0, right: 8, top: 4, bottom: 4 }}
                             >
-                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
-                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
+                              <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" domain={VALUE_HEADROOM} />
+                              <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" interval={0} />
                               <Tooltip formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD']} contentStyle={{ borderRadius: '0.5rem', fontSize: '0.8rem' }} />
                               <Bar dataKey="usd" radius={[0, 4, 4, 0]}>
                                 {[...worldRankings].reverse().slice(0, 10).map(r => (
                                   <Cell key={r.iso3} fill={r.iso3 === 'TUR' ? '#3b82f6' : '#22c55e'} />
                                 ))}
-                              </Bar>
+                              
+                <LabelList dataKey="usd" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                             </BarChart>
                           </ResponsiveContainer>
                         </div>

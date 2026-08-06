@@ -3,7 +3,8 @@ import { Globe, Layers, Activity, Factory, Leaf, MapPin, TrendingUp, ChevronRigh
 import {
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
   LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer
+  Tooltip, ResponsiveContainer,
+  LabelList,
 } from 'recharts';
 import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
@@ -13,7 +14,7 @@ import {
   TABS, TURKEY_COLOR, CHART_COLORS
 } from './productionTypes';
 import type { Insight, OverviewKPIs, SupplyChainData, OverviewTrendPoint, Tab } from './productionTypes';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 interface OverviewTabProps {
   overviewKPIs: OverviewKPIs;
@@ -95,11 +96,13 @@ export function OverviewTab({
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={overviewTopCountries} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={110} />
+              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={110} interval={0} />
               <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {overviewTopCountries.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : CHART_COLORS[i % CHART_COLORS.length]} />)}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

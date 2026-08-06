@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, num } from '../services/d1';
 
@@ -10,6 +11,7 @@ const R = 'tuik/bitkisel-uretim';
 import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
+import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -247,14 +249,16 @@ export default function TuikPlantProductionPage() {
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={cityData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
+                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} interval={0} />
                   <Tooltip formatter={(value: number) => [`${formatTon(value)} ${unit}`, selectedUnsur]} />
                   <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
                     {cityData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                     ))}
-                  </Bar>
+                  
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

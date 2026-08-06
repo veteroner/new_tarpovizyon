@@ -2,11 +2,13 @@ import { useState } from 'react';
 import {
   BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LabelList,
 } from 'recharts';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
+import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 interface Props {
   data: OverviewData;
@@ -54,13 +56,15 @@ export function LivestockSection({ data }: Props) {
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data.livestockStocks.breakdown} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} />
+              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={100} interval={0} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {data.livestockStocks.breakdown.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

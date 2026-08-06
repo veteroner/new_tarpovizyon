@@ -40,3 +40,27 @@ export const truncTick = (v: unknown): string => {
   const s = String(v ?? '');
   return s.length > 14 ? s.slice(0, 13) + '…' : s;
 };
+
+/**
+ * Çubuk ucundaki değer etiketi için kısa sayı.
+ *
+ * Eşikler ve son ekler `plantTypes.fmtShort` ile BİREBİR aynı tutuldu:
+ * etiket ile eksen aynı sayıyı farklı yazarsa (ör. "1.2M" vs "1.200K")
+ * okuyucu iki ayrı büyüklük görüyor sanır.
+ */
+export const compactValue = (v: number): string => {
+  if (!Number.isFinite(v)) return '';
+  const m = Math.abs(v);
+  if (m >= 1e9) return (v / 1e9).toFixed(1) + 'B';
+  if (m >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+  if (m >= 1e3) return (v / 1e3).toFixed(0) + 'K';
+  return v.toFixed(m < 10 && m % 1 !== 0 ? 1 : 0);
+};
+
+/**
+ * Yatay çubuk grafiklerinde sayısal eksene tepe payı.
+ *
+ * Değer etiketi çubuğun SAĞ ucunun dışına yazılıyor; en uzun çubuk çizim
+ * alanının sonuna dayandığı için payı olmadan o etiket kırpılıyor.
+ */
+export const VALUE_HEADROOM: [number, (max: number) => number] = [0, (max: number) => max * 1.18];

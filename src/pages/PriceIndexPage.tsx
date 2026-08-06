@@ -1,13 +1,14 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, AreaChart, Area, Cell, ComposedChart, ReferenceLine,
+  LabelList,
 } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, Activity, BarChart3, Thermometer } from 'lucide-react';
 import {
   usePriceIndexData, formatIndex, MONTHS_SHORT, type DatasetId,
 } from './priceIndex/usePriceIndexData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 export default function PriceIndexPage() {
   const {
@@ -264,14 +265,16 @@ export default function PriceIndexPage() {
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={topProducts} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
+                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                     <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="value" name="Endeks" radius={[0, 4, 4, 0]}>
                       {topProducts.map((entry, i) => (
                         <Cell key={i} fill={entry.fill} />
                       ))}
-                    </Bar>
+                    
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -283,14 +286,16 @@ export default function PriceIndexPage() {
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={[...topProducts].sort((a, b) => b.change - a.change)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `%${v.toFixed(0)}`} />
-                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
+                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `%${v.toFixed(0)}`} domain={VALUE_HEADROOM} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                     <Tooltip formatter={(v: number) => [`%${Number(v).toFixed(1)}`, 'Değişim']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="change" name="Değişim" radius={[0, 4, 4, 0]}>
                       {[...topProducts].sort((a, b) => b.change - a.change).map((entry, i) => (
                         <Cell key={i} fill={entry.change >= 0 ? '#ef4444' : '#22c55e'} />
                       ))}
-                    </Bar>
+                    
+                <LabelList dataKey="change" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>

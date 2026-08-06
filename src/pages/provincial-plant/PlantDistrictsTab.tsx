@@ -1,6 +1,7 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell,
+  LabelList,
 } from 'recharts';
 import type { DistrictData } from './provincialPlantUtils';
 import {
@@ -11,6 +12,7 @@ import {
   getProductIcon,
 } from './provincialPlantUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 interface Props {
   selectedProvince: string | null;
@@ -211,14 +213,12 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                   <XAxis
                     type="number"
                     tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-                    tickFormatter={(value) => formatShort(value)}
-                  />
+                    tickFormatter={(value) => formatShort(value)} domain={VALUE_HEADROOM} />
                   <YAxis
                     type="category"
                     dataKey="district"
                     tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-                    width={90}
-                  />
+                    width={90} interval={0} />
                   <Tooltip
                     contentStyle={{
                       background: 'var(--card-bg)',
@@ -231,8 +231,9 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                   <Bar
                     dataKey="totalProduction"
                     radius={[0, 8, 8, 0]}
-                    fill="#3b82f6"
-                  />
+                    fill="#3b82f6">
+                <LabelList dataKey="totalProduction" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

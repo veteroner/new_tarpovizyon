@@ -4,7 +4,8 @@ import {
   PieChart, Pie, Cell,
   AreaChart, Area,
   ComposedChart, Line,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, latestYear, num } from '../services/d1';
 
@@ -14,7 +15,7 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { BAR_COLOR } from '../utils/chartColors';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
@@ -224,12 +225,14 @@ export default function LandCoverPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={coverData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                  <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
-                  </Bar>
+                  
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

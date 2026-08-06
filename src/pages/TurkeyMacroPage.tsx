@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Area, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  LabelList,
 } from 'recharts';
 import {
   TrendingUp, DollarSign, MapPin, Activity, BarChart3, Landmark, Users,
@@ -10,7 +11,7 @@ import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { fetchAgg, fetchRows, num } from '../services/d1';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 
 /* ─── Constants ─── */
 const MAIN_SECTORS = ['A', 'BCD', 'F', 'GHI', 'J', 'K', 'L', 'MN', 'OPQ', 'RST'];
@@ -289,13 +290,15 @@ export default function TurkeyMacroPage() {
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={growthRanking} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={88} />
+              <XAxis type="number" tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={88} interval={0} />
               <Tooltip formatter={(v: number) => [v.toFixed(2) + '%', 'Büyüme']} />
               <Bar dataKey="growth" radius={[0, 4, 4, 0]}>
                 {growthRanking.map((d, i) => (
                   <Cell key={i} fill={d.fill} opacity={d.growth >= 0 ? 1 : 0.6} />
                 ))}
+              
+                <LabelList dataKey="growth" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
 
             </BarChart>
@@ -361,13 +364,15 @@ export default function TurkeyMacroPage() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={incomeTop} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} />
+              <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} interval={0} />
               <Tooltip formatter={(v: number) => ['$' + v.toLocaleString(), 'Kişi Başı Gelir']} />
               <Bar dataKey="USD" fill="#16a34a" radius={[0, 4, 4, 0]}>
                 {incomeTop.map((_, i) => (
                   <Cell key={i} fill={i === 0 ? '#166534' : i < 3 ? '#16a34a' : '#22c55e'} />
                 ))}
+              
+                <LabelList dataKey="USD" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -385,13 +390,15 @@ export default function TurkeyMacroPage() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={incomeBottom} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} />
+              <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} interval={0} />
               <Tooltip formatter={(v: number) => ['$' + v.toLocaleString(), 'Kişi Başı Gelir']} />
               <Bar dataKey="USD" fill="#dc2626" radius={[0, 4, 4, 0]}>
                 {incomeBottom.map((_, i) => (
                   <Cell key={i} fill={i < 3 ? '#dc2626' : i < 6 ? '#f97316' : '#f59e0b'} />
                 ))}
+              
+                <LabelList dataKey="USD" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

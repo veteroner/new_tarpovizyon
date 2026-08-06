@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, AreaChart, Area,
-  ScatterChart, Scatter, ZAxis
+  ScatterChart, Scatter, ZAxis,
+  LabelList,
 } from 'recharts';
 import { fetchAgg, num } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
@@ -10,7 +11,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
-import { pctTick, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -322,8 +323,8 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v: number) => `%${v.toFixed(0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={110} tickFormatter={truncTick} />
+              <XAxis type="number" tickFormatter={(v: number) => `%${v.toFixed(0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip formatter={(value: number) => [`%${value.toFixed(2)}`, '5Y CAGR']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Bar dataKey="cagr5" radius={[0, 4, 4, 0]}>
@@ -333,6 +334,8 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
                     : p.lifecycle === 'mature' ? '#a855f7' : '#ef4444'
                   } />
                 ))}
+              
+                <LabelList dataKey="cagr5" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

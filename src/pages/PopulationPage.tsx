@@ -68,7 +68,7 @@ export default function PopulationPage() {
                     <BarChart data={topCountries} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={100} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={100} interval={0} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Bar dataKey="urban" name="Kentsel" stackId="a" fill="#8b5cf6" />

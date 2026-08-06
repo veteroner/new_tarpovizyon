@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  Cell, AreaChart, Area, ComposedChart, Line, Scatter
+  Cell, AreaChart, Area, ComposedChart, Line, Scatter,
+  LabelList,
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Activity, Zap, Shield, Heart, Scale, Wheat } from 'lucide-react';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
@@ -15,7 +16,7 @@ import {
 } from './foodBalance/useFoodBalanceData';
 import type { Tab } from './foodBalance/useFoodBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
@@ -81,12 +82,14 @@ export default function FoodBalancePage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewByProduct} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Uretim']} />
                       <Bar dataKey="production" radius={[0, 4, 4, 0]}>
                         {overviewByProduct.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="production" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -149,11 +152,13 @@ export default function FoodBalancePage() {
                       <BarChart data={securityData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis type="number" domain={[0, 'dataMax']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                        <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                        <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                         <Tooltip formatter={(v: number) => [`%${Number(v).toFixed(1)}`, 'Yeterlilik']} />
                         <Bar dataKey="sufficiency" radius={[0, 4, 4, 0]}>
                           {securityData.map((d: any, i: number) => <Cell key={i} fill={d.sufficiencyColor} />)}
-                        </Bar>
+                        
+                <LabelList dataKey="sufficiency" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                     <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '12px', flexWrap: 'wrap' }}>
@@ -294,7 +299,7 @@ export default function FoodBalancePage() {
                     <BarChart data={turkeyProfile.products} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
                       <Bar dataKey="production" name="Uretim" fill="#22c55e" />

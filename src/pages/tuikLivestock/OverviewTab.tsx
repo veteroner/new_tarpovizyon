@@ -1,11 +1,12 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, PieChart, Pie, Cell
+  AreaChart, Area, PieChart, Pie, Cell,
+  LabelList,
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = Pick<UseTuikLivestockDataReturn,
@@ -147,12 +148,14 @@ export default function OverviewTab({
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
                 <Bar dataKey="value" name="Hayvan Sayısı" radius={[0, 4, 4, 0]}>
                   {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
-                </Bar>
+                
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -169,11 +172,13 @@ export default function OverviewTab({
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
+              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} interval={0} />
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
               <Bar dataKey="value" name={selectedAnimal} radius={[0, 4, 4, 0]}>
                 {cityData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

@@ -1,11 +1,12 @@
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LabelList,
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 
 interface Props {
   data: OverviewData;
@@ -105,13 +106,15 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.landUseData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={110} tickFormatter={truncTick} />
+              <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ha', '']} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {data.landUseData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
+              
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

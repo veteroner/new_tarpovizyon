@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Cell, AreaChart, Area, ComposedChart, Line, Scatter,
+  LabelList,
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Layers, BarChart2, Activity, Zap, Scale } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
@@ -12,7 +13,7 @@ import {
 } from './fertilizer/useFertilizerData';
 import type { Tab } from './fertilizer/useFertilizerData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
@@ -78,12 +79,14 @@ export default function FertilizerPage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewByType} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'İthalat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -202,12 +205,14 @@ export default function FertilizerPage() {
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'İhracat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -235,7 +240,7 @@ export default function FertilizerPage() {
                     <BarChart data={turkeyProfile.byProduct} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
                       <Bar dataKey="import" name="İthalat" fill="#ef4444" />

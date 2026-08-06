@@ -3,7 +3,8 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area,
-  ComposedChart, Line, Scatter, LineChart
+  ComposedChart, Line, Scatter, LineChart,
+  LabelList,
 } from 'recharts';
 import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, Layers, BarChart2, Activity, Zap } from 'lucide-react';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
@@ -13,7 +14,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { useLandUseData, CHART_COLORS, formatArea, formatShort, formatPercent, LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY } from './landUse/useLandUseData';
 import type { Tab } from './landUse/useLandUseData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍', desc: 'Dunya arazi kullanimi ozeti' },
@@ -99,12 +100,14 @@ export default function LandUsePage() {
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart data={overviewLandTypes} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Alan']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {overviewLandTypes.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -249,12 +252,14 @@ export default function LandUsePage() {
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={benchmarkData.slice(0, 30)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                      <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Bar dataKey="agLand" radius={[0, 4, 4, 0]}>
                         {benchmarkData.slice(0, 30).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
-                      </Bar>
+                      
+                <LabelList dataKey="agLand" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -313,7 +318,7 @@ export default function LandUsePage() {
                     <BarChart data={turkeyRadar} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
+                      <YAxis type="category" dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} interval={0} />
                       <Tooltip formatter={(v: number) => [formatArea(v), '']} />
                       <Legend />
                       <Bar dataKey="turkey" name="Turkiye" fill="#ff6b35" />

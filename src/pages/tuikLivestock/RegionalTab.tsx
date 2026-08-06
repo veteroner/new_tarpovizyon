@@ -1,13 +1,14 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  LabelList,
 } from 'recharts';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { COLORS, REGION_COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = Pick<UseTuikLivestockDataReturn,
@@ -121,14 +122,16 @@ export default function RegionalTab({
             <ResponsiveContainer width="100%" height={420}>
               <BarChart data={cityDataForSelectedRegion.slice(0, 20)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
+                <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {cityDataForSelectedRegion.slice(0, 20).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={REGION_COLORS[selectedRegion] || BAR_COLOR} />
                   ))}
-                </Bar>
+                
+                <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+              </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
