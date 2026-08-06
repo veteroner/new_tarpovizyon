@@ -1,4 +1,5 @@
 import { useWhiteMeatData } from './white-meat/useWhiteMeatData';
+import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
 import WhiteMeatHeroSection from './white-meat/WhiteMeatHeroSection';
 import WhiteMeatMapSection from './white-meat/WhiteMeatMapSection';
 import WhiteMeatEconomicsSection from './white-meat/WhiteMeatEconomicsSection';
@@ -7,7 +8,20 @@ import WhiteMeatTurkeyMeatSection from './white-meat/WhiteMeatTurkeyMeatSection'
 import WhiteMeatQuailSection from './white-meat/WhiteMeatQuailSection';
 import WhiteMeatComparisonSection from './white-meat/WhiteMeatComparisonSection';
 
+/*
+ * 7 bölüm alt alta, mobilde 13.672 px. Özet ve harita her zaman görünür;
+ * geri kalanı sekmelerde.
+ */
+const BOLUMLER: SectionTab[] = [
+  { id: 'ekonomi', label: 'Ekonomi' },
+  { id: 'tavuk', label: 'Tavuk (TÜİK)' },
+  { id: 'hindi', label: 'Hindi' },
+  { id: 'bildircin', label: 'Bıldırcın' },
+  { id: 'karsilastirma', label: 'Karşılaştırma' },
+];
+
 export default function TurkeyWhiteMeatProductionPage() {
+  const { active } = useSectionTab(BOLUMLER);
   const data = useWhiteMeatData();
 
   if (data.loading) {
@@ -39,7 +53,9 @@ export default function TurkeyWhiteMeatProductionPage() {
         setPoultryMapType={data.setPoultryMapType}
       />
 
-      {data.economicData.length > 0 && (
+      <SectionTabs tabs={BOLUMLER} />
+
+      {active === 'ekonomi' && data.economicData.length > 0 && (
         <WhiteMeatEconomicsSection
           economicData={data.economicData}
           econStartDate={data.econStartDate}
@@ -49,7 +65,7 @@ export default function TurkeyWhiteMeatProductionPage() {
         />
       )}
 
-      {data.tuikData.length > 0 && (
+      {active === 'tavuk' && data.tuikData.length > 0 && (
         <WhiteMeatTuikSection
           tuikData={data.tuikData}
           activeTuikTab={data.activeTuikTab}
@@ -59,14 +75,14 @@ export default function TurkeyWhiteMeatProductionPage() {
         />
       )}
 
-      {data.turkeyMeatData.length > 0 && (
+      {active === 'hindi' && data.turkeyMeatData.length > 0 && (
         <WhiteMeatTurkeyMeatSection
           turkeyMeatData={data.turkeyMeatData}
           monthlyTurkeyMeat={data.monthlyTurkeyMeat}
         />
       )}
 
-      {data.quailMeatData.length > 0 && (
+      {active === 'bildircin' && data.quailMeatData.length > 0 && (
         <WhiteMeatQuailSection
           quailMeatData={data.quailMeatData}
           quailSlaughterData={data.quailSlaughterData}
@@ -74,7 +90,7 @@ export default function TurkeyWhiteMeatProductionPage() {
         />
       )}
 
-      {(data.tuikData.length > 0 || data.turkeyMeatData.length > 0 || data.quailMeatData.length > 0) && (
+      {active === 'karsilastirma' && (data.tuikData.length > 0 || data.turkeyMeatData.length > 0 || data.quailMeatData.length > 0) && (
         <WhiteMeatComparisonSection
           tuikData={data.tuikData}
           turkeyMeatData={data.turkeyMeatData}

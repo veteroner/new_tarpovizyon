@@ -18,13 +18,27 @@ import {
   type WorldRankings,
   extractYear,
 } from './redmeat/redMeatUtils';
+import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
 import ProductionOverviewSection from './redmeat/ProductionOverviewSection';
 import SpeciesDetailSection from './redmeat/SpeciesDetailSection';
 import WorldComparisonSection from './redmeat/WorldComparisonSection';
 import ImportAnalysisSection from './redmeat/ImportAnalysisSection';
 import EconomicIndicatorsSection from './redmeat/EconomicIndicatorsSection';
 
+/*
+ * 25 grafik + 27 KPI ile sayfa mobilde 14.591 px sürüyordu (~18 ekran).
+ * Bölümler sekmeye alındı; ekran dışı bölüm hiç render edilmiyor.
+ */
+const BOLUMLER: SectionTab[] = [
+  { id: 'uretim', label: 'Üretim' },
+  { id: 'turler', label: 'Türler' },
+  { id: 'dunya', label: 'Dünya' },
+  { id: 'ithalat', label: 'İthalat' },
+  { id: 'ekonomi', label: 'Ekonomi' },
+];
+
 export default function TurkeyRedMeatProductionPage() {
+  const { active } = useSectionTab(BOLUMLER);
   const [loading, setLoading] = useState(true);
   const [series, setSeries] = useState<YearPoint[]>([]);
   const [startYear, setStartYear] = useState(1986);
@@ -421,33 +435,41 @@ export default function TurkeyRedMeatProductionPage() {
         </div>
       ) : (
         <>
-          <ProductionOverviewSection
-            filteredSeries={filteredSeries}
-            latest={latest}
-            yoy={yoy}
-            peak={peak}
-            avgLast5={avgLast5}
-            consumptionData={consumptionData}
-            worldRankings={worldRankings}
-            importAnalytics={importAnalytics}
-          />
+          <SectionTabs tabs={BOLUMLER} />
 
-          <SpeciesDetailSection filteredSeries={filteredSeries} />
+          {active === 'uretim' && (
+            <ProductionOverviewSection
+              filteredSeries={filteredSeries}
+              latest={latest}
+              yoy={yoy}
+              peak={peak}
+              avgLast5={avgLast5}
+              consumptionData={consumptionData}
+              worldRankings={worldRankings}
+              importAnalytics={importAnalytics}
+            />
+          )}
 
-          <WorldComparisonSection
-            worldCarcassPrices={worldCarcassPrices}
-            productivityComparison={productivityComparison}
-            carcassWeightData={carcassWeightData}
-            consumptionComparison={consumptionComparison}
-          />
+          {active === 'turler' && <SpeciesDetailSection filteredSeries={filteredSeries} />}
 
-          <ImportAnalysisSection
-            importData={importData}
-            series={series}
-            importAnalytics={importAnalytics}
-          />
+          {active === 'dunya' && (
+            <WorldComparisonSection
+              worldCarcassPrices={worldCarcassPrices}
+              productivityComparison={productivityComparison}
+              carcassWeightData={carcassWeightData}
+              consumptionComparison={consumptionComparison}
+            />
+          )}
 
-          <EconomicIndicatorsSection economicData={economicData} />
+          {active === 'ithalat' && (
+            <ImportAnalysisSection
+              importData={importData}
+              series={series}
+              importAnalytics={importAnalytics}
+            />
+          )}
+
+          {active === 'ekonomi' && <EconomicIndicatorsSection economicData={economicData} />}
         </>
       )}
     </div>

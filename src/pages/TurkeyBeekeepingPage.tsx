@@ -2,13 +2,24 @@ import { Loading } from '../components/Loading';
 import { useBeekeepingData } from './beekeeping/useBeekeepingData';
 import { BeekeepingKpiCards } from './beekeeping/BeekeepingKpiCards';
 import { BeekeepingIntelligencePanel } from './beekeeping/BeekeepingIntelligencePanel';
+import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
 import { BeekeepingDevelopmentSection } from './beekeeping/BeekeepingDevelopmentSection';
 import { BeekeepingProvincialSection } from './beekeeping/BeekeepingProvincialSection';
 import { BeekeepingProductivitySection } from './beekeeping/BeekeepingProductivitySection';
 import { BeekeepingHoneyTypesSection } from './beekeeping/BeekeepingHoneyTypesSection';
 import { BeekeepingTuikSection } from './beekeeping/BeekeepingTuikSection';
 
+/* 5 bölüm alt alta, mobilde 10.854 px. KPI'lar üstte kalıyor. */
+const BOLUMLER: SectionTab[] = [
+  { id: 'gelisim', label: 'Gelişim' },
+  { id: 'iller', label: 'İller' },
+  { id: 'verimlilik', label: 'Verimlilik' },
+  { id: 'bal', label: 'Bal Türleri' },
+  { id: 'tuik', label: 'TÜİK Kovan' },
+];
+
 export default function TurkeyBeekeepingPage() {
+  const { active } = useSectionTab(BOLUMLER);
   const {
     loading,
     yearTrendData,
@@ -44,20 +55,24 @@ export default function TurkeyBeekeepingPage() {
 
           {tuikKovanKpi && <BeekeepingIntelligencePanel tuikKovanKpi={tuikKovanKpi} />}
 
-          <BeekeepingDevelopmentSection yearTrendData={yearTrendData} />
+          <SectionTabs tabs={BOLUMLER} />
 
+          {active === 'gelisim' && <BeekeepingDevelopmentSection yearTrendData={yearTrendData} />}
+
+          {active === 'iller' && (
           <BeekeepingProvincialSection
             topBeekeepers={topBeekeepers}
             topProducers={topProducers}
             topYield={topYield}
             honeyTypesData={honeyTypesData}
           />
+          )}
 
-          <BeekeepingProductivitySection treemapData={treemapData} />
+          {active === 'verimlilik' && <BeekeepingProductivitySection treemapData={treemapData} />}
 
-          <BeekeepingHoneyTypesSection honeyTypesData={honeyTypesData} />
+          {active === 'bal' && <BeekeepingHoneyTypesSection honeyTypesData={honeyTypesData} />}
 
-          {tuikKovanYear.length > 0 && tuikKovanKpi && (
+          {active === 'tuik' && tuikKovanYear.length > 0 && tuikKovanKpi && (
             <BeekeepingTuikSection
               tuikKovanYear={tuikKovanYear}
               tuikKovanKpi={tuikKovanKpi}
