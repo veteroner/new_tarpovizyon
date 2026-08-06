@@ -4,7 +4,12 @@ import {
   AreaChart, Area,
   PieChart, Pie, Cell
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, num } from '../services/d1';
+
+const R = 'fao/me-indicator';
+// Kıta/toplam satırlarını dışla — "en büyük 20 ülke" listesini World, Asia,
+// Americas, Northern America, Europe yönetiyordu.
+const EX = { preset: 'v1' as const, col: 'area' };
 import { translateCountry } from '../utils/countryTranslations';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -56,21 +61,20 @@ export default function MacroEconomicPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Dünya toplam GSYH yıllık trend
-      const yearlyQuery = `SELECT year, SUM(CAST(value AS DECIMAL(20,4))) as total 
-        FROM fao_ME_indicator 
-        WHERE item='${selectedIndicator}' AND elementcode='6110' AND unit='million USD'
-        GROUP BY year ORDER BY year`;
-
-      // Ülke bazında GSYH (en büyük 20)
-      const countryQuery = `SELECT area, SUM(CAST(value AS DECIMAL(20,4))) as total 
-        FROM fao_ME_indicator 
-        WHERE item='${selectedIndicator}' AND year='${selectedYear}' AND elementcode='6110' AND unit='million USD'
-        GROUP BY area ORDER BY total DESC LIMIT 20`;
+      // NOT: bu tabloda her (item, area, year) satırı BİREBİR İKİ KEZ
+      // tekrarlanıyor (min == max). Eski sorgular SUM kullandığı için her
+      // rakam iki katı çıkıyordu — max ile tekilleştiriliyor.
+      const ORTAK = { item: selectedIndicator, elementcode: '6110', unit: 'million USD' };
 
       const [yearlyRes, countryRes] = await Promise.all([
-        fetchQuery(yearlyQuery),
-        fetchQuery(countryQuery)
+        // Dünya toplamı için FAO'nun kendi 'World' satırı kullanılıyor;
+        // tüm alanları toplamak kıtaları ülkelerle birlikte sayardı.
+        fetchAgg(R, { groupBy: ['year'], max: ['value'], where: { ...ORTAK, area: 'World' },
+          orderBy: 'year', dir: 'asc' })
+          .then((rows) => ({ data: rows.map((r) => ({ year: r.year, total: num(r.max_value) })) })),
+        fetchAgg(R, { groupBy: ['area'], max: ['value'], where: { ...ORTAK, year: selectedYear },
+          exclude: EX, orderBy: 'max_value', dir: 'desc', limit: 20 })
+          .then((rows) => ({ data: rows.map((r) => ({ area: r.area, total: num(r.max_value) })) })),
       ]);
 
       if (yearlyRes.data) {
@@ -86,7 +90,7 @@ export default function MacroEconomicPage() {
       }
 
       if (countryRes.data) {
-        const total = countryRes.data.reduce((sum: number, item) => sum + (Number(item['total']) || 0), 0);
+        const total = countryRes.data.reduce((sum: number, item) => sum + num(item.total), 0);
         const mapped = countryRes.data.map((item, index: number) => ({
           name: translateCountry(String(item['area'] || '')),
           value: (Number(item['total']) || 0) * 1e6,
@@ -195,8 +199,8 @@ export default function MacroEconomicPage() {
           <div className="chart-grid">
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Üke Dağılımı ({selectedYear})</h3>
-              <ChartInsightButton title="Üke Dağılımı" description="Üke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Ülke Dağılımı ({selectedYear})</h3>
+              <ChartInsightButton title="Ülke Dağılımı" description="Ülke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={countryData} layout="vertical">
@@ -215,8 +219,8 @@ export default function MacroEconomicPage() {
 
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Top 8 Üke Payı</h3>
-              <ChartInsightButton title="Top 8 Üke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Top 8 Ülke Payı</h3>
+              <ChartInsightButton title="Top 8 Ülke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>

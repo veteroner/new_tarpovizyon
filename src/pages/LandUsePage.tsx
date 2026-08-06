@@ -243,7 +243,7 @@ export default function LandUsePage() {
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <h3 className="chart-title" style={{ marginBottom: 0 }}>Tarim Arazisi - Ulke Siralamasi</h3>
-                  <ChartInsightButton title="Tarım Arazisi Üke Sıralaması" description="Tarım arazisi ülke sıralaması" data={benchmarkData.slice(0,30)} context={{ section: 'Benchmark' }} compact />
+                  <ChartInsightButton title="Tarım Arazisi Ülke Sıralaması" description="Tarım arazisi ülke sıralaması" data={benchmarkData.slice(0,30)} context={{ section: 'Benchmark' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={benchmarkData.slice(0, 30)} layout="vertical">

@@ -88,7 +88,7 @@ export default function FertilizerPage() {
                 </div>
                 <div className="chart-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 İthalatçı Üke</h3>
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 İthalatçı Ülke</h3>
                   <ChartInsightButton title="Top 15 Gübre İthalatçısı" description="Top 15 gübre ithalatçısı ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gübre Genel' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
@@ -195,8 +195,8 @@ export default function FertilizerPage() {
               <div className="chart-grid">
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gübre İhracatı — Üke Sıralaması</h3>
-                  <ChartInsightButton title="Gübre İhracatı Üke Sıralaması" description="Gübre ihracatcı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
+                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gübre İhracatı — Ülke Sıralaması</h3>
+                  <ChartInsightButton title="Gübre İhracatı Ülke Sıralaması" description="Gübre ihracatcı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">

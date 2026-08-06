@@ -92,7 +92,7 @@ export default function FoodBalancePage() {
                 <div className="chart-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Uretici Ulke</h3>
-                  <ChartInsightButton title="Top 15 Üretici Üke" description="Top 15 gıda üretici ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gıda Dengesi' }} compact />
+                  <ChartInsightButton title="Top 15 Üretici Ülke" description="Top 15 gıda üretici ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gıda Dengesi' }} compact />
                   </div>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>

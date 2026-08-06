@@ -4,7 +4,9 @@ import {
   AreaChart, Area,
   PieChart, Pie, Cell
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, num } from '../services/d1';
+
+const R = 'tuik/bitkisel-uretim';
 import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 
@@ -63,8 +65,9 @@ export default function TuikPlantProductionPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const query = `SELECT DISTINCT urun FROM tuik_bitkisel_uretim WHERE unsur='Üretim' ORDER BY urun LIMIT 100`;
-        const res = await fetchQuery(query);
+        const res = { data: await fetchAgg(R, {
+          groupBy: ['urun'], where: { unsur: 'Üretim' }, orderBy: 'urun', dir: 'asc', limit: 100,
+        }) };
         if (res.data) {
           const products = res.data.map((item) => ({
             id: String(item['urun']),
@@ -93,44 +96,18 @@ export default function TuikPlantProductionPage() {
 
     setLoading(true);
     try {
-      const productList = selectedProducts.map(p => `'${p}'`).join(',');
       const yearCol = selectedYear;
-
-      // İl bazında veriler
-      const cityQuery = `SELECT yer, SUM(CAST(${yearCol} AS DECIMAL(20,2))) as toplam 
-        FROM tuik_bitkisel_uretim 
-        WHERE unsur='${selectedUnsur}' AND urun IN (${productList}) AND duzeykod='3'
-        GROUP BY yer ORDER BY toplam DESC LIMIT 20`;
-
-      // Yıllık trend (Türkiye toplamı)
-      const yearlyQuery = `SELECT 
-        SUM(CAST(y2004 AS DECIMAL(20,2))) as v2004,
-        SUM(CAST(y2005 AS DECIMAL(20,2))) as v2005,
-        SUM(CAST(y2006 AS DECIMAL(20,2))) as v2006,
-        SUM(CAST(y2007 AS DECIMAL(20,2))) as v2007,
-        SUM(CAST(y2008 AS DECIMAL(20,2))) as v2008,
-        SUM(CAST(y2009 AS DECIMAL(20,2))) as v2009,
-        SUM(CAST(y2010 AS DECIMAL(20,2))) as v2010,
-        SUM(CAST(y2011 AS DECIMAL(20,2))) as v2011,
-        SUM(CAST(y2012 AS DECIMAL(20,2))) as v2012,
-        SUM(CAST(y2013 AS DECIMAL(20,2))) as v2013,
-        SUM(CAST(y2014 AS DECIMAL(20,2))) as v2014,
-        SUM(CAST(y2015 AS DECIMAL(20,2))) as v2015,
-        SUM(CAST(y2016 AS DECIMAL(20,2))) as v2016,
-        SUM(CAST(y2017 AS DECIMAL(20,2))) as v2017,
-        SUM(CAST(y2018 AS DECIMAL(20,2))) as v2018,
-        SUM(CAST(y2019 AS DECIMAL(20,2))) as v2019,
-        SUM(CAST(y2020 AS DECIMAL(20,2))) as v2020,
-        SUM(CAST(y2021 AS DECIMAL(20,2))) as v2021,
-        SUM(CAST(y2022 AS DECIMAL(20,2))) as v2022,
-        SUM(CAST(y2023 AS DECIMAL(20,2))) as v2023,
-        SUM(CAST(y2024 AS DECIMAL(20,2))) as v2024
-        FROM tuik_bitkisel_uretim 
-        WHERE unsur='${selectedUnsur}' AND urun IN (${productList}) AND duzeykod='3'`;
+      const ORTAK = { where: { unsur: selectedUnsur, duzeykod: 3 }, whereIn: { urun: selectedProducts } };
+      const YIL_SUTUNLARI = Array.from({ length: 21 }, (_, i) => `y${2004 + i}`);
 
       const [cityRes, yearlyRes] = await Promise.all([
-        fetchQuery(cityQuery),
-        fetchQuery(yearlyQuery)
+        fetchAgg(R, { groupBy: ['yer'], sum: [yearCol], ...ORTAK,
+          orderBy: `sum_${yearCol}`, dir: 'desc', limit: 20 })
+          .then((rows) => ({ data: rows.map((r) => ({ yer: r.yer, toplam: num(r[`sum_${yearCol}`]) })) })),
+        // Eskiden 21 ayrı SUM(yNNNN) sütunuydu.
+        fetchAgg(R, { sum: YIL_SUTUNLARI, ...ORTAK })
+          .then((rows) => ({ data: [Object.fromEntries(YIL_SUTUNLARI.map((yc) =>
+            [`v${yc.slice(1)}`, num(rows[0]?.[`sum_${yc}`])]))] })),
       ]);
 
       if (cityRes.data) {

@@ -13,10 +13,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, num } from '../services/d1';
+
+const R = 'tuik/hayvancilik-hayvansaluretim';
+const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
 
-const TABLE_NAME = 'tuik_hayvancilik_hayvansaluretim';
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef'];
 
@@ -85,13 +87,14 @@ export default function TurkeyOtherAnimalProductsPage() {
   const currentProduct = PRODUCTS.find(p => p.id === selectedProduct) || PRODUCTS[0];
 
   // Ürün filtresi için tur belirleme
-  const getTurFilter = (productId: string): string => {
+  /** Ürüne özgü tür süzgeci — eskiden SQL parçasıydı, artık filtre nesnesi. */
+  const getTurFilter = (productId: string): Record<string, string> => {
     switch (productId) {
-      case 'merinos_yapagi': return "AND tur='Merinos'";
-      case 'yerli_yapagi': return "AND tur='Yerli'";
-      case 'kovan_eski': return "AND tur='Eski Tip'";
-      case 'kovan_yeni': return "AND tur='Yeni Tip'";
-      default: return '';
+      case 'merinos_yapagi': return { tur: 'Merinos' };
+      case 'yerli_yapagi': return { tur: 'Yerli' };
+      case 'kovan_eski': return { tur: 'Eski Tip' };
+      case 'kovan_yeni': return { tur: 'Yeni Tip' };
+      default: return {};
     }
   };
 
@@ -101,14 +104,12 @@ export default function TurkeyOtherAnimalProductsPage() {
       try {
         const queries = PRODUCTS.map(p => {
           const turFilter = getTurFilter(p.id);
-          return fetchQuery(`
-            SELECT 
-              SUM(CAST(COALESCE(\`2024\`,0) AS DECIMAL(20,2))) as val2024,
-              SUM(CAST(COALESCE(\`2023\`,0) AS DECIMAL(20,2))) as val2023
-            FROM ${TABLE_NAME}
-            WHERE hayvan='${p.hayvan}' AND urun='${p.urun}' ${turFilter}
-              AND duzeykod='1'
-          `);
+          return fetchAgg(R, {
+            sum: ['2024', '2023'],
+            where: { hayvan: p.hayvan, urun: p.urun, duzeykod: 1, ...turFilter },
+          }).then((rows) => ({ data: [{
+            val2024: num(rows[0]?.['sum_2024']), val2023: num(rows[0]?.['sum_2023']),
+          }] }));
         });
 
         const results = await Promise.all(queries);
@@ -142,27 +143,19 @@ export default function TurkeyOtherAnimalProductsPage() {
       const turFilter = getTurFilter(selectedProduct);
 
       // Yıllık trend (ülke düzeyi)
-      const yearSums = YEARS.map(y => `SUM(CAST(COALESCE(\`${y}\`,0) AS DECIMAL(20,2))) as v${y}`).join(', ');
-      const trendQuery = `SELECT ${yearSums}
-        FROM ${TABLE_NAME}
-        WHERE hayvan='${currentProduct.hayvan}' AND urun='${currentProduct.urun}' ${turFilter}
-          AND duzeykod='1'`;
-
-      // İl bazında dağılım (en son veri olan yıl)
-      const cityQuery = `SELECT il, 
-          CAST(COALESCE(\`2024\`,0) AS DECIMAL(20,2)) as val2024,
-          CAST(COALESCE(\`2023\`,0) AS DECIMAL(20,2)) as val2023
-        FROM ${TABLE_NAME}
-        WHERE hayvan='${currentProduct.hayvan}' AND urun='${currentProduct.urun}' ${turFilter}
-          AND duzeykod='3'
-          AND il IS NOT NULL AND il != '' 
-          AND il NOT IN ('TOPLAM','Toplam','TÜRKİYE','Türkiye')
-        ORDER BY CAST(COALESCE(\`2024\`, \`2023\`, 0) AS DECIMAL(20,2)) DESC
-        LIMIT 20`;
-
+      const ORTAK = { hayvan: currentProduct.hayvan, urun: currentProduct.urun, ...turFilter };
       const [trendRes, cityRes] = await Promise.all([
-        fetchQuery(trendQuery),
-        fetchQuery(cityQuery)
+        // Eskiden yıl başına bir SUM sütunuydu.
+        fetchAgg(R, { sum: YEARS.map(String), where: { ...ORTAK, duzeykod: 1 } })
+          .then((rows) => ({ data: [Object.fromEntries(YEARS.map((y) =>
+            [`v${y}`, num(rows[0]?.[`sum_${y}`])]))] })),
+        // il NOT IN (…) / boş süzgeci istemcide; sıralama 2024, yoksa 2023.
+        fetchAgg(R, { groupBy: ['il'], sum: ['2024', '2023'], where: { ...ORTAK, duzeykod: 3 } })
+          .then((rows) => ({ data: rows
+            .map((r) => ({ il: String(r.il ?? ''), val2024: num(r['sum_2024']), val2023: num(r['sum_2023']) }))
+            .filter((r) => r.il !== '' && !TOPLAM_SATIRLARI.includes(r.il))
+            .sort((a, b) => (b.val2024 || b.val2023) - (a.val2024 || a.val2023))
+            .slice(0, 20) })),
       ]);
 
       // Trend verisi

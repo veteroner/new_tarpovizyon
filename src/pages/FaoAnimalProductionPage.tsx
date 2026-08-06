@@ -7,7 +7,12 @@ import {
   ComposedChart, Line,
   AreaChart, Area,
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, latestYear, num } from '../services/d1';
+
+const R = 'fao/uretim-hayvansal-birincil';
+// Kıta/toplam satırlarını dışla. Eski liste yalnızca World/Total varyantlarını
+// çıkarıyordu; Asya, Afrika gibi bölge satırları ülke sıralamasına karışıyordu.
+const EX = { preset: 'v1' as const, col: 'ulkead' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -83,10 +88,8 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetchQuery(
-        "SELECT MAX(year) as max_year FROM fao_uretim_hayvansal_birincil"
-      );
-      const maxYear = String(res.data?.[0]?.max_year ?? '').trim();
+      // Körlemesine MAX(year) değil, son DOLU yıl.
+      const maxYear = String((await latestYear(R, 'year')) ?? '');
       if (!cancelled && maxYear) setSelectedYear(maxYear);
     })();
     return () => { cancelled = true; };
@@ -102,34 +105,17 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
 
     setLoading(true);
     try {
-      const excludedAreas = "('World','WORLD','Dünya','DÜNYA','Dunya','Total','TOTAL','Toplam','TOPLAM')";
-      const productList = selectedProducts.map(p => `'${p.replace(/'/g, "''")}'`).join(',');
-
-      const productQuery = `SELECT urunad as item, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE year='${selectedYear}' AND urunad IN (${productList})
-          AND ulkead IS NOT NULL AND ulkead != ''
-          AND ulkead NOT IN ${excludedAreas}
-        GROUP BY urunad ORDER BY toplam DESC`;
-
-      const countryQuery = `SELECT ulkead as area, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE year='${selectedYear}' AND urunad IN (${productList})
-          AND ulkead IS NOT NULL AND ulkead != ''
-          AND ulkead NOT IN ${excludedAreas}
-        GROUP BY ulkead ORDER BY toplam DESC LIMIT 20`;
-
-      const yearlyQuery = `SELECT year, SUM(CAST(REPLACE(uretim_deger, ',', '.') AS DECIMAL(20,2))) as toplam 
-        FROM fao_uretim_hayvansal_birincil 
-        WHERE urunad IN (${productList})
-          AND ulkead IS NOT NULL AND ulkead != ''
-          AND ulkead NOT IN ${excludedAreas}
-        GROUP BY year ORDER BY year`;
-
+      const ORTAK = { whereIn: { urunad: selectedProducts } };
       const [productRes, countryRes, yearlyRes] = await Promise.all([
-        fetchQuery(productQuery),
-        fetchQuery(countryQuery),
-        fetchQuery(yearlyQuery),
+        fetchAgg(R, { groupBy: ['urunad'], sum: ['uretim_deger'], where: { year: selectedYear },
+          ...ORTAK, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc' })
+          .then((rows) => ({ data: rows.map((r) => ({ item: r.urunad, toplam: num(r.sum_uretim_deger) })) })),
+        fetchAgg(R, { groupBy: ['ulkead'], sum: ['uretim_deger'], where: { year: selectedYear },
+          ...ORTAK, exclude: EX, orderBy: 'sum_uretim_deger', dir: 'desc', limit: 20 })
+          .then((rows) => ({ data: rows.map((r) => ({ area: r.ulkead, toplam: num(r.sum_uretim_deger) })) })),
+        fetchAgg(R, { groupBy: ['year'], sum: ['uretim_deger'], ...ORTAK, exclude: EX,
+          orderBy: 'year', dir: 'asc' })
+          .then((rows) => ({ data: rows.map((r) => ({ year: r.year, toplam: num(r.sum_uretim_deger) })) })),
       ]);
 
       if (productRes.data) {
@@ -328,8 +314,8 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
           <div className="chart-grid">
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Üke Üretim Dağılımı (Treemap)</h3>
-              <ChartInsightButton title="Üke Üretim Dağılımı" description="Üke üretim dağılımı treemap" data={countryData.slice(0,12)} context={{ section: 'Hayvansal Üretim' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Ülke Üretim Dağılımı (Treemap)</h3>
+              <ChartInsightButton title="Ülke Üretim Dağılımı" description="Ülke üretim dağılımı treemap" data={countryData.slice(0,12)} context={{ section: 'Hayvansal Üretim' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <Treemap
@@ -390,8 +376,8 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
           <div className="chart-grid">
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Üke Performansı</h3>
-              <ChartInsightButton title="Top 6 Üke Performansı" description="Top 6 ülke radar analizi" data={radarData} context={{ section: 'Hayvansal Üretim' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Ülke Performansı</h3>
+              <ChartInsightButton title="Top 6 Ülke Performansı" description="Top 6 ülke radar analizi" data={radarData} context={{ section: 'Hayvansal Üretim' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>

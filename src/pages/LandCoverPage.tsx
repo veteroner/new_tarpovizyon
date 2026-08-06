@@ -6,7 +6,11 @@ import {
   ComposedChart, Line,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { fetchQuery } from '../services/api';
+import { fetchAgg, latestYear, num } from '../services/d1';
+
+const R = 'fao/land-cover';
+// Kıta/toplam satırlarını dışla — ülke sıralamasına karışıyorlardı.
+const EX = { preset: 'v1' as const, col: 'area' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -68,8 +72,8 @@ export default function LandCoverPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetchQuery("SELECT MAX(year) as max_year FROM fao_land_cover");
-      const my = parseInt(String(res.data?.[0]?.max_year ?? '2022'));
+      // Körlemesine MAX(year) değil, son DOLU yıl (kısmi yıllar eleniyor).
+      const my = (await latestYear(R, 'year')) ?? 2022;
       if (!cancelled && my) {
         setMaxYear(my);
         setSelectedYear(String(my));
@@ -88,27 +92,17 @@ export default function LandCoverPage() {
     
     setLoading(true);
     try {
-      const itemList = selectedItems.map(p => `'${p}'`).join(',');
-      
-      const coverQuery = `SELECT item_tr, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
-        FROM fao_land_cover 
-        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
-        GROUP BY item_tr ORDER BY toplam DESC`;
-      
-      const countryQuery = `SELECT area, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
-        FROM fao_land_cover 
-        WHERE year='${selectedYear}' AND item_tr IN (${itemList})
-        GROUP BY area ORDER BY toplam DESC LIMIT 20`;
-
-      const yearlyQuery = `SELECT year, SUM(CAST(value AS DECIMAL(20,2))) as toplam 
-        FROM fao_land_cover 
-        WHERE item_tr IN (${itemList})
-        GROUP BY year ORDER BY year`;
-
+      const ORTAK = { whereIn: { item_tr: selectedItems } };
       const [coverRes, countryRes, yearlyRes] = await Promise.all([
-        fetchQuery(coverQuery),
-        fetchQuery(countryQuery),
-        fetchQuery(yearlyQuery)
+        fetchAgg(R, { groupBy: ['item_tr'], sum: ['value'], where: { year: selectedYear }, ...ORTAK,
+          orderBy: 'sum_value', dir: 'desc' })
+          .then((rows) => ({ data: rows.map((r) => ({ item_tr: r.item_tr, toplam: num(r.sum_value) })) })),
+        fetchAgg(R, { groupBy: ['area'], sum: ['value'], where: { year: selectedYear }, ...ORTAK,
+          exclude: EX, orderBy: 'sum_value', dir: 'desc', limit: 20 })
+          .then((rows) => ({ data: rows.map((r) => ({ area: r.area, toplam: num(r.sum_value) })) })),
+        fetchAgg(R, { groupBy: ['year'], sum: ['value'], ...ORTAK, exclude: EX,
+          orderBy: 'year', dir: 'asc' })
+          .then((rows) => ({ data: rows.map((r) => ({ year: r.year, toplam: num(r.sum_value) })) })),
       ]);
 
       if (coverRes.data) {
@@ -257,8 +251,8 @@ export default function LandCoverPage() {
           <div className="chart-grid">
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Üke Alan Karşılaştırması</h3>
-              <ChartInsightButton title="Top 6 Üke Alan Karşılaştırması" description="Top 6 ülke arazi alanı karşılaştırması" data={radarData} context={{ section: 'Arazi Örtüsü' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Ülke Alan Karşılaştırması</h3>
+              <ChartInsightButton title="Top 6 Ülke Alan Karşılaştırması" description="Top 6 ülke arazi alanı karşılaştırması" data={radarData} context={{ section: 'Arazi Örtüsü' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
@@ -273,8 +267,8 @@ export default function LandCoverPage() {
 
             <div className="chart-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Üke ve Alan Payı</h3>
-              <ChartInsightButton title="Üke ve Alan Payı" description="Üke ve arazi alanı payı" data={countryData.slice(0,10)} context={{ section: 'Arazi Örtüsü' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Ülke ve Alan Payı</h3>
+              <ChartInsightButton title="Ülke ve Alan Payı" description="Ülke ve arazi alanı payı" data={countryData.slice(0,10)} context={{ section: 'Arazi Örtüsü' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={countryData.slice(0, 10)}>

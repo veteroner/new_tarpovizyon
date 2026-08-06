@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { fetchRows, fetchAgg, latestYear, num } from '../services/d1';
+import { fetchRows, fetchAgg, latestYear, num, type Row } from '../services/d1';
 
 const R_FAO = 'fao/livestock-primary';
 // Kıta/toplam satırlarını dışla. Eski SQL yalnızca 'World'/'WORLD' çıkarıyordu;
@@ -47,7 +47,7 @@ export default function TurkeyRedMeatProductionPage() {
       // MySQL'deki YEAR(yil) karşılığı: yil '1986-01-01 00:00:00' biçiminde
       // saklanıyor, yıl istemcide ayrıştırılıyor.
       const histSpeciesData = (await fetchRows('oner/kirmizi-et-uretim-miktari'))
-        .map((r) => ({ ...r, yil: extractYear(r.yil) })) as Record<string, string | number>[];
+        .map((r): Row => ({ ...r, yil: extractYear(r.yil) })) as Record<string, string | number>[];
 
       // 2b. Türlere Göre Kırılım - Güncel (2010-2024): sığır/manda/koyun/keçi ayrı
       const detailData = await fetchRows('oner/kirmizi-et-uretimi') as Record<string, string | number>[];
@@ -115,7 +115,7 @@ export default function TurkeyRedMeatProductionPage() {
       const economicRows = (await fetchRows('oner/kirmizi-et-ekonomik-gostergeler'))
         .slice(-60)
         .reverse()
-        .map((r) => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
+        .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
       if (economicRows.length > 0) {
         setEconomicData(economicRows.map((item: Record<string, string | number>) => ({
           tarih: String(item['tarih'] || ''),

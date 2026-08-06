@@ -348,8 +348,8 @@ export function LivestockCompetitionPage() {
       {/* ── Treemap: Ülke Pazar Payı Haritası ──────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Üke Pazar Payı Haritası ({selectedYear}) — Top 20</h3>
-        <ChartInsightButton title="Üke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />
+        <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</h3>
+        <ChartInsightButton title="Ülke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 12px' }}>
           Alan büyüklüğü toplam hayvansal üretim miktarıyla orantılı. Türkiye kırmızı ile gösterilmiştir.
