@@ -1,0 +1,259 @@
+/**
+ * Mobil uyum katmanı.
+ *
+ * Sayfalar grid'lerini büyük ölçüde SATIR İÇİ stille kuruyor
+ * (124 yerde `style={{ gridTemplateColumns: ... }}`). Satır içi stil normal
+ * CSS'i ezdiği için globals.css'teki breakpoint'ler mobilde hiç devreye
+ * girmiyordu: 375 px'te iki pasta grafik yan yana ~145 px'e sıkışıyor,
+ * dilim etiketleri kartın dışına taşıyordu.
+ *
+ * Bu dosya tek tek 71 dosyayı düzenlemek yerine sorunu kaynağında çözüyor.
+ * `!important` burada bilinçli: satır içi stili ezmenin başka yolu yok ve
+ * kural yalnızca dar ekranlarda geçerli.
+ *
+ * Grafik içi ölçüler (pasta yarıçapı, eksen etiket sayısı) CSS'ten
+ * yönetilemediği için onlar `useChartSize` hook'unda ele alınıyor.
+ */
+
+/* ─── Tablet ve altı: iki sütunlu grid'leri tek sütuna indir ─────────────── */
+@media (max-width: 1024px) {
+  .chart-grid,
+  [style*="grid-template-columns: repeat(2"],
+  [style*="gridTemplateColumns: repeat(2"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Satır içi kurulan TÜM grid'ler mobilde tek sütun. auto-fit/minmax
+     kullananlar zaten daralıyor ama minmax tabanı 200-280 px olduğu için
+     375 px'te taşabiliyor; onları da tek sütuna sabitliyoruz. */
+  [style*="display: grid"],
+  [style*="display:grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /*
+   * Ama hepsi tek sütun olmamalı. `minmax(180–220px, 1fr)` ile kurulan
+   * ızgaralar KOMPAKT İSTATİSTİK kartları (162 px yükseklikte, tek sayı
+   * gösteren) — bunları tek sütuna dizmek süt sayfasında 20 kartı 3.240 px'e
+   * çıkarıyordu. 375 px'te iki tanesi rahat sığıyor. Tabanı 240 px ve üzeri
+   * olanlar grafik kabı; onlar tek sütun kalmalı, yoksa grafik okunmaz.
+   */
+  [style*="minmax(180px"],
+  [style*="minmax(200px"],
+  [style*="minmax(220px"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /*
+   * Aynı sorunun sınıfsız hâli: sayfaların çoğu KPI'larını `.kpi-card` yerine
+   * satır içi `linear-gradient` kutularla kuruyor (süt sayfasında 20 tane).
+   * Bunlar 162 px'lik tek sayı kartları; tek sütuna dizilince sayfa 20.000 px'i
+   * geçiyordu. Grafik KABI olan grid'leri dışarıda bırakmak için Recharts
+   * içerenleri ayıklıyoruz — grafik iki sütunda okunmaz.
+   */
+  [style*="display: grid"]:has(> [style*="linear-gradient"]):not(:has(.recharts-wrapper)),
+  [style*="display:grid"]:has(> [style*="linear-gradient"]):not(:has(.recharts-wrapper)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Kart içi 28 px padding iki sütunda sayıyı taşırıyor. */
+  [style*="linear-gradient"][style*="padding: 28px"],
+  [style*="linear-gradient"][style*="padding: 24px"],
+  [style*="linear-gradient"][style*="padding: 20px"] {
+    padding: 14px !important;
+  }
+
+  /*
+   * KRİTİK: tek sütuna indirmek yetmiyor. Bazı kartlarda satır içi
+   * `grid-column: span 2` var; tek explicit track'e span 2 istenince tarayıcı
+   * ÖRTÜK ikinci sütun açıyor ve kardeş kartlar 93 px'e sıkışıyordu (pasta
+   * grafikler bu yüzden kırpılıyordu). Mobilde tüm yerleşimleri sıfırlıyoruz.
+   */
+  .chart-grid > *,
+  .kpi-grid > *,
+  [style*="display: grid"] > *,
+  [style*="display:grid"] > * {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Kart içi boşluk mobilde 24 px çok yer yiyor. */
+  .chart-card,
+  .kpi-card {
+    padding: 16px !important;
+  }
+
+  /* KPI'lar mobilde TEK sütundu: bir sayı için ~180 px yükseklik, 27 kartlı
+     bir sayfada yalnızca KPI'lar ~4.900 px sürüyordu. İki sütun + sıkı tipografi
+     bunu yarıya indiriyor; sayı hâlâ rahat okunuyor. */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .kpi-card {
+    padding: 12px !important;
+  }
+
+  .kpi-card.large {
+    grid-column: span 2 !important;
+  }
+
+  .kpi-value {
+    font-size: 1.35rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .kpi-title {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.02em;
+  }
+
+  .kpi-subtitle {
+    font-size: 0.7rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Dekoratif ikon kutusu dar kartta yer kaplıyor, sayıyı sıkıştırıyor. */
+  .kpi-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .chart-grid {
+    gap: 16px !important;
+  }
+
+  /* Grafik başlıkları 4 satıra bölünüyordu; AI düğmesiyle çakışmasın diye
+     başlık satırını dikey diz. */
+  .chart-card .chart-title {
+    font-size: 0.95rem !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Yatay taşan tablolar kendi içinde kaysın, sayfa değil. */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── Recharts: dar ekranda okunabilirlik ────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Eksen etiketleri 11 px'in altına inince okunmuyor. */
+  .recharts-cartesian-axis-tick-value,
+  .recharts-legend-item-text {
+    font-size: 11px !important;
+  }
+
+  /*
+   * Pasta dilim etiketleri dar kapta kartın dışına taşıyordu ("Keçi: 90.744 ton"
+   * 317 px'lik SVG'de 344 px'e uzanıp kırpılıyordu). Mobilde gizleniyor —
+   * ürün adı zaten açıklamada (legend), değer tooltip'te var.
+   *
+   * DİKKAT: `.recharts-pie-labels` yetmiyor. Sayfalar `label={({name,value}) =>
+   * ...}` ile ÖZEL etiket veriyor; Recharts bunları `.recharts-pie-labels`
+   * İÇİNE değil, ayrı bir `g.recharts-layer` altına `text.recharts-pie-label-text`
+   * olarak basıyor. Taşan sınıf o.
+   */
+  .recharts-pie-labels,
+  .recharts-pie-label-text,
+  .recharts-pie-label-line {
+    display: none !important;
+  }
+
+  /* Açıklama (legend) mobilde iki satıra sarsın, taşmasın. */
+  .recharts-legend-wrapper {
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  .recharts-default-legend {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 12px;
+  }
+}
+
+/* ─── Üst çubuk: 375 px'te taşıyordu ─────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Sağdaki kutu yalnızca ortalama amaçlı boş bir denge alanı; 100 px min-width
+     ile üç çocuk toplamı 430 px'e çıkıp "Türkiye" düğmesini ekran dışına
+     itiyordu (viewport 375 px). */
+  .tarpo-topbar-right {
+    min-width: 0 !important;
+  }
+
+  .tarpo-topbar {
+    padding: 0 0.5rem !important;
+    gap: 0.5rem;
+  }
+
+  /* Marka adı uzun cihaz adlarında sıkışmasın diye küçülüyor. */
+  .tarpo-brand-text {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* ─── Ekran dışı grafikleri render etme ──────────────────────────────────── */
+/*
+ * Kırmızı et sayfası 25 grafik + 27 KPI ile ~15.500 px sürüyor ve tüm Recharts
+ * SVG'leri açılışta çiziliyordu. `content-visibility: auto` tarayıcıya "ekrana
+ * girmeyen kartın içini çizme" diyor; `contain-intrinsic-size` de yer ayırdığı
+ * için kaydırma çubuğu zıplamıyor (CLS yok).
+ */
+.chart-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
+/* ─── Dokunma hedefleri (min 44×44) ──────────────────────────────────────── */
+@media (pointer: coarse) {
+  button,
+  select,
+  [role='button'],
+  .filter-select {
+    min-height: 44px;
+  }
+
+  /* Yalnızca ikon içeren küçük düğmeler (AI yorum vb.) */
+  button:has(> svg:only-child) {
+    min-width: 44px;
+  }
+}
+
+/* ─── Sayfanın kendisi asla yatay kaymaz ─────────────────────────────────── */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Uzun kelimeler (ülke adları, ürün adları) kabı taşırmasın. */
+@media (max-width: 767px) {
+  .chart-title,
+  .kpi-title,
+  .kpi-subtitle {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ─── Hareket azaltma tercihi ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

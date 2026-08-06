@@ -74,6 +74,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { tarpovizyonBasicRoutes } from './tarpovizyon-basic/routes';
 
 import './styles/globals.css';
+// globals.css'ten SONRA: satır içi grid'leri mobilde ezen kurallar burada.
+import './styles/responsive.css';
 
 const queryClient = new QueryClient();
 

@@ -27,6 +27,17 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      // Üretimde netlify.toml, action=ai_chat'i kendi Netlify Function'ımıza,
+      // diğer action'ları dersbende.com'a yönlendiriyor. Dev sunucusunda o
+      // yönlendirme yok; hepsi dersbende.com'a gidiyordu ve ai_chat 502
+      // dönüyordu ("AI Chat bağlantı hatası"). ai_chat'i ayrı bir kuralla
+      // canlı function'a yolluyoruz (VITE_AI_CHAT_ORIGIN ile değiştirilebilir).
+      '^/api\\.php\\?action=ai_chat': {
+        target: process.env.VITE_AI_CHAT_ORIGIN ?? 'https://pro.tarpovizyon.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: () => '/.netlify/functions/ai-chat',
+      },
       '/api.php': {
         target: 'https://dersbende.com',
         changeOrigin: true,

@@ -6,6 +6,7 @@ import {
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
+import { pctTick } from '../../utils/chartTicks';
 
 interface PlantMainChartsProps {
   yearlyData: YearRow[];
@@ -35,7 +36,8 @@ export default function PlantMainCharts({
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis yAxisId="left" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" unit="%" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[-50, 50]} />
+              <YAxis yAxisId="right" orientation="right" unit="%" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                domain={[-50, 50]} tickFormatter={pctTick} />
               <Tooltip
                 formatter={(value: number, name: string) => [
                   name === 'value' ? `${fmt(value)} ${currentBirim}` : `${(value as number).toFixed(1)}%`,

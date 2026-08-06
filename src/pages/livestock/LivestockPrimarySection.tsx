@@ -10,6 +10,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
+import { pctTick } from '../../utils/chartTicks';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -346,7 +347,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="share" name="Pazar Payı" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="number" dataKey="cagr5" name="5Y CAGR" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis type="number" dataKey="cagr5" name="5Y CAGR" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
               <ZAxis type="number" dataKey="total" range={[40, 400]} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value.toFixed(2)}%`, name]}

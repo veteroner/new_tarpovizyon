@@ -33,6 +33,7 @@ import {
 } from '../../utils/livestockCalculations';
 import { type Tab, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { pctTick } from '../../utils/chartTicks';
 
 interface Props {
   selectedYear: string;
@@ -452,7 +453,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" dataKey="marketShare" name="Pazar Payı" tickFormatter={(v: number) => formatShort(v)}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="number" dataKey="cagr" name="CAGR" unit="%"
+                <YAxis type="number" dataKey="cagr" name="CAGR" unit="%" tickFormatter={pctTick}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <ZAxis range={[40, 400]} />
                 <Tooltip formatter={(value: number, name: string) => [name === 'CAGR' ? `%${value.toFixed(2)}` : formatNumber(value), name]}

@@ -11,6 +11,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '../../utils/livestockCalculations';
 import { formatNumber, formatShort } from './livestockUtils';
+import { pctTick } from '../../utils/chartTicks';
 
 const R_BIR = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -379,7 +380,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="r2" name="R²" domain={[0, 1]} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="number" dataKey="growth" name="Büyüme" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis type="number" dataKey="growth" name="Büyüme" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
               <ZAxis type="number" dataKey="volume" range={[30, 300]} />
               <Tooltip
                 formatter={(value: number, name: string) => [name === 'R²' ? value.toFixed(3) : `${value.toFixed(1)}%`, name]}
