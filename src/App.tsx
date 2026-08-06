@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
@@ -12,64 +13,64 @@ import MobileExplorePage from './mobile/pages/MobileExplorePage';
 import MobileMarketPage from './mobile/pages/MobileMarketPage';
 import MobileAIPage from './mobile/pages/MobileAIPage';
 import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
-import { SelectionPage } from './pages/SelectionPage';
-import { HomePage } from './pages/HomePage';
-import { TradePage } from './pages/TradePage';
-import { ProductionPage } from './pages/ProductionPage';
-import TurkeyAnimalProductionPage from './pages/TurkeyAnimalProductionPage';
-import { LivestockCompetitionPage } from './pages/LivestockCompetitionPage';
+const SelectionPage = lazy(() => import('./pages/SelectionPage').then(m => ({ default: m.SelectionPage })));
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const TradePage = lazy(() => import('./pages/TradePage').then(m => ({ default: m.TradePage })));
+const ProductionPage = lazy(() => import('./pages/ProductionPage').then(m => ({ default: m.ProductionPage })));
+const TurkeyAnimalProductionPage = lazy(() => import('./pages/TurkeyAnimalProductionPage'));
+const LivestockCompetitionPage = lazy(() => import('./pages/LivestockCompetitionPage').then(m => ({ default: m.LivestockCompetitionPage })));
 // Hayvansal Üretim Sayfaları (TON bazlı)
-import RedMeatProductionPage from './pages/RedMeatProductionPage';
-import WhiteMeatProductionPage from './pages/WhiteMeatProductionPage';
-import MilkProductionPage from './pages/MilkProductionPage';
-import EggProductionPage from './pages/EggProductionPage';
-import OtherAnimalProductsPage from './pages/OtherAnimalProductsPage';
+const RedMeatProductionPage = lazy(() => import('./pages/RedMeatProductionPage'));
+const WhiteMeatProductionPage = lazy(() => import('./pages/WhiteMeatProductionPage'));
+const MilkProductionPage = lazy(() => import('./pages/MilkProductionPage'));
+const EggProductionPage = lazy(() => import('./pages/EggProductionPage'));
+const OtherAnimalProductsPage = lazy(() => import('./pages/OtherAnimalProductsPage'));
 // TÜİK Hayvansal Üretim (Türkiye)
-import TurkeyRedMeatProductionPage from './pages/TurkeyRedMeatProductionPage';
-import TurkeyWhiteMeatProductionPage from './pages/TurkeyWhiteMeatProductionPage';
-import TurkeyMilkProductionPage from './pages/TurkeyMilkProductionPage';
-import TurkeyEggProductionPage from './pages/TurkeyEggProductionPage';
-import TurkeyBeekeepingPage from './pages/TurkeyBeekeepingPage';
-import TurkeyOtherAnimalProductsPage from './pages/TurkeyOtherAnimalProductsPage';
+const TurkeyRedMeatProductionPage = lazy(() => import('./pages/TurkeyRedMeatProductionPage'));
+const TurkeyWhiteMeatProductionPage = lazy(() => import('./pages/TurkeyWhiteMeatProductionPage'));
+const TurkeyMilkProductionPage = lazy(() => import('./pages/TurkeyMilkProductionPage'));
+const TurkeyEggProductionPage = lazy(() => import('./pages/TurkeyEggProductionPage'));
+const TurkeyBeekeepingPage = lazy(() => import('./pages/TurkeyBeekeepingPage'));
+const TurkeyOtherAnimalProductsPage = lazy(() => import('./pages/TurkeyOtherAnimalProductsPage'));
 // Bitkisel Üretim Sayfaları
-import CerealProductionPage from './pages/CerealProductionPage';
-import VegetableProductionPage from './pages/VegetableProductionPage';
-import FruitProductionPage from './pages/FruitProductionPage';
-import LegumeProductionPage from './pages/LegumeProductionPage';
-import OilseedProductionPage from './pages/OilseedProductionPage';
-import SugarCropProductionPage from './pages/SugarCropProductionPage';
-import NutProductionPage from './pages/NutProductionPage';
-import BeverageCropPage from './pages/BeverageCropPage';
-import FiberCropPage from './pages/FiberCropPage';
+const CerealProductionPage = lazy(() => import('./pages/CerealProductionPage'));
+const VegetableProductionPage = lazy(() => import('./pages/VegetableProductionPage'));
+const FruitProductionPage = lazy(() => import('./pages/FruitProductionPage'));
+const LegumeProductionPage = lazy(() => import('./pages/LegumeProductionPage'));
+const OilseedProductionPage = lazy(() => import('./pages/OilseedProductionPage'));
+const SugarCropProductionPage = lazy(() => import('./pages/SugarCropProductionPage'));
+const NutProductionPage = lazy(() => import('./pages/NutProductionPage'));
+const BeverageCropPage = lazy(() => import('./pages/BeverageCropPage'));
+const FiberCropPage = lazy(() => import('./pages/FiberCropPage'));
 // FAO Verileri Sayfaları
-import LandUsePage from './pages/LandUsePage';
-import LivestockStocksPage from './pages/LivestockStocksPage';
-import AgriculturalEmploymentPage from './pages/AgriculturalEmploymentPage';
-import FertilizerPage from './pages/FertilizerPage';
-import PesticidePage from './pages/PesticidePage';
-import PopulationPage from './pages/PopulationPage';
-import LandCoverPage from './pages/LandCoverPage';
-import FoodBalancePage from './pages/FoodBalancePage';
+const LandUsePage = lazy(() => import('./pages/LandUsePage'));
+const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
+const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
+const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
+const PesticidePage = lazy(() => import('./pages/PesticidePage'));
+const PopulationPage = lazy(() => import('./pages/PopulationPage'));
+const LandCoverPage = lazy(() => import('./pages/LandCoverPage'));
+const FoodBalancePage = lazy(() => import('./pages/FoodBalancePage'));
 // Yeni Sayfalar
-import PriceIndexPage from './pages/PriceIndexPage';
-import MacroEconomicPage from './pages/MacroEconomicPage';
-import TuikPlantProductionPage from './pages/TuikPlantProductionPage';
-import TuikLivestockPage from './pages/TuikLivestockPage';
-import TurkeyProvincialLivestockPage from './pages/TurkeyProvincialLivestockPage';
-import TurkeyProvincialPlantPage from './pages/TurkeyProvincialPlantPage';
-import GeographicalIndicationsPage from './pages/GeographicalIndicationsPage';
-import BasinProductionPage from './pages/BasinProductionPage';
+const PriceIndexPage = lazy(() => import('./pages/PriceIndexPage'));
+const MacroEconomicPage = lazy(() => import('./pages/MacroEconomicPage'));
+const TuikPlantProductionPage = lazy(() => import('./pages/TuikPlantProductionPage'));
+const TuikLivestockPage = lazy(() => import('./pages/TuikLivestockPage'));
+const TurkeyProvincialLivestockPage = lazy(() => import('./pages/TurkeyProvincialLivestockPage'));
+const TurkeyProvincialPlantPage = lazy(() => import('./pages/TurkeyProvincialPlantPage'));
+const GeographicalIndicationsPage = lazy(() => import('./pages/GeographicalIndicationsPage'));
+const BasinProductionPage = lazy(() => import('./pages/BasinProductionPage'));
 import { RasyonApp } from './rasyon/RasyonApp';
-import { HasatTahminiPage } from './pages/HasatTahminiPage';
-import SulamaPlanPage from './pages/SulamaPlanPage';
-import GubreHesapPage from './pages/GubreHesapPage';
-import TarimTakvimPage from './pages/TarimTakvimPage';
-import ProductBalancePage from './pages/ProductBalancePage';
-import TurkeyMacroPage from './pages/TurkeyMacroPage';
-import CrossIntelligencePage from './pages/CrossIntelligencePage';
-import CommodityPricesPage from './pages/CommodityPricesPage';
-import AIAssistantPage from './pages/AIAssistantPage';
-import { OverviewPage } from './pages/OverviewPage';
+const HasatTahminiPage = lazy(() => import('./pages/HasatTahminiPage').then(m => ({ default: m.HasatTahminiPage })));
+const SulamaPlanPage = lazy(() => import('./pages/SulamaPlanPage'));
+const GubreHesapPage = lazy(() => import('./pages/GubreHesapPage'));
+const TarimTakvimPage = lazy(() => import('./pages/TarimTakvimPage'));
+const ProductBalancePage = lazy(() => import('./pages/ProductBalancePage'));
+const TurkeyMacroPage = lazy(() => import('./pages/TurkeyMacroPage'));
+const CrossIntelligencePage = lazy(() => import('./pages/CrossIntelligencePage'));
+const CommodityPricesPage = lazy(() => import('./pages/CommodityPricesPage'));
+const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
+const OverviewPage = lazy(() => import('./pages/OverviewPage').then(m => ({ default: m.OverviewPage })));
 import ErrorBoundary from './components/ErrorBoundary';
 import { tarpovizyonBasicRoutes } from './tarpovizyon-basic/routes';
 
@@ -111,6 +112,12 @@ function AppContent() {
       {!hideHeader && <Header />}
 
       <main className={isTarpoShellRoute ? 'tarpo-shell-host' : `${hideHeader ? '' : 'main-content with-header'} ${showMobilePageHeader ? 'pt-12' : ''}`}>
+        {/*
+          * 53 sayfa statik import ediliyordu; hepsi tek pakete giriyor ve
+          * mobilde ilk açılışta 1 MB gzip indiriliyordu. Rotalar lazy'ye
+          * çevrildi — kullanıcı yalnızca açtığı sayfanın kodunu indiriyor.
+          */}
+        <Suspense fallback={<div className="loading"><div className="loading-spinner" /><p>Yükleniyor...</p></div>}>
         <Routes>
           {/* Mobil Uygulama Rotaları */}
           <Route path="/m" element={<MobileLayout />}>
@@ -220,6 +227,7 @@ function AppContent() {
             <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
           </Route>
         </Routes>
+        </Suspense>
       </main>
     </>
   );
