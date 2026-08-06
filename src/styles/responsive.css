@@ -215,6 +215,30 @@
   contain-intrinsic-size: auto 420px;
 }
 
+/* ─── Grafik yüksekliği: ölü boşluğu kaldır ──────────────────────────────── */
+/*
+ * globals.css mobilde `.recharts-wrapper { max-height: 260px }` uyguluyordu.
+ * Ama ResponsiveContainer'ın DIŞ kutusu (`.recharts-responsive-container`)
+ * bileşende yazan yüksekliği (250–450 px) satır içi stille tutmaya devam
+ * ediyor. Sonuç: "İl Sıralaması — Top 20" kartı 450 px yer ayırıyor, grafik
+ * 260 px çiziliyor, altta 190 px BOMBOŞ alan kalıyordu. 25 grafikli kırmızı
+ * et sayfasında bu birkaç bin piksel demek — "sayfalar çok uzun" şikâyetinin
+ * ana kaynağı.
+ *
+ * Sınırı dış kutuya taşıyoruz: kart da küçülüyor, ResponsiveContainer yeni
+ * yüksekliği ölçüp SVG'yi o boya çiziyor, ölü alan kalmıyor. 300 px, 260'tan
+ * daha okunur (20 barlı yatay grafikte bar başına 13 px yerine 16 px).
+ */
+@media (max-width: 768px) {
+  .recharts-responsive-container {
+    max-height: 300px !important;
+  }
+
+  .recharts-wrapper {
+    max-height: 300px !important;
+  }
+}
+
 /* ─── Dokunma hedefleri (min 44×44) ──────────────────────────────────────── */
 @media (pointer: coarse) {
   button,
@@ -256,4 +280,95 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ─── Satır içi tipografiyi mobilde ölçekle ──────────────────────────────── */
+/*
+ * Kartlar rem değerlerini satır içi yazıyor: `fontSize: '2.5rem'` (40 px) bir
+ * sayı için, `'8rem'` (128 px) ise arka plandaki dekoratif emoji için. İki
+ * sütuna alınan kart 171 px genişliğinde; 40 px'lik "22,49 M ton" iki-üç
+ * satıra bölünüyor, 128 px'lik filigran da sayının okunmasını zorlaştırıyor.
+ *
+ * Satır içi stili ezmenin başka yolu yok; yalnızca dar ekranda geçerli.
+ */
+@media (max-width: 767px) {
+  [style*="font-size: 3rem"],
+  [style*="font-size: 2.8rem"],
+  [style*="font-size: 2.5rem"] {
+    font-size: 1.5rem !important;
+  }
+
+  [style*="font-size: 2.2rem"],
+  [style*="font-size: 2rem"],
+  [style*="font-size: 1.8rem"],
+  [style*="font-size: 1.75rem"] {
+    font-size: 1.3rem !important;
+  }
+
+  /*
+   * Dev dekoratif emoji filigranları (6–8rem, `position: absolute`).
+   * Bilgi taşımıyorlar ve dar kartta sayının üstüne biniyorlar; mobilde
+   * tamamen kaldırılıyor.
+   */
+  [style*="font-size: 8rem"],
+  [style*="font-size: 7rem"],
+  [style*="font-size: 6rem"],
+  [style*="font-size: 5rem"] {
+    display: none !important;
+  }
+}
+
+/* ─── Bölüm sekmeleri (SectionTabs) ──────────────────────────────────────── */
+/*
+ * Uzun sayfaları bölmek için kullanılan şerit. Yapışkan: kullanıcı grafiklerin
+ * arasında kaydırırken bölüm değiştirmek için başa dönmek zorunda kalmıyor.
+ */
+.section-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg-main, var(--bg-card, #fff));
+  border-bottom: 1px solid var(--border);
+}
+
+.section-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.section-tab {
+  flex: 0 0 auto;
+  min-height: 44px; /* dokunma hedefi */
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out;
+}
+
+.section-tab:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.section-tab.is-active {
+  background: var(--accent, #16a34a);
+  border-color: var(--accent, #16a34a);
+  color: #fff;
+  font-weight: 600;
+}
+
+.section-tab:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: 2px;
 }

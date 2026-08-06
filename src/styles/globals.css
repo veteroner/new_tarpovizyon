@@ -1101,9 +1101,17 @@ body {
    Tarayıcı + Capacitor uygulama her ikisinde de geçerli.
    ============================================================ */
 @media (max-width: 768px) {
-  /* Grafik yüksekliğini ekran genişliğine göre sınırla */
+  /*
+   * Grafik yüksekliğini sınırla.
+   *
+   * DİKKAT: sınırı yalnızca `.recharts-wrapper`'a koymak YETMEZ — dış kutu
+   * (`.recharts-responsive-container`) bileşende yazan yüksekliği satır içi
+   * stille tutar ve kartın altında ölü boşluk kalır. Asıl sınır
+   * styles/responsive.css'te dış kutuya uygulanıyor; burası onunla aynı
+   * değeri kullanmalı.
+   */
   .recharts-wrapper {
-    max-height: 260px !important;
+    max-height: 300px !important;
   }
 
   /* Tablolar yatay kaydırılabilir olsun */
