@@ -6,7 +6,7 @@ import {
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
-import { pctTick } from '../../utils/chartTicks';
+import { pctTick, truncTick } from '../../utils/chartTicks';
 
 interface PlantMainChartsProps {
   yearlyData: YearRow[];
@@ -35,9 +35,9 @@ export default function PlantMainCharts({
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis yAxisId="left" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <YAxis yAxisId="right" orientation="right" unit="%" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                domain={[-50, 50]} tickFormatter={pctTick} />
+                domain={[-50, 50]} tickFormatter={pctTick} width={46} />
               <Tooltip
                 formatter={(value: number, name: string) => [
                   name === 'value' ? `${fmt(value)} ${currentBirim}` : `${(value as number).toFixed(1)}%`,
@@ -104,8 +104,8 @@ export default function PlantMainCharts({
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={regionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-30} textAnchor="end" height={80} />
-                <YAxis tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-30} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[4, 4, 0, 0]}>
@@ -129,7 +129,7 @@ export default function PlantMainCharts({
               <BarChart data={productCompareData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={200} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} />
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>

@@ -10,6 +10,7 @@ import { TreemapContent } from '../../components/TreemapContent';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney, formatNumber } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 const R = 'tuik/ticaret-bitkisel';
 // Düzey filtreleri eski SQL'dekiyle birebir: bu tabloda hangi kırılım
@@ -201,7 +202,7 @@ export default function PlantTradeTab() {
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(1)}B`} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(1)}B`} width={46} />
               <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
               <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
               <Area type="monotone" dataKey="exp" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2} />
@@ -219,8 +220,8 @@ export default function PlantTradeTab() {
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={2} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} />
+              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} width={46} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : name === 'imp' ? 'İthalat' : 'Denge']} />
               <Legend formatter={v => v === 'exp' ? 'İhracat' : v === 'imp' ? 'İthalat' : 'Denge'} />
               <Bar yAxisId="left" dataKey="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
@@ -257,8 +258,8 @@ export default function PlantTradeTab() {
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-30} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
+              <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-30} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} width={46} />
               <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
               <Legend />
               <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />

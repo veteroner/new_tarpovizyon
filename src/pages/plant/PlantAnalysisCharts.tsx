@@ -8,6 +8,7 @@ import {
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
+import { truncTick } from '../../utils/chartTicks';
 
 interface PlantAnalysisChartsProps {
   scatterData: ScatterRow[];
@@ -47,7 +48,7 @@ export default function PlantAnalysisCharts({
                 <XAxis type="number" dataKey="area" name="Ekilen Alan" unit=" dek"
                   tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis type="number" dataKey="production" name="Üretim" unit=" ton"
-                  tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <ZAxis type="number" dataKey="verim" range={[60, 600]} name="Verim" unit=" kg/dek" />
                 <Tooltip
                   cursor={{ strokeDasharray: '3 3' }}
@@ -85,7 +86,7 @@ export default function PlantAnalysisCharts({
               <BarChart data={districtData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} tickFormatter={truncTick} />
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
@@ -170,9 +171,9 @@ export default function PlantAnalysisCharts({
               <ComposedChart data={yieldTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
-                <YAxis yAxisId="uretim" tick={{ fill: '#3b82f6', fontSize: 9 }} tickFormatter={v => fmtShort(v)} />
-                <YAxis yAxisId="alan" orientation="right" tick={{ fill: '#22c55e', fontSize: 9 }} tickFormatter={v => fmtShort(v)} />
-                <YAxis yAxisId="verim" orientation="right" tick={{ fill: '#f59e0b', fontSize: 9 }} tickFormatter={v => fmtShort(v)} dx={40} />
+                <YAxis yAxisId="uretim" tick={{ fill: '#3b82f6', fontSize: 9 }} tickFormatter={v => fmtShort(v)} width={46} />
+                <YAxis yAxisId="alan" orientation="right" tick={{ fill: '#22c55e', fontSize: 9 }} tickFormatter={v => fmtShort(v)} width={46} />
+                <YAxis yAxisId="verim" orientation="right" tick={{ fill: '#f59e0b', fontSize: 9 }} tickFormatter={v => fmtShort(v)} dx={40} width={46} />
                 <Tooltip formatter={(v: number, name: string) => [
                   name === 'uretim' ? `${fmt(v)} ton` : name === 'alan' ? `${fmt(v)} dekar` : `${v.toFixed(1)} kg/dek`,
                   name === 'uretim' ? 'Üretim' : name === 'alan' ? 'Ekilen Alan' : 'Verim'
@@ -206,7 +207,7 @@ export default function PlantAnalysisCharts({
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
                       <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 9 }}
-                        tickFormatter={v => fmtShort(v)} label={{ value: 'Üretim Değişimi (ton)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} />
+                        tickFormatter={v => fmtShort(v)} label={{ value: 'Üretim Değişimi (ton)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} width={58} />
                       <Tooltip formatter={(v: number, name: string) => [
                         `${v >= 0 ? '+' : ''}${fmt(v)} ton`,
                         name === 'alanEtkisi' ? '🟩 Alan Etkisi' : name === 'verimEtkisi' ? '🟨 Verim Etkisi' : '🟦 Sinerjik Etki'
@@ -229,7 +230,7 @@ export default function PlantAnalysisCharts({
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
                       <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 9 }}
-                        tickFormatter={v => fmtShort(v)} label={{ value: 'Üretim Değişimi (ton)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} />
+                        tickFormatter={v => fmtShort(v)} label={{ value: 'Üretim Değişimi (ton)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} width={58} />
                       <Tooltip formatter={(v: number) => [
                         `${v >= 0 ? '+' : ''}${fmt(v)} ton`, 'Üretim Değişimi'
                       ]}

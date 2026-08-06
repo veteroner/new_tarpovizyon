@@ -38,7 +38,7 @@ const bevExtra = (
       Yılda 3 füliz dönemi: Mayıs (1. füliz), Temmuz (2. füliz), Eylül (3. füliz) · En kaliteli çay 1. fülizden elde edilir.
     </p>
     <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={CAY_HASAT} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+      <AreaChart data={CAY_HASAT} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
         <defs>
           <linearGradient id="cayGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#10b981" stopOpacity={0.6} />
@@ -48,7 +48,7 @@ const bevExtra = (
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="ay" stroke="var(--text-secondary)" />
         <YAxis stroke="var(--text-secondary)" domain={[0, 110]}
-          tickFormatter={(v: number) => v + '%'} />
+          tickFormatter={(v: number) => v + '%'} width={46} />
         <Tooltip
           contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           formatter={(v: number) => [v + '%', 'Hasat Yoğunluğu']}

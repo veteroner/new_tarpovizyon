@@ -313,7 +313,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                 <AreaChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(value: number) => [`${formatNumber(value)} ${currentProduct.birim}`, currentProduct.label]} />
                   <Area type="monotone" dataKey="value" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
                 </AreaChart>
@@ -330,7 +330,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                   <BarChart data={growthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tickFormatter={(v) => `%${v}`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <YAxis tickFormatter={(v) => `%${v}`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                     <Tooltip formatter={(value: number) => [`%${value.toFixed(1)}`, 'Büyüme']} />
                     <Bar dataKey="growth" name="Büyüme" radius={[4, 4, 0, 0]}>
                       {growthData.map((entry, index) => (

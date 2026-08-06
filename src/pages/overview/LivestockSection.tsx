@@ -113,10 +113,10 @@ export function LivestockSection({ data }: Props) {
             />
           ) : (
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={data.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
+              <BarChart data={data.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 8, left: 4, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {data.livestockStocks.regional[regionalGroup].map((entry, index) => (

@@ -7,6 +7,7 @@ import { fetchCommodityPrices, fetchCommodityChart, fetchGiewsSeries, fetchGiews
 import type { CommodityItem, ChartPoint, GiewsSerie, GiewsDatapoint, GiewsPriceResult } from '../services/api';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Tahıllar': '🌾',
@@ -854,7 +855,7 @@ export default function CommodityPricesPage() {
                       <LineChart data={chartData.map(p => ({ date: new Date(p.t * 1000).toLocaleDateString('tr-TR'), price: p.c }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                         <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
-                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']} />
+                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']} width={46} />
                         <Tooltip
                           contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
                           formatter={(v: number) => [`$${v.toFixed(2)}`, 'Fiyat']}
@@ -1194,7 +1195,7 @@ export default function CommodityPricesPage() {
                         <LineChart data={detailHistory}>
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                           <XAxis dataKey="label" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
-                          <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} />
+                          <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} domain={LINE_Y_DOMAIN} width={46} />
                           <Tooltip
                             contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '0.6rem', color: '#f1f5f9', fontSize: '0.82rem' }}
                             formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'USD ort.']}
@@ -1330,7 +1331,7 @@ export default function CommodityPricesPage() {
                             <BarChart
                               data={worldRankings.slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
                               layout="vertical"
-                              margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                              margin={{ left: 0, right: 8, top: 4, bottom: 4 }}
                             >
                               <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
                               <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
@@ -1351,7 +1352,7 @@ export default function CommodityPricesPage() {
                             <BarChart
                               data={[...worldRankings].reverse().slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
                               layout="vertical"
-                              margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                              margin={{ left: 0, right: 8, top: 4, bottom: 4 }}
                             >
                               <XAxis type="number" fontSize={9} tickFormatter={(v: number) => `$${Number(v).toFixed(0)}`} stroke="#94a3b8" />
                               <YAxis type="category" dataKey="name" fontSize={9} width={98} stroke="#94a3b8" />
@@ -1671,8 +1672,7 @@ export default function CommodityPricesPage() {
                         <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
                         <YAxis
                           stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']}
-                          tickFormatter={(v: number) => `$${Number(v) < 100 ? Number(v).toFixed(1) : Math.round(Number(v)).toLocaleString('en-US')}`}
-                        />
+                          tickFormatter={(v: number) => `$${Number(v) < 100 ? Number(v).toFixed(1) : Math.round(Number(v)).toLocaleString('en-US')}`} width={46} />
                         <Tooltip
                           contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
                           formatter={(v: number) => [`$${Number(v) < 100 ? Number(v).toFixed(2) : Math.round(Number(v)).toLocaleString('en-US')}`, `/${intlSelected.measure_unit_label}`]}

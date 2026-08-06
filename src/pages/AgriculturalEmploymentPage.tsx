@@ -12,6 +12,7 @@ import {
 } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -86,7 +87,7 @@ export default function AgriculturalEmploymentPage() {
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Area type="monotone" dataKey="total" name="Toplam" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
@@ -118,8 +119,8 @@ export default function AgriculturalEmploymentPage() {
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={genderByCountry.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-45} textAnchor="end" height={80} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Bar dataKey="male" name="Erkek" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -136,8 +137,8 @@ export default function AgriculturalEmploymentPage() {
                     <ComposedChart data={genderTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                       <Tooltip />
                       <Legend />
                       <Area yAxisId="left" type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
@@ -184,8 +185,8 @@ export default function AgriculturalEmploymentPage() {
                     <ComposedChart data={concentrationData.hhiHistory}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                       <Tooltip />
                       <Legend />
                       <Bar yAxisId="left" dataKey="hhi" name="HHI" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
@@ -217,8 +218,8 @@ export default function AgriculturalEmploymentPage() {
                     <ComposedChart data={turkeyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                       <Tooltip formatter={(v: number, name: string) => [name.includes('Oran') ? `%${Number(v).toFixed(1)}` : formatPop(v), name]} />
                       <Legend />
                       <Area yAxisId="left" type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
@@ -252,7 +253,7 @@ export default function AgriculturalEmploymentPage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [v ? formatPop(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gercek" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} connectNulls />

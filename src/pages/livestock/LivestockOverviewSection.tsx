@@ -430,7 +430,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
               <AreaChart data={overviewTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(value: number) => [formatNumber(value), 'Hayvan Stoku']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                 <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2.5} />
@@ -454,7 +454,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                 <XAxis type="number" dataKey="marketShare" name="Pazar Payı" tickFormatter={(v: number) => formatShort(v)}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis type="number" dataKey="cagr" name="CAGR" unit="%" tickFormatter={pctTick}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <ZAxis range={[40, 400]} />
                 <Tooltip formatter={(value: number, name: string) => [name === 'CAGR' ? `%${value.toFixed(2)}` : formatNumber(value), name]}
                   labelFormatter={(_, payload) => { if (payload && payload.length > 0) { const d = payload[0].payload as {country: string}; return d.country; } return ''; }}

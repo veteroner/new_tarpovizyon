@@ -372,3 +372,52 @@ body {
   outline: 2px solid var(--accent, #16a34a);
   outline-offset: 2px;
 }
+
+/* ─── Aralık çipleri (RangeChips) ────────────────────────────────────────── */
+.range-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.range-chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out;
+}
+
+.range-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.range-chip.is-active {
+  background: var(--accent, #16a34a);
+  border-color: var(--accent, #16a34a);
+  color: #fff;
+  font-weight: 600;
+}
+
+.range-chip:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: 2px;
+}
+
+/* Seçili aralığın gerçek yılları — çip etiketleri göreli olduğu için
+   kullanıcının hangi yılları gördüğü açıkça yazılıyor. */
+.range-chips-note {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+}

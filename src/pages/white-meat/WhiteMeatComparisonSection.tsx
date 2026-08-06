@@ -92,10 +92,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
                 <ChartInsightButton title="📊 Piliç Eti Dış Ticaret Trendi" description="Türkiye piliç eti ihracat ve ithalat gelişimi" data={tradeData} context={{ section: 'Ticaret' }} />
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={tradeData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+                <ComposedChart data={tradeData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${formatShort(v)}M`} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${formatShort(v)}M`} width={46} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(v: number, name: string) => [`$${v.toLocaleString('tr-TR')} M`, name]} />
                   <Legend />
                   <Bar dataKey="ihracat_musd" name="İhracat (M$)" fill="#22c55e" fillOpacity={0.85} radius={[4, 4, 0, 0]} />
@@ -139,7 +139,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
             })()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number, name: string) => [Number(value).toLocaleString('tr-TR') + ' ton', name]} />
               <Legend />
               <Bar dataKey="tavuk" name="Tavuk Eti" fill="#f97316" radius={[4, 4, 0, 0]} />
@@ -217,7 +217,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
             })()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Toplam']} />
               <Area type="monotone" dataKey="toplam" name="Toplam Beyaz Et" fill="#10b981" stroke="#10b981" fillOpacity={0.3} strokeWidth={3} />
             </AreaChart>

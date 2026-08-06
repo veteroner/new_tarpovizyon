@@ -80,7 +80,7 @@ export function MilkSection({ data }: Props) {
             <AreaChart data={data.milkProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="milk" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
             </AreaChart>

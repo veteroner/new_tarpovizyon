@@ -11,6 +11,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { useTradeIntelligenceData, MONTHS_TR } from './useTradeIntelligenceData';
 import type { HHIResult } from './useTradeIntelligenceData';
+import { truncTick } from '../../utils/chartTicks';
 
 const RISK_COLORS = { low: '#10b981', medium: '#f59e0b', high: '#ef4444', critical: '#991b1b' };
 
@@ -289,7 +290,7 @@ export default function TradeIntelligenceTab() {
                   <ComposedChart data={up.data}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="yil" fontSize={9} />
-                    <YAxis fontSize={9} tickFormatter={v => `$${v.toFixed(0)}`} />
+                    <YAxis fontSize={9} tickFormatter={v => `$${v.toFixed(0)}`} width={46} />
                     <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, '']} />
                     <Bar dataKey="exp_usd_ton" fill="#10b981" name="İhracat $/birim" opacity={0.6} />
                     <Line dataKey="imp_usd_ton" stroke="#f59e0b" name="İthalat $/birim" strokeWidth={2} dot={false} />
@@ -318,7 +319,7 @@ export default function TradeIntelligenceTab() {
               <BarChart data={opportunities.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" fontSize={10} tickFormatter={v => `${v.toFixed(1)}x`} />
-                <YAxis type="category" dataKey="product" fontSize={10} width={120} tick={{ fontSize: 10 }} />
+                <YAxis type="category" dataKey="product" fontSize={10} width={110} tick={{ fontSize: 10 }} tickFormatter={truncTick} />
                 <Tooltip formatter={(v: number) => [`${v.toFixed(2)}x`, 'Mevsimsel Endeks']} />
                 <Bar dataKey="seasonalIndex" name="Mevsimsel Endeks" radius={[0, 4, 4, 0]}>
                   {opportunities.slice(0, 10).map((_, i) => (
@@ -357,7 +358,7 @@ export default function TradeIntelligenceTab() {
             <AreaChart data={seasonalProfileData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="ax" fontSize={10} />
-              <YAxis fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
+              <YAxis fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} width={46} />
               <Tooltip formatter={(v: number) => [formatMoney(v), '']} />
               <Legend />
               {seasonalData.slice(0, 3).map((s, i) => (

@@ -9,6 +9,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { truncTick } from '../../utils/chartTicks';
 
 interface Props {
   selectedYear: string;
@@ -322,7 +323,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
                 isTR: c.country.includes('Türkiye') || c.country.toLowerCase().includes('turkey'),
               }))}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+              margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(0)}M`} />
@@ -350,11 +351,11 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
                 fill: g.cagr > 5 ? '#22c55e' : g.cagr > 0 ? '#3b82f6' : g.cagr > -3 ? '#f59e0b' : '#ef4444',
               }))}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 160, bottom: 5 }}
+              margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(1)}%`} />
-              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={155} />
+              <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={110} tickFormatter={truncTick} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number) => [`%${(v as number).toFixed(2)} CAGR`, 'Büyüme']} />
               {processedGrowthData.slice(0, 15).map((g, i) => (
@@ -373,10 +374,10 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           <ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />
         </div>
         <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+          <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" stroke="var(--text-secondary)" />
-            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(Number(v) / 1e6).toFixed(1)}M`} />
+            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(Number(v) / 1e6).toFixed(1)}M`} width={46} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
               formatter={(v: number, n: string) => [formatNumber(v) + ' ton', n === 'dairy' ? '🧀 Süt Ürünleri' : n === 'fats' ? '🫒 Yağlar' : '📦 Diğer']} />
             <Legend formatter={(v: string) => v === 'dairy' ? '🧀 Süt Ürünleri' : v === 'fats' ? '🫒 Yağlar' : '📦 Diğer'} />

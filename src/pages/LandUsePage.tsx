@@ -13,6 +13,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { useLandUseData, CHART_COLORS, formatArea, formatShort, formatPercent, LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY } from './landUse/useLandUseData';
 import type { Tab } from './landUse/useLandUseData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
 
 const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍', desc: 'Dunya arazi kullanimi ozeti' },
@@ -99,7 +100,7 @@ export default function LandUsePage() {
                     <BarChart data={overviewLandTypes} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Alan']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {overviewLandTypes.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -115,8 +116,8 @@ export default function LandUsePage() {
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                         {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -135,7 +136,7 @@ export default function LandUsePage() {
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Area type="monotone" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                     </AreaChart>
@@ -193,7 +194,7 @@ export default function LandUsePage() {
                     <LineChart data={transformData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                       <Tooltip formatter={(v: number) => [formatArea(v), '']} />
                       <Legend />
                       {Object.keys(transformData[0] || {}).filter(k => k !== 'year').map((key, i) => (
@@ -213,8 +214,8 @@ export default function LandUsePage() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={transformComparison}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-30} textAnchor="end" height={80} />
-                        <YAxis tickFormatter={(v) => '%' + v} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                        <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-30} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                        <YAxis tickFormatter={(v) => '%' + v} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                         <Tooltip formatter={(v: number) => ['%' + (v as number).toFixed(1), '']} />
                         <Bar dataKey="changePct" name="Degisim %" radius={[4, 4, 0, 0]}>
                           {transformComparison.map((tc: any, i: number) => <Cell key={i} fill={tc.changePct > 0 ? '#22c55e' : '#ef4444'} />)}
@@ -249,7 +250,7 @@ export default function LandUsePage() {
                     <BarChart data={benchmarkData.slice(0, 30)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
+                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Bar dataKey="agLand" radius={[0, 4, 4, 0]}>
                         {benchmarkData.slice(0, 30).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -294,7 +295,7 @@ export default function LandUsePage() {
                     <LineChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                       <Tooltip formatter={(v: number) => [v ? formatArea(v) : 'N/A', '']} />
                       <Legend />
                       {Object.keys(turkeyTrends[0] || {}).filter(k => k !== 'year').map((key, i) => (
@@ -365,7 +366,7 @@ export default function LandUsePage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [v ? formatArea(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="turkeyHistorical" name="Turkiye (Gercek)" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} connectNulls />

@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   quailMeatData: TuikTurkeyMeatData[];
@@ -112,8 +113,8 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} />
+              <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="production" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorQuail)" />
               <Line type="monotone" dataKey="production" stroke="#7c3aed" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 4 }} activeDot={{ r: 6 }} />
@@ -138,8 +139,8 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
               })()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Et (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Kesilen (bin adet)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} />
+                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Et (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Kesilen (bin adet)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
                 <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                 <Legend />
                 <Bar yAxisId="right" dataKey="slaughtered" name="Kesilen (bin adet)" fill="#06b6d4" radius={[4, 4, 0, 0]} opacity={0.7} />
@@ -161,8 +162,8 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={monthlyQuailMeat}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
                 <Bar dataKey="value" name="Aylık Üretim" radius={[8, 8, 0, 0]}>
                   {monthlyQuailMeat.map((_, index) => (

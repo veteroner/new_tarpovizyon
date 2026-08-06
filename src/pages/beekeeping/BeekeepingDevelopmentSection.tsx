@@ -43,7 +43,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData:
             <ChartInsightButton title="🐝 Arıcı Sayısı Gelişimi" description="Arıcı sayısı yıllık gelişim trendi" data={yearTrendData} context={{ section: 'Arıcı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <AreaChart data={yearTrendData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <AreaChart data={yearTrendData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorBeekeepers" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
@@ -52,7 +52,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData:
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatNumber(value) + ' arıcı', 'Toplam Arıcı']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

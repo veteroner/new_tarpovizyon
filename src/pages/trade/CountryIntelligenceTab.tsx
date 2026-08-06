@@ -40,6 +40,7 @@ const sonTamYil = async () =>
   String((await latestYear(R_BIT, 'yil', { minShare: 0.9 })) ?? new Date().getFullYear() - 1);
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import countryProfilesData from '../../data/countryProfiles.json';
+import { truncTick } from '../../utils/chartTicks';
 
 interface CountryProfile {
   name_tr: string;
@@ -445,7 +446,7 @@ export default function CountryIntelligenceTab() {
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
                   <Area type="monotone" dataKey="exp" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2} />
@@ -463,7 +464,7 @@ export default function CountryIntelligenceTab() {
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={3} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : name === 'imp' ? 'İthalat' : 'Denge']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : v === 'imp' ? 'İthalat' : 'Denge'} />
                   <Bar dataKey="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
@@ -484,7 +485,7 @@ export default function CountryIntelligenceTab() {
               <BarChart data={productBarData} layout="vertical" onClick={(state: any) => openProductDetail(state?.activePayload?.[0]?.payload?.fullName || '')}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
-                <YAxis type="category" dataKey="name" width={140} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={truncTick} />
                 <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
                 <Legend />
                 <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[0, 4, 4, 0]} />
@@ -557,7 +558,7 @@ export default function CountryIntelligenceTab() {
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
               <ResponsiveContainer width="100%" height={320}>
-                <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <ScatterChart margin={{ top: 10, right: 8, bottom: 30, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     type="number" dataKey="x" name="İhracat Payı (%)"
@@ -567,8 +568,7 @@ export default function CountryIntelligenceTab() {
                   <YAxis
                     type="number" dataKey="y" name="Denge ($M)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    tickFormatter={v => `$${Number(v).toFixed(0)}M`}
-                  />
+                    tickFormatter={v => `$${Number(v).toFixed(0)}M`} width={46} />
                   <ZAxis type="number" dataKey="z" range={[40, 600]} name="İhracat ($M)" />
                   <Tooltip
                     cursor={{ strokeDasharray: '3 3' }}
@@ -752,7 +752,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide />
+                        <YAxis hide width={46} />
                         <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                         <Area type="monotone" dataKey="exp" stroke="#10b981" fill="url(#countryDrawerExp)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="url(#countryDrawerImp)" strokeWidth={2} dot={false} />
@@ -782,7 +782,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide />
+                        <YAxis hide width={46} />
                         <Tooltip formatter={(v: number, name: string) => [`%${v.toFixed(1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
                         <Area type="monotone" dataKey="expShare" stroke="#6366f1" fill="url(#countryDrawerExpShare)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="impShare" stroke="#ef4444" fill="url(#countryDrawerImpShare)" strokeWidth={2} dot={false} />

@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import type { PoultryEconomicData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   economicData: PoultryEconomicData[];
@@ -127,8 +128,8 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
@@ -149,8 +150,8 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)}%`]}
@@ -171,9 +172,9 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend />
               <Line yAxisId="left" type="monotone" dataKey="etlik_pilic_yemi_tl_kg" name="Yem Fiyatı (₺/kg)" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
@@ -190,8 +191,8 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}

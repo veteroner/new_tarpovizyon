@@ -74,7 +74,7 @@ export function EggSection({ data }: Props) {
             <AreaChart data={data.eggProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' adet', 'Üretim']} />
               <Area type="monotone" dataKey="egg" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
             </AreaChart>

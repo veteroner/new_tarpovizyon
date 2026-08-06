@@ -199,10 +199,10 @@ export default function ProductionOverviewSection({
             <ChartInsightButton title={`📈 Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <AreaChart data={filteredSeries} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <AreaChart data={filteredSeries} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 labelFormatter={(label) => `Yıl: ${label}`} 
                 formatter={(value: number) => [formatTon(Number(value))]}

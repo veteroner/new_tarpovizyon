@@ -181,10 +181,10 @@ export default function MilkTuikSection({
             <ChartInsightButton title="📈 Yıllık Üretim Trendi" description="Seçili süt ürünü yıllık üretim trendi" data={tuikSelectedData} context={{ urun: selectedTuikSutUrun }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <ComposedChart data={tuikSelectedData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <ComposedChart data={tuikSelectedData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [new Intl.NumberFormat('tr-TR').format(value) + ' ton']}
                 labelFormatter={(label) => `Yıl: ${label}`}
@@ -218,10 +218,10 @@ export default function MilkTuikSection({
               <ChartInsightButton title="📅 Aylık Dağılım" description="Seçili yıl aylık üretim dağılımı" data={tuikSeasonality} context={{ yil: tuikLatestYear?.yil }} compact />
             </div>
             <ResponsiveContainer width="100%" height={360}>
-              <BarChart data={tuikSeasonality} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+              <BarChart data={tuikSeasonality} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
                 <Tooltip 
                   formatter={(value: number) => [new Intl.NumberFormat('tr-TR').format(value) + ' ton']}
                   labelFormatter={(label) => `${label}`}
@@ -253,10 +253,10 @@ export default function MilkTuikSection({
               <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Seçili ürün yıllık büyüme oranları" data={tuikGrowthRates} context={{ urun: selectedTuikSutUrun }} compact />
             </div>
             <ResponsiveContainer width="100%" height={360}>
-              <BarChart data={tuikGrowthRates} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+              <BarChart data={tuikGrowthRates} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip 
                   formatter={(value: number) => [`${value.toFixed(1)}%`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -287,7 +287,7 @@ export default function MilkTuikSection({
             <ResponsiveContainer width="100%" height={400}>
               <BarChart 
                 data={tuikAllProductsLatest} 
-                margin={{ top: 10, right: 24, left: 0, bottom: 60 }}
+                margin={{ top: 10, right: 8, left: 0, bottom: 60 }}
                 layout="horizontal"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -296,9 +296,8 @@ export default function MilkTuikSection({
                   tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                   angle={-35}
                   textAnchor="end"
-                  height={80}
-                />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+                  height={80} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
                 <Tooltip 
                   formatter={(value: number, _name: string, props: { payload?: { birim?: string } }) => [
                     `${new Intl.NumberFormat('tr-TR').format(value)} ${props.payload?.birim ?? ''}`
@@ -338,10 +337,10 @@ export default function MilkTuikSection({
               <ChartInsightButton title="🌡️ Mevsimsellik Analizi" description="Süt ürünü mevsimsellik ısı haritası" data={tuikSeasonHeatmap} context={{ urun: selectedTuikSutUrun }} />
             </div>
             <ResponsiveContainer width="100%" height={380}>
-              <ComposedChart data={tuikSeasonHeatmap} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+              <ComposedChart data={tuikSeasonHeatmap} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
                 <Tooltip 
                   formatter={(value: number) => [new Intl.NumberFormat('tr-TR').format(value) + ' ton']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

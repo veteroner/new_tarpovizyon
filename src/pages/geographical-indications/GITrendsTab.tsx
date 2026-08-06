@@ -32,10 +32,10 @@ export function GITrendsTab({ yearlyTrend }: Props) {
           <ChartInsightButton title="📊 Yıllık Tescil Trendi" description="Yıllık tescil ve başvuru sayıları trendi" data={yearlyTrend} context={{ section: 'Coğrafi İşaretler Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
-          <AreaChart data={yearlyTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={yearlyTrend} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
-            <YAxis tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
+            <YAxis tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

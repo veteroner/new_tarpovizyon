@@ -12,6 +12,7 @@ import {
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface EggTuikOverviewTabProps {
   tuikData: TuikEggData[];
@@ -74,15 +75,13 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
                 yAxisId="left"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <YAxis
                 yAxisId="right"
                 orientation="right"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Tavuk Sayısı (adet)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Tavuk Sayısı (adet)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend />
               <Bar yAxisId="left" dataKey="eggProduction" name="Yumurta Üretimi (bin adet)" fill="#f59e0b" opacity={0.7} radius={[4, 4, 0, 0]} />

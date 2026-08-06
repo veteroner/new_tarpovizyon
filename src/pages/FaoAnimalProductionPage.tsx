@@ -16,6 +16,7 @@ const EX = { preset: 'v1' as const, col: 'ulkead' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 // --------------- Types ---------------
 export interface FaoProduct {
@@ -360,9 +361,9 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} />
-                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                   <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatValue(value) : `%${value}`, name === 'value' ? 'Üretim' : 'Pay']} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="value" name="Üretim" fill={primaryColor} radius={[4, 4, 0, 0]} />
@@ -399,7 +400,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                   <Tooltip formatter={(value: number) => [formatValue(value), 'Üretim']} />
                   <Area type="monotone" dataKey="value" stroke={primaryColor} fill={primaryColor} fillOpacity={0.3} />
                 </AreaChart>

@@ -14,6 +14,7 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -223,7 +224,7 @@ export default function LandCoverPage() {
                 <BarChart data={coverData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
@@ -273,9 +274,9 @@ export default function LandCoverPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} />
-                  <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                   <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatArea(value) : `%${value}`, name === 'value' ? 'Alan' : 'Pay']} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="value" name="Alan" fill="#22c55e" radius={[4, 4, 0, 0]} />
@@ -295,7 +296,7 @@ export default function LandCoverPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                   <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                 </AreaChart>

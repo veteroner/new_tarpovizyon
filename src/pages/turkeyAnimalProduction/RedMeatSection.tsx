@@ -68,7 +68,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <BarChart data={redMeatTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Legend />
                 <Bar dataKey="Sığır" stackId="a" fill={COLORS['Sığır']} />
@@ -93,7 +93,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <ComposedChart data={buyukbasKucukbasData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Legend />
                 <Area type="monotone" dataKey="Büyükbaş" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.4} strokeWidth={2} />

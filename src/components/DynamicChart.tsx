@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 const DEFAULT_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -108,11 +109,11 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
         {title && <h3 className="chart-title">{title}</h3>}
         {subtitle && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 8 }}>{subtitle}</p>}
         <ResponsiveContainer width="100%" height={height}>
-          <ComposedChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <ComposedChart data={data} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e2e8f0)" />
             <XAxis dataKey={xKey} stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }}
-              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} />
+              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} width={46} />
             <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
             <Legend />
             {activeSeries.map((s, i) => {
@@ -136,11 +137,11 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
         {title && <h3 className="chart-title">{title}</h3>}
         {subtitle && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 8 }}>{subtitle}</p>}
         <ResponsiveContainer width="100%" height={height}>
-          <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <BarChart data={data} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e2e8f0)" />
             <XAxis dataKey={xKey} stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }}
-              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} />
+              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} width={46} />
             <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
             {activeSeries.length > 1 && <Legend />}
             {activeSeries.map((s, i) => (
@@ -163,11 +164,11 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
         {title && <h3 className="chart-title">{title}</h3>}
         {subtitle && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 8 }}>{subtitle}</p>}
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e2e8f0)" />
             <XAxis dataKey={xKey} stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }} />
             <YAxis stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }}
-              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} />
+              tickFormatter={(v: number) => v.toLocaleString('tr-TR')} domain={LINE_Y_DOMAIN} width={46} />
             <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
             {activeSeries.length > 1 && <Legend />}
             {activeSeries.map((s, i) => (
@@ -187,7 +188,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
       {title && <h3 className="chart-title">{title}</h3>}
       {subtitle && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 8 }}>{subtitle}</p>}
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
           <defs>
             {activeSeries.map((s, i) => {
               const color = s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length];
@@ -202,7 +203,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e2e8f0)" />
           <XAxis dataKey={xKey} stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }} />
           <YAxis stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }}
-            tickFormatter={(v: number) => v.toLocaleString('tr-TR')} />
+            tickFormatter={(v: number) => v.toLocaleString('tr-TR')} width={46} />
           <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
           {activeSeries.length > 1 && <Legend />}
           {activeSeries.map((s, i) => {

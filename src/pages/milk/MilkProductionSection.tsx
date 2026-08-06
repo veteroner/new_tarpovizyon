@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { COLORS, formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   series: YearPoint[];
@@ -54,10 +55,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="📈 Toplam Süt Üretimi Trendi (Tüm Yıllar)" description="Türkiye toplam süt üretimi tarihsel trendi" data={series} context={{ section: 'Süt Üretimi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <ComposedChart data={series} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <ComposedChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]} 
                 labelFormatter={(label) => `Yıl: ${label}`}
@@ -124,10 +125,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Son 15 yıl süt üretimi büyüme oranları" data={growthRates.slice(-15)} context={{ section: 'Büyüme' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <LineChart data={growthRates.slice(-15)} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <LineChart data={growthRates.slice(-15)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip 
                 formatter={(value: number) => [`${value.toFixed(2)}%`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -160,10 +161,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="📈 Son 5 Yıl Toplam Üretim Trendi" description="Son 5 yıl toplam süt üretimi trendi" data={series.slice(-5)} context={{ section: 'Üretim Trendi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <ComposedChart data={series.slice(-5)} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <ComposedChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} 
@@ -203,10 +204,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="🐄 Büyükbaş Süt Üretimi (Son 5 Yıl)" description="Büyükbaş hayvan süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'cattle' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} 
@@ -231,10 +232,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="🐑 Koyun Süt Üretimi (Son 5 Yıl)" description="Koyun süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'sheep' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} 
@@ -259,10 +260,10 @@ export default function MilkProductionSection({
             <ChartInsightButton title="🐐 Keçi Süt Üretimi (Son 5 Yıl)" description="Keçi süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'goat' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} 
@@ -306,10 +307,10 @@ export default function MilkProductionSection({
                   <ChartInsightButton title="📈 Süt Verimi Trendi (Litre/Baş)" description="Türkiye süt verimi trendi" data={productivity} context={{ section: 'Verimlilik' }} />
                 </div>
                 <ResponsiveContainer width="100%" height={340}>
-                  <ComposedChart data={productivity} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+                  <ComposedChart data={productivity} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                     <Tooltip 
                       formatter={(value: number) => [`${value.toFixed(1)} lt/baş`]}
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -350,16 +351,15 @@ export default function MilkProductionSection({
                   <ChartInsightButton title="🌍 Dünya Karkas Verimi Karşılaştırması" description="Türkiye vs dünya karkas verim karşılaştırması" data={productivityComparison} context={{ section: 'Verimlilik' }} />
                 </div>
                 <ResponsiveContainer width="100%" height={340}>
-                  <BarChart data={productivityComparison} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+                  <BarChart data={productivityComparison} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis 
                       dataKey="ulke" 
                       tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                       angle={-45}
                       textAnchor="end"
-                      height={100}
-                    />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      height={100} interval="preserveStartEnd" minTickGap={16} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                     <Tooltip 
                       formatter={(value: number) => [`${value} kg/baş`]}
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

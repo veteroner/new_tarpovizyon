@@ -77,7 +77,7 @@ export function YearlyChart({
   return (
     <div ref={containerRef}>
       <ResponsiveContainer width="100%" height={(isNarrow ? 280 : 340) + legendHeight}>
-        <ComposedChart data={data} margin={{ left: 4, right: 12, top: 8, bottom: legendHeight }}>
+        <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8, bottom: legendHeight }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f5" />
           <XAxis dataKey={xKey} interval={tickInterval} tick={{ fontSize }} tickMargin={6} />
           <YAxis

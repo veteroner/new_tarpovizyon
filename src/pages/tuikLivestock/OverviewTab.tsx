@@ -5,6 +5,7 @@ import {
 import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { truncTick } from '../../utils/chartTicks';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedCategory' | 'yearLabel'
@@ -65,8 +66,8 @@ export default function OverviewTab({
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={groupChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" angle={-15} textAnchor="end" height={60} tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="name" angle={-15} textAnchor="end" height={60} tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
               <Bar dataKey="value" name="Hayvan Sayısı" radius={[4, 4, 0, 0]}>
                 {groupChartData.map((entry, index) => (
@@ -88,8 +89,8 @@ export default function OverviewTab({
           <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="year" angle={-30} textAnchor="end" height={60} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="year" angle={-30} textAnchor="end" height={60} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
               <Area type="monotone" dataKey="value" name={selectedAnimal} stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} strokeWidth={2} />
             </AreaChart>
@@ -105,7 +106,7 @@ export default function OverviewTab({
             <BarChart data={growthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [`${value.toFixed(1)}%`, 'Büyüme']} />
               <Bar dataKey="growth" name="Büyüme (%)" radius={[4, 4, 0, 0]}>
                 {growthData.map((entry, index) => (
@@ -146,7 +147,7 @@ export default function OverviewTab({
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
                 <Bar dataKey="value" name="Hayvan Sayısı" radius={[0, 4, 4, 0]}>
                   {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}

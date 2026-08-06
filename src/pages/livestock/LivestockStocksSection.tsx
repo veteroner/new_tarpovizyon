@@ -11,6 +11,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
+import { truncTick } from '../../utils/chartTicks';
 
 const R = 'fao/uretim-hayvansal-canlihayvan';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -403,7 +404,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             <AreaChart data={stocksDeepTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(stocksDeepTrend.length / 15))} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value), '']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend />
               {selectedItems.map((id, idx) => {
@@ -465,7 +466,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
               <ChartInsightButton title="Ülke Growth Quadrant (Büyüme × Stok)" description="Ülkelerin stok büyüme oranı ve toplam stok dağılımı" data={stocksCountryCAGR} context={{}} />
             </div>
             <ResponsiveContainer width="100%" height={400}>
-              <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 10 }}>
+              <ScatterChart margin={{ top: 10, right: 8, bottom: 30, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" dataKey="total" name="Stok" tickFormatter={(v: number) => formatShort(v)}
                   label={{ value: 'Toplam Stok (Baş)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)' }}
@@ -473,7 +474,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                 <YAxis type="number" dataKey="cagr5" name="CAGR"
                   tickFormatter={(v: number) => `${v.toFixed(1)}%`}
                   label={{ value: '5Y CAGR (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
                 <ZAxis range={[60, 400]} />
                 <Tooltip
                   cursor={{ strokeDasharray: '3 3' }}
@@ -513,7 +514,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             <BarChart data={stocksCountryData.slice(0, 20)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Stok']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>

@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { type TuikKovanYearData, type TuikKovanKpi, type TuikProvinceKovan, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   tuikKovanYear: TuikKovanYearData[];
@@ -144,15 +145,14 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <ChartInsightButton title="🪔 Kovan Sayısı Gelişimi" description="Eski ve yeni tip kovan sayısı yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={tuikKovanYear} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <ComposedChart data={tuikKovanYear} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               <YAxis 
                 yAxisId="left"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} 
                 tickFormatter={formatNumber}
-                label={{ value: 'Kovan (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Kovan (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => [
@@ -231,7 +231,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <ChartInsightButton title="🕯️ Balmumu Üretimi Trendi" description="Balmumu üretimi yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Balmumu' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <AreaChart data={tuikKovanYear} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <AreaChart data={tuikKovanYear} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorBalmumu" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6}/>
@@ -243,8 +243,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <YAxis 
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => v.toLocaleString('tr-TR')}
-                label={{ value: 'Balmumu (Ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Balmumu (Ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [value.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' ton', 'Balmumu']}
@@ -303,14 +302,13 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
                 year: d.year,
                 verim: d.toplam > 0 ? (d.balmumu * 1000 / d.toplam) : 0
               }))}
-              margin={{ top: 10, right: 24, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               <YAxis 
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                tickFormatter={(v) => v.toFixed(2)}
-              />
+                tickFormatter={(v) => v.toFixed(2)} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [value.toFixed(3) + ' kg/kovan', 'Balmumu Verimi']}
@@ -347,15 +345,14 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
                 yeniOran: d.toplam > 0 ? (d.yeniTip / d.toplam * 100) : 0,
                 eskiOran: d.toplam > 0 ? (d.eskiTip / d.toplam * 100) : 0,
               }))}
-              margin={{ top: 10, right: 24, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               <YAxis 
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 domain={[0, 100]}
-                tickFormatter={(v) => v + '%'}
-              />
+                tickFormatter={(v) => v + '%'} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => [
@@ -393,7 +390,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <ChartInsightButton title="🪔 En Fazla Kovan Olan İller" description="İl bazında kovan sıralaması" data={tuikTopKovan} context={{ section: 'İl Kovan' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={tuikTopKovan} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
+              <BarChart data={tuikTopKovan} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
                 <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
@@ -425,7 +422,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <ChartInsightButton title="🕯️ En Fazla Balmumu Üreten İller" description="İl bazında balmumu sıralaması" data={tuikTopBalmumu} context={{ section: 'İl Balmumu' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
+              <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />

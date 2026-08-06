@@ -16,6 +16,7 @@ import {
   GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
 } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 const CYAN = '#06b6d4';
 const PURPLE = '#8b5cf6';
@@ -194,10 +195,10 @@ export default function ProductBalancePage() {
               <ChartInsightButton title={`Arz-Talep Akışı — ${selectedProduct}`} description="Arz talep akışı" data={waterfallData} context={{ section: 'Ürün Dengesi' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={waterfallData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                <BarChart data={waterfallData} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={60} />
-                  <YAxis tickFormatter={v => fmt(v)} tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={60} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis tickFormatter={v => fmt(v)} tick={{ fontSize: 10 }} width={46} />
                   <Tooltip formatter={(v: number) => [fmt(v) + ' Ton', '']} />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                     {waterfallData.map((d, i) => (
@@ -221,12 +222,12 @@ export default function ProductBalancePage() {
               <ChartInsightButton title={`10 Yıllık Trend — ${selectedProduct}`} description="10 yıllık ürün trendi" data={yearlyTrend} context={{ section: 'Ürün Dengesi' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={320}>
-                <ComposedChart data={yearlyTrend} margin={{ top: 10, right: 40, bottom: 10, left: 10 }}>
+                <ComposedChart data={yearlyTrend} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-                  <YAxis yAxisId="left" tickFormatter={v => fmt(v)} tick={{ fontSize: 10 }} />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 'auto']}
-                         tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} />
+                  <YAxis yAxisId="left" tickFormatter={v => fmt(v)} tick={{ fontSize: 10 }} width={46} />
+                  <YAxis yAxisId="right" orientation="right" domain={LINE_Y_DOMAIN}
+                         tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} width={46} />
                   <Tooltip formatter={(v: number, name: string) =>
                     [name === 'Yeterlilik' ? v.toFixed(1) + '%' : fmt(v) + ' Ton', name]} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -365,7 +366,7 @@ export default function ProductBalancePage() {
             <ChartInsightButton title="İthalat Bağımlılığı Sıralaması" description="İthalat bağımlılığı sıralaması" data={importRanking} context={{ section: 'Ürün Dengesi' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={Math.max(300, importRanking.length * 28)}>
-              <BarChart data={importRanking} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 100 }}>
+              <BarChart data={importRanking} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" domain={[0, 100]} tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} />
                 <YAxis type="category" dataKey="urun" tick={{ fontSize: 10 }} width={95} />
@@ -392,10 +393,10 @@ export default function ProductBalancePage() {
             <ChartInsightButton title="Kişi Başı Tüketim Trendleri" description="Kişi başı tüketim trendleri (Kg/yıl)" data={perCapitaChartData} context={{ section: 'Ürün Dengesi' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={perCapitaChartData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+              <AreaChart data={perCapitaChartData} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-                <YAxis tickFormatter={v => v.toFixed(0)} tick={{ fontSize: 10 }} />
+                <YAxis tickFormatter={v => v.toFixed(0)} tick={{ fontSize: 10 }} width={46} />
                 <Tooltip formatter={(v: number) => [v.toFixed(1) + ' Kg', '']} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 {perCapitaProducts.map((p, i) => (

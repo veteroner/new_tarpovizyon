@@ -206,10 +206,10 @@ export default function TurkeyEggProductionPage() {
                 <ChartInsightButton title="📊 Yumurta Dış Ticaret Trendi" description="Türkiye yumurta ihracat ve ithalat gelişimi" data={eggTradeData} context={{ section: 'Ticaret' }} />
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={eggTradeData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+                <ComposedChart data={eggTradeData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${formatShort(v)}M`} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${formatShort(v)}M`} width={46} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(v: number, name: string) => [`$${v.toLocaleString('tr-TR')} M`, name]} />
                   <Legend />
                   <Bar dataKey="ihracat_musd" name="İhracat (M$)" fill="#22c55e" fillOpacity={0.85} radius={[4, 4, 0, 0]} />

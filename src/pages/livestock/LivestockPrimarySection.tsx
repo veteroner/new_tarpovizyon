@@ -10,7 +10,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
-import { pctTick } from '../../utils/chartTicks';
+import { pctTick, truncTick } from '../../utils/chartTicks';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -323,7 +323,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tickFormatter={(v: number) => `%${v.toFixed(0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={140} />
+              <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={110} tickFormatter={truncTick} />
               <Tooltip formatter={(value: number) => [`%${value.toFixed(2)}`, '5Y CAGR']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Bar dataKey="cagr5" radius={[0, 4, 4, 0]}>
@@ -347,7 +347,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="share" name="Pazar Payı" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="number" dataKey="cagr5" name="5Y CAGR" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis type="number" dataKey="cagr5" name="5Y CAGR" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <ZAxis type="number" dataKey="total" range={[40, 400]} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value.toFixed(2)}%`, name]}
@@ -380,8 +380,8 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={primaryCountryData.slice(0, 20)}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" tick={{fill: 'var(--text-secondary)', fontSize: 9}} angle={-45} textAnchor="end" height={100} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <XAxis dataKey="name" tick={{fill: 'var(--text-secondary)', fontSize: 9}} angle={-45} textAnchor="end" height={100} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Üretim (ton)']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -432,7 +432,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <AreaChart data={primaryYearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Üretim (ton)']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} strokeWidth={2.5} />

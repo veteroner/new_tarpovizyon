@@ -152,7 +152,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart
             data={yearlyTrendData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
           >
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -167,8 +167,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => formatShort(value)}
-            />
+              tickFormatter={(value) => formatShort(value)} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',
@@ -212,7 +211,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
               const growth = prevValue > 0 ? ((d.value - prevValue) / prevValue) * 100 : 0;
               return { year: d.year, growth };
             })}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis
@@ -221,8 +220,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => `${value.toFixed(0)}%`}
-            />
+              tickFormatter={(value) => `${value.toFixed(0)}%`} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

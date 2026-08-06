@@ -110,12 +110,11 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={projection2026Egg}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v)}
-                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => [
@@ -155,12 +154,11 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <ResponsiveContainer width="100%" height={400}>
               <ComposedChart data={projection2026Layer}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
                 <YAxis
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                   tickFormatter={(v) => formatShort(v)}
-                  label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                />
+                  label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                 <Tooltip
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                   formatter={(value: number, name: string) => [

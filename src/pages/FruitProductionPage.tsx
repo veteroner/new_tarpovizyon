@@ -40,11 +40,11 @@ const fruitExtra = (
       Türkiye; kiraz, kayısı, vişne ve kızılcık üretiminde dünya birincisidir · Kaynak: FAO 2022
     </p>
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={TR_MEYVE_PAYLARI} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+      <BarChart data={TR_MEYVE_PAYLARI} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="meyve" stroke="var(--text-secondary)" tick={{ fontSize: 12 }} />
         <YAxis stroke="var(--text-secondary)" domain={[0, 35]}
-          tickFormatter={(v: number) => v + '%'} />
+          tickFormatter={(v: number) => v + '%'} width={46} />
         <Tooltip
           contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           formatter={(v: number) => [v + '%', 'Dünya Üretim Payı']}

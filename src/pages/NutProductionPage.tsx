@@ -27,11 +27,11 @@ const nutExtra = (
       Kaynak: FAO 2022 · Kırmızı çubuk = Türkiye
     </p>
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={FINDIK_DUNYA} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <BarChart data={FINDIK_DUNYA} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="ulke" stroke="var(--text-secondary)" tick={{ fontSize: 12 }} />
         <YAxis stroke="var(--text-secondary)"
-          tickFormatter={(v: number) => v + 'K ton'} />
+          tickFormatter={(v: number) => v + 'K ton'} width={46} />
         <Tooltip
           contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           formatter={(v: number) => [(v * 1000).toLocaleString('tr-TR') + ' ton', 'Fındık Üretimi']}

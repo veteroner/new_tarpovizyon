@@ -59,7 +59,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
             <ChartInsightButton title="🐝 En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={topBeekeepers} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
+            <BarChart data={topBeekeepers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
               <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
@@ -91,7 +91,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
             <ChartInsightButton title="🍯 En Fazla Bal Üreten İller" description="İl bazında bal üretimi sıralaması" data={topProducers} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={topProducers} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
+            <BarChart data={topProducers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} />
               <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />
@@ -123,7 +123,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
             <ChartInsightButton title="📊 En Yüksek Verimli İller" description="kg/kovan bazında verimlilik sıralaması" data={topYield} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 24, left: 80, bottom: 0 }}>
+            <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} />

@@ -7,6 +7,7 @@ import { fetchAgg, num, type Row } from '../../services/d1';
 import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
 const R_BIR = 'fao/uretim-hayvansal-birincil';
@@ -465,11 +466,11 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
             <ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+            <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="totalProd" name="Toplam Üretim" stroke="var(--text-secondary)"
                 tickFormatter={(v: number) => v >= 1e6 ? `${(v/1e6).toFixed(0)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : `${v}`} />
-              <YAxis type="number" dataKey="meatEff" name="Et Verimi" stroke="var(--text-secondary)" unit=" kg" />
+              <YAxis type="number" dataKey="meatEff" name="Et Verimi" stroke="var(--text-secondary)" unit=" kg" width={46} />
               <ZAxis type="number" dataKey="totalProd" range={[40, 400]} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
@@ -521,10 +522,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
             ];
             return (
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={segData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={segData} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="segment" stroke="var(--text-secondary)" />
-                  <YAxis stroke="var(--text-secondary)" />
+                  <YAxis stroke="var(--text-secondary)" width={46} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
                   <Legend />
                   <Bar dataKey="meatEff" name="Et (kg/hayvan)" fill="#ef4444" radius={[4, 4, 0, 0]} />
@@ -546,10 +547,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
             <ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={efficiencyTrends} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={efficiencyTrends} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" />
+              <YAxis stroke="var(--text-secondary)" domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
               <Legend />
               <Line type="monotone" dataKey="avgMeatEfficiency" stroke="#ef4444" strokeWidth={2} name="Dünya Et" dot={{ r: 3 }} />

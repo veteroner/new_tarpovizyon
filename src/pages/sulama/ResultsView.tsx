@@ -252,10 +252,10 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           </span>}
         </p>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={calc.aylikDenge} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+          <BarChart data={calc.aylikDenge} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={(v: number) => `${v}`} tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
+            <YAxis tickFormatter={(v: number) => `${v}`} tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
             <Tooltip
               formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]}
               labelFormatter={(label: string) => `📅 ${label}`}
@@ -326,7 +326,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           Turuncu çizgi ile mavi alan arasındaki fark, sulama ihtiyacının yoğunluğunu gösterir.
         </p>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={calc.aylikDenge} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+          <AreaChart data={calc.aylikDenge} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <defs>
               <linearGradient id="gradYagis" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
@@ -343,7 +343,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             </defs>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `📅 ${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Area type="monotone" dataKey="yagis" name="Toplam Yağış" stroke="#3b82f6" fill="url(#gradYagis)" strokeWidth={2} />
@@ -364,10 +364,10 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           İki barın farkı, yağışla karşılanan su miktarını yansıtır.
         </p>
         <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart data={calc.aylikDenge} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+          <ComposedChart data={calc.aylikDenge} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `📅 ${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="etc" name="ETc (Bitki Su Tüketimi)" fill="#e67e22" radius={[3, 3, 0, 0]} />

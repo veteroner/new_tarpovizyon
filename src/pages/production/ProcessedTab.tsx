@@ -11,6 +11,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatShort, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, ProcessedKPIs } from './productionTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface ProcessedTabProps {
   processedProduct: string;
@@ -77,8 +78,8 @@ export function ProcessedTab({
               <LineChart data={processedTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fill: TURKEY_COLOR, fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fill: TURKEY_COLOR, fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'world' ? 'Dünya' : '🇹🇷 Türkiye']} />
                 <Legend formatter={(v) => v === 'world' ? 'Dünya' : '🇹🇷 Türkiye'} />
                 <Line yAxisId="left" type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />

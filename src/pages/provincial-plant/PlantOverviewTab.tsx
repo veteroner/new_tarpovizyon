@@ -239,7 +239,7 @@ export function PlantOverviewTab({
             <BarChart
               data={filteredProvincialData.slice(0, 15)}
               layout="horizontal"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
@@ -248,13 +248,11 @@ export function PlantOverviewTab({
                 tick={{ fontSize: 10, fill: 'var(--text-secondary)' }}
                 angle={-45}
                 textAnchor="end"
-                height={80}
-              />
+                height={80} interval="preserveStartEnd" minTickGap={16} />
               <YAxis
                 type="number"
                 tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-                tickFormatter={(value) => formatShort(value)}
-              />
+                tickFormatter={(value) => formatShort(value)} width={46} />
               <Tooltip
                 contentStyle={{
                   background: 'var(--card-bg)',

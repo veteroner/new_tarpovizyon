@@ -37,7 +37,7 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
           <BarChart
             data={filteredProvincialData.slice(0, 20)}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+            margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis 

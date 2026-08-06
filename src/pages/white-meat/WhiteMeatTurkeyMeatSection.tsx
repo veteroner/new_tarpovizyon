@@ -106,8 +106,8 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} />
+              <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="production" stroke="#ea580c" strokeWidth={3} fillOpacity={1} fill="url(#colorTurkey)" />
               <Line type="monotone" dataKey="production" stroke="#dc2626" strokeWidth={2} dot={{ fill: '#ea580c', r: 4 }} activeDot={{ r: 6 }} />
@@ -148,8 +148,8 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
               <ResponsiveContainer width="100%" height={380}>
                 <BarChart data={monthlyTurkeyMeat}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' ton', 'Üretim']} />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {monthlyTurkeyMeat.map((_, index) => (

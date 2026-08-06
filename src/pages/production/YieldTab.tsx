@@ -11,6 +11,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, YieldKPIs } from './productionTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 // Local icon stand-ins for icons not in lucide-react default set
 const Target: typeof AlertTriangle = AlertTriangle;
@@ -66,7 +67,7 @@ export function YieldTab({
               <BarChart data={yieldGapData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(v: unknown) => formatYield(Number(v))} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {yieldGapData.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.fill} />)}
@@ -83,7 +84,7 @@ export function YieldTab({
               <BarChart data={yieldSegmented}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(v: unknown) => formatYield(Number(v))} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {yieldSegmented.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.fill} />)}
@@ -103,7 +104,7 @@ export function YieldTab({
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="x" name="Alan" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => formatHa(v)} />
-                <YAxis dataKey="y" name="Verim" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis dataKey="y" name="Verim" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip content={({ active, payload }: any) => {
                   if (active && payload?.[0]) { const d = payload[0].payload; return (
                     <div style={{ padding: '8px 12px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}>
@@ -125,7 +126,7 @@ export function YieldTab({
               <LineChart data={yieldTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatYield(Number(v)), n === 'world' ? 'Dünya' : '🇹🇷 Türkiye']} />
                 <Legend formatter={(v) => v === 'world' ? 'Dünya' : '🇹🇷 Türkiye'} />
                 <Line type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />

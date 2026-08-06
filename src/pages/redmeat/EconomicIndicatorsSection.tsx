@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { type EconomicData } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   economicData: EconomicData[];
@@ -147,16 +148,15 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="📈 Karkas Fiyat Trendi" description="Dana ve kuzu karkas fiyat trendi" data={filteredEconomicData} context={{ section: 'Fiyat Trendi' }} />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
                 dataKey="tarih"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                 angle={-45}
                 textAnchor="end"
-                height={70}
-              />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
@@ -177,10 +177,10 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="💰 Maliyet vs Fiyat" description="Dana karkas maliyet ve fiyat karşılaştırması" data={filteredEconomicData} context={{ section: 'Maliyet-Fiyat' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
@@ -198,10 +198,10 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="📊 Karlılık Trendi" description="Dana karkas karlılık oranı trendi" data={filteredEconomicData} context={{ section: 'Karlılık' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <AreaChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)}%`]}
@@ -217,11 +217,11 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="💱 Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 40, left: 0, bottom: 40 }}>
+            <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => {
@@ -245,7 +245,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="🔄 Dolar-Fiyat Korelasyonu" description="Dolar kuru ile dana karkas fiyatı korelasyon analizi" data={filteredEconomicData} context={{ section: 'Korelasyon' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
                 dataKey="dolar_kuru_tl"
@@ -257,8 +257,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
                 dataKey="dana_karkas_fiyati_tl_kg"
                 name="Dana Karkas"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                label={{ value: 'Dana Karkas Fiyatı (₺/kg)', angle: -90, position: 'left', fill: 'var(--text-secondary)' }}
-              />
+                label={{ value: 'Dana Karkas Fiyatı (₺/kg)', angle: -90, position: 'left', fill: 'var(--text-secondary)' }} width={58} />
               <ZAxis range={[50, 200]} />
               <Tooltip
                 cursor={{ strokeDasharray: '3 3' }}
@@ -279,10 +278,10 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="📈 Besilik Hayvan Fiyatları" description="Besilik dana ve küçükbaş hayvan fiyatları" data={filteredEconomicData} context={{ section: 'Besilik Fiyatlar' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
@@ -300,10 +299,10 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <ChartInsightButton title="📉 Fiyat-Maliyet Farkı" description="Dana karkas fiyat-maliyet farkı trendi" data={filteredEconomicData} context={{ section: 'Fiyat-Maliyet Fark' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <BarChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}

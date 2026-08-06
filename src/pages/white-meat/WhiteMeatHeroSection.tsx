@@ -114,13 +114,12 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
             <ChartInsightButton title="📈 Kanatlı Eti Üretimi Trendi" description="Kanatlı eti uzun dönem üretim trendi" data={series} context={{ section: 'Trend' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <AreaChart data={series} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
+            <AreaChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                tickFormatter={(v) => formatShort(Number(v))}
-              />
+                tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip
                 formatter={(value: number) => [formatTon(value), 'Kanatlı Eti']}
                 labelFormatter={(label) => `Yıl: ${label}`}

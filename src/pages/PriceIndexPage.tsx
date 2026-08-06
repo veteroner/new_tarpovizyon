@@ -7,6 +7,7 @@ import {
   usePriceIndexData, formatIndex, MONTHS_SHORT, type DatasetId,
 } from './priceIndex/usePriceIndexData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
 
 export default function PriceIndexPage() {
   const {
@@ -157,7 +158,7 @@ export default function PriceIndexPage() {
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Bar dataKey="value" name="Endeks" fill={config.color} radius={[4, 4, 0, 0]}>
                     {monthlyData.map((entry, i) => {
@@ -177,7 +178,7 @@ export default function PriceIndexPage() {
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Line type="monotone" dataKey="value" stroke={config.color} strokeWidth={3} dot={{ fill: config.color, r: 5 }} activeDot={{ r: 8 }} />
                 </LineChart>
@@ -195,7 +196,7 @@ export default function PriceIndexPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(yearlyData.length / 12))} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Ortalama Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Area type="monotone" dataKey="value" stroke={config.color} fill={config.color} fillOpacity={0.15} strokeWidth={2} />
                 </AreaChart>
@@ -217,8 +218,8 @@ export default function PriceIndexPage() {
                   <ComposedChart data={scissorData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(scissorData.length / 12))} />
-                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}`} label={{ value: 'Fark (puan)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}`} label={{ value: 'Fark (puan)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={58} />
                     <Tooltip formatter={(v: number, name: string) => name === 'Fark (GFE-TÜFE)' ? [`${v >= 0 ? '+' : ''}${Number(v).toFixed(1)} puan`, name] : [formatIndex(Number(v)), name]} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Legend />
                     <ReferenceLine yAxisId="right" y={0} stroke="var(--border)" strokeDasharray="3 3" />
@@ -264,7 +265,7 @@ export default function PriceIndexPage() {
                   <BarChart data={topProducts} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={170} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
                     <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="value" name="Endeks" radius={[0, 4, 4, 0]}>
                       {topProducts.map((entry, i) => (
@@ -283,7 +284,7 @@ export default function PriceIndexPage() {
                   <BarChart data={[...topProducts].sort((a, b) => b.change - a.change)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `%${v.toFixed(0)}`} />
-                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={170} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} />
                     <Tooltip formatter={(v: number) => [`%${Number(v).toFixed(1)}`, 'Değişim']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="change" name="Değişim" radius={[0, 4, 4, 0]}>
                       {[...topProducts].sort((a, b) => b.change - a.change).map((entry, i) => (

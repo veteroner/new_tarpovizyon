@@ -17,6 +17,7 @@ import {
 import type { TuikTab, TuikChickenData, MonthlyData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -115,8 +116,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <ComposedChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} label={{ value: 'Kesilen Tavuk (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} label={{ value: 'Et Üretimi (ton)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} />
+                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} label={{ value: 'Kesilen Tavuk (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} label={{ value: 'Et Üretimi (ton)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="slaughtered" name="Kesilen Tavuk (bin adet)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
@@ -202,7 +203,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} width={46} />
                   <Tooltip formatter={(value: number) => [`${(value * 1000).toLocaleString('tr-TR')} adet`, 'Kesilen Tavuk']} labelFormatter={(label) => `Yıl: ${label}`} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Area type="monotone" dataKey="slaughtered" stroke="#f97316" fill="#f97316" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>
@@ -217,7 +218,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                   <Tooltip formatter={(value: number) => [`${value.toLocaleString('tr-TR')} ton`, 'Et Üretimi']} labelFormatter={(label) => `Yıl: ${label}`} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Area type="monotone" dataKey="meatProduction" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>
@@ -239,8 +240,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={monthlySlaughter}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                      <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                       <Tooltip formatter={(value: number) => [`${value.toLocaleString('tr-TR')} adet`, 'Kesilen']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                       <Bar dataKey="value" fill="#f97316" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -254,8 +255,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={monthlyMeat}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
-                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                      <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                       <Tooltip formatter={(value: number) => [`${value.toLocaleString('tr-TR')} ton`, 'Üretim']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                       <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -280,7 +281,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <LineChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[60, 100]} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[60, 100]} width={46} />
                   <Tooltip formatter={(value: number) => [`%${value.toFixed(2)}`, 'Başarı Oranı']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Line type="monotone" dataKey="hatchRate" name="Kuluçka Başarı Oranı (%)" stroke="#22c55e" strokeWidth={3} dot={{ fill: '#22c55e', r: 5 }} />
                 </LineChart>
@@ -295,7 +296,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <BarChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[0, 3]} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[0, 3]} width={46} />
                   <Tooltip formatter={(value: number) => [`${value.toFixed(3)} kg/baş`, 'Verim']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Bar dataKey="yieldPerBird" name="Et Verimi" fill="#3b82f6" radius={[4, 4, 0, 0]}>
                     {tuikData.map((_, index) => (
@@ -431,8 +432,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   return [...data2025, ...data2026];
                 })()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={90} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={90} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                   <Tooltip formatter={(value) => { if (value === null || value === undefined) return ['', '']; return [`${Number(value).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet`, '']; }} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Legend />
                   <Bar dataKey="actual" name="2025 Gerçek" fill="#f97316" radius={[4, 4, 0, 0]} />
@@ -459,8 +460,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   return [...data2025, ...data2026];
                 })()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={90} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={90} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
                   <Tooltip formatter={(value) => { if (value === null || value === undefined) return ['', '']; return [`${Number(value).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ton`, '']; }} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Legend />
                   <Bar dataKey="actual" name="2025 Gerçek" fill="#ef4444" radius={[4, 4, 0, 0]} />

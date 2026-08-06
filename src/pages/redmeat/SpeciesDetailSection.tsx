@@ -28,10 +28,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
           <ChartInsightButton title={`🐄 Sığır Eti Üretimi (${rangeLabel})`} description="Yıllık sığır eti üretim verisi" data={filteredSeries} context={{ tur: 'sigir' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
             <Tooltip 
               formatter={(value: number) => [formatTon(Number(value))]}
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -48,10 +48,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
           <ChartInsightButton title={`🐑 Koyun Eti Üretimi (${rangeLabel})`} description="Yıllık koyun eti üretim verisi" data={filteredSeries} context={{ tur: 'koyun' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
             <Tooltip 
               formatter={(value: number) => [formatTon(Number(value))]}
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -68,10 +68,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
           <ChartInsightButton title={`🐐 Keçi Eti Üretimi (${rangeLabel})`} description="Yıllık keçi eti üretim verisi" data={filteredSeries} context={{ tur: 'keci' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
             <Tooltip 
               formatter={(value: number) => [formatTon(Number(value))]}
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -88,10 +88,10 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
           <ChartInsightButton title={`🦬 Manda Eti Üretimi (${rangeLabel})`} description="Yıllık manda eti üretim verisi" data={filteredSeries} context={{ tur: 'manda' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={filteredSeries} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
             <Tooltip 
               formatter={(value: number) => [formatTon(Number(value))]}
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

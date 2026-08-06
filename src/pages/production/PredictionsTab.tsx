@@ -9,6 +9,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatValue, formatShort, formatYield, formatHa } from './productionTypes';
 import type { Insight, PredKPIs, ForecastData } from './productionTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 // Local icon stand-ins
 const Leaf: typeof TrendingUp = TrendingUp;
@@ -79,7 +80,7 @@ export function PredictionsTab({
               <LineChart data={prodSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'actual' ? 'Gerçek' : 'Tahmin']} />
                 <Legend formatter={(v) => v === 'actual' ? 'Gerçek' : 'Tahmin'} />
                 <Line type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={2} dot={false} name="actual" connectNulls={false} />
@@ -98,7 +99,7 @@ export function PredictionsTab({
               <LineChart data={worldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'actual' ? 'Gerçek' : 'Tahmin']} />
                 <Legend formatter={(v) => v === 'actual' ? 'Gerçek' : 'Tahmin'} />
                 <Line type="monotone" dataKey="actual" stroke="#10b981" strokeWidth={2} dot={false} name="actual" connectNulls={false} />
@@ -120,7 +121,7 @@ export function PredictionsTab({
               <LineChart data={yieldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatYield(Number(v)), n === 'actual' ? 'Gerçek' : 'Tahmin']} />
                 <Legend formatter={(v) => v === 'actual' ? 'Gerçek' : 'Tahmin'} />
                 <Line type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={2} dot={false} name="actual" connectNulls={false} />
@@ -139,7 +140,7 @@ export function PredictionsTab({
               <LineChart data={areaSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatHa(Number(v)), n === 'actual' ? 'Gerçek' : 'Tahmin']} />
                 <Legend formatter={(v) => v === 'actual' ? 'Gerçek' : 'Tahmin'} />
                 <Line type="monotone" dataKey="actual" stroke="#a855f7" strokeWidth={2} dot={false} name="actual" connectNulls={false} />

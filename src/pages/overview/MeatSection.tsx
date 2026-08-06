@@ -99,7 +99,7 @@ export function MeatSection({ data }: Props) {
             <BarChart data={data.meatProduction.breakdown} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {data.meatProduction.breakdown.map((entry, index) => (
@@ -119,7 +119,7 @@ export function MeatSection({ data }: Props) {
             <AreaChart data={data.meatProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="meat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
             </AreaChart>

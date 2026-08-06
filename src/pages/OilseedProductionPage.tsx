@@ -32,11 +32,11 @@ const oilseedExtra = (
       Tohum başına ortalama yağ içeriği oranı. Susam ve yerfıstığı en zengin yağ kaynakları arasında yer alır.
     </p>
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={YAG_ICERIK} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+      <BarChart data={YAG_ICERIK} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="isim" stroke="var(--text-secondary)" tick={{ fontSize: 12 }} />
         <YAxis stroke="var(--text-secondary)" domain={[0, 60]}
-          tickFormatter={(v: number) => v + '%'} />
+          tickFormatter={(v: number) => v + '%'} width={46} />
         <Tooltip
           contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           formatter={(v: number) => [v + '%', 'Yağ İçeriği']}

@@ -4,6 +4,7 @@ import {
 import type { ProductGroupData } from './giTypes';
 import { formatNumber } from './giTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { truncTick } from '../../utils/chartTicks';
 
 interface Props {
   productGroupData: ProductGroupData[];
@@ -35,7 +36,7 @@ export function GIProductsTab({ productGroupData }: Props) {
           <BarChart
             data={productGroupData.slice(0, 15)}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 200, bottom: 5 }}
+            margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
@@ -43,8 +44,7 @@ export function GIProductsTab({ productGroupData }: Props) {
               type="category"
               dataKey="group"
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              width={190}
-            />
+              width={110} tickFormatter={truncTick} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

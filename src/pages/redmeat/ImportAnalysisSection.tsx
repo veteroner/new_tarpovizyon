@@ -26,6 +26,7 @@ import {
   formatNumber,
 } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   importData: ImportData[];
@@ -250,14 +251,13 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               <ChartInsightButton title={`🏠 Yeterlilik (Proxy) Trendi (${importRangeLabel})`} description="Kırmızı et yeterlilik proxy trendi" data={ssrProxyTrend} context={{ section: 'Yeterlilik' }} />
             </div>
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={ssrProxyTrend} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
+              <LineChart data={ssrProxyTrend} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                  domain={[0, 100]}
-                  tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
-                />
+                  domain={LINE_Y_DOMAIN}
+                  tickFormatter={(v) => `${Number(v).toFixed(0)}%`} width={46} />
                 <Tooltip
                   formatter={(value: number) => [`%${Number(value).toFixed(1)}`, 'Yeterlilik (Proxy)']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -284,10 +284,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <ChartInsightButton title="🥩 Karkas Et İthalatı Trendi" description="Yıllık karkas et ithalat trendi" data={importData} context={{ section: 'Karkas Et' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
+            <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -303,10 +303,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <ChartInsightButton title="🐄 Besilik Sığır İthalatı Trendi" description="Yıllık besilik sığır ithalatı" data={importData} context={{ section: 'Besilik Sığır' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
+            <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} baş`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -322,10 +322,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <ChartInsightButton title="🐑 Küçükbaş İthalatı Trendi" description="Yıllık küçükbaş ithalatı" data={importData} context={{ section: 'Küçükbaş' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
+            <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} baş`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -342,10 +342,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               <ChartInsightButton title="💰 İthalat Harcama Trendi" description="Yıllık ithalat harcaması (USD)" data={importData} context={{ section: 'Harcama' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={importData} margin={{ top: 10, right: 24, left: 0, bottom: 5 }}>
+              <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
                 <Tooltip 
                   formatter={(value: number) => [`$${formatNumber(value)}`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -365,10 +365,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <ChartInsightButton title="📈 Bileşik İthalat Kompozisyonu Trendi" description="Bileşik ithalat kompozisyonu yıllık trendi" data={importData} context={{ section: 'Kompozisyon' }} />
           </div>
           <ResponsiveContainer width="100%" height={380}>
-            <AreaChart data={importData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart data={importData} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip 
                 formatter={(value: number, name: string) => {
                   if (name === 'Karkas Et') return [`${formatNumber(value)} ton`, name];
@@ -431,7 +431,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
                 { category: 'Besilik Sığır', value: importAnalytics.averages.cattle, unit: 'baş', color: '#ea580c' },
                 { category: 'Küçükbaş', value: importAnalytics.averages.smallRuminant, unit: 'baş', color: '#f59e0b' },
               ]}
-              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              margin={{ top: 20, right: 8, left: 4, bottom: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis 
@@ -439,9 +439,8 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} 
                 angle={-45} 
                 textAnchor="end" 
-                height={80}
-              />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} />
+                height={80} interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
               <Tooltip 
                 formatter={(value: number, _name: string, props: { payload?: { unit?: string; category?: string } }) => [
                   `${formatNumber(value)} ${props.payload?.unit ?? ''}`,

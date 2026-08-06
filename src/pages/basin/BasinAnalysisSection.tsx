@@ -14,6 +14,7 @@ import {
 } from './basinUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { BasinSummary, BasinProductionStats, BasinData, BasinProduct } from './basinUtils';
+import { truncTick } from '../../utils/chartTicks';
 
 interface BasinAnalysisSectionProps {
   basinSummary: BasinSummary[];
@@ -518,9 +519,8 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                   <YAxis 
                     type="category" 
                     dataKey="urun" 
-                    width={180}
-                    tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
-                  />
+                    width={110}
+                    tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} />
                   <Tooltip 
                     contentStyle={{ 
                       background: 'rgba(30, 41, 59, 0.95)',

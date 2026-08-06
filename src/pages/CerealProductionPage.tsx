@@ -44,10 +44,10 @@ const cerealExtra = (
         Kaynak: FAO + TÜİK (2014-2023) · Türkiye verim açığı son 10 yılda yaklaşık <strong>650-800 kg/ha</strong> · 2023'te en yüksek değer <strong>3.050 kg/ha</strong> · Hedef: dünya ortalaması <strong>3.700 kg/ha</strong>
       </p>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={VERIM_TREND} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <LineChart data={VERIM_TREND} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="yil" stroke="var(--text-secondary)" />
-          <YAxis stroke="var(--text-secondary)" tickFormatter={(v: number) => `${v}`} domain={[2000, 4000]} />
+          <YAxis stroke="var(--text-secondary)" tickFormatter={(v: number) => `${v}`} domain={[2000, 4000]} width={46} />
           <Tooltip
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
             formatter={(v: number, name: string) => [`${v.toLocaleString('tr-TR')} kg/ha`, name]}
@@ -68,11 +68,11 @@ const cerealExtra = (
         Kaynak: FAO 2022 tahminleri · Türkiye küresel buğday üretiminin yaklaşık %2'sini karşılıyor · Kırmızı çubuk = Türkiye
       </p>
       <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={KURESEL_BUGDAY} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <BarChart data={KURESEL_BUGDAY} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="ulke" stroke="var(--text-secondary)" tick={{ fontSize: 11 }} />
           <YAxis stroke="var(--text-secondary)"
-            tickFormatter={(v: number) => v >= 1000 ? (v / 1000).toFixed(0) + 'M' : v + 'K'} />
+            tickFormatter={(v: number) => v >= 1000 ? (v / 1000).toFixed(0) + 'M' : v + 'K'} width={46} />
           <Tooltip
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
             formatter={(v: number) => [(v * 1000).toLocaleString('tr-TR') + ' ton', 'Üretim']}

@@ -352,7 +352,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <AreaChart data={predForecastChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <Tooltip formatter={(value: number, name: string) => [formatNumber(value), name === 'actual' ? 'Gerçek' : name === 'forecast' ? 'Tahmin' : name === 'upper' ? 'İyimser' : 'Kötümser']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Area type="monotone" dataKey="upper" stroke="none" fill="#22c55e" fillOpacity={0.1} name="upper" />
@@ -380,7 +380,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="r2" name="R²" domain={[0, 1]} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis type="number" dataKey="growth" name="Büyüme" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis type="number" dataKey="growth" name="Büyüme" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <ZAxis type="number" dataKey="volume" range={[30, 300]} />
               <Tooltip
                 formatter={(value: number, name: string) => [name === 'R²' ? value.toFixed(3) : `${value.toFixed(1)}%`, name]}
@@ -414,7 +414,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <BarChart data={predAnomalyTimeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <YAxis tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <Tooltip contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Bar dataKey="spikes" stackId="a" fill="#22c55e" name="Ani Artış" radius={[0, 0, 0, 0]} />
               <Bar dataKey="drops" stackId="a" fill="#ef4444" name="Ani Düşüş" radius={[4, 4, 0, 0]} />

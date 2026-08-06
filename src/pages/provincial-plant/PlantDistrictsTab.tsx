@@ -205,7 +205,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                 <BarChart
                   data={districtData.slice(0, 10)}
                   layout="vertical"
-                  margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                  margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis

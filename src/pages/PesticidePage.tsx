@@ -10,6 +10,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { usePesticideData, TABS, CHART_COLORS, formatTon, formatKgHa, formatShort } from './pesticide/usePesticideData';
 import type { Tab } from './pesticide/usePesticideData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { truncTick } from '../utils/chartTicks';
 
 export default function PesticidePage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -80,8 +81,8 @@ export default function PesticidePage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 8 }} angle={-50} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                         {overviewTopCountries.slice(0, 15).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -100,7 +101,7 @@ export default function PesticidePage() {
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Toplam']} />
                       <Area type="monotone" dataKey="value" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
                     </AreaChart>
@@ -135,7 +136,7 @@ export default function PesticidePage() {
                       <AreaChart data={compTrends}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                         <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                         <Legend />
                         <Area type="monotone" dataKey="Herbisitler" name="Herbisitler" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
@@ -172,7 +173,7 @@ export default function PesticidePage() {
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={140} />
+                      <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -204,7 +205,7 @@ export default function PesticidePage() {
                     <BarChart data={turkeyProfile.composition} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis type="number" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={160} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="tonaj" radius={[0, 4, 4, 0]}>
                         {turkeyProfile.composition.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
@@ -221,7 +222,7 @@ export default function PesticidePage() {
                     <AreaChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Toplam']} />
                       <Area type="monotone" dataKey="value" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
                     </AreaChart>
@@ -251,7 +252,7 @@ export default function PesticidePage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [v ? formatTon(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gerçek" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} connectNulls />

@@ -6,6 +6,7 @@ import {
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   data: OverviewData;
@@ -54,8 +55,8 @@ export function ComparativeSection({ data }: Props) {
             <ComposedChart data={combinedData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => formatShort(v) + 'M'} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => formatShort(v) + 'M'} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip
                 formatter={(value: number, name: string) => {
                   if (name === 'yumurta') return [formatNumber(value) + ' Milyon adet', 'Yumurta'];
@@ -114,7 +115,7 @@ export function ComparativeSection({ data }: Props) {
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number, _name: string, props: { payload?: { unit?: string } }) => [value + ' ' + (props.payload?.unit ?? ''), '']} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {[COLORS.milk[0], COLORS.meat[0], COLORS.egg[0]].map((fill, index) => (

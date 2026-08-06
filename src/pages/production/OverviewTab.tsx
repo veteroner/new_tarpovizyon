@@ -13,6 +13,7 @@ import {
   TABS, TURKEY_COLOR, CHART_COLORS
 } from './productionTypes';
 import type { Insight, OverviewKPIs, SupplyChainData, OverviewTrendPoint, Tab } from './productionTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface OverviewTabProps {
   overviewKPIs: OverviewKPIs;
@@ -116,7 +117,7 @@ export function OverviewTab({
               <defs><linearGradient id="ovPG" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.8} /><stop offset="95%" stopColor="#10b981" stopOpacity={0.1} /></linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
               <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
               <Area type="monotone" dataKey="worldProduction" stroke="#10b981" strokeWidth={2} fill="url(#ovPG)" name="Üretim" />
             </AreaChart>
@@ -131,7 +132,7 @@ export function OverviewTab({
             <LineChart data={overviewTrends}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip formatter={(v: unknown) => formatYield(Number(v))} />
               <Line type="monotone" dataKey="worldYield" stroke="#3b82f6" strokeWidth={2} dot={false} name="Verim" />
             </LineChart>

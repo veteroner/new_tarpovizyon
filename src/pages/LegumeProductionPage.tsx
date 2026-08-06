@@ -33,11 +33,11 @@ const legumeExtra = (
       Yeşil = baklagil · Turuncu = hayvansal referans
     </p>
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={PROTEIN_KARSI} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+      <BarChart data={PROTEIN_KARSI} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="isim" stroke="var(--text-secondary)" tick={{ fontSize: 11 }} />
         <YAxis stroke="var(--text-secondary)" domain={[0, 35]}
-          label={{ value: 'g/100g', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+          label={{ value: 'g/100g', angle: -90, position: 'insideLeft', fontSize: 11 }} width={58} />
         <Tooltip
           contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           formatter={(v: number) => [v + ' g', 'Protein']}

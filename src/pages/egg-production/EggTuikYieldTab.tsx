@@ -15,6 +15,7 @@ import {
 import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface EggTuikYieldTabProps {
   tuikData: TuikEggData[];
@@ -58,8 +59,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                     tickFormatter={(v) => formatShort(v)}
-                    label={{ value: 'Tavuk Sayısı', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                  />
+                    label={{ value: 'Tavuk Sayısı', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [value.toLocaleString('tr-TR') + ' adet', 'Yumurtacı Tavuk']}
@@ -95,8 +95,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    label={{ value: 'Verim (adet/baş/yıl)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                  />
+                    label={{ value: 'Verim (adet/baş/yıl)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [value.toFixed(1) + ' adet/baş/yıl', 'Verim']}
@@ -134,8 +133,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                     tickFormatter={(v) => formatShort(v * 1000)}
-                    label={{ value: 'Kuluçka Yumurtası (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                  />
+                    label={{ value: 'Kuluçka Yumurtası (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [(value * 1000).toLocaleString('tr-TR') + ' adet', 'Kuluçka']}

@@ -285,7 +285,7 @@ export default function ProductIntelligenceTab() {
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
                   <Area type="monotone" dataKey="exp" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2} />
@@ -303,7 +303,7 @@ export default function ProductIntelligenceTab() {
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={3} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : name === 'imp' ? 'İthalat' : 'Denge']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : v === 'imp' ? 'İthalat' : 'Denge'} />
                   <Bar dataKey="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
@@ -323,8 +323,8 @@ export default function ProductIntelligenceTab() {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={countryBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-25} textAnchor="end" height={65} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} />
+                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-25} textAnchor="end" height={65} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${Number(v).toFixed(0)}M`} width={46} />
                 <Tooltip formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
                 <Legend />
                 <Bar dataKey="ihracatMilyonUsd" name="İhracat" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -379,7 +379,7 @@ export default function ProductIntelligenceTab() {
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
               <ResponsiveContainer width="100%" height={320}>
-                <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <ScatterChart margin={{ top: 10, right: 8, bottom: 30, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     type="number" dataKey="x" name="İhracat Payı (%)"
@@ -389,8 +389,7 @@ export default function ProductIntelligenceTab() {
                   <YAxis
                     type="number" dataKey="y" name="Denge ($M)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    tickFormatter={v => `$${Number(v).toFixed(0)}M`}
-                  />
+                    tickFormatter={v => `$${Number(v).toFixed(0)}M`} width={46} />
                   <ZAxis type="number" dataKey="z" range={[40, 600]} name="İhracat ($M)" />
                   <Tooltip
                     cursor={{ strokeDasharray: '3 3' }}

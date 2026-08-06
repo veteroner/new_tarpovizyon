@@ -186,7 +186,7 @@ export function CompetitionTab({
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="x" name="Büyüme %" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v.toFixed(0)}%`} />
-                <YAxis dataKey="y" name="Üretim" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+                <YAxis dataKey="y" name="Üretim" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
                 <Tooltip content={({ active, payload }: any) => {
                   if (active && payload?.[0]) { const d = payload[0].payload; return (
                     <div style={{ padding: '8px 12px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}>
@@ -215,7 +215,7 @@ export function CompetitionTab({
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(v: unknown) => [Number(v).toFixed(0), 'HHI']} />
                 <ReferenceLine y={2500} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Çok Yoğun', fill: '#ef4444', fontSize: 11 }} />
                 <ReferenceLine y={1500} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'Yoğun', fill: '#f59e0b', fontSize: 11 }} />

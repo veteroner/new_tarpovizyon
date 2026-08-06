@@ -34,10 +34,10 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <ChartInsightButton title="🍗 Tavuk Eti Üretimi" description="Aylık tavuk eti üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
-            <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} />
+              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
               <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
               <Area type="monotone" dataKey="Tavuk Eti (ton)" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} />
               <Line type="monotone" dataKey="Tavuk Eti (ton)" stroke="#059669" strokeWidth={3} dot={{ fill: '#059669', r: 3 }} />
@@ -54,10 +54,10 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <ChartInsightButton title="🥚 Yumurta Üretimi" description="Aylık yumurta üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
-            <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 24, left: 0, bottom: 40 }}>
+            <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(v: unknown) => `${v} M adet`} />
               <Area type="monotone" dataKey="Yumurta (M adet)" fill="#fbbf24" stroke="#fbbf24" fillOpacity={0.4} strokeWidth={2} />
               <Line type="monotone" dataKey="Yumurta (M adet)" stroke="#f59e0b" strokeWidth={3} dot={{ fill: '#f59e0b', r: 3 }} />

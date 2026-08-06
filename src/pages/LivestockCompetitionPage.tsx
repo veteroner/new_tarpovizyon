@@ -9,6 +9,7 @@ import { Loading } from '../components/Loading';
 import { InsightCard } from '../components/InsightCard';
 import { useLivestockCompetitionData, isTR } from './livestockCompetition/useLivestockCompetitionData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 /* ── Color constants ───────────────────────────────────────── */
 const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
@@ -192,10 +193,10 @@ export function LivestockCompetitionPage() {
           <ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={mktShareChart} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+            <AreaChart data={mktShareChart} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${v.toFixed(0)}%`} />
+              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${v.toFixed(0)}%`} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`%${(v as number).toFixed(2)}`, n]} />
               <Legend />
@@ -217,12 +218,12 @@ export function LivestockCompetitionPage() {
           <ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 20 }}>
+            <ScatterChart margin={{ top: 20, right: 8, bottom: 30, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="share" stroke="var(--text-secondary)"
                 label={{ value: 'Pazar Payı (%)', position: 'bottom', fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis type="number" dataKey="cagr" stroke="var(--text-secondary)"
-                label={{ value: 'BBO (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                label={{ value: 'BBO (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
               <Tooltip content={({ payload }) => {
                 const d = payload?.[0]?.payload;
                 if (!d) return null;
@@ -272,7 +273,7 @@ export function LivestockCompetitionPage() {
                 isTurkey: isTR(c.country),
               }))}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+              margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${v.toFixed(0)}M`} />
@@ -332,10 +333,10 @@ export function LivestockCompetitionPage() {
         <ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={turkeyTrend} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+          <LineChart data={turkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" stroke="var(--text-secondary)" />
-            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} />
+            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} domain={LINE_Y_DOMAIN} width={46} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
               formatter={(v: number, n: string) => [fmtVal(v) + ' ton', n === 'meat' ? '🥩 Et' : n === 'milk' ? '🥛 Süt' : '🥚 Yumurta']} />
             <Legend formatter={v => v === 'meat' ? '🥩 Et' : v === 'milk' ? '🥛 Süt' : '🥚 Yumurta'} />
@@ -409,10 +410,10 @@ export function LivestockCompetitionPage() {
               HHI &lt; 1500 = Rekabetçi · 1500–2500 = Orta · &gt; 2500 = Yoğunlaşmış piyasa (DOJ kriterleri)
             </p>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={hhiSeries} margin={{ top: 10, right: 70, left: 20, bottom: 5 }}>
+              <LineChart data={hhiSeries} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" stroke="var(--text-secondary)" />
-                <YAxis stroke="var(--text-secondary)" domain={['auto', 'auto']} />
+                <YAxis stroke="var(--text-secondary)" domain={['auto', 'auto']} width={46} />
                 <Tooltip
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                   formatter={(v: number) => [v.toLocaleString(), 'HHI']}
@@ -564,10 +565,10 @@ export function LivestockCompetitionPage() {
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={breakdown} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <BarChart data={breakdown} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="name" stroke="var(--text-secondary)" />
-                  <YAxis stroke="var(--text-secondary)" tickFormatter={fmtVal} />
+                  <YAxis stroke="var(--text-secondary)" tickFormatter={fmtVal} width={46} />
                   <Tooltip formatter={(v: number) => [fmtVal(v) + ' ton', 'Üretim']}
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
                   <Bar dataKey="val" radius={[6, 6, 0, 0]}>

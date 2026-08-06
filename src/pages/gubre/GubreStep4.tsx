@@ -9,6 +9,7 @@ import { ModelWarningBox } from '../../components/ModelWarningBox';
 import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
 import { calculate } from './gubreUtils';
 import type { CalcResult, WizardState, FertilizerProduct } from './gubreTypes';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   result: CalcResult;
@@ -65,10 +66,10 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           {state.alan} dekar alan için — per-dekar değerler (kg/da)
         </p>
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={result.chartData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+          <BarChart data={result.chartData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'kg/da', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'kg/da', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} kg/da`, name]} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="ihtiyac" name="Toplam İhtiyaç"       fill="#3b82f6" radius={[3, 3, 0, 0]} />
@@ -188,11 +189,11 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
               <strong> Kalın işaretli</strong> sütun seçili senaryodur.
             </p>
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={scenarioData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+              <ComposedChart data={scenarioData} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="senaryo" tick={{ fontSize: 12 }} />
-                <YAxis yAxisId="left" tick={{ fontSize: 11 }} label={{ value: '₺ Toplam Maliyet', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} tickFormatter={(v) => `₺${(v / 1000).toFixed(0)}k`} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} label={{ value: 'Verim (ton/da)', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11 }} label={{ value: '₺ Toplam Maliyet', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} tickFormatter={(v) => `₺${(v / 1000).toFixed(0)}k`} width={58} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} label={{ value: 'Verim (ton/da)', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} domain={LINE_Y_DOMAIN} width={58} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     if (name === 'Toplam Maliyet') return [`₺${value.toLocaleString()}`, name];

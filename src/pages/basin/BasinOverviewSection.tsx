@@ -16,6 +16,7 @@ import type {
   BasinSummary, TopProduct, ProductLeader, TrendDataPoint,
   MetricsData,
 } from './basinUtils';
+import { LINE_Y_DOMAIN, truncTick } from '../../utils/chartTicks';
 
 interface BasinOverviewSectionProps {
   metrics: MetricsData;
@@ -239,9 +240,8 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
               <YAxis 
                 type="category" 
                 dataKey="urun" 
-                width={200}
-                tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
-              />
+                width={110}
+                tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} />
               <Tooltip 
                 contentStyle={{ 
                   background: 'rgba(30, 41, 59, 0.95)',
@@ -327,9 +327,8 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                     <YAxis 
                       type="category" 
                       dataKey="ili" 
-                      width={120}
-                      tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
-                    />
+                      width={110}
+                      tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} />
                     <Tooltip 
                       contentStyle={{ 
                         background: 'rgba(30, 41, 59, 0.95)',
@@ -358,9 +357,8 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                     <YAxis 
                       type="category" 
                       dataKey="yer" 
-                      width={120}
-                      tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
-                    />
+                      width={110}
+                      tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} tickFormatter={truncTick} />
                     <Tooltip 
                       contentStyle={{ 
                         background: 'rgba(30, 41, 59, 0.95)',
@@ -468,7 +466,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                   dataKey="year" 
                   tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
                 />
-                <YAxis tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
                 <Tooltip 
                   contentStyle={{ 
                     background: 'rgba(30, 41, 59, 0.95)',

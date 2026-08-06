@@ -189,16 +189,15 @@ export default function WorldComparisonSection({
               <ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)" description="Dünya karkas ağırlıkları dağılım histogrami" data={carcassWeightHistogram} context={{ section: 'Histogram' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={380}>
-              <BarChart data={carcassWeightHistogram} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={carcassWeightHistogram} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis 
                   dataKey="range" 
                   tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} 
                   angle={-45} 
                   textAnchor="end" 
-                  height={70}
-                />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Ülke Sayısı', angle: -90, position: 'insideLeft' }} />
+                  height={70} interval="preserveStartEnd" minTickGap={16} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Ülke Sayısı', angle: -90, position: 'insideLeft' }} width={58} />
                 <Tooltip 
                   formatter={(value: number) => [`${value} ülke`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

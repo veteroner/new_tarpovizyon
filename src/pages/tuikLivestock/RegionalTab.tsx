@@ -7,6 +7,7 @@ import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import { COLORS, REGION_COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { truncTick } from '../../utils/chartTicks';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedRegion'
@@ -48,8 +49,8 @@ export default function RegionalTab({
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={regionalAnalysis}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="region" angle={-15} textAnchor="end" height={100} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                  <XAxis dataKey="region" angle={-15} textAnchor="end" height={100} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" minTickGap={16} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                   <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, 'Toplam']} />
                   <Bar dataKey="total" name="Toplam Hayvan" radius={[8, 8, 0, 0]}>
                     {regionalAnalysis.map((entry, index) => (
@@ -120,7 +121,7 @@ export default function RegionalTab({
               <BarChart data={cityDataForSelectedRegion.slice(0, 20)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {cityDataForSelectedRegion.slice(0, 20).map((_, index) => (

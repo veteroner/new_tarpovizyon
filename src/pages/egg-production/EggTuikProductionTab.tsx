@@ -43,8 +43,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [(value * 1000).toLocaleString('tr-TR') + ' adet', 'Üretim']}
@@ -81,8 +80,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-              />
+                label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [(value * 1000).toLocaleString('tr-TR') + ' adet', 'Tavuk']}
@@ -118,12 +116,11 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={monthlyEgg}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                     tickFormatter={(v) => formatShort(v)}
-                    label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                  />
+                    label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [value.toLocaleString('tr-TR') + ' adet', 'Üretim']}
@@ -151,12 +148,11 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={monthlyLayer}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
                     <YAxis
                       tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                       tickFormatter={(v) => formatShort(v)}
-                      label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
-                    />
+                      label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                     <Tooltip
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                       formatter={(value: number) => [value.toLocaleString('tr-TR') + ' adet', 'Tavuk']}

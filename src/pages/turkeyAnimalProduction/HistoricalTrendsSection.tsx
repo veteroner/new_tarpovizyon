@@ -3,6 +3,7 @@ import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line
 } from 'recharts';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface HistoricalTrendsSectionProps {
   historicalChartData: Record<string, string | number>[];
@@ -49,9 +50,9 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart data={historicalChartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={70} />
-            <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+            <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+            <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
             <Legend />
             <Area yAxisId="left" type="monotone" dataKey="Süt (M ton)" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} strokeWidth={2} />

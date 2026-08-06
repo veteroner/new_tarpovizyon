@@ -181,7 +181,7 @@ export default function ProvincialTrendsTab({
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart
             data={yearlyTrendData}
-            margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 10, right: 8, left: 4, bottom: 5 }}
           >
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -196,8 +196,7 @@ export default function ProvincialTrendsTab({
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => formatShort(value)}
-            />
+              tickFormatter={(value) => formatShort(value)} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',
@@ -242,7 +241,7 @@ export default function ProvincialTrendsTab({
               const growth = prevValue > 0 ? ((item.value - prevValue) / prevValue) * 100 : 0;
               return { year: item.year, growth };
             })}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis
@@ -251,8 +250,7 @@ export default function ProvincialTrendsTab({
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => `${value.toFixed(1)}%`}
-            />
+              tickFormatter={(value) => `${value.toFixed(1)}%`} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

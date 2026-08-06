@@ -60,7 +60,7 @@ export default function TrendsTab({
             <ComposedChart data={[...yearlyData, ...regressionAnalysis.predictions]}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number, name: string) => [`${formatNumber(value)} baş`, name]} />
               <Legend />
               <Area type="monotone" dataKey="value" name="Gerçek Veri" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} />
@@ -142,10 +142,10 @@ export default function TrendsTab({
             <ChartInsightButton title="📊 Korelasyon Grafiği" description="Dağılım ve korelasyon analizi" data={scatterData} context={{ section: 'Korelasyon' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={400}>
-            <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+            <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="x" type="number" name="Yıl" stroke="var(--text-secondary)" />
-              <YAxis dataKey="y" type="number" name="Hayvan Sayısı" stroke="var(--text-secondary)" />
+              <YAxis dataKey="y" type="number" name="Hayvan Sayısı" stroke="var(--text-secondary)" width={46} />
               <ZAxis dataKey="z" range={[50, 400]} />
               <Tooltip
                 content={({ active, payload }) => {

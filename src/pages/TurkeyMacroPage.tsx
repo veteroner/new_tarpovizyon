@@ -10,6 +10,7 @@ import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { fetchAgg, fetchRows, num } from '../services/d1';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 /* ─── Constants ─── */
 const MAIN_SECTORS = ['A', 'BCD', 'F', 'GHI', 'J', 'K', 'L', 'MN', 'OPQ', 'RST'];
@@ -286,7 +287,7 @@ export default function TurkeyMacroPage() {
           <ChartInsightButton title="Sektörel Reel Büyüme" description="2024 sektörel reel büyüme oranları" data={growthRanking} context={{ section: 'Makro Türkiye' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={growthRanking} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 90 }}>
+            <BarChart data={growthRanking} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis type="number" tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={88} />
@@ -312,13 +313,13 @@ export default function TurkeyMacroPage() {
         <ChartInsightButton title="Tarım Sektörünün 25 Yıllık Serüveni" description="GSYH payı ve reel büyüme trendi" data={agriChartData} context={{ section: 'Makro Türkiye' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={agriChartData} margin={{ top: 10, right: 50, bottom: 10, left: 10 }}>
+          <ComposedChart data={agriChartData} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="yil" tick={{ fontSize: 10 }} interval={2} />
             <YAxis yAxisId="left" domain={[0, 'auto']} tickFormatter={v => v + '%'} tick={{ fontSize: 10 }}
-                   label={{ value: 'GSYH Payı (%)', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                   label={{ value: 'GSYH Payı (%)', angle: -90, position: 'insideLeft', fontSize: 10 }} width={58} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }}
-                   label={{ value: 'Büyüme (%)', angle: 90, position: 'insideRight', fontSize: 10 }} />
+                   label={{ value: 'Büyüme (%)', angle: 90, position: 'insideRight', fontSize: 10 }} domain={LINE_Y_DOMAIN} width={58} />
             <Tooltip formatter={(v: number, name: string) => [
               name.includes('GSYH') ? v.toFixed(0) + ' Milyar ₺' : v.toFixed(2) + '%', name
             ]} />
@@ -358,7 +359,7 @@ export default function TurkeyMacroPage() {
           <ChartInsightButton title="En Yüksek Kişi Başı Gelir" description="2024 en yüksek kişi başı gelir" data={incomeTop} context={{ section: 'Makro Türkiye' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={incomeTop} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 80 }}>
+            <BarChart data={incomeTop} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} />
               <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} />
@@ -382,7 +383,7 @@ export default function TurkeyMacroPage() {
           <ChartInsightButton title="En Düşük Kişi Başı Gelir" description="2024 en düşük kişi başı gelir" data={incomeBottom} context={{ section: 'Makro Türkiye' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={incomeBottom} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 80 }}>
+            <BarChart data={incomeBottom} layout="vertical" margin={{ top: 5, right: 8, bottom: 5, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis type="number" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} />
               <YAxis type="category" dataKey="yer" tick={{ fontSize: 11 }} width={75} />
@@ -408,12 +409,12 @@ export default function TurkeyMacroPage() {
           <ChartInsightButton title="Gelir Eşitsizliği Trendi" description="En zengin 5 vs en yoksul 5 il gelir trendi" data={incomeGapChart} context={{ section: 'Makro Türkiye' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart data={incomeGapChart} margin={{ top: 10, right: 50, bottom: 10, left: 10 }}>
+            <ComposedChart data={incomeGapChart} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="yil" tick={{ fontSize: 10 }} />
-              <YAxis yAxisId="left" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} />
-              <YAxis yAxisId="right" orientation="right" domain={[0, 'auto']} tick={{ fontSize: 10 }}
-                     label={{ value: 'Oran (x)', angle: 90, position: 'insideRight', fontSize: 10 }} />
+              <YAxis yAxisId="left" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} width={46} />
+              <YAxis yAxisId="right" orientation="right" domain={LINE_Y_DOMAIN} tick={{ fontSize: 10 }}
+                     label={{ value: 'Oran (x)', angle: 90, position: 'insideRight', fontSize: 10 }} width={58} />
               <Tooltip formatter={(v: number, name: string) =>
                 [name === 'Oran' ? v + 'x' : '$' + v.toLocaleString(), name]} />
               <Legend wrapperStyle={{ fontSize: 11 }} />

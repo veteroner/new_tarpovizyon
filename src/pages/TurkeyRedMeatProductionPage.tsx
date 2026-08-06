@@ -19,6 +19,7 @@ import {
   extractYear,
 } from './redmeat/redMeatUtils';
 import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
+import RangeChips from '../components/RangeChips';
 import ProductionOverviewSection from './redmeat/ProductionOverviewSection';
 import SpeciesDetailSection from './redmeat/SpeciesDetailSection';
 import WorldComparisonSection from './redmeat/WorldComparisonSection';
@@ -41,7 +42,8 @@ export default function TurkeyRedMeatProductionPage() {
   const { active } = useSectionTab(BOLUMLER);
   const [loading, setLoading] = useState(true);
   const [series, setSeries] = useState<YearPoint[]>([]);
-  const [startYear, setStartYear] = useState(1986);
+  // Mobilde 40 yıllık seri okunmuyor; varsayılan son 20 yıl (bkz. RangeChips).
+  const [startYear, setStartYear] = useState(0);
   const [economicData, setEconomicData] = useState<EconomicData[]>([]);
   const [worldCarcassPrices, setWorldCarcassPrices] = useState<WorldCarcassPrices | null>(null);
   const [productivityComparison, setProductivityComparison] = useState<ProductivityComparison[]>([]);
@@ -294,10 +296,21 @@ export default function TurkeyRedMeatProductionPage() {
   const minYear = useMemo(() => (availableYears.length ? Math.min(...availableYears) : 0), [availableYears]);
   const maxYear = useMemo(() => (availableYears.length ? Math.max(...availableYears) : 0), [availableYears]);
 
+  /*
+   * Kullanıcı bir aralık seçmediyse son 20 yıl. Veri yüklenmeden yıl aralığı
+   * bilinmediği için state'i sabit bir yılla başlatamıyoruz; 0 = "seçim yok"
+   * ve gerçek başlangıç veriden türetiliyor.
+   */
+  const varsayilanBaslangic = useMemo(
+    () => (maxYear ? Math.max(minYear, maxYear - 19) : 0),
+    [minYear, maxYear],
+  );
+  const etkinBaslangic = startYear || varsayilanBaslangic;
+
   const filteredSeries = useMemo(() => {
-    if (!startYear) return series;
-    return series.filter((p) => p.year >= startYear);
-  }, [series, startYear]);
+    if (!etkinBaslangic) return series;
+    return series.filter((p) => p.year >= etkinBaslangic);
+  }, [series, etkinBaslangic]);
 
   const latest = useMemo(() => {
     for (let i = series.length - 1; i >= 0; i--) {
@@ -401,32 +414,13 @@ export default function TurkeyRedMeatProductionPage() {
         </p>
       </div>
 
-      {/* Filtre */}
-      <div className="date-filter">
-        <div className="filter-group">
-          <label className="filter-label">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            Başlangıç Yılı
-          </label>
-          <select
-            className="filter-select"
-            value={startYear}
-            onChange={(e) => setStartYear(Number(e.target.value) || 1986)}
-            disabled={!availableYears.length}
-          >
-            <option value={1986}>1986 (Tüm Veriler)</option>
-            <option value={2000}>2000</option>
-            <option value={2010}>2010</option>
-            <option value={2015}>2015</option>
-            <option value={2020}>2020</option>
-          </select>
-        </div>
-      </div>
+      {/*
+        * Açılır menü yerine aralık çipleri. Varsayılan SON 20 YIL: 375 px'lik
+        * ekranda çizim alanı ~195 px; 40 yıllık seriyi oraya sıkıştırınca yıl
+        * başına 5 px düşüyor ve grafik okunmaz hâle geliyordu. "Tümü" tek
+        * dokunuş uzakta.
+        */}
+      <RangeChips years={availableYears} value={etkinBaslangic} onChange={setStartYear} />
 
       {loading ? (
         <div className="loading">

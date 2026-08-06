@@ -12,6 +12,7 @@ import { ErrorState } from '../components/ErrorState';
 import { useCrossIntelligenceData } from './crossIntelligence/useCrossIntelligenceData';
 import type { ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 export default function CrossIntelligencePage() {
   const {
@@ -117,8 +118,8 @@ export default function CrossIntelligencePage() {
             <ComposedChart data={crossData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="year" fontSize={10} />
-              <YAxis yAxisId="left" fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
-              <YAxis yAxisId="right" orientation="right" fontSize={9} />
+              <YAxis yAxisId="left" fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} width={46} />
+              <YAxis yAxisId="right" orientation="right" fontSize={9} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip formatter={(v: number, name: string) => {
                 if (name.includes('Fiyat') || name.includes('Yeterlilik')) return [v.toFixed(1), name];
                 return [v > 1e6 ? `${(v / 1e6).toFixed(2)}M ton` : `${(v / 1e3).toFixed(0)}K ton`, name];
@@ -175,7 +176,7 @@ export default function CrossIntelligencePage() {
           <ScatterChart>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="x" name="Üretim (ton)" fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
-            <YAxis dataKey="y" name="Yeterlilik %" fontSize={9} domain={[0, 'auto']} />
+            <YAxis dataKey="y" name="Yeterlilik %" fontSize={9} domain={[0, 'auto']} width={46} />
             <ZAxis dataKey="size" range={[50, 400]} />
             <Tooltip content={({ payload }) => {
               if (!payload?.[0]) return null;
@@ -392,14 +393,14 @@ export default function CrossIntelligencePage() {
               Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>%{avgImportDep.toFixed(1)}</strong> · Ortalama ihracat oranı: <strong>%{avgExportRatio.toFixed(1)}</strong>
             </p>
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={decomp} margin={{ top: 10, right: 55, left: 20, bottom: 5 }} stackOffset="sign">
+              <ComposedChart data={decomp} margin={{ top: 10, right: 8, left: 4, bottom: 5 }} stackOffset="sign">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" fontSize={10} />
                 <YAxis yAxisId="left" fontSize={9} tickFormatter={v => {
                   const n = Math.abs(v as number);
                   return n > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`;
-                }} />
-                <YAxis yAxisId="right" orientation="right" fontSize={9} domain={[0, 'auto']} tickFormatter={v => `%${v}`} />
+                }} width={46} />
+                <YAxis yAxisId="right" orientation="right" fontSize={9} domain={LINE_Y_DOMAIN} tickFormatter={v => `%${v}`} width={46} />
                 <Tooltip formatter={(v: number, name: string) => {
                   if (name.includes('Bağımlılık') || name.includes('Oran')) return [`%${Math.abs(v).toFixed(1)}`, name];
                   const n = Math.abs(v);
@@ -449,11 +450,11 @@ export default function CrossIntelligencePage() {
               Z-skor analizi · |z| &gt; 1,5 olan yıllar anomali olarak işaretlenir · Tespit edilen anomali: <strong>{outlierCount} yıl</strong>
             </p>
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={anomalyData} margin={{ top: 10, right: 55, left: 20, bottom: 5 }}>
+              <ComposedChart data={anomalyData} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" fontSize={10} />
-                <YAxis yAxisId="prod" fontSize={9} tickFormatter={v => (v as number) > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`} />
-                <YAxis yAxisId="z" orientation="right" fontSize={9} domain={[-3.5, 3.5]} tickFormatter={v => `z${(v as number) >= 0 ? '+' : ''}${v}`} />
+                <YAxis yAxisId="prod" fontSize={9} tickFormatter={v => (v as number) > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`} width={46} />
+                <YAxis yAxisId="z" orientation="right" fontSize={9} domain={[-3.5, 3.5]} tickFormatter={v => `z${(v as number) >= 0 ? '+' : ''}${v}`} width={46} />
                 <Tooltip formatter={(v: number, name: string) => {
                   if (name === 'Z-Skor') return [`z=${v}`, 'Z-Skor'];
                   return [v > 1e6 ? `${(v / 1e6).toFixed(2)}M ton` : `${(v / 1e3).toFixed(0)}K ton`, 'Üretim'];
