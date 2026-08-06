@@ -13,6 +13,7 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import { translateCountry } from '../utils/countryTranslations';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { BAR_COLOR } from '../utils/chartColors';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -210,7 +211,7 @@ export default function MacroEconomicPage() {
                   <Tooltip formatter={(value: number) => [formatValue(value), indicatorName]} />
                   <Bar dataKey="value" name={indicatorName} fill="#3b82f6" radius={[0, 4, 4, 0]}>
                     {countryData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                     ))}
                   </Bar>
                 </BarChart>

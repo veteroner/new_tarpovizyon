@@ -8,6 +8,7 @@ import { COLORS, REGION_COLORS, formatNumber, formatShort } from './tuikLivestoc
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { truncTick } from '../../utils/chartTicks';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedRegion'
@@ -125,7 +126,7 @@ export default function RegionalTab({
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {cityDataForSelectedRegion.slice(0, 20).map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={REGION_COLORS[selectedRegion] || COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={REGION_COLORS[selectedRegion] || BAR_COLOR} />
                   ))}
                 </Bar>
               </BarChart>

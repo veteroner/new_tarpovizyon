@@ -15,6 +15,7 @@ import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, truncTick } from '../utils/chartTicks';
+import { BAR_COLOR } from '../utils/chartColors';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -227,7 +228,7 @@ export default function LandCoverPage() {
                   <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                    {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>

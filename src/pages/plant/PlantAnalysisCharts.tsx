@@ -9,6 +9,7 @@ import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
 import { truncTick } from '../../utils/chartTicks';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 interface PlantAnalysisChartsProps {
   scatterData: ScatterRow[];
@@ -90,7 +91,7 @@ export default function PlantAnalysisCharts({
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
-                  {districtData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {districtData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

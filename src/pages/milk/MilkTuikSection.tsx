@@ -3,8 +3,9 @@ import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, BarChart, Bar, Cell
 } from 'recharts';
-import { TUIK_SUT_URUNLER, COLORS, AY_ADLARI, AY_TAM, formatShort, type TuikSutUrunData } from './milkUtils';
+import { TUIK_SUT_URUNLER, AY_ADLARI, AY_TAM, formatShort, type TuikSutUrunData } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = {
   tuikSutData: TuikSutUrunData[];
@@ -310,7 +311,7 @@ export default function MilkTuikSection({
                     return (
                       <Cell 
                         key={index} 
-                        fill={urunInfo?.color || COLORS[index % COLORS.length]} 
+                        fill={urunInfo?.color || BAR_COLOR} 
                         fillOpacity={entry.urun === selectedTuikSutUrun ? 1 : 0.6}
                         stroke={entry.urun === selectedTuikSutUrun ? '#000' : 'none'}
                         strokeWidth={entry.urun === selectedTuikSutUrun ? 2 : 0}

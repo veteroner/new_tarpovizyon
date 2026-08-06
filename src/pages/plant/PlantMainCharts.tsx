@@ -7,6 +7,7 @@ import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
 import { pctTick, truncTick } from '../../utils/chartTicks';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 interface PlantMainChartsProps {
   yearlyData: YearRow[];
@@ -68,7 +69,7 @@ export default function PlantMainCharts({
               <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
               <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
-                {cityData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                {cityData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -109,7 +110,7 @@ export default function PlantMainCharts({
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[4, 4, 0, 0]}>
-                  {regionData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {regionData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -133,7 +134,7 @@ export default function PlantMainCharts({
                 <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                 <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
-                  {productCompareData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {productCompareData.map((_, i) => <Cell key={i} fill={BAR_COLOR} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

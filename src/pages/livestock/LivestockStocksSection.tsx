@@ -12,6 +12,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { truncTick } from '../../utils/chartTicks';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 const R = 'fao/uretim-hayvansal-canlihayvan';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -519,7 +520,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {stocksCountryData.slice(0, 20).map((item, idx) => (
-                  <Cell key={`cc-${idx}`} fill={String(item.name).includes('Türkiye') ? '#ef4444' : COLORS[idx % COLORS.length]} />
+                  <Cell key={`cc-${idx}`} fill={String(item.name).includes('Türkiye') ? '#ef4444' : BAR_COLOR} />
                 ))}
               </Bar>
             </BarChart>

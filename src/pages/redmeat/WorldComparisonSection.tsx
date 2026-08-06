@@ -11,6 +11,7 @@ import {
   RadarChart,
   ResponsiveContainer,
   Tooltip,
+  Cell,
   Treemap,
   XAxis,
   YAxis,
@@ -22,6 +23,7 @@ import {
   type ConsumptionComparison,
 } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { BAR_COLOR, BAR_HIGHLIGHT } from '../../utils/chartColors';
 
 type Props = {
   worldCarcassPrices: WorldCarcassPrices | null;
@@ -82,15 +84,33 @@ export default function WorldComparisonSection({
     const bins = Array.from({ length: binCount }, (_, i) => ({
       range: `${(min + i * binSize).toFixed(0)}-${(min + (i + 1) * binSize).toFixed(0)}`,
       count: 0,
+      turkiye: false,
     }));
-    
+
     weights.forEach(w => {
       const binIndex = Math.min(binCount - 1, Math.floor((w - min) / binSize));
       bins[binIndex].count++;
     });
-    
+
+    /*
+     * Türkiye'nin düştüğü aralığı işaretle. Bu işaret olmadan grafik
+     * "dünyada 17 ülkenin karkas ağırlığı 242-268 kg" gibi bir trivia
+     * kalıyordu; Türkiye dashboard'unda dağılımın tek anlamı Türkiye'nin
+     * o dağılımın neresinde durduğu.
+     */
+    const tr = carcassWeightData.find(d => /türkiye|turkey/i.test(d.ulke));
+    if (tr && tr.karkas_verimi_kg > 0) {
+      const i = Math.min(binCount - 1, Math.floor((tr.karkas_verimi_kg - min) / binSize));
+      bins[i].turkiye = true;
+    }
+
     return bins;
   }, [carcassWeightData]);
+
+  const turkiyeKarkas = useMemo(
+    () => carcassWeightData.find(d => /türkiye|turkey/i.test(d.ulke))?.karkas_verimi_kg ?? 0,
+    [carcassWeightData],
+  );
 
   return (
     <>
@@ -185,12 +205,22 @@ export default function WorldComparisonSection({
 
           <div className="chart-card" style={{ gridColumn: 'span 2' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)</h3>
-              <ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı (Histogram)" description="Dünya karkas ağırlıkları dağılım histogrami" data={carcassWeightHistogram} context={{ section: 'Histogram' }} compact />
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Türkiye Dünya Karkas Ağırlığı Dağılımında Nerede?</h3>
+              <ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı" description="Türkiye'nin dünya karkas ağırlığı dağılımındaki yeri" data={carcassWeightHistogram} context={{ section: 'Histogram', turkiyeKarkas }} compact />
             </div>
+            <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+              Her sütun bir karkas ağırlığı aralığındaki ülke sayısını gösterir.
+              {turkiyeKarkas > 0 && <> Kırmızı sütun Türkiye'nin bulunduğu aralık — <strong>{turkiyeKarkas.toFixed(0)} kg</strong>.</>}
+            </p>
             <ResponsiveContainer width="100%" height={380}>
-              <BarChart data={carcassWeightHistogram} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              {/*
+                * Histogram; kategorik çubuk grafiği DEĞİL. X ekseni sürekli bir
+                * ölçek (kg aralıkları) olduğu için sütunlar bitişik olmalı ve
+                * köşeleri yuvarlanmamalı — aralarındaki boşluk "bunlar ayrı
+                * kategoriler" yanılgısı yaratıyordu. Ayrım ince beyaz çizgiyle.
+                */}
+              <BarChart data={carcassWeightHistogram} margin={{ top: 20, right: 8, left: 4, bottom: 5 }} barCategoryGap={0}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis 
                   dataKey="range" 
                   tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} 
@@ -199,10 +229,16 @@ export default function WorldComparisonSection({
                   height={70} interval="preserveStartEnd" minTickGap={16} />
                 <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Ülke Sayısı', angle: -90, position: 'insideLeft' }} width={58} />
                 <Tooltip 
+                  cursor={{ fill: 'var(--border)', opacity: 0.35 }}
                   formatter={(value: number) => [`${value} ülke`]}
+                  labelFormatter={(l) => `${l} kg`}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 />
-                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" radius={0} stroke="var(--bg-card)" strokeWidth={1}>
+                  {carcassWeightHistogram.map((b, i) => (
+                    <Cell key={i} fill={b.turkiye ? BAR_HIGHLIGHT : BAR_COLOR} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -6,6 +6,7 @@ import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { truncTick } from '../../utils/chartTicks';
+import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedCategory' | 'yearLabel'
@@ -150,7 +151,7 @@ export default function OverviewTab({
                 <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} />
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
                 <Bar dataKey="value" name="Hayvan Sayısı" radius={[0, 4, 4, 0]}>
-                  {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                  {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -172,7 +173,7 @@ export default function OverviewTab({
               <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={100} />
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
               <Bar dataKey="value" name={selectedAnimal} radius={[0, 4, 4, 0]}>
-                {cityData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                {cityData.map((_, index) => (<Cell key={`cell-${index}`} fill={BAR_COLOR} />))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

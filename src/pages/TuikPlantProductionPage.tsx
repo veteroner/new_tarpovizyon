@@ -9,6 +9,7 @@ import { fetchAgg, num } from '../services/d1';
 const R = 'tuik/bitkisel-uretim';
 import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { BAR_COLOR } from '../utils/chartColors';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -251,7 +252,7 @@ export default function TuikPlantProductionPage() {
                   <Tooltip formatter={(value: number) => [`${formatTon(value)} ${unit}`, selectedUnsur]} />
                   <Bar dataKey="value" name={selectedUnsur} radius={[0, 4, 4, 0]}>
                     {cityData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                     ))}
                   </Bar>
                 </BarChart>

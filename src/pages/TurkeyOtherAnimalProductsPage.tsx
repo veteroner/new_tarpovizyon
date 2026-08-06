@@ -18,6 +18,7 @@ import { fetchAgg, num } from '../services/d1';
 const R = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { BAR_COLOR } from '../utils/chartColors';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef'];
@@ -359,7 +360,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                     <Tooltip formatter={(value: number) => [`${formatNumber(value)} ${currentProduct.birim}`, currentProduct.label]} />
                     <Bar dataKey="value" name={currentProduct.label} radius={[0, 4, 4, 0]}>
                       {cityData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                       ))}
                     </Bar>
                   </BarChart>
