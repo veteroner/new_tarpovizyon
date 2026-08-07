@@ -12,6 +12,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -315,11 +316,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Product CAGR Chart + Country Growth Quadrant */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ürnün CAGR Karşılaştırması (5Y)</h3>
-            <ChartInsightButton title="Ürnün CAGR Karşılaştırması" description="Birincil hayvansal ürünlerin 5 yıllık büléik büyüme analizi" data={primaryProductCAGR.slice(0, 12)} context={{}} compact />
-          </div>
+        <ChartCard title="📊 Ürnün CAGR Karşılaştırması (5Y)" action={<ChartInsightButton title="Ürnün CAGR Karşılaştırması" description="Birincil hayvansal ürünlerin 5 yıllık büléik büyüme analizi" data={primaryProductCAGR.slice(0, 12)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -339,13 +336,9 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌐 Ülke Büyüme Kadranı</h3>
-            <ChartInsightButton title="Ülke Büyüme Kadranı" description="Ülkelerin pazar payı ve büyüme hızı dağılımı" data={primaryCountryCAGR.slice(0, 25)} context={{}} compact />
-          </div>
+        <ChartCard title="🌐 Ülke Büyüme Kadranı" action={<ChartInsightButton title="Ülke Büyüme Kadranı" description="Ülkelerin pazar payı ve büyüme hızı dağılımı" data={primaryCountryCAGR.slice(0, 25)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={380}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -370,16 +363,12 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
               </Scatter>
             </ScatterChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Top 20 Country Ranking */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <div className="chart-card" style={{gridColumn: 'span 2'}}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Top 20 Ülke Üretim Sıralaması</h3>
-            <ChartInsightButton title="Top 20 Ülke Üretim Sıralaması" description="Birincil hayvansal üretimde önde gelen 20 ülke" data={primaryCountryData.slice(0, 20)} context={{}} />
-          </div>
+        <ChartCard title="🌍 Top 20 Ülke Üretim Sıralaması" span={2} action={<ChartInsightButton title="Top 20 Ülke Üretim Sıralaması" description="Birincil hayvansal üretimde önde gelen 20 ülke" data={primaryCountryData.slice(0, 20)} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={primaryCountryData.slice(0, 20)}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -396,7 +385,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Turkey Product Profile */}
@@ -426,11 +415,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Yearly Trend + Country CAGR Table */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Küresel Üretim Trendi</h3>
-            <ChartInsightButton title="Küresel Birincil Hayvansal Üretim Trendi" description="Uzun vadeli küresel birincil hayvansal üretim trendi" data={primaryYearlyData} context={{}} compact />
-          </div>
+        <ChartCard title="📅 Küresel Üretim Trendi" action={<ChartInsightButton title="Küresel Birincil Hayvansal Üretim Trendi" description="Uzun vadeli küresel birincil hayvansal üretim trendi" data={primaryYearlyData} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={primaryYearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -441,7 +426,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
               <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} strokeWidth={2.5} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         <div className="chart-card">
           <h3 className="chart-title">📋 Ülke CAGR Sıralaması (5Y)</h3>

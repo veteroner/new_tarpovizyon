@@ -75,6 +75,7 @@
    */
   .chart-grid > *,
   .kpi-grid > *,
+  .ui-card,
   [style*="display: grid"] > *,
   [style*="display:grid"] > * {
     grid-column: auto !important;
@@ -83,6 +84,9 @@
   }
 
   /* Kart içi boşluk mobilde 24 px çok yer yiyor. */
+  /* Eski sınıflı kartlar. Yeni <Card>/<ChartCard> kendi dolgusunu
+     card.css'ten alıyor ve satır içi stil taşımadığı için !important
+     gerektirmiyor — kartlar taşındıkça bu kural küçülecek. */
   .chart-card,
   .kpi-card {
     padding: 16px !important;
@@ -132,7 +136,8 @@
 
   /* Grafik başlıkları 4 satıra bölünüyordu; AI düğmesiyle çakışmasın diye
      başlık satırını dikey diz. */
-  .chart-card .chart-title {
+  .chart-card .chart-title,
+  .ui-card-title {
     font-size: 0.95rem !important;
     line-height: 1.35 !important;
   }
@@ -210,6 +215,7 @@
  * girmeyen kartın içini çizme" diyor; `contain-intrinsic-size` de yer ayırdığı
  * için kaydırma çubuğu zıplamıyor (CLS yok).
  */
+/* Yeni kartlarda bu, card.css içinde tanımlı. */
 .chart-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
@@ -264,6 +270,7 @@ body {
 /* Uzun kelimeler (ülke adları, ürün adları) kabı taşırmasın. */
 @media (max-width: 767px) {
   .chart-title,
+  .ui-card-title,
   .kpi-title,
   .kpi-subtitle {
     overflow-wrap: anywhere;

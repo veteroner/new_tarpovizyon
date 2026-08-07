@@ -9,6 +9,7 @@ import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   data: OverviewData;
@@ -48,11 +49,7 @@ export function LivestockSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Hayvan Varlığı Dağılımı (2023)</h3>
-            <ChartInsightButton title="Hayvan Varlığı Dağılımı (2023)" description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />
-          </div>
+        <ChartCard title="📊 Hayvan Varlığı Dağılımı (2023)" span={2} action={<ChartInsightButton title="Hayvan Varlığı Dağılımı (2023)" description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data.livestockStocks.breakdown} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -68,7 +65,7 @@ export function LivestockSection({ data }: Props) {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>

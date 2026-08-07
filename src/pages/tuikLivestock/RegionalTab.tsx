@@ -10,6 +10,7 @@ import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedRegion'
@@ -43,11 +44,7 @@ export default function RegionalTab({
       {selectedRegion === 'Tümü' ? (
         <>
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Bölgelere Göre {selectedAnimal} Dağılımı</h3>
-                <ChartInsightButton title="📊 Bölgesel Dağılım" description="Bölgelere göre hayvan dağılımı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />
-              </div>
+            <ChartCard title={<>📊 Bölgelere Göre {selectedAnimal} Dağılımı</>} action={<ChartInsightButton title="📊 Bölgesel Dağılım" description="Bölgelere göre hayvan dağılımı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={regionalAnalysis}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -61,13 +58,9 @@ export default function RegionalTab({
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Bölgesel Pay Dağılımı (%)</h3>
-                <ChartInsightButton title="🥧 Bölgesel Pay Dağılımı" description="Bölgelerin toplam içindeki payı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />
-              </div>
+            <ChartCard title="🥧 Bölgesel Pay Dağılımı (%)" action={<ChartInsightButton title="🥧 Bölgesel Pay Dağılımı" description="Bölgelerin toplam içindeki payı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
@@ -91,14 +84,10 @@ export default function RegionalTab({
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Çok Boyutlu Bölge Karşılaştırması</h3>
-              <ChartInsightButton title="🎯 Bölge Karşılaştırması" description="Radar: çok boyutlu bölge analizi" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />
-            </div>
+          <ChartCard title="🎯 Çok Boyutlu Bölge Karşılaştırması" action={<ChartInsightButton title="🎯 Bölge Karşılaştırması" description="Radar: çok boyutlu bölge analizi" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />}>
             <ResponsiveContainer width="100%" height={450}>
               <RadarChart data={regionalAnalysis}>
                 <PolarGrid stroke="var(--border)" />
@@ -110,15 +99,11 @@ export default function RegionalTab({
                 <Legend />
               </RadarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </>
       ) : (
         <div className="chart-grid">
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ {selectedRegion} — İllere Göre {selectedAnimal} Dağılımı (Top 20)</h3>
-              <ChartInsightButton title="🏙️ İl Dağılımı" description="İl bazında dağılım" data={cityDataForSelectedRegion} context={{ section: 'Bölgesel' }} compact />
-            </div>
+          <ChartCard title={<>🏙️ {selectedRegion} — İllere Göre {selectedAnimal} Dağılımı (Top 20)</>} action={<ChartInsightButton title="🏙️ İl Dağılımı" description="İl bazında dağılım" data={cityDataForSelectedRegion} context={{ section: 'Bölgesel' }} compact />}>
             <ResponsiveContainer width="100%" height={420}>
               <BarChart data={cityDataForSelectedRegion.slice(0, 20)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -134,13 +119,9 @@ export default function RegionalTab({
               </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 {selectedRegion} — İl Pay Dağılımı (%) (Top 10)</h3>
-              <ChartInsightButton title="🥧 İl Pay Dağılımı" description="İl pay dağılımı" data={cityDataForSelectedRegion.slice(0, 10)} context={{ section: 'Bölgesel' }} compact />
-            </div>
+          <ChartCard title={<>🥧 {selectedRegion} — İl Pay Dağılımı (%) (Top 10)</>} action={<ChartInsightButton title="🥧 İl Pay Dağılımı" description="İl pay dağılımı" data={cityDataForSelectedRegion.slice(0, 10)} context={{ section: 'Bölgesel' }} compact />}>
             <ResponsiveContainer width="100%" height={420}>
               <PieChart>
                 <Pie
@@ -168,16 +149,12 @@ export default function RegionalTab({
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 
       {/* Turkey Heatmap */}
-      <div className="chart-card" style={{ marginTop: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Türkiye İl Dağılım Haritası (Coğrafi Bölgeler)</h3>
-          <ChartInsightButton title="🗺️ İl Dağılım Haritası" description="Harita: il bazlı dağılım" data={heatmapData} context={{ section: 'Harita' }} compact />
-        </div>
+      <ChartCard title="🗺️ Türkiye İl Dağılım Haritası (Coğrafi Bölgeler)" action={<ChartInsightButton title="🗺️ İl Dağılım Haritası" description="Harita: il bazlı dağılım" data={heatmapData} context={{ section: 'Harita' }} compact />}>
         {heatmapData.length === 0 ? (
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>İl verileri yükleniyor…</div>
         ) : (
@@ -194,7 +171,7 @@ export default function RegionalTab({
         <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginTop: '12px' }}>
           * İller coğrafi bölgesine göre renklidir; tooltip'te il değerini görebilirsiniz.
         </p>
-      </div>
+      </ChartCard>
     </>
   );
 }

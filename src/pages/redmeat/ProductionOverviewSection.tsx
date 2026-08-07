@@ -22,6 +22,7 @@ import {
   formatShort,
 } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = {
   filteredSeries: YearPoint[];
@@ -193,11 +194,7 @@ export default function ProductionOverviewSection({
 
       {/* Section 2: Üretim Trendi */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kırmızı Et Üretimi Trendi {trendRangeLabel && `(${trendRangeLabel})`}</h3>
-            <ChartInsightButton title={`📈 Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />
-          </div>
+        <ChartCard title={<>📈 Kırmızı Et Üretimi Trendi {trendRangeLabel && `(${trendRangeLabel})`}</>} span={2} action={<ChartInsightButton title={`📈 Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={filteredSeries} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -211,13 +208,9 @@ export default function ProductionOverviewSection({
               <Area type="monotone" dataKey="totalTon" name="Toplam Üretim" stroke="#ef4444" fill="#ef4444" fillOpacity={0.15} strokeWidth={2.5} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Tür Bazında Dağılım ({latest?.year ?? '-'})</h3>
-            <ChartInsightButton title="🥧 Tür Bazında Dağılım" description="Tür bazında kırmızı et üretim dağılımı" data={breakdown} context={{ year: latest?.year }} compact />
-          </div>
+        <ChartCard title={<>🥧 Tür Bazında Dağılım ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="🥧 Tür Bazında Dağılım" description="Tür bazında kırmızı et üretim dağılımı" data={breakdown} context={{ year: latest?.year }} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie
@@ -238,13 +231,9 @@ export default function ProductionOverviewSection({
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Büyükbaş vs Küçükbaş ({latest?.year ?? '-'})</h3>
-            <ChartInsightButton title="📊 Büyükbaş vs Küçükbaş" description="Büyükbaş ve küçükbaş et üretimi karşılaştırması" data={buyukbasKucukbasBreakdown} context={{ year: latest?.year }} compact />
-          </div>
+        <ChartCard title={<>📊 Büyükbaş vs Küçükbaş ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="📊 Büyükbaş vs Küçükbaş" description="Büyükbaş ve küçükbaş et üretimi karşılaştırması" data={buyukbasKucukbasBreakdown} context={{ year: latest?.year }} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie
@@ -265,7 +254,7 @@ export default function ProductionOverviewSection({
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { ChartCard } from '../components/ui/Card';
 
 const SERT_KABUKLU_URUNLER = [
   'Fındık', 'Ceviz', 'Badem', 'Şam Fıstığı (Antep Fıstığı)', 'Kestane'
@@ -17,11 +18,7 @@ const FINDIK_DUNYA = [
 ].sort((a, b) => b.ton - a.ton);
 
 const nutExtra = (
-  <div className="chart-card" style={{ marginTop: 20 }}>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-      <h3 className="chart-title" style={{ marginBottom: 0 }}>🌰 Dünya Fındık Üretiminde Türkiye (2022, bin ton)</h3>
-      <ChartInsightButton title="🌰 Fındık Üretimi" description="Dünya fındık üretiminde Türkiye" data={FINDIK_DUNYA} context={{ section: 'Sert Kabuklu' }} compact />
-    </div>
+  <ChartCard title="🌰 Dünya Fındık Üretiminde Türkiye (2022, bin ton)" action={<ChartInsightButton title="🌰 Fındık Üretimi" description="Dünya fındık üretiminde Türkiye" data={FINDIK_DUNYA} context={{ section: 'Sert Kabuklu' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Türkiye, dünya fındık üretiminin yaklaşık <strong>%70'ini</strong> tek başına karşılıyor.
       Kaynak: FAO 2022 · Kırmızı çubuk = Türkiye
@@ -43,7 +40,7 @@ const nutExtra = (
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  </div>
+  </ChartCard>
 );
 
 export default function NutProductionPage() {

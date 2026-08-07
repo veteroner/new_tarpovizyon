@@ -16,6 +16,7 @@ import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface EggTuikYieldTabProps {
   tuikData: TuikEggData[];
@@ -39,11 +40,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
     <>
       {/* Yumurtacı Tavuk Sayısı Trendi */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 Yumurtacı Tavuk Sayısı Trendi</h3>
-            <ChartInsightButton title="🐔 Yumurtacı Tavuk Sayısı Trendi" description="Yumurtacı tavuk sayısı trendi" data={layerChartData} context={{ section: 'Layer Count' }} compact />
-          </div>
+        <ChartCard title="🐔 Yumurtacı Tavuk Sayısı Trendi" span={2} action={<ChartInsightButton title="🐔 Yumurtacı Tavuk Sayısı Trendi" description="Yumurtacı tavuk sayısı trendi" data={layerChartData} context={{ section: 'Layer Count' }} compact />}>
           {hasLayerChartData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>
@@ -77,16 +74,12 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
               </div>
             </>
           ) : noDataBox('Yumurtacı tavuk sayısı verisi mevcut değil')}
-        </div>
+        </ChartCard>
       </div>
 
       {/* Verim Trendi */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Tavuk Başına Yumurta Verimi Trendi</h3>
-            <ChartInsightButton title="📊 Tavuk Başına Yumurta Verimi Trendi" description="Tavuk başına yumurta verimi trendi" data={yieldData} context={{ section: 'Verim Trend' }} compact />
-          </div>
+        <ChartCard title="📊 Tavuk Başına Yumurta Verimi Trendi" span={2} action={<ChartInsightButton title="📊 Tavuk Başına Yumurta Verimi Trendi" description="Tavuk başına yumurta verimi trendi" data={yieldData} context={{ section: 'Verim Trend' }} compact />}>
           {hasYieldData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>
@@ -114,16 +107,12 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
               </div>
             </>
           ) : noDataBox('Tavuk başına verim verisi hesaplanamıyor (yumurtacı tavuk sayısı gerekli)')}
-        </div>
+        </ChartCard>
       </div>
 
       {/* Kuluçka Yumurtası Trendi */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi)</h3>
-            <ChartInsightButton title="🥚 Kuluçkaya Basılan Yumurta" description="Layer civciv üretimi için kuluçkaya basılan yumurta sayısı" data={hatchData} context={{ section: 'Kuluçka' }} compact />
-          </div>
+        <ChartCard title="🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi)" span={2} action={<ChartInsightButton title="🥚 Kuluçkaya Basılan Yumurta" description="Layer civciv üretimi için kuluçkaya basılan yumurta sayısı" data={hatchData} context={{ section: 'Kuluçka' }} compact />}>
           {hasHatchData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>
@@ -156,7 +145,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
               </div>
             </>
           ) : noDataBox('Kuluçka yumurtası verisi mevcut değil')}
-        </div>
+        </ChartCard>
       </div>
 
       {/* Üretim Döngüsü */}

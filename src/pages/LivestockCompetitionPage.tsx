@@ -10,6 +10,7 @@ import { InsightCard } from '../components/InsightCard';
 import { useLivestockCompetitionData, isTR } from './livestockCompetition/useLivestockCompetitionData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 /* ── Color constants ───────────────────────────────────────── */
 const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
@@ -187,11 +188,7 @@ export function LivestockCompetitionPage() {
       {/* ── Charts Row 1: Market Share + BCG ────────────────── */}
       <div className="chart-grid" style={{ marginTop: 20 }}>
         {/* Market Share Evolution */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Pazar Payı Evrimi (2010–{selectedYear})</h3>
-          <ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />
-          </div>
+        <ChartCard title={<>📈 Pazar Payı Evrimi (2010–{selectedYear})</>} action={<ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart data={mktShareChart} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -209,14 +206,10 @@ export function LivestockCompetitionPage() {
               <Area type="monotone" dataKey="Diğer" stackId="1" stroke="#6b7280" fill="#6b7280" fillOpacity={0.2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         {/* BCG Matrix */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Rekabet Pozisyon Matrisi (Büyüme × Pay)</h3>
-          <ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />
-          </div>
+        <ChartCard title="🎯 Rekabet Pozisyon Matrisi (Büyüme × Pay)" action={<ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 30, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -253,17 +246,13 @@ export function LivestockCompetitionPage() {
           <div style={{ marginTop: 8, fontSize: '0.72rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
             💡 Bir noktaya tıklayarak ülke detayını açabilirsiniz.
           </div>
-        </div>
+        </ChartCard>
       </div>
 
       {/* ── Charts Row 2: Top Producers + Radar ─────────────── */}
       <div className="chart-grid">
         {/* Top 15 */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>🏆 Top 15 Hayvansal Üretici ({selectedYear})</h3>
-          <ChartInsightButton title="Top 15 Hayvansal Üretici" description="Top 15 hayvansal üretici ülkeler" data={currentRankings.slice(0,15)} context={{ section: 'Rekabet' }} compact />
-          </div>
+        <ChartCard title={<>🏆 Top 15 Hayvansal Üretici ({selectedYear})</>} action={<ChartInsightButton title="Top 15 Hayvansal Üretici" description="Top 15 hayvansal üretici ülkeler" data={currentRankings.slice(0,15)} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={currentRankings.slice(0, 15).map(c => ({
@@ -297,14 +286,10 @@ export function LivestockCompetitionPage() {
               <Bar dataKey="eggs" stackId="a" fill="#f59e0b" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         {/* Radar */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Türkiye vs Top 2 – Kategori Karşılaştırması</h3>
-          <ChartInsightButton title="Türkiye vs Top 2 Karşılaştırması" description="Türkiye vs top 2 kategori karşılaştırması" data={radarData} context={{ section: 'Rekabet' }} compact />
-          </div>
+        <ChartCard title="📊 Türkiye vs Top 2 – Kategori Karşılaştırması" action={<ChartInsightButton title="Türkiye vs Top 2 Karşılaştırması" description="Türkiye vs top 2 kategori karşılaştırması" data={radarData} context={{ section: 'Rekabet' }} compact />}>
           {top2.length >= 2 && radarData.length > 0 && (
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart data={radarData}>
@@ -322,15 +307,11 @@ export function LivestockCompetitionPage() {
           <div style={{ padding: 10, fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
             💡 Her kategoride en yüksek üretici = 100 baz puan. Diğerleri oransal.
           </div>
-        </div>
+        </ChartCard>
       </div>
 
       {/* ── Turkey Trend ───────────────────────────────────── */}
-      <div className="chart-card" style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye Üretim Trendi (Tüm Yıllar)</h3>
-        <ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
-        </div>
+      <ChartCard title="📈 Türkiye Üretim Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={turkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -344,13 +325,9 @@ export function LivestockCompetitionPage() {
             <Line type="monotone" dataKey="eggs" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
-      </div>
+      </ChartCard>
       {/* ── Treemap: Ülke Pazar Payı Haritası ──────────────────── */}
-      <div className="chart-card" style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</h3>
-        <ChartInsightButton title="Ülke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />
-        </div>
+      <ChartCard title={<>🗺️ Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</>} action={<ChartInsightButton title="Ülke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />}>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 12px' }}>
           Alan büyüklüğü toplam hayvansal üretim miktarıyla orantılı. Türkiye kırmızı ile gösterilmiştir.
         </p>
@@ -388,7 +365,7 @@ export function LivestockCompetitionPage() {
             <Tooltip formatter={(v: number) => [fmtVal(v) + ' ton', 'Toplam Üretim']} />
           </Treemap>
         </ResponsiveContainer>
-      </div>
+      </ChartCard>
 
       {/* ── HHI Zaman Serisi ─────────────────────────────────── */}
       {mktShareChart.length > 1 && (() => {
@@ -400,11 +377,7 @@ export function LivestockCompetitionPage() {
           return { year, hhi: Math.round(hhi_val * 10000) };
         });
         return (
-          <div className="chart-card" style={{ marginTop: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi</h3>
-            <ChartInsightButton title="Piyasa Konsantrasyon HHI" description="Piyasa konsantrasyon HHI zaman serisi" data={hhiSeries} context={{ section: 'Konsantrasyon' }} compact />
-            </div>
+          <ChartCard title="📊 Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi" action={<ChartInsightButton title="Piyasa Konsantrasyon HHI" description="Piyasa konsantrasyon HHI zaman serisi" data={hhiSeries} context={{ section: 'Konsantrasyon' }} compact />}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 8px' }}>
               HHI &lt; 1500 = Rekabetçi · 1500–2500 = Orta · &gt; 2500 = Yoğunlaşmış piyasa (DOJ kriterleri)
             </p>
@@ -425,7 +398,7 @@ export function LivestockCompetitionPage() {
                   dot={{ r: 3, fill: '#6366f1' }} name="HHI" />
               </LineChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         );
       })()}
       {/* ── Catch-Up Analysis ──────────────────────────────── */}

@@ -34,6 +34,7 @@ import {
 import { type Tab, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { pctTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   selectedYear: string;
@@ -428,11 +429,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Row 3: 20-Year Trend */}
       {overviewTrend.length > 0 && (
         <div className="chart-grid" style={{marginTop: '24px'}}>
-          <div className="chart-card" style={{gridColumn: 'span 2'}}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Küresel Hayvan Stoku Trendi (20 Yıl)</h3>
-              <ChartInsightButton title="Küresel Hayvan Stoku Trendi (20 Yıl)" description="Uzun vadeli küresel hayvan stok trendi" data={overviewTrend} context={{}} />
-            </div>
+          <ChartCard title="📈 Küresel Hayvan Stoku Trendi (20 Yıl)" span={2} action={<ChartInsightButton title="Küresel Hayvan Stoku Trendi (20 Yıl)" description="Uzun vadeli küresel hayvan stok trendi" data={overviewTrend} context={{}} />}>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={overviewTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -443,18 +440,14 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                 <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2.5} />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 
       {/* Row 4: Growth Quadrant */}
       {countryGrowthData.length > 0 && (
         <div className="chart-grid" style={{marginTop: '20px'}}>
-          <div className="chart-card" style={{gridColumn: 'span 2'}}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Ülke Growth Quadrant (CAGR × Pazar Payı)</h3>
-              <ChartInsightButton title="Ülke Growth Quadrant (CAGR × Pazar Payı)" description="Ülkelerin CAGR ve pazar payı dağılımı" data={countryGrowthData.slice(0, 30)} context={{}} />
-            </div>
+          <ChartCard title="🎯 Ülke Growth Quadrant (CAGR × Pazar Payı)" span={2} action={<ChartInsightButton title="Ülke Growth Quadrant (CAGR × Pazar Payı)" description="Ülkelerin CAGR ve pazar payı dağılımı" data={countryGrowthData.slice(0, 30)} context={{}} />}>
             <ResponsiveContainer width="100%" height={400}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -474,7 +467,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                 </Scatter>
               </ScatterChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 

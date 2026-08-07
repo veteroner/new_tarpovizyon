@@ -8,6 +8,7 @@ import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
 const R_BIR = 'fao/uretim-hayvansal-birincil';
@@ -460,11 +461,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       <div className="chart-grid">
         {/* Efficiency Scatter */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Et Verimi vs Üretim Hacmi (Top 50)</h3>
-            <ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />
-          </div>
+        <ChartCard title="📊 Et Verimi vs Üretim Hacmi (Top 50)" action={<ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -488,14 +485,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
             🔴 Türkiye vurgulanmıştır • Büyük nokta = yüksek üretim hacmi
           </div>
-        </div>
+        </ChartCard>
 
         {/* Segmented Analysis */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Segmentasyon: Gelişmiş / Gelişmekte / Türkiye</h3>
-            <ChartInsightButton title="Verimlilik Segmentasyon Analizi" description="Gelişmiş, gelişmekte olan ülkeler ve Türkiye verimlilik karşılaştırması" data={effBestPractices} context={{}} compact />
-          </div>
+        <ChartCard title="🌍 Segmentasyon: Gelişmiş / Gelişmekte / Türkiye" action={<ChartInsightButton title="Verimlilik Segmentasyon Analizi" description="Gelişmiş, gelişmekte olan ülkeler ve Türkiye verimlilik karşılaştırması" data={effBestPractices} context={{}} compact />}>
           {(() => {
             const devAvg = effBestPractices.filter(d => d.segment === 'Gelişmiş');
             const devingAvg = effBestPractices.filter(d => d.segment === 'Gelişmekte');
@@ -538,14 +531,10 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', marginTop: 8 }}>
             Yumurta değerleri görselleştirme için ÷100 ölçeklendirildi
           </div>
-        </div>
+        </ChartCard>
 
         {/* Efficiency Trends */}
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)</h3>
-            <ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />
-          </div>
+        <ChartCard title="📈 Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)" action={<ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={efficiencyTrends} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -562,7 +551,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           <div style={{ padding: '12px 16px', marginTop: 12, background: 'rgba(59,130,246,0.1)', borderRadius: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
             Düz çizgi = Dünya ortalaması • Kesikli çizgi = 🇹🇷 Türkiye
           </div>
-        </div>
+        </ChartCard>
 
         {/* Best Practices Table */}
         <div className="chart-card">

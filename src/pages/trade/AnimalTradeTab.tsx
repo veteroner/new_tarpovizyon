@@ -10,6 +10,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney, formatNumber } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const R = 'tuik/ticaret-hayvansal';
 // Düzey filtreleri eski SQL'dekiyle birebir: bu tabloda hangi kırılım
@@ -274,11 +275,7 @@ export default function AnimalTradeTab() {
       </div>
 
       {/* Canlı vs İşlenmiş Hayvansal Ürün Ayrımı */}
-      <div className="chart-card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ margin: 0 }}>🐄 Canlı Hayvan vs İşlenmiş Ürün Ayrımı ({selectedYear})</h3>
-          <ChartInsightButton title={`Canlı Hayvan vs İşlenmiş Ürün Ayrımı (${selectedYear})`} description="Canlı ve işlenmiş ürünlerde ihracat/ithalat kırılımı" data={liveProcChart} context={animalContext} />
-        </div>
+      <ChartCard title={<>🐄 Canlı Hayvan vs İşlenmiş Ürün Ayrımı ({selectedYear})</>} action={<ChartInsightButton title={`Canlı Hayvan vs İşlenmiş Ürün Ayrımı (${selectedYear})`} description="Canlı ve işlenmiş ürünlerde ihracat/ithalat kırılımı" data={liveProcChart} context={animalContext} />}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
           <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 14 }}>
             <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 700, marginBottom: 4 }}>🐄 CANLI — İhracat</div>
@@ -323,15 +320,11 @@ export default function AnimalTradeTab() {
         <p style={{ marginTop: 8, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center' }}>
           Sınıflandırma heuristiği: ürün adında "canlı" / "damızlık" / "diri" geçenler canlı, diğerleri işlenmiş kabul edilir.
         </p>
-      </div>
+      </ChartCard>
 
       {/* Charts Row 1: Monthly + Product Pie */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık Hayvansal Ticaret ({selectedYear})</h3>
-            <ChartInsightButton title={`Aylık Hayvansal Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={animalContext} />
-          </div>
+        <ChartCard title={<>📊 Aylık Hayvansal Ticaret ({selectedYear})</>} action={<ChartInsightButton title={`Aylık Hayvansal Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={animalContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -343,13 +336,9 @@ export default function AnimalTradeTab() {
               <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🥧 Ürün İhracat Dağılımı ({selectedYear})</h3>
-            <ChartInsightButton title={`Hayvansal Ürün İhracat Dağılımı (${selectedYear})`} description="İlk ürünlerin ihracat ağırlığı" data={pieData} context={animalContext} />
-          </div>
+        <ChartCard title={<>🥧 Ürün İhracat Dağılımı ({selectedYear})</>} action={<ChartInsightButton title={`Hayvansal Ürün İhracat Dağılımı (${selectedYear})`} description="İlk ürünlerin ihracat ağırlığı" data={pieData} context={animalContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie
@@ -368,16 +357,12 @@ export default function AnimalTradeTab() {
               <Tooltip formatter={(v: number) => [formatMoney(v), 'İhracat']} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Yearly trend */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık Hayvansal Ticaret Trendi + Denge</h3>
-            <ChartInsightButton title="Yıllık Hayvansal Ticaret Trendi + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={animalContext} />
-          </div>
+        <ChartCard title="📈 Yıllık Hayvansal Ticaret Trendi + Denge" action={<ChartInsightButton title="Yıllık Hayvansal Ticaret Trendi + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={animalContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -391,16 +376,12 @@ export default function AnimalTradeTab() {
               <Line yAxisId="right" type="monotone" dataKey="denge" stroke="#6366f1" strokeWidth={3} dot={false} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Countries */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🌍 Top 15 Hayvansal İhracat Ülkesi ({selectedYear})</h3>
-            <ChartInsightButton title={`Hayvansal Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={animalContext} />
-          </div>
+        <ChartCard title={<>🌍 Top 15 Hayvansal İhracat Ülkesi ({selectedYear})</>} action={<ChartInsightButton title={`Hayvansal Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={animalContext} />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -412,7 +393,7 @@ export default function AnimalTradeTab() {
               <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Products Table */}

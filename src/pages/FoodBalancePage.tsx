@@ -17,6 +17,7 @@ import {
 import type { Tab } from './foodBalance/useFoodBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
@@ -74,11 +75,7 @@ export default function FoodBalancePage() {
                 <KPICard title="IZLENEN URUN" value={String(overviewKPIs.productCount)} subtitle="Temel gida" icon={Wheat} color="green" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gida Bazinda Uretim</h3>
-                  <ChartInsightButton title="Gıda Bazında Üretim" description="Gıda bazında üretim dağılımı" data={overviewByProduct} context={{ section: 'Gıda Dengesi' }} compact />
-                  </div>
+                <ChartCard title="Gida Bazinda Uretim" action={<ChartInsightButton title="Gıda Bazında Üretim" description="Gıda bazında üretim dağılımı" data={overviewByProduct} context={{ section: 'Gıda Dengesi' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewByProduct} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -92,12 +89,8 @@ export default function FoodBalancePage() {
               </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 Uretici Ulke</h3>
-                  <ChartInsightButton title="Top 15 Üretici Ülke" description="Top 15 gıda üretici ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gıda Dengesi' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Top 15 Uretici Ulke" action={<ChartInsightButton title="Top 15 Üretici Ülke" description="Top 15 gıda üretici ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gıda Dengesi' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -109,14 +102,10 @@ export default function FoodBalancePage() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Dunya Gida Uretim Trendi</h3>
-                  <ChartInsightButton title="Dünya Gıda Üretim Trendi" description="Dünya gıda üretim trendi" data={overviewTrend} context={{ section: 'Gıda Dengesi' }} compact />
-                  </div>
+                <ChartCard title="Dunya Gida Uretim Trendi" span={2} action={<ChartInsightButton title="Dünya Gıda Üretim Trendi" description="Dünya gıda üretim trendi" data={overviewTrend} context={{ section: 'Gıda Dengesi' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -126,7 +115,7 @@ export default function FoodBalancePage() {
                       <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={overviewInsights} />
             </>
@@ -143,11 +132,7 @@ export default function FoodBalancePage() {
               </div>
               {securityData.length > 0 && (
                 <div className="chart-grid">
-                  <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Gida Kendine Yeterlilik Orani (%)</h3>
-                    <ChartInsightButton title="Türkiye Gıda Yeterlilik Oranı" description="Türkiye gıda yeterlilik oranı" data={securityData} context={{ section: 'Gıda Güvenliği' }} compact />
-                    </div>
+                  <ChartCard title="Turkiye Gida Kendine Yeterlilik Orani (%)" span={2} action={<ChartInsightButton title="Türkiye Gıda Yeterlilik Oranı" description="Türkiye gıda yeterlilik oranı" data={securityData} context={{ section: 'Gıda Güvenliği' }} compact />}>
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart data={securityData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -168,16 +153,12 @@ export default function FoodBalancePage() {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </ChartCard>
                 </div>
               )}
               {securityData.length > 0 && (
                 <div className="chart-grid">
-                  <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Uretim vs Ithalat vs Ihracat (Turkiye)</h3>
-                    <ChartInsightButton title="Üretim vs İthalat vs İhracat" description="Türkiye üretim ithalat ihracat dengesi" data={securityData} context={{ section: 'Gıda Güvenliği' }} compact />
-                    </div>
+                  <ChartCard title="Uretim vs Ithalat vs Ihracat (Turkiye)" span={2} action={<ChartInsightButton title="Üretim vs İthalat vs İhracat" description="Türkiye üretim ithalat ihracat dengesi" data={securityData} context={{ section: 'Gıda Güvenliği' }} compact />}>
                     <ResponsiveContainer width="100%" height={350}>
                       <BarChart data={securityData.filter((d: any) => d.production > 0)}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -190,7 +171,7 @@ export default function FoodBalancePage() {
                         <Bar dataKey="exports" name="Ihracat" fill="#ef4444" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
-                  </div>
+                  </ChartCard>
                 </div>
               )}
               <InsightCard insights={securityInsights} />
@@ -209,11 +190,7 @@ export default function FoodBalancePage() {
                 </div>
               )}
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gida Bazinda Ithalat vs Ihracat</h3>
-                  <ChartInsightButton title="Gıda İthalat vs İhracat" description="Gıda bazında ithalat vs ihracat" data={tradeData} context={{ section: 'Ticaret' }} compact />
-                  </div>
+                <ChartCard title="Gida Bazinda Ithalat vs Ihracat" span={2} action={<ChartInsightButton title="Gıda İthalat vs İhracat" description="Gıda bazında ithalat vs ihracat" data={tradeData} context={{ section: 'Ticaret' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={tradeData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -225,15 +202,11 @@ export default function FoodBalancePage() {
                       <Bar dataKey="exports" name="Ihracat" fill="#22c55e" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               {tradeTrend.length > 0 && (
                 <div className="chart-grid">
-                  <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Dunya Gida Ticareti Trendi</h3>
-                    <ChartInsightButton title="Dünya Gıda Ticareti Trendi" description="Dünya gıda ticareti trendi" data={tradeTrend} context={{ section: 'Ticaret' }} compact />
-                    </div>
+                  <ChartCard title="Dunya Gida Ticareti Trendi" span={2} action={<ChartInsightButton title="Dünya Gıda Ticareti Trendi" description="Dünya gıda ticareti trendi" data={tradeTrend} context={{ section: 'Ticaret' }} compact />}>
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart data={tradeTrend}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -246,7 +219,7 @@ export default function FoodBalancePage() {
                         <Line type="monotone" dataKey="exports" name="Ihracat" stroke="#ef4444" strokeWidth={2} />
                       </ComposedChart>
                     </ResponsiveContainer>
-                  </div>
+                  </ChartCard>
                 </div>
               )}
               {tradeData.length > 0 && (() => {
@@ -290,11 +263,7 @@ export default function FoodBalancePage() {
                 <KPICard title="ORT KALORI" value={`${turkeyProfile.avgCal.toFixed(0)} kcal`} subtitle="kisi/gun" icon={Heart} color="purple" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Urun Bazli Uretim</h3>
-                  <ChartInsightButton title="Türkiye Ürün Bazlı Üretim" description="Türkiye ürün bazlı üretim" data={turkeyProfile.products} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Urun Bazli Uretim" action={<ChartInsightButton title="Türkiye Ürün Bazlı Üretim" description="Türkiye ürün bazlı üretim" data={turkeyProfile.products} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={turkeyProfile.products} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -307,12 +276,8 @@ export default function FoodBalancePage() {
                       <Bar dataKey="exports" name="Ihracat" fill="#ef4444" />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Gida Uretim Trendi (2000+)</h3>
-                  <ChartInsightButton title="Türkiye Gıda Üretim Trendi" description="Türkiye gıda üretim trendi (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Turkiye Gida Uretim Trendi (2000+)" action={<ChartInsightButton title="Türkiye Gıda Üretim Trendi" description="Türkiye gıda üretim trendi (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -325,7 +290,7 @@ export default function FoodBalancePage() {
                       <Line type="monotone" dataKey="exports" name="Ihracat" stroke="#ef4444" strokeWidth={2} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={turkeyInsights} />
             </>
@@ -341,11 +306,7 @@ export default function FoodBalancePage() {
                 <KPICard title="ANOMALI" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayisi" icon={AlertTriangle} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Gida Uretimi - Tahmin Projeksiyonu</h3>
-                  <ChartInsightButton title="Türkiye Gıda Üretim Tahmin Projeksiyonu" description="Türkiye gıda üretimi tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Gida Uretimi - Tahmin Projeksiyonu" span={2} action={<ChartInsightButton title="Türkiye Gıda Üretim Tahmin Projeksiyonu" description="Türkiye gıda üretimi tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -358,7 +319,7 @@ export default function FoodBalancePage() {
                       <Scatter dataKey="anomaly" name="Anomali" fill="#ef4444" />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={forecastInsights} />
             </>

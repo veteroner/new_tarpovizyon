@@ -21,6 +21,7 @@ import {
 import { type EconomicData } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = {
   economicData: EconomicData[];
@@ -142,11 +143,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
 
       {/* Karkas Fiyat Trendi */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Karkas Fiyat Trendi</h3>
-            <ChartInsightButton title="📈 Karkas Fiyat Trendi" description="Dana ve kuzu karkas fiyat trendi" data={filteredEconomicData} context={{ section: 'Fiyat Trendi' }} />
-          </div>
+        <ChartCard title="📈 Karkas Fiyat Trendi" span={2} action={<ChartInsightButton title="📈 Karkas Fiyat Trendi" description="Dana ve kuzu karkas fiyat trendi" data={filteredEconomicData} context={{ section: 'Fiyat Trendi' }} />}>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -166,16 +163,12 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Line type="monotone" dataKey="kuzu_karkas_fiyati_tl_kg" name="Kuzu Karkas" stroke="#22c55e" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Maliyet, Karlılık, Dolar/Yem */}
       <div className="chart-grid" style={{ marginTop: '20px' }}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>💰 Maliyet vs Fiyat</h3>
-            <ChartInsightButton title="💰 Maliyet vs Fiyat" description="Dana karkas maliyet ve fiyat karşılaştırması" data={filteredEconomicData} context={{ section: 'Maliyet-Fiyat' }} compact />
-          </div>
+        <ChartCard title="💰 Maliyet vs Fiyat" action={<ChartInsightButton title="💰 Maliyet vs Fiyat" description="Dana karkas maliyet ve fiyat karşılaştırması" data={filteredEconomicData} context={{ section: 'Maliyet-Fiyat' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -190,13 +183,9 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Line type="monotone" dataKey="dana_karkas_fiyati_tl_kg" name="Dana Fiyat" stroke="#ef4444" strokeWidth={2.5} dot={{ fill: '#ef4444', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Karlılık Trendi</h3>
-            <ChartInsightButton title="📊 Karlılık Trendi" description="Dana karkas karlılık oranı trendi" data={filteredEconomicData} context={{ section: 'Karlılık' }} compact />
-          </div>
+        <ChartCard title="📊 Karlılık Trendi" action={<ChartInsightButton title="📊 Karlılık Trendi" description="Dana karkas karlılık oranı trendi" data={filteredEconomicData} context={{ section: 'Karlılık' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -209,13 +198,9 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Area type="monotone" dataKey="karlilik" name="Karlılık (%)" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>💱 Dolar Kuru &amp; Yem Fiyatları</h3>
-            <ChartInsightButton title="💱 Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />
-          </div>
+        <ChartCard title="💱 Dolar Kuru &amp; Yem Fiyatları" action={<ChartInsightButton title="💱 Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -234,16 +219,12 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Line yAxisId="right" type="monotone" dataKey="besi_yemi_fiyatlari_tl_kg" name="Besi Yemi" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Korelasyon Analizi */}
       <div className="chart-grid" style={{ marginTop: '20px' }}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🔄 Dolar-Fiyat Korelasyonu</h3>
-            <ChartInsightButton title="🔄 Dolar-Fiyat Korelasyonu" description="Dolar kuru ile dana karkas fiyatı korelasyon analizi" data={filteredEconomicData} context={{ section: 'Korelasyon' }} compact />
-          </div>
+        <ChartCard title="🔄 Dolar-Fiyat Korelasyonu" action={<ChartInsightButton title="🔄 Dolar-Fiyat Korelasyonu" description="Dolar kuru ile dana karkas fiyatı korelasyon analizi" data={filteredEconomicData} context={{ section: 'Korelasyon' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -270,13 +251,9 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Scatter data={filteredEconomicData} fill="#dc2626" name="Dana Karkas" />
             </ScatterChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Besilik Hayvan Fiyatları</h3>
-            <ChartInsightButton title="📈 Besilik Hayvan Fiyatları" description="Besilik dana ve küçükbaş hayvan fiyatları" data={filteredEconomicData} context={{ section: 'Besilik Fiyatlar' }} compact />
-          </div>
+        <ChartCard title="📈 Besilik Hayvan Fiyatları" action={<ChartInsightButton title="📈 Besilik Hayvan Fiyatları" description="Besilik dana ve küçükbaş hayvan fiyatları" data={filteredEconomicData} context={{ section: 'Besilik Fiyatlar' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -291,13 +268,9 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <Line type="monotone" dataKey="besilik_kucukbas_fiyatlari_tl_kg" name="Besilik Küçükbaş" stroke="#22c55e" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📉 Fiyat-Maliyet Farkı</h3>
-            <ChartInsightButton title="📉 Fiyat-Maliyet Farkı" description="Dana karkas fiyat-maliyet farkı trendi" data={filteredEconomicData} context={{ section: 'Fiyat-Maliyet Fark' }} compact />
-          </div>
+        <ChartCard title="📉 Fiyat-Maliyet Farkı" action={<ChartInsightButton title="📉 Fiyat-Maliyet Farkı" description="Dana karkas fiyat-maliyet farkı trendi" data={filteredEconomicData} context={{ section: 'Fiyat-Maliyet Fark' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -314,7 +287,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

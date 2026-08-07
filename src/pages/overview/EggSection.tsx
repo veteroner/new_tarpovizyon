@@ -5,6 +5,7 @@ import {
 import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   data: OverviewData;
@@ -41,11 +42,7 @@ export function EggSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Yumurta Türleri (2023)</h3>
-            <ChartInsightButton title="Yumurta Türleri (2023)" description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />
-          </div>
+        <ChartCard title="🥧 Yumurta Türleri (2023)" action={<ChartInsightButton title="Yumurta Türleri (2023)" description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -63,13 +60,9 @@ export function EggSection({ data }: Props) {
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' adet', '']} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Yumurta Üretim Trendi (2010-2023)</h3>
-            <ChartInsightButton title="Yumurta Üretim Trendi (2010-2023)" description="Yıllık yumurta üretimi değişimi" data={data.eggProduction.yearly} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet' }} />
-          </div>
+        <ChartCard title="📈 Yumurta Üretim Trendi (2010-2023)" action={<ChartInsightButton title="Yumurta Üretim Trendi (2010-2023)" description="Yıllık yumurta üretimi değişimi" data={data.eggProduction.yearly} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.eggProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -79,7 +72,7 @@ export function EggSection({ data }: Props) {
               <Area type="monotone" dataKey="egg" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

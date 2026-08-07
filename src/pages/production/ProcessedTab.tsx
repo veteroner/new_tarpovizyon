@@ -12,6 +12,7 @@ import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatShort, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, ProcessedKPIs } from './productionTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface ProcessedTabProps {
   processedProduct: string;
@@ -69,11 +70,7 @@ export function ProcessedTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Trend — Dünya vs Türkiye</h3>
-              <ChartInsightButton title="İşlenmiş Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye işlenmiş ürün trendi" data={processedTrends} context={{ ürün: processedProduct }} />
-            </div>
+          <ChartCard title="📈 Trend — Dünya vs Türkiye" action={<ChartInsightButton title="İşlenmiş Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye işlenmiş ürün trendi" data={processedTrends} context={{ ürün: processedProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={processedTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -86,12 +83,8 @@ export function ProcessedTab({
                 <Line yAxisId="right" type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Pazar Payı — Top 10</h3>
-              <ChartInsightButton title="İşlenmiş Ürün Pazar Payı — Top 10" description="İşlenmiş üretimde lider 10 ülke pazar payı" data={processedTopCountries.slice(0, 10)} context={{ ürün: processedProduct }} />
-            </div>
+          </ChartCard>
+          <ChartCard title="🥧 Pazar Payı — Top 10" action={<ChartInsightButton title="İşlenmiş Ürün Pazar Payı — Top 10" description="İşlenmiş üretimde lider 10 ülke pazar payı" data={processedTopCountries.slice(0, 10)} context={{ ürün: processedProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={processedTopCountries.slice(0, 10)} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="production" nameKey="country"
@@ -101,7 +94,7 @@ export function ProcessedTab({
                 <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       </>)}
     </div>

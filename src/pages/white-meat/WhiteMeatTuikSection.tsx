@@ -18,6 +18,7 @@ import type { TuikTab, TuikChickenData, MonthlyData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -107,11 +108,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Kesilen Tavuk vs Et Üretimi (2010-2025)</h3>
-                <ChartInsightButton title="📊 Kesilen Tavuk vs Et Üretimi (2010-2025)" description="Kesilen tavuk sayısı ve et üretimi karşılaştırması" data={tuikData} context={{ section: 'Kesim-Et' }} />
-              </div>
+            <ChartCard title="📊 Kesilen Tavuk vs Et Üretimi (2010-2025)" span={2} action={<ChartInsightButton title="📊 Kesilen Tavuk vs Et Üretimi (2010-2025)" description="Kesilen tavuk sayısı ve et üretimi karşılaştırması" data={tuikData} context={{ section: 'Kesim-Et' }} />}>
               <ResponsiveContainer width="100%" height={360}>
                 <ComposedChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -124,16 +121,12 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Line yAxisId="right" type="monotone" dataKey="meatProduction" name="Et Üretimi (ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 4 }} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Üretim Akışı */}
           <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🔄 Üretim Akışı: Kuluçkadan Kesime (2025)</h3>
-                <ChartInsightButton title="🔄 Üretim Akışı: Kuluçkadan Kesime (2025)" description="Kuluçkadan kesime üretim akışı" data={tuikData} context={{ section: 'Akış' }} compact />
-              </div>
+            <ChartCard title="🔄 Üretim Akışı: Kuluçkadan Kesime (2025)" span={2} action={<ChartInsightButton title="🔄 Üretim Akışı: Kuluçkadan Kesime (2025)" description="Kuluçkadan kesime üretim akışı" data={tuikData} context={{ section: 'Akış' }} compact />}>
               <div style={{ padding: '30px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                 {[
                   { icon: '🥚', value: tuikData[0]?.hatchedEggs || 0, label: 'Kuluçkaya Basılan\nYumurta (bin adet)', color: '#f59e0b' },
@@ -151,7 +144,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   </div>
                 ))}
               </div>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Özet İstatistikler */}
@@ -194,11 +187,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
       {activeTuikTab === 'production' && (
         <>
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kesilen Tavuk Sayısı (2010-2025)</h3>
-                <ChartInsightButton title="📈 Kesilen Tavuk Sayısı (2010-2025)" description="Yıllık kesilen tavuk sayısı trendi" data={tuikData} context={{ section: 'Kesim Sayı' }} compact />
-              </div>
+            <ChartCard title="📈 Kesilen Tavuk Sayısı (2010-2025)" action={<ChartInsightButton title="📈 Kesilen Tavuk Sayısı (2010-2025)" description="Yıllık kesilen tavuk sayısı trendi" data={tuikData} context={{ section: 'Kesim Sayı' }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -208,12 +197,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Area type="monotone" dataKey="slaughtered" stroke="#f97316" fill="#f97316" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Tavuk Eti Üretimi (2010-2025)</h3>
-                <ChartInsightButton title="🥩 Tavuk Eti Üretimi (2010-2025)" description="Yıllık tavuk eti üretim verisi" data={tuikData} context={{ section: 'Et Üretim' }} compact />
-              </div>
+            </ChartCard>
+            <ChartCard title="🥩 Tavuk Eti Üretimi (2010-2025)" action={<ChartInsightButton title="🥩 Tavuk Eti Üretimi (2010-2025)" description="Yıllık tavuk eti üretim verisi" data={tuikData} context={{ section: 'Et Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -223,7 +208,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Area type="monotone" dataKey="meatProduction" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {monthlySlaughter.length > 0 && monthlyMeat.length > 0 && (
@@ -232,11 +217,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>📅 Aylık Üretim Dağılımı (2025)</h2>
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Aylık Kesilen Tavuk</h3>
-                    <ChartInsightButton title="📊 Aylık Kesilen Tavuk" description="Son yıl aylık kesilen tavuk sayısı" data={monthlySlaughter} context={{ section: 'Aylık Kesim' }} compact />
-                  </div>
+                <ChartCard title="📊 Aylık Kesilen Tavuk" action={<ChartInsightButton title="📊 Aylık Kesilen Tavuk" description="Son yıl aylık kesilen tavuk sayısı" data={monthlySlaughter} context={{ section: 'Aylık Kesim' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={monthlySlaughter}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -246,12 +227,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                       <Bar dataKey="value" fill="#f97316" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Aylık Tavuk Eti Üretimi</h3>
-                    <ChartInsightButton title="🥩 Aylık Tavuk Eti Üretimi" description="Son yıl aylık tavuk eti üretimi" data={monthlyMeat} context={{ section: 'Aylık Et' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="🥩 Aylık Tavuk Eti Üretimi" action={<ChartInsightButton title="🥩 Aylık Tavuk Eti Üretimi" description="Son yıl aylık tavuk eti üretimi" data={monthlyMeat} context={{ section: 'Aylık Et' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={monthlyMeat}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -261,7 +238,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                       <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
             </>
           )}
@@ -272,11 +249,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
       {activeTuikTab === 'hatch' && (
         <>
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🐣 Kuluçka Başarı Oranı Trendi</h3>
-                <ChartInsightButton title="🐣 Kuluçka Başarı Oranı Trendi" description="Yıllık kuluçka başarı oranı trendi" data={tuikData} context={{ section: 'Kuluçka' }} compact />
-              </div>
+            <ChartCard title="🐣 Kuluçka Başarı Oranı Trendi" action={<ChartInsightButton title="🐣 Kuluçka Başarı Oranı Trendi" description="Yıllık kuluçka başarı oranı trendi" data={tuikData} context={{ section: 'Kuluçka' }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -286,12 +259,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Line type="monotone" dataKey="hatchRate" name="Kuluçka Başarı Oranı (%)" stroke="#22c55e" strokeWidth={3} dot={{ fill: '#22c55e', r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Tavuk Başına Et Verimi (kg/baş)</h3>
-                <ChartInsightButton title="📊 Tavuk Başına Et Verimi (kg/baş)" description="Tavuk başına et verimi trendi" data={tuikData} context={{ section: 'Verim' }} compact />
-              </div>
+            </ChartCard>
+            <ChartCard title="📊 Tavuk Başına Et Verimi (kg/baş)" action={<ChartInsightButton title="📊 Tavuk Başına Et Verimi (kg/baş)" description="Tavuk başına et verimi trendi" data={tuikData} context={{ section: 'Verim' }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -305,16 +274,12 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Detaylı Kuluçka Akışı */}
           <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🔄 Detaylı Kuluçka Akışı (2025)</h3>
-                <ChartInsightButton title="🔄 Detaylı Kuluçka Akışı (2025)" description="2025 kuluçka detaylı akış analizi" data={tuikData} context={{ year: 2025 }} compact />
-              </div>
+            <ChartCard title="🔄 Detaylı Kuluçka Akışı (2025)" span={2} action={<ChartInsightButton title="🔄 Detaylı Kuluçka Akışı (2025)" description="2025 kuluçka detaylı akış analizi" data={tuikData} context={{ year: 2025 }} compact />}>
               <div style={{ padding: '40px 20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '30px' }}>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
@@ -358,7 +323,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   </div>
                 </div>
               </div>
-            </div>
+            </ChartCard>
           </div>
         </>
       )}
@@ -413,11 +378,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kesilen Tavuk Projeksiyon (Aylık 2025-2026)</h3>
-                <ChartInsightButton title="📈 Kesilen Tavuk Projeksiyon (Aylık 2025-2026)" description="Gelecek dönem kesilen tavuk sayısı projeksiyonu" data={tuikData} context={{ section: 'Projeksiyon' }} compact />
-              </div>
+            <ChartCard title="📈 Kesilen Tavuk Projeksiyon (Aylık 2025-2026)" action={<ChartInsightButton title="📈 Kesilen Tavuk Projeksiyon (Aylık 2025-2026)" description="Gelecek dönem kesilen tavuk sayısı projeksiyonu" data={tuikData} context={{ section: 'Projeksiyon' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={(() => {
                   if (!monthlySlaughter || monthlySlaughter.length === 0) return [];
@@ -440,12 +401,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Bar dataKey="projected" name="2026 Projeksiyon" fill="#fb923c" radius={[4, 4, 0, 0]} opacity={0.7} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Tavuk Eti Projeksiyon (Aylık 2025-2026)</h3>
-                <ChartInsightButton title="🥩 Tavuk Eti Projeksiyon (Aylık 2025-2026)" description="Gelecek dönem tavuk eti üretimi projeksiyonu" data={tuikData} context={{ section: 'Et Projeksiyon' }} compact />
-              </div>
+            </ChartCard>
+            <ChartCard title="🥩 Tavuk Eti Projeksiyon (Aylık 2025-2026)" action={<ChartInsightButton title="🥩 Tavuk Eti Projeksiyon (Aylık 2025-2026)" description="Gelecek dönem tavuk eti üretimi projeksiyonu" data={tuikData} context={{ section: 'Et Projeksiyon' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <ComposedChart data={(() => {
                   if (!monthlyMeat || monthlyMeat.length === 0) return [];
@@ -468,7 +425,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <Bar dataKey="projected" name="2026 Projeksiyon" fill="#f87171" radius={[4, 4, 0, 0]} opacity={0.7} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)', marginTop: '20px' }}>

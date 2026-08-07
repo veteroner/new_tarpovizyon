@@ -14,6 +14,7 @@ import { formatMoney } from '../../services/api';
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import { useTradeOverviewData } from './useTradeOverviewData';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const GROUP_FILTER_LABELS = {
   all: 'Tüm Gruplar',
@@ -231,11 +232,7 @@ export default function TradeOverviewTab() {
 
       {/* Charts Row 1: Monthly + Yearly */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık İhracat/İthalat Trendi ({selectedYear})</h3>
-            <ChartInsightButton title={`Aylık İhracat/İthalat Trendi (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={overviewContext} />
-          </div>
+        <ChartCard title={<>📊 Aylık İhracat/İthalat Trendi ({selectedYear})</>} action={<ChartInsightButton title={`Aylık İhracat/İthalat Trendi (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={overviewContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -247,13 +244,9 @@ export default function TradeOverviewTab() {
               <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık Trend + Ticaret Dengesi (2000–2025)</h3>
-            <ChartInsightButton title="Yıllık Trend + Ticaret Dengesi" description="2000-2025 ihracat, ithalat ve denge" data={yearlyData} context={overviewContext} />
-          </div>
+        <ChartCard title="📈 Yıllık Trend + Ticaret Dengesi (2000–2025)" action={<ChartInsightButton title="Yıllık Trend + Ticaret Dengesi" description="2000-2025 ihracat, ithalat ve denge" data={yearlyData} context={overviewContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -267,16 +260,12 @@ export default function TradeOverviewTab() {
               <Line yAxisId="right" type="monotone" dataKey="denge" name="denge" stroke="#6366f1" strokeWidth={3} dot={false} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Charts Row 2: Treemaps */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🟢 İhracat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
-            <ChartInsightButton title={`İhracat Ürün Dağılımı (${selectedYear})`} description="Ürün bazlı ihracat treemap ağırlıkları" data={treemapExpData} context={overviewContext} />
-          </div>
+        <ChartCard title={<>🟢 İhracat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</>} action={<ChartInsightButton title={`İhracat Ürün Dağılımı (${selectedYear})`} description="Ürün bazlı ihracat treemap ağırlıkları" data={treemapExpData} context={overviewContext} />}>
           <ResponsiveContainer width="100%" height={350}>
             <Treemap data={treemapExpData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapExpData.map((entry, i) => (
@@ -285,13 +274,9 @@ export default function TradeOverviewTab() {
               <Tooltip formatter={(v: number) => [formatMoney(v), 'İhracat Değeri']} />
             </Treemap>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🟠 İthalat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
-            <ChartInsightButton title={`İthalat Ürün Dağılımı (${selectedYear})`} description="Ürün bazlı ithalat treemap ağırlıkları" data={treemapImpData} context={overviewContext} />
-          </div>
+        <ChartCard title={<>🟠 İthalat Ürün Dağılımı ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</>} action={<ChartInsightButton title={`İthalat Ürün Dağılımı (${selectedYear})`} description="Ürün bazlı ithalat treemap ağırlıkları" data={treemapImpData} context={overviewContext} />}>
           <ResponsiveContainer width="100%" height={350}>
             <Treemap data={treemapImpData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapImpData.map((entry, i) => (
@@ -300,16 +285,12 @@ export default function TradeOverviewTab() {
               <Tooltip formatter={(v: number) => [formatMoney(v), 'İthalat Değeri']} />
             </Treemap>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Charts Row 3: Countries */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🌍 Top 10 İhracat Ülkesi - İhracat vs İthalat ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</h3>
-            <ChartInsightButton title={`Top 10 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={overviewContext} />
-          </div>
+        <ChartCard title={<>🌍 Top 10 İhracat Ülkesi - İhracat vs İthalat ({selectedYear}) — {GROUP_FILTER_LABELS[productGroupFilter]}</>} action={<ChartInsightButton title={`Top 10 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={overviewContext} />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -321,7 +302,7 @@ export default function TradeOverviewTab() {
               <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Dünya Ticaret Haritası */}

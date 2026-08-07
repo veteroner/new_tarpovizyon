@@ -10,6 +10,7 @@ import {
 import type { YearPoint, TuikChickenData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = {
   series: YearPoint[];
@@ -108,11 +109,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
       })()}
 
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Kanatlı Eti Üretimi Trendi</h3>
-            <ChartInsightButton title="📈 Kanatlı Eti Üretimi Trendi" description="Kanatlı eti uzun dönem üretim trendi" data={series} context={{ section: 'Trend' }} />
-          </div>
+        <ChartCard title="📈 Kanatlı Eti Üretimi Trendi" span={2} action={<ChartInsightButton title="📈 Kanatlı Eti Üretimi Trendi" description="Kanatlı eti uzun dönem üretim trendi" data={series} context={{ section: 'Trend' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -127,7 +124,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
               <Area type="monotone" dataKey="poultryTon" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

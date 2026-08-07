@@ -41,6 +41,7 @@ const sonTamYil = async () =>
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import countryProfilesData from '../../data/countryProfiles.json';
 import { truncTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface CountryProfile {
   name_tr: string;
@@ -437,11 +438,7 @@ export default function CountryIntelligenceTab() {
 
           {/* Charts */}
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık Ticaret — {selectedCountry} ({yearForMonthly})</h3>
-                <ChartInsightButton title={`${selectedCountry} Aylık Ticaret`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={countryContext} />
-              </div>
+            <ChartCard title={<>📊 Aylık Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Aylık Ticaret`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={countryContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -453,13 +450,9 @@ export default function CountryIntelligenceTab() {
                   <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık Ticaret Trendi — {selectedCountry}</h3>
-                <ChartInsightButton title={`${selectedCountry} Yıllık Ticaret Trendi`} description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={countryContext} />
-              </div>
+            <ChartCard title={<>📈 Yıllık Ticaret Trendi — {selectedCountry}</>} action={<ChartInsightButton title={`${selectedCountry} Yıllık Ticaret Trendi`} description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={countryContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -472,15 +465,11 @@ export default function CountryIntelligenceTab() {
                   <Line type="monotone" dataKey="denge" stroke="#8b5cf6" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Top products bar */}
-          <div className="chart-card" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>📦 Ürün Bazlı Ticaret — {selectedCountry} ({yearForMonthly})</h3>
-              <ChartInsightButton title={`${selectedCountry} Ürün Bazlı Ticaret`} description="İlk 15 ürün için milyon USD bazında ihracat ve ithalat" data={productBarData} context={countryContext} />
-            </div>
+          <ChartCard title={<>📦 Ürün Bazlı Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Ürün Bazlı Ticaret`} description="İlk 15 ürün için milyon USD bazında ihracat ve ithalat" data={productBarData} context={countryContext} />}>
             <ResponsiveContainer width="100%" height={Math.max(300, products.length * 28)}>
               <BarChart data={productBarData} layout="vertical" onClick={(state: any) => openProductDetail(state?.activePayload?.[0]?.payload?.fullName || '')}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -492,7 +481,7 @@ export default function CountryIntelligenceTab() {
                 <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
           {/* Products table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
@@ -549,11 +538,7 @@ export default function CountryIntelligenceTab() {
 
           {/* ScatterChart + RadarChart grid */}
           <div className="chart-grid" style={{ marginTop: 16 }}>
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>🎯 Ürün Fırsat Matrisi — İhracat Payı vs. Denge</h3>
-                <ChartInsightButton title={`${selectedCountry} Ürün Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={productScatterData} context={countryContext} />
-              </div>
+            <ChartCard title="🎯 Ürün Fırsat Matrisi — İhracat Payı vs. Denge" action={<ChartInsightButton title={`${selectedCountry} Ürün Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={productScatterData} context={countryContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
@@ -596,13 +581,9 @@ export default function CountryIntelligenceTab() {
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>🕸️ {selectedCountry} Ticaret Profili</h3>
-                <ChartInsightButton title={`${selectedCountry} Ticaret Profili`} description="0-100 normalize ticaret profili skorları" data={countryRadarData} context={countryContext} />
-              </div>
+            <ChartCard title={<>🕸️ {selectedCountry} Ticaret Profili</>} action={<ChartInsightButton title={`${selectedCountry} Ticaret Profili`} description="0-100 normalize ticaret profili skorları" data={countryRadarData} context={countryContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Her boyut 0–100 skor · Büyük alan = güçlü ticaret pozisyonu
               </div>
@@ -615,15 +596,11 @@ export default function CountryIntelligenceTab() {
                   <Tooltip formatter={(v: number) => [`${v.toFixed(1)}`, 'Skor']} />
                 </RadarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Treemap — ürün ihracat dağılımı */}
-          <div className="chart-card" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>🗺️ {selectedCountry} — Ürün İhracat Dağılımı (Treemap)</h3>
-              <ChartInsightButton title={`${selectedCountry} Ürün İhracat Dağılımı`} description="İlk 15 ürünün ihracat ağırlığı" data={productTreemapData} context={countryContext} />
-            </div>
+          <ChartCard title={<>🗺️ {selectedCountry} — Ürün İhracat Dağılımı (Treemap)</>} action={<ChartInsightButton title={`${selectedCountry} Ürün İhracat Dağılımı`} description="İlk 15 ürünün ihracat ağırlığı" data={productTreemapData} context={countryContext} />}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Alan büyüklüğü ihracat değerine orantılı · İlk 15 ürün · Yeşil = bitkisel, Turuncu = hayvansal
             </div>
@@ -656,7 +633,7 @@ export default function CountryIntelligenceTab() {
                 }}
               />
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
           {selectedProductDetail && (
             <>

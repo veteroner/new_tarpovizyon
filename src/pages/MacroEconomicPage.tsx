@@ -16,6 +16,7 @@ import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -182,11 +183,7 @@ export default function MacroEconomicPage() {
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık {indicatorName} Trendi</h3>
-              <ChartInsightButton title={`Yıllık ${indicatorName} Trendi`} description="Yıllık gösterge trendi" data={yearlyData} context={{ section: 'Makroekonomi' }} compact />
-              </div>
+            <ChartCard title={<>📅 Yıllık {indicatorName} Trendi</>} span={2} action={<ChartInsightButton title={`Yıllık ${indicatorName} Trendi`} description="Yıllık gösterge trendi" data={yearlyData} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -196,15 +193,11 @@ export default function MacroEconomicPage() {
                   <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Ülke Dağılımı ({selectedYear})</h3>
-              <ChartInsightButton title="Ülke Dağılımı" description="Ülke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />
-              </div>
+            <ChartCard title={<>🌍 Ülke Dağılımı ({selectedYear})</>} action={<ChartInsightButton title="Ülke Dağılımı" description="Ülke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={countryData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -220,13 +213,9 @@ export default function MacroEconomicPage() {
               </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Top 8 Ülke Payı</h3>
-              <ChartInsightButton title="Top 8 Ülke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />
-              </div>
+            <ChartCard title="🥧 Top 8 Ülke Payı" action={<ChartInsightButton title="Top 8 Ülke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie 
@@ -245,7 +234,7 @@ export default function MacroEconomicPage() {
                   <Tooltip formatter={(value: number) => [formatValue(value), indicatorName]} />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="data-table">

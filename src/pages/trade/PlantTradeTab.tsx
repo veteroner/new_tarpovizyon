@@ -11,6 +11,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney, formatNumber } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const R = 'tuik/ticaret-bitkisel';
 // Düzey filtreleri eski SQL'dekiyle birebir: bu tabloda hangi kırılım
@@ -193,11 +194,7 @@ export default function PlantTradeTab() {
 
       {/* Charts Row 1 */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık Bitkisel Ticaret ({selectedYear})</h3>
-            <ChartInsightButton title={`Aylık Bitkisel Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={plantContext} />
-          </div>
+        <ChartCard title={<>📊 Aylık Bitkisel Ticaret ({selectedYear})</>} action={<ChartInsightButton title={`Aylık Bitkisel Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -209,13 +206,9 @@ export default function PlantTradeTab() {
               <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık Bitkisel Trend + Denge</h3>
-            <ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />
-          </div>
+        <ChartCard title="📈 Yıllık Bitkisel Trend + Denge" action={<ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -229,32 +222,24 @@ export default function PlantTradeTab() {
               <Line yAxisId="right" type="monotone" dataKey="denge" stroke="#6366f1" strokeWidth={3} dot={false} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Treemap */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🌿 İhracat Ürün Treemap ({selectedYear})</h3>
-            <ChartInsightButton title={`Bitkisel İhracat Ürün Treemap (${selectedYear})`} description="İlk 15 ürünün ihracat ağırlığı" data={treemapData} context={plantContext} />
-          </div>
+        <ChartCard title={<>🌿 İhracat Ürün Treemap ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel İhracat Ürün Treemap (${selectedYear})`} description="İlk 15 ürünün ihracat ağırlığı" data={treemapData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={380}>
             <Treemap data={treemapData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapData.map((e, i) => <Cell key={i} fill={e.fill} />)}
               <Tooltip formatter={(v: number) => [formatMoney(v), 'İhracat']} />
             </Treemap>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Countries */}
       <div className="chart-grid">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ margin: 0 }}>🌍 Top 15 İhracat Ülkesi ({selectedYear})</h3>
-            <ChartInsightButton title={`Bitkisel Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={plantContext} />
-          </div>
+        <ChartCard title={<>🌍 Top 15 İhracat Ülkesi ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -266,7 +251,7 @@ export default function PlantTradeTab() {
               <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Products Detail Table */}

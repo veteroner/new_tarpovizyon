@@ -5,6 +5,7 @@ import {
 import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   data: OverviewData;
@@ -90,11 +91,7 @@ export function MeatSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥩 Et Türleri Dağılımı (2023)</h3>
-            <ChartInsightButton title="Et Türleri Dağılımı (2023)" description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />
-          </div>
+        <ChartCard title="🥩 Et Türleri Dağılımı (2023)" action={<ChartInsightButton title="Et Türleri Dağılımı (2023)" description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.meatProduction.breakdown} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -108,13 +105,9 @@ export function MeatSection({ data }: Props) {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Et Üretim Trendi (2010-2023)</h3>
-            <ChartInsightButton title="Et Üretim Trendi (2010-2023)" description="Yıllık et üretimi değişimi" data={data.meatProduction.yearly} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />
-          </div>
+        <ChartCard title="📈 Et Üretim Trendi (2010-2023)" action={<ChartInsightButton title="Et Üretim Trendi (2010-2023)" description="Yıllık et üretimi değişimi" data={data.meatProduction.yearly} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.meatProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -124,7 +117,7 @@ export function MeatSection({ data }: Props) {
               <Area type="monotone" dataKey="meat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

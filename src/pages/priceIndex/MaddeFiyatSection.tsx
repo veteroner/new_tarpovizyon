@@ -6,6 +6,7 @@ import { useMaddeFiyatData, type FiyatDegisim } from './useMaddeFiyatData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
+import { ChartCard } from '../../components/ui/Card';
 
 const tl = (v: number) =>
   v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2);
@@ -15,11 +16,7 @@ function DegisimGrafigi({ veri, baslik, renk }: {
 }) {
   if (!veri.length) return null;
   return (
-    <div className="chart-card">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <h3 className="chart-title" style={{ marginBottom: 0 }}>{baslik}</h3>
-        <ChartInsightButton title={baslik} description="Aylık fiyat değişimi" data={veri} context={{ birim: '%' }} compact />
-      </div>
+    <ChartCard title={<>{baslik}</>} action={<ChartInsightButton title={baslik} description="Aylık fiyat değişimi" data={veri} context={{ birim: '%' }} compact />}>
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={veri} layout="vertical" margin={{ top: 4, right: 8, left: 4, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
@@ -42,7 +39,7 @@ function DegisimGrafigi({ veri, baslik, renk }: {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </ChartCard>
   );
 }
 
@@ -73,16 +70,9 @@ export default function MaddeFiyatSection() {
         {sonDonem && <> · son dönem <strong>{sonDonem}</strong></>} · {urunler.length} ürün.
       </p>
 
-      <div className="chart-card" style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>
-            📈 {aktifUrun}{aktifBirim && ` (${aktifBirim})`}
-            {sonFiyat !== undefined && <> — son: <strong>{tl(sonFiyat)}</strong></>}
-          </h3>
-          <ChartInsightButton title={`${aktifUrun} fiyat trendi`} description="Aylık TL fiyat trendi"
-            data={seri} context={{ birim: aktifBirim }} compact />
-        </div>
-
+      <ChartCard title={<>📈 {aktifUrun}{aktifBirim && ` (${aktifBirim})`}
+            {sonFiyat !== undefined && <> — son: <strong>{tl(sonFiyat)}</strong></>}</>} action={<ChartInsightButton title={`${aktifUrun} fiyat trendi`} description="Aylık TL fiyat trendi"
+            data={seri} context={{ birim: aktifBirim }} compact />}>
         <select
           className="filter-select"
           value={aktifUrun}
@@ -113,7 +103,7 @@ export default function MaddeFiyatSection() {
               dot={{ r: 2 }} name={aktifUrun} />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
+      </ChartCard>
 
       <div className="chart-grid">
         <DegisimGrafigi veri={enCokArtan} renk="#ef4444"

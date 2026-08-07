@@ -7,6 +7,7 @@ import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   data: OverviewData;
@@ -73,11 +74,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
       </div>
 
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>👥 Nüfus Dağılımı ({yl(y.population)})</h3>
-            <ChartInsightButton title={`Nüfus Dağılımı (${yl(y.population)})`} description="Kentsel ve kırsal nüfus dağılımı" data={[{name:'Kentsel', value: data.urbanPopulation},{name:'Kırsal', value: data.ruralPopulation}]} context={{ nüfus: formatNumber(data.population), kentselOran: urbanPercent+'%', kırsalOran: ruralPercent+'%' }} />
-          </div>
+        <ChartCard title={<>👥 Nüfus Dağılımı ({yl(y.population)})</>} action={<ChartInsightButton title={`Nüfus Dağılımı (${yl(y.population)})`} description="Kentsel ve kırsal nüfus dağılımı" data={[{name:'Kentsel', value: data.urbanPopulation},{name:'Kırsal', value: data.ruralPopulation}]} context={{ nüfus: formatNumber(data.population), kentselOran: urbanPercent+'%', kırsalOran: ruralPercent+'%' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -96,13 +93,9 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' kişi', '']} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Arazi Kullanımı ({yl(y.land)})</h3>
-            <ChartInsightButton title={`Arazi Kullanımı (${yl(y.land)})`} description="Türkiye arazi kullanım kategorileri" data={data.landUseData} context={{ tarımArazisi: formatNumber(data.agriculturalLand)+' ha', tarımPayı: agriLandPercent+'%' }} />
-          </div>
+        <ChartCard title={<>🌍 Arazi Kullanımı ({yl(y.land)})</>} action={<ChartInsightButton title={`Arazi Kullanımı (${yl(y.land)})`} description="Türkiye arazi kullanım kategorileri" data={data.landUseData} context={{ tarımArazisi: formatNumber(data.agriculturalLand)+' ha', tarımPayı: agriLandPercent+'%' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.landUseData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -118,7 +111,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
     </>
   );

@@ -12,6 +12,7 @@ import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -223,11 +224,7 @@ export default function TuikPlantProductionPage() {
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Üretim Trendi (2004-2024)</h3>
-              <ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi (2004-2024)" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />
-              </div>
+            <ChartCard title="📅 Yıllık Üretim Trendi (2004-2024)" span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi (2004-2024)" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -237,15 +234,11 @@ export default function TuikPlantProductionPage() {
                   <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {selectedUnsur} ({yearLabel})</h3>
-              <ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />
-              </div>
+            <ChartCard title={<>🏙️ İl Bazında {selectedUnsur} ({yearLabel})</>} action={<ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={cityData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -261,13 +254,9 @@ export default function TuikPlantProductionPage() {
               </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı</h3>
-              <ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />
-              </div>
+            <ChartCard title="🥧 İl Payları Dağılımı" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie 
@@ -286,7 +275,7 @@ export default function TuikPlantProductionPage() {
                   <Tooltip formatter={(value: number) => [`${formatTon(value)} ${unit}`, selectedUnsur]} />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="data-table">

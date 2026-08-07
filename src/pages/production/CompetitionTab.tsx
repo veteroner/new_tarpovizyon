@@ -13,6 +13,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR } from './productionTypes';
 import type { Insight, CompKPIs } from './productionTypes';
+import { ChartCard } from '../../components/ui/Card';
 
 // Local icon stand-ins
 const Target: typeof Globe = Globe;
@@ -124,11 +125,7 @@ export function CompetitionTab({
             );
           };
           return (
-            <div className="chart-card" style={{ marginBottom: '24px', padding: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</h3>
-                <ChartInsightButton title={`RCA & Rekabet Avantajı — ${translateProduct(compProduct)}`} description="Türkiye rekabet avantajı radar analizi" data={radarRcaData} context={{ ürün: compProduct }} compact />
-              </div>
+            <ChartCard title={<>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</>} action={<ChartInsightButton title={`RCA & Rekabet Avantajı — ${translateProduct(compProduct)}`} description="Türkiye rekabet avantajı radar analizi" data={radarRcaData} context={{ ürün: compProduct }} compact />}>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 Türkiye'nin değerleri global medyana ve top 5 ortalamasına göre normalize edilir. <strong>1,0×</strong> medyan ile eşit, <strong>&gt;1</strong> avantaj.
               </p>
@@ -151,7 +148,7 @@ export function CompetitionTab({
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', fontStyle: 'italic' }}>
                 💡 RCA (Revealed Comparative Advantage) yaklaşımı: değer ne kadar yüksekse Türkiye o boyutta o denli avantajlı.
               </div>
-            </div>
+            </ChartCard>
           );
         })()}
 
@@ -177,11 +174,7 @@ export function CompetitionTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🔬 Büyüme vs Üretim (Scatter)</h3>
-              <ChartInsightButton title="Büyüme vs Üretim (Scatter)" description="Ülkelerin üretim büyüme oranı ve üretim hacmi dağılımı" data={compBubbleData} context={{ ürün: compProduct }} />
-            </div>
+          <ChartCard title="🔬 Büyüme vs Üretim (Scatter)" action={<ChartInsightButton title="Büyüme vs Üretim (Scatter)" description="Ülkelerin üretim büyüme oranı ve üretim hacmi dağılımı" data={compBubbleData} context={{ ürün: compProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -199,12 +192,8 @@ export function CompetitionTab({
                 <Scatter data={compBubbleData.filter((d: any) => d.isTurkey)} fill={TURKEY_COLOR} />
               </ScatterChart>
             </ResponsiveContainer>
-          </div>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📉 HHI Konsantrasyon Trendi</h3>
-              <ChartInsightButton title="HHI Konsantrasyon Trendi" description="Herfindahl-Hirschman endeksi ile pazar yoğunlaşma trendi" data={compHHITimeline} context={{ hhi: compKPIs?.latestHHI }} />
-            </div>
+          </ChartCard>
+          <ChartCard title="📉 HHI Konsantrasyon Trendi" action={<ChartInsightButton title="HHI Konsantrasyon Trendi" description="Herfindahl-Hirschman endeksi ile pazar yoğunlaşma trendi" data={compHHITimeline} context={{ hhi: compKPIs?.latestHHI }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={compHHITimeline}>
                 <defs>
@@ -222,7 +211,7 @@ export function CompetitionTab({
                 <Area type="monotone" dataKey="hhi" stroke="#a855f7" strokeWidth={2} fill="url(#hhiG)" name="HHI" />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       </>)}
     </div>

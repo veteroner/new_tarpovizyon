@@ -11,6 +11,7 @@ import { Loading } from '../../components/Loading';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
+import { ChartCard } from '../../components/ui/Card';
 
 const R_BIT = 'tuik/ticaret-bitkisel';
 const R_HAY = 'tuik/ticaret-hayvansal';
@@ -276,11 +277,7 @@ export default function ProductIntelligenceTab() {
 
           {/* Charts */}
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>📊 Aylık {selectedProduct} Ticareti ({yearForMonthly})</h3>
-                <ChartInsightButton title={`Aylık ${selectedProduct} Ticareti`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={productContext} />
-              </div>
+            <ChartCard title={<>📊 Aylık {selectedProduct} Ticareti ({yearForMonthly})</>} action={<ChartInsightButton title={`Aylık ${selectedProduct} Ticareti`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={productContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -292,13 +289,9 @@ export default function ProductIntelligenceTab() {
                   <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>📈 Yıllık {selectedProduct} Trendi (2000–2025)</h3>
-                <ChartInsightButton title={`Yıllık ${selectedProduct} Trendi`} description="2000-2025 ihracat, ithalat ve denge serisi" data={yearlyData} context={productContext} />
-              </div>
+            <ChartCard title={<>📈 Yıllık {selectedProduct} Trendi (2000–2025)</>} action={<ChartInsightButton title={`Yıllık ${selectedProduct} Trendi`} description="2000-2025 ihracat, ithalat ve denge serisi" data={yearlyData} context={productContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -311,15 +304,11 @@ export default function ProductIntelligenceTab() {
                   <Line type="monotone" dataKey="denge" stroke="#6366f1" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Country Table */}
-          <div className="chart-card" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</h3>
-              <ChartInsightButton title={`${selectedProduct} Ülke Bazlı Ticaret`} description="İlk 12 ülke için milyon USD bazında ihracat ve ithalat" data={countryBarData} context={productContext} />
-            </div>
+          <ChartCard title={<>🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedProduct} Ülke Bazlı Ticaret`} description="İlk 12 ülke için milyon USD bazında ihracat ve ithalat" data={countryBarData} context={productContext} />}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={countryBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -331,7 +320,7 @@ export default function ProductIntelligenceTab() {
                 <Bar dataKey="ithalatMilyonUsd" name="İthalat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
           {/* Countries detail table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
@@ -370,11 +359,7 @@ export default function ProductIntelligenceTab() {
 
           {/* ScatterChart + RadarChart grid */}
           <div className="chart-grid" style={{ marginTop: 16 }}>
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge</h3>
-                <ChartInsightButton title={`${selectedProduct} Ülke Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={scatterData} context={productContext} />
-              </div>
+            <ChartCard title="🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge" action={<ChartInsightButton title={`${selectedProduct} Ülke Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={scatterData} context={productContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
@@ -416,13 +401,9 @@ export default function ProductIntelligenceTab() {
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ margin: 0 }}>🕸️ {selectedProduct} Rekabet Profili</h3>
-                <ChartInsightButton title={`${selectedProduct} Rekabet Profili`} description="0-100 normalize rekabet skorları" data={radarData} context={productContext} />
-              </div>
+            <ChartCard title={<>🕸️ {selectedProduct} Rekabet Profili</>} action={<ChartInsightButton title={`${selectedProduct} Rekabet Profili`} description="0-100 normalize rekabet skorları" data={radarData} context={productContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Her boyut 0–100 skor · Büyük alan = güçlü rekabet pozisyonu
               </div>
@@ -435,15 +416,11 @@ export default function ProductIntelligenceTab() {
                   <Tooltip formatter={(v: number) => [`${v.toFixed(1)}`, 'Skor']} />
                 </RadarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Treemap — ülke ihracat dağılımı */}
-          <div className="chart-card" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</h3>
-              <ChartInsightButton title={`${selectedProduct} Ülke İhracat Dağılımı`} description="İlk 15 ülkenin ihracat ağırlığı" data={treemapData} context={productContext} />
-            </div>
+          <ChartCard title={<>🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</>} action={<ChartInsightButton title={`${selectedProduct} Ülke İhracat Dağılımı`} description="İlk 15 ülkenin ihracat ağırlığı" data={treemapData} context={productContext} />}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Alan büyüklüğü ihracat değerine orantılı · İlk 15 ülke
             </div>
@@ -473,7 +450,7 @@ export default function ProductIntelligenceTab() {
                 }}
               />
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </>
       )}
     </div>

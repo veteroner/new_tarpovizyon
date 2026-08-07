@@ -1,6 +1,7 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { ChartCard } from '../components/ui/Card';
 
 const ICECEK_URUNLER = [
   'Çay Yaprakları',
@@ -29,11 +30,7 @@ const CAY_HASAT = [
 ];
 
 const bevExtra = (
-  <div className="chart-card" style={{ marginTop: 20 }}>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-      <h3 className="chart-title" style={{ marginBottom: 0 }}>🍵 Rize Çayı Hasat Sezonu Takvimi</h3>
-      <ChartInsightButton title="🍵 Rize Çayı Hasat" description="Rize çayı hasat sezonu takvimi" data={CAY_HASAT} context={{ section: 'Mevsimsellik' }} compact />
-    </div>
+  <ChartCard title="🍵 Rize Çayı Hasat Sezonu Takvimi" action={<ChartInsightButton title="🍵 Rize Çayı Hasat" description="Rize çayı hasat sezonu takvimi" data={CAY_HASAT} context={{ section: 'Mevsimsellik' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Yılda 3 füliz dönemi: Mayıs (1. füliz), Temmuz (2. füliz), Eylül (3. füliz) · En kaliteli çay 1. fülizden elde edilir.
     </p>
@@ -57,7 +54,7 @@ const bevExtra = (
           fill="url(#cayGrad)" name="Hasat Endeksi" />
       </AreaChart>
     </ResponsiveContainer>
-  </div>
+  </ChartCard>
 );
 
 export default function BeverageCropPage() {

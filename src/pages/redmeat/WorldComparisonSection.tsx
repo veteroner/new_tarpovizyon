@@ -24,6 +24,7 @@ import {
 } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { BAR_COLOR, BAR_HIGHLIGHT } from '../../utils/chartColors';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = {
   worldCarcassPrices: WorldCarcassPrices | null;
@@ -117,11 +118,7 @@ export default function WorldComparisonSection({
       {/* Section 4: Dünya Karkas Fiyatları */}
       {worldCarcassPriceTreemap.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
-          <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>💰 Dünya Karkas Et Fiyatları (USD/kg)</h3>
-              <ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />
-            </div>
+          <ChartCard title="💰 Dünya Karkas Et Fiyatları (USD/kg)" span={2} action={<ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />}>
             <ResponsiveContainer width="100%" height={400}>
               <Treemap
                 data={worldCarcassPriceTreemap}
@@ -170,18 +167,14 @@ export default function WorldComparisonSection({
                 }}
               />
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 
       {/* Section 5: Verimlilik Karşılaştırması */}
       {productivityRadarData.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Verimlilik Karşılaştırması (11 Ülke)</h3>
-              <ChartInsightButton title="🎯 Verimlilik Karşılaştırması (11 Ülke)" description="Karkas verimi verimlilik karşılaştırması" data={productivityRadarData} context={{ section: 'Verimlilik' }} compact />
-            </div>
+          <ChartCard title="🎯 Verimlilik Karşılaştırması (11 Ülke)" action={<ChartInsightButton title="🎯 Verimlilik Karşılaştırması (11 Ülke)" description="Karkas verimi verimlilik karşılaştırması" data={productivityRadarData} context={{ section: 'Verimlilik' }} compact />}>
             <ResponsiveContainer width="100%" height={380}>
               <RadarChart data={productivityRadarData}>
                 <PolarGrid stroke="var(--border)" />
@@ -201,13 +194,9 @@ export default function WorldComparisonSection({
                 <Legend />
               </RadarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
-          <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Türkiye Dünya Karkas Ağırlığı Dağılımında Nerede?</h3>
-              <ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı" description="Türkiye'nin dünya karkas ağırlığı dağılımındaki yeri" data={carcassWeightHistogram} context={{ section: 'Histogram', turkiyeKarkas }} compact />
-            </div>
+          <ChartCard title="🌍 Türkiye Dünya Karkas Ağırlığı Dağılımında Nerede?" span={2} action={<ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı" description="Türkiye'nin dünya karkas ağırlığı dağılımındaki yeri" data={carcassWeightHistogram} context={{ section: 'Histogram', turkiyeKarkas }} compact />}>
             <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
               Her sütun bir karkas ağırlığı aralığındaki ülke sayısını gösterir.
               {turkiyeKarkas > 0 && <> Kırmızı sütun Türkiye'nin bulunduğu aralık — <strong>{turkiyeKarkas.toFixed(0)} kg</strong>.</>}
@@ -241,7 +230,7 @@ export default function WorldComparisonSection({
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 

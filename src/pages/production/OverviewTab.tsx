@@ -15,6 +15,7 @@ import {
 } from './productionTypes';
 import type { Insight, OverviewKPIs, SupplyChainData, OverviewTrendPoint, Tab } from './productionTypes';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface OverviewTabProps {
   overviewKPIs: OverviewKPIs;
@@ -73,11 +74,7 @@ export function OverviewTab({
       )}
 
       <div className="chart-grid" style={{ marginBottom: '24px' }}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🇹🇷 Türkiye Ürün Kategorileri (2023)</h3>
-            <ChartInsightButton title="Türkiye Ürün Kategorileri (2023)" description="Türkiye bitkisel üretim kategori dağılımı" data={overviewCategoryData} context={{ dünyaToplamUretim: overviewKPIs.worldTotal, türkiyeToplamUretim: overviewKPIs.turkeyTotal }} />
-          </div>
+        <ChartCard title="🇹🇷 Türkiye Ürün Kategorileri (2023)" action={<ChartInsightButton title="Türkiye Ürün Kategorileri (2023)" description="Türkiye bitkisel üretim kategori dağılımı" data={overviewCategoryData} context={{ dünyaToplamUretim: overviewKPIs.worldTotal, türkiyeToplamUretim: overviewKPIs.turkeyTotal }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie data={overviewCategoryData} cx="50%" cy="50%" innerRadius={70} outerRadius={120} paddingAngle={2} dataKey="value"
@@ -87,12 +84,8 @@ export function OverviewTab({
               <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Top 15 Üretici Ülke (2023)</h3>
-            <ChartInsightButton title="Top 15 Üretici Ülke (2023)" description="Dünya bitkisel üretiminde lider ülkeler" data={overviewTopCountries} context={{ türkiyeSira: overviewKPIs.turkeyRank, türkiyePayi: overviewKPIs.turkeyShare }} />
-          </div>
+        </ChartCard>
+        <ChartCard title="🌍 Top 15 Üretici Ülke (2023)" action={<ChartInsightButton title="Top 15 Üretici Ülke (2023)" description="Dünya bitkisel üretiminde lider ülkeler" data={overviewTopCountries} context={{ türkiyeSira: overviewKPIs.turkeyRank, türkiyePayi: overviewKPIs.turkeyShare }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={overviewTopCountries} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -106,15 +99,11 @@ export function OverviewTab({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       <div className="chart-grid" style={{ marginBottom: '24px' }}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Dünya Üretim Trendi</h3>
-            <ChartInsightButton title="Dünya Üretim Trendi" description="Yıllık dünya bitkisel üretim değişimi" data={overviewTrends} context={{ yillikDegisim: overviewKPIs.worldYoY }} />
-          </div>
+        <ChartCard title="📈 Dünya Üretim Trendi" action={<ChartInsightButton title="Dünya Üretim Trendi" description="Yıllık dünya bitkisel üretim değişimi" data={overviewTrends} context={{ yillikDegisim: overviewKPIs.worldYoY }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={overviewTrends}>
               <defs><linearGradient id="ovPG" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.8} /><stop offset="95%" stopColor="#10b981" stopOpacity={0.1} /></linearGradient></defs>
@@ -125,12 +114,8 @@ export function OverviewTab({
               <Area type="monotone" dataKey="worldProduction" stroke="#10b981" strokeWidth={2} fill="url(#ovPG)" name="Üretim" />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Verim Trendi (kg/ha)</h3>
-            <ChartInsightButton title="Verim Trendi (kg/ha)" description="Dünya ortalama verim trendi" data={overviewTrends} context={{ dünyaOrtVerim: overviewKPIs.worldYield, türkiyeVerim: overviewKPIs.turkeyYield }} />
-          </div>
+        </ChartCard>
+        <ChartCard title="📊 Verim Trendi (kg/ha)" action={<ChartInsightButton title="Verim Trendi (kg/ha)" description="Dünya ortalama verim trendi" data={overviewTrends} context={{ dünyaOrtVerim: overviewKPIs.worldYield, türkiyeVerim: overviewKPIs.turkeyYield }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={overviewTrends}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -140,7 +125,7 @@ export function OverviewTab({
               <Line type="monotone" dataKey="worldYield" stroke="#3b82f6" strokeWidth={2} dot={false} name="Verim" />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       <div className="chart-card" style={{ padding: '24px', marginBottom: '24px' }}>

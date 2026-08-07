@@ -13,6 +13,7 @@ import {
 import type { TuikEggData, MonthlyEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { ChartCard } from '../../components/ui/Card';
 
 interface EggTuikProductionTabProps {
   tuikData: TuikEggData[];
@@ -25,11 +26,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
     <>
       {/* Üretim Trendleri */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥚 Yıllık Yumurta Üretimi (2010-2025)</h3>
-            <ChartInsightButton title="🥚 Yıllık Yumurta Üretimi (2010-2025)" description="Yıllık yumurta üretim trendi" data={tuikData} context={{ section: 'Yıllık Üretim' }} compact />
-          </div>
+        <ChartCard title="🥚 Yıllık Yumurta Üretimi (2010-2025)" action={<ChartInsightButton title="🥚 Yıllık Yumurta Üretimi (2010-2025)" description="Yıllık yumurta üretim trendi" data={tuikData} context={{ section: 'Yıllık Üretim' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={tuikData.slice().reverse()}>
               <defs>
@@ -60,13 +57,9 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               return ((last - first) / first * 100).toFixed(2);
             })()}
           </div>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)</h3>
-            <ChartInsightButton title="🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" description="Yıllık yumurtacı tavuk sayısı trendi" data={tuikData} context={{ section: 'Tavuk Sayı' }} compact />
-          </div>
+        <ChartCard title="🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" action={<ChartInsightButton title="🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" description="Yıllık yumurtacı tavuk sayısı trendi" data={tuikData} context={{ section: 'Tavuk Sayı' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={tuikData.slice().reverse()}>
               <defs>
@@ -97,7 +90,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               return ((last - first) / first * 100).toFixed(2);
             })()}
           </div>
-        </div>
+        </ChartCard>
       </div>
 
       {/* 2025 Aylık Dağılım */}
@@ -108,11 +101,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥚 Aylık Yumurta Üretimi (2025)</h3>
-                <ChartInsightButton title="🥚 Aylık Yumurta Üretimi (2025)" description="2025 aylık yumurta üretimi" data={monthlyEgg} context={{ year: 2025 }} compact />
-              </div>
+            <ChartCard title="🥚 Aylık Yumurta Üretimi (2025)" action={<ChartInsightButton title="🥚 Aylık Yumurta Üretimi (2025)" description="2025 aylık yumurta üretimi" data={monthlyEgg} context={{ year: 2025 }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={monthlyEgg}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -137,14 +126,10 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
                 <br />
                 <strong>Toplam (2025):</strong> {monthlyEgg.reduce((sum, m) => sum + m.value, 0).toLocaleString('tr-TR')} adet
               </div>
-            </div>
+            </ChartCard>
 
             {monthlyLayer.length > 0 && (
-              <div className="chart-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>🐔 Aylık Yumurtacı Tavuk Sayısı (2025)</h3>
-                  <ChartInsightButton title="🐔 Aylık Yumurtacı Tavuk Sayısı (2025)" description="2025 aylık yumurtacı tavuk sayısı" data={monthlyLayer} context={{ year: 2025 }} compact />
-                </div>
+              <ChartCard title="🐔 Aylık Yumurtacı Tavuk Sayısı (2025)" action={<ChartInsightButton title="🐔 Aylık Yumurtacı Tavuk Sayısı (2025)" description="2025 aylık yumurtacı tavuk sayısı" data={monthlyLayer} context={{ year: 2025 }} compact />}>
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={monthlyLayer}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -163,7 +148,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
                 <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                   <strong>Ortalama:</strong> {(monthlyLayer.reduce((sum, m) => sum + m.value, 0) / monthlyLayer.length).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
                 </div>
-              </div>
+              </ChartCard>
             )}
           </div>
         </>

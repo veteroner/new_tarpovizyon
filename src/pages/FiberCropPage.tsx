@@ -1,6 +1,7 @@
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { ChartCard } from '../components/ui/Card';
 
 const LIF_URUNLER = [
   'Pamuk, Çırçırlanmamış (Kütlü)',
@@ -22,11 +23,7 @@ const PAMUK_KALITE = [
 ];
 
 const fiberExtra = (
-  <div className="chart-card" style={{ marginTop: 20 }}>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-      <h3 className="chart-title" style={{ marginBottom: 0 }}>🧵 Pamuk Lif Kalite Göstergeleri — Türkiye vs Dünya Referansı</h3>
-      <ChartInsightButton title="🧵 Pamuk Lif Kalitesi" description="Pamuk lif kalite göstergeleri" data={PAMUK_KALITE} context={{ section: 'Lif Ürünler' }} compact />
-    </div>
+  <ChartCard title="🧵 Pamuk Lif Kalite Göstergeleri — Türkiye vs Dünya Referansı" action={<ChartInsightButton title="🧵 Pamuk Lif Kalitesi" description="Pamuk lif kalite göstergeleri" data={PAMUK_KALITE} context={{ section: 'Lif Ürünler' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       ICAC (Uluslararası Pamuk Danışma Komitesi) kriterlerine göre kalite endeksleri (0–100). Türkiye pamuğu lif uzunluğu ve uniformitede referansın üzerindedir.
     </p>
@@ -43,7 +40,7 @@ const fiberExtra = (
         <Legend />
       </RadarChart>
     </ResponsiveContainer>
-  </div>
+  </ChartCard>
 );
 
 export default function FiberCropPage() {

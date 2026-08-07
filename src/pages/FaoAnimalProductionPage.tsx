@@ -18,6 +18,7 @@ import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 // --------------- Types ---------------
 export interface FaoProduct {
@@ -263,11 +264,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
 
           {/* Grafikler - Satır 1 */}
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 {config.comparisonTitle}</h3>
-              <ChartInsightButton title={config.comparisonTitle} description="Ürün karşılaştırması" data={productData} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title={<>📊 {config.comparisonTitle}</>} action={<ChartInsightButton title={config.comparisonTitle} description="Ürün karşılaştırması" data={productData} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -286,13 +283,9 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
               </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 {config.distributionTitle}</h3>
-              <ChartInsightButton title={config.distributionTitle} description="Dağılım analizi" data={productData} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title={<>🥧 {config.distributionTitle}</>} action={<ChartInsightButton title={config.distributionTitle} description="Dağılım analizi" data={productData} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -311,16 +304,12 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                   <Tooltip formatter={(value: number) => [formatValue(value), 'Üretim']} />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Grafikler - Satır 2 */}
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Ülke Üretim Dağılımı (Treemap)</h3>
-              <ChartInsightButton title="Ülke Üretim Dağılımı" description="Ülke üretim dağılımı treemap" data={countryData.slice(0,12)} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title="🗺️ Ülke Üretim Dağılımı (Treemap)" action={<ChartInsightButton title="Ülke Üretim Dağılımı" description="Ülke üretim dağılımı treemap" data={countryData.slice(0,12)} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <Treemap
                   data={countryData.slice(0, 12)}
@@ -354,13 +343,9 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                   )}
                 />
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Üretim ve Pazar Payı</h3>
-              <ChartInsightButton title="Üretim ve Pazar Payı" description="Üretim ve pazar payı" data={countryData.slice(0,10)} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title="📈 Üretim ve Pazar Payı" action={<ChartInsightButton title="Üretim ve Pazar Payı" description="Üretim ve pazar payı" data={countryData.slice(0,10)} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -373,16 +358,12 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                   <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Grafikler - Satır 3 */}
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Ülke Performansı</h3>
-              <ChartInsightButton title="Top 6 Ülke Performansı" description="Top 6 ülke radar analizi" data={radarData} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title="🎯 Top 6 Ülke Performansı" action={<ChartInsightButton title="Top 6 Ülke Performansı" description="Top 6 ülke radar analizi" data={radarData} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
@@ -392,13 +373,9 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                   <Tooltip formatter={(value: number) => [`${value.toFixed(2)}M ton`, 'Üretim']} />
                 </RadarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Üretim Trendi</h3>
-              <ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi" data={yearlyData} context={{ section: 'Hayvansal Üretim' }} compact />
-              </div>
+            <ChartCard title="📅 Yıllık Üretim Trendi" action={<ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi" data={yearlyData} context={{ section: 'Hayvansal Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -408,7 +385,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                   <Area type="monotone" dataKey="value" stroke={primaryColor} fill={primaryColor} fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           {/* Ülke Sıralaması Tablosu */}

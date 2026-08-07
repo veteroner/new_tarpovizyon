@@ -12,6 +12,7 @@ import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, YieldKPIs } from './productionTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 // Local icon stand-ins for icons not in lucide-react default set
 const Target: typeof AlertTriangle = AlertTriangle;
@@ -58,11 +59,7 @@ export function YieldTab({
         <div style={{ marginBottom: '24px' }}><InsightCard insights={yieldInsights} maxDisplay={6} /></div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Verim Gap Analizi</h3>
-              <ChartInsightButton title="Verim Gap Analizi" description="Türkiye ve dünya verim karşılaştırması" data={yieldGapData} context={{ ürün: yieldProduct, türkiyeVerim: yieldKPIs?.turkeyYield, dünyaOrtVerim: yieldKPIs?.worldAvgYield }} />
-            </div>
+          <ChartCard title="📊 Verim Gap Analizi" action={<ChartInsightButton title="Verim Gap Analizi" description="Türkiye ve dünya verim karşılaştırması" data={yieldGapData} context={{ ürün: yieldProduct, türkiyeVerim: yieldKPIs?.turkeyYield, dünyaOrtVerim: yieldKPIs?.worldAvgYield }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={yieldGapData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -74,12 +71,8 @@ export function YieldTab({
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Segmented — Gelişmiş vs Gelişmekte</h3>
-              <ChartInsightButton title="Verim: Gelişmiş vs Gelişmekte" description="Gelişmiş ve gelişmekte olan ülkeler verim karşılaştırması" data={yieldSegmented} context={{ ürün: yieldProduct }} />
-            </div>
+          </ChartCard>
+          <ChartCard title="📊 Segmented — Gelişmiş vs Gelişmekte" action={<ChartInsightButton title="Verim: Gelişmiş vs Gelişmekte" description="Gelişmiş ve gelişmekte olan ülkeler verim karşılaştırması" data={yieldSegmented} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={yieldSegmented}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -91,15 +84,11 @@ export function YieldTab({
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🔬 Alan vs Verim (Scatter)</h3>
-              <ChartInsightButton title="Alan vs Verim Dağılımı" description="Ülkeler için ekim alanı ve verim korelasyonu" data={yieldScatter} context={{ ürün: yieldProduct }} />
-            </div>
+          <ChartCard title="🔬 Alan vs Verim (Scatter)" action={<ChartInsightButton title="Alan vs Verim Dağılımı" description="Ülkeler için ekim alanı ve verim korelasyonu" data={yieldScatter} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -116,12 +105,8 @@ export function YieldTab({
                 <Scatter data={yieldScatter.filter((d: any) => d.isTurkey)} fill={TURKEY_COLOR} fillOpacity={1} />
               </ScatterChart>
             </ResponsiveContainer>
-          </div>
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Verim Trendi — Dünya vs Türkiye</h3>
-              <ChartInsightButton title="Verim Trendi — Dünya vs Türkiye" description="Yıllık verim trendi karşılaştırması" data={yieldTrends} context={{ ürün: yieldProduct }} />
-            </div>
+          </ChartCard>
+          <ChartCard title="📈 Verim Trendi — Dünya vs Türkiye" action={<ChartInsightButton title="Verim Trendi — Dünya vs Türkiye" description="Yıllık verim trendi karşılaştırması" data={yieldTrends} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={yieldTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -133,7 +118,7 @@ export function YieldTab({
                 <Line type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
               </LineChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
 
         <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>

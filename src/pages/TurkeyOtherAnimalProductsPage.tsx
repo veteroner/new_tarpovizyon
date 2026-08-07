@@ -21,6 +21,7 @@ const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef'];
@@ -324,11 +325,7 @@ export default function TurkeyOtherAnimalProductsPage() {
             </div>
 
             {growthData.length > 0 && (
-              <div className="chart-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yıllık Büyüme Oranı (%)</h3>
-                <ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranı (%)" data={growthData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
-                </div>
+              <ChartCard title="📊 Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranı (%)" data={growthData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={growthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -342,18 +339,14 @@ export default function TurkeyOtherAnimalProductsPage() {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </ChartCard>
             )}
           </div>
 
           {/* İl Bazlı Dağılım */}
           {cityData.length > 0 && (
             <div className="chart-grid">
-              <div className="chart-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {currentProduct.label} Üretimi</h3>
-                <ChartInsightButton title={`İl Bazında ${currentProduct.label}`} description="İl bazında üretim" data={cityData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
-                </div>
+              <ChartCard title={<>🏙️ İl Bazında {currentProduct.label} Üretimi</>} action={<ChartInsightButton title={`İl Bazında ${currentProduct.label}`} description="İl bazında üretim" data={cityData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={450}>
                   <BarChart data={cityData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -369,13 +362,9 @@ export default function TurkeyOtherAnimalProductsPage() {
               </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </ChartCard>
 
-              <div className="chart-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı (Top 10)</h3>
-                <ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı (Top 10)" data={cityData.slice(0,10)} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
-                </div>
+              <ChartCard title="🥧 İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı (Top 10)" data={cityData.slice(0,10)} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={450}>
                   <PieChart>
                     <Pie
@@ -395,7 +384,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                     <Tooltip formatter={(value: number) => [`${formatNumber(value)} ${currentProduct.birim}`, currentProduct.label]} />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
+              </ChartCard>
             </div>
           )}
 

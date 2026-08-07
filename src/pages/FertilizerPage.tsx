@@ -14,6 +14,7 @@ import {
 import type { Tab } from './fertilizer/useFertilizerData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
@@ -71,11 +72,7 @@ export default function FertilizerPage() {
                 <KPICard title="EN BÜYÜK İHRACATÇI" value={overviewKPIs.topExporter} subtitle="2023" icon={TrendingUp} color="green" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gübre Türü Dağılımı</h3>
-                  <ChartInsightButton title="Gübre Türü Dağılımı" description="Gübre türü dağılımı" data={overviewByType} context={{ section: 'Gübre Genel' }} compact />
-                  </div>
+                <ChartCard title="Gübre Türü Dağılımı" action={<ChartInsightButton title="Gübre Türü Dağılımı" description="Gübre türü dağılımı" data={overviewByType} context={{ section: 'Gübre Genel' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewByType} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -89,12 +86,8 @@ export default function FertilizerPage() {
               </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 15 İthalatçı Ülke</h3>
-                  <ChartInsightButton title="Top 15 Gübre İthalatçısı" description="Top 15 gübre ithalatçısı ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gübre Genel' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Top 15 İthalatçı Ülke" action={<ChartInsightButton title="Top 15 Gübre İthalatçısı" description="Top 15 gübre ithalatçısı ülkeler" data={overviewTopCountries.slice(0,15)} context={{ section: 'Gübre Genel' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={overviewTopCountries.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -106,14 +99,10 @@ export default function FertilizerPage() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Dünya Gübre İthalat Trendi</h3>
-                  <ChartInsightButton title="Dünya Gübre İthalat Trendi" description="Dünya gübre ithalat trendi" data={overviewTrend} context={{ section: 'Gübre Genel' }} compact />
-                  </div>
+                <ChartCard title="Dünya Gübre İthalat Trendi" span={2} action={<ChartInsightButton title="Dünya Gübre İthalat Trendi" description="Dünya gübre ithalat trendi" data={overviewTrend} context={{ section: 'Gübre Genel' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -123,7 +112,7 @@ export default function FertilizerPage() {
                       <Area type="monotone" dataKey="value" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={overviewInsights} />
             </>
@@ -141,11 +130,7 @@ export default function FertilizerPage() {
                 </div>
               )}
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Gübre Ticaret Dengesi (Tür Bazlı)</h3>
-                  <ChartInsightButton title="Türkiye Gübre Ticaret Dengesi" description="Türkiye gübre ticaret dengesi tür bazlı" data={tradeBalance} context={{ section: 'Ticaret' }} compact />
-                  </div>
+                <ChartCard title="Türkiye Gübre Ticaret Dengesi (Tür Bazlı)" span={2} action={<ChartInsightButton title="Türkiye Gübre Ticaret Dengesi" description="Türkiye gübre ticaret dengesi tür bazlı" data={tradeBalance} context={{ section: 'Ticaret' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={tradeBalance}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -157,15 +142,11 @@ export default function FertilizerPage() {
                       <Bar dataKey="export" name="İhracat" fill="#22c55e" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               {tradeTimeSeries.length > 0 && (
                 <div className="chart-grid">
-                  <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Gübre Ticareti Zaman Serisi</h3>
-                    <ChartInsightButton title="Türkiye Gübre Ticareti Zaman Serisi" description="Türkiye gübre ticareti zaman serisi" data={tradeTimeSeries} context={{ section: 'Ticaret' }} compact />
-                    </div>
+                  <ChartCard title="Türkiye Gübre Ticareti Zaman Serisi" span={2} action={<ChartInsightButton title="Türkiye Gübre Ticareti Zaman Serisi" description="Türkiye gübre ticareti zaman serisi" data={tradeTimeSeries} context={{ section: 'Ticaret' }} compact />}>
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart data={tradeTimeSeries}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -178,7 +159,7 @@ export default function FertilizerPage() {
                         <Line type="monotone" dataKey="balance" name="Açık" stroke="#f59e0b" strokeWidth={2} dot={false} />
                       </ComposedChart>
                     </ResponsiveContainer>
-                  </div>
+                  </ChartCard>
                 </div>
               )}
               <InsightCard insights={tradeInsights} />
@@ -197,11 +178,7 @@ export default function FertilizerPage() {
                 </div>
               )}
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Gübre İhracatı — Ülke Sıralaması</h3>
-                  <ChartInsightButton title="Gübre İhracatı Ülke Sıralaması" description="Gübre ihracatcı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />
-                  </div>
+                <ChartCard title="Gübre İhracatı — Ülke Sıralaması" span={2} action={<ChartInsightButton title="Gübre İhracatı Ülke Sıralaması" description="Gübre ihracatcı ülke sıralaması" data={concData.slice(0,25)} context={{ section: 'Konsantrasyon' }} compact />}>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={concData.slice(0, 25)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -215,7 +192,7 @@ export default function FertilizerPage() {
               </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={concInsights} />
             </>
@@ -231,11 +208,7 @@ export default function FertilizerPage() {
                 <KPICard title="TİCARET ORANI" value={`${turkeyProfile.tradeRatio.toFixed(1)}x`} subtitle="İthalat / İhracat" icon={Scale} color={turkeyProfile.tradeRatio > 3 ? 'red' : 'orange'} />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Gübre Ticareti (Ürün Bazlı)</h3>
-                  <ChartInsightButton title="Türkiye Gübre Ticareti Ürün Bazlı" description="Türkiye gübre ticareti ürün bazlı" data={turkeyProfile.byProduct} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                <ChartCard title="Türkiye Gübre Ticareti (Ürün Bazlı)" action={<ChartInsightButton title="Türkiye Gübre Ticareti Ürün Bazlı" description="Türkiye gübre ticareti ürün bazlı" data={turkeyProfile.byProduct} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={turkeyProfile.byProduct} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -247,12 +220,8 @@ export default function FertilizerPage() {
                       <Bar dataKey="export" name="İhracat" fill="#22c55e" />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Gübre Trendi (2000+)</h3>
-                  <ChartInsightButton title="Türkiye Gübre Trendi" description="Türkiye gübre trendi (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Türkiye Gübre Trendi (2000+)" action={<ChartInsightButton title="Türkiye Gübre Trendi" description="Türkiye gübre trendi (2000+)" data={turkeyTrends} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -264,7 +233,7 @@ export default function FertilizerPage() {
                       <Line type="monotone" dataKey="export" name="İhracat" stroke="#22c55e" strokeWidth={2} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={turkeyInsights} />
             </>
@@ -280,11 +249,7 @@ export default function FertilizerPage() {
                 <KPICard title="ANOMALİ" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayısı" icon={AlertTriangle} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Türkiye Gübre İthalatı — Tahmin Projeksiyonu</h3>
-                  <ChartInsightButton title="Türkiye Gübre Tahmin Projeksiyonu" description="Türkiye gübre ithalatı tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
-                  </div>
+                <ChartCard title="Türkiye Gübre İthalatı — Tahmin Projeksiyonu" span={2} action={<ChartInsightButton title="Türkiye Gübre Tahmin Projeksiyonu" description="Türkiye gübre ithalatı tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -297,7 +262,7 @@ export default function FertilizerPage() {
                       <Scatter dataKey="anomaly" name="Anomali" fill="#ef4444" />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={forecastInsights} />
             </>

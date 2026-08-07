@@ -8,6 +8,7 @@ import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
+import { ChartCard } from '../../components/ui/Card';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'selectedCategory' | 'yearLabel'
@@ -60,11 +61,7 @@ export default function OverviewTab({
           </div>
         </div>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Hayvan Grubu Özeti ({yearLabel})</h3>
-            <ChartInsightButton title="📊 Hayvan Grubu Özeti" description="Hayvan grubu dağılımı" data={groupChartData} context={{ section: 'Hayvan Grubu' }} compact />
-          </div>
+        <ChartCard title={<>📊 Hayvan Grubu Özeti ({yearLabel})</>} action={<ChartInsightButton title="📊 Hayvan Grubu Özeti" description="Hayvan grubu dağılımı" data={groupChartData} context={{ section: 'Hayvan Grubu' }} compact />}>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={groupChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -78,16 +75,12 @@ export default function OverviewTab({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Trend + Growth */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 {selectedAnimal} Trend Grafiği (2004–2025)</h3>
-            <ChartInsightButton title="📈 Trend Grafiği" description="Yıllık trend analizi" data={yearlyData} context={{ section: 'Trend' }} compact />
-          </div>
+        <ChartCard title={<>📈 {selectedAnimal} Trend Grafiği (2004–2025)</>} action={<ChartInsightButton title="📈 Trend Grafiği" description="Yıllık trend analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
           <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -97,13 +90,9 @@ export default function OverviewTab({
               <Area type="monotone" dataKey="value" name={selectedAnimal} stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Yıllık Büyüme Oranı (%)</h3>
-            <ChartInsightButton title="📊 Yıllık Büyüme Oranı" description="Yıllık büyüme oranları" data={growthData} context={{ section: 'Büyüme' }} compact />
-          </div>
+        <ChartCard title="📊 Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="📊 Yıllık Büyüme Oranı" description="Yıllık büyüme oranları" data={growthData} context={{ section: 'Büyüme' }} compact />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={growthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -117,17 +106,13 @@ export default function OverviewTab({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Category Charts */}
       {categoryData.length > 0 && (
         <div className="chart-grid">
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Kategori Dağılımı — {selectedAnimal}</h3>
-              <ChartInsightButton title="🥧 Kategori Dağılımı" description="Kategori dağılımı" data={categoryData} context={{ section: 'Kategori' }} compact />
-            </div>
+          <ChartCard title={<>🥧 Kategori Dağılımı — {selectedAnimal}</>} action={<ChartInsightButton title="🥧 Kategori Dağılımı" description="Kategori dağılımı" data={categoryData} context={{ section: 'Kategori' }} compact />}>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={120} innerRadius={50} dataKey="value"
@@ -138,13 +123,9 @@ export default function OverviewTab({
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
 
-          <div className="chart-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Kategori Karşılaştırma</h3>
-              <ChartInsightButton title="📊 Kategori Karşılaştırma" description="Kategori karşılaştırması" data={categoryData} context={{ section: 'Kategori' }} compact />
-            </div>
+          <ChartCard title="📊 Kategori Karşılaştırma" action={<ChartInsightButton title="📊 Kategori Karşılaştırma" description="Kategori karşılaştırması" data={categoryData} context={{ section: 'Kategori' }} compact />}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -158,17 +139,13 @@ export default function OverviewTab({
               </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartCard>
         </div>
       )}
 
       {/* City Bar + Pie */}
       <div className="chart-grid">
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🏙️ İl Bazında {selectedAnimal} Sayısı ({yearLabel})</h3>
-            <ChartInsightButton title="🏙️ İl Bazında Dağılım" description="İl bazında sayısı" data={cityData} context={{ section: 'İl Dağılım' }} compact />
-          </div>
+        <ChartCard title={<>🏙️ İl Bazında {selectedAnimal} Sayısı ({yearLabel})</>} action={<ChartInsightButton title="🏙️ İl Bazında Dağılım" description="İl bazında sayısı" data={cityData} context={{ section: 'İl Dağılım' }} compact />}>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -182,13 +159,9 @@ export default function OverviewTab({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 İl Payları Dağılımı (Top 10)</h3>
-            <ChartInsightButton title="🥧 İl Payları Dağılımı" description="İl pay dağılımı" data={cityData.slice(0, 10)} context={{ section: 'İl Dağılım' }} compact />
-          </div>
+        <ChartCard title="🥧 İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="🥧 İl Payları Dağılımı" description="İl pay dağılımı" data={cityData.slice(0, 10)} context={{ section: 'İl Dağılım' }} compact />}>
           <ResponsiveContainer width="100%" height={450}>
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={140} innerRadius={40}
@@ -200,7 +173,7 @@ export default function OverviewTab({
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* City Ranking Table */}

@@ -17,6 +17,7 @@ import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { BAR_COLOR } from '../utils/chartColors';
+import { ChartCard } from '../components/ui/Card';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -217,11 +218,7 @@ export default function LandCoverPage() {
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Arazi Örtüsü Dağılımı</h3>
-              <ChartInsightButton title="Arazi Örtüsü Dağılımı" description="Arazi örtüsü tiplerine göre dağılım" data={coverData} context={{ section: 'Arazi Örtüsü' }} compact />
-              </div>
+            <ChartCard title="📊 Arazi Örtüsü Dağılımı" action={<ChartInsightButton title="Arazi Örtüsü Dağılımı" description="Arazi örtüsü tiplerine göre dağılım" data={coverData} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={coverData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -235,13 +232,9 @@ export default function LandCoverPage() {
               </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Örtü Payı Dağılımı</h3>
-              <ChartInsightButton title="Örtü Payı Dağılımı" description="Arazi örtüsü pay dağılımı" data={coverData} context={{ section: 'Arazi Örtüsü' }} compact />
-              </div>
+            <ChartCard title="🥧 Örtü Payı Dağılımı" action={<ChartInsightButton title="Örtü Payı Dağılımı" description="Arazi örtüsü pay dağılımı" data={coverData} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={coverData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name?.substring(0,10)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
@@ -250,15 +243,11 @@ export default function LandCoverPage() {
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Top 6 Ülke Alan Karşılaştırması</h3>
-              <ChartInsightButton title="Top 6 Ülke Alan Karşılaştırması" description="Top 6 ülke arazi alanı karşılaştırması" data={radarData} context={{ section: 'Arazi Örtüsü' }} compact />
-              </div>
+            <ChartCard title="🎯 Top 6 Ülke Alan Karşılaştırması" action={<ChartInsightButton title="Top 6 Ülke Alan Karşılaştırması" description="Top 6 ülke arazi alanı karşılaştırması" data={radarData} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
@@ -268,13 +257,9 @@ export default function LandCoverPage() {
                   <Tooltip formatter={(value: number) => [`${value.toFixed(2)}M ha`, 'Alan']} />
                 </RadarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
 
-            <div className="chart-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Ülke ve Alan Payı</h3>
-              <ChartInsightButton title="Ülke ve Alan Payı" description="Ülke ve arazi alanı payı" data={countryData.slice(0,10)} context={{ section: 'Arazi Örtüsü' }} compact />
-              </div>
+            <ChartCard title="📈 Ülke ve Alan Payı" action={<ChartInsightButton title="Ülke ve Alan Payı" description="Ülke ve arazi alanı payı" data={countryData.slice(0,10)} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={countryData.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -287,15 +272,11 @@ export default function LandCoverPage() {
                   <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#8b5cf6" strokeWidth={2} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="chart-grid">
-            <div className="chart-card" style={{gridColumn: 'span 2'}}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📅 Yıllık Arazi Örtüsü Trendi</h3>
-              <ChartInsightButton title="Yıllık Arazi Örtüsü Trendi" description="Yıllık arazi örtüsü değişim trendi" data={yearlyData} context={{ section: 'Arazi Örtüsü' }} compact />
-              </div>
+            <ChartCard title="📅 Yıllık Arazi Örtüsü Trendi" span={2} action={<ChartInsightButton title="Yıllık Arazi Örtüsü Trendi" description="Yıllık arazi örtüsü değişim trendi" data={yearlyData} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -305,7 +286,7 @@ export default function LandCoverPage() {
                   <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
 
           <div className="data-table">

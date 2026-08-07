@@ -10,6 +10,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { truncTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
   selectedYear: string;
@@ -310,11 +311,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
 
       {/* Charts Row 1 */}
       <div className="chart-grid" style={{ marginTop: 20 }}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🏆 Top 15 İşlenmiş Ürnün Üreticileri ({selectedYear})</h3>
-            <ChartInsightButton title="Top 15 İşlenmiş Ürnün Üreticileri" description="Seçilen yılda işlenmiş hayvansal ürünlerde önde gelen 15 ülke" data={processedCountryData.slice(0, 15)} context={{ yıl: selectedYear }} />
-          </div>
+        <ChartCard title={<>🏆 Top 15 İşlenmiş Ürnün Üreticileri ({selectedYear})</>} action={<ChartInsightButton title="Top 15 İşlenmiş Ürnün Üreticileri" description="Seçilen yılda işlenmiş hayvansal ürünlerde önde gelen 15 ülke" data={processedCountryData.slice(0, 15)} context={{ yıl: selectedYear }} />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedCountryData.slice(0, 15).map(c => ({
@@ -336,13 +333,9 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
               <Bar dataKey="other" stackId="a" fill="#06b6d4" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Ürnün CAGR & Yaşam Döngüsü (5 Yıllık)</h3>
-            <ChartInsightButton title="İşlenmiş Ürnün CAGR & Yaşam Döngüsü" description="5 yıllık işlenmiş hayvansal ürünlerin büyüme ve yaşam döngüsü analizi" data={processedGrowthData.slice(0, 15)} context={{}} compact />
-          </div>
+        <ChartCard title="📊 Ürnün CAGR & Yaşam Döngüsü (5 Yıllık)" action={<ChartInsightButton title="İşlenmiş Ürnün CAGR & Yaşam Döngüsü" description="5 yıllık işlenmiş hayvansal ürünlerin büyüme ve yaşam döngüsü analizi" data={processedGrowthData.slice(0, 15)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedGrowthData.slice(0, 15).map(g => ({
@@ -364,15 +357,11 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
               <Bar dataKey="cagr" fill="#3b82f6" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Turkey Trend */}
-      <div className="chart-card" style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Türkiye İşlenmiş Ürnün Trendi (Tüm Yıllar)</h3>
-          <ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />
-        </div>
+      <ChartCard title="📈 Türkiye İşlenmiş Ürnün Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />}>
         <ResponsiveContainer width="100%" height={350}>
           <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -386,7 +375,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
             <Area type="monotone" dataKey="other" stackId="1" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </ChartCard>
 
       {/* Product Rankings Table */}
       <div className="chart-card" style={{ marginTop: 20 }}>

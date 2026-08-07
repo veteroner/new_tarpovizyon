@@ -13,6 +13,7 @@ import { EggTuikProjectionTab } from './egg-production/EggTuikProjectionTab';
 import type { TuikTab } from './egg-production/eggProductionTypes';
 import { formatShort } from './egg-production/eggProductionTypes';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { ChartCard } from '../components/ui/Card';
 
 export default function TurkeyEggProductionPage() {
   const {
@@ -200,11 +201,7 @@ export default function TurkeyEggProductionPage() {
           )}
 
           <div className="chart-grid" style={{ marginBottom: '40px' }}>
-            <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 İhracat vs İthalat Trendi (M$)</h3>
-                <ChartInsightButton title="📊 Yumurta Dış Ticaret Trendi" description="Türkiye yumurta ihracat ve ithalat gelişimi" data={eggTradeData} context={{ section: 'Ticaret' }} />
-              </div>
+            <ChartCard title="📊 İhracat vs İthalat Trendi (M$)" span={2} action={<ChartInsightButton title="📊 Yumurta Dış Ticaret Trendi" description="Türkiye yumurta ihracat ve ithalat gelişimi" data={eggTradeData} context={{ section: 'Ticaret' }} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={eggTradeData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -217,7 +214,7 @@ export default function TurkeyEggProductionPage() {
                   <Area dataKey={(d: { ihracat_musd: number; ithalat_musd: number }) => d.ihracat_musd - d.ithalat_musd} name="Net Denge (M$)" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </ChartCard>
           </div>
         </>
       )}

@@ -12,6 +12,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '../../utils/livestockCalculations';
 import { formatNumber, formatShort } from './livestockUtils';
 import { pctTick } from '../../utils/chartTicks';
+import { ChartCard } from '../../components/ui/Card';
 
 const R_BIR = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -343,11 +344,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       {/* Global Forecast Chart */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <div className="chart-card" style={{gridColumn: 'span 2'}}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🔮 Küresel Üretim Tahmini — Prophet (Tarihçe + 3Y Projeksiyon)</h3>
-            <ChartInsightButton title="Küresel Üretim Tahmini" description="Prophet modeli ile küresel üretim tahmin ve projeksiyon analizi" data={predForecastChart} context={{}} />
-          </div>
+        <ChartCard title="🔮 Küresel Üretim Tahmini — Prophet (Tarihçe + 3Y Projeksiyon)" span={2} action={<ChartInsightButton title="Küresel Üretim Tahmini" description="Prophet modeli ile küresel üretim tahmin ve projeksiyon analizi" data={predForecastChart} context={{}} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={predForecastChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -366,16 +363,12 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <span><span style={{display: 'inline-block', width: '12px', height: '3px', background: '#f59e0b', borderBottom: '2px dashed #f59e0b', marginRight: '4px', verticalAlign: 'middle'}} /> Tahmin</span>
             <span><span style={{display: 'inline-block', width: '12px', height: '8px', background: 'rgba(34,197,94,.2)', marginRight: '4px', verticalAlign: 'middle'}} /> %80 Güven Bandı</span>
           </div>
-        </div>
+        </ChartCard>
       </div>
 
       {/* R² vs Growth Scatter + Anomaly Timeline */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📐 Çapraz-Doğrulama R² × Büyüme Oranı</h3>
-            <ChartInsightButton title="Tahmin Doğrulama: R² × Büyüme" description="Model doğruluk ve büyüme oranı scatter analizi" data={predR2GrowthScatter} context={{}} compact />
-          </div>
+        <ChartCard title="📐 Çapraz-Doğrulama R² × Büyüme Oranı" action={<ChartInsightButton title="Tahmin Doğrulama: R² × Büyüme" description="Model doğruluk ve büyüme oranı scatter analizi" data={predR2GrowthScatter} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -403,13 +396,9 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
           <div style={{fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '4px'}}>
             🟢 Güvenilir+Büyüme &nbsp; 🔴 Güvenilir+Düşüş &nbsp; ⚪ Düşük Güven
           </div>
-        </div>
+        </ChartCard>
 
-        <div className="chart-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>⚡ Anomali Zaman Çizelgesi</h3>
-            <ChartInsightButton title="Anomali Zaman Çizelgesi" description="Yıllara göre ani artış ve düşü anomali tespitleri" data={predAnomalyTimeline} context={{}} compact />
-          </div>
+        <ChartCard title="⚡ Anomali Zaman Çizelgesi" action={<ChartInsightButton title="Anomali Zaman Çizelgesi" description="Yıllara göre ani artış ve düşü anomali tespitleri" data={predAnomalyTimeline} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={predAnomalyTimeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -421,7 +410,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
               <Legend />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       </div>
 
       {/* Turkey Forecast Cards */}

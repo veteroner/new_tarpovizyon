@@ -11,6 +11,7 @@ import { usePopulationData, TABS, formatPop, formatShort, formatPercent } from '
 import type { Tab } from './population/usePopulationData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 export default function PopulationPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -59,11 +60,7 @@ export default function PopulationPage() {
                 <KPICard title="KIRSAL" value={formatPop(overviewKPIs.worldRural)} subtitle={`Kentsel: ${formatPop(overviewKPIs.worldUrban)}`} icon={Home} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 25 Ulke Nufusu</h3>
-                  <ChartInsightButton title="Top 25 Ülke Nüfusu" description="Top 25 ülke tarım nüfusu" data={topCountries} context={{ section: 'Nüfus' }} compact />
-                  </div>
+                <ChartCard title="Top 25 Ulke Nufusu" action={<ChartInsightButton title="Top 25 Ülke Nüfusu" description="Top 25 ülke tarım nüfusu" data={topCountries} context={{ section: 'Nüfus' }} compact />}>
                   <ResponsiveContainer width="100%" height={500}>
                     <BarChart data={topCountries} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -75,12 +72,8 @@ export default function PopulationPage() {
                       <Bar dataKey="rural" name="Kirsal" stackId="a" fill="#22c55e" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Nufus Buyume Trendi</h3>
-                  <ChartInsightButton title="Nüfus Büyüme Trendi" description="Yıllık nüfus büyüme trendi" data={yearlyTrend} context={{ section: 'Nüfus' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Nufus Buyume Trendi" action={<ChartInsightButton title="Nüfus Büyüme Trendi" description="Yıllık nüfus büyüme trendi" data={yearlyTrend} context={{ section: 'Nüfus' }} compact />}>
                   <ResponsiveContainer width="100%" height={500}>
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -93,7 +86,7 @@ export default function PopulationPage() {
                       <Area type="monotone" dataKey="rural" name="Kirsal" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={overviewInsights} />
             </>
@@ -109,11 +102,7 @@ export default function PopulationPage() {
                 <KPICard title="KENTLESME ARTISI" value={`+${urbanKPIs.urbanShift.toFixed(1)}pp`} subtitle="Tarihsel trend" icon={Activity} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Ulke Bazli Kentsel vs Kirsal</h3>
-                  <ChartInsightButton title="Ülke Bazlı Kentsel vs Kırsal" description="Ülke bazlı kentsel vs kırsal nüfus" data={urbanData.slice(0,15)} context={{ section: 'Kentseşme' }} compact />
-                  </div>
+                <ChartCard title="Ulke Bazli Kentsel vs Kirsal" action={<ChartInsightButton title="Ülke Bazlı Kentsel vs Kırsal" description="Ülke bazlı kentsel vs kırsal nüfus" data={urbanData.slice(0,15)} context={{ section: 'Kentseşme' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={urbanData.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -125,12 +114,8 @@ export default function PopulationPage() {
                       <Bar dataKey="rural" name="Kirsal" fill="#22c55e" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Kentlesme Orani Trendi (%)</h3>
-                  <ChartInsightButton title="Kentselık Oranı Trendi" description="Kentselık oranı trendi" data={urbanTrend} context={{ section: 'Kentseşme' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Kentlesme Orani Trendi (%)" action={<ChartInsightButton title="Kentselık Oranı Trendi" description="Kentselık oranı trendi" data={urbanTrend} context={{ section: 'Kentseşme' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={urbanTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -144,7 +129,7 @@ export default function PopulationPage() {
                       <Line yAxisId="right" type="monotone" dataKey="urbanRate" name="Kentlesme Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={urbanInsights} />
             </>
@@ -160,11 +145,7 @@ export default function PopulationPage() {
                 <KPICard title="TOPLAM" value={formatPop(demoKPIs.totalM + demoKPIs.totalF)} subtitle={`E: ${formatPop(demoKPIs.totalM)} | K: ${formatPop(demoKPIs.totalF)}`} icon={BarChart2} color="blue" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Ulke Bazli Erkek-Kadin Nufusu</h3>
-                  <ChartInsightButton title="Ülke Bazlı Erkek-Kadın Nüfusu" description="Ülke bazlı cinsiyet nüfus dağılımı" data={demoByCountry.slice(0,15)} context={{ section: 'Cinsiyet' }} compact />
-                  </div>
+                <ChartCard title="Ulke Bazli Erkek-Kadin Nufusu" action={<ChartInsightButton title="Ülke Bazlı Erkek-Kadın Nüfusu" description="Ülke bazlı cinsiyet nüfus dağılımı" data={demoByCountry.slice(0,15)} context={{ section: 'Cinsiyet' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={demoByCountry.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -176,12 +157,8 @@ export default function PopulationPage() {
                       <Bar dataKey="female" name="Kadin" fill="#ec4899" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Cinsiyet Orani Trendi (Erkek/100 Kadin)</h3>
-                  <ChartInsightButton title="Cinsiyet Oranı Trendi" description="Cinsiyet oranı zaman serisi" data={demoTrend} context={{ section: 'Cinsiyet' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Cinsiyet Orani Trendi (Erkek/100 Kadin)" action={<ChartInsightButton title="Cinsiyet Oranı Trendi" description="Cinsiyet oranı zaman serisi" data={demoTrend} context={{ section: 'Cinsiyet' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={demoTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -195,7 +172,7 @@ export default function PopulationPage() {
                       <Line yAxisId="right" type="monotone" dataKey="sexRatio" name="Cinsiyet Orani" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={demoInsights} />
             </>
@@ -211,11 +188,7 @@ export default function PopulationPage() {
                 <KPICard title="DUNYA SIRASI" value={`#${turkeyProfile.rank}`} subtitle="Nufus" icon={Award} color="blue" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Nufus & Kentlesme Trendi (1960+)</h3>
-                  <ChartInsightButton title="Türkiye Nüfus & Kentselık Trendi" description="Türkiye nüfus ve kentseşme trendi (1960+)" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Nufus & Kentlesme Trendi (1960+)" span={2} action={<ChartInsightButton title="Türkiye Nüfus & Kentselık Trendi" description="Türkiye nüfus ve kentseşme trendi (1960+)" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={turkeyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -230,7 +203,7 @@ export default function PopulationPage() {
                       <Line yAxisId="right" type="monotone" dataKey="urbanRate" name="Kentlesme Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={turkeyInsights} />
             </>
@@ -246,11 +219,7 @@ export default function PopulationPage() {
                 <KPICard title="ANOMALI" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayisi" icon={AlertTriangle} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Nufus - Tahmin Projeksiyonu</h3>
-                  <ChartInsightButton title="Türkiye Nüfus Tahmin Projeksiyonu" description="Türkiye nüfus tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Nufus - Tahmin Projeksiyonu" span={2} action={<ChartInsightButton title="Türkiye Nüfus Tahmin Projeksiyonu" description="Türkiye nüfus tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -263,7 +232,7 @@ export default function PopulationPage() {
                       <Scatter dataKey="anomaly" name="Anomali" fill="#ef4444" />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={forecastInsights} />
             </>

@@ -13,6 +13,7 @@ import {
 import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { ChartCard } from '../components/ui/Card';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -61,11 +62,7 @@ export default function AgriculturalEmploymentPage() {
                 <KPICard title="ERKEK" value={formatPop(overviewKPIs.worldMale)} subtitle={`Kadin: ${formatPop(overviewKPIs.worldFemale)}`} icon={BarChart2} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 20 Ulke - Tarim Istihdami</h3>
-                  <ChartInsightButton title="Top 20 Ülke Tarım İstihdamı" description="Top 20 ülkede tarım istihdamı" data={topCountries.slice(0,20)} context={{ section: 'Tarım İstihdamı' }} compact />
-                  </div>
+                <ChartCard title="Top 20 Ulke - Tarim Istihdami" action={<ChartInsightButton title="Top 20 Ülke Tarım İstihdamı" description="Top 20 ülkede tarım istihdamı" data={topCountries.slice(0,20)} context={{ section: 'Tarım İstihdamı' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={topCountries.slice(0, 20)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -77,12 +74,8 @@ export default function AgriculturalEmploymentPage() {
                       <Bar dataKey="female" name="Kadin" stackId="a" fill="#ec4899" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Yillik Istihdam Trendi</h3>
-                  <ChartInsightButton title="Yıllık İstihdam Trendi" description="Yıllık tarım istihdamı trendi" data={yearlyTrend} context={{ section: 'Tarım İstihdamı' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Yillik Istihdam Trendi" action={<ChartInsightButton title="Yıllık İstihdam Trendi" description="Yıllık tarım istihdamı trendi" data={yearlyTrend} context={{ section: 'Tarım İstihdamı' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -95,7 +88,7 @@ export default function AgriculturalEmploymentPage() {
                       <Area type="monotone" dataKey="female" name="Kadin" stroke="#ec4899" fill="#ec4899" fillOpacity={0.2} />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={overviewInsights} />
             </>
@@ -111,11 +104,7 @@ export default function AgriculturalEmploymentPage() {
                 <KPICard title="SON 10 YIL" value={`${genderKPIs.recentTrend > 0 ? '+' : ''}${genderKPIs.recentTrend.toFixed(1)}pp`} subtitle="Kadin payi degisimi" icon={Activity} color="purple" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Ulke Bazli Erkek-Kadin Istihdami</h3>
-                  <ChartInsightButton title="Ülke Bazlı Erkek-Kadın İstihdamı" description="Ülke bazlı cinsiyet istihdamı" data={genderByCountry.slice(0,15)} context={{ section: 'Cinsiyet' }} compact />
-                  </div>
+                <ChartCard title="Ulke Bazli Erkek-Kadin Istihdami" action={<ChartInsightButton title="Ülke Bazlı Erkek-Kadın İstihdamı" description="Ülke bazlı cinsiyet istihdamı" data={genderByCountry.slice(0,15)} context={{ section: 'Cinsiyet' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={genderByCountry.slice(0, 15)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -127,12 +116,8 @@ export default function AgriculturalEmploymentPage() {
                       <Bar dataKey="female" name="Kadin" fill="#ec4899" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Kadin Istihdam Orani Trendi (%)</h3>
-                  <ChartInsightButton title="Kadın İstihdam Oranı Trendi" description="Kadın tarım istihdamı oranı trendi" data={genderTrend} context={{ section: 'Cinsiyet' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="Kadin Istihdam Orani Trendi (%)" action={<ChartInsightButton title="Kadın İstihdam Oranı Trendi" description="Kadın tarım istihdamı oranı trendi" data={genderTrend} context={{ section: 'Cinsiyet' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={genderTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -146,7 +131,7 @@ export default function AgriculturalEmploymentPage() {
                       <Line yAxisId="right" type="monotone" dataKey="femaleRatio" name="Kadin Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={genderInsights} />
             </>
@@ -162,11 +147,7 @@ export default function AgriculturalEmploymentPage() {
                 <KPICard title="ULKE SAYISI" value={String(concentrationData.countryCount)} subtitle="Aktif istihdam" icon={Globe} color="green" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Istihdam Pazar Payi Dagilimi</h3>
-                  <ChartInsightButton title="İstihdam Pazar Payı Dağılımı" description="Küresel tarım istihdamı pazar payı" data={concentrationData.pieData} context={{ section: 'Konsantrasyon' }} compact />
-                  </div>
+                <ChartCard title="Istihdam Pazar Payi Dagilimi" action={<ChartInsightButton title="İstihdam Pazar Payı Dağılımı" description="Küresel tarım istihdamı pazar payı" data={concentrationData.pieData} context={{ section: 'Konsantrasyon' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <PieChart>
                       <Pie data={concentrationData.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} dataKey="value" label={({ name, share }: any) => `${name} ${share}%`} labelLine={false}>
@@ -175,12 +156,8 @@ export default function AgriculturalEmploymentPage() {
                       <Tooltip formatter={(v: number) => [formatPop(v), 'Istihdam']} />
                     </PieChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="chart-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>HHI &amp; Top 5 Payi Tarihsel</h3>
-                  <ChartInsightButton title="HHI & Top 5 Payı Tarihsel" description="HHI konsantrasyon endeksi tarihi" data={concentrationData.hhiHistory} context={{ section: 'Konsantrasyon' }} compact />
-                  </div>
+                </ChartCard>
+                <ChartCard title="HHI &amp; Top 5 Payi Tarihsel" action={<ChartInsightButton title="HHI & Top 5 Payı Tarihsel" description="HHI konsantrasyon endeksi tarihi" data={concentrationData.hhiHistory} context={{ section: 'Konsantrasyon' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={concentrationData.hhiHistory}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -193,7 +170,7 @@ export default function AgriculturalEmploymentPage() {
                       <Line yAxisId="right" type="monotone" dataKey="top5" name="Top 5 Pay (%)" stroke="#f59e0b" strokeWidth={2} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={concentrationInsights} />
             </>
@@ -209,11 +186,7 @@ export default function AgriculturalEmploymentPage() {
                 <KPICard title="DUNYA SIRASI" value={`#${turkeyProfile.rank}`} subtitle="Tarim istihdami" icon={Award} color="purple" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Tarim Istihdami Trendi</h3>
-                  <ChartInsightButton title="Türkiye Tarım İstihdamı Trendi" description="Türkiye tarım istihdamı zaman serisi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Tarim Istihdami Trendi" span={2} action={<ChartInsightButton title="Türkiye Tarım İstihdamı Trendi" description="Türkiye tarım istihdamı zaman serisi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={turkeyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -228,7 +201,7 @@ export default function AgriculturalEmploymentPage() {
                       <Line yAxisId="right" type="monotone" dataKey="femaleRatio" name="Kadin Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={turkeyInsights} />
             </>
@@ -244,11 +217,7 @@ export default function AgriculturalEmploymentPage() {
                 <KPICard title="ANOMALI" value={String(forecastData.anomalyCount || 0)} subtitle="Sapma sayisi" icon={AlertTriangle} color="orange" />
               </div>
               <div className="chart-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <h3 className="chart-title" style={{ marginBottom: 0 }}>Turkiye Istihdam - Tahmin Projeksiyonu</h3>
-                  <ChartInsightButton title="Türkiye İstihdam Tahmin Projeksiyonu" description="Türkiye tarım istihdamı tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />
-                  </div>
+                <ChartCard title="Turkiye Istihdam - Tahmin Projeksiyonu" span={2} action={<ChartInsightButton title="Türkiye İstihdam Tahmin Projeksiyonu" description="Türkiye tarım istihdamı tahmin projeksiyonu" data={forecastData.chartData} context={{ section: 'Tahmin' }} compact />}>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -261,7 +230,7 @@ export default function AgriculturalEmploymentPage() {
                       <Scatter dataKey="anomaly" name="Anomali" fill="#ef4444" />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartCard>
               </div>
               <InsightCard insights={forecastInsights} />
             </>

@@ -1,0 +1,152 @@
+/**
+ * Tek kart katmanı — Card / ChartCard / StatCard.
+ *
+ * Eskiden kartların yarısı satır içi stille yapılıyordu; her sayfa kendi
+ * dolgusunu, köşe yarıçapını, gölgesini seçiyordu. Buradaki değerler artık
+ * TEK kaynak. Satır içi stil kalmadıkça mobil katmanındaki `!important`
+ * kullanımı da gereksizleşiyor.
+ */
+
+.ui-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  /* Izgarada çocuk daralabilsin — min-width:auto taşmaya sebep oluyor. */
+  min-width: 0;
+}
+
+.ui-chart-card {
+  padding: 20px;
+  /* Ekran dışı grafikleri çizme; yer ayrıldığı için kaydırma zıplamıyor. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
+/* ─── Başlık satırı ──────────────────────────────────────────────────────── */
+/* Bu satır ~300 yerde elle yazılıyordu, her kopyada küçük farklarla. */
+.ui-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ui-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+  /* Uzun ürün/ülke adları kartı taşırmasın. */
+  overflow-wrap: anywhere;
+}
+
+.ui-card-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.ui-card-action {
+  flex: 0 0 auto;
+}
+
+.ui-card-note {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ─── İstatistik kartı ───────────────────────────────────────────────────── */
+.ui-stat-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ui-stat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ui-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.ui-stat-icon {
+  display: inline-flex;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.ui-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+  /* Sayı sütunları hizada kalsın, rakam değişince kaymasın. */
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-stat-foot {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.ui-delta {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-delta.is-iyi { color: var(--success); }
+.ui-delta.is-kotu { color: var(--error); }
+
+/* ─── Tonlar ─────────────────────────────────────────────────────────────── */
+/*
+ * Ham hex yerine anlamsal ton. Panoda 202 benzersiz hex vardı; kart vurgusu
+ * artık bu altı tondan biri. Sol kenardaki şerit rengi taşıyor — kartın
+ * tamamını boyamak metin kontrastını bozuyordu.
+ */
+.ui-stat-card[class*='ui-ton-']:not(.ui-ton-notr) {
+  border-left-width: 3px;
+  border-left-style: solid;
+}
+
+/* Mevcut token sözlüğü kullanılıyor; yeni isim uydurmak ikinci bir
+   paralel sistem yaratır — düzeltmeye çalıştığımız sorunun ta kendisi. */
+.ui-ton-birincil { border-left-color: var(--primary); }
+.ui-ton-olumlu   { border-left-color: var(--success); }
+.ui-ton-olumsuz  { border-left-color: var(--error); }
+.ui-ton-uyari    { border-left-color: var(--warning); }
+.ui-ton-bilgi    { border-left-color: var(--primary); }
+
+/* ─── Mobil ──────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .ui-chart-card { padding: 14px; }
+  .ui-stat-card { padding: 12px; gap: 4px; }
+  .ui-stat-value { font-size: 1.35rem; }
+  .ui-card-title { font-size: 0.95rem; }
+
+  /* Başlık ve eylem dar ekranda yan yana sığmıyor. */
+  .ui-card-head {
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+}
