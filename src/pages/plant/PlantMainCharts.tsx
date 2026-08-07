@@ -1,11 +1,7 @@
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell,
-  ComposedChart, Line,
-  LabelList,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
@@ -30,25 +26,24 @@ export default function PlantMainCharts({
       {/* ─── Grafik 1: Yıllık Trend (ComposedChart) ─── */}
       <div className="chart-grid">
         <ChartCard title="📅 Yıllık Trend (2004–2024)" span={2} action={<ChartInsightButton title="📅 Yıllık Trend" description="Bitkisel üretim yıllık trendi" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={yearlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={v => fmtShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <YAxis yAxisId="right" orientation="right" unit="%" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                domain={[-50, 50]} tickFormatter={pctTick} width={46} />
-              <Tooltip
-                formatter={(value: number, name: string) => [
-                  name === 'value' ? `${fmt(value)} ${currentBirim}` : `${(value as number).toFixed(1)}%`,
-                  name === 'value' ? selectedUnsur : 'Yıllık Değişim'
-                ]}
-                contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
-              />
-              <Legend />
-              <Bar yAxisId="left" dataKey="value" name={selectedUnsur} fill="#3b82f6" radius={[4, 4, 0, 0]} opacity={0.8} />
-              <Line yAxisId="right" type="monotone" dataKey="change" name="Yıllık Değişim %" stroke="#ef4444" strokeWidth={2} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {/*
+            * "Yıllık değişim %" üretim serisinden TÜRETİLMİŞ. Eskiden ikinci
+            * bir y ekseninde çiziliyordu; iki ölçeğin hizası keyfi olduğu için
+            * çubuk ile çizginin kesiştiği yıl veride karşılığı olmayan bir
+            * dönüm noktası gibi okunuyordu. Ortak x eksenli şeride taşındı.
+            */}
+          <SplitAxisChart
+            data={yearlyData as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            yFormat={fmtShort}
+            stripKey="change"
+            stripLabel="Yıllık Değişim"
+            stripFormat={(v) => `%${pctTick(v)}`}
+          >
+            <Bar dataKey="value" name={selectedUnsur} fill="var(--series-1)"
+              radius={[4, 4, 0, 0]} />
+          </SplitAxisChart>
         </ChartCard>
       </div>
 

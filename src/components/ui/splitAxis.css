@@ -1,0 +1,35 @@
+/**
+ * Ana grafik + türetilmiş seri şeridi.
+ *
+ * Şerit ana grafiğin ALTINDA, aynı x eksenini paylaşıyor. Amaç: çift eksenli
+ * grafiğin uydurduğu sahte kesişmeyi ortadan kaldırmak ama iki seri
+ * arasındaki ilişkiyi görsel olarak korumak.
+ */
+
+.ui-split-chart {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * Şerit etiketi. Şeridin kendi başlığı olmalı — yoksa okuyucu alttaki
+ * çizginin neyi gösterdiğini bilemiyor (çift eksende bu bilgiyi legend
+ * taşıyordu).
+ */
+.ui-split-strip-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 0 2px 46px; /* Y ekseni genişliği kadar içeriden */
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+@media (max-width: 767px) {
+  .ui-split-strip-label {
+    padding-left: 46px;
+    font-size: 0.68rem;
+  }
+}

@@ -10,6 +10,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { usePopulationData, TABS, formatPop, formatShort, formatPercent } from './population/usePopulationData';
 import type { Tab } from './population/usePopulationData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
@@ -116,19 +117,28 @@ export default function PopulationPage() {
                   </ResponsiveContainer>
                 </ChartCard>
                 <ChartCard title="Kentlesme Orani Trendi (%)" action={<ChartInsightButton title="Kentselık Oranı Trendi" description="Kentselık oranı trendi" data={urbanTrend} context={{ section: 'Kentseşme' }} compact />}>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={urbanTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                      <Tooltip />
-                      <Legend />
-                      <Area yAxisId="left" type="monotone" dataKey="urban" name="Kentsel" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} />
-                      <Area yAxisId="left" type="monotone" dataKey="rural" name="Kirsal" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
-                      <Line yAxisId="right" type="monotone" dataKey="urbanRate" name="Kentlesme Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {/*
+                    * Kentleşme oranı, kentsel ve kırsal nüfustan TÜRETİLMİŞ bir
+                    * seri. Eskiden ikinci bir y ekseninde çiziliyordu; iki
+                    * ölçeğin hizası keyfi olduğu için çizgilerin kesiştiği yer
+                    * veride karşılığı olmayan bir "dönüm noktası" gibi
+                    * okunuyordu. Aynı x eksenini paylaşan şeride taşındı.
+                    */}
+                  <SplitAxisChart
+                    data={urbanTrend}
+                    xKey="year"
+                    height={300}
+                    yFormat={formatShort}
+                    stripKey="urbanRate"
+                    stripLabel="Kentleşme Oranı"
+                    stripFormat={(v) => `%${Number(v).toFixed(0)}`}
+                  >
+                    <Legend />
+                    <Area type="monotone" dataKey="urban" name="Kentsel"
+                      stroke="var(--series-1)" fill="var(--series-1)" fillOpacity={0.2} />
+                    <Area type="monotone" dataKey="rural" name="Kırsal"
+                      stroke="var(--series-3)" fill="var(--series-3)" fillOpacity={0.2} />
+                  </SplitAxisChart>
                 </ChartCard>
               </div>
               <InsightCard insights={urbanInsights} />

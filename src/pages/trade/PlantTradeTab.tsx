@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
-  ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis,
-} from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from 'recharts';
 import { TrendingUp, TrendingDown, Leaf, ArrowLeftRight, Zap } from 'lucide-react';
 import { KPICard } from '../../components/KPICard';
 import { Loading } from '../../components/Loading';
@@ -10,8 +7,9 @@ import { TreemapContent } from '../../components/TreemapContent';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney, formatNumber } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+
 import { ChartCard } from '../../components/ui/Card';
+import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 
 const R = 'tuik/ticaret-bitkisel';
 // Düzey filtreleri eski SQL'dekiyle birebir: bu tabloda hangi kırılım
@@ -209,19 +207,26 @@ export default function PlantTradeTab() {
         </ChartCard>
 
         <ChartCard title="📈 Yıllık Bitkisel Trend + Denge" action={<ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />}>
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={yearlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={2} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} width={46} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : name === 'imp' ? 'İthalat' : 'Denge']} />
-              <Legend formatter={v => v === 'exp' ? 'İhracat' : v === 'imp' ? 'İthalat' : 'Denge'} />
-              <Bar yAxisId="left" dataKey="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
-              <Bar yAxisId="left" dataKey="imp" fill="#f59e0b" radius={[2, 2, 0, 0]} opacity={0.8} />
-              <Line yAxisId="right" type="monotone" dataKey="denge" stroke="#6366f1" strokeWidth={3} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {/*
+            * "Denge" ihracat ile ithalatın FARKI — türetilmiş seri. Eskiden
+            * ikinci bir y ekseninde çiziliyordu ve iki eksen AYNI birimi
+            * ($xxB) farklı ölçekte gösteriyordu: okuyucu iki tarafta da dolar
+            * görüyor ama ölçekler tutmuyordu. Ortak x eksenli şeride taşındı.
+            */}
+          <SplitAxisChart
+            data={yearlyData as unknown as Record<string, unknown>[]}
+            xKey="yil"
+            height={270}
+            yFormat={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`}
+            stripKey="denge"
+            stripLabel="Dış Ticaret Dengesi"
+            stripFormat={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`}
+            xProps={{ interval: 2 }}
+          >
+            <Legend formatter={(v: string) => v === 'exp' ? 'İhracat' : 'İthalat'} />
+            <Bar dataKey="exp" fill="var(--series-3)" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="imp" fill="var(--series-4)" radius={[2, 2, 0, 0]} />
+          </SplitAxisChart>
         </ChartCard>
       </div>
 
