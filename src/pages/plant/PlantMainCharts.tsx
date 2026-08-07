@@ -39,7 +39,7 @@ export default function PlantMainCharts({
             yFormat={fmtShort}
             stripKey="change"
             stripLabel="Yıllık Değişim"
-            stripFormat={(v) => `%${pctTick(v)}`}
+            stripFormat={(v: number) => `%${pctTick(v)}`}
           >
             <Bar dataKey="value" name={selectedUnsur} fill="var(--series-1)"
               radius={[4, 4, 0, 0]} />

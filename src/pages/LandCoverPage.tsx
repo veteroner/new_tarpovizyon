@@ -1,12 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell,
-  AreaChart, Area,
-  ComposedChart, Line,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  LabelList,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList } from 'recharts';
 import { fetchAgg, latestYear, num } from '../services/d1';
 
 const R = 'fao/land-cover';
@@ -15,9 +8,10 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { BAR_COLOR } from '../utils/chartColors';
 import { ChartCard } from '../components/ui/Card';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -260,18 +254,20 @@ export default function LandCoverPage() {
             </ChartCard>
 
             <ChartCard title="📈 Ülke ve Alan Payı" action={<ChartInsightButton title="Ülke ve Alan Payı" description="Ülke ve arazi alanı payı" data={countryData.slice(0,10)} context={{ section: 'Arazi Örtüsü' }} compact />}>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={countryData.slice(0, 10)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                  <Tooltip formatter={(value: number, name: string) => [name === 'value' ? formatArea(value) : `%${value}`, name === 'value' ? 'Alan' : 'Pay']} />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="value" name="Alan" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Line yAxisId="right" type="monotone" dataKey="share" name="Pay %" stroke="#8b5cf6" strokeWidth={2} />
-                </ComposedChart>
-              </ResponsiveContainer>
+              {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={countryData.slice(0, 10) as unknown as Record<string, unknown>[]}
+            xKey="name"
+            height={270}
+            stripKey="share"
+            stripLabel="Pay"
+            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+          >
+            <Legend />
+            <Bar dataKey="value" name="Alan" fill="#22c55e" radius={[4, 4, 0, 0]} />
+          </SplitAxisChart>
             </ChartCard>
           </div>
 

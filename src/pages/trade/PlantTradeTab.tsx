@@ -217,10 +217,10 @@ export default function PlantTradeTab() {
             data={yearlyData as unknown as Record<string, unknown>[]}
             xKey="yil"
             height={270}
-            yFormat={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`}
+            yFormat={(v: number) => `$${(Number(v) / 1e9).toFixed(1)}B`}
             stripKey="denge"
             stripLabel="Dış Ticaret Dengesi"
-            stripFormat={(v) => `$${(Number(v) / 1e9).toFixed(1)}B`}
+            stripFormat={(v: number) => `$${(Number(v) / 1e9).toFixed(1)}B`}
             xProps={{ interval: 2 }}
           >
             <Legend formatter={(v: string) => v === 'exp' ? 'İhracat' : 'İthalat'} />

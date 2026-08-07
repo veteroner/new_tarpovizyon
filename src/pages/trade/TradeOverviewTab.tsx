@@ -1,7 +1,4 @@
-import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
-  ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis,
-} from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from 'recharts';
 import { useMemo, useState } from 'react';
 import { TrendingUp, TrendingDown, Scale, ArrowLeftRight, Zap, AlertTriangle } from 'lucide-react';
 import { FlowSankeyCard } from '../../components/FlowSankeyCard';
@@ -13,8 +10,9 @@ import { WorldTradeMap, type WorldTradeMetric, type CountryTradeMetrics } from '
 import { formatMoney } from '../../services/api';
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import { useTradeOverviewData } from './useTradeOverviewData';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+
 import { ChartCard } from '../../components/ui/Card';
+import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 
 const GROUP_FILTER_LABELS = {
   all: 'Tüm Gruplar',
@@ -247,19 +245,22 @@ export default function TradeOverviewTab() {
         </ChartCard>
 
         <ChartCard title="📈 Yıllık Trend + Ticaret Dengesi (2000–2025)" action={<ChartInsightButton title="Yıllık Trend + Ticaret Dengesi" description="2000-2025 ihracat, ithalat ve denge" data={yearlyData} context={overviewContext} />}>
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={yearlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={2} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} width={46} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e9).toFixed(0)}B`} domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : name === 'imp' ? 'İthalat' : 'Denge']} />
-              <Legend formatter={v => v === 'exp' ? 'İhracat' : v === 'imp' ? 'İthalat' : 'Ticaret Dengesi'} />
-              <Bar yAxisId="left" dataKey="exp" name="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
-              <Bar yAxisId="left" dataKey="imp" name="imp" fill="#f59e0b" radius={[2, 2, 0, 0]} opacity={0.8} />
-              <Line yAxisId="right" type="monotone" dataKey="denge" name="denge" stroke="#6366f1" strokeWidth={3} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={yearlyData as unknown as Record<string, unknown>[]}
+            xKey="yil"
+            height={270}
+            stripKey="denge"
+            stripLabel="Dış Ticaret Dengesi"
+            stripFormat={(v: number) => `$${(Number(v)/1e9).toFixed(1)}B`}
+            xProps={{ interval: 2 }}
+          >
+            <Legend />
+            <Bar dataKey="exp" name="exp" fill="#10b981" radius={[2, 2, 0, 0]} opacity={0.8} />
+            <Bar dataKey="imp" name="imp" fill="#f59e0b" radius={[2, 2, 0, 0]} opacity={0.8} />
+          </SplitAxisChart>
         </ChartCard>
       </div>
 

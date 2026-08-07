@@ -1,8 +1,4 @@
-import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
-  ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine,
-  LabelList,
-} from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine, LabelList } from 'recharts';
 import {
   Wheat, TrendingUp, AlertTriangle, ShieldCheck, ShieldAlert,
   Scale, Package, Users, BarChart3, Activity, Search, ArrowRightLeft,
@@ -17,7 +13,8 @@ import {
   GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
 } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, compactValue } from '../utils/chartTicks';
+import { compactValue } from '../utils/chartTicks';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 const CYAN = '#06b6d4';
 const PURPLE = '#8b5cf6';
@@ -222,25 +219,22 @@ export default function ProductBalancePage() {
               </h3>
               <ChartInsightButton title={`10 Yıllık Trend — ${selectedProduct}`} description="10 yıllık ürün trendi" data={yearlyTrend} context={{ section: 'Ürün Dengesi' }} compact />
               </div>
-              <ResponsiveContainer width="100%" height={320}>
-                <ComposedChart data={yearlyTrend} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-                  <YAxis yAxisId="left" tickFormatter={v => fmt(v)} tick={{ fontSize: 10 }} width={46} />
-                  <YAxis yAxisId="right" orientation="right" domain={LINE_Y_DOMAIN}
-                         tickFormatter={v => v + '%'} tick={{ fontSize: 10 }} width={46} />
-                  <Tooltip formatter={(v: number, name: string) =>
-                    [name === 'Yeterlilik' ? v.toFixed(1) + '%' : fmt(v) + ' Ton', name]} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar yAxisId="left" dataKey="Üretim" fill={GREEN} opacity={0.7} radius={[3, 3, 0, 0]} />
-                  <Bar yAxisId="left" dataKey="İthalat" fill={BLUE} opacity={0.7} radius={[3, 3, 0, 0]} />
-                  <Bar yAxisId="left" dataKey="İhracat" fill={ORANGE} opacity={0.7} radius={[3, 3, 0, 0]} />
-                  <Line yAxisId="right" type="monotone" dataKey="Yeterlilik" stroke={RED}
-                        strokeWidth={2} dot={{ r: 3 }} />
-                  <ReferenceLine yAxisId="right" y={100} stroke="#dc2626" strokeDasharray="5 5"
-                                 label={{ value: '100%', fontSize: 10 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
+              {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={yearlyTrend as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            stripKey="Yeterlilik"
+            stripLabel="Yeterlilik Derecesi"
+            stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
+          >
+            <Legend />
+            <Bar dataKey="Üretim" fill={GREEN} opacity={0.7} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="İthalat" fill={BLUE} opacity={0.7} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="İhracat" fill={ORANGE} opacity={0.7} radius={[3, 3, 0, 0]} />
+          </SplitAxisChart>
             </div>
           </div>
 

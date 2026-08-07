@@ -1,22 +1,8 @@
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { PoultryEconomicData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 
 type Props = {
   economicData: PoultryEconomicData[];
@@ -169,18 +155,20 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: 0 }}>🌾 Yem Fiyatı ve Paritesi</h3>
             <ChartInsightButton title="🌾 Yem Fiyatı ve Paritesi" description="Besi yemi fiyatı ve parite trendi" data={filteredData} context={{ section: 'Yem' }} compact />
           </div>
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={filteredData.slice().reverse()}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-              <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="etlik_pilic_yemi_tl_kg" name="Yem Fiyatı (₺/kg)" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
-              <Line yAxisId="right" type="monotone" dataKey="parite_etlik_pilic_yem_paritesi" name="Yem Paritesi" stroke="#8b5cf6" strokeWidth={2.5} dot={{ fill: '#8b5cf6', r: 3 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={filteredData.slice().reverse() as unknown as Record<string, unknown>[]}
+            xKey="tarih"
+            height={270}
+            stripKey="parite_etlik_pilic_yem_paritesi"
+            stripLabel="Piliç/Yem Paritesi"
+            stripFormat={(v: number) => Number(v).toFixed(2)}
+          >
+            <Legend />
+            <Line type="monotone" dataKey="etlik_pilic_yemi_tl_kg" name="Yem Fiyatı (₺/kg)" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
+          </SplitAxisChart>
         </div>
 
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>

@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Area, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
-  Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
-  LabelList,
-} from 'recharts';
+import { Area, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } from 'recharts';
 import {
   TrendingUp, DollarSign, MapPin, Activity, BarChart3, Landmark, Users,
 } from 'lucide-react';
@@ -12,6 +8,7 @@ import { ErrorState } from '../components/ErrorState';
 import { fetchAgg, fetchRows, num } from '../services/d1';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 /* ─── Constants ─── */
 const MAIN_SECTORS = ['A', 'BCD', 'F', 'GHI', 'J', 'K', 'L', 'MN', 'OPQ', 'RST'];
@@ -415,24 +412,23 @@ export default function TurkeyMacroPage() {
           </h3>
           <ChartInsightButton title="Gelir Eşitsizliği Trendi" description="En zengin 5 vs en yoksul 5 il gelir trendi" data={incomeGapChart} context={{ section: 'Makro Türkiye' }} compact />
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart data={incomeGapChart} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="yil" tick={{ fontSize: 10 }} />
-              <YAxis yAxisId="left" tickFormatter={v => '$' + (v / 1000).toFixed(0) + 'K'} tick={{ fontSize: 10 }} width={46} />
-              <YAxis yAxisId="right" orientation="right" domain={LINE_Y_DOMAIN} tick={{ fontSize: 10 }}
-                     label={{ value: 'Oran (x)', angle: 90, position: 'insideRight', fontSize: 10 }} width={58} />
-              <Tooltip formatter={(v: number, name: string) =>
-                [name === 'Oran' ? v + 'x' : '$' + v.toLocaleString(), name]} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Area yAxisId="left" type="monotone" dataKey="En Zengin 5 İl"
+          {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={incomeGapChart as unknown as Record<string, unknown>[]}
+            xKey="yil"
+            height={270}
+            stripKey="Oran"
+            stripLabel="Oran"
+            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+          >
+            <Legend />
+            <Area type="monotone" dataKey="En Zengin 5 İl"
                     fill="#16a34a" fillOpacity={0.1} stroke="#16a34a" strokeWidth={2} />
-              <Area yAxisId="left" type="monotone" dataKey="En Yoksul 5 İl"
+            <Area type="monotone" dataKey="En Yoksul 5 İl"
                     fill="#dc2626" fillOpacity={0.1} stroke="#dc2626" strokeWidth={2} />
-              <Line yAxisId="right" type="monotone" dataKey="Oran"
-                    stroke="#7c3aed" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          </SplitAxisChart>
           <div className="mt-2 rounded-lg p-3 text-xs" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
             <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>📊 İçgörü Notu:</p>
             <p>

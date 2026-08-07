@@ -13,6 +13,7 @@ import { useCrossIntelligenceData } from './crossIntelligence/useCrossIntelligen
 import type { ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 export default function CrossIntelligencePage() {
   const {
@@ -392,28 +393,22 @@ export default function CrossIntelligencePage() {
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
               Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>%{avgImportDep.toFixed(1)}</strong> · Ortalama ihracat oranı: <strong>%{avgExportRatio.toFixed(1)}</strong>
             </p>
-            <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={decomp} margin={{ top: 10, right: 8, left: 4, bottom: 5 }} stackOffset="sign">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="year" fontSize={10} />
-                <YAxis yAxisId="left" fontSize={9} tickFormatter={v => {
-                  const n = Math.abs(v as number);
-                  return n > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`;
-                }} width={46} />
-                <YAxis yAxisId="right" orientation="right" fontSize={9} domain={LINE_Y_DOMAIN} tickFormatter={v => `%${v}`} width={46} />
-                <Tooltip formatter={(v: number, name: string) => {
-                  if (name.includes('Bağımlılık') || name.includes('Oran')) return [`%${Math.abs(v).toFixed(1)}`, name];
-                  const n = Math.abs(v);
-                  return [n > 1e6 ? `${(n / 1e6).toFixed(2)}M ton` : `${(n / 1e3).toFixed(0)}K ton`, name];
-                }} />
-                <Legend />
-                <ReferenceLine yAxisId="left" y={0} stroke="#94a3b8" />
-                <Bar yAxisId="left" dataKey="production" stackId="supply" fill="#10b981" name="Yerli Üretim" />
-                <Bar yAxisId="left" dataKey="imports" stackId="supply" fill="#ef4444" name="İthalat" />
-                <Bar yAxisId="left" dataKey="exports" fill="#3b82f6" name="İhracat (negatif)" />
-                <Line yAxisId="right" type="monotone" dataKey="importDep" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} name="İthalat Bağımlılığı %" />
-              </ComposedChart>
-            </ResponsiveContainer>
+            {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={decomp as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            stripKey="importDep"
+            stripLabel="İthalat Bağımlılığı"
+            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+          >
+            <Legend />
+            <Bar dataKey="production" stackId="supply" fill="#10b981" name="Yerli Üretim" />
+            <Bar dataKey="imports" stackId="supply" fill="#ef4444" name="İthalat" />
+            <Bar dataKey="exports" fill="#3b82f6" name="İhracat (negatif)" />
+          </SplitAxisChart>
             <div className="flex items-center gap-4 mt-3 text-xs flex-wrap" style={{ color: 'var(--text-secondary)' }}>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Yerli üretim</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block" /> İthalat</span>

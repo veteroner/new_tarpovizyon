@@ -14,6 +14,7 @@ import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -118,19 +119,22 @@ export default function AgriculturalEmploymentPage() {
                   </ResponsiveContainer>
                 </ChartCard>
                 <ChartCard title="Kadin Istihdam Orani Trendi (%)" action={<ChartInsightButton title="Kadın İstihdam Oranı Trendi" description="Kadın tarım istihdamı oranı trendi" data={genderTrend} context={{ section: 'Cinsiyet' }} compact />}>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={genderTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                      <Tooltip />
-                      <Legend />
-                      <Area yAxisId="left" type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
-                      <Area yAxisId="left" type="monotone" dataKey="female" name="Kadin" stroke="#ec4899" fill="#ec4899" fillOpacity={0.2} />
-                      <Line yAxisId="right" type="monotone" dataKey="femaleRatio" name="Kadin Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={genderTrend as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            yFormat={formatShort}
+            stripKey="femaleRatio"
+            stripLabel="Kadın Oranı"
+            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+          >
+            <Legend />
+            <Area type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
+            <Area type="monotone" dataKey="female" name="Kadin" stroke="#ec4899" fill="#ec4899" fillOpacity={0.2} />
+          </SplitAxisChart>
                 </ChartCard>
               </div>
               <InsightCard insights={genderInsights} />
@@ -158,18 +162,20 @@ export default function AgriculturalEmploymentPage() {
                   </ResponsiveContainer>
                 </ChartCard>
                 <ChartCard title="HHI &amp; Top 5 Payi Tarihsel" action={<ChartInsightButton title="HHI & Top 5 Payı Tarihsel" description="HHI konsantrasyon endeksi tarihi" data={concentrationData.hhiHistory} context={{ section: 'Konsantrasyon' }} compact />}>
-                  <ResponsiveContainer width="100%" height={350}>
-                    <ComposedChart data={concentrationData.hhiHistory}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="hhi" name="HHI" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                      <Line yAxisId="right" type="monotone" dataKey="top5" name="Top 5 Pay (%)" stroke="#f59e0b" strokeWidth={2} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={concentrationData.hhiHistory as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            stripKey="top5"
+            stripLabel="İlk 5 Ülke Payı"
+            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+          >
+            <Legend />
+            <Bar dataKey="hhi" name="HHI" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+          </SplitAxisChart>
                 </ChartCard>
               </div>
               <InsightCard insights={concentrationInsights} />

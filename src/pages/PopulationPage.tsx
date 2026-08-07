@@ -11,7 +11,7 @@ import { usePopulationData, TABS, formatPop, formatShort, formatPercent } from '
 import type { Tab } from './population/usePopulationData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
+
 import { ChartCard } from '../components/ui/Card';
 
 export default function PopulationPage() {
@@ -131,7 +131,7 @@ export default function PopulationPage() {
                     yFormat={formatShort}
                     stripKey="urbanRate"
                     stripLabel="Kentleşme Oranı"
-                    stripFormat={(v) => `%${Number(v).toFixed(0)}`}
+                    stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
                   >
                     <Legend />
                     <Area type="monotone" dataKey="urban" name="Kentsel"
@@ -169,19 +169,22 @@ export default function PopulationPage() {
                   </ResponsiveContainer>
                 </ChartCard>
                 <ChartCard title="Cinsiyet Orani Trendi (Erkek/100 Kadin)" action={<ChartInsightButton title="Cinsiyet Oranı Trendi" description="Cinsiyet oranı zaman serisi" data={demoTrend} context={{ section: 'Cinsiyet' }} compact />}>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={demoTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" domain={[90, 110]} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <Tooltip />
-                      <Legend />
-                      <Area yAxisId="left" type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
-                      <Area yAxisId="left" type="monotone" dataKey="female" name="Kadin" stroke="#ec4899" fill="#ec4899" fillOpacity={0.2} />
-                      <Line yAxisId="right" type="monotone" dataKey="sexRatio" name="Cinsiyet Orani" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={demoTrend as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            yFormat={formatShort}
+            stripKey="sexRatio"
+            stripLabel="Cinsiyet Oranı"
+            stripFormat={(v: number) => Number(v).toFixed(1)}
+          >
+            <Legend />
+            <Area type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
+            <Area type="monotone" dataKey="female" name="Kadin" stroke="#ec4899" fill="#ec4899" fillOpacity={0.2} />
+          </SplitAxisChart>
                 </ChartCard>
               </div>
               <InsightCard insights={demoInsights} />
@@ -199,20 +202,23 @@ export default function PopulationPage() {
               </div>
               <div className="chart-grid">
                 <ChartCard title="Turkiye Nufus & Kentlesme Trendi (1960+)" span={2} action={<ChartInsightButton title="Türkiye Nüfus & Kentselık Trendi" description="Türkiye nüfus ve kentseşme trendi (1960+)" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={turkeyTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                      <Tooltip formatter={(v: number, name: string) => [name.includes('Oran') ? `%${Number(v).toFixed(1)}` : formatPop(v), name]} />
-                      <Legend />
-                      <Area yAxisId="left" type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
-                      <Area yAxisId="left" type="monotone" dataKey="urban" name="Kentsel" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} />
-                      <Area yAxisId="left" type="monotone" dataKey="rural" name="Kirsal" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
-                      <Line yAxisId="right" type="monotone" dataKey="urbanRate" name="Kentlesme Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={turkeyTrend as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            yFormat={formatShort}
+            stripKey="urbanRate"
+            stripLabel="Kentleşme Oranı"
+            stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
+          >
+            <Legend />
+            <Area type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
+            <Area type="monotone" dataKey="urban" name="Kentsel" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} />
+            <Area type="monotone" dataKey="rural" name="Kirsal" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
+          </SplitAxisChart>
                 </ChartCard>
               </div>
               <InsightCard insights={turkeyInsights} />

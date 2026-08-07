@@ -1,16 +1,13 @@
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area, Cell, ComposedChart, ReferenceLine,
-  LabelList,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area, Cell, LabelList } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, Activity, BarChart3, Thermometer } from 'lucide-react';
 import {
   usePriceIndexData, formatIndex, MONTHS_SHORT, type DatasetId,
 } from './priceIndex/usePriceIndexData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import MaddeFiyatSection from './priceIndex/MaddeFiyatSection';
-import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 export default function PriceIndexPage() {
   const {
@@ -204,24 +201,22 @@ export default function PriceIndexPage() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 12 }}>
                   Pozitif fark = Girdi fiyatları tüketici fiyatlarından yüksek → Çiftçi sıkışması (kırmızı bar). Çizgiler TÜFE/GFE endekslerini gösterir.
                 </p>
-                <ResponsiveContainer width="100%" height={360}>
-                  <ComposedChart data={scissorData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(scissorData.length / 12))} />
-                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}`} label={{ value: 'Fark (puan)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={58} />
-                    <Tooltip formatter={(v: number, name: string) => name === 'Fark (GFE-TÜFE)' ? [`${v >= 0 ? '+' : ''}${Number(v).toFixed(1)} puan`, name] : [formatIndex(Number(v)), name]} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
-                    <Legend />
-                    <ReferenceLine yAxisId="right" y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                    <Bar yAxisId="right" dataKey="gap" name="Fark (GFE-TÜFE)" radius={[2, 2, 0, 0]}>
-                      {scissorData.map((d, i) => (
-                        <Cell key={i} fill={d.gap >= 0 ? '#ef4444' : '#22c55e'} fillOpacity={0.45} />
-                      ))}
-                    </Bar>
-                    <Line yAxisId="left" type="monotone" dataKey="tufe" name="Gıda TÜFE" stroke="#ef4444" strokeWidth={2} dot={false} />
-                    <Line yAxisId="left" type="monotone" dataKey="gfe" name="GFE" stroke="#22c55e" strokeWidth={2} dot={false} />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
+              hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
+              taşındı — bkz. components/ui/SplitAxisChart. */}
+          <SplitAxisChart
+            data={scissorData as unknown as Record<string, unknown>[]}
+            xKey="year"
+            height={270}
+            stripKey="gap"
+            stripLabel="Endeks Farkı"
+            stripFormat={(v: number) => Number(v).toFixed(1)}
+            xProps={{ interval: Math.max(0, Math.floor(scissorData.length / 12)) }}
+          >
+            <Legend />
+            <Line type="monotone" dataKey="tufe" name="Gıda TÜFE" stroke="#ef4444" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="gfe" name="GFE" stroke="#22c55e" strokeWidth={2} dot={false} />
+          </SplitAxisChart>
                 {(() => {
                   const recent = scissorData.slice(-3);
                   const avgGap = recent.reduce((s, d) => s + d.gap, 0) / (recent.length || 1);
