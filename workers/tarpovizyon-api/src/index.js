@@ -464,6 +464,33 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+/*
+ * YAZMA ucu için ayrı ve DAR CORS.
+ *
+ * Okuma herkese açık olabilir (kamuya açık istatistik), ama yazma ucunu
+ * `Access-Control-Allow-Origin: *` ile açık bırakmak, herhangi bir sitenin
+ * ziyaretçinin tarayıcısı üzerinden bu uca istek denemesine izin verir.
+ * Anahtarı olmadan başaramaz ama gereksiz bir yüzey; yalnızca panelin
+ * çalıştığı adresler kabul ediliyor.
+ */
+const YAZMA_ORIGIN = new Set([
+  'https://pro.tarpovizyon.com',
+  'https://tarpovizyon.com',
+  'http://localhost:5177',
+  'http://localhost:5173',
+]);
+
+function yazmaCors(request) {
+  const origin = request.headers.get('Origin') ?? '';
+  if (!YAZMA_ORIGIN.has(origin)) return null;
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key',
+    'Vary': 'Origin',
+  };
+}
+
 // Split a product-list query param on '|' ONLY. Many product names contain
 // commas (e.g. "Buğday, Durum Buğdayı Hariç", "Fasulye, Kuru"), so comma can
 // never be the delimiter — a single comma-name like "Fasulye, Kuru" would be
@@ -524,12 +551,36 @@ async function tradeProductBreakdown(env, table, urunler, yil) {
   return results;
 }
 
+import { handleUpload, UPLOAD_TABLES } from './upload.js';
+
 export default {
   async fetch(request, env) {
-    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
-
     const url = new URL(request.url);
     const slug = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
+
+    // Yazma ucunun ön-uçuş isteği dar CORS ile yanıtlanıyor.
+    if (slug === 'admin/upsert') {
+      const cors = yazmaCors(request);
+      if (!cors) return new Response(null, { status: 403 });
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      const { status, body } = await handleUpload(request, env);
+      return new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors },
+      });
+    }
+
+    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
+
+    // Ön yüzün hangi tabloların yüklenebildiğini ve hangi sütunları beklediğini
+    // öğrenmesi için. Şema bilgisi, veri değil — okuma anahtarıyla erişilebilir.
+    if (slug === 'admin/upload-tables') {
+      return json({
+        hedefler: Object.entries(UPLOAD_TABLES).map(([id, c]) => ({
+          id, label: c.label, keys: c.keys, cols: c.cols,
+        })),
+      });
+    }
 
     if (slug === '' || slug === 'routes') {
       return json({ routes: Object.keys(ROUTES).map(k => `/api/${k}`) });

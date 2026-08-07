@@ -46,6 +46,7 @@ const FiberCropPage = lazy(() => import('./pages/FiberCropPage'));
 const LandUsePage = lazy(() => import('./pages/LandUsePage'));
 const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const VeriYuklePage = lazy(() => import('./pages/VeriYuklePage'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -226,6 +227,9 @@ function AppContent() {
             <Route path="/tarpovizyon/turkey/plant-provincial" element={<TurkeyProvincialPlantPage />} />
             <Route path="/tarpovizyon/turkey/basin-production" element={<BasinProductionPage />} />
             <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
+
+            {/* Elle veri yükleme (TÜİK API'sinde olmayan seriler için). */}
+            <Route path="/tarpovizyon/veri-yukle" element={<VeriYuklePage />} />
 
             {/* Bilinmeyen /tarpovizyon adresleri: kabuk içinde kalsın, boş ekran olmasın. */}
             <Route path="*" element={<NotFoundPage />} />
