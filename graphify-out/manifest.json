@@ -1,0 +1,2287 @@
+{
+  "src/App.tsx": {
+    "mtime": 1786103592.52,
+    "ast_hash": "709c5d9624f00206569376cf2989ad88",
+    "semantic_hash": "709c5d9624f00206569376cf2989ad88"
+  },
+  "src/components/BackToHome.tsx": {
+    "mtime": 1785265981.61,
+    "ast_hash": "6f6b7eb84c97e01d503c42c9c2a49330",
+    "semantic_hash": "6f6b7eb84c97e01d503c42c9c2a49330"
+  },
+  "src/components/ChartInsightButton.tsx": {
+    "mtime": 1785265981.62,
+    "ast_hash": "ddfcc7848948875ddf1b2f0da3fa49e9",
+    "semantic_hash": "ddfcc7848948875ddf1b2f0da3fa49e9"
+  },
+  "src/components/ConfidenceBadge.tsx": {
+    "mtime": 1785265981.62,
+    "ast_hash": "b02773cd623ba7677740446262137018",
+    "semantic_hash": "b02773cd623ba7677740446262137018"
+  },
+  "src/components/CountryFilter.tsx": {
+    "mtime": 1785265981.62,
+    "ast_hash": "035058b2f19c5f365ca694231d063375",
+    "semantic_hash": "035058b2f19c5f365ca694231d063375"
+  },
+  "src/components/CountrySilhouette.tsx": {
+    "mtime": 1785400451.72,
+    "ast_hash": "b787a757599929dd92e777f3d284d9de",
+    "semantic_hash": "b787a757599929dd92e777f3d284d9de"
+  },
+  "src/components/DateFilter.tsx": {
+    "mtime": 1785265981.62,
+    "ast_hash": "188ea16c2b0503980ca330a12254e52a",
+    "semantic_hash": "188ea16c2b0503980ca330a12254e52a"
+  },
+  "src/components/DetailedTable.tsx": {
+    "mtime": 1785265981.68,
+    "ast_hash": "940fcfbfabdccc2e62c67ca7c53bb7a2",
+    "semantic_hash": "940fcfbfabdccc2e62c67ca7c53bb7a2"
+  },
+  "src/components/DynamicChart.tsx": {
+    "mtime": 1786018052.01,
+    "ast_hash": "e41baec2bf5faacca34f63639834e27a",
+    "semantic_hash": "e41baec2bf5faacca34f63639834e27a"
+  },
+  "src/components/ErrorBoundary.tsx": {
+    "mtime": 1785265981.81,
+    "ast_hash": "c50a6be4d5719bccffdcf4f034a557a0",
+    "semantic_hash": "c50a6be4d5719bccffdcf4f034a557a0"
+  },
+  "src/components/ErrorState.tsx": {
+    "mtime": 1785265981.81,
+    "ast_hash": "7fe72d02b141ff9ec6e7cf82a9bb2c0f",
+    "semantic_hash": "7fe72d02b141ff9ec6e7cf82a9bb2c0f"
+  },
+  "src/components/FlowSankeyCard.tsx": {
+    "mtime": 1785265981.82,
+    "ast_hash": "1dcacf86f2c4f3d60c6cb4a46ec3806d",
+    "semantic_hash": "1dcacf86f2c4f3d60c6cb4a46ec3806d"
+  },
+  "src/components/Header.tsx": {
+    "mtime": 1785265981.83,
+    "ast_hash": "b763d6397b4fa0b40a8e4c5ca7471ccd",
+    "semantic_hash": "b763d6397b4fa0b40a8e4c5ca7471ccd"
+  },
+  "src/components/InsightCard.tsx": {
+    "mtime": 1785265981.84,
+    "ast_hash": "dc2994071bdffc51c8aa6288c54aaeab",
+    "semantic_hash": "dc2994071bdffc51c8aa6288c54aaeab"
+  },
+  "src/components/KPICard.tsx": {
+    "mtime": 1785265981.84,
+    "ast_hash": "4f863f084ce26a3da1d6894f9e003383",
+    "semantic_hash": "4f863f084ce26a3da1d6894f9e003383"
+  },
+  "src/components/Loading.tsx": {
+    "mtime": 1785265981.9,
+    "ast_hash": "8439aab81db5532b02129323c93c0730",
+    "semantic_hash": "8439aab81db5532b02129323c93c0730"
+  },
+  "src/components/ModelWarningBox.tsx": {
+    "mtime": 1785265981.9,
+    "ast_hash": "c4c74bdc4d9a5b4f663d433cf3f74ac0",
+    "semantic_hash": "c4c74bdc4d9a5b4f663d433cf3f74ac0"
+  },
+  "src/components/ProductFilter.tsx": {
+    "mtime": 1785265981.9,
+    "ast_hash": "d13384177a9937515a819ffee768daf8",
+    "semantic_hash": "d13384177a9937515a819ffee768daf8"
+  },
+  "src/components/ProductSelector.tsx": {
+    "mtime": 1785265982.04,
+    "ast_hash": "3ee47486dc5418ed10409e3c725fdcad",
+    "semantic_hash": "3ee47486dc5418ed10409e3c725fdcad"
+  },
+  "src/components/ProductTrustPanel.tsx": {
+    "mtime": 1785265982.04,
+    "ast_hash": "517a9dd9a6f6f5a4d3af65eaf54d1600",
+    "semantic_hash": "517a9dd9a6f6f5a4d3af65eaf54d1600"
+  },
+  "src/components/RangeChips.tsx": {
+    "mtime": 1786018197.89,
+    "ast_hash": "2ba4e57d43004818f2d3ec276130d08b",
+    "semantic_hash": "2ba4e57d43004818f2d3ec276130d08b"
+  },
+  "src/components/SankeyDiagram.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "a6b94f32b71603cb4863e58829bd8b53",
+    "semantic_hash": "a6b94f32b71603cb4863e58829bd8b53"
+  },
+  "src/components/SectionTabs.tsx": {
+    "mtime": 1786010698.08,
+    "ast_hash": "e5fb74cc0f565d09dc44f63a62439095",
+    "semantic_hash": "e5fb74cc0f565d09dc44f63a62439095"
+  },
+  "src/components/Sidebar.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "a992323ffc8b8894be7828963eb303d4",
+    "semantic_hash": "a992323ffc8b8894be7828963eb303d4"
+  },
+  "src/components/SourceBadge.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "4b8cae3bad3664a6e39b0273003f6e20",
+    "semantic_hash": "4b8cae3bad3664a6e39b0273003f6e20"
+  },
+  "src/components/TarpoShell.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "0bf6d026ff0a46af9b5660130a18e5f3",
+    "semantic_hash": "0bf6d026ff0a46af9b5660130a18e5f3"
+  },
+  "src/components/TreemapContent.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "ae6d09603f85e3bb221d7c74c5bfa083",
+    "semantic_hash": "ae6d09603f85e3bb221d7c74c5bfa083"
+  },
+  "src/components/TurkeyHeatMap.tsx": {
+    "mtime": 1785265982.05,
+    "ast_hash": "0443a40b3c5f9d12d8fa385f9223ee10",
+    "semantic_hash": "0443a40b3c5f9d12d8fa385f9223ee10"
+  },
+  "src/components/WeatherWidget.tsx": {
+    "mtime": 1785265982.18,
+    "ast_hash": "b6eea280fd015542726c34f804d4f20d",
+    "semantic_hash": "b6eea280fd015542726c34f804d4f20d"
+  },
+  "src/components/WheelPicker.tsx": {
+    "mtime": 1785265982.18,
+    "ast_hash": "0d2fb48d7d42c426730b69ef32d4e90c",
+    "semantic_hash": "0d2fb48d7d42c426730b69ef32d4e90c"
+  },
+  "src/components/WorldTradeMap.tsx": {
+    "mtime": 1785265982.18,
+    "ast_hash": "d61e6c0ab8d7eb6f92181ef76e9fd735",
+    "semantic_hash": "d61e6c0ab8d7eb6f92181ef76e9fd735"
+  },
+  "src/data/countryProfiles.json": {
+    "mtime": 1785265982.19,
+    "ast_hash": "fa7b087a0879660006225da071de8f79",
+    "semantic_hash": "fa7b087a0879660006225da071de8f79"
+  },
+  "src/main.tsx": {
+    "mtime": 1785265982.19,
+    "ast_hash": "888365f8c3ba773d5a8c030cb2d02953",
+    "semantic_hash": "888365f8c3ba773d5a8c030cb2d02953"
+  },
+  "src/mobile/capacitor/app.ts": {
+    "mtime": 1785265982.26,
+    "ast_hash": "86746becc0f81d5e2e45830e5cb36aa1",
+    "semantic_hash": "86746becc0f81d5e2e45830e5cb36aa1"
+  },
+  "src/mobile/capacitor/init.ts": {
+    "mtime": 1785265982.26,
+    "ast_hash": "17a560f9bcdeab9d889467bffdaeebb2",
+    "semantic_hash": "17a560f9bcdeab9d889467bffdaeebb2"
+  },
+  "src/mobile/capacitor/splash.ts": {
+    "mtime": 1785265982.27,
+    "ast_hash": "d519ea0ff181f9f8957e32ae32fbe6b4",
+    "semantic_hash": "d519ea0ff181f9f8957e32ae32fbe6b4"
+  },
+  "src/mobile/capacitor/statusbar.ts": {
+    "mtime": 1785265982.29,
+    "ast_hash": "d26fd2e44f500cc5be3e2f3cf1a43850",
+    "semantic_hash": "d26fd2e44f500cc5be3e2f3cf1a43850"
+  },
+  "src/mobile/components/MobileLayout.tsx": {
+    "mtime": 1785265982.31,
+    "ast_hash": "43d0f4c69ebb0857579188229a1e505e",
+    "semantic_hash": "43d0f4c69ebb0857579188229a1e505e"
+  },
+  "src/mobile/components/MobilePageHeader.tsx": {
+    "mtime": 1785265982.31,
+    "ast_hash": "35555925644720d3afd57951cbe7fad3",
+    "semantic_hash": "35555925644720d3afd57951cbe7fad3"
+  },
+  "src/mobile/components/TabBar.tsx": {
+    "mtime": 1785265982.32,
+    "ast_hash": "aed17d80b29d5e16aea06fd28806f9bb",
+    "semantic_hash": "aed17d80b29d5e16aea06fd28806f9bb"
+  },
+  "src/mobile/hooks/useApi.ts": {
+    "mtime": 1785265982.32,
+    "ast_hash": "560c2d02e4e71aeeff0df1b9a1f9f54c",
+    "semantic_hash": "560c2d02e4e71aeeff0df1b9a1f9f54c"
+  },
+  "src/mobile/hooks/useNetwork.ts": {
+    "mtime": 1785265982.32,
+    "ast_hash": "387713fe95a6c4b0e01821fe3a22d018",
+    "semantic_hash": "387713fe95a6c4b0e01821fe3a22d018"
+  },
+  "src/mobile/pages/MobileAIPage.tsx": {
+    "mtime": 1785265982.33,
+    "ast_hash": "1b060e0627d4731ee7235f28b5485f07",
+    "semantic_hash": "1b060e0627d4731ee7235f28b5485f07"
+  },
+  "src/mobile/pages/MobileExplorePage.tsx": {
+    "mtime": 1785265982.33,
+    "ast_hash": "447b06c28df9f43370900defd1897863",
+    "semantic_hash": "447b06c28df9f43370900defd1897863"
+  },
+  "src/mobile/pages/MobileHomePage.tsx": {
+    "mtime": 1785265982.33,
+    "ast_hash": "727dee73e899d469559834aa55a1d017",
+    "semantic_hash": "727dee73e899d469559834aa55a1d017"
+  },
+  "src/mobile/pages/MobileMarketPage.tsx": {
+    "mtime": 1785265982.33,
+    "ast_hash": "abd9a7b5132e360081bd5c5ac4df4c9c",
+    "semantic_hash": "abd9a7b5132e360081bd5c5ac4df4c9c"
+  },
+  "src/mobile/pages/MobilePrivacyPolicyPage.tsx": {
+    "mtime": 1785265982.33,
+    "ast_hash": "4e99fd7c52cd38985a33081d03084ecf",
+    "semantic_hash": "4e99fd7c52cd38985a33081d03084ecf"
+  },
+  "src/mobile/pages/MobileSettingsPage.tsx": {
+    "mtime": 1785265982.34,
+    "ast_hash": "b0784d0b21dd32f3808c8d541e44a16c",
+    "semantic_hash": "b0784d0b21dd32f3808c8d541e44a16c"
+  },
+  "src/mobile/pages/MobileTermsPage.tsx": {
+    "mtime": 1785265982.34,
+    "ast_hash": "97d1a7a420734dbb39dd1af021de343c",
+    "semantic_hash": "97d1a7a420734dbb39dd1af021de343c"
+  },
+  "src/mobile/services/ai.ts": {
+    "mtime": 1785265982.52,
+    "ast_hash": "0bc89179468a739fe7172f6f292bc445",
+    "semantic_hash": "0bc89179468a739fe7172f6f292bc445"
+  },
+  "src/mobile/services/commodities.ts": {
+    "mtime": 1785265982.55,
+    "ast_hash": "7ade1e2d5dffac69d26264462abb4868",
+    "semantic_hash": "7ade1e2d5dffac69d26264462abb4868"
+  },
+  "src/mobile/services/updates.ts": {
+    "mtime": 1785265982.59,
+    "ast_hash": "f96e3fe02ca915a5853873e4d8573ef0",
+    "semantic_hash": "f96e3fe02ca915a5853873e4d8573ef0"
+  },
+  "src/mobile/services/weather.ts": {
+    "mtime": 1785265982.59,
+    "ast_hash": "c466675bc00f91798def66b206ee4a74",
+    "semantic_hash": "c466675bc00f91798def66b206ee4a74"
+  },
+  "src/mobile/stores/appStore.ts": {
+    "mtime": 1785265982.67,
+    "ast_hash": "dcb366e5165f609412e2fed158f3f134",
+    "semantic_hash": "dcb366e5165f609412e2fed158f3f134"
+  },
+  "src/mobile/utils/platform.ts": {
+    "mtime": 1785265982.68,
+    "ast_hash": "26417b0a697d010d3c928b3b01f72d3c",
+    "semantic_hash": "26417b0a697d010d3c928b3b01f72d3c"
+  },
+  "src/pages/AIAssistantPage.tsx": {
+    "mtime": 1785265982.69,
+    "ast_hash": "9d84ac7deb1b0b026a5c69c1015d2364",
+    "semantic_hash": "9d84ac7deb1b0b026a5c69c1015d2364"
+  },
+  "src/pages/AgriculturalEmploymentPage.tsx": {
+    "mtime": 1786028654.61,
+    "ast_hash": "8287843f76229428a108f554ac270869",
+    "semantic_hash": "8287843f76229428a108f554ac270869"
+  },
+  "src/pages/BasinProductionPage.tsx": {
+    "mtime": 1785955353.74,
+    "ast_hash": "2513920dad257864081dec121301a04a",
+    "semantic_hash": "2513920dad257864081dec121301a04a"
+  },
+  "src/pages/BeverageCropPage.tsx": {
+    "mtime": 1786018052.32,
+    "ast_hash": "40f640c7a3fc6cd7fedb586d72014ffd",
+    "semantic_hash": "40f640c7a3fc6cd7fedb586d72014ffd"
+  },
+  "src/pages/CerealProductionPage.tsx": {
+    "mtime": 1786018052.33,
+    "ast_hash": "5d41a1a6244c0ffd9099e6644563596b",
+    "semantic_hash": "5d41a1a6244c0ffd9099e6644563596b"
+  },
+  "src/pages/CommodityPricesPage.tsx": {
+    "mtime": 1786028654.77,
+    "ast_hash": "4ba096ccc29ff77692f1f8c786f8b6d9",
+    "semantic_hash": "4ba096ccc29ff77692f1f8c786f8b6d9"
+  },
+  "src/pages/CrossIntelligencePage.tsx": {
+    "mtime": 1786018052.51,
+    "ast_hash": "eba6bdf156e5d7bff4366e0d21a8476a",
+    "semantic_hash": "eba6bdf156e5d7bff4366e0d21a8476a"
+  },
+  "src/pages/EggProductionPage.tsx": {
+    "mtime": 1785265982.7,
+    "ast_hash": "ce4f10dcbb2f1ecf3ca1ed9a3ef15499",
+    "semantic_hash": "ce4f10dcbb2f1ecf3ca1ed9a3ef15499"
+  },
+  "src/pages/FaoAnimalProductionPage.tsx": {
+    "mtime": 1786028654.95,
+    "ast_hash": "817d80834830580611fa2c9ecbf645a1",
+    "semantic_hash": "817d80834830580611fa2c9ecbf645a1"
+  },
+  "src/pages/FertilizerPage.tsx": {
+    "mtime": 1786028655.2,
+    "ast_hash": "8d4ccc543240607fd723747bd2a9c2ec",
+    "semantic_hash": "8d4ccc543240607fd723747bd2a9c2ec"
+  },
+  "src/pages/FiberCropPage.tsx": {
+    "mtime": 1785265982.8,
+    "ast_hash": "01fbfa87ef0fc025d6949172621d0bc8",
+    "semantic_hash": "01fbfa87ef0fc025d6949172621d0bc8"
+  },
+  "src/pages/FoodBalancePage.tsx": {
+    "mtime": 1786028655.31,
+    "ast_hash": "6793da616530d2d7e349ba15d7c0e064",
+    "semantic_hash": "6793da616530d2d7e349ba15d7c0e064"
+  },
+  "src/pages/FruitProductionPage.tsx": {
+    "mtime": 1786018052.58,
+    "ast_hash": "6e56fe4f349ae958906ddf3fbcef7dab",
+    "semantic_hash": "6e56fe4f349ae958906ddf3fbcef7dab"
+  },
+  "src/pages/GeographicalIndicationsPage.tsx": {
+    "mtime": 1785265982.82,
+    "ast_hash": "e215ab30c99a26c8f2fd600c99204ac8",
+    "semantic_hash": "e215ab30c99a26c8f2fd600c99204ac8"
+  },
+  "src/pages/GubreHesapPage.tsx": {
+    "mtime": 1785265982.82,
+    "ast_hash": "3b19f69aef578543a487a650b3cdda56",
+    "semantic_hash": "3b19f69aef578543a487a650b3cdda56"
+  },
+  "src/pages/HasatTahminiPage.tsx": {
+    "mtime": 1785265982.83,
+    "ast_hash": "4a71993a81226acf0108b998ecf45cd3",
+    "semantic_hash": "4a71993a81226acf0108b998ecf45cd3"
+  },
+  "src/pages/HomePage.tsx": {
+    "mtime": 1785265982.83,
+    "ast_hash": "426683a673dad25dae7504a2bbd26854",
+    "semantic_hash": "426683a673dad25dae7504a2bbd26854"
+  },
+  "src/pages/LandCoverPage.tsx": {
+    "mtime": 1786028655.44,
+    "ast_hash": "ada695390162da43a4e6820a6b1a9525",
+    "semantic_hash": "ada695390162da43a4e6820a6b1a9525"
+  },
+  "src/pages/LandUsePage.tsx": {
+    "mtime": 1786028655.5,
+    "ast_hash": "15452cc30de6ddb8e874de565c67b762",
+    "semantic_hash": "15452cc30de6ddb8e874de565c67b762"
+  },
+  "src/pages/LegumeProductionPage.tsx": {
+    "mtime": 1786018052.69,
+    "ast_hash": "c66ff143cdb69f71ef9a07f2319496a2",
+    "semantic_hash": "c66ff143cdb69f71ef9a07f2319496a2"
+  },
+  "src/pages/LivestockCompetitionPage.tsx": {
+    "mtime": 1786028655.6,
+    "ast_hash": "f4d0f8f9ef6fca2570606e0d1c5e4102",
+    "semantic_hash": "f4d0f8f9ef6fca2570606e0d1c5e4102"
+  },
+  "src/pages/LivestockStocksPage.tsx": {
+    "mtime": 1785949231.26,
+    "ast_hash": "eca5d6e91c1ca091765f808c37da0c4d",
+    "semantic_hash": "eca5d6e91c1ca091765f808c37da0c4d"
+  },
+  "src/pages/LivestockStocksPage_pre_orchestrator.tsx": {
+    "mtime": 1785265983.08,
+    "ast_hash": "57acd91a048c5784ef03150d391c324e",
+    "semantic_hash": "57acd91a048c5784ef03150d391c324e"
+  },
+  "src/pages/MacroEconomicPage.tsx": {
+    "mtime": 1786028655.73,
+    "ast_hash": "7a76f98330b0766770bf2a7c15f7f6b1",
+    "semantic_hash": "7a76f98330b0766770bf2a7c15f7f6b1"
+  },
+  "src/pages/MilkProductionPage.tsx": {
+    "mtime": 1785265983.08,
+    "ast_hash": "590d90eed83630741c714638a656d9a4",
+    "semantic_hash": "590d90eed83630741c714638a656d9a4"
+  },
+  "src/pages/NotFoundPage.tsx": {
+    "mtime": 1786016638.09,
+    "ast_hash": "80b0bd4630454550c37630d4b9adec10",
+    "semantic_hash": "80b0bd4630454550c37630d4b9adec10"
+  },
+  "src/pages/NutProductionPage.tsx": {
+    "mtime": 1786018052.94,
+    "ast_hash": "01b9a409b929249825081ae8069376da",
+    "semantic_hash": "01b9a409b929249825081ae8069376da"
+  },
+  "src/pages/OilseedProductionPage.tsx": {
+    "mtime": 1786018052.94,
+    "ast_hash": "2afb621300148034c715f075a967ff00",
+    "semantic_hash": "2afb621300148034c715f075a967ff00"
+  },
+  "src/pages/OtherAnimalProductsPage.tsx": {
+    "mtime": 1785265983.09,
+    "ast_hash": "b9d942b5cc602b76c5f4e4acdf499d71",
+    "semantic_hash": "b9d942b5cc602b76c5f4e4acdf499d71"
+  },
+  "src/pages/OverviewPage.tsx": {
+    "mtime": 1785265983.09,
+    "ast_hash": "5659d4c6779095598de2cf06e519b93a",
+    "semantic_hash": "5659d4c6779095598de2cf06e519b93a"
+  },
+  "src/pages/PesticidePage.tsx": {
+    "mtime": 1786028656.0,
+    "ast_hash": "175b77c3fa8f66c3c1fe82ea55f1c4ad",
+    "semantic_hash": "175b77c3fa8f66c3c1fe82ea55f1c4ad"
+  },
+  "src/pages/PopulationPage.tsx": {
+    "mtime": 1786028656.18,
+    "ast_hash": "85b3c3a207a1382137cb2f7a9a187940",
+    "semantic_hash": "85b3c3a207a1382137cb2f7a9a187940"
+  },
+  "src/pages/PriceIndexPage.tsx": {
+    "mtime": 1786100861.41,
+    "ast_hash": "36152a54b056d0dda2ab323d97929c7a",
+    "semantic_hash": "36152a54b056d0dda2ab323d97929c7a"
+  },
+  "src/pages/ProductBalancePage.tsx": {
+    "mtime": 1786028656.34,
+    "ast_hash": "0cd8cd7810be293267e96b622b1c8369",
+    "semantic_hash": "0cd8cd7810be293267e96b622b1c8369"
+  },
+  "src/pages/ProductionPage.tsx": {
+    "mtime": 1785265983.14,
+    "ast_hash": "ba169e4f24fa2bb2cc303e7d34fce46a",
+    "semantic_hash": "ba169e4f24fa2bb2cc303e7d34fce46a"
+  },
+  "src/pages/ProgramSelectionPage.tsx": {
+    "mtime": 1785400451.81,
+    "ast_hash": "092a17025f11f79779b3ace366bcba57",
+    "semantic_hash": "092a17025f11f79779b3ace366bcba57"
+  },
+  "src/pages/RedMeatProductionPage.tsx": {
+    "mtime": 1785265983.14,
+    "ast_hash": "ef2f241128c5433f91631cd6fc357b9f",
+    "semantic_hash": "ef2f241128c5433f91631cd6fc357b9f"
+  },
+  "src/pages/SelectionPage.tsx": {
+    "mtime": 1785265983.15,
+    "ast_hash": "277e2d182fd3eca5b120dbf13e703d92",
+    "semantic_hash": "277e2d182fd3eca5b120dbf13e703d92"
+  },
+  "src/pages/SugarCropProductionPage.tsx": {
+    "mtime": 1785265983.15,
+    "ast_hash": "ae08b8ee8b6bf7c1c9aa30161dcb5bb8",
+    "semantic_hash": "ae08b8ee8b6bf7c1c9aa30161dcb5bb8"
+  },
+  "src/pages/SulamaPlanPage.tsx": {
+    "mtime": 1785265983.15,
+    "ast_hash": "3e36c9993bc7808dd9105c06642ab73e",
+    "semantic_hash": "3e36c9993bc7808dd9105c06642ab73e"
+  },
+  "src/pages/TarimTakvimPage.tsx": {
+    "mtime": 1785265983.15,
+    "ast_hash": "1b425e1005916daa540499ba0fa91ca6",
+    "semantic_hash": "1b425e1005916daa540499ba0fa91ca6"
+  },
+  "src/pages/TradePage.tsx": {
+    "mtime": 1785265983.15,
+    "ast_hash": "09976e7e05d5d00607970422267044f5",
+    "semantic_hash": "09976e7e05d5d00607970422267044f5"
+  },
+  "src/pages/TuikLivestockPage.tsx": {
+    "mtime": 1785265983.16,
+    "ast_hash": "d4ce8a90d845bf2b707f72ea2e7b13d4",
+    "semantic_hash": "d4ce8a90d845bf2b707f72ea2e7b13d4"
+  },
+  "src/pages/TuikPlantCategoryPage.tsx": {
+    "mtime": 1785265983.16,
+    "ast_hash": "93bda8798829fbee46729aa79c48206e",
+    "semantic_hash": "93bda8798829fbee46729aa79c48206e"
+  },
+  "src/pages/TuikPlantProductionPage.tsx": {
+    "mtime": 1786028656.44,
+    "ast_hash": "53b3ca2ed02b96ec31ef2d706647ad23",
+    "semantic_hash": "53b3ca2ed02b96ec31ef2d706647ad23"
+  },
+  "src/pages/TurkeyAnimalProductionPage.tsx": {
+    "mtime": 1785265983.16,
+    "ast_hash": "1d84160aa50a93836444c44ec441f91c",
+    "semantic_hash": "1d84160aa50a93836444c44ec441f91c"
+  },
+  "src/pages/TurkeyBeekeepingPage.tsx": {
+    "mtime": 1786012185.02,
+    "ast_hash": "0e4c07d2fcafac9b8f019b8b1552e759",
+    "semantic_hash": "0e4c07d2fcafac9b8f019b8b1552e759"
+  },
+  "src/pages/TurkeyEggProductionPage.tsx": {
+    "mtime": 1786018053.22,
+    "ast_hash": "33239ac822a1440880cb4d577842b8cb",
+    "semantic_hash": "33239ac822a1440880cb4d577842b8cb"
+  },
+  "src/pages/TurkeyMacroPage.tsx": {
+    "mtime": 1786028656.52,
+    "ast_hash": "3cf692b6a2f419b0670812b0a073f4c2",
+    "semantic_hash": "3cf692b6a2f419b0670812b0a073f4c2"
+  },
+  "src/pages/TurkeyMilkProductionPage.tsx": {
+    "mtime": 1786011225.19,
+    "ast_hash": "8e318cdcd2d165e0f850fbd3c9d4f76a",
+    "semantic_hash": "8e318cdcd2d165e0f850fbd3c9d4f76a"
+  },
+  "src/pages/TurkeyOtherAnimalProductsPage.tsx": {
+    "mtime": 1786028656.65,
+    "ast_hash": "6a10b7a8a8e5816b3e8a942347aa6559",
+    "semantic_hash": "6a10b7a8a8e5816b3e8a942347aa6559"
+  },
+  "src/pages/TurkeyProvincialLivestockPage.tsx": {
+    "mtime": 1785265983.29,
+    "ast_hash": "1d0226d93a45a5fcef8ad5b52b8320f1",
+    "semantic_hash": "1d0226d93a45a5fcef8ad5b52b8320f1"
+  },
+  "src/pages/TurkeyProvincialPlantPage.tsx": {
+    "mtime": 1785265983.29,
+    "ast_hash": "fd7a56724e51cfb089524399acb851b8",
+    "semantic_hash": "fd7a56724e51cfb089524399acb851b8"
+  },
+  "src/pages/TurkeyRedMeatProductionPage.tsx": {
+    "mtime": 1786018231.6,
+    "ast_hash": "4b706f1d78dc7c062d6c8a8efa7e27b3",
+    "semantic_hash": "4b706f1d78dc7c062d6c8a8efa7e27b3"
+  },
+  "src/pages/TurkeyWhiteMeatProductionPage.tsx": {
+    "mtime": 1786094141.98,
+    "ast_hash": "ff47f0fd4e7f676470ad1b6ea736f937",
+    "semantic_hash": "ff47f0fd4e7f676470ad1b6ea736f937"
+  },
+  "src/pages/VegetableProductionPage.tsx": {
+    "mtime": 1785265983.39,
+    "ast_hash": "e8a4f589a437f474c8ab6d705b8a5510",
+    "semantic_hash": "e8a4f589a437f474c8ab6d705b8a5510"
+  },
+  "src/pages/VeriYuklePage.tsx": {
+    "mtime": 1786119246.58,
+    "ast_hash": "9412209618c47ea14a91140ff6607326",
+    "semantic_hash": "9412209618c47ea14a91140ff6607326"
+  },
+  "src/pages/WhiteMeatProductionPage.tsx": {
+    "mtime": 1785265983.39,
+    "ast_hash": "3675a6118f068f668aec00aac42516ea",
+    "semantic_hash": "3675a6118f068f668aec00aac42516ea"
+  },
+  "src/pages/admin/useVeriIzgara.ts": {
+    "mtime": 1786119199.58,
+    "ast_hash": "4ad13a641e6f42959be368980eb850c5",
+    "semantic_hash": "4ad13a641e6f42959be368980eb850c5"
+  },
+  "src/pages/agriculturalEmployment/useAgriculturalEmploymentData.ts": {
+    "mtime": 1785419088.44,
+    "ast_hash": "23e84ce6b29dedd6944805f1df337a74",
+    "semantic_hash": "23e84ce6b29dedd6944805f1df337a74"
+  },
+  "src/pages/basin/BasinAnalysisSection.tsx": {
+    "mtime": 1786028656.92,
+    "ast_hash": "4a21f19e087537f75ec421e806fdc9ba",
+    "semantic_hash": "4a21f19e087537f75ec421e806fdc9ba"
+  },
+  "src/pages/basin/BasinDistrictsSection.tsx": {
+    "mtime": 1785954929.63,
+    "ast_hash": "bf3b10643ca4b8d19aac5eb6a61169bb",
+    "semantic_hash": "bf3b10643ca4b8d19aac5eb6a61169bb"
+  },
+  "src/pages/basin/BasinOverviewSection.tsx": {
+    "mtime": 1786028657.02,
+    "ast_hash": "cad610d00d8f71ecd2ceabef34e1d1d6",
+    "semantic_hash": "cad610d00d8f71ecd2ceabef34e1d1d6"
+  },
+  "src/pages/basin/BasinProvincesSection.tsx": {
+    "mtime": 1785954929.6,
+    "ast_hash": "e5cdc29c69b7e45ad420a9ac9901950d",
+    "semantic_hash": "e5cdc29c69b7e45ad420a9ac9901950d"
+  },
+  "src/pages/basin/DistrictMap.tsx": {
+    "mtime": 1785265983.44,
+    "ast_hash": "d7915d69302460e9570183c68f355ebd",
+    "semantic_hash": "d7915d69302460e9570183c68f355ebd"
+  },
+  "src/pages/basin/basinUtils.ts": {
+    "mtime": 1785265983.44,
+    "ast_hash": "293505fcd83005d6450e3e3bfc076319",
+    "semantic_hash": "293505fcd83005d6450e3e3bfc076319"
+  },
+  "src/pages/beekeeping/BeekeepingDevelopmentSection.tsx": {
+    "mtime": 1786018053.42,
+    "ast_hash": "21fb6a1baf37170ac527662727e12adc",
+    "semantic_hash": "21fb6a1baf37170ac527662727e12adc"
+  },
+  "src/pages/beekeeping/BeekeepingHoneyTypesSection.tsx": {
+    "mtime": 1785265983.45,
+    "ast_hash": "8ea39fff61d681b7d54d822b1f1e50fb",
+    "semantic_hash": "8ea39fff61d681b7d54d822b1f1e50fb"
+  },
+  "src/pages/beekeeping/BeekeepingIntelligencePanel.tsx": {
+    "mtime": 1785265983.45,
+    "ast_hash": "7d20984cea0d02f89f104a0b8cd2c24c",
+    "semantic_hash": "7d20984cea0d02f89f104a0b8cd2c24c"
+  },
+  "src/pages/beekeeping/BeekeepingKpiCards.tsx": {
+    "mtime": 1785265983.45,
+    "ast_hash": "2b52221a03e9defe50d5c92f63dcc8cb",
+    "semantic_hash": "2b52221a03e9defe50d5c92f63dcc8cb"
+  },
+  "src/pages/beekeeping/BeekeepingProductivitySection.tsx": {
+    "mtime": 1785265983.45,
+    "ast_hash": "2815201b7aa6229a035edfc3a572fb23",
+    "semantic_hash": "2815201b7aa6229a035edfc3a572fb23"
+  },
+  "src/pages/beekeeping/BeekeepingProvincialSection.tsx": {
+    "mtime": 1786028657.17,
+    "ast_hash": "11d4d3bff196ad9b11aaeb47e204bf2f",
+    "semantic_hash": "11d4d3bff196ad9b11aaeb47e204bf2f"
+  },
+  "src/pages/beekeeping/BeekeepingTuikSection.tsx": {
+    "mtime": 1786028657.4,
+    "ast_hash": "c50bf048862eeb02571200f0b17ddf55",
+    "semantic_hash": "c50bf048862eeb02571200f0b17ddf55"
+  },
+  "src/pages/beekeeping/beekeepingTypes.ts": {
+    "mtime": 1785265983.46,
+    "ast_hash": "a5553379258b12466ce45be7362b6f0b",
+    "semantic_hash": "a5553379258b12466ce45be7362b6f0b"
+  },
+  "src/pages/beekeeping/useBeekeepingData.ts": {
+    "mtime": 1785997319.52,
+    "ast_hash": "af3f5e20186990586276930c324b8b5c",
+    "semantic_hash": "af3f5e20186990586276930c324b8b5c"
+  },
+  "src/pages/crossIntelligence/useCrossIntelligenceData.ts": {
+    "mtime": 1785953924.3,
+    "ast_hash": "e35b1cb3ef596b3f5b983d7047707566",
+    "semantic_hash": "e35b1cb3ef596b3f5b983d7047707566"
+  },
+  "src/pages/egg-production/EggEconomicSection.tsx": {
+    "mtime": 1786018053.47,
+    "ast_hash": "8367dba680c06b836f07d236880f705b",
+    "semantic_hash": "8367dba680c06b836f07d236880f705b"
+  },
+  "src/pages/egg-production/EggIntelligencePanel.tsx": {
+    "mtime": 1785265983.65,
+    "ast_hash": "0d851a0261469a08f856e733378e3ca0",
+    "semantic_hash": "0d851a0261469a08f856e733378e3ca0"
+  },
+  "src/pages/egg-production/EggKpiCards.tsx": {
+    "mtime": 1785265983.66,
+    "ast_hash": "d7fff7b4fed7ec1f41af16426c8d666c",
+    "semantic_hash": "d7fff7b4fed7ec1f41af16426c8d666c"
+  },
+  "src/pages/egg-production/EggTrendChart.tsx": {
+    "mtime": 1786018053.63,
+    "ast_hash": "70988dc0746a5ce2cd934968e15d6ef9",
+    "semantic_hash": "70988dc0746a5ce2cd934968e15d6ef9"
+  },
+  "src/pages/egg-production/EggTuikOverviewTab.tsx": {
+    "mtime": 1786018053.63,
+    "ast_hash": "3a2bb06035685ff7f767edaa88ee2bfa",
+    "semantic_hash": "3a2bb06035685ff7f767edaa88ee2bfa"
+  },
+  "src/pages/egg-production/EggTuikProductionTab.tsx": {
+    "mtime": 1786018053.64,
+    "ast_hash": "33f39e64e41d5fea8e73c6f1ed42bfd4",
+    "semantic_hash": "33f39e64e41d5fea8e73c6f1ed42bfd4"
+  },
+  "src/pages/egg-production/EggTuikProjectionTab.tsx": {
+    "mtime": 1786018053.64,
+    "ast_hash": "9b32774b714ca7c0212779f60524fed0",
+    "semantic_hash": "9b32774b714ca7c0212779f60524fed0"
+  },
+  "src/pages/egg-production/EggTuikYieldTab.tsx": {
+    "mtime": 1786018053.75,
+    "ast_hash": "beb7f0a7430c04e061d83141dc06477e",
+    "semantic_hash": "beb7f0a7430c04e061d83141dc06477e"
+  },
+  "src/pages/egg-production/eggProductionTypes.ts": {
+    "mtime": 1785265983.67,
+    "ast_hash": "eda84005509df598426763dd5077f77f",
+    "semantic_hash": "eda84005509df598426763dd5077f77f"
+  },
+  "src/pages/egg-production/useEggProductionData.ts": {
+    "mtime": 1785945043.66,
+    "ast_hash": "e5aef4cb621f527e98c2eedbe379533c",
+    "semantic_hash": "e5aef4cb621f527e98c2eedbe379533c"
+  },
+  "src/pages/fertilizer/useFertilizerData.ts": {
+    "mtime": 1785432362.23,
+    "ast_hash": "613c76ad9abc4fe36c25b57e7b5e2ddf",
+    "semantic_hash": "613c76ad9abc4fe36c25b57e7b5e2ddf"
+  },
+  "src/pages/foodBalance/useFoodBalanceData.ts": {
+    "mtime": 1785842870.22,
+    "ast_hash": "29a63bdef30f14cb39e15faa125c65c2",
+    "semantic_hash": "29a63bdef30f14cb39e15faa125c65c2"
+  },
+  "src/pages/geographical-indications/GIKpiCards.tsx": {
+    "mtime": 1785265983.73,
+    "ast_hash": "8f8bd58e2d46f93c72329b5050e7f04d",
+    "semantic_hash": "8f8bd58e2d46f93c72329b5050e7f04d"
+  },
+  "src/pages/geographical-indications/GIOverviewTab.tsx": {
+    "mtime": 1785265983.73,
+    "ast_hash": "c2c8bf69d48ff1705bde63314354154c",
+    "semantic_hash": "c2c8bf69d48ff1705bde63314354154c"
+  },
+  "src/pages/geographical-indications/GIProductsTab.tsx": {
+    "mtime": 1786028657.49,
+    "ast_hash": "49a16dea1e971cf062bf4fe6299160f3",
+    "semantic_hash": "49a16dea1e971cf062bf4fe6299160f3"
+  },
+  "src/pages/geographical-indications/GIProvincesTab.tsx": {
+    "mtime": 1785265983.74,
+    "ast_hash": "57f81346972431559593fc5c4ad48689",
+    "semantic_hash": "57f81346972431559593fc5c4ad48689"
+  },
+  "src/pages/geographical-indications/GITableTab.tsx": {
+    "mtime": 1785265983.74,
+    "ast_hash": "67ac04b50b62ad6bcc771f9637122de7",
+    "semantic_hash": "67ac04b50b62ad6bcc771f9637122de7"
+  },
+  "src/pages/geographical-indications/GITrendsTab.tsx": {
+    "mtime": 1786018053.76,
+    "ast_hash": "b4564facdc767d97ee4756f221b0be6c",
+    "semantic_hash": "b4564facdc767d97ee4756f221b0be6c"
+  },
+  "src/pages/geographical-indications/giTypes.ts": {
+    "mtime": 1785265983.74,
+    "ast_hash": "8c6cc9831eec840b7132205953ae7f0c",
+    "semantic_hash": "8c6cc9831eec840b7132205953ae7f0c"
+  },
+  "src/pages/geographical-indications/useGIData.ts": {
+    "mtime": 1785957111.96,
+    "ast_hash": "debe248c755ba88d86c2bbc9ff1c0421",
+    "semantic_hash": "debe248c755ba88d86c2bbc9ff1c0421"
+  },
+  "src/pages/gubre/FertilizerPricingPanel.tsx": {
+    "mtime": 1785265983.75,
+    "ast_hash": "8489e247fd70a8bcef5473164063cdc2",
+    "semantic_hash": "8489e247fd70a8bcef5473164063cdc2"
+  },
+  "src/pages/gubre/GubreStep1.tsx": {
+    "mtime": 1785265983.88,
+    "ast_hash": "2e02e5c0931f7fe768008eae534c4e89",
+    "semantic_hash": "2e02e5c0931f7fe768008eae534c4e89"
+  },
+  "src/pages/gubre/GubreStep2.tsx": {
+    "mtime": 1785265983.89,
+    "ast_hash": "75f3b0cb2199017751bb299988ce656e",
+    "semantic_hash": "75f3b0cb2199017751bb299988ce656e"
+  },
+  "src/pages/gubre/GubreStep3.tsx": {
+    "mtime": 1785265983.9,
+    "ast_hash": "04c93b7855e3705947e6a56ddf423fce",
+    "semantic_hash": "04c93b7855e3705947e6a56ddf423fce"
+  },
+  "src/pages/gubre/GubreStep4.tsx": {
+    "mtime": 1786018053.78,
+    "ast_hash": "b8b23e62c885ccd238e2a91898d5ec81",
+    "semantic_hash": "b8b23e62c885ccd238e2a91898d5ec81"
+  },
+  "src/pages/gubre/gubreData.ts": {
+    "mtime": 1785265983.9,
+    "ast_hash": "1ef7b191d81300ac62db69f57765030f",
+    "semantic_hash": "1ef7b191d81300ac62db69f57765030f"
+  },
+  "src/pages/gubre/gubreTypes.ts": {
+    "mtime": 1785265983.9,
+    "ast_hash": "73302966c596b37284e985833bfe2d44",
+    "semantic_hash": "73302966c596b37284e985833bfe2d44"
+  },
+  "src/pages/gubre/gubreUtils.ts": {
+    "mtime": 1785265983.9,
+    "ast_hash": "67f8a98416d1abe3cb75f97195a83ae8",
+    "semantic_hash": "67f8a98416d1abe3cb75f97195a83ae8"
+  },
+  "src/pages/hasat/CropStep.tsx": {
+    "mtime": 1785265983.91,
+    "ast_hash": "725d1a3311aadc88b5b7c93364b86312",
+    "semantic_hash": "725d1a3311aadc88b5b7c93364b86312"
+  },
+  "src/pages/hasat/LandStep.tsx": {
+    "mtime": 1785265983.98,
+    "ast_hash": "ecdded14b6754359a0863c3e561b6ca3",
+    "semantic_hash": "ecdded14b6754359a0863c3e561b6ca3"
+  },
+  "src/pages/hasat/LocationStep.tsx": {
+    "mtime": 1785265983.98,
+    "ast_hash": "1eb45e7f4df580a71556dafc83da3dc0",
+    "semantic_hash": "1eb45e7f4df580a71556dafc83da3dc0"
+  },
+  "src/pages/hasat/ResultsView.tsx": {
+    "mtime": 1786018053.84,
+    "ast_hash": "2c2cc858fdef95560453dede46bb95e8",
+    "semantic_hash": "2c2cc858fdef95560453dede46bb95e8"
+  },
+  "src/pages/hasat/hasatUtils.ts": {
+    "mtime": 1785999735.11,
+    "ast_hash": "843a833702589b94b64142d7fedd349e",
+    "semantic_hash": "843a833702589b94b64142d7fedd349e"
+  },
+  "src/pages/landUse/useLandUseData.ts": {
+    "mtime": 1785838785.04,
+    "ast_hash": "3b89caf48ae69471c9d7d76c9d86c464",
+    "semantic_hash": "3b89caf48ae69471c9d7d76c9d86c464"
+  },
+  "src/pages/livestock/LivestockEfficiencySection.tsx": {
+    "mtime": 1786018053.94,
+    "ast_hash": "b9b9dd93b0bfb61847b0b89d5e459d07",
+    "semantic_hash": "b9b9dd93b0bfb61847b0b89d5e459d07"
+  },
+  "src/pages/livestock/LivestockOverviewSection.tsx": {
+    "mtime": 1786093932.71,
+    "ast_hash": "39392759abea4ea2b92e1e7ea7469168",
+    "semantic_hash": "39392759abea4ea2b92e1e7ea7469168"
+  },
+  "src/pages/livestock/LivestockPredictionsSection.tsx": {
+    "mtime": 1786018053.97,
+    "ast_hash": "238667a94b707f93623602e9e5d4a556",
+    "semantic_hash": "238667a94b707f93623602e9e5d4a556"
+  },
+  "src/pages/livestock/LivestockPrimarySection.tsx": {
+    "mtime": 1786028657.83,
+    "ast_hash": "2494e286e2c27fee80d0e1e9244e72e2",
+    "semantic_hash": "2494e286e2c27fee80d0e1e9244e72e2"
+  },
+  "src/pages/livestock/LivestockProcessedSection.tsx": {
+    "mtime": 1786028657.98,
+    "ast_hash": "64a56f57aa8f989517bc6e299ed5cb2a",
+    "semantic_hash": "64a56f57aa8f989517bc6e299ed5cb2a"
+  },
+  "src/pages/livestock/LivestockStocksSection.tsx": {
+    "mtime": 1786028658.01,
+    "ast_hash": "5fcb4617ba809f46bd141c9104ec9030",
+    "semantic_hash": "5fcb4617ba809f46bd141c9104ec9030"
+  },
+  "src/pages/livestock/livestockUtils.ts": {
+    "mtime": 1785921507.19,
+    "ast_hash": "c21a62cc16fd6378b8d6e50aeab5c3d8",
+    "semantic_hash": "c21a62cc16fd6378b8d6e50aeab5c3d8"
+  },
+  "src/pages/livestockCompetition/useLivestockCompetitionData.ts": {
+    "mtime": 1785955769.58,
+    "ast_hash": "5cde990729fabe0d5b9c74e3f1d06793",
+    "semantic_hash": "5cde990729fabe0d5b9c74e3f1d06793"
+  },
+  "src/pages/milk/MilkEconomicsSection.tsx": {
+    "mtime": 1786031812.7,
+    "ast_hash": "f64c8c1a8d76f5c4fd1db18ac0b5c22e",
+    "semantic_hash": "f64c8c1a8d76f5c4fd1db18ac0b5c22e"
+  },
+  "src/pages/milk/MilkHeroSection.tsx": {
+    "mtime": 1785265984.32,
+    "ast_hash": "0e7cbad886ced52c08a354cd27ba627d",
+    "semantic_hash": "0e7cbad886ced52c08a354cd27ba627d"
+  },
+  "src/pages/milk/MilkIndustrySection.tsx": {
+    "mtime": 1786031812.82,
+    "ast_hash": "101e04c3961898817181f2e6aa634f73",
+    "semantic_hash": "101e04c3961898817181f2e6aa634f73"
+  },
+  "src/pages/milk/MilkProductionSection.tsx": {
+    "mtime": 1786031812.87,
+    "ast_hash": "2f3976c4d84670a06a47a23b99e74c4f",
+    "semantic_hash": "2f3976c4d84670a06a47a23b99e74c4f"
+  },
+  "src/pages/milk/MilkTuikSection.tsx": {
+    "mtime": 1786027125.61,
+    "ast_hash": "df269dfbe561d7ce737b16d96335336b",
+    "semantic_hash": "df269dfbe561d7ce737b16d96335336b"
+  },
+  "src/pages/milk/milkUtils.ts": {
+    "mtime": 1785265984.33,
+    "ast_hash": "b33973e58a13fc1c8dd855916a52ab7a",
+    "semantic_hash": "b33973e58a13fc1c8dd855916a52ab7a"
+  },
+  "src/pages/milk/useMilkData.ts": {
+    "mtime": 1785944241.39,
+    "ast_hash": "49fba334976e90f1827834de484028d9",
+    "semantic_hash": "49fba334976e90f1827834de484028d9"
+  },
+  "src/pages/overview/ComparativeSection.tsx": {
+    "mtime": 1786018054.29,
+    "ast_hash": "75769359fcc8a1efa7b2cb38b50c6346",
+    "semantic_hash": "75769359fcc8a1efa7b2cb38b50c6346"
+  },
+  "src/pages/overview/EggSection.tsx": {
+    "mtime": 1786018054.3,
+    "ast_hash": "c230773e92d1961de0a71bb95e8541be",
+    "semantic_hash": "c230773e92d1961de0a71bb95e8541be"
+  },
+  "src/pages/overview/GeneralStatsSection.tsx": {
+    "mtime": 1786028658.71,
+    "ast_hash": "b0a3d335dd44f8235acd79bb2fc4196a",
+    "semantic_hash": "b0a3d335dd44f8235acd79bb2fc4196a"
+  },
+  "src/pages/overview/LivestockSection.tsx": {
+    "mtime": 1786028658.73,
+    "ast_hash": "6bbf02cf1a06a48ed393a7a030039c6b",
+    "semantic_hash": "6bbf02cf1a06a48ed393a7a030039c6b"
+  },
+  "src/pages/overview/MeatSection.tsx": {
+    "mtime": 1786018054.39,
+    "ast_hash": "f2394269597d477b41b564e4c611b26f",
+    "semantic_hash": "f2394269597d477b41b564e4c611b26f"
+  },
+  "src/pages/overview/MilkSection.tsx": {
+    "mtime": 1786018054.39,
+    "ast_hash": "d0a2bc22a13329470bbf326b06e79cf1",
+    "semantic_hash": "d0a2bc22a13329470bbf326b06e79cf1"
+  },
+  "src/pages/overview/overviewTypes.ts": {
+    "mtime": 1785914423.73,
+    "ast_hash": "237f883bd50d25d9d351e621cc2b0cdc",
+    "semantic_hash": "237f883bd50d25d9d351e621cc2b0cdc"
+  },
+  "src/pages/overview/useOverviewData.ts": {
+    "mtime": 1785914423.75,
+    "ast_hash": "f04d222736a33c80331f53486cace7b9",
+    "semantic_hash": "f04d222736a33c80331f53486cace7b9"
+  },
+  "src/pages/pesticide/usePesticideData.ts": {
+    "mtime": 1785919702.95,
+    "ast_hash": "d1b3f38d4f53b8970794d3b4895feea9",
+    "semantic_hash": "d1b3f38d4f53b8970794d3b4895feea9"
+  },
+  "src/pages/plant/PlantAnalysisCharts.tsx": {
+    "mtime": 1786028658.75,
+    "ast_hash": "c21a1bc356bb456facd80a5f3598b1f1",
+    "semantic_hash": "c21a1bc356bb456facd80a5f3598b1f1"
+  },
+  "src/pages/plant/PlantFilters.tsx": {
+    "mtime": 1785265984.58,
+    "ast_hash": "56e1477606490076f284fb2acc1b6e48",
+    "semantic_hash": "56e1477606490076f284fb2acc1b6e48"
+  },
+  "src/pages/plant/PlantKpiPanel.tsx": {
+    "mtime": 1785265984.58,
+    "ast_hash": "f72448f5e56d6bea2191a69ed6188040",
+    "semantic_hash": "f72448f5e56d6bea2191a69ed6188040"
+  },
+  "src/pages/plant/PlantMainCharts.tsx": {
+    "mtime": 1786030229.11,
+    "ast_hash": "2c88860bc363643b61cd2d251962d467",
+    "semantic_hash": "2c88860bc363643b61cd2d251962d467"
+  },
+  "src/pages/plant/plantTypes.ts": {
+    "mtime": 1785265984.58,
+    "ast_hash": "3fa12ab083107d16a9cbcc8c352769bb",
+    "semantic_hash": "3fa12ab083107d16a9cbcc8c352769bb"
+  },
+  "src/pages/plant/usePlantData.ts": {
+    "mtime": 1785959183.39,
+    "ast_hash": "308938ebc09bf6df04b8104995c8eb6b",
+    "semantic_hash": "308938ebc09bf6df04b8104995c8eb6b"
+  },
+  "src/pages/population/usePopulationData.ts": {
+    "mtime": 1785923381.38,
+    "ast_hash": "cc2a697575b42b98e660a53b3793fe2c",
+    "semantic_hash": "cc2a697575b42b98e660a53b3793fe2c"
+  },
+  "src/pages/priceIndex/MaddeFiyatSection.tsx": {
+    "mtime": 1786098559.42,
+    "ast_hash": "f6b3243b52b4c830025bc5e886f506de",
+    "semantic_hash": "f6b3243b52b4c830025bc5e886f506de"
+  },
+  "src/pages/priceIndex/useMaddeFiyatData.ts": {
+    "mtime": 1786099121.79,
+    "ast_hash": "56f507def5d173394e0866f0e55780e0",
+    "semantic_hash": "56f507def5d173394e0866f0e55780e0"
+  },
+  "src/pages/priceIndex/usePriceIndexData.ts": {
+    "mtime": 1786101790.8,
+    "ast_hash": "adb18a6c356fc7c951a3c7fbde8ee9f3",
+    "semantic_hash": "adb18a6c356fc7c951a3c7fbde8ee9f3"
+  },
+  "src/pages/productBalance/useProductBalanceData.ts": {
+    "mtime": 1785955677.16,
+    "ast_hash": "942917327a84096fce29c7b2fcc57bd7",
+    "semantic_hash": "942917327a84096fce29c7b2fcc57bd7"
+  },
+  "src/pages/production/CompetitionTab.tsx": {
+    "mtime": 1786018054.41,
+    "ast_hash": "8c63a64ee77d64b87a3149d330c1435a",
+    "semantic_hash": "8c63a64ee77d64b87a3149d330c1435a"
+  },
+  "src/pages/production/OverviewTab.tsx": {
+    "mtime": 1786028658.84,
+    "ast_hash": "36fea5b274c1af3c34f2ac7de4b10483",
+    "semantic_hash": "36fea5b274c1af3c34f2ac7de4b10483"
+  },
+  "src/pages/production/PredictionsTab.tsx": {
+    "mtime": 1786018054.45,
+    "ast_hash": "b131afb03b4c8a916e61388895f7f53d",
+    "semantic_hash": "b131afb03b4c8a916e61388895f7f53d"
+  },
+  "src/pages/production/PrimaryTab.tsx": {
+    "mtime": 1786018054.66,
+    "ast_hash": "e25999255dd53aa48b83f7cb125d681d",
+    "semantic_hash": "e25999255dd53aa48b83f7cb125d681d"
+  },
+  "src/pages/production/ProcessedTab.tsx": {
+    "mtime": 1786018054.66,
+    "ast_hash": "d41213d8366e755daaeb175a357562bd",
+    "semantic_hash": "d41213d8366e755daaeb175a357562bd"
+  },
+  "src/pages/production/YieldTab.tsx": {
+    "mtime": 1786018054.66,
+    "ast_hash": "51956133948dd7410dc73500dba53d6e",
+    "semantic_hash": "51956133948dd7410dc73500dba53d6e"
+  },
+  "src/pages/production/productionTypes.ts": {
+    "mtime": 1785921507.1,
+    "ast_hash": "b82216f992659c0a666139d5a0060c5f",
+    "semantic_hash": "b82216f992659c0a666139d5a0060c5f"
+  },
+  "src/pages/production/useProductionData.ts": {
+    "mtime": 1785922663.38,
+    "ast_hash": "84e661e06969ecc1e18bc8378475848f",
+    "semantic_hash": "84e661e06969ecc1e18bc8378475848f"
+  },
+  "src/pages/provincial-livestock/ProvincialComparisonTab.tsx": {
+    "mtime": 1786028658.84,
+    "ast_hash": "487bb509477b45882d082c6fc22f3700",
+    "semantic_hash": "487bb509477b45882d082c6fc22f3700"
+  },
+  "src/pages/provincial-livestock/ProvincialCorrelationTab.tsx": {
+    "mtime": 1785265984.77,
+    "ast_hash": "cfa61f0fabab2c7842dc86a8692d4386",
+    "semantic_hash": "cfa61f0fabab2c7842dc86a8692d4386"
+  },
+  "src/pages/provincial-livestock/ProvincialDistrictsTab.tsx": {
+    "mtime": 1786028658.87,
+    "ast_hash": "9d40baf36169ee100de2a6a30236e5a0",
+    "semantic_hash": "9d40baf36169ee100de2a6a30236e5a0"
+  },
+  "src/pages/provincial-livestock/ProvincialForecastTab.tsx": {
+    "mtime": 1785265984.88,
+    "ast_hash": "231898f2f925f9bf31e2baa514740950",
+    "semantic_hash": "231898f2f925f9bf31e2baa514740950"
+  },
+  "src/pages/provincial-livestock/ProvincialLivestockHeader.tsx": {
+    "mtime": 1785265984.89,
+    "ast_hash": "a2637362595fe0d8b4a20670f2285d53",
+    "semantic_hash": "a2637362595fe0d8b4a20670f2285d53"
+  },
+  "src/pages/provincial-livestock/ProvincialOverviewTab.tsx": {
+    "mtime": 1786018054.67,
+    "ast_hash": "ec6785b0270ac4bb7a2ac0bd7a1dafb1",
+    "semantic_hash": "ec6785b0270ac4bb7a2ac0bd7a1dafb1"
+  },
+  "src/pages/provincial-livestock/ProvincialTrendsTab.tsx": {
+    "mtime": 1786018054.67,
+    "ast_hash": "a79fd7973962716c13ae9bfe1c2ebd06",
+    "semantic_hash": "a79fd7973962716c13ae9bfe1c2ebd06"
+  },
+  "src/pages/provincial-livestock/provincialLivestockUtils.ts": {
+    "mtime": 1785265985.04,
+    "ast_hash": "b052a48681b732c3fc16ab0ebd1664c1",
+    "semantic_hash": "b052a48681b732c3fc16ab0ebd1664c1"
+  },
+  "src/pages/provincial-livestock/useProvincialLivestockData.ts": {
+    "mtime": 1785956843.85,
+    "ast_hash": "0c24d9d89dbf4d05444652600a231bef",
+    "semantic_hash": "0c24d9d89dbf4d05444652600a231bef"
+  },
+  "src/pages/provincial-plant/PlantComparisonTab.tsx": {
+    "mtime": 1786028658.96,
+    "ast_hash": "8e42182aedcf1272f0c557c70cbee2e6",
+    "semantic_hash": "8e42182aedcf1272f0c557c70cbee2e6"
+  },
+  "src/pages/provincial-plant/PlantCorrelationTab.tsx": {
+    "mtime": 1785265985.05,
+    "ast_hash": "46d6fa7afbc0a68e5a53691db0f8f6b9",
+    "semantic_hash": "46d6fa7afbc0a68e5a53691db0f8f6b9"
+  },
+  "src/pages/provincial-plant/PlantDistrictsTab.tsx": {
+    "mtime": 1786028658.97,
+    "ast_hash": "492f7a03f5c4b074748ee5012ffe0922",
+    "semantic_hash": "492f7a03f5c4b074748ee5012ffe0922"
+  },
+  "src/pages/provincial-plant/PlantForecastTab.tsx": {
+    "mtime": 1785265985.06,
+    "ast_hash": "4b43cf99f520b3c3ec4f9fd9b632a5f8",
+    "semantic_hash": "4b43cf99f520b3c3ec4f9fd9b632a5f8"
+  },
+  "src/pages/provincial-plant/PlantHeader.tsx": {
+    "mtime": 1785265985.06,
+    "ast_hash": "96b0fd41e8cacc110c773a47f2bf766c",
+    "semantic_hash": "96b0fd41e8cacc110c773a47f2bf766c"
+  },
+  "src/pages/provincial-plant/PlantOverviewTab.tsx": {
+    "mtime": 1786018054.71,
+    "ast_hash": "628dbc5c9086049f923d54671a339fa2",
+    "semantic_hash": "628dbc5c9086049f923d54671a339fa2"
+  },
+  "src/pages/provincial-plant/PlantTrendsTab.tsx": {
+    "mtime": 1786018054.73,
+    "ast_hash": "e84d616ab61ca19bf9e22bdb76e210d1",
+    "semantic_hash": "e84d616ab61ca19bf9e22bdb76e210d1"
+  },
+  "src/pages/provincial-plant/provincialPlantUtils.ts": {
+    "mtime": 1785265985.06,
+    "ast_hash": "f5cb0306d9976f82dca4375bb8785110",
+    "semantic_hash": "f5cb0306d9976f82dca4375bb8785110"
+  },
+  "src/pages/provincial-plant/useProvincialPlantData.ts": {
+    "mtime": 1785957278.97,
+    "ast_hash": "b5b6b357cc85397a630e1c6a3729fba5",
+    "semantic_hash": "b5b6b357cc85397a630e1c6a3729fba5"
+  },
+  "src/pages/redmeat/EconomicIndicatorsSection.tsx": {
+    "mtime": 1786018054.81,
+    "ast_hash": "7d21e146745f9a9d9b29caea5260f9d6",
+    "semantic_hash": "7d21e146745f9a9d9b29caea5260f9d6"
+  },
+  "src/pages/redmeat/ImportAnalysisSection.tsx": {
+    "mtime": 1786018054.82,
+    "ast_hash": "ab6695b92343da7ee50a2405529d7e94",
+    "semantic_hash": "ab6695b92343da7ee50a2405529d7e94"
+  },
+  "src/pages/redmeat/ProductionOverviewSection.tsx": {
+    "mtime": 1786018054.82,
+    "ast_hash": "ad8f859125f20c6f4cbf1e19ca2a28b6",
+    "semantic_hash": "ad8f859125f20c6f4cbf1e19ca2a28b6"
+  },
+  "src/pages/redmeat/SpeciesDetailSection.tsx": {
+    "mtime": 1786018054.83,
+    "ast_hash": "9cb6dc5fdf67c6ffaa9b46532aab7c8d",
+    "semantic_hash": "9cb6dc5fdf67c6ffaa9b46532aab7c8d"
+  },
+  "src/pages/redmeat/WorldComparisonSection.tsx": {
+    "mtime": 1786021099.22,
+    "ast_hash": "5b5a5e1531a19484f1586bc393c9b79b",
+    "semantic_hash": "5b5a5e1531a19484f1586bc393c9b79b"
+  },
+  "src/pages/redmeat/redMeatUtils.ts": {
+    "mtime": 1785265985.28,
+    "ast_hash": "9d5120308367a3b6ec6956ccf31825ed",
+    "semantic_hash": "9d5120308367a3b6ec6956ccf31825ed"
+  },
+  "src/pages/sulama/CropSelectStep.tsx": {
+    "mtime": 1785265985.29,
+    "ast_hash": "cfe752a38c6e7c07a5bd898dea68873b",
+    "semantic_hash": "cfe752a38c6e7c07a5bd898dea68873b"
+  },
+  "src/pages/sulama/LocationClimateStep.tsx": {
+    "mtime": 1785265985.35,
+    "ast_hash": "93df9cd3d0e93830eaee4ac32a0a9f65",
+    "semantic_hash": "93df9cd3d0e93830eaee4ac32a0a9f65"
+  },
+  "src/pages/sulama/ResultsView.tsx": {
+    "mtime": 1786018054.95,
+    "ast_hash": "7d9ce450094ca61eae8310fa855e6b43",
+    "semantic_hash": "7d9ce450094ca61eae8310fa855e6b43"
+  },
+  "src/pages/sulama/SystemLandStep.tsx": {
+    "mtime": 1785265985.37,
+    "ast_hash": "a4db935859257f7d78b9afa6b1832750",
+    "semantic_hash": "a4db935859257f7d78b9afa6b1832750"
+  },
+  "src/pages/sulama/sulamaUtils.ts": {
+    "mtime": 1785265985.37,
+    "ast_hash": "8fa2c92d0f937cb7ab7479c3e67c9d10",
+    "semantic_hash": "8fa2c92d0f937cb7ab7479c3e67c9d10"
+  },
+  "src/pages/takvim/TakvimCropSelector.tsx": {
+    "mtime": 1785265985.49,
+    "ast_hash": "824f1eabd7d278f2b89387865eb51fe8",
+    "semantic_hash": "824f1eabd7d278f2b89387865eb51fe8"
+  },
+  "src/pages/takvim/TakvimRegionCard.tsx": {
+    "mtime": 1785265985.49,
+    "ast_hash": "e12ee44d28550ceaff0b21076e2b748a",
+    "semantic_hash": "e12ee44d28550ceaff0b21076e2b748a"
+  },
+  "src/pages/takvim/TakvimThisWeek.tsx": {
+    "mtime": 1785265985.49,
+    "ast_hash": "ab6057792bc15becece1e13d70f5b442",
+    "semantic_hash": "ab6057792bc15becece1e13d70f5b442"
+  },
+  "src/pages/takvim/TakvimViews.tsx": {
+    "mtime": 1785265985.5,
+    "ast_hash": "43c46e731a4cfccb3c7e9783362c2185",
+    "semantic_hash": "43c46e731a4cfccb3c7e9783362c2185"
+  },
+  "src/pages/takvim/takvimData.ts": {
+    "mtime": 1785265985.5,
+    "ast_hash": "cef0185c09dd7ed27d8dd96c5ae68aff",
+    "semantic_hash": "cef0185c09dd7ed27d8dd96c5ae68aff"
+  },
+  "src/pages/takvim/takvimTypes.ts": {
+    "mtime": 1785265985.5,
+    "ast_hash": "a32550af769d01ebcd094385bee88784",
+    "semantic_hash": "a32550af769d01ebcd094385bee88784"
+  },
+  "src/pages/trade/AnimalTradeTab.tsx": {
+    "mtime": 1786028658.99,
+    "ast_hash": "ecb4a2d5a77237d72b2a46b733f69649",
+    "semantic_hash": "ecb4a2d5a77237d72b2a46b733f69649"
+  },
+  "src/pages/trade/CountryIntelligenceTab.tsx": {
+    "mtime": 1786028659.01,
+    "ast_hash": "e18e2f807c5b9bbe36279b19af9abe68",
+    "semantic_hash": "e18e2f807c5b9bbe36279b19af9abe68"
+  },
+  "src/pages/trade/PlantTradeTab.tsx": {
+    "mtime": 1786018055.25,
+    "ast_hash": "6f7418bd4f9924c55357ca0d88f8d15f",
+    "semantic_hash": "6f7418bd4f9924c55357ca0d88f8d15f"
+  },
+  "src/pages/trade/ProductIntelligenceTab.tsx": {
+    "mtime": 1786018055.25,
+    "ast_hash": "d362ab403a89a9ee94e2ec1183153312",
+    "semantic_hash": "d362ab403a89a9ee94e2ec1183153312"
+  },
+  "src/pages/trade/TradeIntelligenceTab.tsx": {
+    "mtime": 1786028659.01,
+    "ast_hash": "21b05627cb92b6b626aca496f3fce84b",
+    "semantic_hash": "21b05627cb92b6b626aca496f3fce84b"
+  },
+  "src/pages/trade/TradeOverviewTab.tsx": {
+    "mtime": 1786018055.31,
+    "ast_hash": "3ced6178cb8c0bd168ce0c5feca4933a",
+    "semantic_hash": "3ced6178cb8c0bd168ce0c5feca4933a"
+  },
+  "src/pages/trade/useTradeIntelligenceData.ts": {
+    "mtime": 1785952563.63,
+    "ast_hash": "c72bbced4b2635f0a18c12f6cb87fddb",
+    "semantic_hash": "c72bbced4b2635f0a18c12f6cb87fddb"
+  },
+  "src/pages/trade/useTradeOverviewData.ts": {
+    "mtime": 1785938922.64,
+    "ast_hash": "7971814779c30198c4148965784ddad4",
+    "semantic_hash": "7971814779c30198c4148965784ddad4"
+  },
+  "src/pages/tuikLivestock/CorrelationsTab.tsx": {
+    "mtime": 1785265985.66,
+    "ast_hash": "27c774b73831d02e609b4275c20726eb",
+    "semantic_hash": "27c774b73831d02e609b4275c20726eb"
+  },
+  "src/pages/tuikLivestock/OverviewTab.tsx": {
+    "mtime": 1786028659.04,
+    "ast_hash": "f25af353c27b430861874ea77617e0e4",
+    "semantic_hash": "f25af353c27b430861874ea77617e0e4"
+  },
+  "src/pages/tuikLivestock/RegionalTab.tsx": {
+    "mtime": 1786028659.07,
+    "ast_hash": "69c92918d3862b5b136a0358a08e6f1e",
+    "semantic_hash": "69c92918d3862b5b136a0358a08e6f1e"
+  },
+  "src/pages/tuikLivestock/TrendsTab.tsx": {
+    "mtime": 1786031738.53,
+    "ast_hash": "42950127240fc213f54603fc174713f6",
+    "semantic_hash": "42950127240fc213f54603fc174713f6"
+  },
+  "src/pages/tuikLivestock/tuikLivestockTypes.ts": {
+    "mtime": 1785265985.75,
+    "ast_hash": "dc10d4cfbd36bf3aa324d53202c18f20",
+    "semantic_hash": "dc10d4cfbd36bf3aa324d53202c18f20"
+  },
+  "src/pages/tuikLivestock/useTuikLivestockData.ts": {
+    "mtime": 1785997249.07,
+    "ast_hash": "66dbf77d8dff1aa5419cabb85c0f9a62",
+    "semantic_hash": "66dbf77d8dff1aa5419cabb85c0f9a62"
+  },
+  "src/pages/turkeyAnimalProduction/HeroSection.tsx": {
+    "mtime": 1785997500.69,
+    "ast_hash": "c4c1fe97b3a5a4a15fe7c05acf3776d3",
+    "semantic_hash": "c4c1fe97b3a5a4a15fe7c05acf3776d3"
+  },
+  "src/pages/turkeyAnimalProduction/HistoricalTrendsSection.tsx": {
+    "mtime": 1786018055.33,
+    "ast_hash": "f5fa9a11285949e8e3d156f43bd821ae",
+    "semantic_hash": "f5fa9a11285949e8e3d156f43bd821ae"
+  },
+  "src/pages/turkeyAnimalProduction/MapSection.tsx": {
+    "mtime": 1785265985.76,
+    "ast_hash": "aa6cdf00f6a38cdca8a1ad182ae9f694",
+    "semantic_hash": "aa6cdf00f6a38cdca8a1ad182ae9f694"
+  },
+  "src/pages/turkeyAnimalProduction/PoultrySection.tsx": {
+    "mtime": 1786031813.81,
+    "ast_hash": "759b85cdbef0b3721284adfb941c080d",
+    "semantic_hash": "759b85cdbef0b3721284adfb941c080d"
+  },
+  "src/pages/turkeyAnimalProduction/RedMeatSection.tsx": {
+    "mtime": 1786018055.35,
+    "ast_hash": "20d01ba3127909ccc6a5e075a198ed2b",
+    "semantic_hash": "20d01ba3127909ccc6a5e075a198ed2b"
+  },
+  "src/pages/turkeyAnimalProduction/WorldRankingsSection.tsx": {
+    "mtime": 1786028659.09,
+    "ast_hash": "12155fa8ba2cec70ca4dd9b79251d7ab",
+    "semantic_hash": "12155fa8ba2cec70ca4dd9b79251d7ab"
+  },
+  "src/pages/turkeyAnimalProduction/turkeyAnimalProductionTypes.ts": {
+    "mtime": 1786031295.19,
+    "ast_hash": "e5a774fa4d86ec83b8762db7898b523f",
+    "semantic_hash": "e5a774fa4d86ec83b8762db7898b523f"
+  },
+  "src/pages/turkeyAnimalProduction/useTurkeyAnimalProductionData.ts": {
+    "mtime": 1786090500.5,
+    "ast_hash": "dc04ccd9586cd2f6665bd9718627da52",
+    "semantic_hash": "dc04ccd9586cd2f6665bd9718627da52"
+  },
+  "src/pages/white-meat/WhiteMeatComparisonSection.tsx": {
+    "mtime": 1786018055.48,
+    "ast_hash": "90c1c113f80dbfc8f0407a69fd2492e2",
+    "semantic_hash": "90c1c113f80dbfc8f0407a69fd2492e2"
+  },
+  "src/pages/white-meat/WhiteMeatEconomicsSection.tsx": {
+    "mtime": 1786018055.72,
+    "ast_hash": "7a10826d29abc05a09f3cd48fad017b0",
+    "semantic_hash": "7a10826d29abc05a09f3cd48fad017b0"
+  },
+  "src/pages/white-meat/WhiteMeatHeroSection.tsx": {
+    "mtime": 1786018055.72,
+    "ast_hash": "f0c9f9e23fa453b75598cb8bf7b5414d",
+    "semantic_hash": "f0c9f9e23fa453b75598cb8bf7b5414d"
+  },
+  "src/pages/white-meat/WhiteMeatMapSection.tsx": {
+    "mtime": 1786094007.74,
+    "ast_hash": "ce9aba385181829c0252bb6a5c6b2b35",
+    "semantic_hash": "ce9aba385181829c0252bb6a5c6b2b35"
+  },
+  "src/pages/white-meat/WhiteMeatQuailSection.tsx": {
+    "mtime": 1786031738.58,
+    "ast_hash": "9c984304e88dc8e949cda9c3d9adf8c2",
+    "semantic_hash": "9c984304e88dc8e949cda9c3d9adf8c2"
+  },
+  "src/pages/white-meat/WhiteMeatTuikSection.tsx": {
+    "mtime": 1786018056.18,
+    "ast_hash": "fce240a9bd3e5c135f300d5f3762a1aa",
+    "semantic_hash": "fce240a9bd3e5c135f300d5f3762a1aa"
+  },
+  "src/pages/white-meat/WhiteMeatTurkeyMeatSection.tsx": {
+    "mtime": 1786031738.62,
+    "ast_hash": "16847f5b7d8e2defdb2049c5c4f791bb",
+    "semantic_hash": "16847f5b7d8e2defdb2049c5c4f791bb"
+  },
+  "src/pages/white-meat/useWhiteMeatData.ts": {
+    "mtime": 1786094007.73,
+    "ast_hash": "c60e7be6ff2e3b23811b906e787bb471",
+    "semantic_hash": "c60e7be6ff2e3b23811b906e787bb471"
+  },
+  "src/pages/white-meat/whiteMeatUtils.ts": {
+    "mtime": 1786094064.12,
+    "ast_hash": "1f827c52eebfe88771ed0a022851c932",
+    "semantic_hash": "1f827c52eebfe88771ed0a022851c932"
+  },
+  "src/rasyon/App.tsx": {
+    "mtime": 1785265986.05,
+    "ast_hash": "e788e47a9a56e92c21b471b634321b18",
+    "semantic_hash": "e788e47a9a56e92c21b471b634321b18"
+  },
+  "src/rasyon/RasyonApp.tsx": {
+    "mtime": 1785265986.05,
+    "ast_hash": "8d5ccbd6d3c837eb6f662b4edd81cf9b",
+    "semantic_hash": "8d5ccbd6d3c837eb6f662b4edd81cf9b"
+  },
+  "src/rasyon/components/Accordion.tsx": {
+    "mtime": 1785265986.06,
+    "ast_hash": "8fa2d12230ad8032c635d82f02be8f24",
+    "semantic_hash": "8fa2d12230ad8032c635d82f02be8f24"
+  },
+  "src/rasyon/components/AnalysisImportModal.tsx": {
+    "mtime": 1785265986.06,
+    "ast_hash": "d2543a7ca2bba1fb0a8737defc9db4d4",
+    "semantic_hash": "d2543a7ca2bba1fb0a8737defc9db4d4"
+  },
+  "src/rasyon/components/CookieConsent.tsx": {
+    "mtime": 1785265986.06,
+    "ast_hash": "bda6381108b5a970c0b591d758e3df26",
+    "semantic_hash": "bda6381108b5a970c0b591d758e3df26"
+  },
+  "src/rasyon/components/ErrorBoundary.tsx": {
+    "mtime": 1785265986.06,
+    "ast_hash": "ea6b0fac70dbf16bfca9e82e28612747",
+    "semantic_hash": "ea6b0fac70dbf16bfca9e82e28612747"
+  },
+  "src/rasyon/components/FeedComparisonModal.tsx": {
+    "mtime": 1785265986.06,
+    "ast_hash": "379401091ed7c1e60d0c1956623e393c",
+    "semantic_hash": "379401091ed7c1e60d0c1956623e393c"
+  },
+  "src/rasyon/components/FeedImportModal.tsx": {
+    "mtime": 1785265986.22,
+    "ast_hash": "23f6db7c315c27ae552105a0cdc3b2fd",
+    "semantic_hash": "23f6db7c315c27ae552105a0cdc3b2fd"
+  },
+  "src/rasyon/components/InfeasibilityPanel.tsx": {
+    "mtime": 1785265986.22,
+    "ast_hash": "c9761d5c12ee96b6d1960b50cc85051e",
+    "semantic_hash": "c9761d5c12ee96b6d1960b50cc85051e"
+  },
+  "src/rasyon/components/Layout.tsx": {
+    "mtime": 1785265986.22,
+    "ast_hash": "a6d0f188abfeb219e9c0469c08f19eb4",
+    "semantic_hash": "a6d0f188abfeb219e9c0469c08f19eb4"
+  },
+  "src/rasyon/components/OnboardingTour.tsx": {
+    "mtime": 1785265986.23,
+    "ast_hash": "25a031a76c45bcb6a761f38f2e14ceb7",
+    "semantic_hash": "25a031a76c45bcb6a761f38f2e14ceb7"
+  },
+  "src/rasyon/components/OptimizerDiagnosticsPanel.tsx": {
+    "mtime": 1785265986.23,
+    "ast_hash": "c1e304853bcf82f503ca90f1fa2768e0",
+    "semantic_hash": "c1e304853bcf82f503ca90f1fa2768e0"
+  },
+  "src/rasyon/components/ProtectedRoute.tsx": {
+    "mtime": 1785265986.23,
+    "ast_hash": "ab6f5be2516673366aed8bcf00c197b2",
+    "semantic_hash": "ab6f5be2516673366aed8bcf00c197b2"
+  },
+  "src/rasyon/components/RasyonModule.tsx": {
+    "mtime": 1785265986.23,
+    "ast_hash": "6d408c16ba6c9bc3855fbbdd85b80835",
+    "semantic_hash": "6d408c16ba6c9bc3855fbbdd85b80835"
+  },
+  "src/rasyon/components/ToastContainer.tsx": {
+    "mtime": 1785265986.23,
+    "ast_hash": "c1cbd4d10b5b34baa44602c8b8f3edb4",
+    "semantic_hash": "c1cbd4d10b5b34baa44602c8b8f3edb4"
+  },
+  "src/rasyon/constants/nrcConstants.ts": {
+    "mtime": 1785265986.24,
+    "ast_hash": "4382d130f7c4f3ea196ad42e4f53e3c3",
+    "semantic_hash": "4382d130f7c4f3ea196ad42e4f53e3c3"
+  },
+  "src/rasyon/contexts/ConfigContext.tsx": {
+    "mtime": 1785265986.4,
+    "ast_hash": "bda4017cb1c3627b1df3b90594f0cff5",
+    "semantic_hash": "bda4017cb1c3627b1df3b90594f0cff5"
+  },
+  "src/rasyon/data/feedsV2.ts": {
+    "mtime": 1785265986.41,
+    "ast_hash": "d81f37e377d35cf27bdf15dc2b7d8d05",
+    "semantic_hash": "d81f37e377d35cf27bdf15dc2b7d8d05"
+  },
+  "src/rasyon/data/rationPresets.ts": {
+    "mtime": 1785265986.41,
+    "ast_hash": "4a5c8b14d092095939a292403464e68f",
+    "semantic_hash": "4a5c8b14d092095939a292403464e68f"
+  },
+  "src/rasyon/data/riskExplanations.ts": {
+    "mtime": 1785265986.41,
+    "ast_hash": "4f61d495b70aec3149400e75f8ae5294",
+    "semantic_hash": "4f61d495b70aec3149400e75f8ae5294"
+  },
+  "src/rasyon/engine/__tests__/feedConstraints.test.ts": {
+    "mtime": 1785265986.53,
+    "ast_hash": "573bcf1a9eaa7123b79cd3edd368684e",
+    "semantic_hash": "573bcf1a9eaa7123b79cd3edd368684e"
+  },
+  "src/rasyon/engine/__tests__/nrc2021.test.ts": {
+    "mtime": 1785265986.53,
+    "ast_hash": "b053c05047ce95fcb924569ebc5ab3f7",
+    "semantic_hash": "b053c05047ce95fcb924569ebc5ab3f7"
+  },
+  "src/rasyon/engine/__tests__/optimizerV2.test.ts": {
+    "mtime": 1785265986.53,
+    "ast_hash": "33824985d4b49faaace88d389f1a45f1",
+    "semantic_hash": "33824985d4b49faaace88d389f1a45f1"
+  },
+  "src/rasyon/engine/__tests__/profileNormalizer.test.ts": {
+    "mtime": 1785265986.65,
+    "ast_hash": "6f46cdd81028e5f530b89382c763fe45",
+    "semantic_hash": "6f46cdd81028e5f530b89382c763fe45"
+  },
+  "src/rasyon/engine/__tests__/repro-selected-feeds.test.ts": {
+    "mtime": 1785265986.65,
+    "ast_hash": "ce00d3e26233002f437176253d596b7b",
+    "semantic_hash": "ce00d3e26233002f437176253d596b7b"
+  },
+  "src/rasyon/engine/__tests__/riskScoring.test.ts": {
+    "mtime": 1785265986.66,
+    "ast_hash": "c26a551386330284021be70a77f4d662",
+    "semantic_hash": "c26a551386330284021be70a77f4d662"
+  },
+  "src/rasyon/engine/beefEnergy.ts": {
+    "mtime": 1785265986.69,
+    "ast_hash": "875a30fb7f67b38aa2351fcfbe7c7ee4",
+    "semantic_hash": "875a30fb7f67b38aa2351fcfbe7c7ee4"
+  },
+  "src/rasyon/engine/infeasibilityAnalyzer.ts": {
+    "mtime": 1785265986.69,
+    "ast_hash": "5ab6be399aa967f47a23bdf8a11d86de",
+    "semantic_hash": "5ab6be399aa967f47a23bdf8a11d86de"
+  },
+  "src/rasyon/engine/inventoryManager.ts": {
+    "mtime": 1785265986.69,
+    "ast_hash": "c54b9ad5e844317976f3b490ff0a90c2",
+    "semantic_hash": "c54b9ad5e844317976f3b490ff0a90c2"
+  },
+  "src/rasyon/engine/nrc2021.ts": {
+    "mtime": 1785265986.69,
+    "ast_hash": "bc846b13663d5d4ccb4f1384b6dbbebf",
+    "semantic_hash": "bc846b13663d5d4ccb4f1384b6dbbebf"
+  },
+  "src/rasyon/engine/nutritionTargets.ts": {
+    "mtime": 1785265986.7,
+    "ast_hash": "5dcfe380b754f77e8ecd6aae681d64df",
+    "semantic_hash": "5dcfe380b754f77e8ecd6aae681d64df"
+  },
+  "src/rasyon/engine/optimizer/aggregation.ts": {
+    "mtime": 1785265986.7,
+    "ast_hash": "d4b350523422a680405d7d673dea15cf",
+    "semantic_hash": "d4b350523422a680405d7d673dea15cf"
+  },
+  "src/rasyon/engine/optimizer/conversions.ts": {
+    "mtime": 1785265986.7,
+    "ast_hash": "0c7813a3c0521497a8f42c05336ea943",
+    "semantic_hash": "0c7813a3c0521497a8f42c05336ea943"
+  },
+  "src/rasyon/engine/optimizer/feedConstraints.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "3815f67ded613af4da70e7f0b7de5584",
+    "semantic_hash": "3815f67ded613af4da70e7f0b7de5584"
+  },
+  "src/rasyon/engine/optimizer/filterValidFeeds.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "feee2d9b273cf37421ec09de940d90ee",
+    "semantic_hash": "feee2d9b273cf37421ec09de940d90ee"
+  },
+  "src/rasyon/engine/optimizer/types.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "a980d9cafa74e21dab63fb84d51dbab3",
+    "semantic_hash": "a980d9cafa74e21dab63fb84d51dbab3"
+  },
+  "src/rasyon/engine/optimizerV2.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "d349db279e82f288eff1d0d890f9cfb9",
+    "semantic_hash": "d349db279e82f288eff1d0d890f9cfb9"
+  },
+  "src/rasyon/engine/proteinFractions.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "daacedf79321ebe547cb8ede4e05af7b",
+    "semantic_hash": "daacedf79321ebe547cb8ede4e05af7b"
+  },
+  "src/rasyon/engine/rationEvaluator.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "38724b07e3ddfc297569bcd2eb972c55",
+    "semantic_hash": "38724b07e3ddfc297569bcd2eb972c55"
+  },
+  "src/rasyon/engine/riskScoring.ts": {
+    "mtime": 1785265986.71,
+    "ast_hash": "7d37d304064299fc624b61a1d5a26e39",
+    "semantic_hash": "7d37d304064299fc624b61a1d5a26e39"
+  },
+  "src/rasyon/engine/scenarioComparator.ts": {
+    "mtime": 1785265986.72,
+    "ast_hash": "44345f600ecadaa77dd8ffbd82015b14",
+    "semantic_hash": "44345f600ecadaa77dd8ffbd82015b14"
+  },
+  "src/rasyon/pages/AdminDashboard.tsx": {
+    "mtime": 1785265986.72,
+    "ast_hash": "56ff41388dc4abfabfb7f2d91a7648c0",
+    "semantic_hash": "56ff41388dc4abfabfb7f2d91a7648c0"
+  },
+  "src/rasyon/pages/DataBackup.tsx": {
+    "mtime": 1785265986.73,
+    "ast_hash": "9dd0407af6dd5f812ebfe77a40d142cb",
+    "semantic_hash": "9dd0407af6dd5f812ebfe77a40d142cb"
+  },
+  "src/rasyon/pages/DiagnosticsOptimizer.tsx": {
+    "mtime": 1785265986.89,
+    "ast_hash": "bde6f854df8c7b60123b74be789ae40f",
+    "semantic_hash": "bde6f854df8c7b60123b74be789ae40f"
+  },
+  "src/rasyon/pages/FeedInventory.tsx": {
+    "mtime": 1785265986.9,
+    "ast_hash": "2dc6e470d23c7ac537b539e716631dda",
+    "semantic_hash": "2dc6e470d23c7ac537b539e716631dda"
+  },
+  "src/rasyon/pages/FeedLibrary.tsx": {
+    "mtime": 1785265986.9,
+    "ast_hash": "258efa1076ddf1e4942f079ac7dcc0cd",
+    "semantic_hash": "258efa1076ddf1e4942f079ac7dcc0cd"
+  },
+  "src/rasyon/pages/Help.tsx": {
+    "mtime": 1785265986.95,
+    "ast_hash": "84bab0a65b8f665ff9477c4794ffbc30",
+    "semantic_hash": "84bab0a65b8f665ff9477c4794ffbc30"
+  },
+  "src/rasyon/pages/Home.tsx": {
+    "mtime": 1785265986.98,
+    "ast_hash": "aefe78397bfd918edcbf26fef6b18d09",
+    "semantic_hash": "aefe78397bfd918edcbf26fef6b18d09"
+  },
+  "src/rasyon/pages/Login.tsx": {
+    "mtime": 1785265986.98,
+    "ast_hash": "252f499c64fb86052251ca2c7da51e2d",
+    "semantic_hash": "252f499c64fb86052251ca2c7da51e2d"
+  },
+  "src/rasyon/pages/PrivacyPolicy.tsx": {
+    "mtime": 1785265987.05,
+    "ast_hash": "430a5aa5d05a84b30895f767a4368515",
+    "semantic_hash": "430a5aa5d05a84b30895f767a4368515"
+  },
+  "src/rasyon/pages/RationEdit.tsx": {
+    "mtime": 1785265987.05,
+    "ast_hash": "fc735b01f5cbc53d2c73b7969f1398e3",
+    "semantic_hash": "fc735b01f5cbc53d2c73b7969f1398e3"
+  },
+  "src/rasyon/pages/RationEvaluationPage.tsx": {
+    "mtime": 1785265987.07,
+    "ast_hash": "5ed10f8b0ea93fa78d6dcdcc396433c5",
+    "semantic_hash": "5ed10f8b0ea93fa78d6dcdcc396433c5"
+  },
+  "src/rasyon/pages/RationHistory.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "b80918ee59bb6b636eb14f00c5bc98c4",
+    "semantic_hash": "b80918ee59bb6b636eb14f00c5bc98c4"
+  },
+  "src/rasyon/pages/RationLibrary.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "044434aa8db3642277a7626d3858a46a",
+    "semantic_hash": "044434aa8db3642277a7626d3858a46a"
+  },
+  "src/rasyon/pages/RationResultV2.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "a1d628627f9da085e7d31168670b054b",
+    "semantic_hash": "a1d628627f9da085e7d31168670b054b"
+  },
+  "src/rasyon/pages/ScenarioComparisonPage.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "90196a219dc394f450ede890b5ae233e",
+    "semantic_hash": "90196a219dc394f450ede890b5ae233e"
+  },
+  "src/rasyon/pages/Settings.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "00bedeea7ca98b4fef587581110ead52",
+    "semantic_hash": "00bedeea7ca98b4fef587581110ead52"
+  },
+  "src/rasyon/pages/Signup.tsx": {
+    "mtime": 1785265987.08,
+    "ast_hash": "8da4382a53c857b96d6594e492c11d69",
+    "semantic_hash": "8da4382a53c857b96d6594e492c11d69"
+  },
+  "src/rasyon/pages/TermsOfService.tsx": {
+    "mtime": 1785265987.09,
+    "ast_hash": "1c10996b461a89e98e2d3f4130e4567a",
+    "semantic_hash": "1c10996b461a89e98e2d3f4130e4567a"
+  },
+  "src/rasyon/pages/wizard/StepAnimal.tsx": {
+    "mtime": 1785265987.29,
+    "ast_hash": "8162a3a591f199a2e30d86fc69b3367b",
+    "semantic_hash": "8162a3a591f199a2e30d86fc69b3367b"
+  },
+  "src/rasyon/pages/wizard/StepAutoAnimal.tsx": {
+    "mtime": 1785265987.29,
+    "ast_hash": "199d3404de05962ebedde0d4e9da0846",
+    "semantic_hash": "199d3404de05962ebedde0d4e9da0846"
+  },
+  "src/rasyon/pages/wizard/StepAutoFeeds.tsx": {
+    "mtime": 1785265987.3,
+    "ast_hash": "a35e4decd17f9bb537cd6f724bc3a304",
+    "semantic_hash": "a35e4decd17f9bb537cd6f724bc3a304"
+  },
+  "src/rasyon/pages/wizard/StepAutoGoal.tsx": {
+    "mtime": 1785265987.3,
+    "ast_hash": "69892324e095b496d7f46acf61e226c0",
+    "semantic_hash": "69892324e095b496d7f46acf61e226c0"
+  },
+  "src/rasyon/pages/wizard/StepAutoReview.tsx": {
+    "mtime": 1785265987.3,
+    "ast_hash": "0c33fdae090aa4eedbfc9e383d4eb496",
+    "semantic_hash": "0c33fdae090aa4eedbfc9e383d4eb496"
+  },
+  "src/rasyon/pages/wizard/StepFeeds.tsx": {
+    "mtime": 1785265987.33,
+    "ast_hash": "bd8f5a778ae3e5b6f0bd6bac478ebaed",
+    "semantic_hash": "bd8f5a778ae3e5b6f0bd6bac478ebaed"
+  },
+  "src/rasyon/pages/wizard/StepGoal.tsx": {
+    "mtime": 1785265987.34,
+    "ast_hash": "79c6cf713e1746eddba9c6014786fc73",
+    "semantic_hash": "79c6cf713e1746eddba9c6014786fc73"
+  },
+  "src/rasyon/pages/wizard/StepMode.tsx": {
+    "mtime": 1785265987.34,
+    "ast_hash": "d434d13bf09ae91092269485220d9d3e",
+    "semantic_hash": "d434d13bf09ae91092269485220d9d3e"
+  },
+  "src/rasyon/pages/wizard/StepReview.tsx": {
+    "mtime": 1785265987.38,
+    "ast_hash": "df9b2fc63acdcf96d922c01f85aa18cf",
+    "semantic_hash": "df9b2fc63acdcf96d922c01f85aa18cf"
+  },
+  "src/rasyon/pages/wizard/WizardLayout.tsx": {
+    "mtime": 1785265987.38,
+    "ast_hash": "bb2f54dafcaf1aa7456f81bf27807499",
+    "semantic_hash": "bb2f54dafcaf1aa7456f81bf27807499"
+  },
+  "src/rasyon/services/ads/admobRewarded.ts": {
+    "mtime": 1785265987.55,
+    "ast_hash": "ac0cf21819cc3de59360769d8e83e442",
+    "semantic_hash": "ac0cf21819cc3de59360769d8e83e442"
+  },
+  "src/rasyon/services/ads/rewardCredits.ts": {
+    "mtime": 1785265987.55,
+    "ast_hash": "84ce895ba32b5c5a054293c6d0765229",
+    "semantic_hash": "84ce895ba32b5c5a054293c6d0765229"
+  },
+  "src/rasyon/services/ai/huggingface.ts": {
+    "mtime": 1785265987.56,
+    "ast_hash": "f2dd1bc18ae9c6f4b29eb1f678477f45",
+    "semantic_hash": "f2dd1bc18ae9c6f4b29eb1f678477f45"
+  },
+  "src/rasyon/services/feedPrices/feedPriceService.ts": {
+    "mtime": 1785265987.57,
+    "ast_hash": "c42b075d9df97ea95844d410d945a6d8",
+    "semantic_hash": "c42b075d9df97ea95844d410d945a6d8"
+  },
+  "src/rasyon/services/push/pushNotifications.ts": {
+    "mtime": 1785265987.57,
+    "ast_hash": "23091fe4eff1736b2fa03d9c67b80978",
+    "semantic_hash": "23091fe4eff1736b2fa03d9c67b80978"
+  },
+  "src/rasyon/store/authStore.ts": {
+    "mtime": 1785265987.58,
+    "ast_hash": "02629077819930bce18bca2f709fe35f",
+    "semantic_hash": "02629077819930bce18bca2f709fe35f"
+  },
+  "src/rasyon/store/feedStore.ts": {
+    "mtime": 1785265987.58,
+    "ast_hash": "31c1ec70f8ba666d6c0bf9a5178d18cf",
+    "semantic_hash": "31c1ec70f8ba666d6c0bf9a5178d18cf"
+  },
+  "src/rasyon/store/inventoryStore.ts": {
+    "mtime": 1785265987.58,
+    "ast_hash": "20dda791f8e2ce3c36d92312d30444af",
+    "semantic_hash": "20dda791f8e2ce3c36d92312d30444af"
+  },
+  "src/rasyon/store/rationStore.ts": {
+    "mtime": 1785265987.58,
+    "ast_hash": "5a45b8ca2c74d33733c68bca8babda29",
+    "semantic_hash": "5a45b8ca2c74d33733c68bca8babda29"
+  },
+  "src/rasyon/store/rationWizardStore.ts": {
+    "mtime": 1785265987.59,
+    "ast_hash": "96d9861e3c060ced69e8bbd168e78293",
+    "semantic_hash": "96d9861e3c060ced69e8bbd168e78293"
+  },
+  "src/rasyon/store/uiStore.ts": {
+    "mtime": 1785265987.59,
+    "ast_hash": "4b9829962233bb8b999027cd292257ee",
+    "semantic_hash": "4b9829962233bb8b999027cd292257ee"
+  },
+  "src/rasyon/stubs/capacitor-admob.ts": {
+    "mtime": 1785265987.6,
+    "ast_hash": "9289fd37c918acdaf85f3c0b6c473514",
+    "semantic_hash": "9289fd37c918acdaf85f3c0b6c473514"
+  },
+  "src/rasyon/stubs/capacitor-core.ts": {
+    "mtime": 1785265987.6,
+    "ast_hash": "b4f383e676220b421763d3dfb79c6a37",
+    "semantic_hash": "b4f383e676220b421763d3dfb79c6a37"
+  },
+  "src/rasyon/stubs/capacitor-push.ts": {
+    "mtime": 1785265987.6,
+    "ast_hash": "756e4a947d319007b25a513f32b5bd9d",
+    "semantic_hash": "756e4a947d319007b25a513f32b5bd9d"
+  },
+  "src/rasyon/stubs/sentry.ts": {
+    "mtime": 1785265987.6,
+    "ast_hash": "da19650e074679055e8e2900d260adab",
+    "semantic_hash": "da19650e074679055e8e2900d260adab"
+  },
+  "src/rasyon/types/auth.ts": {
+    "mtime": 1785265987.61,
+    "ast_hash": "1f0db57525456cceb9adf6d07dd42ca7",
+    "semantic_hash": "1f0db57525456cceb9adf6d07dd42ca7"
+  },
+  "src/rasyon/types/config.ts": {
+    "mtime": 1785265987.8,
+    "ast_hash": "6f0a2e079502807d313fc781a9662f2c",
+    "semantic_hash": "6f0a2e079502807d313fc781a9662f2c"
+  },
+  "src/rasyon/types/evaluation.ts": {
+    "mtime": 1785265987.8,
+    "ast_hash": "2a722c07f3958a9b4aa280b0b869e02a",
+    "semantic_hash": "2a722c07f3958a9b4aa280b0b869e02a"
+  },
+  "src/rasyon/types/glpk-js.d.ts": {
+    "mtime": 1785265987.8,
+    "ast_hash": "9991fc11dc6d3fbd75941def540a2c11",
+    "semantic_hash": "9991fc11dc6d3fbd75941def540a2c11"
+  },
+  "src/rasyon/types/index.ts": {
+    "mtime": 1785265987.8,
+    "ast_hash": "3dfa6e7dd19d867b7023015f4a39d4f3",
+    "semantic_hash": "3dfa6e7dd19d867b7023015f4a39d4f3"
+  },
+  "src/rasyon/types/inventory.ts": {
+    "mtime": 1785265987.81,
+    "ast_hash": "f19cc6e0bd91bf16ecb03ea6bafb2b66",
+    "semantic_hash": "f19cc6e0bd91bf16ecb03ea6bafb2b66"
+  },
+  "src/rasyon/types/risk.ts": {
+    "mtime": 1785265987.84,
+    "ast_hash": "1d5e558d9fefe730ce47186fec5d6103",
+    "semantic_hash": "1d5e558d9fefe730ce47186fec5d6103"
+  },
+  "src/rasyon/types/scenario.ts": {
+    "mtime": 1785265987.85,
+    "ast_hash": "c99710aee56733c54495e5f193d9aa41",
+    "semantic_hash": "c99710aee56733c54495e5f193d9aa41"
+  },
+  "src/rasyon/utils/adminAnalytics.ts": {
+    "mtime": 1785265987.85,
+    "ast_hash": "9a6d163cb26737b67dbc0b881abbc76c",
+    "semantic_hash": "9a6d163cb26737b67dbc0b881abbc76c"
+  },
+  "src/rasyon/utils/analysisImport.ts": {
+    "mtime": 1785265987.85,
+    "ast_hash": "58582f64328e0d6f50224de3c68790c6",
+    "semantic_hash": "58582f64328e0d6f50224de3c68790c6"
+  },
+  "src/rasyon/utils/analytics.ts": {
+    "mtime": 1785265987.85,
+    "ast_hash": "123abfc4e448b2c1f70a7597cfc6de62",
+    "semantic_hash": "123abfc4e448b2c1f70a7597cfc6de62"
+  },
+  "src/rasyon/utils/animalMetadata.ts": {
+    "mtime": 1785265987.86,
+    "ast_hash": "2f71485b51d56823721ee444dbb2bb0b",
+    "semantic_hash": "2f71485b51d56823721ee444dbb2bb0b"
+  },
+  "src/rasyon/utils/costAnalysis.ts": {
+    "mtime": 1785265987.86,
+    "ast_hash": "3f6f21713347b01b2dd5bc1503fb870d",
+    "semantic_hash": "3f6f21713347b01b2dd5bc1503fb870d"
+  },
+  "src/rasyon/utils/excelExport.ts": {
+    "mtime": 1785265987.86,
+    "ast_hash": "e46fad442147ae15e4959cbef78daa96",
+    "semantic_hash": "e46fad442147ae15e4959cbef78daa96"
+  },
+  "src/rasyon/utils/feedImport.ts": {
+    "mtime": 1785265987.86,
+    "ast_hash": "9a461f904c33ab03f9efbf2a402c93c7",
+    "semantic_hash": "9a461f904c33ab03f9efbf2a402c93c7"
+  },
+  "src/rasyon/utils/logger.ts": {
+    "mtime": 1785265988.04,
+    "ast_hash": "b0e99762ed61b14481632c2e27728451",
+    "semantic_hash": "b0e99762ed61b14481632c2e27728451"
+  },
+  "src/rasyon/utils/onboardingHelpers.ts": {
+    "mtime": 1785265988.04,
+    "ast_hash": "97f1e505ed79def4e38a004fe5887263",
+    "semantic_hash": "97f1e505ed79def4e38a004fe5887263"
+  },
+  "src/rasyon/utils/pdfExport.ts": {
+    "mtime": 1785265988.05,
+    "ast_hash": "f0d914ec4b2bbff52ac5e433dc75b0cd",
+    "semantic_hash": "f0d914ec4b2bbff52ac5e433dc75b0cd"
+  },
+  "src/rasyon/utils/presetValidator.ts": {
+    "mtime": 1785265988.05,
+    "ast_hash": "2332ab89f489d710d7bdca4549abe2a7",
+    "semantic_hash": "2332ab89f489d710d7bdca4549abe2a7"
+  },
+  "src/rasyon/utils/profileNormalizer.ts": {
+    "mtime": 1785265988.11,
+    "ast_hash": "7a860b8a6a3d675626891bb8aaa34b9f",
+    "semantic_hash": "7a860b8a6a3d675626891bb8aaa34b9f"
+  },
+  "src/rasyon/utils/riskFormatter.ts": {
+    "mtime": 1785265988.12,
+    "ast_hash": "0077c6459103c90d00674670608435ac",
+    "semantic_hash": "0077c6459103c90d00674670608435ac"
+  },
+  "src/rasyon/utils/sentry.ts": {
+    "mtime": 1785265988.18,
+    "ast_hash": "ddbe258c36c88d16abd1fd286f92d00b",
+    "semantic_hash": "ddbe258c36c88d16abd1fd286f92d00b"
+  },
+  "src/rasyon/utils/trackingConsent.ts": {
+    "mtime": 1785265988.19,
+    "ast_hash": "4e833f1a2ef157f8b1ec32eeeb5c4e38",
+    "semantic_hash": "4e833f1a2ef157f8b1ec32eeeb5c4e38"
+  },
+  "src/rasyon/utils/validationSchemas.ts": {
+    "mtime": 1785265988.19,
+    "ast_hash": "01f0b8e1dba88479409fd8c97631143a",
+    "semantic_hash": "01f0b8e1dba88479409fd8c97631143a"
+  },
+  "src/services/api.ts": {
+    "mtime": 1785999915.62,
+    "ast_hash": "d22eac7365bc5e283596126c53b933ea",
+    "semantic_hash": "d22eac7365bc5e283596126c53b933ea"
+  },
+  "src/services/d1.ts": {
+    "mtime": 1785949576.44,
+    "ast_hash": "9d6d9a08cda989a29de4d98040c5f4c9",
+    "semantic_hash": "9d6d9a08cda989a29de4d98040c5f4c9"
+  },
+  "src/services/weather.ts": {
+    "mtime": 1785265988.28,
+    "ast_hash": "0724a87fef109d0fc61a90288987b81c",
+    "semantic_hash": "0724a87fef109d0fc61a90288987b81c"
+  },
+  "src/tarpovizyon-basic/BasicShell.tsx": {
+    "mtime": 1785400452.16,
+    "ast_hash": "559241fe51e63f4d6ec3efc4bfba3d4d",
+    "semantic_hash": "559241fe51e63f4d6ec3efc4bfba3d4d"
+  },
+  "src/tarpovizyon-basic/PageRenderer.tsx": {
+    "mtime": 1785400452.17,
+    "ast_hash": "24db6834094290553c2dac6a6f1151ae",
+    "semantic_hash": "24db6834094290553c2dac6a6f1151ae"
+  },
+  "src/tarpovizyon-basic/api.ts": {
+    "mtime": 1785400452.17,
+    "ast_hash": "47c7b206f8fa4df7d3697f7a8e243165",
+    "semantic_hash": "47c7b206f8fa4df7d3697f7a8e243165"
+  },
+  "src/tarpovizyon-basic/charts/DateRangeFilter.tsx": {
+    "mtime": 1785400452.22,
+    "ast_hash": "542c9264413fb7d8c84fca2026654c76",
+    "semantic_hash": "542c9264413fb7d8c84fca2026654c76"
+  },
+  "src/tarpovizyon-basic/charts/GaugeChart.tsx": {
+    "mtime": 1785400452.26,
+    "ast_hash": "95d7cf438c99ea4a301c9f9ece645768",
+    "semantic_hash": "95d7cf438c99ea4a301c9f9ece645768"
+  },
+  "src/tarpovizyon-basic/charts/HavzaDistrictMap.tsx": {
+    "mtime": 1785400452.32,
+    "ast_hash": "7decbdee2bbbc98fb666f11abc24fc16",
+    "semantic_hash": "7decbdee2bbbc98fb666f11abc24fc16"
+  },
+  "src/tarpovizyon-basic/charts/HorizontalRankBar.tsx": {
+    "mtime": 1785400452.35,
+    "ast_hash": "6a9976404469a010b169fc5aba10a2ee",
+    "semantic_hash": "6a9976404469a010b169fc5aba10a2ee"
+  },
+  "src/tarpovizyon-basic/charts/KpiCard.tsx": {
+    "mtime": 1785400452.37,
+    "ast_hash": "e6c432a3f1d77d972145498d0adf8e5a",
+    "semantic_hash": "e6c432a3f1d77d972145498d0adf8e5a"
+  },
+  "src/tarpovizyon-basic/charts/ProportionBar.tsx": {
+    "mtime": 1785400452.38,
+    "ast_hash": "7cec9b4547aaba703fc849479c0e9228",
+    "semantic_hash": "7cec9b4547aaba703fc849479c0e9228"
+  },
+  "src/tarpovizyon-basic/charts/RankedTable.tsx": {
+    "mtime": 1785400452.47,
+    "ast_hash": "918e8b539d5a87f13feb894b506fd917",
+    "semantic_hash": "918e8b539d5a87f13feb894b506fd917"
+  },
+  "src/tarpovizyon-basic/charts/RankingBlock.tsx": {
+    "mtime": 1785400452.49,
+    "ast_hash": "43dd7cb3d286535fa76c72914b34b813",
+    "semantic_hash": "43dd7cb3d286535fa76c72914b34b813"
+  },
+  "src/tarpovizyon-basic/charts/SnapshotBarChart.tsx": {
+    "mtime": 1785400452.55,
+    "ast_hash": "5a09222e6751cbd470614d97fc9c46bf",
+    "semantic_hash": "5a09222e6751cbd470614d97fc9c46bf"
+  },
+  "src/tarpovizyon-basic/charts/StackedComparisonBar.tsx": {
+    "mtime": 1785400452.59,
+    "ast_hash": "67446269f309f21040777df9a531be46",
+    "semantic_hash": "67446269f309f21040777df9a531be46"
+  },
+  "src/tarpovizyon-basic/charts/StatTileGrid.tsx": {
+    "mtime": 1785400452.62,
+    "ast_hash": "3419bf9623996545c44d10ea27b57fcb",
+    "semantic_hash": "3419bf9623996545c44d10ea27b57fcb"
+  },
+  "src/tarpovizyon-basic/charts/TradeTrendSection.tsx": {
+    "mtime": 1785400452.66,
+    "ast_hash": "8ddb11278a841273d7527705d265ee85",
+    "semantic_hash": "8ddb11278a841273d7527705d265ee85"
+  },
+  "src/tarpovizyon-basic/charts/TurkeyProvinceMap.tsx": {
+    "mtime": 1785400452.67,
+    "ast_hash": "2441844eb08cc28ac0fd4cd111c2c57a",
+    "semantic_hash": "2441844eb08cc28ac0fd4cd111c2c57a"
+  },
+  "src/tarpovizyon-basic/charts/WorldChoroplethMap.tsx": {
+    "mtime": 1785400452.95,
+    "ast_hash": "ccbf7b488105f0a1267aef330ba2354f",
+    "semantic_hash": "ccbf7b488105f0a1267aef330ba2354f"
+  },
+  "src/tarpovizyon-basic/charts/YearlyChart.tsx": {
+    "mtime": 1786018056.24,
+    "ast_hash": "bbbf6361f89ad7a296130eaf6a8c4b33",
+    "semantic_hash": "bbbf6361f89ad7a296130eaf6a8c4b33"
+  },
+  "src/tarpovizyon-basic/charts/chartResponsive.ts": {
+    "mtime": 1785400453.1,
+    "ast_hash": "0ee2f5e04299db2e86ef81b4dff10ae2",
+    "semantic_hash": "0ee2f5e04299db2e86ef81b4dff10ae2"
+  },
+  "src/tarpovizyon-basic/charts/districtGeo.ts": {
+    "mtime": 1785400453.11,
+    "ast_hash": "6a670132eee17e7d68c5bd7b6a67ec62",
+    "semantic_hash": "6a670132eee17e7d68c5bd7b6a67ec62"
+  },
+  "src/tarpovizyon-basic/charts/faoCountryOverrides.ts": {
+    "mtime": 1785400453.12,
+    "ast_hash": "b831ee5ae9e42e9ea8b9fd05966e8a54",
+    "semantic_hash": "b831ee5ae9e42e9ea8b9fd05966e8a54"
+  },
+  "src/tarpovizyon-basic/charts/period.ts": {
+    "mtime": 1785400453.22,
+    "ast_hash": "9f7219b908bb3496f2e23e99c9d5d3cd",
+    "semantic_hash": "9f7219b908bb3496f2e23e99c9d5d3cd"
+  },
+  "src/tarpovizyon-basic/pages.ts": {
+    "mtime": 1785400453.28,
+    "ast_hash": "5da6ad8beb8c1e86f6d8749781a1770d",
+    "semantic_hash": "5da6ad8beb8c1e86f6d8749781a1770d"
+  },
+  "src/tarpovizyon-basic/pagesBitkisel.ts": {
+    "mtime": 1785400453.33,
+    "ast_hash": "d3f8939766f6dd128bbbb70657c5ce32",
+    "semantic_hash": "d3f8939766f6dd128bbbb70657c5ce32"
+  },
+  "src/tarpovizyon-basic/pagesIlDuzeyinde.ts": {
+    "mtime": 1785400453.33,
+    "ast_hash": "bb468b1145e80b6efff49e3061e49d81",
+    "semantic_hash": "bb468b1145e80b6efff49e3061e49d81"
+  },
+  "src/tarpovizyon-basic/pagesMakro.ts": {
+    "mtime": 1785400453.36,
+    "ast_hash": "32f6482c625a48049b2bc0712a5f38a7",
+    "semantic_hash": "32f6482c625a48049b2bc0712a5f38a7"
+  },
+  "src/tarpovizyon-basic/routes.tsx": {
+    "mtime": 1785400453.37,
+    "ast_hash": "0ebb081d48aadafbbad205169248f32f",
+    "semantic_hash": "0ebb081d48aadafbbad205169248f32f"
+  },
+  "src/tarpovizyon-basic/templates/CropSectorPage.tsx": {
+    "mtime": 1785400453.47,
+    "ast_hash": "0755840a06674397f51c78dbac0400fa",
+    "semantic_hash": "0755840a06674397f51c78dbac0400fa"
+  },
+  "src/tarpovizyon-basic/templates/EndeksKarsilastirmaPage.tsx": {
+    "mtime": 1785400453.52,
+    "ast_hash": "dc1cc0a9feb788e9ab6080aad4a382f6",
+    "semantic_hash": "dc1cc0a9feb788e9ab6080aad4a382f6"
+  },
+  "src/tarpovizyon-basic/templates/FaoIndexPage.tsx": {
+    "mtime": 1785400453.53,
+    "ast_hash": "a22633f9d597acb7e82a9f99819263c0",
+    "semantic_hash": "a22633f9d597acb7e82a9f99819263c0"
+  },
+  "src/tarpovizyon-basic/templates/GaugeGridPage.tsx": {
+    "mtime": 1785400453.65,
+    "ast_hash": "fcd08aefbbe6d8c27a5dfad054534922",
+    "semantic_hash": "fcd08aefbbe6d8c27a5dfad054534922"
+  },
+  "src/tarpovizyon-basic/templates/GfeBreakdownPage.tsx": {
+    "mtime": 1785400453.65,
+    "ast_hash": "32017a52c9d118f9d535485e3b017ff6",
+    "semantic_hash": "32017a52c9d118f9d535485e3b017ff6"
+  },
+  "src/tarpovizyon-basic/templates/HavzaUrunDeseniPage.tsx": {
+    "mtime": 1785400453.65,
+    "ast_hash": "712e403ebde3400f5390d4eb6ccfe50e",
+    "semantic_hash": "712e403ebde3400f5390d4eb6ccfe50e"
+  },
+  "src/tarpovizyon-basic/templates/IlAricilikPage.tsx": {
+    "mtime": 1785400453.66,
+    "ast_hash": "9c3b443388060640e26f79c16ec19718",
+    "semantic_hash": "9c3b443388060640e26f79c16ec19718"
+  },
+  "src/tarpovizyon-basic/templates/IlBitkiselUretimPage.tsx": {
+    "mtime": 1785400453.67,
+    "ast_hash": "f1a1c6bf6af707e09563a0db0ed3916c",
+    "semantic_hash": "f1a1c6bf6af707e09563a0db0ed3916c"
+  },
+  "src/tarpovizyon-basic/templates/IlCografiIsaretPage.tsx": {
+    "mtime": 1785400453.74,
+    "ast_hash": "b110b6b546326705004e25654c7b29ba",
+    "semantic_hash": "b110b6b546326705004e25654c7b29ba"
+  },
+  "src/tarpovizyon-basic/templates/IlHayvansalUretimPage.tsx": {
+    "mtime": 1785400453.78,
+    "ast_hash": "a33a19add0f09a8d9d9b3bbeff9588c7",
+    "semantic_hash": "a33a19add0f09a8d9d9b3bbeff9588c7"
+  },
+  "src/tarpovizyon-basic/templates/IndexTrendPage.tsx": {
+    "mtime": 1785400453.79,
+    "ast_hash": "ef7b77932d4431b8a4e3bcd89c31bbba",
+    "semantic_hash": "ef7b77932d4431b8a4e3bcd89c31bbba"
+  },
+  "src/tarpovizyon-basic/templates/MakroOzetPage.tsx": {
+    "mtime": 1785400453.8,
+    "ast_hash": "b5bacd7673e648b89621438ad9557dd9",
+    "semantic_hash": "b5bacd7673e648b89621438ad9557dd9"
+  },
+  "src/tarpovizyon-basic/templates/RankingPage.tsx": {
+    "mtime": 1785400453.82,
+    "ast_hash": "8b92cb8a0eed5911fd3842a2b172b3e2",
+    "semantic_hash": "8b92cb8a0eed5911fd3842a2b172b3e2"
+  },
+  "src/tarpovizyon-basic/templates/StackedComparisonPage.tsx": {
+    "mtime": 1785400453.86,
+    "ast_hash": "62d0df8ea0ec490fd29dce463a6cd5d9",
+    "semantic_hash": "62d0df8ea0ec490fd29dce463a6cd5d9"
+  },
+  "src/tarpovizyon-basic/templates/StatTilesPage.tsx": {
+    "mtime": 1785400453.91,
+    "ast_hash": "a9ba4c699ff01e7210a7cd0de0fb96fa",
+    "semantic_hash": "a9ba4c699ff01e7210a7cd0de0fb96fa"
+  },
+  "src/tarpovizyon-basic/templates/TradePage.tsx": {
+    "mtime": 1785400453.98,
+    "ast_hash": "b4b1ee253228078dfe5414a9193411b4",
+    "semantic_hash": "b4b1ee253228078dfe5414a9193411b4"
+  },
+  "src/tarpovizyon-basic/templates/YearlyPage.tsx": {
+    "mtime": 1785400453.99,
+    "ast_hash": "7ebde0e8ea3e4b43bccb45f4225384d1",
+    "semantic_hash": "7ebde0e8ea3e4b43bccb45f4225384d1"
+  },
+  "src/tarpovizyon-basic/types.ts": {
+    "mtime": 1785400454.0,
+    "ast_hash": "2e7bedce03d4fd4f13d30e25450c2827",
+    "semantic_hash": "2e7bedce03d4fd4f13d30e25450c2827"
+  },
+  "src/utils/__tests__/countryTranslations.test.ts": {
+    "mtime": 1785265988.33,
+    "ast_hash": "336813b54ecd1daeb15896fe84547322",
+    "semantic_hash": "336813b54ecd1daeb15896fe84547322"
+  },
+  "src/utils/__tests__/productionCategories.test.ts": {
+    "mtime": 1785265988.33,
+    "ast_hash": "81106e883364577dd816722da18bd840",
+    "semantic_hash": "81106e883364577dd816722da18bd840"
+  },
+  "src/utils/__tests__/tarimVeGubre.test.ts": {
+    "mtime": 1785265988.33,
+    "ast_hash": "fe31377db76e85db70aef92f7020cf9a",
+    "semantic_hash": "fe31377db76e85db70aef92f7020cf9a"
+  },
+  "src/utils/chartColors.ts": {
+    "mtime": 1786019956.07,
+    "ast_hash": "a46cf3b3d527eebffd1a26e2e28f8c1d",
+    "semantic_hash": "a46cf3b3d527eebffd1a26e2e28f8c1d"
+  },
+  "src/utils/chartTicks.ts": {
+    "mtime": 1786027560.33,
+    "ast_hash": "bb48bcbfa873bb08837a6dee63dea9f1",
+    "semantic_hash": "bb48bcbfa873bb08837a6dee63dea9f1"
+  },
+  "src/utils/climate-data.ts": {
+    "mtime": 1785265988.33,
+    "ast_hash": "b8cc892ad8294a999cac979e1fd9dd0c",
+    "semantic_hash": "b8cc892ad8294a999cac979e1fd9dd0c"
+  },
+  "src/utils/constants.ts": {
+    "mtime": 1785265988.34,
+    "ast_hash": "6b8c4424661f1b3296b703b0f5c0c45b",
+    "semantic_hash": "6b8c4424661f1b3296b703b0f5c0c45b"
+  },
+  "src/utils/countryTranslations.ts": {
+    "mtime": 1785265988.34,
+    "ast_hash": "805bfe90c8aa9173d8582f2a86f7b5c6",
+    "semantic_hash": "805bfe90c8aa9173d8582f2a86f7b5c6"
+  },
+  "src/utils/intelligenceCalculations.ts": {
+    "mtime": 1785921507.15,
+    "ast_hash": "c36c60b56bce2d3a02c2566499a1a28e",
+    "semantic_hash": "c36c60b56bce2d3a02c2566499a1a28e"
+  },
+  "src/utils/livestockCalculations.ts": {
+    "mtime": 1785265988.34,
+    "ast_hash": "eaa663af66554b1e32928f597d508333",
+    "semantic_hash": "eaa663af66554b1e32928f597d508333"
+  },
+  "src/utils/livestockInsights.ts": {
+    "mtime": 1785265988.34,
+    "ast_hash": "2cc83780418ef540ea9bcc0f1e042f53",
+    "semantic_hash": "2cc83780418ef540ea9bcc0f1e042f53"
+  },
+  "src/utils/productTranslations.ts": {
+    "mtime": 1785265988.45,
+    "ast_hash": "ac604e13e530e4d61403101bd1463d47",
+    "semantic_hash": "ac604e13e530e4d61403101bd1463d47"
+  },
+  "src/utils/productionCategories.ts": {
+    "mtime": 1785265988.46,
+    "ast_hash": "2f0bb9ef80049b8da453cb9d0e330e39",
+    "semantic_hash": "2f0bb9ef80049b8da453cb9d0e330e39"
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1785265988.46,
+    "ast_hash": "ac55832c88e0145489ff302b4c6cf2e8",
+    "semantic_hash": "ac55832c88e0145489ff302b4c6cf2e8"
+  },
+  "workers/tarpovizyon-api/migrations/0002_tarim_madde_fiyat.sql": {
+    "mtime": 1786097334.54,
+    "ast_hash": "52cb21a426f04a12cb2dce1cd0452196",
+    "semantic_hash": "52cb21a426f04a12cb2dce1cd0452196"
+  },
+  "workers/tarpovizyon-api/src/index.js": {
+    "mtime": 1786119026.41,
+    "ast_hash": "9f9059b6e13a2616ee542ed0a429c4ae",
+    "semantic_hash": "9f9059b6e13a2616ee542ed0a429c4ae"
+  },
+  "workers/tarpovizyon-api/src/tabloSayfalari.js": {
+    "mtime": 1786119812.66,
+    "ast_hash": "dd42dc38dd66856a672372e0293363db",
+    "semantic_hash": "dd42dc38dd66856a672372e0293363db"
+  },
+  "workers/tarpovizyon-api/src/upload.js": {
+    "mtime": 1786118995.15,
+    "ast_hash": "14f1c655fdfe6d0dda69e179f18dd904",
+    "semantic_hash": "14f1c655fdfe6d0dda69e179f18dd904"
+  },
+  "scripts/fix_rasyon_paths.py": {
+    "mtime": 1785265981.47,
+    "ast_hash": "da610dfbc54d64a027f16dc505683d99",
+    "semantic_hash": "da610dfbc54d64a027f16dc505683d99"
+  },
+  "scripts/generate_app_assets.py": {
+    "mtime": 1785265981.48,
+    "ast_hash": "34defaf20f33928491bbf4207daf10a4",
+    "semantic_hash": "34defaf20f33928491bbf4207daf10a4"
+  },
+  "scripts/prophet_forecaster.py": {
+    "mtime": 1785400451.62,
+    "ast_hash": "273ca7a15038e1b7fc83d947c7e55131",
+    "semantic_hash": "273ca7a15038e1b7fc83d947c7e55131"
+  },
+  "scripts/run_canlihayvan.py": {
+    "mtime": 1785265981.48,
+    "ast_hash": "b9d419b9d415c1c4d6ef324a5833bdd9",
+    "semantic_hash": "b9d419b9d415c1c4d6ef324a5833bdd9"
+  },
+  "scripts/sync-rasyon.mjs": {
+    "mtime": 1785265981.48,
+    "ast_hash": "16b8b8f0d9a94312d91db63ff03ac659",
+    "semantic_hash": "16b8b8f0d9a94312d91db63ff03ac659"
+  },
+  "scripts/tuik-sync/datasets.mjs": {
+    "mtime": 1786101114.78,
+    "ast_hash": "8caf6f70d3afba18b0cd42fe0e951f39",
+    "semantic_hash": "8caf6f70d3afba18b0cd42fe0e951f39"
+  },
+  "scripts/tuik-sync/sync.mjs": {
+    "mtime": 1786097963.04,
+    "ast_hash": "d4ddf54a43caf719d53ea67ca032f162",
+    "semantic_hash": "d4ddf54a43caf719d53ea67ca032f162"
+  },
+  "src/pages/landUse/LAND_USE_TRANSITION_MATRIX_SCHEMA.md": {
+    "mtime": 1785265984.16,
+    "ast_hash": "8f8ffa4dfa76f79f6729f57ded80bda0",
+    "semantic_hash": "8f8ffa4dfa76f79f6729f57ded80bda0"
+  },
+  "src/assets/react.svg": {
+    "mtime": 1785265981.61,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": "f0402b67b6ce880f65666bb49e841696"
+  }
+}

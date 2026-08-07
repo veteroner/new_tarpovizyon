@@ -1,0 +1,85 @@
+/**
+ * Konum izi (breadcrumb) ve kapsam anahtarı işareti.
+ *
+ * 61 sayfalık, üç seviyeli hiyerarşide hiç konum göstergesi yoktu; kullanıcı
+ * nerede olduğunu ancak kenar menüsüne bakarak anlıyordu. Menü mobilde kapalı
+ * olduğu için orada hiç anlaşılmıyordu.
+ */
+.tarpo-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.tarpo-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
+.tarpo-breadcrumb button {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.tarpo-breadcrumb button:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.tarpo-breadcrumb button:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: 2px;
+}
+
+.tarpo-breadcrumb strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tarpo-breadcrumb svg {
+  flex: 0 0 auto;
+  opacity: 0.5;
+}
+
+/*
+ * Kapsam düğmesindeki nokta: bu konunun o kapsamda karşılığı YOK demek.
+ * Tıklarsa genel bakışa düşecek; sessizce olmasındansa önceden görsün.
+ */
+.tarpo-mode-warn {
+  margin-left: 4px;
+  opacity: 0.55;
+  font-size: 1.1em;
+  line-height: 0;
+}
+
+/* Mobil sayfada kategori başlığı — "Tümü" görünümünde grupları ayırıyor. */
+.tarpo-sheet-group-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 767px) {
+  .tarpo-breadcrumb {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+}
