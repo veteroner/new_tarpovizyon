@@ -56,6 +56,8 @@ export type WhiteMeatData = {
   setEconEndDate: (v: string) => void;
   worldRanking: { world: number; eu: number } | null;
   provincialPoultry: RegionTotal[];
+  /** İl verisinin yılı — TÜİK API'sinde olmadığı için tazelenemiyor, başlıkta gösteriliyor. */
+  provincialYear: string;
   provincialBroilers: RegionTotal[];
   provincialLayers: RegionTotal[];
   poultryMapType: PoultryMapType;

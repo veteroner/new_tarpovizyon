@@ -62,6 +62,12 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
     crossInsights: Insight[];
   } | null>(null);
   const [provincialLivestock, setProvincialLivestock] = useState<RegionTotal[]>([]);
+  /*
+   * İl bazlı hayvan sayıları TÜİK'in SDMX API'sinde YOK (yalnızca MEDAS'ta),
+   * yani otomatik tazelenemiyor ve şu an 2024'te duruyor. Kullanıcı grafiğe
+   * bakıp güncel sanmasın diye veri yılı başlıkta yazıyor.
+   */
+  const [provincialYear, setProvincialYear] = useState<string>('');
   const [livestockMapType, setLivestockMapType] = useState<'cattle' | 'sheep' | 'goat' | 'total'>('total');
 
   // Load provincial livestock data for Turkey map
@@ -86,6 +92,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
             total_livestock: num(r.sigir_varligi_bas) + num(r.manda_varligi_bas)
               + num(r.koyun_varligi_bas) + num(r.keci_varligi_bas),
           })) };
+        if (!cancelled) setProvincialYear(sonTarih.slice(0, 4));
         if (!cancelled && provincialRes.data && provincialRes.data.length > 0) {
           const mapped: RegionTotal[] = provincialRes.data.map((row: Record<string, string | number>) => ({
             name: String(row.province || ''),
@@ -474,7 +481,9 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Row 5: Turkey Provincial Heat Map */}
       {provincialLivestock.length > 0 && (
         <div className="chart-card" style={{marginTop: '20px'}}>
-          <h3 className="chart-title">🇹🇷 İl Bazlı Hayvan Varlığı Haritası</h3>
+          <h3 className="chart-title">
+            🇹🇷 İl Bazlı Hayvan Varlığı Haritası{provincialYear && ` (${provincialYear})`}
+          </h3>
           <div style={{display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap'}}>
             {(['total', 'cattle', 'sheep', 'goat'] as const).map(type => (
               <button key={type} onClick={() => setLivestockMapType(type)}

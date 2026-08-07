@@ -4,13 +4,16 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 type Props = {
   provincialPoultry: RegionTotal[];
+
+  provincialYear?: string;
   provincialBroilers: RegionTotal[];
   provincialLayers: RegionTotal[];
   poultryMapType: PoultryMapType;
   setPoultryMapType: (v: PoultryMapType) => void;
 };
 
-export default function WhiteMeatMapSection({ provincialPoultry, provincialBroilers, provincialLayers, poultryMapType, setPoultryMapType }: Props) {
+export default function WhiteMeatMapSection({ provincialPoultry,
+  provincialYear, provincialBroilers, provincialLayers, poultryMapType, setPoultryMapType }: Props) {
   return (
     <div style={{ marginTop: '40px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
@@ -45,6 +48,7 @@ export default function WhiteMeatMapSection({ provincialPoultry, provincialBroil
             {poultryMapType === 'total' && 'Et Tavuğu + Yumurta Tavuğu (Toplam)'}
             {poultryMapType === 'broiler' && 'Et Tavuğu (Etlik Piliç)'}
             {poultryMapType === 'layer' && 'Yumurta Tavuğu (Yumurtacı Tavuk)'}
+            {provincialYear && ` (${provincialYear})`}
           </h3>
           <ChartInsightButton title="🗺️ İl Bazlı Kanatlı Hayvan Varlığı" description="Türkiye il bazlı kanatlı hayvan varlığı dağılımı" data={provincialPoultry} context={{ section: 'İl Dağılımı' }} compact />
         </div>

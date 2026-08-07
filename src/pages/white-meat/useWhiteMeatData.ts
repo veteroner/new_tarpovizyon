@@ -27,6 +27,11 @@ export function useWhiteMeatData(): WhiteMeatData {
   const [econEndDate, setEconEndDate] = useState<string>('');
   const [worldRanking, setWorldRanking] = useState<{ world: number; eu: number } | null>(null);
   const [provincialPoultry, setProvincialPoultry] = useState<RegionTotal[]>([]);
+  /*
+   * İl bazlı kanatlı sayıları TÜİK SDMX'te YOK (yalnızca MEDAS'ta); tablo
+   * 2024'te duruyor. Veri yılı başlıkta gösteriliyor ki güncel sanılmasın.
+   */
+  const [provincialYear, setProvincialYear] = useState<string>('');
   const [provincialBroilers, setProvincialBroilers] = useState<RegionTotal[]>([]);
   const [provincialLayers, setProvincialLayers] = useState<RegionTotal[]>([]);
   const [poultryMapType, setPoultryMapType] = useState<PoultryMapType>('total');
@@ -145,6 +150,7 @@ export function useWhiteMeatData(): WhiteMeatData {
             layer_count: num(r.yumurta_tavugu_sayisi),
             total_poultry: num(r.et_tavugu_sayisi) + num(r.yumurta_tavugu_sayisi),
           })) };
+        setProvincialYear(sonTarih.slice(0, 4));
         if (provincialRes.data && provincialRes.data.length > 0) {
           const totalMapped: RegionTotal[] = provincialRes.data.map((row) => ({
             name: String(row.province || ''),
@@ -449,6 +455,7 @@ export function useWhiteMeatData(): WhiteMeatData {
     econEndDate, setEconEndDate,
     worldRanking,
     provincialPoultry,
+    provincialYear,
     provincialBroilers,
     provincialLayers,
     poultryMapType, setPoultryMapType,

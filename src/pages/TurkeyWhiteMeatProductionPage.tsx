@@ -47,6 +47,7 @@ export default function TurkeyWhiteMeatProductionPage() {
 
       <WhiteMeatMapSection
         provincialPoultry={data.provincialPoultry}
+        provincialYear={data.provincialYear}
         provincialBroilers={data.provincialBroilers}
         provincialLayers={data.provincialLayers}
         poultryMapType={data.poultryMapType}
