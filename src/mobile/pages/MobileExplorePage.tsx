@@ -29,7 +29,19 @@ const KAPSAMLAR = [
 
 export default function MobileExplorePage() {
   const navigate = useNavigate();
-  const [kapsam, setKapsam] = useState<Kapsam>('turkey');
+  /*
+   * Kapsam oturum boyunca hatırlanıyor. Eskiden bileşen durumundaydı: bir
+   * dünya sayfasına girip geri dönünce Keşfet yeniden kuruluyor ve seçim
+   * Türkiye'ye sıfırlanıyordu — kullanıcı her seferinde Dünya'ya basmak
+   * zorunda kalıyordu.
+   */
+  const [kapsam, setKapsam] = useState<Kapsam>(
+    () => (sessionStorage.getItem('tarpo.kapsam') as Kapsam) ?? 'turkey',
+  );
+  const kapsamSec = (k: Kapsam) => {
+    setKapsam(k);
+    try { sessionStorage.setItem('tarpo.kapsam', k); } catch { /* özel mod */ }
+  };
   const [ara, setAra] = useState('');
 
   const kategoriler = useMemo(() => {
@@ -61,8 +73,7 @@ export default function MobileExplorePage() {
         </div>
 
         <div style={{ marginTop: 10 }}>
-          {/* setState'i doğrudan geçmek T'yi SetStateAction'a kaydırıyor. */}
-          <Segmented options={KAPSAMLAR} value={kapsam} onChange={(k) => setKapsam(k)} label="Kapsam" />
+          <Segmented options={KAPSAMLAR} value={kapsam} onChange={kapsamSec} label="Kapsam" />
         </div>
 
         {/*
