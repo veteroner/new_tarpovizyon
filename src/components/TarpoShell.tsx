@@ -202,7 +202,17 @@ export default function TarpoShell() {
         </nav>
 
         <main className="tarpo-content">
-          <Outlet />
+          {/*
+            * `key` yola bağlı: rota değişince sayfa YENİDEN KURULUYOR.
+            *
+            * Birçok sayfa aynı bileşenin farklı prop'larla kullanılmış hâli
+            * (ör. dünya bitkisel sayfalarının hepsi ProductionPage). React
+            * bunlarda bileşeni sökmeyip yalnızca yeniden çiziyor; başlangıç
+            * değeri prop'tan okunan durumlar ise ilk kurulumdaki değerinde
+            * kalıyordu. Sonuç: Tahıllar'dan Sebzeler'e geçince adres ve
+            * başlık değişiyor, İÇERİK eskisi kalıyordu.
+            */}
+          <Outlet key={location.pathname} />
         </main>
       </div>
 

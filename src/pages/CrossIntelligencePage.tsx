@@ -309,7 +309,24 @@ export default function CrossIntelligencePage() {
         const cellBg = (v: number) =>
           v >= 0.7 ? '#15803d' : v >= 0.4 ? '#4ade80' : v >= 0.1 ? '#bbf7d0' :
           v >= -0.1 ? '#f1f5f9' : v >= -0.4 ? '#fca5a5' : v >= -0.7 ? '#ef4444' : '#991b1b';
-        const cellFg = (v: number) => (Math.abs(v) >= 0.4 ? '#fff' : 'var(--text-primary)');
+        /**
+         * Hücre yazısının rengi zeminin AÇIKLIĞINDAN türetiliyor.
+         *
+         * Eskiden `|v| >= 0.4` ise beyaz yazılıyordu. Ama 0.4–0.7 aralığının
+         * zemini açık yeşil (#4ade80) ve açık kırmızı (#fca5a5); beyaz yazı
+         * oralarda 1.8–1.9:1 kontrast veriyor, yani okunmuyordu. Değere değil
+         * renge bakınca ramp değişse bile doğru kalıyor.
+         */
+        const cellFg = (v: number) => {
+          const hex = cellBg(v);
+          const kanal = (i: number) => {
+            const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+          };
+          const L = 0.2126 * kanal(0) + 0.7152 * kanal(1) + 0.0722 * kanal(2);
+          // Beyaz yalnızca 4.5:1'i geçtiğinde; aksi hâlde koyu metin.
+          return 1.05 / (L + 0.05) >= 4.5 ? '#fff' : 'var(--text-primary)';
+        };
         return (
           <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
             <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>

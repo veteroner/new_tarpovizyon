@@ -46,7 +46,13 @@ export default function MobileDataShell() {
         onBack={() => navigate(-1)}
       />
       <div className="ios-scroll ios-data">
-        <Outlet />
+        {/*
+          * `key` yola bağlı — bkz. TarpoShell'deki aynı satır. Sayfaların
+          * çoğu aynı bileşenin farklı prop'larla kullanılmış hâli; yeniden
+          * kurulmazlarsa başlangıç değeri prop'tan gelen durumlar eski
+          * sayfanınkinde kalıyor.
+          */}
+        <Outlet key={pathname} />
       </div>
       <TabBar />
     </div>

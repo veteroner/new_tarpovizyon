@@ -26,7 +26,12 @@
   /* Metin — iOS label ailesi */
   --ios-label: #1c1c1e;
   --ios-label-2: #3c3c43;
-  --ios-label-3: #8e8e93;
+  /*
+   * iOS'un tertiaryLabel'ı #8e8e93. Grup zemininde (#f2f2f7) 2.92:1 veriyor;
+   * grup başlıkları ve satır değerleri 12–15 px olduğu için WCAG'nin 4.5:1
+   * sınırının altında kalıyordu. Bir tık koyultuldu: aynı gri ailesi, 4.5:1.
+   */
+  --ios-label-3: #6e6e73;
   --ios-separator: #c6c6c8;
 
   /* Vurgu ve durum */

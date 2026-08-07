@@ -368,9 +368,14 @@ body {
   border-color: var(--text-secondary);
 }
 
+/*
+ * Seçili sekme. `--accent` (#3b82f6) üzerinde beyaz yazı 3.68:1 veriyor;
+ * etiketler 13–15 px olduğu için WCAG sınırı 4.5:1. Aynı mavinin koyu adımı
+ * (#1d4ed8) 6.3:1 — renk kimliği aynı, yazı okunur. Ölçülerek seçildi.
+ */
 .section-tab.is-active {
-  background: var(--accent, #16a34a);
-  border-color: var(--accent, #16a34a);
+  background: var(--accent-deep, #1d4ed8);
+  border-color: var(--accent-deep, #1d4ed8);
   color: #fff;
   font-weight: 600;
 }
@@ -408,9 +413,10 @@ body {
   border-color: var(--text-secondary);
 }
 
+/* Seçili aralık çipi — yukarıdaki sekmeyle aynı kontrast gerekçesi. */
 .range-chip.is-active {
-  background: var(--accent, #16a34a);
-  border-color: var(--accent, #16a34a);
+  background: var(--accent-deep, #1d4ed8);
+  border-color: var(--accent-deep, #1d4ed8);
   color: #fff;
   font-weight: 600;
 }
