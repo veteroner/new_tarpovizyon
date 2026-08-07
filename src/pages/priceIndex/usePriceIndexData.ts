@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchRows, num, type Row } from '../../services/d1';
+import { SERIES } from '../../utils/chartColors';
 
 const R = 'tuik/fiyatendex';
 
@@ -17,7 +18,7 @@ export interface AnomalyItem { month: string; value: number; zScore: number }
 // ---------- CONSTANTS ----------
 export const MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 export const MONTHS_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-export const COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#10b981', '#d946ef', '#0ea5e9'];
+export const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 export const DATASETS: Record<DatasetId, DatasetConfig> = {
   'TUFE':  { title: 'Tüketici Fiyat Endeksi (TÜFE)',           subtitle: 'TÜİK · Baz Yılı 2025=100', color: '#ef4444' },

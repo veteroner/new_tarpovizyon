@@ -19,12 +19,12 @@ import { fetchAgg, num } from '../services/d1';
 const R = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { BAR_COLOR } from '../utils/chartColors';
+import { BAR_COLOR, SERIES } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
-const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef'];
+const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 interface ProductOption {
   id: string;

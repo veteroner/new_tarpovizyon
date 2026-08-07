@@ -8,6 +8,7 @@ import {
   analyzeTrend
 } from '../../utils/intelligenceCalculations';
 import type { YearValue, IntelligenceAlert } from '../../utils/intelligenceCalculations';
+import { SERIES } from '../../utils/chartColors';
 
 // D1 toplama rotası — bu sayfanın tüm sorguları tek tabloya dayanıyor.
 // Kıta/gelir grubu satırları sunucudaki 'v1' hazır listesiyle dışlanıyor
@@ -25,7 +26,7 @@ export const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'alerts', label: 'İçgörüler', icon: '🧠' },
 ];
 
-export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
+export const CHART_COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 export function formatPop(value: number): string {
   const actual = value * 1000;

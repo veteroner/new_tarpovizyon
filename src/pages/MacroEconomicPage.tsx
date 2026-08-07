@@ -14,11 +14,12 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import { translateCountry } from '../utils/countryTranslations';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import { SERIES } from '../utils/chartColors';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
-const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 interface YearlyDataItem {
   year: string;

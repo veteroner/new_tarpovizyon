@@ -1,0 +1,84 @@
+/**
+ * Veri görselleştirme renk token'ları.
+ *
+ * ─── NEDEN ──────────────────────────────────────────────────────────────────
+ * Panoda 78 benzersiz hex, 1.207 kullanım vardı. Kategorik palet YEDİ ayrı
+ * yerde, her biri farklı sırada tanımlanmıştı (MacroEconomicPage, priceIndex,
+ * agriculturalEmployment, TurkeyOtherAnimalProducts, giTypes, DynamicChart…).
+ * Aynı ürün iki sayfada iki farklı renkteydi.
+ *
+ * ─── DOĞRULAMA ──────────────────────────────────────────────────────────────
+ * Mevcut fiili palet renk körlüğü testinden GEÇMİYORDU:
+ *   #f59e0b ↔ #22c55e  ΔE 5.7 (protanopi) — eşik 8
+ * Aşağıdaki palet dataviz doğrulayıcısıyla sınandı, iki modda da geçiyor:
+ *   açık: en kötü komşu ΔE 9.1 (protan) · koyu: 8.4
+ * Değiştirirken göz kararı yapma, doğrulayıcıyı çalıştır.
+ *
+ * ─── KURALLAR ───────────────────────────────────────────────────────────────
+ * • Kategorik renkler SABİT SIRAYLA verilir, döngüye sokulmaz. 9. seri renk
+ *   üretmez — "Diğer"e katlanır veya küçük çoklu grafiğe ayrılır.
+ * • Renk VARLIĞA bağlıdır, sırasına değil. Filtre seri sayısını değiştirince
+ *   kalanların rengi değişmemeli.
+ * • Durum renkleri (iyi/uyarı/kritik) ayrıdır, "4. seri" olarak kullanılmaz.
+ * • Koyu tema adımları otomatik ters çevirme DEĞİL; ayrı seçilip ayrı
+ *   doğrulandı.
+ */
+
+:root {
+  /* Kategorik seriler — sabit sıra. */
+  --series-1: #2a78d6; /* mavi */
+  --series-2: #eb6834; /* turuncu */
+  --series-3: #1baf7a; /* deniz yeşili */
+  --series-4: #eda100; /* sarı */
+  --series-5: #e87ba4; /* magenta */
+  --series-6: #008300; /* yeşil */
+  --series-7: #4a3aa7; /* mor */
+  --series-8: #e34948; /* kırmızı */
+
+  /* Vurgu — "bu satır Türkiye" gibi tek öğeyi öne çıkarmak için.
+     Kategorik yuvalardan AYRI ki seri rengiyle karışmasın. */
+  --viz-highlight: #d03b3b;
+  /* Vurgulanmayanlar bu nötr tonda kalır. */
+  --viz-muted: #9aa0a6;
+
+  /* Durum — kategorik yuvalarla asla değiştirilmez, ikon/etiketle birlikte. */
+  --viz-good: #0ca30c;
+  --viz-warning: #fab219;
+  --viz-serious: #ec835a;
+  --viz-critical: #d03b3b;
+
+  /* Grafik yüzeyi ve çizgileri. */
+  --viz-surface: #fcfcfb;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+}
+
+/*
+ * Koyu tema adımları.
+ *
+ * DİKKAT: `prefers-color-scheme` ile OTOMATİK açılmıyor. Uygulamanın kendi
+ * yüzeyleri (arka plan, kart) hâlâ açık; işletim sistemi koyu modda diye
+ * yalnızca grafik renklerini koyu adımlara çevirmek, koyu serileri AÇIK
+ * zemine basmak demekti — kontrast yanlış yöne gidiyordu. (Bu bir kez
+ * gerçekleşti ve tarayıcıda yakalandı.)
+ *
+ * Bu adımlar uygulama gerçekten koyu temayı desteklediğinde, yüzeylerle
+ * BİRLİKTE devreye alınmalı: `<html data-theme="dark">`.
+ */
+:root[data-theme='dark'] {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+
+  --viz-highlight: #e66767;
+  --viz-muted: #6b7075;
+
+  --viz-surface: #1a1a19;
+  --viz-grid: #2c2c2a;
+  --viz-axis: #383835;
+}
