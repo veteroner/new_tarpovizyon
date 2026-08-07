@@ -1,0 +1,329 @@
+/**
+ * Mobil uygulama tasarım katmanı — iOS Human Interface Guidelines.
+ *
+ * ─── NEDEN AYRI BİR KATMAN ──────────────────────────────────────────────────
+ * Uygulama App Store ve Play'de yayımlanacak. Masaüstü panosunun küçültülmüş
+ * hâli mağazada "web sitesi sarmalayıcısı" gibi durur ve yerli hissettirmez.
+ * Bu dosya panonun token'larını DEĞİL, platformun kendi ölçülerini taşıyor.
+ *
+ * ─── NÖTRLER NEDEN MARKAYA BOYANMADI ────────────────────────────────────────
+ * Zemin ve kart renkleri Apple'ın sistem grileri. Uygulamanın "yerli"
+ * hissetmesini sağlayan tam olarak bu griler; markaya çekmek onu web sitesine
+ * benzetir. Marka TEK vurgu renginde yaşıyor.
+ *
+ * ─── VURGU RENGİ ────────────────────────────────────────────────────────────
+ * Yeşil yalnızca DOKUNULABİLİR şeylerde ve seçili sekmede. Yüzeyler beyaz ve
+ * gri kalıyor — renk anlam taşıyor, dekor değil. Kategori ikonlarındaki
+ * kırmızı/mavi/turuncu vurgu değil, kategori KİMLİĞİ.
+ */
+
+:root {
+  /* Yüzeyler — iOS systemGroupedBackground ailesi */
+  --ios-bg: #f2f2f7;
+  --ios-card: #ffffff;
+  --ios-fill: #e5e5ea;
+
+  /* Metin — iOS label ailesi */
+  --ios-label: #1c1c1e;
+  --ios-label-2: #3c3c43;
+  --ios-label-3: #8e8e93;
+  --ios-separator: #c6c6c8;
+
+  /* Vurgu ve durum */
+  --ios-tint: #34c759;
+  --ios-tint-deep: #248a3d;
+  --ios-red: #ff3b30;
+  --ios-orange: #ff9500;
+  --ios-blue: #007aff;
+
+  /* Ölçüler — 44 pt dokunma hedefi HIG zorunluluğu */
+  --ios-touch: 44px;
+  --ios-radius: 11px;
+  --ios-radius-lg: 14px;
+}
+
+/*
+ * Koyu tema adımları.
+ *
+ * DİKKAT: `prefers-color-scheme` ile OTOMATİK AÇILMIYOR. Uygulama açık tema
+ * olarak tasarlandı; işletim sistemi koyu modda diye kendiliğinden koyuya
+ * geçmesi istenmiyor. (Bir kez böyle yapıldı ve uygulama beklenmedik şekilde
+ * siyah açıldı.)
+ *
+ * Adımlar burada hazır duruyor — ayarlara tema anahtarı eklendiğinde
+ * `<html data-theme="dark">` ile devreye girer. Otomatik ters çevirme değil,
+ * iOS'un kendi koyu yüzeyleri: siyah zemin, #1c1c1e kart, parlak vurgu.
+ */
+:root[data-theme='dark'] {
+  --ios-bg: #000000;
+  --ios-card: #1c1c1e;
+  --ios-fill: #2c2c2e;
+  --ios-label: #ffffff;
+  --ios-label-2: #ebebf5;
+  --ios-label-3: #8e8e93;
+  --ios-separator: #38383a;
+  --ios-tint: #30d158;
+  --ios-tint-deep: #30d158;
+  --ios-red: #ff453a;
+  --ios-orange: #ff9f0a;
+  --ios-blue: #0a84ff;
+}
+
+/* ─── Kabuk ──────────────────────────────────────────────────────────────── */
+.ios-app {
+  background: var(--ios-bg);
+  color: var(--ios-label);
+  min-height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-scroll {
+  flex: 1 1 auto;
+  /* Alt sekme çubuğu + ana ekran göstergesi kadar boşluk; içerik altında
+     kaybolmasın (HIG: safe area). */
+  padding: 0 16px calc(72px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Gezinme çubuğu ─────────────────────────────────────────────────────── */
+.ios-nav {
+  padding: calc(env(safe-area-inset-top) + 6px) 16px 8px;
+  background: var(--ios-bg);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.ios-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 32px;
+  padding: 0 8px 0 0;
+  border: none;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  margin-left: -4px;
+}
+
+.ios-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -.024em;
+  line-height: 1.12;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.ios-subtitle {
+  font-size: 13.5px;
+  color: var(--ios-label-3);
+  margin: 2px 0 0;
+}
+
+/* ─── Gruplu liste (inset grouped) ───────────────────────────────────────── */
+.ios-group-header {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ios-label-3);
+  padding: 20px 4px 7px;
+}
+
+.ios-group {
+  background: var(--ios-card);
+  border-radius: var(--ios-radius);
+  overflow: hidden;
+}
+
+.ios-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Satırın TAMAMI dokunma hedefi — ikon 28 px ama hedef 44 pt. */
+  min-height: var(--ios-touch);
+  padding: 8px 14px;
+  width: 100%;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Ayırıcı ikonun hizasından başlar — iOS'ta böyle. */
+.ios-row + .ios-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 0;
+  height: .5px;
+  background: var(--ios-separator);
+}
+.ios-row.has-icon + .ios-row.has-icon::before { left: 54px; }
+
+.ios-row:active { background: var(--ios-fill); }
+
+.ios-row-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.ios-row-icon svg { width: 16px; height: 16px; }
+
+.ios-row-text { flex: 1 1 auto; min-width: 0; font-size: 16px; letter-spacing: -.01em; }
+.ios-row-sub { display: block; font-size: 12.5px; color: var(--ios-label-3); margin-top: 1px; }
+
+.ios-row-value {
+  font-size: 15.5px;
+  color: var(--ios-label-3);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.ios-chev { width: 8px; height: 13px; flex: 0 0 auto; color: #c7c7cc; }
+
+/* ─── Sayı kartları ──────────────────────────────────────────────────────── */
+.ios-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.ios-tile {
+  background: var(--ios-card);
+  border-radius: var(--ios-radius);
+  padding: 12px 13px;
+}
+.ios-tile-label { font-size: 12px; color: var(--ios-label-3); letter-spacing: -.005em; }
+.ios-tile-value {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -.024em;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.ios-tile-delta {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.ios-up { color: var(--ios-tint-deep); }
+.ios-down { color: var(--ios-red); }
+
+/* ─── Grafik kartı ───────────────────────────────────────────────────────── */
+.ios-chart-card {
+  background: var(--ios-card);
+  border-radius: var(--ios-radius);
+  padding: 13px;
+  margin-top: 10px;
+}
+.ios-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.ios-chart-title { font-size: 15px; font-weight: 600; letter-spacing: -.012em; }
+
+/* Segment kontrolü — iOS'un kendi bileşeni */
+.ios-segment {
+  display: flex;
+  background: var(--ios-fill);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.ios-segment button {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  color: var(--ios-label-2);
+  cursor: pointer;
+  min-height: 28px;
+}
+.ios-segment button[aria-selected='true'] {
+  background: var(--ios-card);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+}
+
+.ios-strip-label {
+  font-size: 10.5px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ios-label-3);
+  margin: 9px 0 2px;
+}
+
+/* ─── Alt sekme çubuğu ───────────────────────────────────────────────────── */
+.ios-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  background: color-mix(in srgb, var(--ios-card) 94%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: .5px solid var(--ios-separator);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.ios-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 49px; /* HIG sekme çubuğu yüksekliği */
+  padding: 6px 2px 4px;
+  border: none;
+  background: none;
+  color: var(--ios-label-3);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ios-tab svg { width: 24px; height: 24px; }
+.ios-tab span {
+  font-size: 10px;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+}
+.ios-tab[aria-current='page'] { color: var(--ios-tint); }
+.ios-tab[aria-current='page'] span { font-weight: 600; }
+
+/* Klavye/erişilebilirlik odağı görünür kalmalı. */
+.ios-tab:focus-visible,
+.ios-row:focus-visible,
+.ios-back:focus-visible,
+.ios-segment button:focus-visible {
+  outline: 2px solid var(--ios-tint);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-row, .ios-tab { transition: none; }
+}
