@@ -8,6 +8,7 @@ import {
   usePriceIndexData, formatIndex, MONTHS_SHORT, type DatasetId,
 } from './priceIndex/usePriceIndexData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
+import MaddeFiyatSection from './priceIndex/MaddeFiyatSection';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 
 export default function PriceIndexPage() {
@@ -367,6 +368,8 @@ export default function PriceIndexPage() {
               ))}
             </div>
           )}
+
+          <MaddeFiyatSection />
         </>
       )}
     </div>
