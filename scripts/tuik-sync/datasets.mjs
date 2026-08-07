@@ -119,6 +119,13 @@ export const DATASETS = [
     // D1'de seri 2020'de başlıyor; TÜİK 2010'a kadar veriyor ama tabloya
     // olmayan yılları eklemiyoruz (syncMonthCols yalnızca günceller).
     minPeriod: '2020-01',
+    /*
+     * Genel Tarım-ÜFE serisi TÜİK'te 'A' kodunda, D1'de ise '0' olarak
+     * duruyor. Eşleme olmadan sayfanın ANA grafiği (T-UFE toplamı)
+     * güncellenmiyordu — alt kırılımlar dolarken başlık serisi martta
+     * kalıyordu.
+     */
+    codeMap: new Proxy({ A: '0' }, { get: (t, k) => (k in t ? t[k] : k) }),
   },
   {
     kind: 'monthCols',

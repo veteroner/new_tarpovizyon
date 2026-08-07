@@ -20,14 +20,17 @@ export default function PriceIndexPage() {
     loading, error,
     monthlyData, yearlyData, topProducts, heatmapData, scissorData, anomalies,
     avgIndex, maxMonth, minMonth, yearChange, cagr5, volatility,
-    selectedProductName, heatmapProducts, config,
+    selectedProductName, heatmapProducts, config, sonDonem,
   } = usePriceIndexData();
 
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">{config.title}</h1>
-        <p className="page-subtitle">{config.subtitle}</p>
+        <p className="page-subtitle">
+          {config.subtitle}
+          {sonDonem && <> · son veri: <strong>{sonDonem}</strong></>}
+        </p>
       </div>
 
       <div className="date-filter">

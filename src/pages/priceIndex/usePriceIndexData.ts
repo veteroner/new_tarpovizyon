@@ -35,7 +35,29 @@ function ortalamaDoluAylar(satir: Row, aylar: string[] = MONTHS_TR): number {
   return degerler.length ? degerler.reduce((a, b) => a + b, 0) / degerler.length : 0;
 }
 /** d1.d2.d3.d4 → tek kod dizisi (eski CONCAT karşılığı). */
-const urunKodu = (r: Row) => `${r.d1}.${r.d2}.${r.d3}.${r.d4}`;
+/*
+ * Ürün anahtarı.
+ *
+ * TÜİK aileleri (TUFE/T-UFE/T-GFE) hiyerarşiyi d1..d4 alanlarında taşıyor.
+ * FAO ise TAŞIMIYOR — 12 satırın (6 endeks × nominal/real) hepsinde d1..d4
+ * sıfır. Aynı anahtarı kullanınca hepsi tek girdiye çöküyor, seçicide tek
+ * "0.0.0.0" seçeneği kalıyor ve sayfa hangi satır önce gelirse onu
+ * gösteriyordu. FAO'da anahtar maddekod (nominal/real) + ürün adı.
+ */
+const urunKodu = (r: Row, dataset: DatasetId) =>
+  dataset === 'FAO'
+    ? `${r.maddekod}|${r.urun}`
+    : `${r.d1}.${r.d2}.${r.d3}.${r.d4}`;
+
+/** Ürün anahtarını API filtresine çevirir. */
+const urunFiltresi = (kod: string, dataset: DatasetId): Record<string, string | number> => {
+  if (dataset === 'FAO') {
+    const [maddekod, urun] = kod.split('|');
+    return { maddekod, urun };
+  }
+  const [d1, d2, d3, d4] = kod.split('.');
+  return { d1, d2, d3, d4 };
+};
 
 // ---------- HELPERS ----------
 export function formatIndex(v: number): string {
@@ -56,6 +78,13 @@ function calcStdDev(values: number[]): number {
 // ---------- HOOK ----------
 export function usePriceIndexData() {
   const [dataset, setDataset] = useState<DatasetId>('TUFE');
+  /*
+   * Serinin gerçekten dolu olan son ayı. Her veri seti farklı hızda
+   * yayımlanıyor (TÜİK tarım ÜFE'yi FAO'dan önce, TÜFE'yi portalda) ve
+   * sayfa bunu göstermeyince "neden nisanda kalmış?" sorusu ekranda
+   * cevapsız kalıyordu.
+   */
+  const [sonDonem, setSonDonem] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState('');
   const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -92,8 +121,13 @@ export function usePriceIndexData() {
           : tumSatirlar;
         const harita = new Map<string, { code: string; urun: string }>();
         for (const r of secilenler) {
-          const code = urunKodu(r);
-          if (!harita.has(code)) harita.set(code, { code, urun: String(r.urun ?? '') });
+          const code = urunKodu(r, dataset);
+          // FAO'da aynı ürünün nominal ve reel serisi var; ad tek başına
+          // ikisini ayırmadığı için etikete yazılıyor.
+          const ad = dataset === 'FAO'
+            ? `${r.urun} (${r.maddekod === 'real' ? 'reel' : 'nominal'})`
+            : String(r.urun ?? '');
+          if (!harita.has(code)) harita.set(code, { code, urun: ad });
         }
         const liste = [...harita.values()];
         return dataset === 'TUFE'
@@ -124,9 +158,8 @@ export function usePriceIndexData() {
     setError('');
     try {
       const yr = selectedYear;
-      const [d1, d2, d3, d4] = selectedProduct.split('.');
       const prevYr = String(Number(yr) - 1);
-      const urunF = { endeks: dataset, d1, d2, d3, d4 };
+      const urunF = { endeks: dataset, ...urunFiltresi(selectedProduct, dataset) };
 
       // Tüm hesaplar (dolu-ay ortalaması, aylık seri, ısı haritası, makas)
       // eskiden dev SQL ifadeleriyle yapılıyordu; satırlar çekilip istemcide.
@@ -182,6 +215,8 @@ export function usePriceIndexData() {
           value: Number(row[m]) || 0,
         }));
         availableMonthIndices = monthly.filter(m => m.value > 0).map(m => m.monthIdx);
+        const sonAy = availableMonthIndices.at(-1);
+        setSonDonem(sonAy === undefined ? '' : `${MONTHS_TR[sonAy]} ${yr}`);
         setMonthlyData(monthly.filter(m => m.value > 0));
         const vals = monthly.map(m => m.value).filter(v => v > 0);
         if (vals.length >= 3) {
@@ -323,6 +358,6 @@ export function usePriceIndexData() {
     loading, error,
     monthlyData, yearlyData, topProducts, heatmapData, scissorData, anomalies,
     avgIndex, maxMonth, minMonth, yearChange, cagr5, volatility,
-    selectedProductName, heatmapProducts, config, prevSamePeriodAvg,
+    selectedProductName, heatmapProducts, config, prevSamePeriodAvg, sonDonem,
   };
 }
