@@ -68,6 +68,11 @@ const ROUTES = {
   // için sayfa sorguları yeniden yazılırken alan adları değişmiyor.
   'tuik/bitkisel-uretim': { table: 'tuik_bitkisel_uretim', filters: ['duzeykod', 'yerkod', 'yer', 'ili', 'urun', 'urunkod', 'urun_grup', 'ugkod', 'unsur', 'birim', 'duzey'], order: 'urun ASC', maxLimit: 10000 },
   'tuik/urundenge': { table: 'tuik_urundenge', filters: ['urun'], order: 'urun ASC', maxLimit: 2000 },
+  /*
+   * ENDEKS değil, GERÇEK TL FİYAT. tuik_fiyatendex 2020=100 endeksini
+   * tutuyor ("ne kadar arttı"); bu uç maddenin kaç lira olduğunu veriyor.
+   */
+  'tuik/madde-fiyat': { table: 'tarim_madde_fiyat', filters: ['maddekod', 'urun', 'yil', 'ay'], order: 'yil ASC, ay ASC', maxLimit: 5000 },
   'tuik/fiyatendex': { table: 'tuik_fiyatendex', filters: ['endeks', 'maddekod', 'urun', 'yil', 'alan', 'd1', 'd2', 'd3', 'd4'], order: 'yil ASC', maxLimit: 10000 },
   'tuik/gsyh-a21': { table: 'tuik_gsyh_a21', filters: ['yerkod', 'yer', 'sektorkod', 'sektor', 'yil'], order: 'yil ASC', maxLimit: 10000 },
   'tuik/kisibasigelir': { table: 'tuik_kisibasigelir', filters: ['yil', 'yer', 'yerkod', 'duzey'], order: 'yil ASC', maxLimit: 5000 },

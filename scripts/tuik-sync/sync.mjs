@@ -249,6 +249,12 @@ async function syncLong(ds) {
 
   const labelCol = ds.labelColumn;
   const keyCols = labelCol ? [labelCol, 'yil', 'ay'] : ['yil', 'ay'];
+  /*
+   * Bazı tablolarda etiketin kendisine bağlı SABİT bir alan daha var
+   * (madde fiyatlarında birim: TL/kg, TL/baş…). Değere göre değişmediği için
+   * gözlemden değil, koddan gelen haritadan yazılıyor.
+   */
+  const sabitSutunlar = ds.staticColumns ?? {};
 
   const wanted = new Map();
   for (const r of rows) {
@@ -263,7 +269,7 @@ async function syncLong(ds) {
     const ay = Number(m);
     const value = toNumber(r.OBS_VALUE, ds.decimals);
     if (value === null) continue; // yayımlanmamış dönem — boş satır yazma (bkz. 'wide' yolundaki not)
-    wanted.set(`${label ?? ''}|${yil}|${ay}`, { label, yil, ay, value });
+    wanted.set(`${label ?? ''}|${yil}|${ay}`, { label, yil, ay, value, code: ds.labelDim ? r[ds.labelDim] : null });
   }
   if (!wanted.size) throw new Error(`${ds.flow}: eşleşen etiket bulunamadı. Kod listesi değişmiş olabilir.`);
 
@@ -289,10 +295,14 @@ async function syncLong(ds) {
       });
     } else {
       inserted++;
-      const cols = [...keyCols, ds.valueColumn];
+      // Etikete bağlı sabit alanlar (ör. birim) yalnızca INSERT'te yazılır;
+      // UPDATE onlara dokunmaz çünkü değere göre değişmezler.
+      const sabitAd = Object.keys(sabitSutunlar);
+      const sabitDeger = sabitAd.map((c) => sabitSutunlar[c][v.code] ?? null);
+      const cols = [...keyCols, ...sabitAd, ds.valueColumn];
       writes.push({
         sql: `INSERT INTO ${ds.table} (${cols.join(',')}) VALUES (${Array(cols.length).fill('?').join(',')})`,
-        params: [...keyVals, v.value],
+        params: [...keyVals, ...sabitDeger, v.value],
       });
     }
   }
@@ -300,6 +310,86 @@ async function syncLong(ds) {
   await applyWrites(writes);
   const periods = [...wanted.values()].map((v) => `${v.yil}-${String(v.ay).padStart(2, '0')}`).sort();
   return { dataset: ds.name, status: 'ok', inserted, updated, latestPeriod: periods.at(-1) ?? null, message: null };
+}
+
+// ─── Ay sütunlu tablolar (tuik_fiyatendex) ──────────────────────────────────
+
+const AY_SUTUN = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+/**
+ * `tuik_fiyatendex` düzeni: her satır bir (endeks, maddekod, yil) üçlüsü ve
+ * 12 ay ayrı SÜTUN. Diğer tablolardaki "her dönem bir satır" düzeninden
+ * farklı olduğu için ayrı bir yazıcı gerekiyor.
+ *
+ * YALNIZCA GÜNCELLER, satır eklemez. Tablo `urun`, `d1..d4`, `bazyil` gibi
+ * SDMX'ten türetilemeyen alanlar da taşıyor; yeni bir madde kodu geldiğinde
+ * onu uydurmak yerine atlayıp raporluyoruz — eksik ürün adıyla satır eklemek
+ * ön yüzdeki eşleştirmeleri sessizce bozar.
+ */
+async function syncMonthCols(ds) {
+  const rows = parseCsv(await fetchDataset(ds)).filter((r) => matchesFilter(r, ds.filter));
+  if (!rows.length) throw new Error(`${ds.flow}: filtreye uyan satır yok. Boyut kodları değişmiş olabilir.`);
+
+  // TÜİK kodu → D1'deki maddekod. GFE'de D1 sıfır dolgulu 6 haneli kod
+  // kullanıyor (20_1 yerine 201000), o yüzden eşleme dışarıdan verilebiliyor.
+  const kodEsle = (k) => (ds.codeMap ? ds.codeMap[k] : k);
+
+  const gelen = new Map(); // "kod|yil" -> { ay: değer }
+  for (const r of rows) {
+    if (!inRange(ds, r.TIME_PERIOD)) continue;
+    const kod = kodEsle(r[ds.codeDim]);
+    if (!kod) continue;
+    const deger = toNumber(r.OBS_VALUE, ds.decimals);
+    if (deger === null) continue; // yayımlanmamış dönem
+    const [y, m] = r.TIME_PERIOD.split('-');
+    const anahtar = `${kod}|${Number(y)}`;
+    if (!gelen.has(anahtar)) gelen.set(anahtar, {});
+    gelen.get(anahtar)[Number(m)] = deger;
+  }
+  if (!gelen.size) throw new Error(`${ds.flow}: eşleşen madde kodu yok.`);
+
+  const aySutun = AY_SUTUN.map((a) => `"${a}"`).join(',');
+  const mevcut = new Map();
+  for (const r of await d1(
+    `SELECT ${ds.codeColumn}, ${ds.yearColumn}, ${aySutun} FROM ${ds.table} WHERE endeks = ?`,
+    [ds.endeks],
+  )) {
+    mevcut.set(`${r[ds.codeColumn]}|${r[ds.yearColumn]}`, r);
+  }
+
+  const writes = [];
+  let updated = 0;
+  let atlanan = 0;
+
+  for (const [anahtar, aylar] of gelen) {
+    const prev = mevcut.get(anahtar);
+    if (!prev) { atlanan++; continue; }
+    const setler = [];
+    const params = [];
+    for (const [ay, deger] of Object.entries(aylar)) {
+      const sutun = AY_SUTUN[Number(ay) - 1];
+      if (same(prev[sutun], deger)) continue;
+      setler.push(`"${sutun}" = ?`);
+      params.push(deger);
+    }
+    if (!setler.length) continue;
+    const [kod, yil] = anahtar.split('|');
+    updated++;
+    writes.push({
+      sql: `UPDATE ${ds.table} SET ${setler.join(', ')} `
+        + `WHERE endeks = ? AND ${ds.codeColumn} = ? AND ${ds.yearColumn} = ?`,
+      params: [...params, ds.endeks, kod, Number(yil)],
+    });
+  }
+
+  await applyWrites(writes);
+  const donemler = rows.map((r) => r.TIME_PERIOD).filter(isMonth).sort();
+  return {
+    dataset: ds.name, status: 'ok', inserted: 0, updated,
+    latestPeriod: donemler.at(-1) ?? null,
+    message: atlanan ? `${atlanan} bilinmeyen (kod,yıl) atlandı` : null,
+  };
 }
 
 // ─── Orkestrasyon ────────────────────────────────────────────────────────────
@@ -337,7 +427,9 @@ async function main() {
   const results = [];
   for (const ds of DATASETS) {
     try {
-      results.push(ds.kind === 'wide' ? await syncWide(ds) : await syncLong(ds));
+      const yazici = { wide: syncWide, long: syncLong, monthCols: syncMonthCols }[ds.kind];
+      if (!yazici) throw new Error(`Bilinmeyen veri seti türü: ${ds.kind}`);
+      results.push(await yazici(ds));
     } catch (e) {
       results.push({ dataset: ds.name, status: 'error', inserted: 0, updated: 0, latestPeriod: null, message: e.message });
     }
