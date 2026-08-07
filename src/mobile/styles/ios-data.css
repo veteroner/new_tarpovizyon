@@ -1,0 +1,85 @@
+/**
+ * Veri sayfalarının mobil kabuk içindeki görünümü.
+ *
+ * ─── NEDEN BU DOSYA VAR ─────────────────────────────────────────────────────
+ * Veri sayfaları panonun görsel diliyle yazıldı: 16 px köşeli kartlar, 24 px
+ * iç boşluk, mavi–mor gradyan "büyük" KPI kutuları, üzerine gelince yükselen
+ * gölgeler. Bunlar iOS kabuğunun içine düşünce uygulama iki ayrı programın
+ * ekranlarını arka arkaya göstermiş gibi oluyordu.
+ *
+ * Sayfaların KODUNA dokunmadan (yetmişten fazla sayfa) çerçeveleri buradan
+ * platformun diline çekiliyor. Kurallar yalnızca `.ios-data` altında geçerli;
+ * masaüstü panosu olduğu gibi kalıyor.
+ */
+
+/* Sayfa kendi başlığını bir daha yazmıyor — gezinme çubuğu zaten taşıyor. */
+.ios-data .page-header { display: none; }
+
+/* ─── KPI kutuları ───────────────────────────────────────────────────────── */
+.ios-data .kpi-card,
+.ios-data .kpi-card.large {
+  background: var(--ios-card);
+  color: var(--ios-label);
+  border: none;
+  border-radius: var(--ios-radius);
+  box-shadow: none;
+  padding: 12px 13px;
+  /* 140–160 px'lik alt sınır mobilde kutuların yarısını boş bırakıyordu. */
+  min-height: 0;
+  /* Üzerine gelince yükselme dokunmatik cihazda karşılığı olmayan bir efekt. */
+  transition: none;
+}
+.ios-data .kpi-card:hover,
+.ios-data .kpi-card.large:hover { transform: none; box-shadow: none; }
+
+.ios-data .kpi-header { margin-bottom: 4px; }
+.ios-data .kpi-title,
+.ios-data .kpi-card.large .kpi-title {
+  font-size: 12px;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: var(--ios-label-3);
+}
+.ios-data .kpi-value,
+.ios-data .kpi-card.large .kpi-value {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -.024em;
+  color: var(--ios-label);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 1px;
+}
+.ios-data .kpi-subtitle,
+.ios-data .kpi-card.large .kpi-subtitle {
+  font-size: 12.5px;
+  color: var(--ios-label-3);
+}
+
+/* ─── Grafik kartları ────────────────────────────────────────────────────── */
+.ios-data .chart-card,
+.ios-data .data-table {
+  background: var(--ios-card);
+  border: none;
+  border-radius: var(--ios-radius);
+  box-shadow: none;
+  padding: 13px;
+  transition: none;
+}
+.ios-data .chart-card:hover { transform: none; box-shadow: none; }
+
+.ios-data .chart-title,
+.ios-data .data-table-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.012em;
+  color: var(--ios-label);
+}
+
+/*
+ * Satır içi `linear-gradient` ile çizilmiş dekoratif kutulara DOKUNULMUYOR.
+ *
+ * Denendi ve geri alındı: hepsini beyaz karta indirgeyen tek bir kural,
+ * içlerindeki beyaz yazıyı beyaz zeminde bırakıyordu — metin rengi çocuk
+ * düğümlerde satır içi tanımlı olduğu için kuralın erişemediği yerde
+ * kalıyor. Bu kutuların düzeltilmesi sayfanın kendi kodunda yapılmalı.
+ */

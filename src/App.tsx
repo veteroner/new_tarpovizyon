@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
-import TarpoShell from './components/TarpoShell';
+import DataShell from './components/DataShell';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
 // Mobile imports
 import { isPlatform } from './mobile/utils/platform';
@@ -155,8 +155,10 @@ function AppContent() {
           <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
           <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
 
-          {/* TARPOVIZYON - Veri Sayfaları (TarpoShell layout) */}
-          <Route element={<TarpoShell />}>
+          {/* TARPOVIZYON - Veri Sayfaları
+              Kabuk cihaza göre seçiliyor: geniş ekranda pano (TarpoShell),
+              dar ekranda ve Capacitor'da iOS kabuğu. Rotalar tek yerde. */}
+          <Route element={<DataShell />}>
             <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
             <Route path="/tarpovizyon/commodity-prices" element={<ErrorBoundary><CommodityPricesPage /></ErrorBoundary>} />
             <Route path="/tarpovizyon/ai-assistant" element={<ErrorBoundary><AIAssistantPage /></ErrorBoundary>} />

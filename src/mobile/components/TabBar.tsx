@@ -1,4 +1,9 @@
-import { NavLink, useLocation } from 'react-router-dom';
+/*
+ * `NavLink` değil `Link`: NavLink `aria-current`'ı KENDİ eşleşmesine göre
+ * yazıyor ve dışarıdan verileni yok sayıyor. Veri sayfaları Keşfet sekmesine
+ * bağlanacağı için aktiflik kararı bu bileşende, aşağıda veriliyor.
+ */
+import { Link, useLocation } from 'react-router-dom';
 import { Home, Compass, BarChart3, Bot, Settings } from 'lucide-react';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { isPlatform } from '../utils/platform';
@@ -43,13 +48,21 @@ export default function TabBar() {
   return (
     <nav className="ios-tabbar" aria-label="Ana gezinme">
       {tabs.map((tab) => {
+        /*
+         * Veri sayfaları Keşfet'in altında sayılıyor. Kullanıcı oraya
+         * Keşfet'ten giriyor; sekmelerin hiçbirinin yanmaması "uygulamanın
+         * dışına çıktım" hissi veriyordu.
+         */
+        const veriSayfasi = location.pathname.startsWith('/tarpovizyon/');
         const aktif = tab.path === '/m'
           ? location.pathname === '/m'
-          : location.pathname.startsWith(tab.path);
+          : tab.path === '/m/explore'
+            ? location.pathname.startsWith('/m/explore') || veriSayfasi
+            : location.pathname.startsWith(tab.path);
         const Icon = tab.icon;
 
         return (
-          <NavLink
+          <Link
             key={tab.path}
             to={tab.path}
             onClick={hapticTap}
@@ -60,7 +73,7 @@ export default function TabBar() {
                 filled/outline ayrımı. Renk tek başına anlam taşımıyor. */}
             <Icon size={24} strokeWidth={aktif ? 2.4 : 1.7} aria-hidden="true" />
             <span>{tab.label}</span>
-          </NavLink>
+          </Link>
         );
       })}
     </nav>

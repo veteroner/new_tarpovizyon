@@ -36,6 +36,13 @@
   --ios-orange: #ff9500;
   --ios-blue: #007aff;
 
+  /*
+   * METİN için ayrı kırmızı. iOS'un systemRed'i (#ff3b30) beyaz zeminde
+   * 3.3:1 — küçük metin için WCAG'nin 4.5:1 sınırının altında. İkon ve dolgu
+   * gibi büyük alanlarda parlak ton kalıyor, YAZIDA koyu tonu kullanılıyor.
+   */
+  --ios-red-text: #d70015;
+
   /* Ölçüler — 44 pt dokunma hedefi HIG zorunluluğu */
   --ios-touch: 44px;
   --ios-radius: 11px;
@@ -65,6 +72,8 @@
   --ios-tint: #30d158;
   --ios-tint-deep: #30d158;
   --ios-red: #ff453a;
+  /* Koyu zeminde parlak kırmızı zaten yeterli kontrasta sahip. */
+  --ios-red-text: #ff453a;
   --ios-orange: #ff9f0a;
   --ios-blue: #0a84ff;
 }
@@ -129,6 +138,34 @@
   margin: 2px 0 0;
 }
 
+/* ─── Arama alanı ────────────────────────────────────────────────────────── */
+.ios-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ios-fill);
+  border-radius: 10px;
+  padding: 0 9px;
+  /* 36 px iOS'un arama alanı yüksekliği; alanın TAMAMI odaklanabilir olduğu
+     için 44 pt kuralı burada girdi alanının kendisiyle karşılanıyor. */
+  min-height: 36px;
+  color: var(--ios-label-3);
+}
+.ios-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  /* 16 px altı iOS'ta odaklanınca sayfayı otomatik yakınlaştırır. */
+  font-size: 16px;
+  color: var(--ios-label);
+  padding: 7px 0;
+  outline: none;
+}
+.ios-search input::placeholder { color: var(--ios-label-3); }
+.ios-search:focus-within { outline: 2px solid var(--ios-tint); outline-offset: 1px; }
+
 /* ─── Gruplu liste (inset grouped) ───────────────────────────────────────── */
 .ios-group-header {
   font-size: 12.5px;
@@ -144,6 +181,14 @@
   border-radius: var(--ios-radius);
   overflow: hidden;
 }
+
+/*
+ * Başlıksız bir grup, kendinden önceki gruba yapışıyordu: iki ayrı liste tek
+ * bir kart gibi görünüyor, "Önbelleği temizle" bir önceki grubun son satırı
+ * sanılıyordu. Araya başlığın getirdiği boşluk kadar mesafe.
+ */
+.ios-group + .ios-group,
+.ios-footnote + .ios-group { margin-top: 20px; }
 
 .ios-row {
   display: flex;
@@ -199,6 +244,114 @@
 
 .ios-chev { width: 8px; height: 13px; flex: 0 0 auto; color: #c7c7cc; }
 
+/* Sağa yaslı iki satırlı değer (fiyat + değişim). */
+.ios-value-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-size: 12.5px;
+  font-weight: 600;
+  /* Sayılar sabit genişlikte — sütun satırdan satıra kaymıyor. */
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.ios-value-main { font-size: 16px; font-weight: 600; color: var(--ios-label); }
+
+/* ─── Durum parçaları ────────────────────────────────────────────────────── */
+.ios-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--ios-touch);
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--ios-tint-deep);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ios-refresh:disabled { color: var(--ios-label-3); cursor: default; }
+
+.ios-spin { animation: ios-spin 1s linear infinite; }
+@keyframes ios-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ios-spin { animation: none; } }
+
+.ios-skeleton {
+  display: block;
+  height: 13px;
+  border-radius: 4px;
+  background: var(--ios-fill);
+}
+
+.ios-empty {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  background: var(--ios-card);
+  border-radius: var(--ios-radius);
+  padding: 26px 16px;
+  margin-top: 12px;
+  color: var(--ios-label-3);
+  text-align: center;
+}
+.ios-empty svg { color: var(--ios-red); }
+
+.ios-btn {
+  min-height: var(--ios-touch);
+  padding: 0 18px;
+  border: none;
+  border-radius: 9px;
+  background: var(--ios-tint);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ios-btn:active { filter: brightness(.93); }
+.ios-btn.ios-btn-quiet { background: var(--ios-fill); color: var(--ios-label); }
+.ios-btn.ios-btn-danger { background: none; color: var(--ios-red-text); }
+
+/* ─── Anahtar (switch) ───────────────────────────────────────────────────── */
+.ios-switch {
+  flex: 0 0 auto;
+  width: 51px;   /* iOS anahtarının gerçek ölçüsü */
+  height: 31px;
+  border: none;
+  border-radius: 16px;
+  background: #e9e9ea;
+  padding: 2px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.ios-switch.is-on { background: var(--ios-tint); }
+.ios-knob {
+  display: block;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+  transition: transform .2s;
+}
+.ios-switch.is-on .ios-knob { transform: translateX(20px); }
+:root[data-theme='dark'] .ios-switch { background: #39393d; }
+@media (prefers-reduced-motion: reduce) {
+  .ios-switch, .ios-knob { transition: none; }
+}
+
+/* Grup altı açıklama — iOS'ta bu metin listenin dışında, küçük ve gri. */
+.ios-footnote {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ios-label-3);
+  padding: 7px 16px 0;
+  margin: 0;
+}
+.ios-footnote-center { text-align: center; padding-top: 28px; }
+
 /* ─── Sayı kartları ──────────────────────────────────────────────────────── */
 .ios-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -222,7 +375,7 @@
   font-variant-numeric: tabular-nums;
 }
 .ios-up { color: var(--ios-tint-deep); }
-.ios-down { color: var(--ios-red); }
+.ios-down { color: var(--ios-red-text); }
 
 /* ─── Grafik kartı ───────────────────────────────────────────────────────── */
 .ios-chart-card {
@@ -273,6 +426,153 @@
   color: var(--ios-label-3);
   margin: 9px 0 2px;
 }
+
+/* ─── Sohbet ─────────────────────────────────────────────────────────────── */
+/* Yazma alanı sekme çubuğunun üstünde sabit duruyor; sohbet onun altında
+   kalmasın diye ek boşluk. */
+.ios-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+  padding-bottom: calc(122px + env(safe-area-inset-bottom));
+}
+
+.ios-bubble {
+  max-width: 82%;
+  padding: 8px 12px 6px;
+  border-radius: 17px;
+  font-size: 15.5px;
+  line-height: 1.38;
+  /* Kuyruk tarafındaki köşe sivri — iOS Mesajlar'ın balon biçimi. */
+}
+.ios-bubble-user {
+  align-self: flex-end;
+  background: var(--ios-tint);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+.ios-bubble-assistant {
+  align-self: flex-start;
+  background: var(--ios-card);
+  color: var(--ios-label);
+  border-bottom-left-radius: 5px;
+}
+
+.ios-bubble-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ios-bubble-time {
+  display: block;
+  font-size: 10.5px;
+  opacity: .62;
+  text-align: right;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Markdown yanıtın içi: başlıklar balonu ezmesin. */
+.ios-md :is(h1, h2, h3) { font-size: 15.5px; font-weight: 700; margin: 8px 0 3px; }
+.ios-md p { margin: 0 0 7px; }
+.ios-md p:last-child { margin-bottom: 0; }
+/*
+ * Tailwind'in preflight'ı `ul`'un madde işaretini ve girintisini sıfırlıyor;
+ * yanıt maddeleri işaretsiz, hizasız duruyordu. Burada geri veriliyor.
+ */
+.ios-md ul { list-style: disc; margin: 0 0 7px; padding-left: 20px; }
+.ios-md ol { list-style: decimal; margin: 0 0 7px; padding-left: 22px; }
+.ios-md li { margin: 0 0 3px; }
+/* Gevşek listede her madde bir <p> sarmalıyor; kendi alt boşluğunu ekleyip
+   maddeler arasını iki katına çıkarıyordu. */
+.ios-md li > p { margin: 0; }
+.ios-md code {
+  font-size: 13px;
+  background: var(--ios-fill);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+/* Kod ve tablo balonu yatay taşırmasın — sayfa yana kaymamalı. */
+.ios-md :is(pre, table) { overflow-x: auto; display: block; max-width: 100%; }
+
+.ios-chat-empty {
+  margin: auto 0;
+  text-align: center;
+  color: var(--ios-label-3);
+  font-size: 14px;
+  padding: 12px 8px;
+}
+.ios-chat-empty-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ios-label);
+  margin: 0 0 5px;
+  letter-spacing: -.02em;
+}
+
+.ios-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.ios-chip {
+  border: none;
+  background: var(--ios-card);
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 13.5px;
+  padding: 9px 13px;
+  border-radius: 16px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.ios-chip:active { background: var(--ios-fill); }
+
+/* Yazma alanı — sekme çubuğunun tam üstünde. */
+.ios-composer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(49px + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--ios-card) 94%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: .5px solid var(--ios-separator);
+}
+.ios-composer input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: .5px solid var(--ios-separator);
+  border-radius: 18px;
+  background: var(--ios-bg);
+  color: var(--ios-label);
+  font: inherit;
+  /* 16 px altı odaklanınca iOS sayfayı yakınlaştırır. */
+  font-size: 16px;
+  outline: none;
+}
+.ios-composer input:focus { border-color: var(--ios-tint); }
+
+.ios-send {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ios-tint);
+  /* Yeşil zeminde BEYAZ ok — koyu metin kontrast sınırının altındaydı. */
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.ios-send:disabled { background: var(--ios-fill); color: var(--ios-label-3); cursor: default; }
 
 /* ─── Alt sekme çubuğu ───────────────────────────────────────────────────── */
 .ios-tabbar {
