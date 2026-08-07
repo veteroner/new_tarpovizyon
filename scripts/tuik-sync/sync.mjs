@@ -195,6 +195,17 @@ async function syncWide(ds) {
     byPeriod.get(r.TIME_PERIOD)[col] = toNumber(r.OBS_VALUE, ds.decimals);
   }
 
+  /*
+   * TÜİK henüz yayımlamadığı aylar için de satır döndürüyor; OBS_VALUE boş
+   * geliyor ve toNumber bunu null yapıyor. Bu dönemleri yazmak tabloya
+   * TAMAMI BOŞ satırlar ekliyordu — arayüz de onları 0 diye çizip "Aralık
+   * 2025'te yumurta üretimi sıfır" gibi bir grafik çıkarıyordu.
+   * Hiçbir sütununda değer olmayan dönem hiç yazılmaz.
+   */
+  for (const [period, values] of [...byPeriod]) {
+    if (cols.every((c) => values[c] === null || values[c] === undefined)) byPeriod.delete(period);
+  }
+
   const existing = new Map();
   for (const r of await d1(`SELECT substr(${ds.periodColumn},1,7) AS p, ${cols.join(',')} FROM ${ds.table}`)) {
     existing.set(String(r.p), r);
@@ -250,7 +261,9 @@ async function syncLong(ds) {
     const [y, m] = r.TIME_PERIOD.split('-');
     const yil = Number(y);
     const ay = Number(m);
-    wanted.set(`${label ?? ''}|${yil}|${ay}`, { label, yil, ay, value: toNumber(r.OBS_VALUE, ds.decimals) });
+    const value = toNumber(r.OBS_VALUE, ds.decimals);
+    if (value === null) continue; // yayımlanmamış dönem — boş satır yazma (bkz. 'wide' yolundaki not)
+    wanted.set(`${label ?? ''}|${yil}|${ay}`, { label, yil, ay, value });
   }
   if (!wanted.size) throw new Error(`${ds.flow}: eşleşen etiket bulunamadı. Kod listesi değişmiş olabilir.`);
 

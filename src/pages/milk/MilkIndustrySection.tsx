@@ -88,7 +88,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="yogurt_ton" name="Yoğurt" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} />
+              <Area type="monotone" dataKey="yogurt_ton" name="Yoğurt" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="yogurt_ton" stroke="#059669" strokeWidth={3} dot={{ fill: '#059669', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -114,7 +114,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="inek_peyniri_ton" name="Peynir" fill="#f59e0b" stroke="#f59e0b" fillOpacity={0.4} strokeWidth={2} />
+              <Area type="monotone" dataKey="inek_peyniri_ton" name="Peynir" fill="#f59e0b" stroke="#f59e0b" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="inek_peyniri_ton" stroke="#d97706" strokeWidth={3} dot={{ fill: '#d97706', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -140,7 +140,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="ayran_ton" name="Ayran" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.4} strokeWidth={2} />
+              <Area type="monotone" dataKey="ayran_ton" name="Ayran" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="ayran_ton" stroke="#2563eb" strokeWidth={3} dot={{ fill: '#2563eb', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -166,7 +166,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="icme_sutu_pastorize_uht_vb_ton" name="İçme Sütü" fill="#06b6d4" stroke="#06b6d4" fillOpacity={0.4} strokeWidth={2} />
+              <Area type="monotone" dataKey="icme_sutu_pastorize_uht_vb_ton" name="İçme Sütü" fill="#06b6d4" stroke="#06b6d4" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="icme_sutu_pastorize_uht_vb_ton" stroke="#0891b2" strokeWidth={3} dot={{ fill: '#0891b2', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -192,7 +192,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="tereyag_ton" name="Tereyağı" fill="#eab308" stroke="#eab308" fillOpacity={0.4} strokeWidth={2} />
+              <Area type="monotone" dataKey="tereyag_ton" name="Tereyağı" fill="#eab308" stroke="#eab308" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="tereyag_ton" stroke="#ca8a04" strokeWidth={3} dot={{ fill: '#ca8a04', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -244,7 +244,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Area type="monotone" dataKey="inek_sutu_ton" name="Ham İnek Sütü" fill="#22c55e" stroke="#22c55e" fillOpacity={0.3} strokeWidth={2} />
+              <Area type="monotone" dataKey="inek_sutu_ton" name="Ham İnek Sütü" fill="#22c55e" stroke="#22c55e" fillOpacity={0.3} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="inek_sutu_ton" stroke="#16a34a" strokeWidth={4} dot={{ fill: '#16a34a', r: 4 }} />
             </ComposedChart>
           </ResponsiveContainer>

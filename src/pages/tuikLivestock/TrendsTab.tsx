@@ -63,7 +63,7 @@ export default function TrendsTab({
               <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip formatter={(value: number, name: string) => [`${formatNumber(value)} baş`, name]} />
               <Legend />
-              <Area type="monotone" dataKey="value" name="Gerçek Veri" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} />
+              <Area type="monotone" dataKey="value" name="Gerçek Veri" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="value" strokeDasharray="5 5" stroke="#f59e0b" strokeWidth={2} name="Tahmin" dot={{ fill: '#f59e0b', r: 4 }} />
               <ReferenceLine x={yearLabel} stroke="#ef4444" strokeDasharray="3 3" label="Güncel" />
             </ComposedChart>

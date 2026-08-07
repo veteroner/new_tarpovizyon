@@ -28,8 +28,9 @@ export interface RedMeatData {
 
 export interface PoultryData {
   tarih: string;
-  tavuk_yumurtasi_bin_adet: number;
-  tavuk_eti_ton: number;
+  // null = TÜİK o ayı henüz yayımlamadı (0 DEĞİL — grafikte boşluk olmalı)
+  tavuk_yumurtasi_bin_adet: number | null;
+  tavuk_eti_ton: number | null;
 }
 
 export interface CityData {

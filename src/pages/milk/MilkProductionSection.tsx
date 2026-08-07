@@ -176,8 +176,7 @@ export default function MilkProductionSection({
                 fill="#8b5cf6" 
                 stroke="#8b5cf6"
                 fillOpacity={0.3}
-                strokeWidth={2}
-              />
+                strokeWidth={2} tooltipType="none" legendType="none" />
               <Line 
                 type="monotone" 
                 dataKey="totalTon" 
@@ -321,8 +320,7 @@ export default function MilkProductionSection({
                       fill="#8b5cf6" 
                       stroke="#8b5cf6"
                       fillOpacity={0.2}
-                      strokeWidth={2}
-                    />
+                      strokeWidth={2} tooltipType="none" legendType="none" />
                     <Line 
                       type="monotone" 
                       dataKey="cig_sut_verimi_lt" 

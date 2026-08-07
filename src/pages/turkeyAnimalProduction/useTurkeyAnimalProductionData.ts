@@ -41,7 +41,8 @@ export interface UseTurkeyAnimalProductionDataReturn {
   redMeatBreakdown: { name: string; value: number; color: string }[];
   redMeatTrendData: Record<string, string | number>[];
   buyukbasKucukbasData: Record<string, string | number>[];
-  poultryMonthlyData: Record<string, string | number>[];
+  // null taşır: TÜİK yayımlamamış ay grafikte boşluk olarak çizilir
+  poultryMonthlyData: Record<string, string | number | null>[];
   worldBeefRanking: WorldRankingItem[];
   worldMilkRanking: WorldRankingItem[];
   worldChickenRanking: WorldRankingItem[];
@@ -65,6 +66,13 @@ function buildWorldRanking(worldData: WorldData[], urun: string): WorldRankingIt
   return list.slice(0, 10).map((d, i) => ({ ulke: d.ulke, uretim: d.uretim_miktari_ton, isTurkey: false, rank: i + 1 }));
 }
 
+/** Değer yoksa null döner; 0 DÖNMEZ — "veri yok" ile "üretim sıfır" aynı şey değil. */
+function sayiVeyaBos(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataReturn {
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
   const [worldData, setWorldData] = useState<WorldData[]>([]);
@@ -82,7 +90,17 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         fetchRows('oner/hayvansal-urun-uretimi', { limit: 200 }),
         fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 }),
         fetchRows('oner/kirmizi-et-uretimi', { limit: 200 }),
-        fetchRows('oner/kanatli-uretimleri', { limit: 500 }),
+        /*
+         * DİKKAT — 'oner/kanatli-uretimleri' DEĞİL.
+         *
+         * İki tablo aynı veriyi tutuyor: oner_kanatli_uretimleri eski MySQL
+         * göçünden kalma DONMUŞ kopya (2025-11'de duruyor, üstelik 5 tane
+         * tamamı boş satırı var), kanatli_uretimleri ise günlük TÜİK senkron
+         * işinin (scripts/tuik-sync) güncel tuttuğu tablo — 2026-05'e kadar
+         * dolu. Örtüşen 196 ayın 12'sinde de değerler farklı; TÜİK aylık
+         * rakamları revize ediyor ve doğru olan senkron tablosundaki.
+         */
+        fetchRows('kanatli/uretimleri', { limit: 500 }),
         // SUM(CASE WHEN grup=… ) pivotu: grup/kategori kırılımı çekilip
         // istemcide pivotlanıyor.
         fetchAgg(R_CANLI, { groupBy: ['il', 'grup', 'kategori'], sum: ['y2024'], where: { duzeykod: 3 } }),
@@ -170,8 +188,13 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
       if ((poultryRes.data?.length ?? 0) > 0) {
         setPoultryData((poultryRes.data as Record<string, string | number>[]).map(row => ({
           tarih: String(row['tarih'] || ''),
-          tavuk_yumurtasi_bin_adet: parseFloat(String(row['tavuk_yumurtasi_bin_adet'] || '0')) || 0,
-          tavuk_eti_ton: parseFloat(String(row['tavuk_eti_ton'] || '0')) || 0,
+          /*
+           * NULL'u 0'a çevirmek YANLIŞ: TÜİK'in henüz yayımlamadığı aylar
+           * "üretim sıfır" diye çiziliyordu. Veri yoksa null kalmalı —
+           * Recharts null'da çizgiyi kesip boşluk bırakıyor.
+           */
+          tavuk_yumurtasi_bin_adet: sayiVeyaBos(row['tavuk_yumurtasi_bin_adet']),
+          tavuk_eti_ton: sayiVeyaBos(row['tavuk_eti_ton']),
         })));
       }
 
@@ -274,7 +297,11 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
   const poultryMonthlyData = useMemo(() => poultryData.map(d => ({
     ay: d.tarih.substring(0, 7),
     'Tavuk Eti (ton)': d.tavuk_eti_ton,
-    'Yumurta (M adet)': (d.tavuk_yumurtasi_bin_adet / 1_000).toFixed(1),
+    // toFixed bir METİN üretiyordu; Recharts metni sayı sanıp ölçekliyor ama
+    // null olan ayda "null" metni çıkıyordu. Sayı bırakıp null'u koruyoruz.
+    'Yumurta (M adet)': d.tavuk_yumurtasi_bin_adet === null
+      ? null
+      : Math.round(d.tavuk_yumurtasi_bin_adet / 100) / 10,
   })), [poultryData]);
 
   const worldBeefRanking = useMemo(() => buildWorldRanking(worldData, 'Sığır Eti (Manda Hariç)'), [worldData]);

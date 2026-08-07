@@ -109,7 +109,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
-              <Area type="monotone" dataKey="production" stroke="#ea580c" strokeWidth={3} fillOpacity={1} fill="url(#colorTurkey)" />
+              <Area type="monotone" dataKey="production" stroke="#ea580c" strokeWidth={3} fillOpacity={1} fill="url(#colorTurkey)" tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="production" stroke="#dc2626" strokeWidth={2} dot={{ fill: '#ea580c', r: 4 }} activeDot={{ r: 6 }} />
             </ComposedChart>
           </ResponsiveContainer>
