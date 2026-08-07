@@ -1,186 +1,163 @@
 /**
- * Elle veri yükleme ucu.
+ * Veri düzenleme uçları (katalog + satır yazma).
  *
- * TÜİK'in bazı serileri (il bazlı hayvan sayıları, verimlilikler, arıcı
- * sayısı, TÜFE…) SDMX API'sinde YAYIMLANMIYOR; yalnızca MEDAS/portal
- * üzerinden elle indirilebiliyor. Bu uç, indirilen dosyanın panelden
- * yüklenebilmesi için var.
+ * TÜİK'in bir kısım serisi API'de yayımlanmıyor; ayrıca kullanıcı zaman zaman
+ * elle düzeltme yapmak istiyor. Bu uçlar paneldeki ızgara editörünü besliyor.
  *
  * ─── GÜVENLİK ───────────────────────────────────────────────────────────────
- * Bu, üretim veritabanına YAZAN tek uç. Üç katman:
+ * Yazan tek uç burası. Katmanlar:
  *
- *  1. Ayrı anahtar. Okuma anahtarı (x-api-key) İŞE YARAMAZ; `x-admin-key`
- *     başlığı `env.ADMIN_KEY` secret'ıyla birebir eşleşmeli. Secret depoda
- *     değil, `wrangler secret put ADMIN_KEY` ile tutuluyor.
- *  2. Beyaz liste. Yalnızca aşağıdaki TABLOLAR ve yalnızca burada YAZILI
- *     sütunlar yazılabilir. Listede olmayan tablo/sütun 400 döner —
- *     istemcinin gönderdiği hiçbir isim doğrudan SQL'e girmiyor.
- *  3. Bağlı parametre. Bütün değerler `?` ile bağlanıyor; SQL'e string
- *     birleştirmesiyle hiçbir veri girmiyor.
+ *  1. Ayrı anahtar. Okuma anahtarı işe yaramaz; `x-admin-key` başlığı
+ *     `env.ADMIN_KEY` secret'ıyla eşleşmeli. Secret tanımlı değilse uç
+ *     TAMAMEN KAPALI (fail-closed).
+ *  2. Tablo beyaz listesi. Yazılabilir tablolar ROUTES'tan geliyor; istemcinin
+ *     gönderdiği isim doğrudan SQL'e girmiyor, listede aranıyor.
+ *  3. Sütun doğrulaması VERİTABANINDAN. Sütun adları PRAGMA ile tablonun
+ *     kendisinden okunuyor; istemcinin uydurduğu bir sütun adı SQL'e giremez.
+ *  4. Bağlı parametre. Bütün DEĞERLER `?` ile bağlanıyor.
  *
- * Ayrıca: DELETE/DROP yok, rastgele SQL yok, istek başına satır sınırı var.
- * En kötü durumda beyaz listedeki bir tablonun beyaz listedeki bir sütunu
- * yanlış değer alır — geri alınabilir, yıkıcı değil.
+ * DELETE yok, DROP yok, serbest SQL yok, istek başına satır sınırı var.
+ *
+ * ─── NEDEN `id` ─────────────────────────────────────────────────────────────
+ * Upsert'i "iş anahtarı" ile yapmak tehlikeli: aynı sütun tabloda
+ * '2023-01-01 00:00:00', dosyada '2023' olabiliyor ve eşleşmeyince satır
+ * güncellenmek yerine ikizleniyor. Bu yüzden düzenleme KİMLİĞİ `id`:
+ * ızgaradan gelen `id`'li satır GÜNCELLENİR, `id`'siz satır EKLENİR.
+ * Kullanıcı hangi satırı düzenlediğini ekranda görüyor, tahmin yok.
  */
 
-/** İstek başına en fazla satır. Ön yüz bundan büyük dosyaları parçalayarak yollar. */
 export const MAX_ROWS = 500;
 
+/** Yazmaya kapalı sütunlar — kimlik ve otomatik alanlar. */
+const YAZILAMAZ = new Set(['id', 'created_at', 'updated_at']);
+
+const q = (isim) => `"${String(isim).replace(/"/g, '""')}"`;
+
+/** Tablonun gerçek sütunlarını veritabanından okur. */
+async function sutunlar(env, tablo) {
+  const { results } = await env.DB.prepare(
+    'SELECT name, type FROM pragma_table_info(?)',
+  ).bind(tablo).all();
+  return results ?? [];
+}
+
 /**
- * Yüklenebilir tablolar.
- *
- *   keys : satırı tekilleştiren İŞ anahtarı (id değil — id otomatik artan
- *          vekil anahtar, dosyada karşılığı yok).
- *   cols : yazılabilir sütunlar. Buraya eklenmemiş sütun yazılamaz.
- *   nums : sayıya çevrilecek sütunlar (dosyadan metin gelebiliyor).
+ * Katalog: hangi tablolar düzenlenebilir, hangi sayfalarda kullanılıyor.
+ * `ROUTES` okuma rotalarının tablo eşlemesi; yazma da aynı listeyle sınırlı.
  */
-export const UPLOAD_TABLES = {
-  'il-hayvan-sayilari': {
-    table: 'oner_i_llerin_hayvan_sayisi',
-    label: 'İl Bazında Hayvan Sayıları',
-    keys: ['il', 'tarih'],
-    cols: ['il', 'tarih', 'sigir_varligi_bas', 'manda_varligi_bas', 'koyun_varligi_bas',
-      'keci_varligi_bas', 'arici_sayisi', 'bal_uretimi_ton', 'aricilik_yapan_isletme_sayisi_adet',
-      'yeni_kovan_sayisi_adet', 'eski_kovan_sayisi_adet', 'kovan_varligi_adet',
-      'balmumu_uretimi_ton', 'bal_verimi_kg', 'et_tavugu_sayisi', 'yumurta_tavugu_sayisi',
-      'toplam_hayvan_varligi'],
-    nums: ['sigir_varligi_bas', 'manda_varligi_bas', 'koyun_varligi_bas', 'keci_varligi_bas',
-      'arici_sayisi', 'bal_uretimi_ton', 'aricilik_yapan_isletme_sayisi_adet',
-      'yeni_kovan_sayisi_adet', 'eski_kovan_sayisi_adet', 'kovan_varligi_adet',
-      'balmumu_uretimi_ton', 'bal_verimi_kg', 'et_tavugu_sayisi', 'yumurta_tavugu_sayisi',
-      'toplam_hayvan_varligi'],
-  },
-  'verimlilikler': {
-    table: 'oner_verimlilikler',
-    label: 'Verimlilikler',
-    keys: ['yil'],
-    cols: ['yil', 'cig_sut_verimi_lt', 'buyukbas_karkas_et_verimi_kg',
-      'kucukbas_karkas_et_verimi_kg', 'bal_verimi_kg'],
-    nums: ['cig_sut_verimi_lt', 'buyukbas_karkas_et_verimi_kg',
-      'kucukbas_karkas_et_verimi_kg', 'bal_verimi_kg'],
-  },
-  'arici-sayisi': {
-    table: 'il_arici_sayisi_yillik',
-    label: 'İllere Göre Arıcı Sayısı',
-    keys: ['il', 'yil'],
-    cols: ['il', 'yil', 'arici_sayisi'],
-    nums: ['yil', 'arici_sayisi'],
-  },
-  'kisi-basi-uretim-tuketim': {
-    table: 'tr_kisi_basi_uretim_tuketim',
-    label: 'Kişi Başı Üretim / Tüketim',
-    keys: ['yil'],
-    cols: ['yil', 'nufus_kisi', 'toplam_sut_uretimi', 'sut_uretimi_kg_kisi',
-      'sut_tuketimi_kg_kisi', 'yumurta_uretimi_adet_kisi', 'yumurta_tuketimi_adet_kisi',
-      'tavuk_eti_uretim_kg_kisi', 'tavuk_eti_tuketim_kg_kisi', 'kisi_basina_bal_uretimi_kg_kisi'],
-    nums: ['nufus_kisi', 'toplam_sut_uretimi', 'sut_uretimi_kg_kisi', 'sut_tuketimi_kg_kisi',
-      'yumurta_uretimi_adet_kisi', 'yumurta_tuketimi_adet_kisi', 'tavuk_eti_uretim_kg_kisi',
-      'tavuk_eti_tuketim_kg_kisi', 'kisi_basina_bal_uretimi_kg_kisi'],
-  },
-  'fiyat-endeks': {
-    table: 'tuik_fiyatendex',
-    label: 'Fiyat Endeksleri (TÜFE / T-ÜFE / T-GFE / FAO)',
-    keys: ['endeks', 'maddekod', 'urun', 'yil'],
-    cols: ['alan', 'endeks', 'maddekod', 'urun', 'yil', 'd1', 'd2', 'd3', 'd4', 'bazyil',
-      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
-    nums: ['yil', 'd1', 'd2', 'd3', 'd4', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs',
-      'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
-  },
-};
+export async function handleCatalog(env, ROUTES, SAYFA_HARITASI) {
+  const gorulen = new Set();
+  const out = [];
+  for (const [rota, cfg] of Object.entries(ROUTES)) {
+    if (!cfg?.table || gorulen.has(cfg.table)) continue;
+    gorulen.add(cfg.table);
+    out.push({
+      tablo: cfg.table,
+      rota,
+      sayfalar: SAYFA_HARITASI[cfg.table] ?? [],
+    });
+  }
+  out.sort((a, b) => a.tablo.localeCompare(b.tablo, 'tr'));
+  return { tablolar: out };
+}
 
-const q = (isim) => `"${isim.replace(/"/g, '""')}"`;
+/** Tek tablonun şeması — ızgara sütunlarını kurmak için. */
+export async function handleSchema(env, ROUTES, tablo) {
+  const gecerli = Object.values(ROUTES).some((c) => c?.table === tablo);
+  if (!gecerli) return { status: 400, body: { error: 'Bilinmeyen tablo' } };
+  const cols = await sutunlar(env, tablo);
+  if (!cols.length) return { status: 404, body: { error: 'Tablo bulunamadı' } };
+  return {
+    status: 200,
+    body: {
+      tablo,
+      idVar: cols.some((c) => c.name === 'id'),
+      sutunlar: cols.map((c) => ({
+        ad: c.name,
+        tur: c.type,
+        yazilabilir: !YAZILAMAZ.has(c.name),
+      })),
+    },
+  };
+}
 
-/** Dosyadan gelen değeri sütun türüne göre normalize eder. */
-function deger(cfg, sutun, ham) {
+/** Değeri sütun türüne göre normalize eder. */
+function deger(tur, ham) {
   if (ham === undefined || ham === null || ham === '') return null;
-  if (!cfg.nums.includes(sutun)) return String(ham);
+  const sayisal = /INT|REAL|NUM|DOUB|FLOA/i.test(tur || '');
+  if (!sayisal) return String(ham);
   const n = Number(String(ham).replace(/\s/g, '').replace(',', '.'));
   return Number.isFinite(n) ? n : null;
 }
 
 /**
- * @returns {{status:number, body:object}}
+ * Satır yazma. Gövde: { tablo, guncellenecek: [{id, ...}], eklenecek: [{...}] }
  */
-export async function handleUpload(request, env) {
-  if (request.method !== 'POST') {
-    return { status: 405, body: { error: 'Yalnızca POST' } };
-  }
+export async function handleRows(request, env, ROUTES) {
+  if (request.method !== 'POST') return { status: 405, body: { error: 'Yalnızca POST' } };
 
-  const gelenAnahtar = request.headers.get('x-admin-key') ?? '';
   const beklenen = env.ADMIN_KEY ?? '';
-  // Secret tanımlı değilse uç tamamen kapalı — varsayılan olarak açık kalmasın.
-  if (!beklenen || gelenAnahtar !== beklenen) {
+  if (!beklenen || (request.headers.get('x-admin-key') ?? '') !== beklenen) {
     return { status: 401, body: { error: 'Yetkisiz' } };
   }
 
   let govde;
-  try {
-    govde = await request.json();
-  } catch {
-    return { status: 400, body: { error: 'Geçersiz JSON' } };
+  try { govde = await request.json(); } catch { return { status: 400, body: { error: 'Geçersiz JSON' } }; }
+
+  const tablo = govde?.tablo;
+  if (!Object.values(ROUTES).some((c) => c?.table === tablo)) {
+    return { status: 400, body: { error: 'Bilinmeyen tablo' } };
   }
 
-  const cfg = UPLOAD_TABLES[govde?.hedef];
-  if (!cfg) {
-    return { status: 400, body: { error: 'Bilinmeyen hedef', gecerli: Object.keys(UPLOAD_TABLES) } };
+  const guncellenecek = Array.isArray(govde.guncellenecek) ? govde.guncellenecek : [];
+  const eklenecek = Array.isArray(govde.eklenecek) ? govde.eklenecek : [];
+  if (guncellenecek.length + eklenecek.length === 0) {
+    return { status: 400, body: { error: 'Yazılacak satır yok' } };
   }
-
-  const rows = Array.isArray(govde.rows) ? govde.rows : null;
-  if (!rows || rows.length === 0) return { status: 400, body: { error: 'rows boş' } };
-  if (rows.length > MAX_ROWS) {
+  if (guncellenecek.length + eklenecek.length > MAX_ROWS) {
     return { status: 400, body: { error: `İstek başına en fazla ${MAX_ROWS} satır` } };
   }
 
-  // Gönderilen sütunlar beyaz listede mi?
-  const gelenSutunlar = [...new Set(rows.flatMap((r) => Object.keys(r)))];
-  const izinsiz = gelenSutunlar.filter((c) => !cfg.cols.includes(c));
+  // Sütun adları veritabanından; istemcinin uydurduğu ad buraya giremez.
+  const cols = await sutunlar(env, tablo);
+  const tur = new Map(cols.map((c) => [c.name, c.type]));
+  const yazilabilir = cols.filter((c) => !YAZILAMAZ.has(c.name)).map((c) => c.name);
+  const idVar = cols.some((c) => c.name === 'id');
+
+  const gelen = [...new Set([...guncellenecek, ...eklenecek].flatMap(Object.keys))]
+    .filter((k) => k !== 'id');
+  const izinsiz = gelen.filter((k) => !yazilabilir.includes(k));
   if (izinsiz.length) {
     return { status: 400, body: { error: 'İzin verilmeyen sütun', sutunlar: izinsiz } };
   }
-  const eksikAnahtar = cfg.keys.filter((k) => !gelenSutunlar.includes(k));
-  if (eksikAnahtar.length) {
-    return { status: 400, body: { error: 'Anahtar sütun eksik', sutunlar: eksikAnahtar } };
+  if (guncellenecek.length && !idVar) {
+    return { status: 400, body: { error: 'Bu tabloda id yok; güncelleme yapılamaz' } };
   }
 
-  const yazilacak = gelenSutunlar.filter((c) => cfg.cols.includes(c));
-
-  // Hangi satırlar zaten var? Anahtarlarla tek seferde sorulup ayrılıyor.
-  const anahtarKosul = cfg.keys.map((k) => `${q(k)} = ?`).join(' AND ');
-  const mevcut = new Set();
-  const sorgular = rows.map((r) =>
-    env.DB.prepare(`SELECT ${cfg.keys.map(q).join(',')} FROM ${q(cfg.table)} WHERE ${anahtarKosul} LIMIT 1`)
-      .bind(...cfg.keys.map((k) => deger(cfg, k, r[k]))));
-  const bulunanlar = await env.DB.batch(sorgular);
-  bulunanlar.forEach((sonuc, i) => {
-    if (sonuc.results?.length) mevcut.add(i);
-  });
-
   const ifadeler = [];
-  let eklenen = 0;
-  let guncellenen = 0;
 
-  rows.forEach((r, i) => {
-    const degerler = yazilacak.map((c) => deger(cfg, c, r[c]));
-    if (mevcut.has(i)) {
-      const setSutun = yazilacak.filter((c) => !cfg.keys.includes(c));
-      if (!setSutun.length) return; // yalnızca anahtar gönderilmiş, yazacak bir şey yok
-      guncellenen++;
-      ifadeler.push(env.DB
-        .prepare(`UPDATE ${q(cfg.table)} SET ${setSutun.map((c) => `${q(c)} = ?`).join(', ')} WHERE ${anahtarKosul}`)
-        .bind(
-          ...setSutun.map((c) => deger(cfg, c, r[c])),
-          ...cfg.keys.map((k) => deger(cfg, k, r[k])),
-        ));
-    } else {
-      eklenen++;
-      ifadeler.push(env.DB
-        .prepare(`INSERT INTO ${q(cfg.table)} (${yazilacak.map(q).join(',')}) VALUES (${yazilacak.map(() => '?').join(',')})`)
-        .bind(...degerler));
-    }
-  });
+  for (const r of guncellenecek) {
+    const id = Number(r.id);
+    if (!Number.isInteger(id)) return { status: 400, body: { error: 'Geçersiz id' } };
+    const sutun = Object.keys(r).filter((k) => k !== 'id' && yazilabilir.includes(k));
+    if (!sutun.length) continue;
+    ifadeler.push(env.DB
+      .prepare(`UPDATE ${q(tablo)} SET ${sutun.map((c) => `${q(c)} = ?`).join(', ')} WHERE ${q('id')} = ?`)
+      .bind(...sutun.map((c) => deger(tur.get(c), r[c])), id));
+  }
 
-  if (!ifadeler.length) return { status: 200, body: { eklenen: 0, guncellenen: 0 } };
+  for (const r of eklenecek) {
+    const sutun = Object.keys(r).filter((k) => yazilabilir.includes(k));
+    if (!sutun.length) continue;
+    ifadeler.push(env.DB
+      .prepare(`INSERT INTO ${q(tablo)} (${sutun.map(q).join(',')}) VALUES (${sutun.map(() => '?').join(',')})`)
+      .bind(...sutun.map((c) => deger(tur.get(c), r[c]))));
+  }
+
+  if (!ifadeler.length) return { status: 200, body: { guncellenen: 0, eklenen: 0 } };
   await env.DB.batch(ifadeler);
-  return { status: 200, body: { tablo: cfg.table, eklenen, guncellenen } };
+  return {
+    status: 200,
+    body: { tablo, guncellenen: guncellenecek.length, eklenen: eklenecek.length },
+  };
 }

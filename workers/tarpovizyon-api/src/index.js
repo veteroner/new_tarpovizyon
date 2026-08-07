@@ -551,36 +551,36 @@ async function tradeProductBreakdown(env, table, urunler, yil) {
   return results;
 }
 
-import { handleUpload, UPLOAD_TABLES } from './upload.js';
+import { handleCatalog, handleSchema, handleRows } from './upload.js';
+import { TABLO_SAYFALARI } from './tabloSayfalari.js';
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const slug = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
 
-    // Yazma ucunun ön-uçuş isteği dar CORS ile yanıtlanıyor.
-    if (slug === 'admin/upsert') {
+    // ── Yönetim uçları ──────────────────────────────────────────────────
+    // Yazma ucu dar CORS ile korunuyor; okuma/şema uçları katalog bilgisi
+    // verdiği için normal CORS'ta kalabilir (veri değil, sütun adı).
+    if (slug === 'admin/rows') {
       const cors = yazmaCors(request);
       if (!cors) return new Response(null, { status: 403 });
       if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
-      const { status, body } = await handleUpload(request, env);
+      const { status, body } = await handleRows(request, env, ROUTES);
       return new Response(JSON.stringify(body), {
         status,
         headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors },
       });
     }
+    if (slug === 'admin/catalog') {
+      return json(await handleCatalog(env, ROUTES, TABLO_SAYFALARI));
+    }
+    if (slug.startsWith('admin/schema/')) {
+      const { status, body } = await handleSchema(env, ROUTES, slug.slice('admin/schema/'.length));
+      return json(body, status);
+    }
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
-
-    // Ön yüzün hangi tabloların yüklenebildiğini ve hangi sütunları beklediğini
-    // öğrenmesi için. Şema bilgisi, veri değil — okuma anahtarıyla erişilebilir.
-    if (slug === 'admin/upload-tables') {
-      return json({
-        hedefler: Object.entries(UPLOAD_TABLES).map(([id, c]) => ({
-          id, label: c.label, keys: c.keys, cols: c.cols,
-        })),
-      });
-    }
 
     if (slug === '' || slug === 'routes') {
       return json({ routes: Object.keys(ROUTES).map(k => `/api/${k}`) });
