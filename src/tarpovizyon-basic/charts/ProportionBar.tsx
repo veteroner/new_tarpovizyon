@@ -1,3 +1,5 @@
+import { okunurMetin } from '../../utils/contrast';
+
 const pctFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 });
 
 export type ProportionItem = { name: string; value: number; color: string };
@@ -20,7 +22,9 @@ export function ProportionBar({ items }: { items: ProportionItem[] }) {
             <div
               key={item.name}
               className="tvb-proportion__seg"
-              style={{ width: `${pct}%`, background: item.color }}
+              /* Yazı rengi dilimin KENDİ renginden türetiliyor: palette açık
+                 tonlar da var, sabit beyaz yazı onlarda 2.5:1'e düşüyordu. */
+              style={{ width: `${pct}%`, background: item.color, color: okunurMetin(item.color) }}
               title={`${item.name}: ${pctFmt.format(pct)}%`}
             >
               {pct >= 8 && <span>{pctFmt.format(pct)}%</span>}

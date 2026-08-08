@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import {
   Globe, MapPin, TrendingUp, Package, Sprout, Droplets, FlaskConical, CalendarDays,
+  LayoutGrid,
 } from 'lucide-react';
 import { useWeather } from '../hooks/useApi';
 import {
@@ -36,6 +37,19 @@ const VERI_KAYNAKLARI = [
     yol: '/tarpovizyon/turkey/plant-production',
   },
 ];
+
+/*
+ * Basic ayrı bir uygulama gibi duruyordu ve mobilde hiçbir yerden
+ * erişilemiyordu. Ana sayfada kendi satırı var; Keşfet'te de tüm sayfaları
+ * listeleniyor.
+ */
+const BASIC = {
+  baslik: 'TarpoVizyon Basic',
+  alt: 'Özet göstergeler · 20 rapor',
+  icon: LayoutGrid,
+  renk: 'var(--ios-tint-deep)',
+  yol: '/tarpovizyon-basic',
+};
 
 const PIYASA = [
   { baslik: 'Piyasa fiyatları', alt: 'Borsa ve vadeli', icon: TrendingUp, renk: 'var(--ios-orange)', yol: '/m/market' },
@@ -77,6 +91,14 @@ export default function MobileHomePage() {
         </TileRow>
 
         <ListGroup header="Veri kaynağı">
+          <ListRow
+            key={BASIC.yol}
+            icon={<BASIC.icon size={16} strokeWidth={2.2} />}
+            iconColor={BASIC.renk}
+            title={BASIC.baslik}
+            subtitle={BASIC.alt}
+            onClick={() => navigate(BASIC.yol)}
+          />
           {VERI_KAYNAKLARI.map((k) => (
             <ListRow
               key={k.yol}

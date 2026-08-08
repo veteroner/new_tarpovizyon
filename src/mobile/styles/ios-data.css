@@ -308,3 +308,43 @@
 /* Camgöbeği (#06b6d4) 2.4:1 — koyu adıma. */
 .ios-data [style*="color: rgb(6, 182, 212)"] { color: #0e7490 !important; }
 .ios-data :is(.text-cyan-400, .text-cyan-500) { color: #0e7490 !important; }
+
+/* ─── Araç sayfalarının kendi üst çubuğu ─────────────────────────────────── */
+/*
+ * Hasat/Sulama/Gübre/Takvim sayfaları kendi üst çubuğunu çiziyor ve
+ * içindeki "← Ana Sayfa" düğmesi `navigate('/')` yapıyor — yani kullanıcıyı
+ * MASAÜSTÜ program seçim ekranına atıyor. Mobil uygulamada bu, uygulamadan
+ * çıkmak demekti; kullanıcının bildirdiği "ana sayfa ikonuna basınca eski
+ * UI'ye dönüyor" sorunu buydu.
+ *
+ * Geri dönüş yolunu kabuk veriyor (gezinme çubuğu) ve ana sayfaya dönüş de
+ * sekme çubuğunda. Sayfanın kendi çubuğu gizleniyor.
+ *
+ * "Yeniden Başla" gibi çubuk İÇİNDEKİ işlevsel düğmeler kaybolmasın diye
+ * çubuğun tamamı değil, yalnızca geri düğmesi ve başlığı gizleniyor.
+ */
+.ios-data :is(.hz-topbar__back, .sp-topbar__back, .gh-topbar__back, .tt-topbar__back) {
+  display: none;
+}
+.ios-data :is(.hz-topbar__title, .sp-topbar__title, .gh-topbar__title, .tt-topbar__title) {
+  display: none;
+}
+.ios-data :is(.hz-topbar, .sp-topbar, .gh-topbar, .tt-topbar) {
+  /* Yalnızca kalan düğmeler için ince bir şerit. */
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 0 8px;
+  min-height: 0;
+  justify-content: flex-end;
+}
+/* Çubukta hiç görünür çocuk kalmadıysa şerit de gitsin. */
+.ios-data :is(.hz-topbar, .sp-topbar, .gh-topbar, .tt-topbar):not(:has(button:not([class*="__back"]))) {
+  display: none;
+}
+
+/*
+ * Basic'in sayfa afişi. Gezinme çubuğundaki başlıkla aynı metni bir daha
+ * yazıyor — masaüstünde üst menünün altında anlamlı, kabuğun içinde tekrar.
+ */
+.ios-data .tvb-page__banner { display: none; }

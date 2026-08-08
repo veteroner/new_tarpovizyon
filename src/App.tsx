@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
-import DataShell from './components/DataShell';
+import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
 // Mobile imports
 import { isPlatform } from './mobile/utils/platform';
@@ -103,8 +103,19 @@ function AppContent() {
     !isTarpovizyonHome;
   const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute || isTarpovizyonBasicPage;
 
-  // Show persistent back+home bar when running inside Capacitor on any non-mobile route
-  const showMobilePageHeader = isPlatform('capacitor') && !isMobilePage && !isProgramSelection;
+  /*
+   * Capacitor'daki kalıcı geri+ana sayfa çubuğu.
+   *
+   * Artık YALNIZCA iOS kabuğunun kapsamadığı rotalarda. Veri sayfaları,
+   * Basic ve araçlar kendi gezinme çubuğunu (geri düğmesi + sayfa başlığı)
+   * kabuktan alıyor; bu çubuk orada ikinci bir başlık olarak üst üste
+   * biniyordu. Ayrıca kendi sayfa-adı sözlüğünü taşıyor — menü tek kaynağa
+   * indirildikten sonra dördüncü kopya oluyordu.
+   */
+  const kabukluRota = isTarpoShellRoute || isTarpovizyonBasicPage
+    || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
+  const showMobilePageHeader =
+    isPlatform('capacitor') && !isMobilePage && !isProgramSelection && !kabukluRota;
 
   return (
     <>
@@ -134,13 +145,22 @@ function AppContent() {
           {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}
           <Route path="/" element={isPlatform('capacitor') ? <Navigate to="/m" replace /> : <ProgramSelectionPage />} />
           
-          {/* Hasat Tahmini */}
-          <Route path="/hasat-tahmini" element={<ErrorBoundary><HasatTahminiPage /></ErrorBoundary>} />
-          
-          {/* Çiftçi Araçları */}
-          <Route path="/sulama-plan" element={<ErrorBoundary><SulamaPlanPage /></ErrorBoundary>} />
-          <Route path="/gubre-hesap" element={<ErrorBoundary><GubreHesapPage /></ErrorBoundary>} />
-          <Route path="/tarim-takvim" element={<ErrorBoundary><TarimTakvimPage /></ErrorBoundary>} />
+          {/*
+            * Çiftçi araçları.
+            *
+            * Mobilde iOS kabuğunun İÇİNDE açılıyorlar. Eskiden kabuğun
+            * dışındaydılar: araca girince sekme çubuğu kayboluyor, sayfanın
+            * kendi "← Ana Sayfa" düğmesi de kullanıcıyı masaüstü program
+            * seçim ekranına atıyordu — uygulamadan çıkmış gibi oluyordu.
+            *
+            * Masaüstünde kabuk yok, sayfa eskisi gibi tek başına.
+            */}
+          <Route element={<DataShell desktop={<KabuksuzMasaustu />} />}>
+            <Route path="/hasat-tahmini" element={<ErrorBoundary><HasatTahminiPage /></ErrorBoundary>} />
+            <Route path="/sulama-plan" element={<ErrorBoundary><SulamaPlanPage /></ErrorBoundary>} />
+            <Route path="/gubre-hesap" element={<ErrorBoundary><GubreHesapPage /></ErrorBoundary>} />
+            <Route path="/tarim-takvim" element={<ErrorBoundary><TarimTakvimPage /></ErrorBoundary>} />
+          </Route>
           
           {/* TARPOL Rasyon (tam entegre) */}
           <Route path="/rasyon/*" element={<RasyonApp />} />

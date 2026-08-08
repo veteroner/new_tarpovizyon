@@ -1,7 +1,8 @@
 import {
-  BarChart3, Beef, DollarSign, MapPinned, Package, Sprout, Globe2, Wrench,
+  BarChart3, Beef, DollarSign, MapPinned, Package, Sprout, Globe2, Wrench, LayoutGrid,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { NAV_GROUPS as BASIC_GRUPLARI } from '../../tarpovizyon-basic/pages';
 
 export type Kapsam = 'world' | 'turkey';
 
@@ -131,6 +132,33 @@ export const MENU: MenuCategory[] = [
   },
 ];
 
+/**
+ * TarpoVizyon Basic kategorileri.
+ *
+ * ─── NEDEN BURADA ───────────────────────────────────────────────────────────
+ * Basic ayrı bir uygulama gibi duruyordu: kendi kabuğu, kendi menüsü, kendi
+ * adres uzayı. Mobil uygulamadan HİÇBİR yerden erişilemiyordu — sekme
+ * çubuğunda yok, Keşfet'te yok, ana sayfada yok. Kullanıcı "Basic'i
+ * göremedim, o nerede?" diye sorunca ortaya çıktı.
+ *
+ * Sayfa listesi Basic'in kendi tanımından TÜRETİLİYOR, elle kopyalanmıyor;
+ * oraya yeni sayfa eklendiğinde burada da beliriyor. (`pages.ts` yalnızca
+ * `import type` kullanıyor, çalışma zamanına ek yük binmiyor.)
+ *
+ * Basic sayfalarının kapsamı yok — hepsi `any`, Dünya/Türkiye ayrımına
+ * girmiyorlar.
+ */
+export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
+  title: `Basic · ${grup.label}`,
+  icon: LayoutGrid,
+  items: grup.sections.flatMap((bolum) =>
+    bolum.pages.map((sayfa) => ({
+      label: sayfa.label,
+      any: `/tarpovizyon-basic/${bolum.path}/${sayfa.path}`,
+    })),
+  ),
+}));
+
 /** Yolu (sorgu dahil) normalize eder — aktiflik karşılaştırması için. */
 const norm = (p: string) => p.replace(/\/$/, '');
 
@@ -140,7 +168,8 @@ const norm = (p: string) => p.replace(/\/$/, '');
  */
 export function locate(pathname: string, search: string) {
   const tam = norm(pathname) + (search || '');
-  for (const kat of MENU) {
+  // Basic de aranıyor: mobil kabuk sayfa başlığını buradan okuyor.
+  for (const kat of [...MENU, ...BASIC_MENU]) {
     for (const item of kat.items) {
       for (const k of ['any', 'world', 'turkey'] as const) {
         const y = item[k];

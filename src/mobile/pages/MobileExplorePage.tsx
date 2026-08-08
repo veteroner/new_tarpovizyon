@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import {
-  visibleMenu, itemPath, KAPSAM_ADI, type Kapsam,
+  visibleMenu, itemPath, KAPSAM_ADI, BASIC_MENU, type Kapsam,
 } from '../../components/nav/menu';
 import { NavBar, ListGroup, ListRow, Segmented } from '../components/ui/IosList';
 
@@ -45,7 +45,11 @@ export default function MobileExplorePage() {
   const [ara, setAra] = useState('');
 
   const kategoriler = useMemo(() => {
-    const tum = visibleMenu(kapsam);
+    /*
+     * Pro sayfaları (kapsama göre) + Basic sayfaları (kapsamsız).
+     * Basic mobil uygulamada hiçbir yerden erişilemiyordu.
+     */
+    const tum = [...visibleMenu(kapsam), ...BASIC_MENU];
     const q = ara.trim().toLocaleLowerCase('tr');
     if (!q) return tum;
     return tum

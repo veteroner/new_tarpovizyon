@@ -4,6 +4,10 @@
 
 :root {
   --gh-primary: #16a34a;
+  /* Beyaz yazı taşıyan dolgular ve metin olarak kullanılan yeşil için
+     koyu adım: #16a34a üstünde beyaz 3.3:1, açık zeminde metin olarak
+     4.4:1 — ikisi de 4.5:1 sınırının altında. */
+  --gh-primary-deep: #166534;
   --gh-primary-dark: #15803d;
   --gh-primary-light: #22c55e;
   --gh-secondary: #2563eb;
@@ -412,9 +416,10 @@
 }
 
 .gh-preset-btn--active {
-  background: var(--gh-primary);
+  /* Seçili dolgu koyu adımda: #16a34a üstünde beyaz 3.3:1 idi. */
+  background: var(--gh-primary-deep);
   color: #fff;
-  border-color: var(--gh-primary);
+  border-color: var(--gh-primary-deep);
 }
 
 /* ── Soil Grid ──────────────────────────────────────────────────────────────── */
