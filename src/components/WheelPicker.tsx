@@ -18,7 +18,7 @@ const menuItems: MenuItem[] = [
   { path: '/transport', label: 'Taşıma', icon: '🚚' },
   { path: '/production', label: 'Üretim', icon: '🏭' },
   // Hayvansal Üretim
-  { path: '', label: '🐄 Hayvansal Üretim', icon: '', isCategory: true },
+  { path: '', label: 'Hayvansal Üretim', icon: '', isCategory: true },
   { path: '/red-meat', label: 'Kırmızı Et', icon: '🥩' },
   { path: '/white-meat', label: 'Beyaz Et', icon: '🍗' },
   { path: '/milk', label: 'Süt Üretimi', icon: '🥛' },
@@ -26,7 +26,7 @@ const menuItems: MenuItem[] = [
   { path: '/other-animal', label: 'Diğer Ürünler', icon: '📦' },
   { path: '/livestock-competition', label: 'Rekabet Analizi', icon: '🏆' },
   // Bitkisel Üretim
-  { path: '', label: '🌱 Bitkisel Üretim', icon: '', isCategory: true },
+  { path: '', label: 'Bitkisel Üretim', icon: '', isCategory: true },
   { path: '/cereals', label: 'Tahıl', icon: '🌾' },
   { path: '/vegetables', label: 'Sebze', icon: '🥕' },
   { path: '/fruits', label: 'Meyve', icon: '🍎' },
@@ -37,7 +37,7 @@ const menuItems: MenuItem[] = [
   { path: '/beverages', label: 'İçecek Bitkileri', icon: '☕' },
   { path: '/fiber-crops', label: 'Lifli Bitki', icon: '🧵' },
   // FAO Verileri
-  { path: '', label: '📈 FAO Verileri', icon: '', isCategory: true },
+  { path: '', label: 'FAO Verileri', icon: '', isCategory: true },
   { path: '/land-use', label: 'Arazi Kullanımı', icon: '🗺️' },
   { path: '/livestock-stocks', label: 'Hayvan Stokları', icon: '🐾' },
   { path: '/employment', label: 'Tarım İstihdamı', icon: '👥' },
@@ -53,15 +53,15 @@ const menuItems: MenuItem[] = [
   { path: '/tuik-plant', label: 'TÜİK Bitkisel', icon: '🚜' },
   { path: '/tuik-livestock', label: 'Canlı Hayvan Envanteri', icon: '📊' },
   // TÜİK Dış Ticaret
-  { path: '', label: '📦 TÜİK Dış Ticaret', icon: '', isCategory: true },
+  { path: '', label: 'TÜİK Dış Ticaret', icon: '', isCategory: true },
   { path: '/tuik-plant-trade', label: 'Bitkisel Dış Ticaret', icon: '🌾' },
   { path: '/tuik-animal-trade', label: 'Hayvansal Dış Ticaret', icon: '🥩' },
   // Detaylı İhracat
-  { path: '', label: '📤 Detaylı İhracat', icon: '', isCategory: true },
+  { path: '', label: 'Detaylı İhracat', icon: '', isCategory: true },
   { path: '/plant-export-detail', label: 'Bitkisel İhracat', icon: '🌾' },
   { path: '/animal-export-detail', label: 'Hayvansal İhracat', icon: '🐄' },
   // Detaylı İthalat
-  { path: '', label: '📥 Detaylı İthalat', icon: '', isCategory: true },
+  { path: '', label: 'Detaylı İthalat', icon: '', isCategory: true },
   { path: '/plant-import-detail', label: 'Bitkisel İthalat', icon: '🌱' },
   { path: '/animal-import-detail', label: 'Hayvansal İthalat', icon: '🥛' },
 ];

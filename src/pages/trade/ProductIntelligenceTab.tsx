@@ -277,7 +277,7 @@ export default function ProductIntelligenceTab() {
 
           {/* Charts */}
           <div className="chart-grid">
-            <ChartCard title={<>📊 Aylık {selectedProduct} Ticareti ({yearForMonthly})</>} action={<ChartInsightButton title={`Aylık ${selectedProduct} Ticareti`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={productContext} />}>
+            <ChartCard title={<>Aylık {selectedProduct} Ticareti ({yearForMonthly})</>} action={<ChartInsightButton title={`Aylık ${selectedProduct} Ticareti`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={productContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -291,7 +291,7 @@ export default function ProductIntelligenceTab() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title={<>📈 Yıllık {selectedProduct} Trendi (2000–2025)</>} action={<ChartInsightButton title={`Yıllık ${selectedProduct} Trendi`} description="2000-2025 ihracat, ithalat ve denge serisi" data={yearlyData} context={productContext} />}>
+            <ChartCard title={<>Yıllık {selectedProduct} Trendi (2000–2025)</>} action={<ChartInsightButton title={`Yıllık ${selectedProduct} Trendi`} description="2000-2025 ihracat, ithalat ve denge serisi" data={yearlyData} context={productContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -324,7 +324,7 @@ export default function ProductIntelligenceTab() {
 
           {/* Countries detail table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">📋 Ülke Detay Tablosu</h3>
+            <h3 className="chart-title">Ülke Detay Tablosu</h3>
             <div style={{ maxHeight: 400, overflow: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>

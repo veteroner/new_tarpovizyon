@@ -152,7 +152,7 @@ export default function PriceIndexPage() {
           )}
 
           <div className="chart-grid">
-            <ChartCard title={<>📊 Aylık Endeks ({selectedYear})</>} action={<ChartInsightButton title="Aylık Endeks" description="Aylık fiyat endeksi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
+            <ChartCard title={<>Aylık Endeks ({selectedYear})</>} action={<ChartInsightButton title="Aylık Endeks" description="Aylık fiyat endeksi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -182,7 +182,7 @@ export default function PriceIndexPage() {
           </div>
 
           <div className="chart-grid">
-            <ChartCard title={<>📅 Yıllık Endeks Trendi ({yearlyData[0]?.year || '…'}–{yearlyData[yearlyData.length - 1]?.year || '…'})</>} span={2} action={<ChartInsightButton title="Yıllık Endeks Trendi" description="Yıllık fiyat endeksi trendi" data={yearlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
+            <ChartCard title={<>Yıllık Endeks Trendi ({yearlyData[0]?.year || '…'}–{yearlyData[yearlyData.length - 1]?.year || '…'})</>} span={2} action={<ChartInsightButton title="Yıllık Endeks Trendi" description="Yıllık fiyat endeksi trendi" data={yearlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -241,7 +241,7 @@ export default function PriceIndexPage() {
 
           {topProducts.length > 0 && (
             <div className="chart-grid">
-              <ChartCard title={<>🏆 Kategori Endeks Sıralaması ({selectedYear})</>} action={<ChartInsightButton title="Kategori Endeks Sıralaması" description="Kategori endeks sıralaması" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />}>
+              <ChartCard title={<>Kategori Endeks Sıralaması ({selectedYear})</>} action={<ChartInsightButton title="Kategori Endeks Sıralaması" description="Kategori endeks sıralaması" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />}>
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={topProducts} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -280,7 +280,7 @@ export default function PriceIndexPage() {
 
           {heatmapProducts.length > 0 && (
             <div className="chart-card" style={{ marginBottom: 20 }}>
-              <h3 className="chart-title">🌡️ Enflasyon Heatmap — Kategori × Ay ({selectedYear})</h3>
+              <h3 className="chart-title">Enflasyon Heatmap — Kategori × Ay ({selectedYear})</h3>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <thead>
@@ -328,7 +328,7 @@ export default function PriceIndexPage() {
 
           {topProducts.length > 0 && (
             <div className="data-table">
-              <h3 className="data-table-title">📋 Kategori Detay Tablosu ({selectedYear})</h3>
+              <h3 className="data-table-title">Kategori Detay Tablosu ({selectedYear})</h3>
               {topProducts.map((p, index) => (
                 <div className="table-row" key={p.name}>
                   <div className={`table-rank ${index < 3 ? 'red' : ''}`}>{index + 1}</div>

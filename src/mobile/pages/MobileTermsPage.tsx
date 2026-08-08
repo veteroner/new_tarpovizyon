@@ -53,7 +53,7 @@ export default function MobileTermsPage() {
           <h2 className="text-sm font-bold text-slate-800 mb-2">2. Sorumluluk Reddi</h2>
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200">
             <p className="text-sm text-amber-800 leading-relaxed font-medium mb-2">
-              ⚠️ Önemli Uyarı
+              Önemli Uyarı
             </p>
             <p className="text-sm text-amber-700 leading-relaxed">
               Uygulama sonuçları <span className="font-bold">tahmindir</span>; kesin

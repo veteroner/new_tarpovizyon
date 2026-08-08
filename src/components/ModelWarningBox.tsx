@@ -29,13 +29,13 @@ export function ModelWarningBox({ modelType, r2, dataLevel, message }: ModelWarn
       display: 'flex', flexDirection: 'column', gap: '4px',
     }}>
       <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-        🔬 Model: {modelType}
+        Model: {modelType}
       </div>
       {r2Label && (
         <div style={{ color: r2Label.color, fontWeight: 600 }}>{r2Label.text}</div>
       )}
       {dataLevel && (
-        <div>📍 Veri seviyesi: <strong>{dataLevel}</strong></div>
+        <div>Veri seviyesi: <strong>{dataLevel}</strong></div>
       )}
       <div style={{ marginTop: '4px', color: '#92400e' }}>
         {message ?? 'Bu sonuç bir ön karar destek çıktısıdır. Kesin kararlar için uzman ile teyit edin.'}

@@ -231,10 +231,10 @@ export function TakvimViews({
       {/* ── Print + ICS ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', marginTop: '1rem' }}>
         <button className="tt-print-btn" onClick={() => window.print()}>
-          🖨️ Takvimi Yazdır
+          Takvimi Yazdır
         </button>
         <button className="tt-print-btn" style={{ marginLeft: 8 }} onClick={downloadIcs}>
-          📅 ICS İndir
+          ICS İndir
         </button>
       </div>
 

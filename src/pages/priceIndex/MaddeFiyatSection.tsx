@@ -63,7 +63,7 @@ export default function MaddeFiyatSection() {
 
   return (
     <>
-      <h2 style={{ marginTop: 32, marginBottom: 4 }}>💰 Ürün Fiyatları (TL)</h2>
+      <h2 style={{ marginTop: 32, marginBottom: 4 }}>Ürün Fiyatları (TL)</h2>
       <p style={{ color: 'var(--text-secondary)', marginTop: 0, marginBottom: 16, fontSize: '0.9rem', lineHeight: 1.5 }}>
         Yukarıdaki endeksler fiyatın <strong>ne kadar arttığını</strong> gösteriyor; bu bölüm
         ürünün <strong>kaç lira</strong> olduğunu. Kaynak: TÜİK Tarım ÜFE madde fiyatları

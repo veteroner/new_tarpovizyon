@@ -47,7 +47,7 @@ export default function OnboardingTour({ run = false, onComplete }: OnboardingTo
       target: '[data-tour="wizard-mode"]',
       content: (
         <div>
-          <h3 className="font-bold mb-2">📋 Mod Seçimi</h3>
+          <h3 className="font-bold mb-2">Mod Seçimi</h3>
           <p className="text-sm">
             <strong>Manuel Mod:</strong> Tüm parametreleri kendiniz kontrol edersiniz.<br />
             <strong>Otomatik Mod:</strong> Sistem sizin için önerilerde bulunur.
@@ -63,7 +63,7 @@ export default function OnboardingTour({ run = false, onComplete }: OnboardingTo
       target: '[data-tour="help-link"]',
       content: (
         <div>
-          <h3 className="font-bold mb-2">❓ Yardım Bölümü</h3>
+          <h3 className="font-bold mb-2">Yardım Bölümü</h3>
           <p className="text-sm">
             Takıldığınız her an buradan detaylı kullanım kılavuzu, SSS ve 
             sorun giderme rehberine ulaşabilirsiniz.
@@ -76,7 +76,7 @@ export default function OnboardingTour({ run = false, onComplete }: OnboardingTo
       target: '[data-tour="feed-library"]',
       content: (
         <div>
-          <h3 className="font-bold mb-2">🌾 Yem Kütüphanesi</h3>
+          <h3 className="font-bold mb-2">Yem Kütüphanesi</h3>
           <p className="text-sm">
             86+ hazır yem verisi + kendi özel yemlerinizi ekleyebilirsiniz.
             CSV toplu içe aktarma desteklenir.
@@ -89,7 +89,7 @@ export default function OnboardingTour({ run = false, onComplete }: OnboardingTo
       target: '[data-tour="backup-link"]',
       content: (
         <div>
-          <h3 className="font-bold mb-2">💾 Veri Yedekleme</h3>
+          <h3 className="font-bold mb-2">Veri Yedekleme</h3>
           <p className="text-sm text-orange-700 mb-2">
             <strong>ÖNEMLİ:</strong> Verileriniz tarayıcınızda saklanır!
           </p>
@@ -105,7 +105,7 @@ export default function OnboardingTour({ run = false, onComplete }: OnboardingTo
       target: 'body',
       content: (
         <div>
-          <h2 className="text-xl font-bold mb-2">✅ Hazırsınız!</h2>
+          <h2 className="text-xl font-bold mb-2">Hazırsınız!</h2>
           <p className="text-gray-700 mb-3">
             Şimdi <strong>"Yeni Rasyon"</strong> butonuna tıklayarak ilk rasyonunuzu 
             hesaplayabilirsiniz.

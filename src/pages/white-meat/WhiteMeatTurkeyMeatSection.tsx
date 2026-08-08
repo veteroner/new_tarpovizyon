@@ -14,6 +14,7 @@ import {
 import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { BarChart3, Bird, Hash, TrendingUp } from 'lucide-react';
 
 type Props = {
   turkeyMeatData: TuikTurkeyMeatData[];
@@ -27,7 +28,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
     <>
       <div style={{ marginTop: '60px', marginBottom: '30px' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          🦃 Hindi Eti Üretimi (TÜİK)
+          Hindi Eti Üretimi (TÜİK)
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px' }}>
           Türkiye'de yıllık hindi eti üretimi ve aylık dağılım verileri
@@ -39,7 +40,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">2025 ÜRETİM</span>
-            <div className="kpi-icon orange">🦃</div>
+            <div className="kpi-icon orange"><Bird size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {(turkeyMeatData[0]?.production || 0).toLocaleString('tr-TR')} ton
@@ -50,7 +51,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">ORTALAMA (10 YIL)</span>
-            <div className="kpi-icon blue">📊</div>
+            <div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {(() => {
@@ -65,7 +66,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">BÜYÜME ORANI</span>
-            <div className="kpi-icon green">📈</div>
+            <div className="kpi-icon green"><TrendingUp size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {(() => {
@@ -82,7 +83,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">TOPLAM ({turkeyMeatData.length} YIL)</span>
-            <div className="kpi-icon purple">🔢</div>
+            <div className="kpi-icon purple"><Hash size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {turkeyMeatData.reduce((sum, d) => sum + d.production, 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ton
@@ -175,21 +176,21 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
       {/* Hindi Eti Özet */}
       <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
         <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', fontWeight: '700' }}>
-          📊 Hindi Eti Üretimi Özet
+          Hindi Eti Üretimi Özet
         </h3>
         <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.7' }}>
           <p style={{ marginBottom: '12px' }}>
-            <strong>🔍 Veri Kaynağı:</strong> TÜİK Kümes Hayvancılığı İstatistikleri
+            <strong>Veri Kaynağı:</strong> TÜİK Kümes Hayvancılığı İstatistikleri
           </p>
           <p style={{ marginBottom: '12px' }}>
-            <strong>📅 Dönem:</strong> {turkeyMeatData[turkeyMeatData.length - 1]?.year} - {turkeyMeatData[0]?.year} ({turkeyMeatData.length} yıl)
+            <strong>Dönem:</strong> {turkeyMeatData[turkeyMeatData.length - 1]?.year} - {turkeyMeatData[0]?.year} ({turkeyMeatData.length} yıl)
           </p>
           <p style={{ marginBottom: '12px' }}>
-            <strong>⚠️ Not:</strong> Bazı yıllarda TÜİK tarafından aylık detay veriler gizli tutulmuştur.
+            <strong>Not:</strong> Bazı yıllarda TÜİK tarafından aylık detay veriler gizli tutulmuştur.
             Bu durumlarda yıllık toplam kullanılmış veya mevcut ayların ortalaması ile tahmin yapılmıştır.
           </p>
           <p style={{ marginBottom: '0' }}>
-            <strong>💡 Bilgi:</strong> Hindi eti üretimi, Türkiye'de beyaz et sektörünün küçük ama önemli bir parçasıdır.
+            <strong>Bilgi:</strong> Hindi eti üretimi, Türkiye'de beyaz et sektörünün küçük ama önemli bir parçasıdır.
             Özellikle bayram dönemlerinde ve özel günlerde talep artışı görülmektedir.
           </p>
         </div>

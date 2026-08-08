@@ -22,7 +22,7 @@ export default function ProvincialTrendsTab({
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📈 Zaman Serisi & Trendler
+        Zaman Serisi & Trendler
       </h2>
 
       {/* Year Range Selector */}
@@ -229,7 +229,7 @@ export default function ProvincialTrendsTab({
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 Yıllık Büyüme Oranları (%)
+            Yıllık Büyüme Oranları (%)
           </h3>
           <ChartInsightButton title="📊 Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>

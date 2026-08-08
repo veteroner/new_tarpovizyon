@@ -82,7 +82,7 @@ export function GubreStep1({ state, setState, onNext }: Props) {
 
       {cropData && (
         <div className="gh-crop-info">
-          <h3>{cropData.emoji} {cropData.ad} — Besin İhtiyacı (100 kg verim için)</h3>
+          <h3>{cropData.ad} — Besin İhtiyacı (100 kg verim için)</h3>
           <div className="gh-nutrient-bars">
             <div className="gh-nutrient-row">
               <span className="gh-nutrient-label">N (Azot)</span>
@@ -101,10 +101,10 @@ export function GubreStep1({ state, setState, onNext }: Props) {
             </div>
           </div>
           <div className="gh-micro-grid">
-            <span title="Demir">🔩 Fe: {cropData.fe} kg</span>
-            <span title="Çinko">⚡ Zn: {cropData.zn} kg</span>
-            <span title="Mangan">🔧 Mn: {cropData.mn} kg</span>
-            <span title="Bor">💎 B: {cropData.b} kg</span>
+            <span title="Demir">Fe: {cropData.fe} kg</span>
+            <span title="Çinko">Zn: {cropData.zn} kg</span>
+            <span title="Mangan">Mn: {cropData.mn} kg</span>
+            <span title="Bor">B: {cropData.b} kg</span>
           </div>
           <p><strong>Uygun pH:</strong> {cropData.ph_min} — {cropData.ph_max}</p>
           <p><strong>Kaynak:</strong> {cropData.kaynak}</p>

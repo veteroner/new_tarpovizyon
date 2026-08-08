@@ -26,7 +26,7 @@ export default function MilkProductionSection({
       {/* Üretim Analizi Bölümü */}
       <div style={{ marginTop: '48px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          📊 Üretim Analizi
+          Üretim Analizi
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Türkiye süt üretimi tarihsel trendler ve türlere göre detaylı analiz
@@ -50,7 +50,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📈 Toplam Süt Üretimi Trendi (Tüm Yıllar)
+              Toplam Süt Üretimi Trendi (Tüm Yıllar)
             </h3>
             <ChartInsightButton title="📈 Toplam Süt Üretimi Trendi (Tüm Yıllar)" description="Türkiye toplam süt üretimi tarihsel trendi" data={series} context={{ section: 'Süt Üretimi' }} />
           </div>
@@ -83,7 +83,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥧 Türlere Göre Dağılım ({latest?.year ?? '-'})
+              Türlere Göre Dağılım ({latest?.year ?? '-'})
             </h3>
             <ChartInsightButton title="🥧 Türlere Göre Dağılım" description="Tür bazında süt üretimi dağılımı" data={latestBreakdown.rows} context={{ year: latest?.year }} />
           </div>
@@ -120,7 +120,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📊 Yıllık Büyüme Oranları (%)
+              Yıllık Büyüme Oranları (%)
             </h3>
             <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Son 15 yıl süt üretimi büyüme oranları" data={growthRates.slice(-15)} context={{ section: 'Büyüme' }} compact />
           </div>
@@ -156,7 +156,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📈 Son 5 Yıl Toplam Üretim Trendi
+              Son 5 Yıl Toplam Üretim Trendi
             </h3>
             <ChartInsightButton title="📈 Son 5 Yıl Toplam Üretim Trendi" description="Son 5 yıl toplam süt üretimi trendi" data={series.slice(-5)} context={{ section: 'Üretim Trendi' }} />
           </div>
@@ -198,7 +198,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🐄 Büyükbaş (Son 5 Yıl)
+              Büyükbaş (Son 5 Yıl)
             </h3>
             <ChartInsightButton title="🐄 Büyükbaş Süt Üretimi (Son 5 Yıl)" description="Büyükbaş hayvan süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'cattle' }} compact />
           </div>
@@ -226,7 +226,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🐑 Koyun (Son 5 Yıl)
+              Koyun (Son 5 Yıl)
             </h3>
             <ChartInsightButton title="🐑 Koyun Süt Üretimi (Son 5 Yıl)" description="Koyun süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'sheep' }} compact />
           </div>
@@ -254,7 +254,7 @@ export default function MilkProductionSection({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🐐 Keçi (Son 5 Yıl)
+              Keçi (Son 5 Yıl)
             </h3>
             <ChartInsightButton title="🐐 Keçi Süt Üretimi (Son 5 Yıl)" description="Keçi süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'goat' }} compact />
           </div>
@@ -278,7 +278,7 @@ export default function MilkProductionSection({
         <>
           <div style={{ marginTop: '40px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-              ⚡ Verimlilik Göstergeleri
+              Verimlilik Göstergeleri
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
               Türkiye süt üretim verimi ve dünya karşılaştırması
@@ -301,7 +301,7 @@ export default function MilkProductionSection({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                    📈 Süt Verimi Trendi (Litre/Baş)
+                    Süt Verimi Trendi (Litre/Baş)
                   </h3>
                   <ChartInsightButton title="📈 Süt Verimi Trendi (Litre/Baş)" description="Türkiye süt verimi trendi" data={productivity} context={{ section: 'Verimlilik' }} />
                 </div>
@@ -344,7 +344,7 @@ export default function MilkProductionSection({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                    🌍 Dünya Karkas Verimi Karşılaştırması
+                    Dünya Karkas Verimi Karşılaştırması
                   </h3>
                   <ChartInsightButton title="🌍 Dünya Karkas Verimi Karşılaştırması" description="Türkiye vs dünya karkas verim karşılaştırması" data={productivityComparison} context={{ section: 'Verimlilik' }} />
                 </div>

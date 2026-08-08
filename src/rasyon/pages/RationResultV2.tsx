@@ -530,7 +530,7 @@ export default function RationResultV2() {
             className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-sm border border-purple-200 p-6"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <h2 className="text-lg font-semibold text-gray-900">🤖 AI Açıklama</h2>
+              <h2 className="text-lg font-semibold text-gray-900">AI Açıklama</h2>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-3 py-1 text-xs font-semibold">
                   Hazır
@@ -548,7 +548,7 @@ export default function RationResultV2() {
 
             {aiExplanation.criticalPoints.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">⚠️ Dikkat Edilecekler:</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">Dikkat Edilecekler:</p>
                 <ul className="space-y-1">
                   {aiExplanation.criticalPoints.map((point, idx) => (
                     <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
@@ -562,7 +562,7 @@ export default function RationResultV2() {
 
             {aiExplanation.recommendations.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">💡 Öneriler:</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">Öneriler:</p>
                 <ul className="space-y-1">
                   {aiExplanation.recommendations.map((rec, idx) => (
                     <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
@@ -679,7 +679,7 @@ export default function RationResultV2() {
 
               {riskScore.warnings.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                  <p className="text-sm font-medium text-gray-700 mb-3">⚠️ Dikkat Edilmesi Gerekenler:</p>
+                  <p className="text-sm font-medium text-gray-700 mb-3">Dikkat Edilmesi Gerekenler:</p>
                   <div className="space-y-2">
                     {riskScore.warnings.map((warning: RiskWarning, idx: number) => {
                       const explanation = getRiskExplanation(warning.code)
@@ -697,11 +697,11 @@ export default function RationResultV2() {
                           {explanation ? (
                             <div className="space-y-3 text-sm">
                               <div>
-                                <p className="font-medium text-gray-900 mb-1">📋 Açıklama:</p>
+                                <p className="font-medium text-gray-900 mb-1">Açıklama:</p>
                                 <p className="text-gray-700">{explanation.explanation}</p>
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900 mb-1">💡 Öneri:</p>
+                                <p className="font-medium text-gray-900 mb-1">Öneri:</p>
                                 <p className="text-gray-700">{explanation.recommendation}</p>
                               </div>
                               <div className="pt-2 border-t border-gray-200">
@@ -742,7 +742,7 @@ export default function RationResultV2() {
               <AlertTriangle className="shrink-0 mt-0.5 text-red-600" size={24} />
               <div className="flex-1">
                 <p className="text-base font-bold text-red-900 mb-2">
-                  ⚠️ KRİTİK: Mineral/Premiks Eksikliği Tespit Edildi!
+                  KRİTİK: Mineral/Premiks Eksikliği Tespit Edildi!
                 </p>
                 <p className="text-sm text-red-800 mb-3">
                   Bu rasyon <strong>mineral veya vitamin premiksi içermiyor</strong>. 
@@ -763,13 +763,13 @@ export default function RationResultV2() {
                     }}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
                   >
-                    🔧 Mineral Ekle (Wizard)
+                    Mineral Ekle (Wizard)
                   </button>
                   <button
                     onClick={() => navigate('/rasyon/feeds')}
                     className="px-4 py-2 bg-white border-2 border-red-600 text-red-600 rounded-lg hover:bg-red-50 text-sm font-medium"
                   >
-                    📚 Yem Kütüphanesi
+                    Yem Kütüphanesi
                   </button>
                 </div>
               </div>
@@ -1079,7 +1079,7 @@ export default function RationResultV2() {
                     )}
                     {exceedsMax && (
                       <p className="text-xs text-red-600 mt-1">
-                        ⚠️ Üst sınır aşılıyor (hedef: ≤ {maxAllowedAsFed!.toFixed(1)} kg as-fed / gün)
+                        Üst sınır aşılıyor (hedef: ≤ {maxAllowedAsFed!.toFixed(1)} kg as-fed / gün)
                       </p>
                     )}
                   </div>
@@ -1138,7 +1138,7 @@ export default function RationResultV2() {
             title={
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">
-                  📊 Maliyet Dağılımı Detayı
+                  Maliyet Dağılımı Detayı
                 </span>
                 <span className="text-xs text-gray-500">({enhancedCost.benchmarkSource})</span>
               </div>
@@ -1148,7 +1148,7 @@ export default function RationResultV2() {
               {/* Progress Bar - Yem */}
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">🌾 Yem</span>
+                  <span className="text-gray-600">Yem</span>
                   <span className="font-medium text-gray-900">
                     {enhancedCost.breakdown.feedCostTL.toFixed(2)} TL ({(enhancedCost.feedCostRatio * 100).toFixed(0)}%)
                   </span>
@@ -1164,7 +1164,7 @@ export default function RationResultV2() {
               {/* Progress Bar - İşçilik */}
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">👷 İşçilik</span>
+                  <span className="text-gray-600">İşçilik</span>
                   <span className="font-medium text-gray-900">
                     {enhancedCost.breakdown.laborCostTL.toFixed(2)} TL
                   </span>
@@ -1180,7 +1180,7 @@ export default function RationResultV2() {
               {/* Progress Bar - Enerji */}
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">⚡ Enerji</span>
+                  <span className="text-gray-600">Enerji</span>
                   <span className="font-medium text-gray-900">
                     {enhancedCost.breakdown.energyCostTL.toFixed(2)} TL
                   </span>

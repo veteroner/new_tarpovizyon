@@ -21,7 +21,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
       <div style={{ marginTop: '48px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-            📈 Tarihsel Üretim Trendleri
+            Tarihsel Üretim Trendleri
           </h2>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
             1961-2024 dönemi hayvansal ürün üretim trendleri

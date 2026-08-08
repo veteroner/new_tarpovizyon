@@ -1,5 +1,6 @@
 import type { YearPoint } from './eggProductionTypes';
 import { formatMillion, formatTL } from './eggProductionTypes';
+import { Egg, Trophy, Wallet } from 'lucide-react';
 
 interface EggKpiCardsProps {
   latest: YearPoint | undefined;
@@ -36,7 +37,7 @@ export function EggKpiCards({ latest, yoy, peak, eggPrices, eggPriceDate, eggPri
       <div className="kpi-card">
         <div className="kpi-header">
           <span className="kpi-title">ZİRVE</span>
-          <div className="kpi-icon orange">🏆</div>
+          <div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div>
         </div>
         <div className="kpi-value">{formatMillion(peak?.eggsMillion ?? 0)}</div>
         <div className="kpi-subtitle">milyon adet ({peak?.year ?? '-'})</div>
@@ -44,8 +45,8 @@ export function EggKpiCards({ latest, yoy, peak, eggPrices, eggPriceDate, eggPri
 
       <div className="kpi-card" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
         <div className="kpi-header">
-          <span className="kpi-title" style={{ color: 'white' }}>GÜNCEL YUMURTA FİYATLARI 🥚</span>
-          <div className="kpi-icon orange">💰</div>
+          <span className="kpi-title" style={{ color: 'white' }}>GÜNCEL YUMURTA FİYATLARI </span>
+          <div className="kpi-icon orange"><Wallet size={18} aria-hidden="true" /></div>
         </div>
         {eggPriceError ? (
           <div style={{ fontSize: '0.9rem', color: 'white', padding: '10px 0' }}>{eggPriceError}</div>
@@ -100,7 +101,7 @@ export function EggKpiCards({ latest, yoy, peak, eggPrices, eggPriceDate, eggPri
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YUMURTA</span>
-            <div className="kpi-icon yellow">🥚</div>
+            <div className="kpi-icon yellow"><Egg size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value" style={{ fontSize: '1.8rem' }}>Dünya #{worldRanking.world}</div>
           <div className="kpi-subtitle">AB #{worldRanking.eu}</div>

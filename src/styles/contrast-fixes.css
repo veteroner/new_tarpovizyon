@@ -1,0 +1,256 @@
+/**
+ * Kontrast düzeltmeleri — uygulamanın TAMAMI için.
+ *
+ * ─── NEDEN AYRI BİR DOSYA ───────────────────────────────────────────────────
+ * Bu kurallar önce yalnızca mobil kabuk altında (.ios-data) yazılmıştı; ama
+ * düzelttikleri sorun mobile özgü değil. Uygulama bir zamanlar koyu temaydı;
+ * açığa çevrilirken metin renkleri güncellenmedi. Sonuç: masaüstü panosunda
+ * da aynı okunmayan yazılar duruyordu.
+ *
+ * Hepsi ÖLÇÜLEREK belirlendi (WCAG bağıl parlaklık, saydam katmanlar
+ * harmanlanarak): küçük metin için 4.5:1, büyük metin için 3:1.
+ *
+ * ─── KALICI ÇÖZÜM DEĞİL ─────────────────────────────────────────────────────
+ * Bu bir telafi katmanı. Doğrusu, sayfaların renk seçimini kendi kodunda
+ * düzeltmek; ancak 54 dosyada 170'ten fazla yerde satır içi renk var.
+ * Sayfalar tek tek elden geçtikçe buradan satır silinebilir.
+ *
+ * Dolgu (background) tonlarına DOKUNULMUYOR — onlar grafik rengi olarak
+ * doğru. Yalnızca METİN olarak kullanılan tonlar ve beyaz yazı taşıyan
+ * dolgular koyu adıma çekiliyor.
+ */
+
+/* ─── Parlak renkli küçük yazılar ────────────────────────────────────────── */
+/*
+ * Sayfalar durum ve kategori bilgisini Tailwind'in 500 tonlarıyla yazıyor:
+ * yeşil #22c55e, kehribar #f59e0b, mavi #3b82f6… Bunlar DOLGU rengi olarak
+ * tasarlandı; 10–14 px yazı olarak açık zeminde 2.0–2.9:1 kontrast veriyor,
+ * WCAG'nin 4.5:1 sınırının çok altında. Ölçüldü, uydurulmadı.
+ *
+ * Aynı rengin koyu (700) kardeşine eşleniyor: renk kodlaması ve anlamı
+ * korunuyor, yalnızca okunabilir hâle geliyor. Satır içi yazıldıkları için
+ * seçici de satır içi değerin kendisini hedefliyor.
+ *
+ * Not: Bu, sayfaların kendi kodunda düzeltilmesi gereken bir kusurun mobil
+ * kabuktaki telafisi. Kaynağı düzeltmek hem panoyu hem mobili kapsardı.
+ */
+[style*="color: rgb(34, 197, 94)"]  { color: #166534 !important; } /* yeşil   */
+[style*="color: rgb(16, 185, 129)"] { color: #047857 !important; } /* zümrüt  */
+[style*="color: rgb(245, 158, 11)"] { color: #92400e !important; } /* kehribar*/
+[style*="color: rgb(59, 130, 246)"] { color: #1d4ed8 !important; } /* mavi    */
+[style*="color: rgb(20, 184, 166)"] { color: #0f766e !important; } /* turkuaz */
+[style*="color: rgb(139, 92, 246)"] { color: #6d28d9 !important; } /* mor     */
+[style*="color: rgb(239, 68, 68)"]  { color: #b91c1c !important; } /* kırmızı */
+[style*="color: rgb(249, 115, 22)"] { color: #c2410c !important; } /* turuncu */
+[style*="color: rgb(236, 72, 153)"] { color: #be185d !important; } /* pembe   */
+
+/*
+ * Beyaz yazılı "seçili" düğmeler. Zemin `var(--success)` (#10b981) ve yazı
+ * beyaz: 2.54:1 — okunmuyor. Aynı yeşilin koyu adımına çekiliyor (4.9:1).
+ * Token'ın kendisi değiştirilmedi; grafik dolgusu olarak başka yerlerde de
+ * kullanılıyor ve orada bir sorun yok.
+ */
+[style*="color: white"][style*="var(--success)"],
+[style*="color: rgb(255, 255, 255)"][style*="var(--success)"] {
+  /* #248a3d üstünde beyaz 4.40:1 — ölçüldü, hâlâ sınırın altında. Bir adım
+     daha koyu: #166534 üstünde beyaz 6.4:1. */
+  background: #166534 !important;
+  border-color: #166534 !important;
+}
+
+/*
+ * Sınıf tabanlı renkli değerler. `.table-value.orange` gibi yardımcı sınıflar
+ * doğrudan `var(--orange)`/`var(--success)` yazıyor; bunlar dolgu tonları,
+ * 14–16 px yazıda açık zeminde 2.5–2.8:1 veriyor.
+ *
+ * Token'ın kendisi değiştirilmiyor (grafik dolgusu olarak doğru); yalnızca
+ * METİN olarak kullanıldığı bu sınıflar koyu kardeşine çekiliyor.
+ * `.kpi-icon` listede yok — içi emoji, emoji CSS rengini kullanmıyor.
+ */
+.table-value.green,  .table-rank.green  { color: #046c50 !important; }
+.table-value.orange, .table-rank.orange { color: #c2410c !important; }
+.table-value.blue,   .table-rank.blue   { color: #1d4ed8 !important; }
+.table-value.red,    .table-rank.red    { color: #b91c1c !important; }
+.table-value.purple, .table-rank.purple { color: #6d28d9 !important; }
+.table-value.teal,   .table-rank.teal   { color: #0f766e !important; }
+
+/*
+ * Seçili sekme/düğmelerin beyaz yazısı. Zemin orta tonlu bir marka rengi:
+ * `var(--primary)` #3b82f6 → 3.68:1, `var(--success)` #10b981 → 2.54:1.
+ * 13–15 px yazı için sınır 4.5:1, ikisi de altında.
+ *
+ * Aynı rengin koyu adımına çekiliyor — sekme hâlâ mavi/yeşil, artık okunuyor.
+ * Token'lar olduğu gibi bırakıldı; grafik dolgusu olarak doğrular.
+ */
+[style*="color: white"][style*="var(--primary)"],
+[style*="color: rgb(255, 255, 255)"][style*="var(--primary)"] {
+  background: #1d4ed8 !important;   /* beyaz üstünde 6.3:1 */
+  border-color: #1d4ed8 !important;
+}
+
+/* Başlıklarda kullanılan açık tonlar (400 adımı) — 20 px'te bile 2.0:1. */
+[style*="color: rgb(251, 146, 60)"] { color: #c2410c !important; } /* turuncu-400 */
+[style*="color: rgb(220, 38, 38)"]  { color: #b91c1c !important; } /* kırmızı-600 */
+[style*="color: rgb(52, 211, 153)"] { color: #047857 !important; } /* zümrüt-400  */
+[style*="color: rgb(96, 165, 250)"] { color: #1d4ed8 !important; } /* mavi-400    */
+[style*="color: rgb(251, 191, 36)"] { color: #92400e !important; } /* kehribar-400*/
+
+/*
+ * Bölüm sekmeleri. Seçili olan `.section-tab.is-active`, zemini #3b82f6 ve
+ * yazısı beyaz: 3.68:1. Sekme etiketleri 13–15 px, sınır 4.5:1.
+ */
+.section-tab.is-active,
+.section-tab.active {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* Yeşil-600 (#16a34a) metin olarak 3.2–3.3:1; koyu adıma çekiliyor. */
+[style*="color: rgb(22, 163, 74)"] { color: #166534 !important; }
+
+/* ─── Tailwind renk yardımcıları ─────────────────────────────────────────── */
+/*
+ * Son aile: `text-green-600`, `text-amber-600`, `text-red-500` gibi Tailwind
+ * sınıfları. Açık zeminde 2.5–3.3:1 veriyorlar; 11–16 px yazıda sınır 4.5:1.
+ *
+ * Her biri AYNI RENGİN koyu adımına eşleniyor — yeşil yeşil, kırmızı kırmızı
+ * kalıyor, yalnızca okunur oluyor. Yön okları ve etiketler zaten renkten
+ * bağımsız anlam taşıyor; burada değişen sadece tonun koyuluğu.
+ */
+:is(.text-green-400, .text-green-500, .text-green-600)     { color: #166534 !important; }
+:is(.text-emerald-400, .text-emerald-500, .text-emerald-600){ color: #047857 !important; }
+:is(.text-red-400, .text-red-500, .text-red-600)           { color: #b91c1c !important; }
+:is(.text-rose-400, .text-rose-500)                        { color: #be123c !important; }
+:is(.text-amber-400, .text-amber-500, .text-amber-600)     { color: #92400e !important; }
+:is(.text-yellow-400, .text-yellow-500, .text-yellow-600)  { color: #a16207 !important; }
+:is(.text-orange-400, .text-orange-500, .text-orange-600)  { color: #c2410c !important; }
+:is(.text-blue-300, .text-blue-400, .text-blue-500)        { color: #1d4ed8 !important; }
+:is(.text-sky-300, .text-sky-400, .text-sky-500)           { color: #0369a1 !important; }
+:is(.text-teal-400, .text-teal-500)                        { color: #0f766e !important; }
+:is(.text-purple-400, .text-purple-500)                    { color: #6d28d9 !important; }
+:is(.text-violet-400, .text-violet-500)                    { color: #6d28d9 !important; }
+:is(.text-indigo-400, .text-indigo-500)                    { color: #4338ca !important; }
+:is(.text-pink-400, .text-pink-500)                        { color: #be185d !important; }
+/* Nötr griler — ikincil metin olarak 2.5:1 civarındaydılar. */
+:is(.text-slate-400, .text-gray-400, .text-zinc-400)       { color: #5b6472 !important; }
+
+/*
+ * 200/300 adımları — karanlık temadan kalma.
+ *
+ * Uygulama koyu zeminden açığa çevrildiğinde bu sınıflar güncellenmemiş:
+ * `text-green-300` bir zamanlar lacivert kartın üstündeydi, şimdi #f8fafc
+ * üstünde 1.3:1 veriyor. Neredeyse görünmez.
+ */
+:is(.text-green-200, .text-green-300)     { color: #166534 !important; }
+:is(.text-emerald-200, .text-emerald-300) { color: #047857 !important; }
+:is(.text-red-200, .text-red-300)         { color: #b91c1c !important; }
+:is(.text-amber-200, .text-amber-300)     { color: #92400e !important; }
+:is(.text-orange-200, .text-orange-300)   { color: #c2410c !important; }
+:is(.text-blue-200, .text-blue-300)       { color: #1d4ed8 !important; }
+:is(.text-purple-200, .text-purple-300)   { color: #6d28d9 !important; }
+:is(.text-violet-200, .text-violet-300)   { color: #6d28d9 !important; }
+:is(.text-teal-200, .text-teal-300)       { color: #0f766e !important; }
+:is(.text-sky-200, .text-sky-300)         { color: #0369a1 !important; }
+:is(.text-pink-200, .text-pink-300)       { color: #be185d !important; }
+:is(.text-slate-300, .text-gray-300)      { color: #5b6472 !important; }
+
+/*
+ * Sayfa içi "Ana Sayfa" düğmesi. Masaüstünde sayfanın kendi geri dönüş yolu,
+ * mobil kabukta ise gezinme çubuğunun geri düğmesiyle AYNI işi yapan ikinci
+ * bir denetim — üstelik pano görünümünde duruyor. Kabuk zaten geri veriyor.
+ */
+.back-to-home,
+.home-button { display: none; }
+
+/* Satır içi soluk griler — token'la aynı gerekçe, 2.5:1 → 5.9:1. */
+[style*="color: rgb(148, 163, 184)"],
+[style*="color: rgb(156, 163, 175)"],
+[style*="color: rgb(161, 161, 170)"] { color: #5b6472 !important; }
+/* Slate-500 (#64748b) 4.26:1 — sınırın hemen altında. */
+[style*="color: rgb(100, 116, 139)"] { color: #51596b !important; }
+
+/*
+ * Tailwind dolgu sınıfları üzerinde beyaz yazı. `bg-green-600` (#16a34a) +
+ * beyaz = 3.30:1; seçili filtre çipleri bu kalıpla yazılmış. Dolgu koyu
+ * adıma çekiliyor, yazı beyaz kalıyor.
+ */
+:is(.bg-green-500, .bg-green-600)     { background-color: #166534 !important; }
+:is(.bg-emerald-500, .bg-emerald-600) { background-color: #047857 !important; }
+:is(.bg-blue-500, .bg-blue-600)       { background-color: #1d4ed8 !important; }
+:is(.bg-red-500, .bg-red-600)         { background-color: #b91c1c !important; }
+:is(.bg-amber-500, .bg-amber-600)     { background-color: #92400e !important; }
+:is(.bg-purple-500, .bg-purple-600)   { background-color: #6d28d9 !important; }
+:is(.bg-teal-500, .bg-teal-600)       { background-color: #0f766e !important; }
+
+/* Dünya sayfalarında kullanılan tonlar. */
+[style*="color: rgb(168, 85, 247)"] { color: #7e22ce !important; } /* mor-500     */
+[style*="color: rgb(180, 83, 9)"]   { color: #92400e !important; } /* kehribar-700*/
+[style*="color: rgb(255, 107, 53)"] { color: #c2410c !important; } /* TR vurgusu  */
+:is(.text-purple-600, .text-fuchsia-500) { color: #7e22ce !important; }
+
+/*
+ * `.kpi-icon` de listeye alındı. Başta hariç tutulmuştu ("içi emoji, emoji
+ * CSS rengini kullanmaz") — ama bazı sayfalarda içinde "#17", "#9" gibi
+ * SIRA NUMARASI var ve orada renk gerçekten metni boyuyor.
+ */
+.kpi-icon.green  { color: #166534 !important; }
+.kpi-icon.orange { color: #c2410c !important; }
+.kpi-icon.blue   { color: #1d4ed8 !important; }
+.kpi-icon.red    { color: #b91c1c !important; }
+.kpi-icon.purple { color: #6d28d9 !important; }
+.kpi-icon.teal   { color: #0f766e !important; }
+
+/* Token'ı satır içi metin rengi olarak kullananlar. */
+[style*="color: var(--accent)"],
+[style*="color: var(--primary)"] { color: #1d4ed8 !important; }
+[style*="color: var(--success)"] { color: #047857 !important; }
+[style*="color: var(--warning)"] { color: #92400e !important; }
+[style*="color: var(--error)"]   { color: #b91c1c !important; }
+[style*="color: var(--purple)"]  { color: #6d28d9 !important; }
+[style*="color: var(--teal)"]    { color: #0f766e !important; }
+[style*="color: var(--orange)"]  { color: #c2410c !important; }
+[style*="color: var(--text-muted)"] { color: #5b6472 !important; }
+
+/* Camgöbeği (#06b6d4) 2.4:1 — koyu adıma. */
+[style*="color: rgb(6, 182, 212)"] { color: #0e7490 !important; }
+:is(.text-cyan-400, .text-cyan-500) { color: #0e7490 !important; }
+
+/* ─── Araç sayfalarının kendi üst çubuğu ─────────────────────────────────── */
+/*
+ * Hasat/Sulama/Gübre/Takvim sayfaları kendi üst çubuğunu çiziyor ve
+ * içindeki "← Ana Sayfa" düğmesi `navigate('/')` yapıyor — yani kullanıcıyı
+ * MASAÜSTÜ program seçim ekranına atıyor. Mobil uygulamada bu, uygulamadan
+ * çıkmak demekti; kullanıcının bildirdiği "ana sayfa ikonuna basınca eski
+ * UI'ye dönüyor" sorunu buydu.
+ *
+ * Geri dönüş yolunu kabuk veriyor (gezinme çubuğu) ve ana sayfaya dönüş de
+ * sekme çubuğunda. Sayfanın kendi çubuğu gizleniyor.
+ *
+ * "Yeniden Başla" gibi çubuk İÇİNDEKİ işlevsel düğmeler kaybolmasın diye
+ * çubuğun tamamı değil, yalnızca geri düğmesi ve başlığı gizleniyor.
+ */
+:is(.hz-topbar__back, .sp-topbar__back, .gh-topbar__back, .tt-topbar__back) {
+  display: none;
+}
+:is(.hz-topbar__title, .sp-topbar__title, .gh-topbar__title, .tt-topbar__title) {
+  display: none;
+}
+:is(.hz-topbar, .sp-topbar, .gh-topbar, .tt-topbar) {
+  /* Yalnızca kalan düğmeler için ince bir şerit. */
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 0 8px;
+  min-height: 0;
+  justify-content: flex-end;
+}
+/* Çubukta hiç görünür çocuk kalmadıysa şerit de gitsin. */
+:is(.hz-topbar, .sp-topbar, .gh-topbar, .tt-topbar):not(:has(button:not([class*="__back"]))) {
+  display: none;
+}
+
+/*
+ * Basic'in sayfa afişi. Gezinme çubuğundaki başlıkla aynı metni bir daha
+ * yazıyor — masaüstünde üst menünün altında anlamlı, kabuğun içinde tekrar.
+ */
+.tvb-page__banner { display: none; }

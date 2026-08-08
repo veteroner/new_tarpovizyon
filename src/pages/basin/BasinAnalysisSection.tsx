@@ -173,7 +173,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
-            🌾 Havza Üretim Karşılaşması (2024 - Ton)
+            Havza Üretim Karşılaşması (2024 - Ton)
           </h3>
           <ChartInsightButton title="🌾 Havza Karşılaşması" description="Havza bazında üretim karşılaşması" data={basinProductionStats} context={{ section: 'Havza Analiz' }} compact />
         </div>
@@ -183,7 +183,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           </div>
         ) : basinProductionStats.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-            📭 Veri bulunamadı.
+            Veri bulunamadı.
           </div>
         ) : (
           <>
@@ -240,7 +240,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
               />
             </ResponsiveContainer>
             <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-              💡 En çok üretim yapan 15 havzanın 2024 yılı toplam bitkisel üretimi (Kare boyutları üretim miktarına göre orantılıdır)
+              En çok üretim yapan 15 havzanın 2024 yılı toplam bitkisel üretimi (Kare boyutları üretim miktarına göre orantılıdır)
             </div>
           </>
         )}
@@ -258,7 +258,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           boxShadow: 'var(--shadow-md)'
         }}>
           <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-            🎯 En Çok Üreten 10 Havza
+            En Çok Üreten 10 Havza
           </h3>
           {loadingBasinStats ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
@@ -266,7 +266,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
             </div>
           ) : basinProductionStats.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-              📭 Veri bulunamadı.
+              Veri bulunamadı.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
@@ -343,7 +343,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
         boxShadow: 'var(--shadow-md)'
       }}>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🗂️ Tüm Havzalar - Üretim Verileri
+          Tüm Havzalar - Üretim Verileri
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {basinProductionStats.map((basin, idx) => (
@@ -418,7 +418,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                     border: '1px solid rgba(255,255,255,0.1)'
                   }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                      ⚖️ Toplam Üretim
+                      Toplam Üretim
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 700, color: basin.color }}>
                       {(basin.toplam_uretim / 1000000).toFixed(2)}M
@@ -434,7 +434,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                     border: '1px solid rgba(255,255,255,0.1)'
                   }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                      🌾 Ürün Çeşidi
+                      Ürün Çeşidi
                     </div>
                     <div style={{ fontSize: '20px', fontWeight: 700, color: basin.color }}>
                       {basin.urun_cesit}
@@ -455,7 +455,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                   fontWeight: 600,
                   textAlign: 'center'
                 }}>
-                  🌾 Üretim Verilerini Gör
+                  Üretim Verilerini Gör
                 </div>
               </div>
             </div>
@@ -499,7 +499,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                 fontSize: '13px'
               }}
             >
-              ✕ Kapat
+              Kapat
             </button>
           </div>
 
@@ -509,7 +509,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
             </div>
           ) : basinProducts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-              📭 Bu havza için üretim verisi bulunamadı.
+              Bu havza için üretim verisi bulunamadı.
             </div>
           ) : (
             <div>

@@ -79,7 +79,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">🐄 Hayvansal Üretim</div>
+        <div className="nav-section-title">Hayvansal Üretim</div>
         
         {animalProductionItems.map((item) => (
           <NavLink
@@ -92,7 +92,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">🌱 Bitkisel Üretim</div>
+        <div className="nav-section-title">Bitkisel Üretim</div>
         
         {plantProductionItems.map((item) => (
           <NavLink
@@ -105,7 +105,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">📊 FAO Verileri</div>
+        <div className="nav-section-title">FAO Verileri</div>
         
         {faoDataItems.map((item) => (
           <NavLink
@@ -131,7 +131,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">🔍 Detaylı Analiz</div>
+        <div className="nav-section-title">Detaylı Analiz</div>
         
         {excelDataItems.map((item) => (
           <NavLink

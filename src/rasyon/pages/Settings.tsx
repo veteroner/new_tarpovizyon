@@ -78,7 +78,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          ⚙️ Ayarlar
+          Ayarlar
         </h1>
         <p className="text-gray-600">
           Uygulama tercihlerinizi yönetin
@@ -100,7 +100,7 @@ export default function SettingsPage() {
               </p>
               <p className="text-sm text-gray-600">
                 Durum: {tourCompleted ? (
-                  <span className="text-green-600 font-medium">✅ Tamamlandı</span>
+                  <span className="text-green-600 font-medium">Tamamlandı</span>
                 ) : (
                   <span className="text-orange-600 font-medium">⏳ Henüz görüntülenmedi</span>
                 )}
@@ -129,7 +129,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
-            <p className="font-semibold mb-1">📖 Tur İçeriği:</p>
+            <p className="font-semibold mb-1">Tur İçeriği:</p>
             <ul className="list-disc list-inside space-y-1">
               <li>Mod seçimi (Manuel / Otomatik)</li>
               <li>Yardım bölümü kullanımı</li>
@@ -144,7 +144,7 @@ export default function SettingsPage() {
       {/* General Settings (placeholder) */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-6 opacity-60">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          🔧 Genel Ayarlar
+          Genel Ayarlar
         </h2>
         <p className="text-gray-600 text-sm">
           Yakında eklenecek: Tema seçimi, dil ayarları, bildirim tercihleri...
@@ -154,7 +154,7 @@ export default function SettingsPage() {
       {/* Notifications */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mt-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">
-          🔔 Bildirimler
+          Bildirimler
         </h2>
         <p className="text-gray-600 text-sm mb-4">
           Stok uyarıları ve güncellemeler için bildirimleri açabilirsiniz.
@@ -170,7 +170,7 @@ export default function SettingsPage() {
       {/* Support Section */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mt-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">
-          💛 Destek
+          Destek
         </h2>
         <p className="text-gray-600 text-sm mb-4">
           Uygulamayı ücretsiz tutmak için isterseniz bir reklam izleyerek destek olabilirsiniz.

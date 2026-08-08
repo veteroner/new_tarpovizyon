@@ -23,7 +23,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📍 İlçe Detay Analizi
+        İlçe Detay Analizi
       </h2>
 
       {selectedProvince ? (
@@ -69,7 +69,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
             border: '1px solid var(--border)'
           }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-              📋 İlçe Detayları
+              İlçe Detayları
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -199,7 +199,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-                  📊 İlçe Üretim (Top 10)
+                  İlçe Üretim (Top 10)
                 </h3>
                 <ChartInsightButton title="📊 İlçe Üretimi" description="Top 10 ilçe üretim dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>
@@ -247,7 +247,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-                  🥧 İl Payı Dağılımı (Top 10)
+                  İl Payı Dağılımı (Top 10)
                 </h3>
                 <ChartInsightButton title="🥧 İl Payı Dağılımı" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>

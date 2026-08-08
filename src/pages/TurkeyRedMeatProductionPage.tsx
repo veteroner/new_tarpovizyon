@@ -407,7 +407,7 @@ export default function TurkeyRedMeatProductionPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🥩 Türkiye Kırmızı Et Üretimi</h1>
+        <h1 className="page-title">Türkiye Kırmızı Et Üretimi</h1>
         <p className="page-subtitle">
           Kırmızı et üretimi (ton)
           {minYear && maxYear ? ` (${minYear}–${maxYear})` : ''}

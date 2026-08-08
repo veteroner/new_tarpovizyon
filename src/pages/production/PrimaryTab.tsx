@@ -66,7 +66,7 @@ export function PrimaryTab({
         <div style={{ marginBottom: '24px' }}><InsightCard insights={primaryInsights} maxDisplay={8} /></div>
 
         <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
-          <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {translateProduct(primaryProduct)} (2023)</h3>
+          <h3 className="chart-title" style={{ marginBottom: '16px' }}>Top Üretici — {translateProduct(primaryProduct)} (2023)</h3>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
               {['#', 'Ülke', 'Üretim', 'Pay %', 'Ekim (ha)', 'Verim'].map(h => <th key={h} style={{ textAlign: h === '#' || h === 'Ülke' ? 'left' : 'right', padding: '10px 8px', color: 'var(--text-secondary)', fontWeight: 600 }}>{h}</th>)}
@@ -88,7 +88,7 @@ export function PrimaryTab({
 
         {primaryHHI && (
           <div className="chart-card" style={{ marginBottom: '24px', padding: '20px' }}>
-            <h3 className="chart-title" style={{ marginBottom: '16px' }}>📊 Pazar Konsantrasyonu</h3>
+            <h3 className="chart-title" style={{ marginBottom: '16px' }}>Pazar Konsantrasyonu</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
               <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>HHI</div>

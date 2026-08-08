@@ -77,7 +77,7 @@ export default function TurkeyEggProductionPage() {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">Türkiye Yumurta Üretim Analizi 🥚</h1>
+        <h1 className="page-title">Türkiye Yumurta Üretim Analizi </h1>
         <p className="page-subtitle">Yıllık üretim trendleri, ekonomik göstergeler ve TÜİK verileri</p>
       </div>
 
@@ -112,7 +112,7 @@ export default function TurkeyEggProductionPage() {
         <>
           <div style={{ marginTop: '40px', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-              📊 TÜİK Yumurta Üretim Verileri{tuikRangeLabel ? ` (${tuikRangeLabel})` : ''}
+              TÜİK Yumurta Üretim Verileri{tuikRangeLabel ? ` (${tuikRangeLabel})` : ''}
             </h2>
             <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
               Türkiye İstatistik Kurumu resmi yumurta üretimi, tavuk sayısı ve verim verileri
@@ -171,7 +171,7 @@ export default function TurkeyEggProductionPage() {
         <>
           <div style={{ marginTop: '60px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-              🌍 Yumurta Dış Ticaret Analizi
+              Yumurta Dış Ticaret Analizi
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
               Türkiye yumurta ihracat ve ithalat performansı — yıllık ticaret akışları ve denge analizi

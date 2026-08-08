@@ -34,7 +34,7 @@ export default function ProvincialOverviewTab({
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        🗺️ İl Genel Bakış
+        İl Genel Bakış
       </h2>
 
       {/* Top 10 İller - Intelligence Format Table */}
@@ -47,7 +47,7 @@ export default function ProvincialOverviewTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🏆 Top 10 İl - Hayvan Popülasyonu Sıralaması
+          Top 10 İl - Hayvan Popülasyonu Sıralaması
         </h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -204,7 +204,7 @@ export default function ProvincialOverviewTab({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-              📊 İl Bazında Dağılım (Top 15)
+              İl Bazında Dağılım (Top 15)
             </h3>
             <ChartInsightButton title="📊 İl Bazında Dağılım" description="Top 15 il dağılımı" data={filteredProvincialData.slice(0, 15)} context={{ section: 'Genel Bakış' }} compact />
           </div>
@@ -251,7 +251,7 @@ export default function ProvincialOverviewTab({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-              🥧 Bölgesel Dağılım
+              Bölgesel Dağılım
             </h3>
             <ChartInsightButton title="🥧 Bölgesel Dağılım" description="Bölgelere göre dağılım" data={filteredProvincialData} context={{ section: 'Genel Bakış' }} compact />
           </div>
@@ -301,7 +301,7 @@ export default function ProvincialOverviewTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🌍 Bölgesel Özet
+          Bölgesel Özet
         </h3>
         <div style={{
           display: 'grid',
@@ -379,7 +379,7 @@ export default function ProvincialOverviewTab({
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            🗺️ Türkiye İl Dağılım Haritası (Coğrafi Bölgeler)
+            Türkiye İl Dağılım Haritası (Coğrafi Bölgeler)
           </h3>
           <ChartInsightButton title="🗺️ İl Dağılım Haritası" description="Harita: il bazlı hayvan popülasyonu" data={filteredProvincialData} context={{ section: 'Harita' }} compact />
         </div>

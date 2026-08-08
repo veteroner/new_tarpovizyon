@@ -50,22 +50,22 @@ export function OverviewTab({
 
       {overviewSupplyChain && (
         <div className="chart-card" style={{ marginBottom: '24px', padding: '24px' }}>
-          <h3 className="chart-title" style={{ marginBottom: '20px' }}>📦 Tedarik Zinciri — Birincil → İşlenmiş</h3>
+          <h3 className="chart-title" style={{ marginBottom: '20px' }}>Tedarik Zinciri — Birincil → İşlenmiş</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr auto 1fr', gap: '16px', alignItems: 'center' }}>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(16,185,129,0.1)', borderRadius: '12px', border: '2px solid #10b981' }}>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>🌾 Birincil</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Birincil</div>
               <div style={{ fontSize: '22px', fontWeight: 700, color: '#10b981' }}>{formatValue(overviewSupplyChain.primaryTotal)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>🇹🇷 {formatValue(overviewSupplyChain.turkeyPrimary)}</div>
             </div>
             <div style={{ fontSize: '28px', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(168,85,247,0.1)', borderRadius: '12px', border: '2px solid #a855f7' }}>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>⚙️ İşleme</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>İşleme</div>
               <div style={{ fontSize: '22px', fontWeight: 700, color: '#a855f7' }}>%{overviewSupplyChain.processingRatio.toFixed(1)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>🇹🇷 %{overviewSupplyChain.turkeyProcessingRatio.toFixed(1)}</div>
             </div>
             <div style={{ fontSize: '28px', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(59,130,246,0.1)', borderRadius: '12px', border: '2px solid #3b82f6' }}>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>🏭 İşlenmiş</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>İşlenmiş</div>
               <div style={{ fontSize: '22px', fontWeight: 700, color: '#3b82f6' }}>{formatValue(overviewSupplyChain.processedTotal)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>🇹🇷 {formatValue(overviewSupplyChain.turkeyProcessed)}</div>
             </div>
@@ -129,7 +129,7 @@ export function OverviewTab({
       </div>
 
       <div className="chart-card" style={{ padding: '24px', marginBottom: '24px' }}>
-        <h3 className="chart-title" style={{ marginBottom: '16px' }}>🧭 Derin Analiz Modülleri</h3>
+        <h3 className="chart-title" style={{ marginBottom: '16px' }}>Derin Analiz Modülleri</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           {TABS.filter(t => t.id !== 'overview').map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -148,7 +148,7 @@ export function OverviewTab({
       </div>
 
       <div style={{ padding: '16px', background: 'rgba(59,130,246,0.05)', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.2)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-        <strong>📊 Metodoloji:</strong> FAO FAOSTAT • {overviewKPIs.countryCount} ülke • {overviewKPIs.productCount} birincil + 24 işlenmiş • CAGR, HHI, Volatilite, Anomali, Forecast
+        <strong>Metodoloji:</strong> FAO FAOSTAT • {overviewKPIs.countryCount} ülke • {overviewKPIs.productCount} birincil + 24 işlenmiş • CAGR, HHI, Volatilite, Anomali, Forecast
       </div>
     </div>
   );

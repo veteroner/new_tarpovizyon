@@ -17,7 +17,7 @@ function suIhtiyaciLabel(kc: number): { label: string; emoji: string; color: str
 export function CropSelectStep({ state, setState, cropData, goStep3 }: Props) {
   return (
     <div className="sp-card sp-card--wide">
-      <h2 className="sp-card__title">🌾 Ürün Seçimi</h2>
+      <h2 className="sp-card__title">Ürün Seçimi</h2>
       <p className="sp-card__desc">Sulama planı yapılacak ürünü seçin</p>
 
       <div className="sp-crop-grid">
@@ -29,7 +29,7 @@ export function CropSelectStep({ state, setState, cropData, goStep3 }: Props) {
               onClick={() => setState(s => ({ ...s, urun: crop.urun }))}>
               <span className="sp-crop-btn__name">{crop.urun}</span>
               <span className="sp-crop-btn__hint" style={{ color: su.color, fontSize: '0.7rem' }}>
-                {su.emoji} {su.label}
+                {su.label}
               </span>
             </button>
           );

@@ -42,7 +42,7 @@ export default function ProvincialLivestockHeader({
     <>
       {/* Page Header */}
       <div className="page-header">
-        <h1 className="page-title">🗺️ İl ve İlçe Bazlı Hayvancılık Analizi</h1>
+        <h1 className="page-title">İl ve İlçe Bazlı Hayvancılık Analizi</h1>
         <p className="page-subtitle">
           Detaylı coğrafi analiz, trend izleme ve tahmin platformu
         </p>
@@ -292,7 +292,7 @@ export default function ProvincialLivestockHeader({
                   cursor: 'pointer'
                 }}
               >
-                📤 Dışa Aktar
+                Dışa Aktar
               </button>
               {exportMenuOpen && (
                 <div style={{
@@ -319,7 +319,7 @@ export default function ProvincialLivestockHeader({
                       fontSize: '13px'
                     }}
                   >
-                    📊 Excel
+                    Excel
                   </button>
                   <button
                     onClick={() => { exportToPDF(); setExportMenuOpen(false); }}
@@ -333,7 +333,7 @@ export default function ProvincialLivestockHeader({
                       fontSize: '13px'
                     }}
                   >
-                    📄 PDF
+                    PDF
                   </button>
                 </div>
               )}
@@ -351,12 +351,12 @@ export default function ProvincialLivestockHeader({
         overflowX: 'auto'
       }}>
         {[
-          { id: 'overview' as TabId, label: '🗺️ İl Genel Bakış', desc: 'Provincial Overview' },
-          { id: 'districts' as TabId, label: '📍 İlçe Detayları', desc: 'District Deep Dive' },
-          { id: 'trends' as TabId, label: '📈 Zaman Serisi', desc: 'Time Series' },
-          { id: 'comparison' as TabId, label: '⚖️ Karşılaştırma', desc: 'Comparative Analysis' },
-          { id: 'correlation' as TabId, label: '🔗 Korelasyon', desc: 'Türler arası içgörü' },
-          { id: 'forecast' as TabId, label: '🔮 Tahmin', desc: 'Forecasting' }
+          { id: 'overview' as TabId, label: 'İl Genel Bakış', desc: 'Provincial Overview' },
+          { id: 'districts' as TabId, label: 'İlçe Detayları', desc: 'District Deep Dive' },
+          { id: 'trends' as TabId, label: 'Zaman Serisi', desc: 'Time Series' },
+          { id: 'comparison' as TabId, label: 'Karşılaştırma', desc: 'Comparative Analysis' },
+          { id: 'correlation' as TabId, label: 'Korelasyon', desc: 'Türler arası içgörü' },
+          { id: 'forecast' as TabId, label: 'Tahmin', desc: 'Forecasting' }
         ].map(tab => (
           <button
             key={tab.id}

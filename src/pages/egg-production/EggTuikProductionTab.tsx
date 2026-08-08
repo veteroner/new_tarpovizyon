@@ -97,7 +97,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {monthlyEgg.length > 0 && (
         <>
           <div style={{ marginTop: '40px', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>📅 2025 Aylık Dağılım</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>2025 Aylık Dağılım</h3>
           </div>
 
           <div className="chart-grid">

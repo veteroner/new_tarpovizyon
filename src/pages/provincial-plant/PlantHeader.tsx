@@ -88,7 +88,7 @@ export function PlantHeader({
           boxShadow: '0 8px 16px rgba(245, 158, 11, 0.2)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
-            🏆 Lider İl
+            Lider İl
           </div>
           <div style={{ fontSize: '24px', fontWeight: 800, marginBottom: '4px' }}>
             {metrics.leaderProvince}
@@ -107,7 +107,7 @@ export function PlantHeader({
           boxShadow: '0 8px 16px rgba(59, 130, 246, 0.2)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
-            📈 En Hızlı Büyüyen
+            En Hızlı Büyüyen
           </div>
           <div style={{ fontSize: '24px', fontWeight: 800, marginBottom: '4px' }}>
             {metrics.fastestGrowing}
@@ -126,7 +126,7 @@ export function PlantHeader({
           boxShadow: '0 8px 16px rgba(139, 92, 246, 0.2)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
-            🗺️ Aktif İl Sayısı
+            Aktif İl Sayısı
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px' }}>
             {metrics.activeProvinces}
@@ -155,7 +155,7 @@ export function PlantHeader({
           {/* Year Selector */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              📅 YIL SEÇİMİ
+              YIL SEÇİMİ
             </label>
             <select
               value={selectedYear}
@@ -181,7 +181,7 @@ export function PlantHeader({
           {/* Unsur Selector */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              📊 UNSUR
+              UNSUR
             </label>
             <select
               value={selectedUnsur}
@@ -207,7 +207,7 @@ export function PlantHeader({
           {/* Product Multi-Select */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              🌾 ÜRÜN SEÇİMİ (Max 5)
+              ÜRÜN SEÇİMİ (Max 5)
             </label>
             <div style={{ position: 'relative' }}>
               <select
@@ -244,7 +244,7 @@ export function PlantHeader({
           {/* Region Filter */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              🗺️ BÖLGE FİLTRESİ
+              BÖLGE FİLTRESİ
             </label>
             <select
               value={selectedRegion}
@@ -271,7 +271,7 @@ export function PlantHeader({
           {/* Province Selector for Districts */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              🏙️ İLÇE ANALİZİ İÇİN İL
+              İLÇE ANALİZİ İÇİN İL
             </label>
             <select
               value={selectedProvince || ''}
@@ -298,7 +298,7 @@ export function PlantHeader({
           {/* Export Menu */}
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              📥 DIŞA AKTAR
+              DIŞA AKTAR
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
@@ -315,7 +315,7 @@ export function PlantHeader({
                   cursor: 'pointer'
                 }}
               >
-                📊 Excel
+                Excel
               </button>
               <button
                 onClick={exportToPDF}
@@ -331,7 +331,7 @@ export function PlantHeader({
                   cursor: 'pointer'
                 }}
               >
-                📄 PDF
+                PDF
               </button>
             </div>
           </div>

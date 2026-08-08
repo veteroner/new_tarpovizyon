@@ -13,6 +13,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Sprout, TriangleAlert, Trophy } from 'lucide-react';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -255,7 +256,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <div className="kpi-subtitle">Küresel yıllık büyüme</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">LİDER</span><div className="kpi-icon orange">🏆</div></div>
+            <div className="kpi-header"><span className="kpi-title">LİDER</span><div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{primaryKPIs.leader}</div>
             <div className="kpi-subtitle">%{primaryKPIs.leaderShare.toFixed(1)} pazar payı</div>
           </div>
@@ -275,12 +276,12 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <div className="kpi-subtitle">{primaryKPIs.turkeyCAGR5 > primaryKPIs.globalCAGR5 ? '✅ Küreselden hızlı' : '⚠️ Küreselden yavaş'}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">YÜKSELEN</span><div className="kpi-icon green">🌱</div></div>
+            <div className="kpi-header"><span className="kpi-title">YÜKSELEN</span><div className="kpi-icon green"><Sprout size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{color: '#22c55e'}}>{primaryProductCAGR.filter(p => p.lifecycle === 'emerging').length}</div>
             <div className="kpi-subtitle">Emerging ürün</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">DÜŞEN</span><div className="kpi-icon" style={{background:'rgba(239,68,68,.15)', color:'#ef4444'}}>⚠️</div></div>
+            <div className="kpi-header"><span className="kpi-title">DÜŞEN</span><div className="kpi-icon" style={{background:'rgba(239,68,68,.15)', color:'#ef4444'}}><TriangleAlert size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{color: '#ef4444'}}>{primaryProductCAGR.filter(p => p.lifecycle === 'declining').length}</div>
             <div className="kpi-subtitle">Declining ürün</div>
           </div>
@@ -292,7 +293,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Product Lifecycle Cards */}
       <div className="chart-card" style={{marginTop: '20px'}}>
-        <h3 className="chart-title">🧬 Ürün Yaşam Döngüsü Matrisi</h3>
+        <h3 className="chart-title">Ürün Yaşam Döngüsü Matrisi</h3>
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginTop: '12px'}}>
           {primaryProductCAGR.slice(0, 12).map((p, i) => {
             const lcStyle = p.lifecycle === 'emerging' ? {bg: 'rgba(34,197,94,.1)', border: '#22c55e', badge: '🌱 Emerging', color: '#22c55e'}
@@ -429,7 +430,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
         </ChartCard>
 
         <div className="chart-card">
-          <h3 className="chart-title">📋 Ülke CAGR Sıralaması (5Y)</h3>
+          <h3 className="chart-title">Ülke CAGR Sıralaması (5Y)</h3>
           <div style={{maxHeight: '300px', overflowY: 'auto'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '12px'}}>
               <thead>

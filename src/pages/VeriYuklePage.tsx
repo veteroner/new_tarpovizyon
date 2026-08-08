@@ -54,7 +54,7 @@ export default function VeriYuklePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🗂️ Veri Düzenle</h1>
+        <h1 className="page-title">Veri Düzenle</h1>
         <p className="page-subtitle">
           Tabloyu seç, satırları düzenle veya dosyadan içe aktar, onayla.
         </p>

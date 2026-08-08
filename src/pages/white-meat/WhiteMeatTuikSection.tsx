@@ -19,6 +19,7 @@ import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { BarChart3, Beef, Bird, Egg } from 'lucide-react';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -35,7 +36,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
     <>
       <div style={{ marginTop: '60px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          🐔 TÜİK Kümes Hayvancılığı Verileri
+          TÜİK Kümes Hayvancılığı Verileri
         </h2>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
           Yıllık kesim sayıları, et üretimi ve kuluçkadan üretime detaylı analizler
@@ -76,7 +77,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">KESİLEN TAVUK (2025)</span>
-                <div className="kpi-icon orange">🐔</div>
+                <div className="kpi-icon orange"><Bird size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value">{formatShort(tuikData[0]?.slaughtered * 1000)} adet</div>
               <div className="kpi-subtitle">{tuikData[0]?.slaughtered.toLocaleString('tr-TR')} bin adet</div>
@@ -84,7 +85,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">TAVUK ETİ ÜRETİMİ</span>
-                <div className="kpi-icon red">🥩</div>
+                <div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value">{formatTon(tuikData[0]?.meatProduction)}</div>
               <div className="kpi-subtitle">2025 yılı</div>
@@ -92,7 +93,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">KULUÇKA BAŞARI ORANI</span>
-                <div className="kpi-icon green">🥚</div>
+                <div className="kpi-icon green"><Egg size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value" style={{ color: '#22c55e' }}>%{tuikData[0]?.hatchRate.toFixed(1)}</div>
               <div className="kpi-subtitle">Civiv çıkma oranı</div>
@@ -100,7 +101,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">VERİM (KG/BAŞ)</span>
-                <div className="kpi-icon blue">📊</div>
+                <div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value">{tuikData[0]?.yieldPerBird.toFixed(2)} kg</div>
               <div className="kpi-subtitle">Tavuk başına et verimi</div>
@@ -149,7 +150,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
 
           {/* Özet İstatistikler */}
           <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: '700' }}>📊 Özet İstatistikler (2010-2025)</h3>
+            <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: '700' }}>Özet İstatistikler (2010-2025)</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
               <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Toplam Kesilen (16 yıl)</div>
@@ -214,7 +215,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
           {monthlySlaughter.length > 0 && monthlyMeat.length > 0 && (
             <>
               <div style={{ marginTop: '30px', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>📅 Aylık Üretim Dağılımı (2025)</h2>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>Aylık Üretim Dağılımı (2025)</h2>
               </div>
               <div className="chart-grid">
                 <ChartCard title="📊 Aylık Kesilen Tavuk" action={<ChartInsightButton title="📊 Aylık Kesilen Tavuk" description="Son yıl aylık kesilen tavuk sayısı" data={monthlySlaughter} context={{ section: 'Aylık Kesim' }} compact />}>
@@ -333,7 +334,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
             <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>📊 2026 Tahmini Kesilen Tavuk</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>2026 Tahmini Kesilen Tavuk</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f97316', marginBottom: '8px' }}>
                 {(() => {
                   const lastYear = tuikData[0]?.slaughtered || 0;
@@ -346,7 +347,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>CAGR bazlı projeksiyon</div>
             </div>
             <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>🥩 2026 Tahmini Et Üretimi</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>2026 Tahmini Et Üretimi</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#ef4444', marginBottom: '8px' }}>
                 {(() => {
                   const lastYear = tuikData[0]?.meatProduction || 0;
@@ -359,7 +360,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>CAGR bazlı projeksiyon</div>
             </div>
             <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>📈 Yıllık Büyüme Oranı</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>Yıllık Büyüme Oranı</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981', marginBottom: '8px' }}>
                 %{(() => {
                   const lastYear = tuikData[0]?.slaughtered || 0;
@@ -371,7 +372,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{tuikData.length} yıllık CAGR</div>
             </div>
             <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>🔮 Projeksiyon Metodu</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: '600' }}>Projeksiyon Metodu</div>
               <div style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>CAGR Model</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bileşik yıllık büyüme oranı</div>
             </div>
@@ -429,7 +430,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
           </div>
 
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)', marginTop: '20px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>📋 Projeksiyon Metodolojisi</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Projeksiyon Metodolojisi</h3>
             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
               <p style={{ marginBottom: '12px' }}><strong>CAGR (Compound Annual Growth Rate):</strong> Bileşik yıllık büyüme oranı modeli kullanılarak 2026 yılı projeksiyonu hesaplanmaktadır.</p>
               <p style={{ marginBottom: '12px' }}><strong>Hesaplama:</strong> Son {tuikData.length} yıllık verinin geometrik ortalaması alınarak sabit bir büyüme oranı belirlenir ve gelecek dönem tahminleri yapılır.</p>

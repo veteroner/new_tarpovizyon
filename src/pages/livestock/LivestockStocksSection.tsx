@@ -14,6 +14,7 @@ import { calculateHHI } from '../../utils/livestockCalculations';
 import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
 import { BAR_COLOR } from '../../utils/chartColors';
+import { Rocket, Trophy } from 'lucide-react';
 
 const R = 'fao/uretim-hayvansal-canlihayvan';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -345,12 +346,12 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             <div className="kpi-subtitle">{stocksKPIs.turkeyCAGR5 > stocksKPIs.globalCAGR5 ? '✅ Küresel ortalamanın üstünde' : '⚠️ Küresel ortalamanın altında'}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green">🚀</div></div>
+            <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{stocksKPIs.topGrower}</div>
             <div className="kpi-subtitle">CAGR %{stocksKPIs.topGrowerCAGR.toFixed(1)}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon orange">🏆</div></div>
+            <div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{stocksCountryData[0]?.name || '-'}</div>
             <div className="kpi-subtitle">Pay: %{stocksCountryData[0]?.share || '0'}</div>
           </div>
@@ -372,7 +373,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 1: Animal CAGR cards */}
       {stocksAnimalCAGR.length > 0 && (
         <div style={{marginTop: '24px'}}>
-          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>🐾 Tür Populasyon Trendleri</h3>
+          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>Tür Populasyon Trendleri</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px'}}>
             {stocksAnimalCAGR.map((a, i) => {
               const trendIcon = a.trend === 'surge' ? '🚀' : a.trend === 'growth' ? '📈' : a.trend === 'stable' ? '➡️' : a.trend === 'decline' ? '📉' : '💀';
@@ -399,7 +400,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       <div className="chart-grid" style={{marginTop: '24px'}}>
         <div className="chart-card" style={{gridColumn: 'span 2'}}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Uzun Vadeli Populasyon Trendi (Stacked)</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Uzun Vadeli Populasyon Trendi (Stacked)</h3>
             <ChartInsightButton title="Uzun Vadeli Populasyon Trendi" description="Hayvan türlerine göre uzun vadeli nüfus trendi" data={stocksDeepTrend} context={{}} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
@@ -423,7 +424,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       <div className="chart-grid">
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 Tür CAGR Karşılaştırması</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Tür CAGR Karşılaştırması</h3>
             <ChartInsightButton title="Tür CAGR Karşılaştırması" description="Hayvan türlerine göre büléik büyüme oranı analizi" data={stocksAnimalCAGR} context={{}} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
@@ -444,7 +445,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
         </div>
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Küresel Tür Dağılımı</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Küresel Tür Dağılımı</h3>
             <ChartInsightButton title="Küresel Hayvan Tür Dağılımı" description="Dünya genelinde hayvan türlerine göre stok dağılımı" data={stocksData} context={{}} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
@@ -464,7 +465,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
         <div className="chart-grid">
           <div className="chart-card" style={{gridColumn: 'span 2'}}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>🎯 Ülke Growth Quadrant (Büyüme × Stok)</h3>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>Ülke Growth Quadrant (Büyüme × Stok)</h3>
               <ChartInsightButton title="Ülke Growth Quadrant (Büyüme × Stok)" description="Ülkelerin stok büyüme oranı ve toplam stok dağılımı" data={stocksCountryCAGR} context={{}} />
             </div>
             <ResponsiveContainer width="100%" height={400}>
@@ -509,7 +510,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       <div className="chart-grid">
         <div className="chart-card" style={{gridColumn: 'span 2'}}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🌍 Top 20 Ülke Sıralaması ({selectedYear})</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Top 20 Ülke Sıralaması ({selectedYear})</h3>
             <ChartInsightButton title="Top 20 Ülke Sıralaması" description="Seçilen yılda en fazla hayvan stokuna sahip 20 ülke" data={stocksCountryData.slice(0, 20)} context={{ yıl: selectedYear }} />
           </div>
           <ResponsiveContainer width="100%" height={500}>
@@ -556,7 +557,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 7: Risk Alerts Table */}
       {stocksRiskAlerts.length > 0 && (
         <div style={{marginTop: '24px'}}>
-          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>🚨 Populasyon Risk Uyarıları (10 Yıllık Değişim)</h3>
+          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>Populasyon Risk Uyarıları (10 Yıllık Değişim)</h3>
           <div style={{background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'auto'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem'}}>
               <thead>
@@ -595,7 +596,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 8: Country CAGR Rankings Table */}
       {stocksCountryCAGR.length > 0 && (
         <div style={{marginTop: '24px'}}>
-          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>📋 Ülke Stok Sıralaması & Büyüme</h3>
+          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>Ülke Stok Sıralaması & Büyüme</h3>
           <div style={{background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'auto'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem'}}>
               <thead>

@@ -135,7 +135,7 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
         justifyContent: 'center',
         color: 'var(--text-secondary)'
       }}>
-        🗺️ İlçe haritası yükleniyor...
+        İlçe haritası yükleniyor...
       </div>
     );
   }
@@ -149,7 +149,7 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
         justifyContent: 'center',
         color: 'var(--error)'
       }}>
-        ❌ İlçe haritası yüklenemedi
+        İlçe haritası yüklenemedi
       </div>
     );
   }

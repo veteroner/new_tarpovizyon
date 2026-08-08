@@ -31,7 +31,7 @@ export default function ProvincialDistrictsTab({
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📍 İlçe Detay Analizi
+        İlçe Detay Analizi
       </h2>
       {selectedProvince ? (
         <div>
@@ -78,7 +78,7 @@ export default function ProvincialDistrictsTab({
             border: '1px solid var(--border)'
           }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-              📊 İlçeler Detay Tablosu
+              İlçeler Detay Tablosu
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -239,7 +239,7 @@ export default function ProvincialDistrictsTab({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-                  📊 İlçe Popülasyon Dağılımı
+                  İlçe Popülasyon Dağılımı
                 </h3>
                 <ChartInsightButton title="📊 İlçe Popülasyonu" description="İlçe bazında hayvan dağılımı" data={districtData} context={{ section: 'İlçe' }} compact />
               </div>
@@ -288,7 +288,7 @@ export default function ProvincialDistrictsTab({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-                  🥧 İl İçi Pay Dağılımı (Top 10)
+                  İl İçi Pay Dağılımı (Top 10)
                 </h3>
                 <ChartInsightButton title="🥧 İl İçi Pay" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>
@@ -349,7 +349,7 @@ export default function ProvincialDistrictsTab({
             fontSize: '13px',
             fontWeight: 600
           }}>
-            💡 İpucu: Tab 1'deki tabloda bir ile tıklayarak da seçebilirsiniz
+            İpucu: Tab 1'deki tabloda bir ile tıklayarak da seçebilirsiniz
           </div>
         </div>
       )}

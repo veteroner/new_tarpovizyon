@@ -16,6 +16,7 @@ import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { BarChart3, Bird, TrendingUp, Utensils } from 'lucide-react';
 
 type Props = {
   quailMeatData: TuikTurkeyMeatData[];
@@ -30,7 +31,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
     <>
       <div style={{ marginTop: '60px', marginBottom: '30px' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          🐦 Bıldırcın Eti Üretimi (TÜİK)
+          Bıldırcın Eti Üretimi (TÜİK)
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px' }}>
           Türkiye'de yıllık bıldırcın eti üretimi ve kesilen bıldırcın sayısı
@@ -42,7 +43,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">BILDIRCIN ETİ ({quailMeatData[0]?.year})</span>
-            <div className="kpi-icon orange">🐦</div>
+            <div className="kpi-icon orange"><Bird size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {(quailMeatData[0]?.production || 0).toLocaleString('tr-TR')} ton
@@ -54,7 +55,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
           <div className="kpi-card">
             <div className="kpi-header">
               <span className="kpi-title">KESİLEN ({quailSlaughterData[0]?.year})</span>
-              <div className="kpi-icon blue">🔪</div>
+              <div className="kpi-icon blue"><Utensils size={18} aria-hidden="true" /></div>
             </div>
             <div className="kpi-value">
               {(quailSlaughterData[0]?.production || 0).toLocaleString('tr-TR')} bin adet
@@ -66,7 +67,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">BÜYÜME</span>
-            <div className="kpi-icon green">📈</div>
+            <div className="kpi-icon green"><TrendingUp size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">
             {(() => {
@@ -84,7 +85,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
           <div className="kpi-card">
             <div className="kpi-header">
               <span className="kpi-title">VERİM</span>
-              <div className="kpi-icon purple">📊</div>
+              <div className="kpi-icon purple"><BarChart3 size={18} aria-hidden="true" /></div>
             </div>
             <div className="kpi-value">
               {(() => {
@@ -147,7 +148,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
       {/* Bıldırcın Aylık Dağılım */}
       {monthlyQuailMeat.some(m => m.value > 0) && (
         <div className="chart-grid" style={{ marginTop: '20px' }}>
-          <ChartCard title={<>📅 Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</>} span={2} action={<ChartInsightButton title="📅 Aylık Bıldırcın Eti Üretimi" description="En son yıl aylık bıldırcın eti üretimi" data={quailMeatData} context={{ year: quailMeatData[0]?.year }} compact />}>
+          <ChartCard title={<>Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</>} span={2} action={<ChartInsightButton title="📅 Aylık Bıldırcın Eti Üretimi" description="En son yıl aylık bıldırcın eti üretimi" data={quailMeatData} context={{ year: quailMeatData[0]?.year }} compact />}>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={monthlyQuailMeat}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

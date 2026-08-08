@@ -239,7 +239,7 @@ export default function WorldComparisonSection({
         <>
           <div style={{ marginTop: '40px', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-              🌏 Dünya Et Tüketimi Karşılaştırması (Kişi Başı/Yıl)
+              Dünya Et Tüketimi Karşılaştırması (Kişi Başı/Yıl)
             </h2>
           </div>
           <div className="kpi-grid">
@@ -252,19 +252,19 @@ export default function WorldComparisonSection({
                 </div>
                 <div style={{ fontSize: '0.85rem', marginTop: '8px', lineHeight: '1.6' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>🍗 Kanatlı:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Kanatlı:</span>
                     <span style={{ fontWeight: '600', color: '#dc2626' }}>{country.kanatli_eti.toFixed(1)} kg</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>🥩 Sığır:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Sığır:</span>
                     <span style={{ fontWeight: '600', color: '#ea580c' }}>{country.sigir_eti.toFixed(1)} kg</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>🐑 Koyun/Keçi:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Koyun/Keçi:</span>
                     <span style={{ fontWeight: '600', color: '#ca8a04' }}>{country.koyun_keci_eti.toFixed(1)} kg</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>🐟 Balık:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Balık:</span>
                     <span style={{ fontWeight: '600', color: '#14b8a6' }}>{country.balik_ve_deniz_urunleri.toFixed(1)} kg</span>
                   </div>
                   <div style={{ borderTop: '1px solid var(--border)', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between' }}>

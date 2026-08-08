@@ -1,4 +1,5 @@
 import { fmt } from './plantTypes';
+import { BarChart3, Trophy } from 'lucide-react';
 
 interface PlantKpiPanelProps {
   totalValue: number;
@@ -38,12 +39,12 @@ export default function PlantKpiPanel({
           <div className="kpi-subtitle">Önceki yıla göre</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon green">🏆</div></div>
+          <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon green"><Trophy size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{topCity}</div>
           <div className="kpi-subtitle">{fmt(topCityValue)} {currentBirim}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">ÜRÜN SAYISI</span><div className="kpi-icon blue">📊</div></div>
+          <div className="kpi-header"><span className="kpi-title">ÜRÜN SAYISI</span><div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{productCount}</div>
           <div className="kpi-subtitle">Seçili ürün</div>
         </div>
@@ -58,7 +59,7 @@ export default function PlantKpiPanel({
         color: 'white'
       }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          🧠 Tarım İçgörü Özeti
+          Tarım İçgörü Özeti
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

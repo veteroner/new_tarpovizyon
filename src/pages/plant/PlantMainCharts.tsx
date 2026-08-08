@@ -49,7 +49,7 @@ export default function PlantMainCharts({
 
       {/* ─── Grafik 2 & 3: İl Sıralaması + Pie ─── */}
       <div className="chart-grid">
-        <ChartCard title={<>🏙️ İl Sıralaması — Top 20 ({selectedYear})</>} action={<ChartInsightButton title="🏙️ İl Sıralaması" description="Top 20 il" data={cityData.slice(0, 20)} context={{ section: 'Bitkisel Üretim' }} compact />}>
+        <ChartCard title={<>İl Sıralaması — Top 20 ({selectedYear})</>} action={<ChartInsightButton title="🏙️ İl Sıralaması" description="Top 20 il" data={cityData.slice(0, 20)} context={{ section: 'Bitkisel Üretim' }} compact />}>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -84,7 +84,7 @@ export default function PlantMainCharts({
       {/* ─── Grafik 4: Bölge Karşılaştırması ─── */}
       {regionData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title={<>🗺️ Bölge Karşılaşması ({selectedYear})</>} span={2} action={<ChartInsightButton title="🗺️ Bölge Karşılaşması" description="Bölgesel karşılaştirma" data={regionData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+          <ChartCard title={<>Bölge Karşılaşması ({selectedYear})</>} span={2} action={<ChartInsightButton title="🗺️ Bölge Karşılaşması" description="Bölgesel karşılaştirma" data={regionData} context={{ section: 'Bitkisel Üretim' }} compact />}>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={regionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -104,7 +104,7 @@ export default function PlantMainCharts({
       {/* ─── Grafik 5: Ürünler Arası Karşılaştırma ─── */}
       {productCompareData.length > 1 && (
         <div className="chart-grid">
-          <ChartCard title={<>📊 Ürün Karşılaşması ({selectedYear})</>} span={2} action={<ChartInsightButton title="📊 Ürün Karşılaşması" description="Ürün bazlı karşılaştirma" data={productCompareData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+          <ChartCard title={<>Ürün Karşılaşması ({selectedYear})</>} span={2} action={<ChartInsightButton title="📊 Ürün Karşılaşması" description="Ürün bazlı karşılaştirma" data={productCompareData} context={{ section: 'Bitkisel Üretim' }} compact />}>
             <ResponsiveContainer width="100%" height={Math.max(250, productCompareData.length * 32)}>
               <BarChart data={productCompareData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

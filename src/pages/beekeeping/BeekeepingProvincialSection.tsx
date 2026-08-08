@@ -33,7 +33,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🏆 İl Bazlı Liderlik Analizi
+          İl Bazlı Liderlik Analizi
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           En çok arıcı, en fazla üretim ve en yüksek verimli iller
@@ -56,7 +56,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🐝 En Çok Arıcı Olan İller (2023)
+              En Çok Arıcı Olan İller (2023)
             </h3>
             <ChartInsightButton title="🐝 En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
           </div>
@@ -90,7 +90,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🍯 En Fazla Bal Üreten İller
+              En Fazla Bal Üreten İller
             </h3>
             <ChartInsightButton title="🍯 En Fazla Bal Üreten İller" description="İl bazında bal üretimi sıralaması" data={topProducers} context={{ section: 'İl Liderlik' }} compact />
           </div>
@@ -124,7 +124,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📊 En Yüksek Verimli İller (kg/kovan)
+              En Yüksek Verimli İller (kg/kovan)
             </h3>
             <ChartInsightButton title="📊 En Yüksek Verimli İller" description="kg/kovan bazında verimlilik sıralaması" data={topYield} context={{ section: 'İl Liderlik' }} compact />
           </div>
@@ -158,7 +158,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🌸 Bal Çeşitleri Dağılımı
+              Bal Çeşitleri Dağılımı
             </h3>
             <ChartInsightButton title="🌸 Bal Çeşitleri Dağılımı" description="Bal çeşitlerinin dağılımı" data={honeyTypesData} context={{ section: 'Bal Çeşitleri' }} compact />
           </div>
@@ -208,7 +208,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         return (
           <div style={{ marginTop: '32px' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-              🕸️ İl Arıcılık Profili — Çok Boyutlu Radar
+              İl Arıcılık Profili — Çok Boyutlu Radar
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
               Arıcı sayısı, bal üretimi ve kovan verimi boyutlarında il endeks karşılaştırması (0–100 normalize).

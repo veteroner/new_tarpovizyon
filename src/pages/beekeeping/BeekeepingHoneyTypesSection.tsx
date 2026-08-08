@@ -5,7 +5,7 @@ export function BeekeepingHoneyTypesSection({ honeyTypesData }: { honeyTypesData
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🌺 Türkiye Bal Çeşitleri
+          Türkiye Bal Çeşitleri
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Türkiye'de üretilen bal çeşitleri ve illerdeki yaygınlığı

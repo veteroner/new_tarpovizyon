@@ -319,7 +319,7 @@ export default function CountryIntelligenceTab() {
       {!selectedCountry && (
         <>
           <div className="chart-card" style={{ marginBottom: 16 }}>
-            <h3 className="chart-title" style={{ margin: '0 0 8px' }}>🗺️ Dünya Üzerinden Ülke Seçin</h3>
+            <h3 className="chart-title" style={{ margin: '0 0 8px' }}>Dünya Üzerinden Ülke Seçin</h3>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
               Yukarıdaki listeden veya hızlı erişim çiplerinden bir ülke seçtiğinizde, harita yerine ülke profili açılır.
             </div>
@@ -438,7 +438,7 @@ export default function CountryIntelligenceTab() {
 
           {/* Charts */}
           <div className="chart-grid">
-            <ChartCard title={<>📊 Aylık Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Aylık Ticaret`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={countryContext} />}>
+            <ChartCard title={<>Aylık Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Aylık Ticaret`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={countryContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -452,7 +452,7 @@ export default function CountryIntelligenceTab() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title={<>📈 Yıllık Ticaret Trendi — {selectedCountry}</>} action={<ChartInsightButton title={`${selectedCountry} Yıllık Ticaret Trendi`} description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={countryContext} />}>
+            <ChartCard title={<>Yıllık Ticaret Trendi — {selectedCountry}</>} action={<ChartInsightButton title={`${selectedCountry} Yıllık Ticaret Trendi`} description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={countryContext} />}>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -469,7 +469,7 @@ export default function CountryIntelligenceTab() {
           </div>
 
           {/* Top products bar */}
-          <ChartCard title={<>📦 Ürün Bazlı Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Ürün Bazlı Ticaret`} description="İlk 15 ürün için milyon USD bazında ihracat ve ithalat" data={productBarData} context={countryContext} />}>
+          <ChartCard title={<>Ürün Bazlı Ticaret — {selectedCountry} ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedCountry} Ürün Bazlı Ticaret`} description="İlk 15 ürün için milyon USD bazında ihracat ve ithalat" data={productBarData} context={countryContext} />}>
             <ResponsiveContainer width="100%" height={Math.max(300, products.length * 28)}>
               <BarChart data={productBarData} layout="vertical" onClick={(state: any) => openProductDetail(state?.activePayload?.[0]?.payload?.fullName || '')}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -485,7 +485,7 @@ export default function CountryIntelligenceTab() {
 
           {/* Products table */}
           <div className="chart-card" style={{ marginTop: 16 }}>
-            <h3 className="chart-title">📋 Ürün Detay Tablosu</h3>
+            <h3 className="chart-title">Ürün Detay Tablosu</h3>
             <div style={{ maxHeight: 450, overflow: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>

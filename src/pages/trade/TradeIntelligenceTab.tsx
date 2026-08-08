@@ -232,7 +232,7 @@ export default function TradeIntelligenceTab() {
           Ticaret Dengesizliği Uyarıları — {year}
         </h3>
         {imbalanced.length === 0 ? (
-          <p className="text-sm text-center py-8" style={{ color: 'var(--text-secondary)' }}>Ciddi dengesizlik tespit edilmedi ✓</p>
+          <p className="text-sm text-center py-8" style={{ color: 'var(--text-secondary)' }}>Ciddi dengesizlik tespit edilmedi </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

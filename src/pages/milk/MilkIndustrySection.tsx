@@ -20,7 +20,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🏭 Sanayiye Giden Süt ve Ürünler
+          Sanayiye Giden Süt ve Ürünler
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Süt sanayiinde kullanılan süt ve üretilen ürün miktarları - Aylık tüketim analizi
@@ -43,7 +43,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🎯 Ürün Dağılım Haritası
+              Ürün Dağılım Haritası
             </h3>
             <ChartInsightButton title="🎯 Ürün Dağılım Haritası" description="Süt sanayii ürün dağılım radar grafik" data={industrySutData} context={{ section: 'Süt Sanayii' }} compact />
           </div>
@@ -75,7 +75,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥣 Yoğurt Üretimi (Aylık)
+              Yoğurt Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🥣 Yoğurt Üretimi (Aylık)" description="Aylık yoğurt üretim miktarı" data={industrySutData} context={{ urun: 'yogurt' }} compact />
           </div>
@@ -101,7 +101,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🧀 Peynir Üretimi (Aylık)
+              Peynir Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🧀 Peynir Üretimi (Aylık)" description="Aylık peynir üretim miktarı" data={industrySutData} context={{ urun: 'peynir' }} compact />
           </div>
@@ -127,7 +127,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥤 Ayran Üretimi (Aylık)
+              Ayran Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🥤 Ayran Üretimi (Aylık)" description="Aylık ayran üretim miktarı" data={industrySutData} context={{ urun: 'ayran' }} compact />
           </div>
@@ -153,7 +153,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥛 İçme Sütü Üretimi (Aylık)
+              İçme Sütü Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🥛 İçme Sütü Üretimi (Aylık)" description="Aylık içme sütü üretim miktarı" data={industrySutData} context={{ urun: 'icme_sutu' }} compact />
           </div>
@@ -179,7 +179,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🧈 Tereyağı Üretimi (Aylık)
+              Tereyağı Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🧈 Tereyağı Üretimi (Aylık)" description="Aylık tereyağı üretim miktarı" data={industrySutData} context={{ urun: 'tereyagi' }} compact />
           </div>
@@ -205,7 +205,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥛 Süt Tozu Üretimi (Aylık)
+              Süt Tozu Üretimi (Aylık)
             </h3>
             <ChartInsightButton title="🥛 Süt Tozu Üretimi (Aylık)" description="Aylık süt tozu üretim miktarı" data={industrySutData} context={{ urun: 'sut_tozu' }} compact />
           </div>
@@ -231,7 +231,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📈 Sanayiye Giden Ham İnek Sütü (Aylık Trend)
+              Sanayiye Giden Ham İnek Sütü (Aylık Trend)
             </h3>
             <ChartInsightButton title="📈 Sanayiye Giden Ham İnek Sütü (Aylık Trend)" description="Sanayiye giden ham inek sütü aylık trend" data={industrySutData} context={{ urun: 'ham_inek_sutu' }} />
           </div>

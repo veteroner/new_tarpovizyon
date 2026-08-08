@@ -109,14 +109,14 @@ export function FertilizerPricingPanel({ pricing }: PanelProps) {
     <div className="gh-card" style={{ marginBottom: 12, background: 'linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%)', border: '1px solid #5eead4' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <h2 className="gh-card__title" style={{ margin: 0 }}>💱 Gübre Fiyat Kaynağı</h2>
+          <h2 className="gh-card__title" style={{ margin: 0 }}>Gübre Fiyat Kaynağı</h2>
           <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#0f766e' }}>
             {useLivePricing && usdTry
               ? <>Canlı: <strong>1 USD = ₺{usdTry.toFixed(2)}</strong> {updatedAtStr && <span style={{ opacity: 0.7 }}>({updatedAtStr})</span>} · Dünya pazar USD/ton × kur ÷ 1000</>
               : 'Statik 2024 ortalama fiyatlar'}
             {Object.keys(overrides).length > 0 && <span style={{ marginLeft: 6, color: '#92400e' }}>· {Object.keys(overrides).length} ürün manuel</span>}
           </p>
-          {error && <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#b91c1c' }}>⚠️ Canlı kur alınamadı: {error}. Statik fiyatlara döndü.</p>}
+          {error && <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#b91c1c' }}>Canlı kur alınamadı: {error}. Statik fiyatlara döndü.</p>}
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', cursor: 'pointer' }}>
@@ -195,7 +195,7 @@ export function FertilizerPricingPanel({ pricing }: PanelProps) {
               onClick={() => setOverrides({})}
               style={{ marginTop: 8, padding: '4px 10px', fontSize: '0.8rem', border: '1px solid #f59e0b', borderRadius: 6, background: '#fff', color: '#92400e', cursor: 'pointer' }}
             >
-              ✕ Tüm manuel girişleri temizle
+              Tüm manuel girişleri temizle
             </button>
           )}
         </div>

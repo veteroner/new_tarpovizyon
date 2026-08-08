@@ -15,7 +15,7 @@ interface Props {
 export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
   return (
     <div className="sp-card">
-      <h2 className="sp-card__title">💧 Sulama Sistemi ve Arazi Bilgileri</h2>
+      <h2 className="sp-card__title">Sulama Sistemi ve Arazi Bilgileri</h2>
       <p className="sp-card__desc">Seçilen ürün: <strong>{state.urun}</strong></p>
 
       <div className="sp-field">
@@ -92,7 +92,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
 
       {state.sulamaSistemi !== 'yok' && (
         <div className="sp-field">
-          <label className="sp-label">⚡ Elektrik Birim Fiyatı (₺/m³)</label>
+          <label className="sp-label">Elektrik Birim Fiyatı (₺/m³)</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="number" step="0.01" min="0.01" max="5"
@@ -132,7 +132,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
       )}
 
       <hr style={{ margin: '18px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
-      <h3 style={{ margin: '0 0 6px 0', fontSize: '1.05rem' }}>⚙️ Gelişmiş Ayarlar</h3>
+      <h3 style={{ margin: '0 0 6px 0', fontSize: '1.05rem' }}>Gelişmiş Ayarlar</h3>
       <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: '#6b7280' }}>
         Bu bölümdeki seçenekler, eldeki veri seti (uzun yıl ETo/yağış tablosu + opsiyonel OpenWeather tahmini) nedeniyle
         <strong> yaklaşık / karar-destek</strong> amaçlı uygulanır.
@@ -299,7 +299,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
                   if (d) setState(s => ({ ...s, fertN_kgDa: d.n, fertP2O5_kgDa: d.p, fertK2O_kgDa: d.k }));
                 }}
               >
-                ✅ Varsayılanı Uygula
+                Varsayılanı Uygula
               </button>
             </div>
           )}
@@ -337,7 +337,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
 
       <div className="sp-btn-row">
         <button className="sp-btn sp-btn--secondary" onClick={() => setState(s => ({ ...s, step: 2 }))}>← Geri</button>
-        <button className="sp-btn sp-btn--primary" onClick={goStep4}>📊 Sonuçları Hesapla →</button>
+        <button className="sp-btn sp-btn--primary" onClick={goStep4}>Sonuçları Hesapla →</button>
       </div>
     </div>
   );

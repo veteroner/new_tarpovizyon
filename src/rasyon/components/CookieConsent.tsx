@@ -34,7 +34,7 @@ export function CookieConsent() {
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              🍪 Çerez Kullanımı ve Gizlilik
+              Çerez Kullanımı ve Gizlilik
             </h3>
             <p className="text-sm text-gray-600 mt-1">
               {config.appName}'da deneyiminizi iyileştirmek için çerezler kullanıyoruz.

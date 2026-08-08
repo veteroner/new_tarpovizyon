@@ -54,7 +54,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         <>
           <div style={{ marginTop: '60px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-              🌍 Piliç Eti Dış Ticaret Analizi
+              Piliç Eti Dış Ticaret Analizi
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
               Türkiye piliç eti ihracat ve ithalat performansı — yıllık ticaret akışları ve denge analizi
@@ -88,7 +88,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
           <div className="chart-grid" style={{ marginBottom: '40px' }}>
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h3 className="chart-title" style={{ marginBottom: 0 }}>📊 İhracat vs İthalat Trendi (M$)</h3>
+                <h3 className="chart-title" style={{ marginBottom: 0 }}>İhracat vs İthalat Trendi (M$)</h3>
                 <ChartInsightButton title="📊 Piliç Eti Dış Ticaret Trendi" description="Türkiye piliç eti ihracat ve ithalat gelişimi" data={tradeData} context={{ section: 'Ticaret' }} />
               </div>
               <ResponsiveContainer width="100%" height={300}>
@@ -110,7 +110,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
 
       <div style={{ marginTop: '60px', marginBottom: '30px' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          📊 Toplam Beyaz Et Karşılaştırması
+          Toplam Beyaz Et Karşılaştırması
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px' }}>
           Tavuk, Hindi ve Bıldırcın eti üretim trendlerinin karşılaştırmalı analizi
@@ -120,7 +120,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
       <div className="chart-grid">
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Beyaz Et Türlerinin Yıllık Karşılaştırması (ton)</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Beyaz Et Türlerinin Yıllık Karşılaştırması (ton)</h3>
             <ChartInsightButton title="📈 Beyaz Et Türlerinin Yıllık Karşılaştırması" description="Tavuk, hindi ve bıldırcın eti yıllık üretim karşılaştırması" data={tuikData} context={{ section: 'Karşılaştırma' }} />
           </div>
           <ResponsiveContainer width="100%" height={420}>
@@ -152,7 +152,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         {/* Son Yıl Pay Dağılımı */}
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🥧 Son Yıl Beyaz Et Bileşimi</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Son Yıl Beyaz Et Bileşimi</h3>
             <ChartInsightButton title="🥧 Son Yıl Beyaz Et Bileşimi" description="Son yıl beyaz et tür dağılımı" data={tuikData.slice(0,1)} context={{ section: 'Bileşim' }} compact />
           </div>
           <div style={{ padding: '20px' }}>
@@ -173,7 +173,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
                   {items.map(item => (
                     <div key={item.name}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{item.emoji} {item.name}</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{item.name}</span>
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                           {item.value.toLocaleString('tr-TR')} ton ({total > 0 ? ((item.value / total) * 100).toFixed(1) : 0}%)
                         </span>
@@ -198,7 +198,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         {/* Toplam Beyaz Et Trendi */}
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 Toplam Beyaz Et Trendi</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Toplam Beyaz Et Trendi</h3>
             <ChartInsightButton title="📈 Toplam Beyaz Et Trendi" description="Tüm beyaz et türlerinin toplam üretim trendi" data={tuikData} context={{ section: 'Toplam Trend' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>

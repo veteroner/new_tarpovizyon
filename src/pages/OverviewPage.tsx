@@ -26,7 +26,7 @@ export function OverviewPage() {
     <div className="page-container">
       <div className="page-header">
         <div className="page-title-section">
-          <h1 className="page-title">🌾 Türkiye Tarım Genel Bakış</h1>
+          <h1 className="page-title">Türkiye Tarım Genel Bakış</h1>
           <p className="page-subtitle">Nüfus, ekonomi, arazi ve hayvansal üretim özeti</p>
         </div>
       </div>

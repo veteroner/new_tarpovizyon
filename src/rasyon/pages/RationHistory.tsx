@@ -6,6 +6,7 @@ import { useRationStore } from '@/store/rationStore'
 import type { RiskScore } from '@/types'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { Check } from 'lucide-react';
 
 const getOverallScore = (riskScore?: RiskScore): number | undefined => {
   const overall = riskScore?.overall
@@ -176,7 +177,7 @@ export default function RationHistory() {
                           <div className="text-sm font-semibold text-gray-900">
                             {ration.evaluations?.length || 0}
                             {ration.evaluations && ration.evaluations.length > 0 && (
-                              <span className="ml-1 text-xs text-green-600">✓</span>
+                              <span className="ml-1 text-xs text-green-600"><Check size={18} aria-hidden="true" /></span>
                             )}
                           </div>
                         </div>

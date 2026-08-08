@@ -21,7 +21,7 @@ export default function LocationStep({
 }: Props) {
   return (
     <div className="hz-card">
-      <h2 className="hz-card__title">📍 Konum Seçin</h2>
+      <h2 className="hz-card__title">Konum Seçin</h2>
       <p className="hz-card__desc">Arazi konumunuzu girin veya GPS ile otomatik tespit edin.</p>
 
       <button className={`hz-gps-btn ${gpsLoad ? 'hz-gps-btn--loading' : ''}`} onClick={handleGPS} disabled={gpsLoad}>

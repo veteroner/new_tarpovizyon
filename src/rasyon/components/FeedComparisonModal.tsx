@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, BarChart3 } from 'lucide-react'
 import type { Feed } from '@/types'
+import { TrendingDown, Trophy } from 'lucide-react';
 
 type NumericFeedKey = {
   [K in keyof Feed]-?: Feed[K] extends number | undefined ? K : never
@@ -183,8 +184,8 @@ export default function FeedComparisonModal({ feeds, onClose }: FeedComparisonMo
                                   `}
                                 >
                                   {numValue !== null ? nutrient.format(numValue) : '-'}
-                                  {isMax && <span className="ml-1 text-xs">🏆</span>}
-                                  {isMin && <span className="ml-1 text-xs">📉</span>}
+                                  {isMax && <span className="ml-1 text-xs"><Trophy size={18} aria-hidden="true" /></span>}
+                                  {isMin && <span className="ml-1 text-xs"><TrendingDown size={18} aria-hidden="true" /></span>}
                                 </td>
                               )
                             })}
@@ -199,11 +200,11 @@ export default function FeedComparisonModal({ feeds, onClose }: FeedComparisonMo
                 <div className="mt-4 flex items-center gap-4 text-xs text-gray-600">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-green-100 border border-green-200 rounded"></div>
-                    <span>En Yüksek Değer 🏆</span>
+                    <span>En Yüksek Değer </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-orange-100 border border-orange-200 rounded"></div>
-                    <span>En Düşük Değer 📉</span>
+                    <span>En Düşük Değer </span>
                   </div>
                 </div>
               </div>

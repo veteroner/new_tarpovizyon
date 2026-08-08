@@ -14,7 +14,7 @@ const CATEGORIES: Array<{ key: 'kislik' | 'yazlik' | 'cok_yillik'; label: string
 export function TakvimCropSelector({ selectedCrops, toggleCrop }: Props) {
   return (
     <div className="tt-card">
-      <h2 className="tt-card__title">🌱 Ürün Seçimi</h2>
+      <h2 className="tt-card__title">Ürün Seçimi</h2>
       <p className="tt-card__desc">Takip etmek istediğin ürünleri seç. Her kartta kural güveni görünür; ayrıntılı kaynak notu hover ile okunabilir.</p>
       <div className="tt-data-meta">Veri sürümü: v{TAKVIM_DATA_VERSION} · {TAKVIM_DATA_SOURCE_NOTE}</div>
 

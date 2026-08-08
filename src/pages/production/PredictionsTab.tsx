@@ -138,24 +138,24 @@ export function PredictionsTab({
         </div>
 
         <div className="chart-card" style={{ padding: '24px', marginBottom: '24px' }}>
-          <h3 className="chart-title" style={{ marginBottom: '16px' }}>📐 Senaryo Analizi (5 Yıl)</h3>
+          <h3 className="chart-title" style={{ marginBottom: '16px' }}>Senaryo Analizi (5 Yıl)</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(239,68,68,0.08)', borderRadius: '12px', border: '1px solid rgba(239,68,68,0.3)' }}>
-              <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '8px' }}>📉 Kötümser (×0.8)</div>
+              <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '8px' }}>Kötümser (×0.8)</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction * 0.8)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 {((predKPIs.forecastProduction * 0.8 / predKPIs.currentProduction - 1) * 100).toFixed(1)}%
               </div>
             </div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(59,130,246,0.08)', borderRadius: '12px', border: '1px solid rgba(59,130,246,0.3)' }}>
-              <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 600, marginBottom: '8px' }}>📊 Baz Senaryo</div>
+              <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 600, marginBottom: '8px' }}>Baz Senaryo</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 {predKPIs.prodChange >= 0 ? '+' : ''}{predKPIs.prodChange.toFixed(1)}%
               </div>
             </div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(16,185,129,0.08)', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)' }}>
-              <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '8px' }}>📈 İyimser (×1.2)</div>
+              <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '8px' }}>İyimser (×1.2)</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction * 1.2)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 {((predKPIs.forecastProduction * 1.2 / predKPIs.currentProduction - 1) * 100).toFixed(1)}%
@@ -165,7 +165,7 @@ export function PredictionsTab({
         </div>
 
         <div style={{ padding: '12px 16px', background: 'rgba(245,158,11,0.05)', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-          <strong>⚠️ Model Notu:</strong> Doğrusal regresyon (OLS) • R² = {predKPIs.r2Production.toFixed(3)} • Tahminler geçmiş trendlere dayalıdır • İklim/politika değişkenlikleri dahil değil
+          <strong>Model Notu:</strong> Doğrusal regresyon (OLS) • R² = {predKPIs.r2Production.toFixed(3)} • Tahminler geçmiş trendlere dayalıdır • İklim/politika değişkenlikleri dahil değil
         </div>
       </>)}
     </div>

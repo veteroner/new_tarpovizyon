@@ -17,7 +17,7 @@ export function LocationClimateStep({ state, setState, bolge, goStep2 }: Props) 
 
   return (
     <div className="sp-card">
-      <h2 className="sp-card__title">📍 Konum Bilgileri</h2>
+      <h2 className="sp-card__title">Konum Bilgileri</h2>
       <p className="sp-card__desc">İl seçerek iklim bölgesi otomatik belirlensin. Gerçek ETo ve yağış verileri hesaplanacak.</p>
 
       <div className="sp-field">
@@ -46,8 +46,8 @@ export function LocationClimateStep({ state, setState, bolge, goStep2 }: Props) 
           </div>
           <p className="sp-bolge-card__desc">{bolgeMeta.aciklama}</p>
           <div className="sp-bolge-card__stats">
-            <span>📊 Yıllık Ort. ETo: {(Array.from({ length: 12 }, (_, i) => getETo(state.il, i + 1)).reduce((s, v) => s + v, 0) / 12).toFixed(1)} mm/gün</span>
-            <span>🌧️ Yıllık Toplam Yağış: {Array.from({ length: 12 }, (_, i) => getYagis(state.il, i + 1)).reduce((s, v) => s + v, 0).toFixed(0)} mm</span>
+            <span>Yıllık Ort. ETo: {(Array.from({ length: 12 }, (_, i) => getETo(state.il, i + 1)).reduce((s, v) => s + v, 0) / 12).toFixed(1)} mm/gün</span>
+            <span>Yıllık Toplam Yağış: {Array.from({ length: 12 }, (_, i) => getYagis(state.il, i + 1)).reduce((s, v) => s + v, 0).toFixed(0)} mm</span>
           </div>
         </div>
       )}

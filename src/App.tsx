@@ -80,6 +80,8 @@ import './styles/globals.css';
 // globals.css'ten SONRA: satır içi grid'leri mobilde ezen kurallar burada.
 import './styles/dataviz-tokens.css';
 import './styles/responsive.css';
+// responsive.css'ten SONRA: ölçülmüş kontrast düzeltmeleri (tüm uygulama).
+import './styles/contrast-fixes.css';
 
 const queryClient = new QueryClient();
 

@@ -211,7 +211,7 @@ export default function CrossIntelligencePage() {
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500" /> Yeterli (%100+)</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-amber-500" /> Kısmi (%80-100)</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-red-500" /> Yetersiz (&lt;%80)</span>
-          <span className="ml-auto italic" style={{ color: 'var(--text-secondary)' }}>💡 Bir noktaya tıklayarak ürünü seçebilirsiniz.</span>
+          <span className="ml-auto italic" style={{ color: 'var(--text-secondary)' }}>Bir noktaya tıklayarak ürünü seçebilirsiniz.</span>
         </div>
       </div>
 

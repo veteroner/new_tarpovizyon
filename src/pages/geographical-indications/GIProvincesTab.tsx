@@ -14,7 +14,7 @@ export function GIProvincesTab({ provinceData, allProducts, selectedProvince, on
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📍 İl Bazında Coğrafi İşaretli Gıda Ürünleri
+        İl Bazında Coğrafi İşaretli Gıda Ürünleri
       </h2>
 
       {/* Province Selector */}

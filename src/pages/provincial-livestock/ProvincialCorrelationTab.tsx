@@ -17,7 +17,7 @@ export default function ProvincialCorrelationTab({
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        🔗 Hayvan Türleri Korelasyon Analizi
+        Hayvan Türleri Korelasyon Analizi
       </h2>
 
       {/* Animal Distribution by Top Provinces */}
@@ -30,7 +30,7 @@ export default function ProvincialCorrelationTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🐾 Hayvan Türü Dağılımı (Top 10 İl)
+          Hayvan Türü Dağılımı (Top 10 İl)
         </h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -98,7 +98,7 @@ export default function ProvincialCorrelationTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🌈 Çeşitlilik Skorları (Top 10)
+          Çeşitlilik Skorları (Top 10)
         </h3>
         <div style={{
           display: 'grid',

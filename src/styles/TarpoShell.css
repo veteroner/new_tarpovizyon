@@ -1,4 +1,9 @@
 /* ═══════════════════════════════════════════════
+   NOT (kontrast): Menü metinleri `rgba(148,163,184, .5–.8)` idi. Alfa,
+   yazıyı koyu lacivert zeminle karıştırıp kontrastı 3.7:1'e düşürüyordu
+   (küçük metin sınırı 4.5:1). Aynı ton tam opaklıkta 6.9:1 veriyor —
+   renk değişmedi, yalnızca saydamlık kalktı.
+
    TarpoShell — Responsive Hybrid Layout
    Desktop: slim topbar + collapsible left sidebar
    Mobile:  slim topbar + bottom tab bar + sheets
@@ -57,7 +62,7 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 5px;
-  color: rgba(148, 163, 184, 0.75);
+  color: #94a3b8;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -104,7 +109,7 @@
   background: transparent;
   border: none;
   border-radius: 5px;
-  color: rgba(148, 163, 184, 0.80);
+  color: #94a3b8;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -153,7 +158,7 @@
   background: transparent;
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(148, 163, 184, 0.50);
+  color: #94a3b8;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
@@ -189,7 +194,7 @@
   background: transparent;
   border: none;
   border-radius: 5px;
-  color: rgba(148, 163, 184, 0.65);
+  color: #94a3b8;
   font-size: 0.79rem;
   font-weight: 700;
   text-align: left;
@@ -238,7 +243,7 @@
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: rgba(148, 163, 184, 0.65);
+  color: #94a3b8;
   font-size: 0.80rem;
   font-weight: 500;
   text-align: left;
@@ -331,7 +336,7 @@
 .tarpo-sheet-header button {
   background: none;
   border: none;
-  color: rgba(148, 163, 184, 0.65);
+  color: #94a3b8;
   cursor: pointer;
   padding: 0.2rem;
   display: flex;
@@ -402,7 +407,7 @@
   gap: 0.18rem;
   background: transparent;
   border: none;
-  color: rgba(148, 163, 184, 0.55);
+  color: #94a3b8;
   font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;

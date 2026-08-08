@@ -29,7 +29,7 @@ export function ConfidenceBadge({ score, label, size = 'md' }: ConfidenceBadgePr
       color: color.text, fontSize: fsize, fontWeight: 700,
       whiteSpace: 'nowrap',
     }}>
-      {color.emoji} {label ?? 'Güven'}: %{clamped}
+      {label ?? 'Güven'}: %{clamped}
     </span>
   );
 }

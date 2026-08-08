@@ -13,6 +13,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { BarChart3, Trophy } from 'lucide-react';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -58,7 +59,17 @@ function formatShort(value: number): string {
 export default function TuikPlantProductionPage() {
   const [selectedYear, setSelectedYear] = useState('y2024');
   const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(['Buğday']);
+  /*
+   * Başlangıçta seçim YOK; doğru varsayılan ürün listesi geldikten sonra
+   * seçiliyor (aşağıya bakınız).
+   *
+   * Eskiden sabit `['Buğday']` yazıyordu — ama TÜİK'in ürün adları arasında
+   * düz "Buğday" YOK: "Buğday, Durum Buğdayı Hariç", "Durum Buğdayı",
+   * "Kara Buğday", "Buğday (Hasıl/Yeşilot)" var. Seçim hiçbir zaman
+   * eşleşmediği için sayfa "Ürün seçin…" yazısı ve tamamen sıfır değerlerle
+   * açılıyordu; kullanıcı elle bir ürün seçene kadar boş duruyordu.
+   */
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [cityData, setCityData] = useState<CityDataItem[]>([]);
   const [yearlyData, setYearlyData] = useState<YearlyDataItem[]>([]);
@@ -70,7 +81,8 @@ export default function TuikPlantProductionPage() {
     const loadProducts = async () => {
       try {
         const res = { data: await fetchAgg(R, {
-          groupBy: ['urun'], where: { unsur: 'Üretim' }, orderBy: 'urun', dir: 'asc', limit: 100,
+          // 230 ürün var; 100'lük sınır listenin yarısını kesiyordu.
+          groupBy: ['urun'], where: { unsur: 'Üretim' }, orderBy: 'urun', dir: 'asc', limit: 500,
         }) };
         if (res.data) {
           const products = res.data.map((item) => ({
@@ -79,9 +91,22 @@ export default function TuikPlantProductionPage() {
             nameTR: String(item['urun'])
           }));
           setProductList(products);
-          if (products.length > 0 && selectedProducts.length === 0) {
-            setSelectedProducts([products[0].id]);
-          }
+
+          /*
+           * Varsayılan ürün listeden SEÇİLİYOR, elle yazılmıyor.
+           *
+           * Buğday Türkiye'nin en çok ekilen ürünü, açılışta onu göstermek
+           * doğru; ama adı veri kaynağında değişebiliyor. Bu yüzden ada göre
+           * aranıyor, bulunamazsa listenin ilki kullanılıyor — hangi durumda
+           * olursa olsun sayfa DOLU açılıyor.
+           */
+          setSelectedProducts((onceki) => {
+            const gecerli = onceki.filter((id) => products.some((p) => p.id === id));
+            if (gecerli.length) return gecerli;
+            const bugday = products.find((p) => /^buğday,/i.test(p.id))
+              ?? products.find((p) => /buğday/i.test(p.id));
+            return [(bugday ?? products[0])?.id].filter(Boolean) as string[];
+          });
         }
       } catch (error) {
         console.error('Ürün listesi yüklenirken hata:', error);
@@ -212,12 +237,12 @@ export default function TuikPlantProductionPage() {
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon green">🏆</div></div>
+              <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon green"><Trophy size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{topCity}</div>
               <div className="kpi-subtitle">{formatTon(topCityValue)} {unit}</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">İL ORTALAMASI</span><div className="kpi-icon blue">📊</div></div>
+              <div className="kpi-header"><span className="kpi-title">İL ORTALAMASI</span><div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value">{formatTon(avgValue)}</div>
               <div className="kpi-subtitle">{unit}/il</div>
             </div>
@@ -238,7 +263,7 @@ export default function TuikPlantProductionPage() {
           </div>
 
           <div className="chart-grid">
-            <ChartCard title={<>🏙️ İl Bazında {selectedUnsur} ({yearLabel})</>} action={<ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+            <ChartCard title={<>İl Bazında {selectedUnsur} ({yearLabel})</>} action={<ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={cityData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -279,7 +304,7 @@ export default function TuikPlantProductionPage() {
           </div>
 
           <div className="data-table">
-            <h3 className="data-table-title">📋 İl Sıralaması - {selectedUnsur}</h3>
+            <h3 className="data-table-title">İl Sıralaması - {selectedUnsur}</h3>
             {cityData.map((city, index) => (
               <div className="table-row" key={city.name}>
                 <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>

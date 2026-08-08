@@ -49,7 +49,7 @@ export default function TermsOfService() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">4. Sorumluluk Reddi</h2>
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-            <p className="text-yellow-800 font-medium">⚠️ Önemli Uyarı</p>
+            <p className="text-yellow-800 font-medium">Önemli Uyarı</p>
           </div>
           <p className="text-gray-600 mb-4">
             <strong>Uygulama "olduğu gibi" sunulmaktadır.</strong> Hesaplamalar NRC 2021 

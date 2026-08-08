@@ -50,7 +50,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
       border: '1px solid var(--border)'
     }}>
       <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-        🗺️ İl Bazında Havza Dağılımı
+        İl Bazında Havza Dağılımı
       </h3>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
@@ -61,7 +61,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
               <th style={{ textAlign: 'left', color: 'var(--text-primary)', fontSize: '13px', padding: '12px' }}>Dominant Havza</th>
               <th style={{ textAlign: 'center', color: 'var(--text-primary)', fontSize: '13px', padding: '12px' }}>Havza Sayısı</th>
               <th style={{ textAlign: 'center', color: 'var(--text-primary)', fontSize: '13px', padding: '12px' }}>İlçe Sayısı</th>
-              <th style={{ textAlign: 'center', color: 'var(--text-primary)', fontSize: '13px', padding: '12px' }}>🌾 Ürün Çeşitliliği</th>
+              <th style={{ textAlign: 'center', color: 'var(--text-primary)', fontSize: '13px', padding: '12px' }}>Ürün Çeşitliliği</th>
             </tr>
           </thead>
           <tbody>
@@ -148,7 +148,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
         marginTop: '24px'
       }}>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          🗺️ Ürün Bazlı Coğrafi Üretim Dağılımı
+          Ürün Bazlı Coğrafi Üretim Dağılımı
         </h3>
         <div style={{ marginBottom: '16px' }}>
           <input
@@ -185,7 +185,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
               fontWeight: 600
             }}
           >
-            🌍 Harita Göster
+            Harita Göster
           </button>
         </div>
 
@@ -209,7 +209,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
             />
             <div style={{ marginTop: '24px' }}>
               <h4 style={{ color: 'var(--text-primary)', fontSize: '16px', marginBottom: '12px', fontWeight: 600 }}>
-                📊 İl Bazlı Üretim Sıralaması - {selectedProductForMap} (2024)
+                İl Bazlı Üretim Sıralaması - {selectedProductForMap} (2024)
               </h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
                 {productDistribution.slice(0, 20).map((item, idx) => (

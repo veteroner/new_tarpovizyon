@@ -29,7 +29,7 @@ export default function PesticidePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🌿 Pestisit Analizi</h1>
+        <h1 className="page-title">Pestisit Analizi</h1>
         <p className="page-subtitle">FAO pestisit kullanımı — akıllı analiz motoru</p>
       </div>
 

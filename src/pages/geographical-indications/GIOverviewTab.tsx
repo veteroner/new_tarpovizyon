@@ -40,7 +40,7 @@ export function GIOverviewTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🗺️ İllere Göre Coğrafi İşaretli Gıda Dağılımı
+          İllere Göre Coğrafi İşaretli Gıda Dağılımı
         </h3>
         <TurkeyHeatMap
           regionTotals={provinceData.map(p => ({
@@ -67,7 +67,7 @@ export function GIOverviewTab({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-              📊 Durum Dağılımı
+              Durum Dağılımı
             </h3>
             <ChartInsightButton title="📊 Durum Dağılımı" description="Coğrafi işaretli ürünlerin durum dağılımı" data={statusPieData} context={{ section: 'Coğrafi İşaretler' }} compact />
           </div>
@@ -109,7 +109,7 @@ export function GIOverviewTab({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-              🏷️ İşaret Türü Dağılımı
+              İşaret Türü Dağılımı
             </h3>
             <ChartInsightButton title="🏷️ İşaret Türü Dağılımı" description="Coğrafi işaret türüne göre dağılım" data={typeData} context={{ section: 'Coğrafi İşaretler' }} compact />
           </div>
@@ -153,7 +153,7 @@ export function GIOverviewTab({
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🏆 En Çok Coğrafi İşaretli Gıda Üreyen 10 İl
+          En Çok Coğrafi İşaretli Gıda Üreyen 10 İl
         </h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>

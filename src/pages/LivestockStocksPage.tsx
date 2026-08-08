@@ -58,7 +58,7 @@ export default function LivestockStocksPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🌍 Dünya Hayvansal Üretim</h1>
+        <h1 className="page-title">Dünya Hayvansal Üretim</h1>
         <p className="page-subtitle">
           Canlı hayvan stokları, birincil ve işlenmiş ürün analizleri - FAO Veritabanı ({selectedYear})
         </p>

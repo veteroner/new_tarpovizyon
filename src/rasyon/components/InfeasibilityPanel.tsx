@@ -90,7 +90,7 @@ export default function InfeasibilityPanel({ diagnostics }: Props) {
                   )}
 
                   <p className="text-sm text-gray-700">
-                    <span className="font-medium">💡 Öneri:</span> {diag.suggestion}
+                    <span className="font-medium">Öneri:</span> {diag.suggestion}
                   </p>
                 </div>
               </div>

@@ -23,7 +23,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🥩 Kırmızı Et Üretim Analizi
+          Kırmızı Et Üretim Analizi
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Türkiye kırmızı et üretimi detaylı dağılım ve trend analizi
@@ -35,7 +35,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📊 Kırmızı Et Türlerine Göre Dağılım
+              Kırmızı Et Türlerine Göre Dağılım
             </h3>
             <ChartInsightButton title="📊 Kırmızı Et Dağılımı" description="Et türlerine göre dağılım" data={redMeatBreakdown} context={{ section: 'Kırmızı Et' }} compact />
           </div>
@@ -60,7 +60,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                📈 Kırmızı Et Türleri (Son 5 Yıl)
+                Kırmızı Et Türleri (Son 5 Yıl)
               </h3>
               <ChartInsightButton title="📈 Kırmızı Et Trend" description="Kırmızı et türleri yıllık trendi" data={redMeatTrendData} context={{ section: 'Kırmızı Et' }} compact />
             </div>
@@ -85,7 +85,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', gridColumn: 'span 2' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                🐂 Büyükkbaş vs Küçükkbaş Karşılaştırması
+                Büyükkbaş vs Küçükkbaş Karşılaştırması
               </h3>
               <ChartInsightButton title="🐂 Büyükkbaş vs Küçükkbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
             </div>

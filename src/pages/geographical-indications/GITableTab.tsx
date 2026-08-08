@@ -43,7 +43,7 @@ export function GITableTab({
         gap: '16px'
       }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          📊 Tüm Coğrafi İşaretli Gıda Ürünleri
+          Tüm Coğrafi İşaretli Gıda Ürünleri
         </h2>
         <button
           onClick={onExport}
@@ -61,7 +61,7 @@ export function GITableTab({
             gap: '8px'
           }}
         >
-          📥 Excel İndir
+          Excel İndir
         </button>
       </div>
 

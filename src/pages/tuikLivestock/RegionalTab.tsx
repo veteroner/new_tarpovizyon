@@ -25,7 +25,7 @@ export default function RegionalTab({
 }: Props) {
   return (
     <>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>🗺️ Bölgesel Dağılım Analizi</h2>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Bölgesel Dağılım Analizi</h2>
 
       {/* Bölgesel KPI'lar */}
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
@@ -44,7 +44,7 @@ export default function RegionalTab({
       {selectedRegion === 'Tümü' ? (
         <>
           <div className="chart-grid">
-            <ChartCard title={<>📊 Bölgelere Göre {selectedAnimal} Dağılımı</>} action={<ChartInsightButton title="📊 Bölgesel Dağılım" description="Bölgelere göre hayvan dağılımı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />}>
+            <ChartCard title={<>Bölgelere Göre {selectedAnimal} Dağılımı</>} action={<ChartInsightButton title="📊 Bölgesel Dağılım" description="Bölgelere göre hayvan dağılımı" data={regionalAnalysis} context={{ section: 'Bölgesel' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={regionalAnalysis}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

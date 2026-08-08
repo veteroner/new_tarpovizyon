@@ -43,7 +43,7 @@ export function ComparativeSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#8b5cf6' }}>📊 Karşılaştırmalı Analizler</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#8b5cf6' }}>Karşılaştırmalı Analizler</h2>
       </div>
 
       <div className="chart-grid">
@@ -117,7 +117,7 @@ export function ComparativeSection({ data }: Props) {
       </div>
 
       <div className="data-table" style={{ marginTop: '2rem' }}>
-        <h3 className="data-table-title">📋 Kategori Özet Karşılaştırması (2023)</h3>
+        <h3 className="data-table-title">Kategori Özet Karşılaştırması (2023)</h3>
         <div className="table-row" style={{ background: 'var(--bg-card)', fontWeight: '600', borderBottom: '2px solid var(--border)' }}>
           <div className="table-rank" style={{ width: '200px' }}>Kategori</div>
           <div className="table-info" style={{ flex: 1 }}>Toplam Üretim</div>

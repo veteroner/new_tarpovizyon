@@ -14,7 +14,7 @@ export function GIProductsTab({ productGroupData }: Props) {
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        🏷️ Ürün Grupları Analizi
+        Ürün Grupları Analizi
       </h2>
 
       {/* Product Groups Chart */}
@@ -28,7 +28,7 @@ export function GIProductsTab({ productGroupData }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 Ürün Gruplarına Göre Dağılım (Top 15)
+            Ürün Gruplarına Göre Dağılım (Top 15)
           </h3>
           <ChartInsightButton title="📊 Ürün Grupları" description="Coğrafi işaretli ürün grupları dağılımı" data={productGroupData} context={{ section: 'Coğrafi İşaretler Ürünler' }} compact />
         </div>

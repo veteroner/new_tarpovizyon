@@ -61,7 +61,7 @@ export function CompetitionTab({
         {compTopMovers && (
           <div className="chart-grid" style={{ marginBottom: '24px' }}>
             <div className="chart-card" style={{ padding: '20px' }}>
-              <h3 className="chart-title" style={{ marginBottom: '16px', color: '#10b981' }}>📈 En Hızlı Büyüyenler</h3>
+              <h3 className="chart-title" style={{ marginBottom: '16px', color: '#10b981' }}>En Hızlı Büyüyenler</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {(compTopMovers.gainers || []).slice(0, 5).map((c: any, i: number) => (
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(16,185,129,0.07)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)' }}>
@@ -74,7 +74,7 @@ export function CompetitionTab({
               </div>
             </div>
             <div className="chart-card" style={{ padding: '20px' }}>
-              <h3 className="chart-title" style={{ marginBottom: '16px', color: '#ef4444' }}>📉 En Hızlı Düşenler</h3>
+              <h3 className="chart-title" style={{ marginBottom: '16px', color: '#ef4444' }}>En Hızlı Düşenler</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {(compTopMovers.decliners || []).slice(0, 5).map((c: any, i: number) => (
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(239,68,68,0.07)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -125,7 +125,7 @@ export function CompetitionTab({
             );
           };
           return (
-            <ChartCard title={<>🎯 RCA & Rekabet Avantajı — {translateProduct(compProduct)}</>} action={<ChartInsightButton title={`RCA & Rekabet Avantajı — ${translateProduct(compProduct)}`} description="Türkiye rekabet avantajı radar analizi" data={radarRcaData} context={{ ürün: compProduct }} compact />}>
+            <ChartCard title={<>RCA & Rekabet Avantajı — {translateProduct(compProduct)}</>} action={<ChartInsightButton title={`RCA & Rekabet Avantajı — ${translateProduct(compProduct)}`} description="Türkiye rekabet avantajı radar analizi" data={radarRcaData} context={{ ürün: compProduct }} compact />}>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 Türkiye'nin değerleri global medyana ve top 5 ortalamasına göre normalize edilir. <strong>1,0×</strong> medyan ile eşit, <strong>&gt;1</strong> avantaj.
               </p>
@@ -146,14 +146,14 @@ export function CompetitionTab({
                 </RadarChart>
               </ResponsiveContainer>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', fontStyle: 'italic' }}>
-                💡 RCA (Revealed Comparative Advantage) yaklaşımı: değer ne kadar yüksekse Türkiye o boyutta o denli avantajlı.
+                RCA (Revealed Comparative Advantage) yaklaşımı: değer ne kadar yüksekse Türkiye o boyutta o denli avantajlı.
               </div>
             </ChartCard>
           );
         })()}
 
         <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
-          <h3 className="chart-title" style={{ marginBottom: '16px' }}>🗺️ Rekabet Matrisi — Top 15</h3>
+          <h3 className="chart-title" style={{ marginBottom: '16px' }}>Rekabet Matrisi — Top 15</h3>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
               {['#', 'Ülke', 'Üretim', 'Pay %', 'Ekim (ha)', 'Verim'].map(h => <th key={h} style={{ textAlign: h === '#' || h === 'Ülke' ? 'left' : 'right', padding: '10px 8px', color: 'var(--text-secondary)', fontWeight: 600 }}>{h}</th>)}

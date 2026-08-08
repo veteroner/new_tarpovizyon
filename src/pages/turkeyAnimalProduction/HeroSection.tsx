@@ -76,7 +76,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       {/* Intelligence Panel */}
       <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '12px', padding: '20px', marginBottom: '48px', color: 'white' }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          🧠 Hayvansal Üretim İçgörü Özeti
+          Hayvansal Üretim İçgörü Özeti
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

@@ -17,7 +17,7 @@ export default function LandStep({
 }: Props) {
   return (
     <div className="hz-card">
-      <h2 className="hz-card__title">📐 Arazi Bilgileri</h2>
+      <h2 className="hz-card__title">Arazi Bilgileri</h2>
       <p className="hz-card__desc">Seçilen ürün: <strong>{state.urun}</strong></p>
 
       <div className="hz-field">
@@ -71,10 +71,10 @@ export default function LandStep({
         <label className="hz-label">Sulama Durumu</label>
         <div className="hz-toggle-row">
           <button className={`hz-toggle-btn ${!state.sulama ? 'hz-toggle-btn--active' : ''}`} onClick={() => setState(s => ({ ...s, sulama: false }))}>
-            💧 Sulamasız (Kuru)
+            Sulamasız (Kuru)
           </button>
           <button className={`hz-toggle-btn ${state.sulama ? 'hz-toggle-btn--active' : ''}`} onClick={() => setState(s => ({ ...s, sulama: true }))}>
-            🚿 Sulamalı (+%25)
+            Sulamalı (+%25)
           </button>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function LandStep({
           className={`hz-econ-toggle ${showCost ? 'hz-econ-toggle--open' : ''}`}
           onClick={() => setShowCost(!showCost)}
         >
-          <span>💰 Ekonomik Analiz (Opsiyonel)</span>
+          <span>Ekonomik Analiz (Opsiyonel)</span>
           <span className="hz-econ-toggle__arrow">{showCost ? '▲' : '▼'}</span>
         </button>
         {showCost && (

@@ -17,7 +17,7 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        ⚖️ İller Arası Karşılaştırma
+        İller Arası Karşılaştırma
       </h2>
 
       {/* Top 20 Provinces Comparison */}
@@ -31,7 +31,7 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 Top 20 İl Karşılaştırma
+            Top 20 İl Karşılaştırma
           </h3>
           <ChartInsightButton title="📊 Top 20 İl Karşılaştırma" description="İl bazında bitkisel üretim" data={filteredProvincialData.slice(0, 20)} context={{ section: 'İl Karşılaştırma' }} compact />
         </div>
@@ -86,7 +86,7 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          🌍 Bölgesel Karşılaştırma Metrikleri
+          Bölgesel Karşılaştırma Metrikleri
         </h3>
         <div style={{
           display: 'grid',

@@ -22,7 +22,7 @@ export default function TrendsTab({
 }: Props) {
   return (
     <>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>📈 Trend Analizi ve Tahminler</h2>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Trend Analizi ve Tahminler</h2>
 
       {/* CAGR KPI'lar */}
       {cagrAnalysis && (
@@ -52,7 +52,7 @@ export default function TrendsTab({
 
       {/* Trend Line with Predictions */}
       {regressionAnalysis && (
-        <ChartCard title={<>📉 Trend Çizgisi ve 3 Yıllık Projeksiyon (R² = {regressionAnalysis.r2.toFixed(3)})</>} action={<ChartInsightButton title="📉 Trend ve Projeksiyon" description="Regresyon ile tahmin analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
+        <ChartCard title={<>Trend Çizgisi ve 3 Yıllık Projeksiyon (R² = {regressionAnalysis.r2.toFixed(3)})</>} action={<ChartInsightButton title="📉 Trend ve Projeksiyon" description="Regresyon ile tahmin analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={[...yearlyData, ...regressionAnalysis.predictions]}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

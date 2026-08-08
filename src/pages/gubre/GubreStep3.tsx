@@ -19,34 +19,34 @@ export function GubreStep3({ state, setState, onNext, onBack }: Props) {
         <label className={`gh-radio-btn ${state.gubre_tipi === 'kimyasal' ? 'gh-radio-btn--active' : ''}`}>
           <input type="radio" name="gubre" checked={state.gubre_tipi === 'kimyasal'}
             onChange={() => setState({ ...state, gubre_tipi: 'kimyasal' })} />
-          <span>🧪 Kimyasal Gübreler</span>
+          <span>Kimyasal Gübreler</span>
           <span className="gh-radio-hint">Hızlı etki, hassas doz kontrolü, düşük hacim</span>
         </label>
 
         <label className={`gh-radio-btn ${state.gubre_tipi === 'organik' ? 'gh-radio-btn--active' : ''}`}>
           <input type="radio" name="gubre" checked={state.gubre_tipi === 'organik'}
             onChange={() => setState({ ...state, gubre_tipi: 'organik' })} />
-          <span>🌿 Organik Gübreler</span>
+          <span>Organik Gübreler</span>
           <span className="gh-radio-hint">Toprak yapısını iyileştirir, yavaş salınım, çevre dostu</span>
         </label>
 
         <label className={`gh-radio-btn ${state.gubre_tipi === 'her_ikisi' ? 'gh-radio-btn--active' : ''}`}>
           <input type="radio" name="gubre" checked={state.gubre_tipi === 'her_ikisi'}
             onChange={() => setState({ ...state, gubre_tipi: 'her_ikisi' })} />
-          <span>⚖️ Her İkisini Karşılaştır</span>
+          <span>Her İkisini Karşılaştır</span>
           <span className="gh-radio-hint">Kimyasal ve organik seçenekleri yan yana gör</span>
         </label>
       </div>
 
       <div style={{ marginTop: 20 }}>
         <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8, color: 'var(--gh-text-primary, #1a1a2e)' }}>
-          📊 Gübreleme Senaryosu
+          Gübreleme Senaryosu
         </h3>
         <div className="gh-radio-group">
           {([
-            { key: 'tutucu' as const,   label: '🛡️ Tutumlu (-%20)',    hint: "Maliyet odaklı — temel ihtiyaçların %80'ini karşılar" },
-            { key: 'standart' as const, label: '⚖️ Standart',          hint: 'Kitap değerleri — referans ihtiyaçların tamamı' },
-            { key: 'agresif' as const,  label: '🚀 Maksimum (+%20)',   hint: 'Verim odaklı — yüksek verim hedefi için %20 fazla' },
+            { key: 'tutucu' as const,   label: 'Tutumlu (-%20)',    hint: "Maliyet odaklı — temel ihtiyaçların %80'ini karşılar" },
+            { key: 'standart' as const, label: 'Standart',          hint: 'Kitap değerleri — referans ihtiyaçların tamamı' },
+            { key: 'agresif' as const,  label: 'Maksimum (+%20)',   hint: 'Verim odaklı — yüksek verim hedefi için %20 fazla' },
           ] as const).map(s => (
             <label key={s.key} className={`gh-radio-btn ${state.senaryo === s.key ? 'gh-radio-btn--active' : ''}`}>
               <input type="radio" name="senaryo" checked={state.senaryo === s.key}
@@ -60,7 +60,7 @@ export function GubreStep3({ state, setState, onNext, onBack }: Props) {
 
       <div className="gh-btn-row">
         <button className="gh-btn gh-btn--secondary" onClick={onBack}>← Geri</button>
-        <button className="gh-btn gh-btn--primary" onClick={onNext}>Hesapla 🧮</button>
+        <button className="gh-btn gh-btn--primary" onClick={onNext}>Hesapla </button>
       </div>
     </div>
   );

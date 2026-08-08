@@ -50,7 +50,7 @@ export default function MilkTuikSection({
     <>
       <div style={{ marginTop: '48px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          📊 TÜİK Süt ve Süt Ürünleri {tuikRangeLabel && `(${tuikRangeLabel})`}
+          TÜİK Süt ve Süt Ürünleri {tuikRangeLabel && `(${tuikRangeLabel})`}
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Sanayiye giden süt ve üretilen ürün miktarları — Yıllık ve aylık detaylı TÜİK verileri
@@ -75,7 +75,7 @@ export default function MilkTuikSection({
               transition: 'all 0.2s ease',
             }}
           >
-            {urun.emoji} {urun.label}
+            {urun.label}
           </button>
         ))}
       </div>
@@ -214,7 +214,7 @@ export default function MilkTuikSection({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                📅 Aylık Dağılım ({tuikLatestYear?.yil})
+                Aylık Dağılım ({tuikLatestYear?.yil})
               </h3>
               <ChartInsightButton title="📅 Aylık Dağılım" description="Seçili yıl aylık üretim dağılımı" data={tuikSeasonality} context={{ yil: tuikLatestYear?.yil }} compact />
             </div>
@@ -249,7 +249,7 @@ export default function MilkTuikSection({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                📊 Yıllık Büyüme Oranları (%)
+                Yıllık Büyüme Oranları (%)
               </h3>
               <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Seçili ürün yıllık büyüme oranları" data={tuikGrowthRates} context={{ urun: selectedTuikSutUrun }} compact />
             </div>
@@ -281,7 +281,7 @@ export default function MilkTuikSection({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                🏆 Tüm Süt Ürünleri Karşılaştırması ({tuikAllProductsLatest[0]?.yil})
+                Tüm Süt Ürünleri Karşılaştırması ({tuikAllProductsLatest[0]?.yil})
               </h3>
               <ChartInsightButton title="🏆 Tüm Süt Ürünleri Karşılaştırması" description="Tüm süt ürünleri yıllık üretim karşılaştırması" data={tuikAllProductsLatest} context={{ section: 'Tüm Ürünler' }} />
             </div>
@@ -333,7 +333,7 @@ export default function MilkTuikSection({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                🌡️ Mevsimsellik Analizi — {selectedTuikSutUrun} (Yıl x Ay)
+                Mevsimsellik Analizi — {selectedTuikSutUrun} (Yıl x Ay)
               </h3>
               <ChartInsightButton title="🌡️ Mevsimsellik Analizi" description="Süt ürünü mevsimsellik ısı haritası" data={tuikSeasonHeatmap} context={{ urun: selectedTuikSutUrun }} />
             </div>

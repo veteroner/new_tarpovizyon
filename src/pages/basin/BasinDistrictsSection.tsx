@@ -104,7 +104,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', alignItems: 'end' }}>
           {/* Basin filter */}
           <div>
-            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>🌊 HAVZA</label>
+            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>HAVZA</label>
             <select
               value={mapFilterBasin}
               onChange={(e) => { setMapFilterBasin(e.target.value); setSelectedMapDistrict(null); setDistrictProducts([]); }}
@@ -116,7 +116,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           </div>
           {/* Province filter */}
           <div>
-            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>🏙️ İL</label>
+            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>İL</label>
             <select
               value={mapFilterProvince}
               onChange={(e) => { setMapFilterProvince(e.target.value); setMapFilterDistrict('Tümü'); setSelectedMapDistrict(null); setDistrictProducts([]); }}
@@ -128,7 +128,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           </div>
           {/* District filter */}
           <div>
-            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>📍 İLÇE</label>
+            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>İLÇE</label>
             <select
               value={mapFilterDistrict}
               onChange={(e) => {
@@ -155,7 +155,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
                 onClick={() => { setMapFilterBasin('Tümü'); setMapFilterProvince('Tümü'); setMapFilterDistrict('Tümü'); setSelectedMapDistrict(null); setDistrictProducts([]); setDistrictProduction([]); }}
                 style={{ padding: '10px 18px', borderRadius: '8px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer' }}
               >
-                ✕ Sıfırla
+                Sıfırla
               </button>
             </div>
           )}
@@ -172,7 +172,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
         boxShadow: 'var(--shadow-md)'
       }}>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          📍 İlçe Bazında Havza Haritası
+          İlçe Bazında Havza Haritası
           {selectedMapDistrict && (
             <span style={{ marginLeft: '12px', fontSize: '14px', fontWeight: 400, color: 'var(--text-secondary)' }}>
               — Seçili: <strong style={{ color: 'var(--text-primary)' }}>{selectedMapDistrict.name}</strong> / {selectedMapDistrict.province}
@@ -189,7 +189,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           onDistrictClick={handleDistrictClick}
         />
         <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-          💡 İlçeye tıklayarak bitkisel üretim ürünlerini görüntüleyin
+          İlçeye tıklayarak bitkisel üretim ürünlerini görüntüleyin
         </div>
       </div>
 
@@ -212,7 +212,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           {loadingProducts ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>⏳ Ürünler yükleniyor...</div>
           ) : districtProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>📭 Bu ilçe için ürün deseni verisi bulunamadı.</div>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>Bu ilçe için ürün deseni verisi bulunamadı.</div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {districtProducts.map((p, i) => {
@@ -269,7 +269,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           {loadingProduction ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>⏳ Üretim verileri yükleniyor...</div>
           ) : districtProduction.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>📭 Bu ilçe için 2024 üretim miktarı verisi bulunamadı.</div>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>Bu ilçe için 2024 üretim miktarı verisi bulunamadı.</div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
               {districtProduction.map((p, i) => {
@@ -313,7 +313,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
         boxShadow: 'var(--shadow-md)'
       }}>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>
-          📊 Havza Bazında İlçe Dağılımı
+          Havza Bazında İlçe Dağılımı
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {basinSummary.slice(0, 12).map((basin, idx) => (

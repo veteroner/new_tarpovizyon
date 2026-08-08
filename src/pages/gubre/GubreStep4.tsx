@@ -10,6 +10,7 @@ import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
 import { calculate } from './gubreUtils';
 import type { CalcResult, WizardState, FertilizerProduct } from './gubreTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { Bolt, Gem, Wrench, Zap } from 'lucide-react';
 
 interface Props {
   result: CalcResult;
@@ -28,7 +29,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           <ConfidenceBadge score={confidenceScore} label="Reçete Güveni" />
           {confidenceScore < 60 && (
             <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
-              ⚠️ Toprak analizini tam girerek güveni artırın
+              Toprak analizini tam girerek güveni artırın
             </span>
           )}
         </div>
@@ -61,7 +62,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
 
       {/* NPK Chart */}
       <div className="gh-card">
-        <h2 className="gh-card__title">📊 NPK Besin Dengesi</h2>
+        <h2 className="gh-card__title">NPK Besin Dengesi</h2>
         <p className="gh-card__desc" style={{ marginBottom: '1rem' }}>
           {state.alan} dekar alan için — per-dekar değerler (kg/da)
         </p>
@@ -81,7 +82,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
 
       {/* NPK Radar — Toprak Mevcut vs İhtiyaç Profili */}
       <div className="gh-card">
-        <h2 className="gh-card__title">🕸️ N-P-K Besin Profili (Radar)</h2>
+        <h2 className="gh-card__title">N-P-K Besin Profili (Radar)</h2>
         <p className="gh-card__desc" style={{ marginBottom: '1rem', color: 'var(--gh-text-secondary, #6b7280)', fontSize: '0.9rem' }}>
           Bitkinin toplam ihtiyacı (mavi) ile toprakta mevcut besin düzeyi (yeşil) karşılaştırması — kg/da.
         </p>
@@ -109,7 +110,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
         const total = pieData.reduce((s, d) => s + d.value, 0);
         return (
           <div className="gh-card">
-            <h2 className="gh-card__title">🥧 Makro Besin Dağılımı (N / P / K)</h2>
+            <h2 className="gh-card__title">Makro Besin Dağılımı (N / P / K)</h2>
             <p className="gh-card__desc" style={{ marginBottom: '1rem', color: 'var(--gh-text-secondary, #6b7280)', fontSize: '0.9rem' }}>
               Toplam makro besin ihtiyacı içinde N, P₂O₅ ve K₂O'nun oransal dağılımı.
             </p>
@@ -183,7 +184,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
 
         return (
           <div className="gh-card">
-            <h2 className="gh-card__title">📈 Senaryo Karşılaştırması · Maliyet vs Verim</h2>
+            <h2 className="gh-card__title">Senaryo Karşılaştırması · Maliyet vs Verim</h2>
             <p className="gh-card__desc" style={{ marginBottom: '1rem', color: 'var(--gh-text-secondary, #6b7280)', fontSize: '0.9rem' }}>
               Üç senaryonun ({state.alan} dekar üzerinden) toplam gübre maliyeti ve hedeflenen verim karşılaştırması.
               <strong> Kalın işaretli</strong> sütun seçili senaryodur.
@@ -226,14 +227,14 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
               ))}
             </div>
             <p style={{ marginTop: 8, fontSize: '0.78rem', color: '#6b7280' }}>
-              💡 Birim maliyet (₺/kg ürün) = toplam gübre maliyeti ÷ (hedef verim × alan). Düşük olan senaryo sermaye verimliliği açısından daha avantajlı.
+              Birim maliyet (₺/kg ürün) = toplam gübre maliyeti ÷ (hedef verim × alan). Düşük olan senaryo sermaye verimliliği açısından daha avantajlı.
             </p>
           </div>
         );
       })()}
 
       <div className="gh-card">
-        <h2 className="gh-card__title">🧪 Makro Besin İhtiyacı</h2>
+        <h2 className="gh-card__title">Makro Besin İhtiyacı</h2>
         <div className="gh-summary-grid">
           <div className="gh-summary-item">
             <div className="gh-summary-label">Azot (N)</div>
@@ -258,10 +259,10 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
 
       {/* Micro Nutrients */}
       <div className="gh-card">
-        <h2 className="gh-card__title">🔬 Mikro Besin Elementleri (per dekar)</h2>
+        <h2 className="gh-card__title">Mikro Besin Elementleri (per dekar)</h2>
         <div className="gh-micro-result-grid">
           <div className="gh-micro-item">
-            <span className="gh-micro-icon">🔩</span>
+            <span className="gh-micro-icon"><Bolt size={18} aria-hidden="true" /></span>
             <div>
               <div className="gh-micro-name">Demir (Fe)</div>
               <div className="gh-micro-val">{result.mikroIhtiyac.fe} kg/da</div>
@@ -269,7 +270,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
             </div>
           </div>
           <div className="gh-micro-item">
-            <span className="gh-micro-icon">⚡</span>
+            <span className="gh-micro-icon"><Zap size={18} aria-hidden="true" /></span>
             <div>
               <div className="gh-micro-name">Çinko (Zn)</div>
               <div className="gh-micro-val">{result.mikroIhtiyac.zn} kg/da</div>
@@ -277,7 +278,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
             </div>
           </div>
           <div className="gh-micro-item">
-            <span className="gh-micro-icon">🔧</span>
+            <span className="gh-micro-icon"><Wrench size={18} aria-hidden="true" /></span>
             <div>
               <div className="gh-micro-name">Mangan (Mn)</div>
               <div className="gh-micro-val">{result.mikroIhtiyac.mn} kg/da</div>
@@ -285,7 +286,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
             </div>
           </div>
           <div className="gh-micro-item">
-            <span className="gh-micro-icon">💎</span>
+            <span className="gh-micro-icon"><Gem size={18} aria-hidden="true" /></span>
             <div>
               <div className="gh-micro-name">Bor (B)</div>
               <div className="gh-micro-val">{result.mikroIhtiyac.b} kg/da</div>
@@ -298,7 +299,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
       {/* Kimyasal Fertilizer Table */}
       {(state.gubre_tipi === 'kimyasal' || state.gubre_tipi === 'her_ikisi') && (
         <div className="gh-card">
-          <h2 className="gh-card__title">🧪 Kimyasal Gübre Önerisi ({state.alan} dekar)</h2>
+          <h2 className="gh-card__title">Kimyasal Gübre Önerisi ({state.alan} dekar)</h2>
           <div className="gh-fertilizer-table">
             <table>
               <thead>
@@ -326,7 +327,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
       {/* Organik Fertilizer Table */}
       {(state.gubre_tipi === 'organik' || state.gubre_tipi === 'her_ikisi') && (
         <div className="gh-card">
-          <h2 className="gh-card__title">🌿 Organik Gübre Önerisi ({state.alan} dekar)</h2>
+          <h2 className="gh-card__title">Organik Gübre Önerisi ({state.alan} dekar)</h2>
           <div className="gh-fertilizer-table">
             <table>
               <thead>
@@ -354,7 +355,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
       {/* Cost Comparison */}
       {state.gubre_tipi === 'her_ikisi' && (
         <div className="gh-card gh-comparison">
-          <h3>⚖️ Maliyet Karşılaştırması ({state.alan} dekar)</h3>
+          <h3>Maliyet Karşılaştırması ({state.alan} dekar)</h3>
           <div className="gh-comparison-row">
             <div className="gh-comparison-item">
               <span>Kimyasal Gübre</span>
@@ -376,7 +377,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
 
       {/* Application Schedule */}
       <div className="gh-card">
-        <h2 className="gh-card__title">📅 Uygulama Takvimi (kg/dekar)</h2>
+        <h2 className="gh-card__title">Uygulama Takvimi (kg/dekar)</h2>
         <div className="gh-schedule-table">
           <table>
             <thead>
@@ -397,7 +398,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           </table>
         </div>
         <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--gh-text-secondary)' }}>
-          💡 Gübreleme zamanlaması hava koşullarına ve bitki gelişimine göre ayarlanmalıdır.
+          Gübreleme zamanlaması hava koşullarına ve bitki gelişimine göre ayarlanmalıdır.
         </p>
       </div>
 
@@ -412,8 +413,8 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
       </div>
 
       <div className="gh-btn-row gh-btn-row--center">
-        <button className="gh-btn gh-btn--secondary" onClick={onReset}>🔄 Yeni Hesaplama</button>
-        <button className="gh-btn gh-btn--primary" onClick={() => window.print()}>🖨️ Yazdır</button>
+        <button className="gh-btn gh-btn--secondary" onClick={onReset}>Yeni Hesaplama</button>
+        <button className="gh-btn gh-btn--primary" onClick={() => window.print()}>Yazdır</button>
       </div>
     </div>
   );

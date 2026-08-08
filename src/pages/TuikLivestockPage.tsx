@@ -67,7 +67,7 @@ export default function TuikLivestockPage() {
   return (
     <div ref={pageRef}>
       <div className="page-header" style={{ position: 'relative' }}>
-        <h1 className="page-title">📊 TÜİK Canlı Hayvan Envanteri ve Trend Analizi</h1>
+        <h1 className="page-title">TÜİK Canlı Hayvan Envanteri ve Trend Analizi</h1>
         <p className="page-subtitle">Türkiye İl ve Bölge Bazında Kapsamlı Hayvancılık İstatistikleri — {yearLabel} (Kaynak: TÜİK)</p>
 
         <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
@@ -86,7 +86,7 @@ export default function TuikLivestockPage() {
               opacity: loading ? 0.5 : 1
             }}
           >
-            📥 Export
+            Export
           </button>
           {exportMenuOpen && (
             <div style={{
@@ -107,7 +107,7 @@ export default function TuikLivestockPage() {
                 onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
               >
-                📄 PDF
+                PDF
               </button>
               <button
                 onClick={() => { exportToExcel(); setExportMenuOpen(false); }}
@@ -115,7 +115,7 @@ export default function TuikLivestockPage() {
                 onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
               >
-                📊 Excel
+                Excel
               </button>
             </div>
           )}
@@ -125,10 +125,10 @@ export default function TuikLivestockPage() {
       {/* Tab Navigation */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid var(--border)', paddingBottom: '0' }}>
         {([
-          { key: 'overview', label: '📋 Genel Bakış' },
-          { key: 'regional', label: '🗺️ Bölgesel Analiz' },
-          { key: 'trends', label: '📈 Trend & Tahmin' },
-          { key: 'correlations', label: '🔗 Korelasyonlar' }
+          { key: 'overview', label: 'Genel Bakış' },
+          { key: 'regional', label: 'Bölgesel Analiz' },
+          { key: 'trends', label: 'Trend & Tahmin' },
+          { key: 'correlations', label: 'Korelasyonlar' }
         ] as const).map(tab => (
           <button
             key={tab.key}
@@ -157,7 +157,7 @@ export default function TuikLivestockPage() {
           <label className="filter-label">Hayvan Grubu</label>
           <select className="filter-select" value={selectedAnimal} onChange={(e) => setSelectedAnimal(e.target.value)}>
             {ANIMAL_GROUPS.map(opt => (
-              <option key={opt.id} value={opt.id}>{opt.icon} {opt.name}</option>
+              <option key={opt.id} value={opt.id}>{opt.name}</option>
             ))}
           </select>
         </div>

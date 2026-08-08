@@ -8,11 +8,11 @@ import { GITrendsTab } from './geographical-indications/GITrendsTab';
 import { GITableTab } from './geographical-indications/GITableTab';
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'overview', label: '🗺️ Genel Bakış' },
-  { id: 'provinces', label: '📍 İl Analizi' },
-  { id: 'products', label: '🏷️ Ürün Grupları' },
-  { id: 'trends', label: '📈 Trend Analizi' },
-  { id: 'table', label: '📊 Detaylı Tablo' },
+  { id: 'overview', label: 'Genel Bakış' },
+  { id: 'provinces', label: 'İl Analizi' },
+  { id: 'products', label: 'Ürün Grupları' },
+  { id: 'trends', label: 'Trend Analizi' },
+  { id: 'table', label: 'Detaylı Tablo' },
 ];
 
 export default function GeographicalIndicationsPage() {

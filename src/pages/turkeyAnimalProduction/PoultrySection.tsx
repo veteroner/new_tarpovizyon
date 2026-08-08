@@ -17,7 +17,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🍗 Kanatlı Ürün Üretimi
+          Kanatlı Ürün Üretimi
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Tavuk eti ve yumurta üretimi - Son 24 ay detaylı analiz
@@ -29,7 +29,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🍗 Tavuk Eti Üretimi (Aylık Trend)
+              Tavuk Eti Üretimi (Aylık Trend)
             </h3>
             <ChartInsightButton title="🍗 Tavuk Eti Üretimi" description="Aylık tavuk eti üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>
@@ -49,7 +49,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🥚 Yumurta Üretimi (Aylık Trend)
+              Yumurta Üretimi (Aylık Trend)
             </h3>
             <ChartInsightButton title="🥚 Yumurta Üretimi" description="Aylık yumurta üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>

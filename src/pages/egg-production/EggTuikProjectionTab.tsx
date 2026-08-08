@@ -13,6 +13,7 @@ import type { TuikEggData, MonthlyEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { Bird, Egg, Sparkles, TrendingUp } from 'lucide-react';
 
 interface EggTuikProjectionTabProps {
   tuikData: TuikEggData[];
@@ -67,7 +68,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">2026 YUMURTA TAHMİNİ</span>
-            <div className="kpi-icon orange">🥚</div>
+            <div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{formatShort(totalProjected2026Egg)} adet</div>
           <div className="kpi-subtitle">Yıllık toplam projeksiyon</div>
@@ -76,7 +77,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">2026 TAVUK TAHMİNİ</span>
-            <div className="kpi-icon green">🐔</div>
+            <div className="kpi-icon green"><Bird size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{hasLayerData ? formatShort(totalProjected2026Layer) + ' adet' : 'Veri yok'}</div>
           <div className="kpi-subtitle">Ortalama tavuk sayısı</div>
@@ -85,7 +86,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YILLIK BÜYÜME (CAGR)</span>
-            <div className="kpi-icon blue">📈</div>
+            <div className="kpi-icon blue"><TrendingUp size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">%{(eggGrowthRate * 100).toFixed(2)}</div>
           <div className="kpi-subtitle">16 yıllık ortalama büyüme</div>
@@ -94,7 +95,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">PROJEKSİYON MODELİ</span>
-            <div className="kpi-icon purple">🔮</div>
+            <div className="kpi-icon purple"><Sparkles size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">CAGR</div>
           <div className="kpi-subtitle">Bileşik yıllık büyüme oranı</div>
@@ -138,7 +139,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {/* 2026 Aylık Tavuk Projeksiyonu */}
       {!hasLayerData && (
         <div style={{ padding: '24px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-          ⚠️ Yumurtacı tavuk sayısı (layer) verisi bulunamadı. Tavuk projeksiyon grafiği gösterilemiyor.
+          Yumurtacı tavuk sayısı (layer) verisi bulunamadı. Tavuk projeksiyon grafiği gösterilemiyor.
         </div>
       )}
       {hasLayerData && (
@@ -179,17 +180,17 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {/* Projeksiyon Metodolojisi */}
       <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
         <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', fontWeight: '700' }}>
-          📚 Projeksiyon Metodolojisi
+          Projeksiyon Metodolojisi
         </h3>
         <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.7' }}>
           <p style={{ marginBottom: '12px' }}>
-            <strong>🔮 Model:</strong> 2026 tahminleri, <strong>CAGR (Compound Annual Growth Rate)</strong> yöntemi kullanılarak hesaplanmıştır.
+            <strong>Model:</strong> 2026 tahminleri, <strong>CAGR (Compound Annual Growth Rate)</strong> yöntemi kullanılarak hesaplanmıştır.
           </p>
           <p style={{ marginBottom: '12px' }}>
-            <strong>📊 Veri Kaynağı:</strong> 2010-2025 arası 16 yıllık TÜİK yumurta üretim verileri
+            <strong>Veri Kaynağı:</strong> 2010-2025 arası 16 yıllık TÜİK yumurta üretim verileri
           </p>
           <p style={{ marginBottom: '12px' }}>
-            <strong>📈 Hesaplama:</strong>
+            <strong>Hesaplama:</strong>
           </p>
           <ul style={{ marginLeft: '20px', marginBottom: '12px' }}>
             <li>Yıllık büyüme oranı: CAGR = (Son Yıl / İlk Yıl)^(1/yıl sayısı) - 1</li>
@@ -197,7 +198,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <li>2026 tahmini: 2025 × (1 + CAGR)</li>
           </ul>
           <p style={{ marginBottom: '12px' }}>
-            <strong>⚠️ Önemli Notlar:</strong>
+            <strong>Önemli Notlar:</strong>
           </p>
           <ul style={{ marginLeft: '20px' }}>
             <li>Projeksiyonlar geçmiş trendlere dayalıdır ve garantili tahmin değildir</li>
@@ -206,7 +207,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <li>Mevsimsel etkiler aylık dağılımda dikkate alınmamıştır</li>
           </ul>
           <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-            <strong>📊 Model Performansı:</strong>
+            <strong>Model Performansı:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
               <div>• CAGR (Yumurta): <strong>%{(eggGrowthRate * 100).toFixed(2)}</strong></div>
               <div>• CAGR (Tavuk): <strong>%{(layerGrowthRate * 100).toFixed(2)}</strong></div>

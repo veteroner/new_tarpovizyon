@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, TrendingUp, Shield, Zap, BarChart3, FileText } from 'lucide-react'
+import { Beef, Check } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate()
@@ -107,40 +108,40 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span className="text-2xl">🐄</span>
+                <span className="text-2xl"><Beef size={18} aria-hidden="true" /></span>
                 Büyükbaş
               </h3>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Süt İnekleri (Holstein, Simental, Brown Swiss, Jersey)</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Besi Sığırları (Büyütme, Finisher)</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Kuru Dönem & Gebelik</span>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span className="text-2xl">🐑</span>
+                <span className="text-2xl"><Beef size={18} aria-hidden="true" /></span>
                 Küçükbaş
               </h3>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Koyun (Merino, Akkaraman, Yerli)</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Keçi (Saanen, Yerli)</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600"><Check size={18} aria-hidden="true" /></span>
                   <span>Süt & Besi Amaçlı</span>
                 </li>
               </ul>

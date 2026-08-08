@@ -68,7 +68,7 @@ export function LivestockCompetitionPage() {
     <div>
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="page-header">
-        <h1 className="page-title">🏆 Rekabet Analizi</h1>
+        <h1 className="page-title">Rekabet Analizi</h1>
         <p className="page-subtitle">
           Türkiye'nin dünya hayvansal üretimindeki stratejik konumu · FAO verileri · {selectedYear}
         </p>
@@ -101,21 +101,21 @@ export function LivestockCompetitionPage() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🥩 ET SIRALAMASI</span><div className="kpi-icon red">#{rnk.meat}</div></div>
+          <div className="kpi-header"><span className="kpi-title">ET SIRALAMASI</span><div className="kpi-icon red">#{rnk.meat}</div></div>
           <div className="kpi-value">{turkeyData ? fmtVal(turkeyData.meat) : 'N/A'}</div>
           <div className="kpi-subtitle">{rankBadge(pRnk.meat - rnk.meat)} 5 yılda</div>
           <div style={{ marginTop: 5 }}>{cagrBadge(trCagr.meat)}</div>
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🥛 SÜT SIRALAMASI</span><div className="kpi-icon blue">#{rnk.milk}</div></div>
+          <div className="kpi-header"><span className="kpi-title">SÜT SIRALAMASI</span><div className="kpi-icon blue">#{rnk.milk}</div></div>
           <div className="kpi-value">{turkeyData ? fmtVal(turkeyData.milk) : 'N/A'}</div>
           <div className="kpi-subtitle">{rankBadge(pRnk.milk - rnk.milk)} 5 yılda</div>
           <div style={{ marginTop: 5 }}>{cagrBadge(trCagr.milk)}</div>
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🥚 YUMURTA SIRALAMASI</span><div className="kpi-icon orange">#{rnk.eggs}</div></div>
+          <div className="kpi-header"><span className="kpi-title">YUMURTA SIRALAMASI</span><div className="kpi-icon orange">#{rnk.eggs}</div></div>
           <div className="kpi-value">{turkeyData ? fmtVal(turkeyData.eggs) : 'N/A'}</div>
           <div className="kpi-subtitle">{rankBadge(pRnk.eggs - rnk.eggs)} 5 yılda</div>
           <div style={{ marginTop: 5 }}>{cagrBadge(trCagr.eggs)}</div>
@@ -125,14 +125,14 @@ export function LivestockCompetitionPage() {
       {/* ── KPI Row 2 – Intelligence metrics ───────────────── */}
       <div className="kpi-grid" style={{ marginTop: 15 }}>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">📊 PAZAR PAYI</span></div>
+          <div className="kpi-header"><span className="kpi-title">PAZAR PAYI</span></div>
           <div className="kpi-value" style={{ color: '#10b981' }}>
             %{turkeyData && world.total > 0 ? ((turkeyData.total / world.total) * 100).toFixed(2) : '0'}
           </div>
           <div className="kpi-subtitle">Dünya toplam hayvansal üretim payı</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🎯 HHI KONSANTRASYON</span></div>
+          <div className="kpi-header"><span className="kpi-title">HHI KONSANTRASYON</span></div>
           <div className="kpi-value" style={{
             color: hhi.concentration === 'VERY_HIGH' ? NEG : hhi.concentration === 'HIGH' ? NEUT : POS
           }}>{hhi.hhi.toFixed(0)}</div>
@@ -141,12 +141,12 @@ export function LivestockCompetitionPage() {
           </div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">📈 TOP 3 PAY</span></div>
+          <div className="kpi-header"><span className="kpi-title">TOP 3 PAY</span></div>
           <div className="kpi-value" style={{ color: '#8b5cf6' }}>%{hhi.top3Share.toFixed(1)}</div>
           <div className="kpi-subtitle">En büyük 3 üreticinin payı</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🌍 ETKİN RAKİP</span></div>
+          <div className="kpi-header"><span className="kpi-title">ETKİN RAKİP</span></div>
           <div className="kpi-value" style={{ color: '#06b6d4' }}>{hhi.effectiveCompetitors.toFixed(1)}</div>
           <div className="kpi-subtitle">{currentRankings.length} ülke arasında</div>
         </div>
@@ -188,7 +188,7 @@ export function LivestockCompetitionPage() {
       {/* ── Charts Row 1: Market Share + BCG ────────────────── */}
       <div className="chart-grid" style={{ marginTop: 20 }}>
         {/* Market Share Evolution */}
-        <ChartCard title={<>📈 Pazar Payı Evrimi (2010–{selectedYear})</>} action={<ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />}>
+        <ChartCard title={<>Pazar Payı Evrimi (2010–{selectedYear})</>} action={<ChartInsightButton title="Pazar Payı Evrimi" description="Pazar payı evrimi" data={mktShareChart} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart data={mktShareChart} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -244,7 +244,7 @@ export function LivestockCompetitionPage() {
             <span>↙️ Sol alt: Köpekler</span>
           </div>
           <div style={{ marginTop: 8, fontSize: '0.72rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-            💡 Bir noktaya tıklayarak ülke detayını açabilirsiniz.
+            Bir noktaya tıklayarak ülke detayını açabilirsiniz.
           </div>
         </ChartCard>
       </div>
@@ -252,7 +252,7 @@ export function LivestockCompetitionPage() {
       {/* ── Charts Row 2: Top Producers + Radar ─────────────── */}
       <div className="chart-grid">
         {/* Top 15 */}
-        <ChartCard title={<>🏆 Top 15 Hayvansal Üretici ({selectedYear})</>} action={<ChartInsightButton title="Top 15 Hayvansal Üretici" description="Top 15 hayvansal üretici ülkeler" data={currentRankings.slice(0,15)} context={{ section: 'Rekabet' }} compact />}>
+        <ChartCard title={<>Top 15 Hayvansal Üretici ({selectedYear})</>} action={<ChartInsightButton title="Top 15 Hayvansal Üretici" description="Top 15 hayvansal üretici ülkeler" data={currentRankings.slice(0,15)} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={currentRankings.slice(0, 15).map(c => ({
@@ -305,7 +305,7 @@ export function LivestockCompetitionPage() {
             </ResponsiveContainer>
           )}
           <div style={{ padding: 10, fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-            💡 Her kategoride en yüksek üretici = 100 baz puan. Diğerleri oransal.
+            Her kategoride en yüksek üretici = 100 baz puan. Diğerleri oransal.
           </div>
         </ChartCard>
       </div>
@@ -327,7 +327,7 @@ export function LivestockCompetitionPage() {
         </ResponsiveContainer>
       </ChartCard>
       {/* ── Treemap: Ülke Pazar Payı Haritası ──────────────────── */}
-      <ChartCard title={<>🗺️ Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</>} action={<ChartInsightButton title="Ülke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />}>
+      <ChartCard title={<>Ülke Pazar Payı Haritası ({selectedYear}) — Top 20</>} action={<ChartInsightButton title="Ülke Pazar Payı Haritası" description="Top 20 ülke pazar payı haritası" data={currentRankings.slice(0,20)} context={{ section: 'Rekabet' }} compact />}>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 12px' }}>
           Alan büyüklüğü toplam hayvansal üretim miktarıyla orantılı. Türkiye kırmızı ile gösterilmiştir.
         </p>
@@ -403,7 +403,7 @@ export function LivestockCompetitionPage() {
       })()}
       {/* ── Catch-Up Analysis ──────────────────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">🎯 Yakalama Analizi – Türkiye vs Dünya Liderleri</h3>
+        <h3 className="chart-title">Yakalama Analizi – Türkiye vs Dünya Liderleri</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
             <thead>
@@ -417,7 +417,7 @@ export function LivestockCompetitionPage() {
             <tbody>
               {catchUp.map((c, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{c.emoji} {c.name}</td>
+                  <td style={{ padding: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{c.name}</td>
                   <td style={{ padding: 12, color: 'var(--text-primary)' }}>{c.leader}</td>
                   <td style={{ padding: 12, textAlign: 'right', color: 'var(--text-secondary)' }}>{fmtVal(c.leaderVal)}</td>
                   <td style={{ padding: 12, textAlign: 'right', color: TURKEY_COLOR, fontWeight: 600 }}>{fmtVal(c.trVal)}</td>
@@ -459,7 +459,7 @@ export function LivestockCompetitionPage() {
 
       {/* ── Nearest Rivals ─────────────────────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">⚔️ Türkiye'nin En Yakın Rakipleri (±5 sıra)</h3>
+        <h3 className="chart-title">Türkiye'nin En Yakın Rakipleri (±5 sıra)</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
             <thead>
@@ -519,7 +519,7 @@ export function LivestockCompetitionPage() {
                 </h3>
                 <button onClick={() => setDrillCountry(null)}
                   style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                  ✕ Kapat
+                  Kapat
                 </button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>

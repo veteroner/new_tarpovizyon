@@ -12,6 +12,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
+import { Globe, Trophy } from 'lucide-react';
 
 // --------------- Types ---------------
 export interface FaoProduct {
@@ -240,7 +241,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">ÜRETİCİ ÜLKE</span>
-                <div className="kpi-icon purple">🌍</div>
+                <div className="kpi-icon purple"><Globe size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value">{countryCount}</div>
               <div className="kpi-subtitle">İlk 15 ülke</div>
@@ -248,7 +249,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
             <div className="kpi-card">
               <div className="kpi-header">
                 <span className="kpi-title">LİDER ÜLKE</span>
-                <div className="kpi-icon orange">🏆</div>
+                <div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div>
               </div>
               <div className="kpi-value" style={{fontSize: '1.1rem'}}>{topCountry}</div>
               <div className="kpi-subtitle">En yüksek üretim</div>
@@ -386,7 +387,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
           {/* Ülke Sıralaması Tablosu */}
           <div className="data-table">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 className="data-table-title" style={{ margin: 0 }}>📋 Ülke Sıralaması</h3>
+              <h3 className="data-table-title" style={{ margin: 0 }}>Ülke Sıralaması</h3>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button 
                   onClick={() => { setSortBy('value'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }}

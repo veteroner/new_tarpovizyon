@@ -334,7 +334,7 @@ export default function TurkeyMacroPage() {
           </ComposedChart>
         </ResponsiveContainer>
         <div className="mt-3 rounded-lg p-3 text-xs" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-          <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>📊 İçgörü Notu:</p>
+          <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>İçgörü Notu:</p>
           <p>
             {agriShareTrend.length > 0 && (() => {
               const first = agriShareTrend[0];
@@ -430,7 +430,7 @@ export default function TurkeyMacroPage() {
                     fill="#dc2626" fillOpacity={0.1} stroke="#dc2626" strokeWidth={2} />
           </SplitAxisChart>
           <div className="mt-2 rounded-lg p-3 text-xs" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-            <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>📊 İçgörü Notu:</p>
+            <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>İçgörü Notu:</p>
             <p>
               {incomeGapChart.length > 0 && (() => {
                 const first = incomeGapChart[0];
@@ -491,7 +491,7 @@ export default function TurkeyMacroPage() {
       <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '2px solid var(--border)' }}>
         <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <Activity size={16} className="text-green-400" />
-          🧠 Makroekonomik İçgörü Özeti
+          Makroekonomik İçgörü Özeti
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>

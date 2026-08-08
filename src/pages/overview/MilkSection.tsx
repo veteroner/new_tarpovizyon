@@ -6,6 +6,7 @@ import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { Milk } from 'lucide-react';
 
 interface Props {
   data: OverviewData;
@@ -15,12 +16,12 @@ export function MilkSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#3b82f6' }}>🥛 Süt Üretimi</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#3b82f6' }}>Süt Üretimi</h2>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi-card large" style={{ borderLeft: '4px solid #3b82f6' }}>
-          <div className="kpi-header"><span className="kpi-title">TOPLAM SÜT</span><div className="kpi-icon" style={{ background: '#dbeafe', color: '#3b82f6' }}>🥛</div></div>
+          <div className="kpi-header"><span className="kpi-title">TOPLAM SÜT</span><div className="kpi-icon" style={{ background: '#dbeafe', color: '#3b82f6' }}><Milk size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#3b82f6' }}>{formatNumber(data.milkProduction.total)} ton</div>
           <div className="kpi-subtitle">2023 Yılı Toplam</div>
         </div>

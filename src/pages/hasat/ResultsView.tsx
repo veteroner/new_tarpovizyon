@@ -90,7 +90,7 @@ export default function ResultsView({
               <ConfidenceBadge score={conf} label="Tahmin Güveni" />
               {calc.dataLevel !== 'ilce' && (
                 <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
-                  ⚠️ İlçe verisi yok — veri kaydırıldı
+                  İlçe verisi yok — veri kaydırıldı
                 </span>
               )}
             </div>
@@ -157,7 +157,7 @@ export default function ResultsView({
       {/* ── Ekonomik Analiz (if data entered) ── */}
       {(calc.brutGelir !== null || calc.toplamMaliyet !== null) && (
         <div className="hz-econ-card">
-          <h3>💰 Ekonomik Analiz</h3>
+          <h3>Ekonomik Analiz</h3>
           <div className="hz-econ-grid">
             {calc.brutGelir !== null && (
               <div className="hz-econ-item">
@@ -183,14 +183,14 @@ export default function ResultsView({
               </div>
             )}
           </div>
-          <p className="hz-econ-disclaimer">⚠️ Bu analiz girdiğiniz fiyat/maliyet bilgisine dayanır. Gerçek sonuçlar farklılık gösterebilir.</p>
+          <p className="hz-econ-disclaimer">Bu analiz girdiğiniz fiyat/maliyet bilgisine dayanır. Gerçek sonuçlar farklılık gösterebilir.</p>
         </div>
       )}
 
       {/* Performance scores */}
       {(calc.perfVsIl !== null || calc.perfVsTR !== null) && (
         <div className="hz-perf-card">
-          <h3>📈 Performans Karşılaştırması</h3>
+          <h3>Performans Karşılaştırması</h3>
           <div className="hz-perf-row">
             {calc.perfVsIl !== null && (
               <div className={`hz-perf-item ${calc.perfVsIl >= 0 ? 'hz-perf-item--positive' : 'hz-perf-item--negative'}`}>
@@ -218,9 +218,9 @@ export default function ResultsView({
           <span className="hz-param">🌾 {state.urun}</span>
           <span className="hz-param">📐 {state.alan.toLocaleString('tr-TR')} da</span>
           <span className="hz-param">{state.sulama ? '🚿 Sulamalı (+%25)' : '💧 Sulamasız'}</span>
-          <span className="hz-param">🪨 Toprak: {state.toprakKalite === 'iyi' ? 'İyi (+%15)' : state.toprakKalite === 'zayif' ? 'Zayıf (-%15)' : 'Orta'}</span>
-          <span className="hz-param">📊 Veri: {calc.dataLevel === 'ilce' ? 'İlçe' : calc.dataLevel === 'il' ? 'İl Ort.' : 'Türkiye Ort.'}</span>
-          <span className="hz-param">📈 Model: Linear Regresyon (R² = {calc.regR2.toFixed(2)})</span>
+          <span className="hz-param">Toprak: {state.toprakKalite === 'iyi' ? 'İyi (+%15)' : state.toprakKalite === 'zayif' ? 'Zayıf (-%15)' : 'Orta'}</span>
+          <span className="hz-param">Veri: {calc.dataLevel === 'ilce' ? 'İlçe' : calc.dataLevel === 'il' ? 'İl Ort.' : 'Türkiye Ort.'}</span>
+          <span className="hz-param">Model: Linear Regresyon (R² = {calc.regR2.toFixed(2)})</span>
         </div>
       </div>
 
@@ -286,7 +286,7 @@ export default function ResultsView({
       {/* ── Turkey Yield HeatMap ── */}
       {state.ilVerimler.length > 0 && (
         <div className="hz-map-card">
-          <h3>🗺️ Türkiye Verim Haritası — {state.urun} (2024)</h3>
+          <h3>Türkiye Verim Haritası — {state.urun} (2024)</h3>
           <p className="hz-chart-note">İller üzerinde gezinerek verim değerini görebilirsiniz. Koyu renk = yüksek verim.</p>
           <TurkeyHeatMap
             regionTotals={state.ilVerimler}
@@ -306,7 +306,7 @@ export default function ResultsView({
       {/* ── İl Sıralaması Tablosu ── */}
       {state.ilRanking.length > 0 && (
         <div className="hz-ranking-card">
-          <h3>🏆 İl Verim Sıralaması — {state.urun} (2024, Kg/da)</h3>
+          <h3>İl Verim Sıralaması — {state.urun} (2024, Kg/da)</h3>
           <div className="hz-ranking-table-wrap">
             <table className="hz-ranking-table">
               <thead>
@@ -370,14 +370,14 @@ export default function ResultsView({
       {/* ── İklim Risk Skoru ── */}
       {climateRisk && (
         <div className="hz-climate-card">
-          <h3>🌡️ İklim Risk Analizi — {state.il}</h3>
+          <h3>İklim Risk Analizi — {state.il}</h3>
           <div className="hz-climate-header">
             <div className="hz-climate-score" style={{ borderColor: climateRisk.color }}>
               <span className="hz-climate-score__val">{climateRisk.skor}</span>
               <span className="hz-climate-score__max">/100</span>
             </div>
             <div className="hz-climate-label" style={{ color: climateRisk.color }}>
-              {climateRisk.emoji} {climateRisk.label}
+              {climateRisk.label}
             </div>
           </div>
           <div className="hz-climate-factors">
@@ -412,7 +412,7 @@ export default function ResultsView({
       {/* ── Multi-crop Comparison Matrix ── */}
       {compareResults.length > 0 && (
         <div className="hz-multicrop-card">
-          <h3>🔄 Ürün Karşılaştırma Matrisi</h3>
+          <h3>Ürün Karşılaştırma Matrisi</h3>
           <div className="hz-multicrop-table-wrap">
             <table className="hz-multicrop-table">
               <thead>
@@ -454,11 +454,11 @@ export default function ResultsView({
 
       {/* ── Sowing + Harvest Calendar ── */}
       <div className="hz-calendar-card">
-        <h3>📅 Tarım Takvimi — {state.urun}</h3>
+        <h3>Tarım Takvimi — {state.urun}</h3>
         <div className="hz-cal-dual">
           {sowing && (
             <div className="hz-cal-section">
-              <h4>🌱 Ekim Dönemi</h4>
+              <h4>Ekim Dönemi</h4>
               <div className="hz-cal-timeline">
                 <div className="hz-cal-item">
                   <span className="hz-cal-label">Başlangıç</span>
@@ -475,7 +475,7 @@ export default function ResultsView({
           )}
           {harvest && (
             <div className="hz-cal-section">
-              <h4>🌾 Hasat Dönemi</h4>
+              <h4>Hasat Dönemi</h4>
               <div className="hz-cal-timeline">
                 <div className="hz-cal-item">
                   <span className="hz-cal-label">Başlangıç</span>
@@ -497,7 +497,7 @@ export default function ResultsView({
       {history.length > 0 && (
         <div className="hz-history-card">
           <div className="hz-history-header">
-            <h3>📋 Geçmiş Tahminler</h3>
+            <h3>Geçmiş Tahminler</h3>
             <div className="hz-history-actions">
               <button type="button" className="hz-btn hz-btn--xs hz-btn--ghost"
                 onClick={() => setShowHistory(!showHistory)}>
@@ -505,7 +505,7 @@ export default function ResultsView({
               </button>
               <button type="button" className="hz-btn hz-btn--xs hz-btn--ghost hz-btn--danger"
                 onClick={() => { clearHistory(); setHistory([]); }}>
-                🗑️ Temizle
+                Temizle
               </button>
             </div>
           </div>
@@ -534,7 +534,7 @@ export default function ResultsView({
 
       {/* ── Model Disclaimer ──────────────────────────────────────── */}
       <div className="hz-card" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '2px solid #f59e0b' }}>
-        <h3 style={{ color: '#92400e', margin: '0 0 8px 0', fontSize: '1rem' }}>⚠️ Tahmin Uyarısı</h3>
+        <h3 style={{ color: '#92400e', margin: '0 0 8px 0', fontSize: '1rem' }}>Tahmin Uyarısı</h3>
         <ul style={{ margin: 0, paddingLeft: 20, color: '#92400e', fontSize: '0.85rem', lineHeight: 1.8 }}>
           <li>Bu sonuçlar <strong>istatistiksel bir tahmin modeline</strong> dayanmaktadır ve kesin verim garantisi değildir.</li>
           <li>Model, TÜİK il bazlı yıllık üretim istatistiklerinden lineer regresyon ile hesaplanmıştır.</li>
@@ -549,9 +549,9 @@ export default function ResultsView({
           ← Arazi Bilgileri
         </button>
         <button className="hz-btn hz-btn--secondary" onClick={() => window.print()}>
-          🖨️ Yazdır
+          Yazdır
         </button>
-        <button className="hz-btn hz-btn--primary" onClick={reset}>🔄 Yeni Tahmin</button>
+        <button className="hz-btn hz-btn--primary" onClick={reset}>Yeni Tahmin</button>
       </div>
     </div>
   );

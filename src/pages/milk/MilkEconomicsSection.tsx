@@ -58,7 +58,7 @@ export default function MilkEconomicsSection({
         <>
           <div style={{ marginTop: '40px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-              🌍 Dünya Süt Fiyatları Karşılaştırması
+              Dünya Süt Fiyatları Karşılaştırması
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
               Türkiye ve dünya ülkeleri çiğ süt fiyatları karşılaştırması (USD/kg)
@@ -75,7 +75,7 @@ export default function MilkEconomicsSection({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                💵 Ülkelere Göre Süt Fiyatları
+                Ülkelere Göre Süt Fiyatları
               </h3>
               <ChartInsightButton title="💵 Ülkelere Göre Süt Fiyatları" description="Dünya süt fiyatları karşılaştırması" data={worldMilkPrices ? [worldMilkPrices] : []} context={{ birim: 'USD/kg' }} compact />
             </div>
@@ -118,7 +118,7 @@ export default function MilkEconomicsSection({
         <>
           <div style={{ marginTop: '40px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-              🥛 Çiğ Süt Ekonomik Göstergeleri
+              Çiğ Süt Ekonomik Göstergeleri
             </h2>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
               Fiyatlar, maliyetler, pariteler ve karlılık analizi
@@ -259,7 +259,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  💰 Fiyat ve Maliyet Trendi
+                  Fiyat ve Maliyet Trendi
                 </h3>
                 <ChartInsightButton title="💰 Fiyat ve Maliyet Trendi" description="Çiğ süt fiyat ve maliyet karşılaştırma trendi" data={chronological} context={{ section: 'Ekonomik Göstergeler' }} />
               </div>
@@ -345,7 +345,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  🌾 Süt Yemi Fiyatları (19% HP)
+                  Süt Yemi Fiyatları (19% HP)
                 </h3>
                 <ChartInsightButton title="🌾 Süt Yemi Fiyatları (19% HP)" description="Süt yemi fiyat trendi" data={chronological} context={{ yem: 'sut_yemi' }} compact />
               </div>
@@ -368,7 +368,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  🌽 Mısır Silajı Fiyatları
+                  Mısır Silajı Fiyatları
                 </h3>
                 <ChartInsightButton title="🌽 Mısır Silajı Fiyatları" description="Mısır silajı fiyat trendi" data={chronological} context={{ yem: 'misir_silaji' }} compact />
               </div>
@@ -391,7 +391,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  🍀 Yonca Fiyatları
+                  Yonca Fiyatları
                 </h3>
                 <ChartInsightButton title="🍀 Yonca Fiyatları" description="Yonca fiyat trendi" data={chronological} context={{ yem: 'yonca' }} compact />
               </div>
@@ -414,7 +414,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  📈 Süt-Yem Paritesi
+                  Süt-Yem Paritesi
                 </h3>
                 <ChartInsightButton title="📈 Süt-Yem Paritesi" description="Süt-yem paritesi ve destek dahil parite" data={chronological} context={{ section: 'Parite' }} />
               </div>
@@ -438,7 +438,7 @@ export default function MilkEconomicsSection({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                  🎁 Destek Oranı (Fiyat İçinde Destek Payı)
+                  Destek Oranı (Fiyat İçinde Destek Payı)
                 </h3>
                 <ChartInsightButton title="🎁 Destek Oranı (Fiyat İçinde Destek Payı)" description="Yıllık ortalama destek oranı" data={yearlySupport} context={{ section: 'Destek' }} compact />
               </div>

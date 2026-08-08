@@ -13,6 +13,7 @@ import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '
 import { formatNumber, formatShort } from './livestockUtils';
 import { pctTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Flame, Rocket, TriangleAlert, Zap } from 'lucide-react';
 
 const R_BIR = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -302,7 +303,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       {predKPIs && (
         <div className="kpi-grid">
           <div className="kpi-card large">
-            <div className="kpi-header"><span className="kpi-title">🔮 TAHMİN MODELLERİ</span></div>
+            <div className="kpi-header"><span className="kpi-title">TAHMİN MODELLERİ</span></div>
             <div className="kpi-value" style={{fontSize: '1.4rem', color: 'var(--accent)'}}>{predKPIs.totalForecasts}</div>
             <div className="kpi-subtitle">Prophet / 3Y projeksiyon ({parseInt(selectedYear) + 1}-{parseInt(selectedYear) + 3})</div>
           </div>
@@ -312,22 +313,22 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <div className="kpi-subtitle">{predKPIs.highConfidence} yüksek güvenilir (R²&gt;0.8)</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">📈 YÜKSELEN</span><div className="kpi-icon green">🚀</div></div>
+            <div className="kpi-header"><span className="kpi-title">YÜKSELEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{color: '#22c55e'}}>{predKPIs.upTrend}</div>
             <div className="kpi-subtitle">Büyüme trendi</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">📉 DÜŞEN</span><div className="kpi-icon" style={{background:'rgba(239,68,68,.15)', color:'#ef4444'}}>⚠️</div></div>
+            <div className="kpi-header"><span className="kpi-title">DÜŞEN</span><div className="kpi-icon" style={{background:'rgba(239,68,68,.15)', color:'#ef4444'}}><TriangleAlert size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{color: '#ef4444'}}>{predKPIs.downTrend}</div>
             <div className="kpi-subtitle">Düşüş trendi</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">ANOMALİ</span><div className="kpi-icon red">⚡</div></div>
+            <div className="kpi-header"><span className="kpi-title">ANOMALİ</span><div className="kpi-icon red"><Zap size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value">{predKPIs.anomalyCount}</div>
             <div className="kpi-subtitle">Z-score &gt; 2.5</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">KRİTİK RİSK</span><div className="kpi-icon orange">🔥</div></div>
+            <div className="kpi-header"><span className="kpi-title">KRİTİK RİSK</span><div className="kpi-icon orange"><Flame size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{color: '#ef4444'}}>{predKPIs.riskCount}</div>
             <div className="kpi-subtitle">CAGR &lt; -5%</div>
           </div>
@@ -394,7 +395,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             </ScatterChart>
           </ResponsiveContainer>
           <div style={{fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '4px'}}>
-            🟢 Güvenilir+Büyüme &nbsp; 🔴 Güvenilir+Düşüş &nbsp; ⚪ Düşük Güven
+            Güvenilir+Büyüme &nbsp; 🔴 Güvenilir+Düşüş &nbsp; ⚪ Düşük Güven
           </div>
         </ChartCard>
 
@@ -445,7 +446,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       {/* Country Selector */}
       <div className="chart-card" style={{marginTop: '20px'}}>
-        <h3 className="chart-title">🌐 Ülke Bazlı Tahmin Karşılaştırması</h3>
+        <h3 className="chart-title">Ülke Bazlı Tahmin Karşılaştırması</h3>
         <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px'}}>
           {['Türkiye', 'Brezilya', 'ABD', 'Hindistan', 'Çin', 'Almanya', 'Fransa', 'Rusya'].map(c => (
             <button key={c} onClick={() => setPredSelectedCountry(c)}
@@ -490,7 +491,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       {/* Risk Matrix */}
       {riskAlerts.length > 0 && (
         <div className="chart-card" style={{marginTop: '20px', background: 'rgba(239,68,68,.04)', border: '1px solid rgba(239,68,68,.2)'}}>
-          <h3 className="chart-title">🚨 Kritik Risk Matrisi (CAGR &lt; -5%)</h3>
+          <h3 className="chart-title">Kritik Risk Matrisi (CAGR &lt; -5%)</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginTop: '12px'}}>
             {riskAlerts.slice(0, 9).map((risk, idx) => {
               const severity = risk.decline < -15 ? 'critical' : risk.decline < -10 ? 'high' : 'medium';
@@ -513,7 +514,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       {/* Anomaly Table */}
       {anomalyAlerts.length > 0 && (
         <div className="chart-card" style={{marginTop: '20px'}}>
-          <h3 className="chart-title">⚡ Anomali Tespitleri (Z-score &gt; 2.5)</h3>
+          <h3 className="chart-title">Anomali Tespitleri (Z-score &gt; 2.5)</h3>
           <div style={{maxHeight: '320px', overflowY: 'auto'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '12px'}}>
               <thead>

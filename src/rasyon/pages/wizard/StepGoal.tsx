@@ -61,10 +61,10 @@ export default function StepGoal() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {(
               [
-                { value: 'dairy' as const, label: '🥛 Süt' },
-                { value: 'beef' as const, label: '🥩 Besi' },
-                { value: 'dry' as const, label: '🌾 Kuru' },
-                { value: 'grower' as const, label: '🐮 Düve' },
+                { value: 'dairy' as const, label: 'Süt' },
+                { value: 'beef' as const, label: 'Besi' },
+                { value: 'dry' as const, label: 'Kuru' },
+                { value: 'grower' as const, label: 'Düve' },
               ]
             ).map((opt) => (
               <button

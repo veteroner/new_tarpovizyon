@@ -18,6 +18,7 @@ import { SERIES } from '../utils/chartColors';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { BarChart3, Trophy } from 'lucide-react';
 
 const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
@@ -133,7 +134,7 @@ export default function MacroEconomicPage() {
     <div>
       <BackToHome />
       <div className="page-header">
-        <h1 className="page-title">💰 Makroekonomik Göstergeler</h1>
+        <h1 className="page-title">Makroekonomik Göstergeler</h1>
         <p className="page-subtitle">{indicatorName} - {selectedYear}</p>
       </div>
 
@@ -172,19 +173,19 @@ export default function MacroEconomicPage() {
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon blue">🏆</div></div>
+              <div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon blue"><Trophy size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{topCountry}</div>
               <div className="kpi-subtitle">{formatValue(topCountryValue)}</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">TOP 5 PAYI</span><div className="kpi-icon purple">📊</div></div>
+              <div className="kpi-header"><span className="kpi-title">TOP 5 PAYI</span><div className="kpi-icon purple"><BarChart3 size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value">%{top5Share.toFixed(1)}</div>
               <div className="kpi-subtitle">Dünya toplamından</div>
             </div>
           </div>
 
           <div className="chart-grid">
-            <ChartCard title={<>📅 Yıllık {indicatorName} Trendi</>} span={2} action={<ChartInsightButton title={`Yıllık ${indicatorName} Trendi`} description="Yıllık gösterge trendi" data={yearlyData} context={{ section: 'Makroekonomi' }} compact />}>
+            <ChartCard title={<>Yıllık {indicatorName} Trendi</>} span={2} action={<ChartInsightButton title={`Yıllık ${indicatorName} Trendi`} description="Yıllık gösterge trendi" data={yearlyData} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -198,7 +199,7 @@ export default function MacroEconomicPage() {
           </div>
 
           <div className="chart-grid">
-            <ChartCard title={<>🌍 Ülke Dağılımı ({selectedYear})</>} action={<ChartInsightButton title="Ülke Dağılımı" description="Ülke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />}>
+            <ChartCard title={<>Ülke Dağılımı ({selectedYear})</>} action={<ChartInsightButton title="Ülke Dağılımı" description="Ülke dağılımı" data={countryData} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={countryData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -239,7 +240,7 @@ export default function MacroEconomicPage() {
           </div>
 
           <div className="data-table">
-            <h3 className="data-table-title">📋 Ülke Sıralaması - {indicatorName}</h3>
+            <h3 className="data-table-title">Ülke Sıralaması - {indicatorName}</h3>
             {countryData.map((country, index) => (
               <div className="table-row" key={country.name}>
                 <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>

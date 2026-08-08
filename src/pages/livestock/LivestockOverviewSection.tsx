@@ -35,6 +35,7 @@ import { type Tab, type DataItem, formatNumber, formatShort } from './livestockU
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { pctTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Beef, Egg, Milk, Rocket } from 'lucide-react';
 
 interface Props {
   selectedYear: string;
@@ -350,22 +351,22 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {overviewKPIs && intelligenceMetrics && (
         <div className="kpi-grid" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginTop: '12px'}}>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green">🚀</div></div>
+            <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{intelligenceMetrics.topMoverCountry || '-'}</div>
             <div className="kpi-subtitle">CAGR %{(intelligenceMetrics.topMoverGrowth ?? 0).toFixed(1)}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">ET ÜRETİMİ</span><div className="kpi-icon red">🥩</div></div>
+            <div className="kpi-header"><span className="kpi-title">ET ÜRETİMİ</span><div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value">{formatNumber(overviewKPIs.totalMeat)}</div>
             <div className="kpi-subtitle">ton ({selectedYear})</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">SÜT ÜRETİMİ</span><div className="kpi-icon blue">🥛</div></div>
+            <div className="kpi-header"><span className="kpi-title">SÜT ÜRETİMİ</span><div className="kpi-icon blue"><Milk size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value">{formatNumber(overviewKPIs.totalMilk)}</div>
             <div className="kpi-subtitle">ton ({selectedYear})</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">YUMURTA</span><div className="kpi-icon orange">🥚</div></div>
+            <div className="kpi-header"><span className="kpi-title">YUMURTA</span><div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value">{formatNumber(overviewKPIs.totalEggs)}</div>
             <div className="kpi-subtitle">ton ({selectedYear})</div>
           </div>
@@ -382,7 +383,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Executive Summary Card */}
       {execSummary && (
         <div className="chart-card" style={{marginTop: '20px'}}>
-          <h3 className="chart-title">📊 Executive Summary — Tedarik Zinciri</h3>
+          <h3 className="chart-title">Executive Summary — Tedarik Zinciri</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '12px'}}>
             <div style={{background: 'rgba(59,130,246,.08)', borderRadius: '12px', padding: '16px', textAlign: 'center'}}>
               <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Birincil Üretim</div>

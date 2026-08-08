@@ -43,7 +43,7 @@ export function InsightCard({ insights, maxDisplay = 10 }: InsightCardProps) {
   if (insights.length === 0) {
     return (
       <div className="chart-card">
-        <h3 className="chart-title">💡 Otomatik İçgörüler</h3>
+        <h3 className="chart-title">Otomatik İçgörüler</h3>
         <div style={{
           padding: '40px 20px',
           textAlign: 'center',
@@ -59,7 +59,7 @@ export function InsightCard({ insights, maxDisplay = 10 }: InsightCardProps) {
 
   return (
     <div className="chart-card">
-      <h3 className="chart-title">💡 Otomatik İçgörüler</h3>
+      <h3 className="chart-title">Otomatik İçgörüler</h3>
       <div style={{
         display: 'flex',
         flexDirection: 'column',

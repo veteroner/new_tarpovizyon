@@ -9,6 +9,7 @@ import type { CommodityItem, ChartPoint, GiewsSerie, GiewsDatapoint, GiewsPriceR
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Tahıllar': '🌾',
@@ -693,12 +694,12 @@ export default function CommodityPricesPage() {
               <div className="kpi-subtitle">Takip edilen ürün</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green">📈</span></div>
+              <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green"><TrendingUp size={18} aria-hidden="true" /></span></div>
               <div className="kpi-value text-green-400">{gainers}</div>
               <div className="kpi-subtitle">Bugün artış gösteren</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">DÜŞENLER</span><span className="kpi-icon red">📉</span></div>
+              <div className="kpi-header"><span className="kpi-title">DÜŞENLER</span><span className="kpi-icon red"><TrendingDown size={18} aria-hidden="true" /></span></div>
               <div className="kpi-value text-red-400">{losers}</div>
               <div className="kpi-subtitle">Bugün düşüş gösteren</div>
             </div>
@@ -1010,7 +1011,7 @@ export default function CommodityPricesPage() {
           <div>
             {/* ── Country selector ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '0.85rem 1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>📍 Ülke</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>Ülke</span>
               <select
                 value={faoCountry}
                 onChange={e => { setFaoCountry(e.target.value); setFaoDetailComm(''); setWorldModalComm(''); }}
@@ -1022,7 +1023,7 @@ export default function CommodityPricesPage() {
               {!faoLoading && !faoError && cards.length > 0 && (
                 <span style={{ fontSize: '0.82rem', color: '#10b981', fontWeight: 600 }}>{cards.length} ürün bulundu</span>
               )}
-              <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#94a3b8' }}>📡 FAO GIEWS · Aylık iç piyasa fiyatları</div>
+              <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#94a3b8' }}>FAO GIEWS · Aylık iç piyasa fiyatları</div>
             </div>
 
             {/* ── KPI row ── */}
@@ -1033,12 +1034,12 @@ export default function CommodityPricesPage() {
                 <div className="kpi-subtitle">{faoCountryLabel} iç piyasasında</div>
               </div>
               <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green">📈</span></div>
+                <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green"><TrendingUp size={18} aria-hidden="true" /></span></div>
                 <div className="kpi-value text-green-400">{faoGainers}</div>
                 <div className="kpi-subtitle">Ay/ay artış gösteren</div>
               </div>
               <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">DÜŞENLER</span><span className="kpi-icon red">📉</span></div>
+                <div className="kpi-header"><span className="kpi-title">DÜŞENLER</span><span className="kpi-icon red"><TrendingDown size={18} aria-hidden="true" /></span></div>
                 <div className="kpi-value text-red-400">{faoLosers}</div>
                 <div className="kpi-subtitle">Ay/ay düşüş gösteren</div>
               </div>
@@ -1234,7 +1235,7 @@ export default function CommodityPricesPage() {
                       onClick={() => setWorldModalComm(faoDetailComm)}
                       style={{ flex: 1, padding: '0.75rem', borderRadius: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', boxShadow: '0 2px 8px rgba(16,185,129,0.3)' }}
                     >
-                      🌍 Dünya Fiyatları
+                      Dünya Fiyatları
                     </button>
                     <button
                       onClick={() => setFaoDetailComm('')}
@@ -1271,7 +1272,7 @@ export default function CommodityPricesPage() {
                       onClick={() => setWorldModalComm('')}
                       style={{ padding: '0.5rem 1.1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', color: '#475569' }}
                     >
-                      ✕ Kapat
+                      Kapat
                     </button>
                   </div>
 
@@ -1327,7 +1328,7 @@ export default function CommodityPricesPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
                         {/* Most expensive */}
                         <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: '1rem', padding: '1rem' }}>
-                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#dc2626' }}>💸 En Pahalı 10 Ülke</h4>
+                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#dc2626' }}>En Pahalı 10 Ülke</h4>
                           <ResponsiveContainer width="100%" height={270}>
                             <BarChart
                               data={worldRankings.slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
@@ -1350,7 +1351,7 @@ export default function CommodityPricesPage() {
 
                         {/* Cheapest */}
                         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '1rem', padding: '1rem' }}>
-                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#16a34a' }}>💚 En Ucuz 10 Ülke</h4>
+                          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#16a34a' }}>En Ucuz 10 Ülke</h4>
                           <ResponsiveContainer width="100%" height={270}>
                             <BarChart
                               data={[...worldRankings].reverse().slice(0, 10).map(r => ({ name: (COUNTRY_TR[r.name] ?? r.name).slice(0, 16), usd: parseFloat(r.latestUsd.toFixed(2)), iso3: r.iso3 }))}
@@ -1375,7 +1376,7 @@ export default function CommodityPricesPage() {
                       {/* Full ranking table */}
                       <div style={{ border: '1px solid #e2e8f0', borderRadius: '1rem', overflow: 'hidden' }}>
                         <div style={{ background: '#f8fafc', padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>📋 Tam Sıralama</h4>
+                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>Tam Sıralama</h4>
                           <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{worldRankings.length} ülke · USD fiyatına göre ↓</span>
                         </div>
                         <div style={{ maxHeight: 340, overflowY: 'auto' }}>
@@ -1492,7 +1493,7 @@ export default function CommodityPricesPage() {
                     <div className="kpi-subtitle">Emtia grubu</div>
                   </div>
                   <div className="kpi-card">
-                    <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green">📈</span></div>
+                    <div className="kpi-header"><span className="kpi-title">YÜKSELENLER</span><span className="kpi-icon green"><TrendingUp size={18} aria-hidden="true" /></span></div>
                     <div className="kpi-value text-green-400">{rising}</div>
                     <div className="kpi-subtitle">Aylık bazda artan</div>
                   </div>

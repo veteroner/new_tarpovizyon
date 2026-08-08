@@ -13,7 +13,7 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          ⚡ Verimlilik Analizi
+          Verimlilik Analizi
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Kovan sayısı, bal verimi ve toplam üretim ilişkisi
@@ -30,7 +30,7 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-            📍 İl Bazlı Bal Üretim Haritası
+            İl Bazlı Bal Üretim Haritası
           </h3>
           <ChartInsightButton title="📍 İl Bazlı Bal Üretim Haritası" description="Treemap: il bazlı bal üretim dağılımı" data={treemapData} context={{ section: 'İl Dağılım' }} compact />
         </div>

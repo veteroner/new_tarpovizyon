@@ -158,7 +158,7 @@ export function RationEvaluationPage() {
           <div className="space-y-6">
             {/* Ration Selection Section */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <h3 className="font-medium text-amber-900 mb-2">📋 Rasyon Seçimi (Opsiyonel)</h3>
+              <h3 className="font-medium text-amber-900 mb-2">Rasyon Seçimi (Opsiyonel)</h3>
               <p className="text-sm text-amber-700 mb-3">
                 Değerlendirmeyi kaydetmek için kütüphanenizden bir rasyon seçin. 
                 Seçmezseniz sadece sonuçları görüntüleyebilirsiniz (kaydetmeden).

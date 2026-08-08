@@ -80,7 +80,7 @@ export default function StepAnimal() {
           <Sparkles className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
-              🤖 Hızlı Giriş (AI ile)
+              Hızlı Giriş (AI ile)
             </h3>
             <p className="text-xs text-gray-600 mb-3">
               Doğal dil ile hayvan bilgilerini girin, AI otomatik dolduracak.
@@ -120,9 +120,9 @@ export default function StepAnimal() {
           <div className="grid grid-cols-3 gap-3">
             {(
               [
-                { value: 'cattle' as const, label: '🐄 Sığır' },
-                { value: 'sheep' as const, label: '🐑 Koyun' },
-                { value: 'goat' as const, label: '🐐 Keçi' },
+                { value: 'cattle' as const, label: 'Sığır' },
+                { value: 'sheep' as const, label: 'Koyun' },
+                { value: 'goat' as const, label: 'Keçi' },
               ]
             ).map((opt) => (
               <button

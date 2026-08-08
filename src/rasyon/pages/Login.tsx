@@ -63,7 +63,7 @@ export default function Login() {
 
         {/* Mock Warning */}
         <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg">
-          <p className="text-sm font-medium">⚠️ Mock Authentication</p>
+          <p className="text-sm font-medium">Mock Authentication</p>
           <p className="text-xs mt-1">
             Firebase Auth henüz entegre edilmedi. Herhangi bir email/şifre ile giriş yapabilirsiniz.
           </p>

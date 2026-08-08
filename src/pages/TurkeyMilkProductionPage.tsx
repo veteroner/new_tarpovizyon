@@ -54,7 +54,7 @@ export default function TurkeyMilkProductionPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🥛 Türkiye Süt Üretimi (TÜİK)</h1>
+        <h1 className="page-title">Türkiye Süt Üretimi (TÜİK)</h1>
         <p className="page-subtitle">Yıllık süt üretimi ve türlere göre dağılım (ton)</p>
       </div>
 

@@ -14,6 +14,7 @@ import {
 } from './sulamaUtils';
 import type { ForecastSummary } from '../../services/weather';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { Droplets, TrendingUp } from 'lucide-react';
 
 interface Props {
   state: WizardState;
@@ -46,12 +47,12 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
               <ConfidenceBadge score={Math.min(100, conf)} label="Hesap Güveni" />
               {donRisk && (
                 <span style={{ fontSize: '0.8rem', color: '#dc2626', background: 'rgba(220,38,38,0.08)', padding: '3px 10px', borderRadius: 999, border: '1px solid #fca5a5' }}>
-                  ❄️ Bu ay bölgede don riski var
+                  Bu ay bölgede don riski var
                 </span>
               )}
               {wxStatus !== 'ready' && (
                 <span style={{ fontSize: '0.8rem', color: '#b45309', background: 'rgba(245,158,11,0.1)', padding: '3px 10px', borderRadius: 999, border: '1px solid #f59e0b' }}>
-                  ⚠️ Hava tahmini yok — günlük plan statik
+                  Hava tahmini yok — günlük plan statik
                 </span>
               )}
             </div>
@@ -65,15 +66,15 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       })()}
 
       <div className="sp-card">
-        <h3 style={{ margin: '0 0 10px 0' }}>⚙️ Gelişmiş Özet</h3>
+        <h3 style={{ margin: '0 0 10px 0' }}>Gelişmiş Özet</h3>
         <div className="sp-params">
-          <span>🧮 ETo: {calc.etoYontemiLabel}</span>
-          <span>🌤️ Senaryo: {calc.iklimSenaryosuLabel}</span>
-          <span>🌿 Kc: {calc.kcModeliLabel}</span>
-          <span>🎯 Karşılama: %{state.sulamaKarsilamaPct}</span>
-          <span>🌱 Kök: {state.kokDerinligiM.toFixed(2)} m</span>
-          <span title="OpenWeather API anahtarı gereklidir — Netlify ortam değişkenine ekleyin">🌧️ Tahmin: {wxStatus === 'ready' && forecast ? 'Aktif ✅' : wxStatus === 'unavailable' ? 'Bağlı değil ⚠️' : 'Yükleniyor...'}</span>
-          {calc.parMol != null && <span title="Fotosentetik Aktif Radyasyon — bitkinin büyümesi için kullanabileceği günlük ışık enerjisi">☀️ Işık: {calc.parMol.toFixed(1)} mol/m²/gün</span>}
+          <span>ETo: {calc.etoYontemiLabel}</span>
+          <span>Senaryo: {calc.iklimSenaryosuLabel}</span>
+          <span>Kc: {calc.kcModeliLabel}</span>
+          <span>Karşılama: %{state.sulamaKarsilamaPct}</span>
+          <span>Kök: {state.kokDerinligiM.toFixed(2)} m</span>
+          <span title="OpenWeather API anahtarı gereklidir — Netlify ortam değişkenine ekleyin">Tahmin: {wxStatus === 'ready' && forecast ? 'Aktif ✅' : wxStatus === 'unavailable' ? 'Bağlı değil ⚠️' : 'Yükleniyor...'}</span>
+          {calc.parMol != null && <span title="Fotosentetik Aktif Radyasyon — bitkinin büyümesi için kullanabileceği günlük ışık enerjisi">Işık: {calc.parMol.toFixed(1)} mol/m²/gün</span>}
         </div>
         {calc.ilkSulama && !calc.sulamaYok && (
           <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f8fafc' }}>
@@ -84,7 +85,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       </div>
 
       <div className="sp-card">
-        <h3 style={{ margin: '0 0 10px 0' }}>🌾 Su Stresi & Verim Analizi</h3>
+        <h3 style={{ margin: '0 0 10px 0' }}>Su Stresi & Verim Analizi</h3>
         <div className="sp-kpi-grid">
           <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
             <div className="sp-kpi__label">Sezon Stres Oranı</div>
@@ -109,7 +110,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {wxStatus === 'unavailable' && (
         <div className="sp-card" style={{ border: '1px solid #fed7aa', background: '#fff7ed' }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#c2410c' }}>🌤️ Hava Tahmini Aktif Değil</h3>
+          <h3 style={{ margin: '0 0 8px 0', color: '#c2410c' }}>Hava Tahmini Aktif Değil</h3>
           <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: '#9a3412' }}>
             Şu an sulama planı yalnızca uzun yıl iklim ortalamalarına dayanıyor. Gerçek yağış tahminini dahil etmek için ücretsiz bir OpenWeather API anahtarı gereklidir.
           </p>
@@ -122,7 +123,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
               <li>Siteyi yeniden deploy et</li>
             </ol>
             <p style={{ margin: '8px 0 0 0' }}>
-              ✅ Aktif olunca: 5 günlük yağış tahmini günlük plana dahil edilir, yağış günleri sulama otomatik ertelenir ve hesap güveni artar.
+              Aktif olunca: 5 günlük yağış tahmini günlük plana dahil edilir, yağış günleri sulama otomatik ertelenir ve hesap güveni artar.
             </p>
           </div>
         </div>
@@ -130,7 +131,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {forecast && (
         <div className="sp-card">
-          <h3 style={{ margin: '0 0 10px 0' }}>🌧️ Yağış Tahmini (OpenWeather)</h3>
+          <h3 style={{ margin: '0 0 10px 0' }}>Yağış Tahmini (OpenWeather)</h3>
           <div className="sp-kpi-grid">
             <div className="sp-kpi">
               <div className="sp-kpi__label">24 saat</div>
@@ -177,7 +178,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* Water Deficit Warning for "Sulama Yok" */}
       {calc.sulamaYok && (
         <div className="sp-card" style={{ border: '2px solid #e74c3c', background: 'linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)' }}>
-          <h3 style={{ color: '#c53030', margin: '0 0 12px 0' }}>🚫 Su Açığı Analizi — Sulama Sistemsiz</h3>
+          <h3 style={{ color: '#c53030', margin: '0 0 12px 0' }}>Su Açığı Analizi — Sulama Sistemsiz</h3>
           <p style={{ color: '#742a2a', marginBottom: 16 }}>
             Sulama sistemi seçilmediği için aşağıda bitkinin <strong>karşılanamayan su ihtiyacı</strong> gösterilmektedir.
             Bu, yalnızca yağış ile karşılanamayan miktardır.
@@ -200,7 +201,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             </div>
           </div>
           <div style={{ marginTop: 16, padding: '12px 16px', background: '#fffbeb', borderRadius: 8, border: '1px solid #f59e0b' }}>
-            <strong>💡 Öneri:</strong> Bu ürün için en az <strong>damla sulama</strong> sistemi kurulması önerilir.
+            <strong>Öneri:</strong> Bu ürün için en az <strong>damla sulama</strong> sistemi kurulması önerilir.
             Damla sulama ile su kullanımı azalır ve verim artışı mümkün olabilir (ürün ve yönetim koşullarına bağlı).
             Tahmini kurulum maliyeti: {(IRRIGATION_SYSTEMS['damla'].maliyet_kurulum * state.alan).toLocaleString('tr-TR')} ₺
           </div>
@@ -241,11 +242,11 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* Monthly Water Balance Chart */}
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ marginBottom: 0 }}>📊 Aylık Su Dengesi — {state.il}</h3>
+          <h3 style={{ marginBottom: 0 }}>Aylık Su Dengesi — {state.il}</h3>
           <ChartInsightButton title="📊 Aylık Su Dengesi" description="Aylık su dengesi analizi" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
-          {bolgeMeta && <span style={{ marginRight: 8 }}>{bolgeMeta.emoji} {bolgeMeta.ad}</span>}
+          {bolgeMeta && <span style={{ marginRight: 8 }}>{bolgeMeta.ad}</span>}
           İl bazlı uzun yıl iklim istatistikleriyle hesaplanmıştır (statik veri tablosu, canlı MGM verisi değildir). ETo: <strong>{calc.etoYontemiLabel}</strong>, Senaryo: <strong>{calc.iklimSenaryosuLabel}</strong>, Kc: <strong>{calc.kcModeliLabel}</strong>.
           {calc.sulamaYok && <span style={{ color: '#e74c3c', fontWeight: 600, marginLeft: 8 }}>
             (Sulama sistemi yok — Brüt Sulama kolonu karşılanamayan su açığını gösterir)
@@ -276,7 +277,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
         const gaugeData = [{ name: 'Su Karşılama', value: karsilama, fill: color }];
         return (
           <div className="sp-chart-card">
-            <h3>💧 Su Karşılama Oranı Göstergesi</h3>
+            <h3>Su Karşılama Oranı Göstergesi</h3>
             <p className="sp-chart-desc">
               Sezonluk efektif sulama ve yağışın bitki ETc talebini karşılama yüzdesi.
               {karsilama > 75 ? ' ✅ İyi düzey' : karsilama > 50 ? ' ⚠️ Orta düzey' : ' 🚨 Düşük düzey'}
@@ -318,7 +319,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* ── Aylık Yağış & ETo Alan Grafiği ──────────────────────────────────── */}
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ marginBottom: 0 }}>🌧️ Aylık Yağış &amp; ETo — Alan Grafiği</h3>
+          <h3 style={{ marginBottom: 0 }}>Aylık Yağış &amp; ETo — Alan Grafiği</h3>
           <ChartInsightButton title="🌧️ Yağış &amp; ETo" description="Aylık yağış ve ETo alan grafiği" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
@@ -356,7 +357,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* ── ETc vs Sulama Bileşik Grafik ─────────────────────────────────────── */}
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ marginBottom: 0 }}>🌿 Bitki Su İhtiyacı (ETc) vs Sulama — Bileşik Grafik</h3>
+          <h3 style={{ marginBottom: 0 }}>Bitki Su İhtiyacı (ETc) vs Sulama — Bileşik Grafik</h3>
           <ChartInsightButton title="🌿 ETc vs Sulama" description="Bitki su ihtiyacı ve sulama karşılaşması" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
@@ -377,7 +378,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
         </ResponsiveContainer>
       </div>
       <div className="sp-table-card">
-        <h3>📋 Aylık Detay Tablosu</h3>
+        <h3>Aylık Detay Tablosu</h3>
         <div className="sp-table-wrap">
           <table className="sp-detail-table">
             <thead>
@@ -422,7 +423,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* Cost Analysis */}
       {!calc.sulamaYok && (
       <div className="sp-cost-card">
-        <h3>💰 Maliyet Analizi (Sezonluk)</h3>
+        <h3>Maliyet Analizi (Sezonluk)</h3>
         <div className="sp-cost-row">
           <span>Elektrik (Pompa)</span>
           <span>{calc.elektrikMaliyet.toFixed(0)} ₺</span>
@@ -447,9 +448,9 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* Benefits */}
       {!calc.sulamaYok && calc.verimArtisi > 0 && (
         <div className="sp-benefit-card">
-          <h3>🌱 Potansiyel Faydalar</h3>
+          <h3>Potansiyel Faydalar</h3>
           <div className="sp-benefit-item">
-            <span className="sp-benefit-icon">📈</span>
+            <span className="sp-benefit-icon"><TrendingUp size={18} aria-hidden="true" /></span>
             <div>
               <div className="sp-benefit-title">Verim Artışı</div>
               <div className="sp-benefit-value">+%{calc.verimArtisi.toFixed(0)}</div>
@@ -458,7 +459,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           </div>
           {calc.suTasarrufu > 0 && (
             <div className="sp-benefit-item">
-              <span className="sp-benefit-icon">💧</span>
+              <span className="sp-benefit-icon"><Droplets size={18} aria-hidden="true" /></span>
               <div>
                 <div className="sp-benefit-title">Su Tasarrufu</div>
                 <div className="sp-benefit-value">%{calc.suTasarrufu.toFixed(0)}</div>
@@ -470,7 +471,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       )}
 
       <div className="sp-table-card">
-        <h3>📅 Günlük Plan (14 gün)</h3>
+        <h3>Günlük Plan (14 gün)</h3>
         <div className="sp-table-wrap">
           <table className="sp-detail-table">
             <thead>
@@ -514,7 +515,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
 
       {calc.toprakKatmanlari && (
         <div className="sp-table-card">
-          <h3>🪨 Toprak Katman Profili (Yaklaşık)</h3>
+          <h3>Toprak Katman Profili (Yaklaşık)</h3>
           <div className="sp-table-wrap">
             <table className="sp-detail-table">
               <thead>
@@ -541,7 +542,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       {/* Irrigation Schedule */}
       {!calc.sulamaYok && (
       <div className="sp-schedule-card">
-        <h3>📅 Sulama Takvimi — {cropData.urun}</h3>
+        <h3>Sulama Takvimi — {cropData.urun}</h3>
         <div className="sp-schedule-grid">
           {cropData.donem.map((donem, idx) => {
             const kc = cropData.donemKc[idx];
@@ -566,20 +567,20 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           <span>📍 {state.il}{bolgeMeta ? ` (${bolgeMeta.emoji} ${bolgeMeta.ad})` : ''}</span>
           <span>🌾 {state.urun}</span>
           <span>📐 {state.alan.toLocaleString('tr-TR')} da</span>
-          <span>🪨 Toprak: {SOIL_TYPES[state.toprakTipi].tip}</span>
-          <span>💧 Sistem: {IRRIGATION_SYSTEMS[state.sulamaSistemi].tip}</span>
-          <span>📊 Dönem: {cropData.donem[state.gelismeDonemi]}</span>
-          <span>🧮 ETo: {calc.etoYontemiLabel}</span>
-          <span>🌤️ Senaryo: {calc.iklimSenaryosuLabel}</span>
-          <span>🌿 Kc: {calc.kcModeliLabel}</span>
-          <span>🎯 Karşılama: %{state.sulamaKarsilamaPct}</span>
+          <span>Toprak: {SOIL_TYPES[state.toprakTipi].tip}</span>
+          <span>Sistem: {IRRIGATION_SYSTEMS[state.sulamaSistemi].tip}</span>
+          <span>Dönem: {cropData.donem[state.gelismeDonemi]}</span>
+          <span>ETo: {calc.etoYontemiLabel}</span>
+          <span>Senaryo: {calc.iklimSenaryosuLabel}</span>
+          <span>Kc: {calc.kcModeliLabel}</span>
+          <span>Karşılama: %{state.sulamaKarsilamaPct}</span>
         </div>
       </div>
 
       <div className="sp-btn-row sp-btn-row--center">
         <button className="sp-btn sp-btn--secondary" onClick={() => setState(s => ({ ...s, step: 3 }))}>← Sistem Bilgileri</button>
-        <button className="sp-btn sp-btn--secondary" onClick={() => window.print()}>🖨️ Yazdır</button>
-        <button className="sp-btn sp-btn--primary" onClick={reset}>🔄 Yeni Plan</button>
+        <button className="sp-btn sp-btn--secondary" onClick={() => window.print()}>Yazdır</button>
+        <button className="sp-btn sp-btn--primary" onClick={reset}>Yeni Plan</button>
       </div>
     </div>
   );

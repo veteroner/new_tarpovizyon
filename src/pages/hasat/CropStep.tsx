@@ -19,7 +19,7 @@ export default function CropStep({
 }: Props) {
   return (
     <div className="hz-card hz-card--wide">
-      <h2 className="hz-card__title">🌾 Ürün Seçin</h2>
+      <h2 className="hz-card__title">Ürün Seçin</h2>
       <p className="hz-card__desc"><strong>{state.ilce}, {state.il}</strong> ilçesinde kayıtlı ürünler</p>
 
       <div className="hz-cat-row" role="group" aria-label="Ürün Kategorisi">

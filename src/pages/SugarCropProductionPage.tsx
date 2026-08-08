@@ -19,7 +19,7 @@ const AYLAR_K = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl'
 
 const sugarExtra = (
   <div className="chart-card" style={{ marginTop: 20 }}>
-    <h3 className="chart-title">🗓️ Şeker Pancarı Kampanya Takvimi (Yıllık Döngü)</h3>
+    <h3 className="chart-title">Şeker Pancarı Kampanya Takvimi (Yıllık Döngü)</h3>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Türkiye'de şeker pancarı kampanyası ekimden fabrika depolamasına kadar yaklaşık 9 ay sürer.
     </p>

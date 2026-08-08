@@ -22,21 +22,21 @@ const MapSection: React.FC<MapSectionProps> = ({ mapData, mapFilter, setMapFilte
   })();
 
   const filters: { key: MapFilterKey; label: string; color: string }[] = [
-    { key: 'toplam', label: '🐄 Toplam', color: '#6b7280' },
-    { key: 'sigir', label: '🐄 Sığır', color: COLORS['Sığır'] },
-    { key: 'manda', label: '🐃 Manda', color: COLORS['Manda'] },
-    { key: 'koyun', label: '🐑 Koyun', color: COLORS['Koyun'] },
-    { key: 'keci', label: '🐐 Keçi', color: COLORS['Keçi'] },
-    { key: 'kovan', label: '🐝 Kovan', color: COLORS['Bal'] },
-    { key: 'etTavugu', label: '🍗 Et Tavuğu', color: '#ef4444' },
-    { key: 'yumurtaTavugu', label: '🥚 Yumurta Tavuğu', color: '#fbbf24' },
+    { key: 'toplam', label: 'Toplam', color: '#6b7280' },
+    { key: 'sigir', label: 'Sığır', color: COLORS['Sığır'] },
+    { key: 'manda', label: 'Manda', color: COLORS['Manda'] },
+    { key: 'koyun', label: 'Koyun', color: COLORS['Koyun'] },
+    { key: 'keci', label: 'Keçi', color: COLORS['Keçi'] },
+    { key: 'kovan', label: 'Kovan', color: COLORS['Bal'] },
+    { key: 'etTavugu', label: 'Et Tavuğu', color: '#ef4444' },
+    { key: 'yumurtaTavugu', label: 'Yumurta Tavuğu', color: '#fbbf24' },
   ];
 
   return (
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          🗺️ İl Bazlı Dağılım
+          İl Bazlı Dağılım
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
           {mapDescription}

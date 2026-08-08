@@ -37,7 +37,7 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 6: Scatter — Alan vs Üretim vs Verim ─── */}
       {scatterData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title={<>🔵 Alan – Üretim – Verim İlişkisi ({selectedYear})</>} span={2} action={<ChartInsightButton title="🔵 Alan–Üretim–Verim" description="Scatter: alan vs üretim vs verim" data={scatterData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title={<>Alan – Üretim – Verim İlişkisi ({selectedYear})</>} span={2} action={<ChartInsightButton title="🔵 Alan–Üretim–Verim" description="Scatter: alan vs üretim vs verim" data={scatterData} context={{ section: 'Analiz' }} compact />}>
             <p style={{ color: 'var(--text-secondary)', fontSize: 12, margin: '0 0 8px 0' }}>
               X: Ekilen Alan (Dekar) — Y: Üretim (Ton) — Nokta Boyutu: Verim (Kg/Dekar)
             </p>
@@ -150,7 +150,7 @@ export default function PlantAnalysisCharts({
         <div className="chart-grid">
           <ChartCard title="📊 Üretim-Alan-Verim Trendi" action={<ChartInsightButton title="📊 Üretim-Alan-Verim Trendi" description="Trend analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '8px' }}>
-              🔵 Üretim (ton) | 🟢 Alan (dekar) | 🟠 Verim (kg/dek)
+              Üretim (ton) | 🟢 Alan (dekar) | 🟠 Verim (kg/dek)
             </p>
             <ResponsiveContainer width="100%" height={280}>
               <ComposedChart data={yieldTrendData}>
@@ -180,8 +180,8 @@ export default function PlantAnalysisCharts({
               return hasDecomposition ? (
                 <>
                   <p style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '2px', lineHeight: '1.4' }}>
-                    <strong>🟩 Alan Genişlemesi:</strong> Verim sabit, alan arttı • <strong>🟨 Verim Artışı:</strong> Alan sabit, verim arttı<br />
-                    <strong>🟦 Sinerjik Etki:</strong> Hem alan hem verim birlikte değiştiğinde oluşan ekstra etki (ΔAlan × ΔVerim)
+                    <strong>Alan Genişlemesi:</strong> Verim sabit, alan arttı • <strong>Verim Artışı:</strong> Alan sabit, verim arttı<br />
+                    <strong>Sinerjik Etki:</strong> Hem alan hem verim birlikte değiştiğinde oluşan ekstra etki (ΔAlan × ΔVerim)
                   </p>
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={yieldTrendData.slice(1)}>
@@ -204,7 +204,7 @@ export default function PlantAnalysisCharts({
               ) : (
                 <>
                   <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '8px' }}>
-                    📊 Yıllık üretim değişimi (Alan/verim verisi mevcut değil)
+                    Yıllık üretim değişimi (Alan/verim verisi mevcut değil)
                   </p>
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={yieldTrendData.slice(1)}>
@@ -228,7 +228,7 @@ export default function PlantAnalysisCharts({
 
       {/* ─── Detay Tablosu ─── */}
       <div className="data-table">
-        <h3 className="data-table-title">📋 İl Sıralaması — {selectedUnsur} ({selectedYear})</h3>
+        <h3 className="data-table-title">İl Sıralaması — {selectedUnsur} ({selectedYear})</h3>
         {cityData.map((city, i) => (
           <div className="table-row" key={city.name}
             style={{ cursor: 'pointer', background: selectedProvince === city.name ? 'var(--bg-hover)' : undefined }}

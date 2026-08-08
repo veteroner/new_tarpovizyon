@@ -11,7 +11,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        🔮 Tahmin & Projeksiyon
+        Tahmin & Projeksiyon
       </h2>
 
       {/* Forecast Info Banner */}
@@ -23,7 +23,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
         color: 'white'
       }}>
         <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-          📊 Gelecek Projeksiyonları
+          Gelecek Projeksiyonları
         </div>
         <div style={{ fontSize: '14px', opacity: 0.9 }}>
           Geçmiş trendlere dayalı olarak {yearRange[0]}-{yearRange[1]} yılları arasındaki büyüme oranları kullanılarak
@@ -41,7 +41,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-          📈 Top 5 İl Büyüme Projeksiyonları (2026-2028)
+          Top 5 İl Büyüme Projeksiyonları (2026-2028)
         </h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -120,7 +120,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
                         fontSize: '20px',
                         background: growthRate > 0 ? 'rgba(34, 197, 94, 0.1)' : growthRate < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                       }}>
-                        {growthRate > 0 ? '🚀' : growthRate < 0 ? '📉' : '➡️'}
+                        {growthRate > 0 ? '' : growthRate < 0 ? '📉' : '➡️'}
                       </div>
                     </td>
                   </tr>

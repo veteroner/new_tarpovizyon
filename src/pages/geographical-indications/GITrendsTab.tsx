@@ -13,7 +13,7 @@ export function GITrendsTab({ yearlyTrend }: Props) {
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📈 Yıllara Göre Trend Analizi
+        Yıllara Göre Trend Analizi
       </h2>
 
       {/* Yearly Trend Chart */}
@@ -27,7 +27,7 @@ export function GITrendsTab({ yearlyTrend }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 Yıllık Tescil ve Başvuru Sayıları
+            Yıllık Tescil ve Başvuru Sayıları
           </h3>
           <ChartInsightButton title="📊 Yıllık Tescil Trendi" description="Yıllık tescil ve başvuru sayıları trendi" data={yearlyTrend} context={{ section: 'Coğrafi İşaretler Trend' }} compact />
         </div>

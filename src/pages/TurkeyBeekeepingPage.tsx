@@ -42,7 +42,7 @@ export default function TurkeyBeekeepingPage() {
       {/* Page Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          🐝 Türkiye Arıcılık İstihbaratı
+          Türkiye Arıcılık İstihbaratı
         </h1>
         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', maxWidth: '700px' }}>
           Arıcı sayıları, kovan dağılımı, bal üretimi, verimlilik analizi ve TÜİK kovan/balmumu verileri
@@ -91,7 +91,7 @@ export default function TurkeyBeekeepingPage() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '0.95rem', color: '#92400e', fontWeight: '600' }}>
-              📊 Veriler TÜİK (Türkiye İstatistik Kurumu) resmi kaynaklarından derlenmiştir - 2023/2024 Yılı
+              Veriler TÜİK (Türkiye İstatistik Kurumu) resmi kaynaklarından derlenmiştir - 2023/2024 Yılı
             </div>
           </div>
         </>

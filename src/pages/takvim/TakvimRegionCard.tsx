@@ -16,7 +16,7 @@ export function TakvimRegionCard({ selectedIl, setSelectedIl, bolge }: Props) {
 
   return (
     <div className="tt-card">
-      <h2 className="tt-card__title">📍 Bölge Seçimi</h2>
+      <h2 className="tt-card__title">Bölge Seçimi</h2>
       <p className="tt-card__desc">İlini seçerek iklim bölgene özel tarımsal takvim oluştur.</p>
 
       <div className="tt-region-row">
@@ -33,7 +33,7 @@ export function TakvimRegionCard({ selectedIl, setSelectedIl, bolge }: Props) {
 
         {selectedIl && (
           <div className="tt-bolge-badge">
-            {bolgeMeta.emoji} {bolgeMeta.ad} İklimi
+            {bolgeMeta.ad} İklimi
           </div>
         )}
 

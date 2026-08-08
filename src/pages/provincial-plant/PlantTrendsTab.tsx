@@ -16,7 +16,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
-        📈 Zaman Serisi & Trendler
+        Zaman Serisi & Trendler
       </h2>
 
       {/* Year Range Selector */}
@@ -28,7 +28,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
         border: '1px solid var(--border)'
       }}>
         <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', display: 'block' }}>
-          📅 YIL ARALIĞI
+          YIL ARALIĞI
         </label>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           {[
@@ -199,7 +199,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 Yıllık Büyüme Oranları
+            Yıllık Büyüme Oranları
           </h3>
           <ChartInsightButton title="📊 Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>

@@ -455,7 +455,7 @@ export default function ProductBalancePage() {
         <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '2px solid var(--border)' }}>
           <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Activity size={16} className="text-green-400" />
-            🧠 İçgörü Özeti — {selectedProduct}
+            İçgörü Özeti — {selectedProduct}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>

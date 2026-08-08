@@ -151,7 +151,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
       {/* Üretim Döngüsü */}
       <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
         <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: '700' }}>
-          🔄 Üretim Döngüsü: Kuluçka → Yumurtacı Tavuk → Yumurta
+          Üretim Döngüsü: Kuluçka → Yumurtacı Tavuk → Yumurta
         </h3>
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '30px', padding: '20px 0' }}>
           {hasHatchData && (
@@ -184,7 +184,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
         </div>
         {hasYieldData && (
           <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            <strong>📊 Verimlilik Göstergeleri:</strong>
+            <strong>Verimlilik Göstergeleri:</strong>
             <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
               <div>• <strong>Tavuk başına verim:</strong> {tuikData[0]?.yieldPerBird.toFixed(1)} adet/yıl</div>
               {tuikData[0]?.layerCount > 0 && (

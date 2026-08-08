@@ -9,6 +9,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Beef, Egg, Milk } from 'lucide-react';
 
 const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
 const R_BIR = 'fao/uretim-hayvansal-birincil';
@@ -351,28 +352,28 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
       {/* 8 KPI Cards */}
       <div className="kpi-grid">
         <div className="kpi-card large">
-          <div className="kpi-header"><span className="kpi-title">⚡ VERİMLİLİK İSTİHBARATI</span></div>
+          <div className="kpi-header"><span className="kpi-title">VERİMLİLİK İSTİHBARATI</span></div>
           <div className="kpi-value" style={{ fontSize: '1.8rem', color: 'var(--accent)' }}>
             {effKPIs.countryCount} Ülke
           </div>
           <div className="kpi-subtitle">Et/Süt/Yumurta Verimlilik Analizi ({selectedYear})</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 ET VERİMİ</span><div className="kpi-icon red">🥩</div></div>
+          <div className="kpi-header"><span className="kpi-title">🇹🇷 ET VERİMİ</span><div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trMeatEff > effKPIs.worldAvgMeat ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trMeatEff.toFixed(0)}
           </div>
           <div className="kpi-subtitle">kg/hayvan • Sıra: #{effKPIs.trMeatRank}/{effKPIs.countryCount}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 SÜT VERİMİ</span><div className="kpi-icon blue">🥛</div></div>
+          <div className="kpi-header"><span className="kpi-title">🇹🇷 SÜT VERİMİ</span><div className="kpi-icon blue"><Milk size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trMilkEff > effKPIs.worldAvgMilk ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trMilkEff.toFixed(0)}
           </div>
           <div className="kpi-subtitle">kg/inek • Sıra: #{effKPIs.trMilkRank}/{effKPIs.countryCount}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 YUMURTA VERİMİ</span><div className="kpi-icon orange">🥚</div></div>
+          <div className="kpi-header"><span className="kpi-title">🇹🇷 YUMURTA VERİMİ</span><div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trEggEff > effKPIs.worldAvgEgg ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trEggEff.toFixed(0)}
           </div>
@@ -400,7 +401,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       {/* Gap Analysis Cards */}
       <div className="chart-card" style={{ marginBottom: 24 }}>
-        <h3 className="chart-title">🎯 Türkiye Verimlilik Açığı Analizi — Catch-Up Calculator</h3>
+        <h3 className="chart-title">Türkiye Verimlilik Açığı Analizi — Catch-Up Calculator</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
           {effGapAnalysis.map(g => (
             <div key={g.category} style={{
@@ -408,7 +409,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
               border: `2px solid ${g.gapToAvg >= 0 ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontSize: 18, fontWeight: 700 }}>{g.icon} {g.category}</span>
+                <span style={{ fontSize: 18, fontWeight: 700 }}>{g.category}</span>
                 <span style={{
                   padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
                   background: g.trend === 'improving' ? 'rgba(34,197,94,0.15)' : g.trend === 'stable' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
@@ -483,7 +484,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
             </ScatterChart>
           </ResponsiveContainer>
           <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
-            🔴 Türkiye vurgulanmıştır • Büyük nokta = yüksek üretim hacmi
+            Türkiye vurgulanmıştır • Büyük nokta = yüksek üretim hacmi
           </div>
         </ChartCard>
 
@@ -555,7 +556,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
         {/* Best Practices Table */}
         <div className="chart-card">
-          <h3 className="chart-title">🏆 En Verimli 10 Ülke — Best Practices</h3>
+          <h3 className="chart-title">En Verimli 10 Ülke — Best Practices</h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>

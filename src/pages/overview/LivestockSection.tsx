@@ -10,6 +10,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Beef, Bird } from 'lucide-react';
 
 interface Props {
   data: OverviewData;
@@ -22,27 +23,27 @@ export function LivestockSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#6b7280' }}>🐄 Hayvan Varlığı (2023)</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#6b7280' }}>Hayvan Varlığı (2023)</h2>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">SIĞIR</span><div className="kpi-icon">🐄</div></div>
+          <div className="kpi-header"><span className="kpi-title">SIĞIR</span><div className="kpi-icon"><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{formatNumber(data.livestockStocks.cattle)}</div>
           <div className="kpi-subtitle">Baş</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">KOYUN</span><div className="kpi-icon">🐑</div></div>
+          <div className="kpi-header"><span className="kpi-title">KOYUN</span><div className="kpi-icon"><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{formatNumber(data.livestockStocks.sheep)}</div>
           <div className="kpi-subtitle">Baş</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">KEÇİ</span><div className="kpi-icon">🐐</div></div>
+          <div className="kpi-header"><span className="kpi-title">KEÇİ</span><div className="kpi-icon"><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{formatNumber(data.livestockStocks.goat)}</div>
           <div className="kpi-subtitle">Baş</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">KANATLI</span><div className="kpi-icon">🐔</div></div>
+          <div className="kpi-header"><span className="kpi-title">KANATLI</span><div className="kpi-icon"><Bird size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{formatNumber(data.livestockStocks.poultry)}</div>
           <div className="kpi-subtitle">Baş</div>
         </div>
@@ -69,7 +70,7 @@ export function LivestockSection({ data }: Props) {
 
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>🗺️ Bölgesel Dağılım (Top 12)</h3>
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>Bölgesel Dağılım (Top 12)</h3>
             <ChartInsightButton title="Bölgesel Hayvan Varlığı Dağılımı" description="İl bazlı hayvan varlığı dağılımı" data={data.livestockStocks.regional[regionalGroup] ?? []} context={{ seçiliTür: regionalGroup }} compact />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div

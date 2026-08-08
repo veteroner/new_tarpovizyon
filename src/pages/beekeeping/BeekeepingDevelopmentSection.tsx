@@ -15,7 +15,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData:
     <>
       <div style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          📈 Arıcılık Gelişimi (2013-2023)
+          Arıcılık Gelişimi (2013-2023)
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Türkiye geneli arıcı sayısı ve kovan gelişimi tarihsel trend analizi
@@ -38,7 +38,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData:
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              🐝 Arıcı Sayısı Gelişimi
+              Arıcı Sayısı Gelişimi
             </h3>
             <ChartInsightButton title="🐝 Arıcı Sayısı Gelişimi" description="Arıcı sayısı yıllık gelişim trendi" data={yearTrendData} context={{ section: 'Arıcı' }} compact />
           </div>

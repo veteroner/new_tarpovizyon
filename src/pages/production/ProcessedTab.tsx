@@ -51,7 +51,7 @@ export function ProcessedTab({
         <div style={{ marginBottom: '24px' }}><InsightCard insights={processedInsights} maxDisplay={6} /></div>
 
         <div className="chart-card" style={{ marginBottom: '24px', padding: '20px', overflowX: 'auto' }}>
-          <h3 className="chart-title" style={{ marginBottom: '16px' }}>🏆 Top Üretici — {translateProduct(processedProduct).substring(0, 40)}</h3>
+          <h3 className="chart-title" style={{ marginBottom: '16px' }}>Top Üretici — {translateProduct(processedProduct).substring(0, 40)}</h3>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
               {['#', 'Ülke', 'Üretim', 'Pay %'].map(h => <th key={h} style={{ textAlign: h === '#' || h === 'Ülke' ? 'left' : 'right', padding: '10px 8px', color: 'var(--text-secondary)', fontWeight: 600 }}>{h}</th>)}

@@ -10,7 +10,7 @@ export default function HelpPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          📖 Yardım & Dokümantasyon
+          Yardım & Dokümantasyon
         </h1>
         <p className="text-gray-600">
           {config.appName} Hesaplama Sistemi'ni kullanmak için ihtiyacınız olan tüm bilgiler burada
@@ -21,7 +21,7 @@ export default function HelpPage() {
       <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
           <BookOpen size={24} />
-          🚀 Hızlı Başlangıç
+          Hızlı Başlangıç
         </h2>
         <p className="text-blue-800 mb-4">
           İlk rasyonunuzu 5 dakikada hesaplayın:
@@ -119,7 +119,7 @@ export default function HelpPage() {
       <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-bold text-yellow-900 mb-4 flex items-center gap-2">
           <HelpCircle size={24} />
-          ⚠️ Sık Karşılaşılan Sorunlar
+          Sık Karşılaşılan Sorunlar
         </h2>
         
         <div className="space-y-4">
@@ -135,7 +135,7 @@ export default function HelpPage() {
 
           <div>
             <h3 className="font-bold text-yellow-900 mb-1">
-              ⚠️ Yüksek asidoz riski uyarısı
+              Yüksek asidoz riski uyarısı
             </h3>
             <p className="text-yellow-800 text-sm">
               <strong>Çözüm:</strong> Tahıl oranını azaltın (%20-25 ideal), kaba yem (yonca/ot) artırın, 
@@ -145,7 +145,7 @@ export default function HelpPage() {
 
           <div>
             <h3 className="font-bold text-yellow-900 mb-1">
-              💾 Verilerim kayboldu
+              Verilerim kayboldu
             </h3>
             <p className="text-yellow-800 text-sm">
               <strong>Çözüm:</strong> Son yedeği geri yükleyin (Veri Yedekleme → İçe Aktar). 
@@ -155,7 +155,7 @@ export default function HelpPage() {
 
           <div>
             <h3 className="font-bold text-yellow-900 mb-1">
-              📱 Mobil cihazda tablolar sığmıyor
+              Mobil cihazda tablolar sığmıyor
             </h3>
             <p className="text-yellow-800 text-sm">
               <strong>Çözüm:</strong> Telefonu yatay çevirin (landscape), parmak hareketiyle kaydırın, 
@@ -168,7 +168,7 @@ export default function HelpPage() {
       {/* Scientific Info */}
       <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          🔬 Bilimsel Temeller
+          Bilimsel Temeller
         </h2>
         
         <div className="grid md:grid-cols-2 gap-4">
@@ -205,7 +205,7 @@ export default function HelpPage() {
       {/* Support & Contact */}
       <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          📞 Destek & İletişim
+          Destek & İletişim
         </h2>
         
         <div className="grid md:grid-cols-2 gap-4">
@@ -262,7 +262,7 @@ export default function HelpPage() {
       {/* Legal Disclaimer */}
       <div className="mt-8 p-4 bg-gray-100 border border-gray-300 rounded-lg">
         <p className="text-gray-600 text-sm">
-          <strong>⚠️ Sorumluluk Reddi:</strong> Bu yazılım bilimsel hesaplamalar yapar ancak 
+          <strong>Sorumluluk Reddi:</strong> Bu yazılım bilimsel hesaplamalar yapar ancak 
           veteriner tavsiyesi yerini tutmaz. Rasyon uygulamadan önce bir veteriner hekim 
           veya beslenme uzmanı ile görüşünüz.
         </p>

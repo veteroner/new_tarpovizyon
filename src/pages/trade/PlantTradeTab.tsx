@@ -192,7 +192,7 @@ export default function PlantTradeTab() {
 
       {/* Charts Row 1 */}
       <div className="chart-grid">
-        <ChartCard title={<>📊 Aylık Bitkisel Ticaret ({selectedYear})</>} action={<ChartInsightButton title={`Aylık Bitkisel Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={plantContext} />}>
+        <ChartCard title={<>Aylık Bitkisel Ticaret ({selectedYear})</>} action={<ChartInsightButton title={`Aylık Bitkisel Ticaret (${selectedYear})`} description="Aylık ihracat ve ithalat değerleri" data={monthlyData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -232,7 +232,7 @@ export default function PlantTradeTab() {
 
       {/* Treemap */}
       <div className="chart-grid">
-        <ChartCard title={<>🌿 İhracat Ürün Treemap ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel İhracat Ürün Treemap (${selectedYear})`} description="İlk 15 ürünün ihracat ağırlığı" data={treemapData} context={plantContext} />}>
+        <ChartCard title={<>İhracat Ürün Treemap ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel İhracat Ürün Treemap (${selectedYear})`} description="İlk 15 ürünün ihracat ağırlığı" data={treemapData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={380}>
             <Treemap data={treemapData} dataKey="size" stroke="#fff" content={<TreemapContent />}>
               {treemapData.map((e, i) => <Cell key={i} fill={e.fill} />)}
@@ -244,7 +244,7 @@ export default function PlantTradeTab() {
 
       {/* Countries */}
       <div className="chart-grid">
-        <ChartCard title={<>🌍 Top 15 İhracat Ülkesi ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={plantContext} />}>
+        <ChartCard title={<>Top 15 İhracat Ülkesi ({selectedYear})</>} action={<ChartInsightButton title={`Bitkisel Top 15 İhracat Ülkesi (${selectedYear})`} description="Ülke bazlı milyon USD ihracat ve ithalat" data={countryChartData} context={plantContext} />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={countryChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -261,7 +261,7 @@ export default function PlantTradeTab() {
 
       {/* Products Detail Table */}
       <div className="chart-card" style={{ marginTop: 16 }}>
-        <h3 className="chart-title">📋 Bitkisel Ürün Detay Tablosu ({selectedYear})</h3>
+        <h3 className="chart-title">Bitkisel Ürün Detay Tablosu ({selectedYear})</h3>
         <div style={{ maxHeight: 500, overflow: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>

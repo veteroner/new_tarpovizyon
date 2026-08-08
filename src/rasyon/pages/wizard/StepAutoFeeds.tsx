@@ -309,7 +309,7 @@ export default function StepAutoFeeds() {
       {selectedFeeds.length > 0 && !canContinue && (
         <div className="card bg-amber-50 border-amber-200">
           <p className="text-sm text-amber-800">
-            ⚠️ Lütfen seçtiğiniz tüm yemlerin fiyatlarını girin.
+            Lütfen seçtiğiniz tüm yemlerin fiyatlarını girin.
           </p>
         </div>
       )}

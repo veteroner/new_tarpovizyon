@@ -227,7 +227,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       {/* KPI Row */}
       <div className="kpi-grid">
         <div className="kpi-card large">
-          <div className="kpi-header"><span className="kpi-title">🏭 İŞLENMİŞ ÜRETİM</span></div>
+          <div className="kpi-header"><span className="kpi-title">İŞLENMİŞ ÜRETİM</span></div>
           <div className="kpi-value" style={{ fontSize: '1.8rem', color: '#8b5cf6' }}>
             {formatShort(processedKPIs.totalProduction)}
           </div>
@@ -246,14 +246,14 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           </div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🔄 İŞLEME ORANI</span></div>
+          <div className="kpi-header"><span className="kpi-title">İŞLEME ORANI</span></div>
           <div className="kpi-value" style={{ color: processedKPIs.processingRate > 20 ? '#22c55e' : '#f59e0b' }}>
             %{processedKPIs.processingRate.toFixed(1)}
           </div>
           <div className="kpi-subtitle">Ham süt → İşlenmiş ürün dönüşümü</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">📊 ÜRÜN ÇESİTLİLİĞİ</span></div>
+          <div className="kpi-header"><span className="kpi-title">ÜRÜN ÇESİTLİLİĞİ</span></div>
           <div className="kpi-value" style={{ color: '#06b6d4' }}>
             {processedProductData.filter(p => p.turkeyVal > 0).length}
           </div>
@@ -311,7 +311,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
 
       {/* Charts Row 1 */}
       <div className="chart-grid" style={{ marginTop: 20 }}>
-        <ChartCard title={<>🏆 Top 15 İşlenmiş Ürnün Üreticileri ({selectedYear})</>} action={<ChartInsightButton title="Top 15 İşlenmiş Ürnün Üreticileri" description="Seçilen yılda işlenmiş hayvansal ürünlerde önde gelen 15 ülke" data={processedCountryData.slice(0, 15)} context={{ yıl: selectedYear }} />}>
+        <ChartCard title={<>Top 15 İşlenmiş Ürnün Üreticileri ({selectedYear})</>} action={<ChartInsightButton title="Top 15 İşlenmiş Ürnün Üreticileri" description="Seçilen yılda işlenmiş hayvansal ürünlerde önde gelen 15 ülke" data={processedCountryData.slice(0, 15)} context={{ yıl: selectedYear }} />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedCountryData.slice(0, 15).map(c => ({
@@ -379,7 +379,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
 
       {/* Product Rankings Table */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">🏭 Tüm İşlenmiş Ürünler – Dünya & Türkiye ({selectedYear})</h3>
+        <h3 className="chart-title">Tüm İşlenmiş Ürünler – Dünya & Türkiye ({selectedYear})</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 15 }}>
             <thead>

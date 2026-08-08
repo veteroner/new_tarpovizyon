@@ -313,7 +313,7 @@ export default function BasinProductionPage() {
         boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)'
       }}>
         <h1 style={{ fontSize: '32px', fontWeight: 800, margin: 0, color: 'white' }}>
-          🌊 Türkiye Hidrografik Havza Haritası
+          Türkiye Hidrografik Havza Haritası
         </h1>
         <p style={{ fontSize: '16px', margin: '8px 0 0 0', color: 'rgba(255,255,255,0.95)' }}>
           30 Havza • 81 İl • {formatNumber(metrics.totalDistricts)} İlçe - Ürün Deseni Analiz Platformu
@@ -328,10 +328,10 @@ export default function BasinProductionPage() {
         flexWrap: 'wrap'
       }}>
         {[
-          { id: 'overview', label: '📊 Genel Bakış' },
-          { id: 'basins', label: '🌊 Havza Analizi' },
-          { id: 'provinces', label: '🗺️ İl Dağılımı' },
-          { id: 'districts', label: '📍 İlçe Haritası' }
+          { id: 'overview', label: 'Genel Bakış' },
+          { id: 'basins', label: 'Havza Analizi' },
+          { id: 'provinces', label: 'İl Dağılımı' },
+          { id: 'districts', label: 'İlçe Haritası' }
         ].map(tab => (
           <button
             key={tab.id}

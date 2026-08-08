@@ -19,7 +19,7 @@ export default function WhiteMeatMapSection({ provincialPoultry,
     <div style={{ marginTop: '40px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          🗺️ İl Bazlı Kanatlı Hayvan Varlığı Dağılımı
+          İl Bazlı Kanatlı Hayvan Varlığı Dağılımı
         </h2>
         <div style={{ display: 'flex', gap: '8px' }}>
           {(['total', 'broiler', 'layer'] as const).map((type) => (

@@ -360,7 +360,7 @@ export default function RationEdit() {
 
       {/* Info */}
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
-        <p className="font-medium mb-1">💡 İpucu:</p>
+        <p className="font-medium mb-1">İpucu:</p>
         <ul className="list-disc list-inside space-y-1 text-blue-700">
           <li>"Manuel Kaydet" miktarları olduğu gibi kaydeder</li>
           <li>"Yeniden Optimize Et" kısıtlara göre en iyi çözümü bulur</li>

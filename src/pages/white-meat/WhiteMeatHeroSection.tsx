@@ -11,6 +11,7 @@ import type { YearPoint, TuikChickenData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { Bird } from 'lucide-react';
 
 type Props = {
   series: YearPoint[];
@@ -47,7 +48,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
           <div className="kpi-card">
             <div className="kpi-header">
               <span className="kpi-title">TAVUK ETİ</span>
-              <div className="kpi-icon orange">🐔</div>
+              <div className="kpi-icon orange"><Bird size={18} aria-hidden="true" /></div>
             </div>
             <div className="kpi-value" style={{ fontSize: '1.8rem' }}>Dünya #{worldRanking.world}</div>
             <div className="kpi-subtitle">AB #{worldRanking.eu}</div>
@@ -80,7 +81,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
             boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)',
           }}>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🧠 Beyaz Et İçgörü Özeti
+              Beyaz Et İçgörü Özeti
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>

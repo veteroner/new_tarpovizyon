@@ -80,7 +80,7 @@ export default function AIAssistantPage() {
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
       <BackToHome />
       <div className="page-header" style={{ flexShrink: 0 }}>
-        <h1 className="page-title">🤖 Tarpol AI Asistan</h1>
+        <h1 className="page-title">Tarpol AI Asistan</h1>
         <p className="page-subtitle">Tarım, hayvancılık ve gıda sektörü hakkında sorularınızı sorun</p>
       </div>
       <style>{`

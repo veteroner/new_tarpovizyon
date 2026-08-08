@@ -22,6 +22,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR, SERIES } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { CalendarDays, Trophy } from 'lucide-react';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
@@ -238,7 +239,7 @@ export default function TurkeyOtherAnimalProductsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🧶 Türkiye Diğer Hayvansal Ürünler (TÜİK)</h1>
+        <h1 className="page-title">Türkiye Diğer Hayvansal Ürünler (TÜİK)</h1>
         <p className="page-subtitle">Yapağı, Tiftik, Keçi Kılı, Balmumu, İpek Böceği Kozası, Kovan — İl Bazlı Analiz</p>
       </div>
 
@@ -248,7 +249,7 @@ export default function TurkeyOtherAnimalProductsPage() {
           <label className="filter-label">Ürün Seçimi</label>
           <select className="filter-select" value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)}>
             {PRODUCTS.map(p => (
-              <option key={p.id} value={p.id}>{p.icon} {p.label}</option>
+              <option key={p.id} value={p.id}>{p.label}</option>
             ))}
           </select>
         </div>
@@ -261,7 +262,7 @@ export default function TurkeyOtherAnimalProductsPage() {
             <div className="kpi-card" key={idx} style={{ cursor: 'pointer', border: PRODUCTS[idx]?.id === selectedProduct ? '2px solid #f59e0b' : undefined }}
               onClick={() => PRODUCTS[idx] && setSelectedProduct(PRODUCTS[idx].id)}>
               <div className="kpi-header">
-                <span className="kpi-title">{summary.icon} {summary.label}</span>
+                <span className="kpi-title">{summary.label}</span>
                 {summary.change !== 0 && (
                   <div className={`kpi-icon ${summary.change >= 0 ? 'green' : 'red'}`}>
                     {summary.change >= 0 ? '📈' : '📉'}
@@ -285,7 +286,7 @@ export default function TurkeyOtherAnimalProductsPage() {
           {/* KPI Detay */}
           <div className="kpi-grid">
             <div className="kpi-card large">
-              <div className="kpi-header"><span className="kpi-title">{currentProduct.icon} {currentProduct.label.toUpperCase()}</span></div>
+              <div className="kpi-header"><span className="kpi-title">{currentProduct.label.toUpperCase()}</span></div>
               <div className="kpi-value">{formatNumber(totalValue)}</div>
               <div className="kpi-subtitle">{currentProduct.birim} ({latestYear})</div>
             </div>
@@ -295,12 +296,12 @@ export default function TurkeyOtherAnimalProductsPage() {
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">VERİ ARALIĞI</span><div className="kpi-icon blue">📅</div></div>
+              <div className="kpi-header"><span className="kpi-title">VERİ ARALIĞI</span><div className="kpi-icon blue"><CalendarDays size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value" style={{ fontSize: '1rem' }}>{trendData[0]?.year || '-'} – {latestYear}</div>
               <div className="kpi-subtitle">{trendData.length} yıllık veri</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon orange">🏆</div></div>
+              <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{cityData[0]?.name || '-'}</div>
               <div className="kpi-subtitle">{cityData[0] ? formatNumber(cityData[0].value) + ' ' + currentProduct.birim : '-'}</div>
             </div>
@@ -346,7 +347,7 @@ export default function TurkeyOtherAnimalProductsPage() {
           {/* İl Bazlı Dağılım */}
           {cityData.length > 0 && (
             <div className="chart-grid">
-              <ChartCard title={<>🏙️ İl Bazında {currentProduct.label} Üretimi</>} action={<ChartInsightButton title={`İl Bazında ${currentProduct.label}`} description="İl bazında üretim" data={cityData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
+              <ChartCard title={<>İl Bazında {currentProduct.label} Üretimi</>} action={<ChartInsightButton title={`İl Bazında ${currentProduct.label}`} description="İl bazında üretim" data={cityData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={450}>
                   <BarChart data={cityData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -391,7 +392,7 @@ export default function TurkeyOtherAnimalProductsPage() {
           {/* İl Sıralama Tablosu */}
           {cityData.length > 0 && (
             <div className="data-table">
-              <h3 className="data-table-title">📋 İl Sıralaması — {currentProduct.label}</h3>
+              <h3 className="data-table-title">İl Sıralaması — {currentProduct.label}</h3>
               {cityData.map((city, index) => (
                 <div className="table-row" key={city.name}>
                   <div className={`table-rank ${index < 3 ? 'orange' : ''}`}>{index + 1}</div>

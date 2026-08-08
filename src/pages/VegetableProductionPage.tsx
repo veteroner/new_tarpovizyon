@@ -25,7 +25,7 @@ function getCellBg(row: SebzeRow, ay: number): string {
 
 const vegExtra = (
   <div className="chart-card" style={{ marginTop: 20 }}>
-    <h3 className="chart-title">📅 Sebze Mevsimsellik Takvimi (Türkiye)</h3>
+    <h3 className="chart-title">Sebze Mevsimsellik Takvimi (Türkiye)</h3>
     <div style={{ display: 'flex', gap: 20, marginBottom: 12, flexWrap: 'wrap' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}>
         <span style={{ width: 14, height: 14, background: '#10b981', borderRadius: 3, display: 'inline-block' }} />

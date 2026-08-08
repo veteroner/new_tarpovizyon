@@ -14,6 +14,7 @@ import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { BarChart3, Bird, Egg } from 'lucide-react';
 
 interface EggTuikOverviewTabProps {
   tuikData: TuikEggData[];
@@ -27,7 +28,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YUMURTA ÜRETİMİ (2025)</span>
-            <div className="kpi-icon orange">🥚</div>
+            <div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{formatShort(tuikData[0]?.eggProduction * 1000)} adet</div>
           <div className="kpi-subtitle">{tuikData[0]?.eggProduction.toLocaleString('tr-TR')} bin adet</div>
@@ -36,7 +37,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YUMURTACI TAVUK</span>
-            <div className="kpi-icon green">🐔</div>
+            <div className="kpi-icon green"><Bird size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{formatShort(tuikData[0]?.layerCount * 1000)} adet</div>
           <div className="kpi-subtitle">{tuikData[0]?.layerCount.toLocaleString('tr-TR')} bin adet</div>
@@ -45,7 +46,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">TAVUK BAŞINA VERİM</span>
-            <div className="kpi-icon blue">📊</div>
+            <div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{tuikData[0]?.yieldPerBird.toFixed(0)} adet/yıl</div>
           <div className="kpi-subtitle">Yıllık ortalama</div>
@@ -54,7 +55,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">KULUÇKA YUMURTAs</span>
-            <div className="kpi-icon yellow">🥚</div>
+            <div className="kpi-icon yellow"><Egg size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{formatShort(tuikData[0]?.hatchedEggs * 1000)} adet</div>
           <div className="kpi-subtitle">{tuikData[0]?.hatchedEggs.toLocaleString('tr-TR')} bin adet</div>
@@ -128,7 +129,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
       {/* Özet İstatistikler */}
       <div style={{ marginTop: '30px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)' }}>
         <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: '700' }}>
-          📊 TÜİK Yumurta Üretimi Özet İstatistikler (2010-2025)
+          TÜİK Yumurta Üretimi Özet İstatistikler (2010-2025)
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>

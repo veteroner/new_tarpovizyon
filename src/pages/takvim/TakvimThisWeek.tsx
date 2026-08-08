@@ -18,7 +18,7 @@ export function TakvimThisWeek({ now, bolge, selectedIl, buHaftaGorevler, gecikm
   return (
     <div className="tt-card tt-thisweek">
       <div className="tt-thisweek__header">
-        <span>📅 Bu Hafta</span>
+        <span>Bu Hafta</span>
         <span className="tt-thisweek__il">
           {AYLAR[now.ay - 1]} – {now.hafta}. Hafta
           {selectedIl && ` · ${selectedIl}`}
@@ -46,7 +46,7 @@ export function TakvimThisWeek({ now, bolge, selectedIl, buHaftaGorevler, gecikm
       )}
 
       {buHaftaGorevler.length === 0 ? (
-        <div className="tt-thisweek__empty">Bu hafta planlanmış görev yok ✅</div>
+        <div className="tt-thisweek__empty">Bu hafta planlanmış görev yok </div>
       ) : (
         <div className="tt-thisweek__tasks">
           {buHaftaGorevler.map((a) => (

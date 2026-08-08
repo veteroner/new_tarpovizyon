@@ -22,6 +22,7 @@ import { type EconomicData } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { ArrowRightLeft, Banknote, BarChart3, Wheat } from 'lucide-react';
 
 type Props = {
   economicData: EconomicData[];
@@ -49,7 +50,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
     <>
       <div style={{ marginTop: '40px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          💰 Türkiye Kırmızı Et Ekonomik Göstergeleri
+          Türkiye Kırmızı Et Ekonomik Göstergeleri
         </h2>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -96,7 +97,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">DANA KARKAS FİYATI</span>
-            <div className="kpi-icon red">💵</div>
+            <div className="kpi-icon red"><Banknote size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{filteredEconomicData[0]?.dana_karkas_fiyati_tl_kg.toFixed(2)} ₺/kg</div>
           <div className="kpi-subtitle">{filteredEconomicData[0]?.tarih}</div>
@@ -105,7 +106,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">KUZU KARKAS FİYATI</span>
-            <div className="kpi-icon green">💵</div>
+            <div className="kpi-icon green"><Banknote size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{filteredEconomicData[0]?.kuzu_karkas_fiyati_tl_kg.toFixed(2)} ₺/kg</div>
           <div className="kpi-subtitle">{filteredEconomicData[0]?.tarih}</div>
@@ -114,7 +115,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">KARLILIK ORANI</span>
-            <div className="kpi-icon blue">📊</div>
+            <div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value" style={{ color: filteredEconomicData[0]?.karlilik >= 0 ? '#22c55e' : '#ef4444' }}>
             {filteredEconomicData[0]?.karlilik.toFixed(2)}%
@@ -125,7 +126,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">DOLAR KURU</span>
-            <div className="kpi-icon yellow">💱</div>
+            <div className="kpi-icon yellow"><ArrowRightLeft size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{filteredEconomicData[0]?.dolar_kuru_tl.toFixed(2)} ₺</div>
           <div className="kpi-subtitle">{filteredEconomicData[0]?.tarih}</div>
@@ -134,7 +135,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YEM FİYATI</span>
-            <div className="kpi-icon orange">🌾</div>
+            <div className="kpi-icon orange"><Wheat size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value">{filteredEconomicData[0]?.besi_yemi_fiyatlari_tl_kg.toFixed(2)} ₺/kg</div>
           <div className="kpi-subtitle">{filteredEconomicData[0]?.tarih}</div>

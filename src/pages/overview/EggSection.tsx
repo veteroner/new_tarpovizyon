@@ -6,6 +6,7 @@ import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { Egg } from 'lucide-react';
 
 interface Props {
   data: OverviewData;
@@ -15,12 +16,12 @@ export function EggSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#f59e0b' }}>🥚 Yumurta Üretimi</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#f59e0b' }}>Yumurta Üretimi</h2>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi-card large" style={{ borderLeft: '4px solid #f59e0b' }}>
-          <div className="kpi-header"><span className="kpi-title">TOPLAM YUMURTA</span><div className="kpi-icon" style={{ background: '#fef3c7', color: '#f59e0b' }}>🥚</div></div>
+          <div className="kpi-header"><span className="kpi-title">TOPLAM YUMURTA</span><div className="kpi-icon" style={{ background: '#fef3c7', color: '#f59e0b' }}><Egg size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#f59e0b' }}>{formatNumber(data.eggProduction.total)} adet</div>
           <div className="kpi-subtitle">2023 Yılı Toplam</div>
         </div>

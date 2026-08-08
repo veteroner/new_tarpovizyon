@@ -12,6 +12,7 @@ import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { BAR_COLOR } from '../utils/chartColors';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
+import { Globe, TreePine, Trophy } from 'lucide-react';
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -160,7 +161,7 @@ export default function LandCoverPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🌿 Arazi Örtüsü</h1>
+        <h1 className="page-title">Arazi Örtüsü</h1>
         <p className="page-subtitle">Dünya arazi örtüsü dağılımı - 1000 ha ({selectedYear})</p>
       </div>
 
@@ -195,17 +196,17 @@ export default function LandCoverPage() {
               <div className="kpi-subtitle">{selectedItems.length} örtü türü</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">ÖRTÜ TÜRÜ</span><div className="kpi-icon green">🌲</div></div>
+              <div className="kpi-header"><span className="kpi-title">ÖRTÜ TÜRÜ</span><div className="kpi-icon green"><TreePine size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value">{coverData.length}</div>
               <div className="kpi-subtitle">Seçili tür</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">ÜLKE SAYISI</span><div className="kpi-icon purple">🌍</div></div>
+              <div className="kpi-header"><span className="kpi-title">ÜLKE SAYISI</span><div className="kpi-icon purple"><Globe size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value">{countryData.length}</div>
               <div className="kpi-subtitle">İlk 15 ülke</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">EN BÜYÜK</span><div className="kpi-icon orange">🏆</div></div>
+              <div className="kpi-header"><span className="kpi-title">EN BÜYÜK</span><div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div></div>
               <div className="kpi-value" style={{fontSize: '1.1rem'}}>{topCountry}</div>
               <div className="kpi-subtitle">En geniş alan</div>
             </div>
@@ -287,7 +288,7 @@ export default function LandCoverPage() {
 
           <div className="data-table">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 className="data-table-title" style={{ margin: 0 }}>📋 Ülke Sıralaması</h3>
+              <h3 className="data-table-title" style={{ margin: 0 }}>Ülke Sıralaması</h3>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => { setSortBy('value'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }}
                   style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: sortBy === 'value' ? 'var(--primary)' : 'var(--bg-primary)', color: sortBy === 'value' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>

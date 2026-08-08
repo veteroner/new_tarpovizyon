@@ -23,7 +23,7 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
   return (
     <div className="chart-grid" style={{ marginTop: '30px' }}>
       {/* Sığır Üretimi */}
-      <ChartCard title={<>🐄 Sığır Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐄 Sığır Eti Üretimi (${rangeLabel})`} description="Yıllık sığır eti üretim verisi" data={filteredSeries} context={{ tur: 'sigir' }} compact />}>
+      <ChartCard title={<>Sığır Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐄 Sığır Eti Üretimi (${rangeLabel})`} description="Yıllık sığır eti üretim verisi" data={filteredSeries} context={{ tur: 'sigir' }} compact />}>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -39,7 +39,7 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       </ChartCard>
 
       {/* Koyun Üretimi */}
-      <ChartCard title={<>🐑 Koyun Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐑 Koyun Eti Üretimi (${rangeLabel})`} description="Yıllık koyun eti üretim verisi" data={filteredSeries} context={{ tur: 'koyun' }} compact />}>
+      <ChartCard title={<>Koyun Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐑 Koyun Eti Üretimi (${rangeLabel})`} description="Yıllık koyun eti üretim verisi" data={filteredSeries} context={{ tur: 'koyun' }} compact />}>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -55,7 +55,7 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       </ChartCard>
 
       {/* Keçi Üretimi */}
-      <ChartCard title={<>🐐 Keçi Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐐 Keçi Eti Üretimi (${rangeLabel})`} description="Yıllık keçi eti üretim verisi" data={filteredSeries} context={{ tur: 'keci' }} compact />}>
+      <ChartCard title={<>Keçi Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🐐 Keçi Eti Üretimi (${rangeLabel})`} description="Yıllık keçi eti üretim verisi" data={filteredSeries} context={{ tur: 'keci' }} compact />}>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -71,7 +71,7 @@ export default function SpeciesDetailSection({ filteredSeries }: Props) {
       </ChartCard>
 
       {/* Manda Üretimi */}
-      <ChartCard title={<>🦬 Manda Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🦬 Manda Eti Üretimi (${rangeLabel})`} description="Yıllık manda eti üretim verisi" data={filteredSeries} context={{ tur: 'manda' }} compact />}>
+      <ChartCard title={<>Manda Eti Üretimi {rangeLabel && `(${rangeLabel})`}</>} action={<ChartInsightButton title={`🦬 Manda Eti Üretimi (${rangeLabel})`} description="Yıllık manda eti üretim verisi" data={filteredSeries} context={{ tur: 'manda' }} compact />}>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={filteredSeries} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

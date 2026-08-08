@@ -6,6 +6,7 @@ import { formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { Beef } from 'lucide-react';
 
 interface Props {
   data: OverviewData;
@@ -15,12 +16,12 @@ export function MeatSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#ef4444' }}>🥩 Et Üretimi</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#ef4444' }}>Et Üretimi</h2>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi-card large" style={{ borderLeft: '4px solid #ef4444' }}>
-          <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{ background: '#fee2e2', color: '#ef4444' }}>🥩</div></div>
+          <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{ background: '#fee2e2', color: '#ef4444' }}><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#ef4444' }}>{formatNumber(data.meatProduction.total)} ton</div>
           <div className="kpi-subtitle">2023 Yılı Toplam</div>
         </div>
@@ -47,7 +48,7 @@ export function MeatSection({ data }: Props) {
       </div>
 
       <div className="section-header" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#dc2626' }}>🐄 Kırmızı Et Detayı</h3>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#dc2626' }}>Kırmızı Et Detayı</h3>
       </div>
 
       <div className="kpi-grid">
@@ -74,7 +75,7 @@ export function MeatSection({ data }: Props) {
       </div>
 
       <div className="section-header" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fb923c' }}>🐔 Beyaz Et Detayı</h3>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fb923c' }}>Beyaz Et Detayı</h3>
       </div>
 
       <div className="kpi-grid">

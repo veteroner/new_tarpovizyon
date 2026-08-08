@@ -143,7 +143,7 @@ export default function LandUsePage() {
           {activeTab === 'transformation' && (
             <>
               <div className="chart-card" style={{ marginBottom: 16 }}>
-                <h3 className="chart-title">🛠️ Geçiş Matrisi Admin Import</h3>
+                <h3 className="chart-title">Geçiş Matrisi Admin Import</h3>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
                   <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg)' }}>
                     <span>CSV Override Yükle</span>

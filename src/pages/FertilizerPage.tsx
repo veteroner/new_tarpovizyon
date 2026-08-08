@@ -40,7 +40,7 @@ export default function FertilizerPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🌱 Gübre Ticareti Analizi</h1>
+        <h1 className="page-title">Gübre Ticareti Analizi</h1>
         <p className="page-subtitle">FAO gübre ticareti — akıllı analiz motoru</p>
       </div>
 

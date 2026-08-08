@@ -157,7 +157,7 @@ export default function DataBackup() {
                 Daha önce aldığınız yedeği geri yükleyin.
               </p>
               <p className="text-xs text-amber-600">
-                ⚠️ Mevcut veriler korunur, yeni veriler eklenir.
+                Mevcut veriler korunur, yeni veriler eklenir.
               </p>
             </div>
             <div>
@@ -185,7 +185,7 @@ export default function DataBackup() {
 
       {/* Instructions */}
       <div className="card mt-6 bg-gray-50">
-        <h3 className="font-semibold text-gray-900 mb-3">💡 Kullanım İpuçları</h3>
+        <h3 className="font-semibold text-gray-900 mb-3">Kullanım İpuçları</h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
             <span className="text-blue-600">•</span>
