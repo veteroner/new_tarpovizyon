@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header';
 import DataShell, { KabuksuzMasaustu } from './components/DataShell';
+import { GirisEkrani } from './components/GirisEkrani';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
 // Mobile imports
 import { isPlatform } from './mobile/utils/platform';
@@ -145,7 +146,7 @@ function AppContent() {
           </Route>
 
           {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}
-          <Route path="/" element={isPlatform('capacitor') ? <Navigate to="/m" replace /> : <ProgramSelectionPage />} />
+          <Route path="/" element={<GirisEkrani masaustu={<ProgramSelectionPage />} mobilYol="/m" />} />
           
           {/*
             * Çiftçi araçları.
@@ -171,9 +172,9 @@ function AppContent() {
           {tarpovizyonBasicRoutes()}
           
           {/* TARPOVIZYON - Giriş ve Ana Sayfalar (TarpoShell dışında) */}
-          <Route path="/tarpovizyon" element={<SelectionPage />} />
-          <Route path="/tarpovizyon/world" element={<HomePage />} />
-          <Route path="/tarpovizyon/turkey" element={<HomePage />} />
+          <Route path="/tarpovizyon" element={<GirisEkrani masaustu={<SelectionPage />} mobilYol="/m" />} />
+          <Route path="/tarpovizyon/world" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="world" />} />
+          <Route path="/tarpovizyon/turkey" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="turkey" />} />
           <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
           <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
 
