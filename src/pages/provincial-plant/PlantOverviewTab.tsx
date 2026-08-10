@@ -1,3 +1,4 @@
+import { useKademeli } from '../../components/ui/useKademeli';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -30,6 +31,8 @@ export function PlantOverviewTab({
   selectedRegion, setSelectedRegion, setSelectedProvince, setActiveTab,
   selectedUnsur,
 }: Props) {
+  const kademe = useKademeli(top10Provinces, 5);
+
   return (
     <div>
       <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-primary)' }}>
@@ -61,7 +64,7 @@ export function PlantOverviewTab({
               </tr>
             </thead>
             <tbody>
-              {top10Provinces.map((province, idx) => (
+              {kademe.gosterilecek.map((province, idx) => (
                 <tr
                   key={province.province}
                   onClick={() => {
@@ -171,6 +174,14 @@ export function PlantOverviewTab({
               ))}
             </tbody>
           </table>
+          {kademe.dugmeVar && (
+            /* Mobilde liste 10 satırla ~850 px yer kaplıyordu; ilk 5 gösterilip
+               gerisi tek dokunuşla açılıyor. Geniş ekran değişmiyor. */
+            <button type="button" className="kademeli-dugme" onClick={kademe.cevir}
+              aria-expanded={kademe.acik}>
+              {kademe.acik ? 'Daha az göster' : `Tümünü göster (${kademe.toplam} il)`}
+            </button>
+          )}
         </div>
       </div>
 

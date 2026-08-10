@@ -112,27 +112,28 @@ aynı 1 507 px'lik blok tekrar ediyor.
 
 ---
 
-## S4 — Aşırı büyük göstergeler  🟠
+## S4 — Aşırı büyük göstergeler  ✅ çözüldü (kısmen yanlış teşhis)
 
-**Kanıt (genişlik × yükseklik):**
+**Gerçek sorun — Basic'in gauge'ları:**
 
-| Sayfa | Gösterge |
-|---|---|
-| İl Bazında · Hayvancılık | 245 × **450** |
-| İl Bazında · Bitkisel | 229 × **450** |
-| Beyaz Et | 313 × **420** |
-| Coğrafi İşaretli | 229 × **420** |
-| Dış Ticaret | 311 × 420 (×2) |
-| Genel Bakış | 311 × 380 |
-| Arz-Talep Dengesi | 279 × 320 |
-| **Basic · Makro Veriler** | 255 × 140 (×3) |
+`.tvb-gauge { min-width: 220px }` yüzünden 343 px'lik mobil içerik alanına tek
+gösterge sığıyordu; üç yarım daire alt alta **506 px**. Kullanıcının "hız
+göstergeleri büyük" dediği bu.
 
-Kullanıcının "hız göstergeleri büyük" dediği Basic'teki üç yarım daire: her
-biri 140 px + başlık, üçü arka arkaya ~500 px.
+→ Dar ekranda üçü yan yana alındı: **506 px → ~90 px**.
 
-**Düzeltme:** Mobilde SVG göstergelere üst sınır — dairesel/yarım daire
-göstergeler 200 px, Basic'in gauge'ları 110 px. Üçlü gauge grubu tek satırda
-üç sütun (255 px genişliğe 3 tane sığar, her biri ~85 px).
+**Yanlış teşhis — düzeltildi:**
+
+İlk taramada "aşırı büyük gösterge" diye işaretlediğim 420–450 px'lik SVG'ler
+aslında **harita**: 81 çocuk düğüm = 81 il, 22 çocuk = bölgeler. Bunlara
+DOKUNULMADI. Mobilde 420 px'lik haritayı küçültmek illeri dokunulamaz hâle
+getirirdi — çocuk sayısını ölçünce anlaşıldı.
+
+| Sayfa | 420–450 px SVG | Ne olduğu |
+|---|---|---|
+| İl Bazında · Hayvancılık / Bitkisel | 245×450 | Türkiye haritası (81 il) |
+| Beyaz Et | 313×420 | Türkiye haritası (81 il) |
+| Dış Ticaret | 311×420 (×2) | Bölge haritası (22) |
 
 ---
 
@@ -183,8 +184,55 @@ Etki/risk oranına göre:
 
 ---
 
-## Bu belge nasıl doğrulanacak
+## Ölçülen sonuçlar (düzeltmelerden sonra)
 
-Her madde bitince aynı ölçüm tekrar çalıştırılacak ve tablodaki piksel
-değerleri güncellenecek. Hedef: hiçbir Pro sayfası **6 ekranı** geçmesin
-(bugün 9 sayfa geçiyor).
+Aynı ölçüm tekrar çalıştırıldı.
+
+### Sayfa boyu
+
+| Sayfa | Önce | Sonra |
+|---|---|---|
+| Tahıllar | 9,7 ekran | **8,3** |
+| Sebzeler | 9,2 | **7,8** |
+| Bakliyat | 9,1 | **7,7** |
+| Yağlı Tohumlar | 9,2 | **7,9** |
+| Kuruyemişler | 8,6 | **7,3** |
+| Meyveler | 8,6 | **7,1** |
+| Dünya · Hayvan Stokları | 5,7 | **4,5** |
+| Dünya · Genel Üretim | 5,8 | **5,3** |
+| İl Bazında · Hayvancılık | 5,8 | **5,3** |
+| İl Bazında · Bitkisel | 5,7 | **5,0** |
+
+### Blok bazında
+
+| Blok | Önce | Sonra |
+|---|---|---|
+| Sıralama listesi (6 bitkisel sayfada) | 1 575 px | **421 px** |
+| İl tablosu (İl Bazında · Bitkisel) | 1 171 px | **586 px** |
+| İl tablosu (İl Bazında · Hayvancılık) | 852 px | **465 px** |
+| Bölüm sekmeleri (Dünya · Genel Üretim) | 835 px | **521 px** |
+| Bölüm sekmeleri (Hayvan Stokları) | 282 px | tek satır şerit |
+| Basic göstergeleri | 506 px | **~90 px** |
+
+### Yol boyunca çıkan kusur
+
+**Grafik açıklamaları (legend) kartın 48 px yukarısına taşıyordu** — bütün
+grafikleri etkiliyordu. Sebep benim daha önce yazdığım
+`.recharts-legend-wrapper { position: relative !important }`: Recharts
+açıklamayı `position: absolute; bottom: 48px` ile konumluyor, `relative`e
+çevrilince bu değer mutlak konum olmaktan çıkıp akıştan kaydırmaya dönüşüyor.
+Konuma dokunulmuyor artık.
+
+---
+
+## Kalan
+
+**S5 — grafik yığını.** Hedef "hiçbir Pro sayfası 6 ekranı geçmesin" idi;
+hâlâ 6 sayfa geçiyor (7,1–8,3 ekran). Kalan uzunluk artık seçim kartlarından
+değil **grafik sayısından** geliyor: Tahıllar'da 12, Genel Bakış'ta 12,
+TÜİK Canlı Hayvan'da 7 grafik.
+
+Bunu kısaltmanın yolu katlanabilir bölümler (ilk bölüm açık, gerisi başlığına
+dokununca açılır). Sayfa sayfa JSX değişikliği gerektiriyor; en uzun dört
+sayfada yapılacak: Genel Bakış (11,9), TÜİK Canlı Hayvan (12,5), Tahıllar
+(8,3), Yumurta (9,0).

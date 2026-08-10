@@ -515,3 +515,70 @@ body {
     box-sizing: border-box;
   }
 }
+
+/* ─── Bölüm sekmeleri: sarmalanmak yerine tek satır şerit ────────────────── */
+/*
+ * Sayfa içi bölüm sekmeleri ("Genel Bakış / Tahminler / Verimlilik …") büyük
+ * kutular hâlinde yazılmış ve dar ekranda 2–3 satıra sarmalanıyor. Ölçüldü:
+ * Dünya Genel Üretim 835 px, İl Bazında 705 px, Hayvan Stokları 282 px —
+ * yalnızca sekmeler için ekranın üçte biri.
+ *
+ * Tek satır yatay şeride alınıyor: 835 px → ~60 px.
+ *
+ * ─── Neden açılır menü değil ───────────────────────────────────────────────
+ * SAYFALAR arası geçiş açılır menü oldu (kabuktaki seçici). Ama sayfa İÇİ
+ * bölümlerde şerit daha doğru: seçili bölüm ekranda görünür kalıyor, yanındaki
+ * seçenekler de göz ucuyla okunuyor. iOS'un kendi kaydırılabilir sekmesi bu.
+ * Açılır menüde hangi bölümde olduğunu görmek için menüyü açmak gerekirdi.
+ *
+ * Seçici `:has()` ile 4+ düğme çocuğu olan flex kaplarını hedefliyor —
+ * "sekme satırı" tam olarak bu. Alt sekme çubuğu etkilenmiyor (onun çocukları
+ * `<a>`).
+ */
+@media (max-width: 767px) {
+  [style*="display: flex"]:has(> button + button + button + button) {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  [style*="display: flex"]:has(> button + button + button + button)::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Şeritteki düğmeler küçülmesin, metinleri kırılmasın. */
+  [style*="display: flex"]:has(> button + button + button + button) > button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /*
+   * Kart ızgarası biçiminde yazılmış bölüm seçicileri (160 px tabanlı).
+   * Tek sütuna düşüp 835 px'e çıkıyorlardı; iki sütun yeterli.
+   */
+  [style*="minmax(160px"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+/* Kademeli liste düğmesi ("Tümünü göster"). */
+.kademeli-dugme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: var(--accent-deep, #1d4ed8);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.kademeli-dugme svg { transition: transform 160ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .kademeli-dugme svg { transition: none; } }

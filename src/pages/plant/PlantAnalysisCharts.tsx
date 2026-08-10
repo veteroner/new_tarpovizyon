@@ -1,3 +1,4 @@
+import { KademeliListe } from '../../components/ui/KademeliListe';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Treemap,
@@ -229,6 +230,7 @@ export default function PlantAnalysisCharts({
       {/* ─── Detay Tablosu ─── */}
       <div className="data-table">
         <h3 className="data-table-title">İl Sıralaması — {selectedUnsur} ({selectedYear})</h3>
+        <KademeliListe ilk={5} birim="il">
         {cityData.map((city, i) => (
           <div className="table-row" key={city.name}
             style={{ cursor: 'pointer', background: selectedProvince === city.name ? 'var(--bg-hover)' : undefined }}
@@ -241,6 +243,7 @@ export default function PlantAnalysisCharts({
             <div className="table-value green">{fmt(city.value)} {currentBirim}</div>
           </div>
         ))}
+        </KademeliListe>
         {cityData.length === 0 && (
           <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 20 }}>Veri bulunamadı</p>
         )}
