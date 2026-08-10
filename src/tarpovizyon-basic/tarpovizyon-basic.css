@@ -787,3 +787,35 @@
   .tvb-section { padding: 12px; }
   .tvb-gauge { min-width: 0; }
 }
+
+/* ─── Göstergeler dar ekranda ────────────────────────────────────────────── */
+/*
+ * `.tvb-gauge { min-width: 220px }` masaüstünde doğru, ama 343 px'lik mobil
+ * içerik alanına tek gösterge sığdırıyor: üç yarım daire alt alta 506 px
+ * (ölçüldü) — neredeyse tam ekran, üç sayı için.
+ *
+ * Dar ekranda üçü yan yana. Yarım daire zaten geniş-basık bir biçim; 100 px
+ * genişlikte de okunuyor, içindeki yüzde değeri de.
+ */
+@media (max-width: 767px) {
+  .tvb-gauge-row {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .tvb-gauge {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .tvb-gauge svg {
+    width: 100%;
+    height: auto;
+    max-height: 84px;
+  }
+
+  .tvb-gauge__label {
+    font-size: 10.5px;
+    line-height: 1.25;
+  }
+}

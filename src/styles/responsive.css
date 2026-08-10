@@ -188,10 +188,22 @@
     display: none !important;
   }
 
-  /* Açıklama (legend) mobilde iki satıra sarsın, taşmasın. */
+  /*
+   * Açıklama (legend) mobilde iki satıra sarsın, taşmasın.
+   *
+   * DİKKAT — burada `position: relative` YAZILMAZ. Denendi ve grafiği bozdu:
+   * Recharts açıklamayı satır içi `position: absolute; left: 4px; bottom: 48px`
+   * ile konumluyor. `relative`e çevrilince bu değerler mutlak konum olmaktan
+   * çıkıp AKIŞTAN KAYDIRMAYA dönüşüyor ve açıklama kartın 48 px yukarısına,
+   * grafiğin dışına çıkıyordu (ölçüldü).
+   *
+   * Recharts açıklamanın yüksekliğini zaten çizim alanından düşüyor; konuma
+   * dokunmaya gerek yok. Taşmanın sebebi genişlikti — piksel cinsinden sabit
+   * genişlik dar kapta kabı aşıyordu.
+   */
   .recharts-legend-wrapper {
-    position: relative !important;
     width: 100% !important;
+    left: 0 !important;
   }
 
   .recharts-default-legend {
