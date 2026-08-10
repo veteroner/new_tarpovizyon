@@ -12,8 +12,21 @@
  * masaüstü panosu olduğu gibi kalıyor.
  */
 
-/* Sayfa kendi başlığını bir daha yazmıyor — gezinme çubuğu zaten taşıyor. */
-.ios-data .page-header { display: none; }
+/*
+ * Sayfa kendi başlığını bir daha yazmıyor — gezinme çubuğu zaten taşıyor.
+ *
+ * İki biçim var: `.page-header` sınıfını kullananlar ve doğrudan satır içi
+ * stille yazılmış `<h1>`'ler. İkincisi 32 px, ortalanmış ve mobilde üç satıra
+ * yayılıyordu; gezinme çubuğundaki başlıkla birlikte aynı metin ekranda iki
+ * kez duruyordu.
+ *
+ * Ayrıca kabuğun kendi başlığı da `<h1>`; sayfada ikincisi olması belge
+ * yapısını da bozuyor. (Kabuğunki `.ios-nav` içinde, bu seçicinin dışında.)
+ */
+/* `!important`: bu başlıklar satır içi `display: flex` taşıyor, o da
+   sınıf seçicisini yener. */
+.ios-data .page-header,
+.ios-data h1 { display: none !important; }
 
 /* ─── KPI kutuları ───────────────────────────────────────────────────────── */
 .ios-data .kpi-card,

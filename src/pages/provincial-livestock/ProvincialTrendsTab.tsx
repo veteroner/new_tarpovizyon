@@ -9,6 +9,7 @@ import {
   type YearlyTrendData,
 } from './provincialLivestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { BarChart3, TrendingUp } from 'lucide-react';
 
 interface Props {
   yearRange: [number, number];
@@ -93,7 +94,7 @@ export default function ProvincialTrendsTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>📊</div>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}><BarChart3 size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Başlangıç ({yearRange[0]})
           </div>
@@ -125,7 +126,7 @@ export default function ProvincialTrendsTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>📈</div>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}><TrendingUp size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             CAGR (Bileşik Büyüme)
           </div>

@@ -19,7 +19,9 @@ import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
-import { BarChart3, Beef, Bird, Egg } from 'lucide-react';
+import {
+  BarChart3, Beef, Bird, Egg,
+} from 'lucide-react';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -284,7 +286,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
               <div style={{ padding: '40px 20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '30px' }}>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}>🥚</div>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}><Egg size={22} aria-hidden="true" /></div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b' }}>{(tuikData[0]?.hatchedEggs || 0).toLocaleString('tr-TR')}</div>
                     <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px', fontWeight: '600' }}>Kuluçkaya Basılan Yumurta</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px' }}>(bin adet)</div>
@@ -305,7 +307,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
 
                 <div style={{ borderTop: '2px dashed var(--border)', paddingTop: '40px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '30px' }}>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}>🐔</div>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}><Bird size={22} aria-hidden="true" /></div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f97316' }}>{(tuikData[0]?.slaughtered || 0).toLocaleString('tr-TR')}</div>
                     <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px', fontWeight: '600' }}>Kesilen Tavuk</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px' }}>(bin adet)</div>
@@ -317,7 +319,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                     </div>
                   </div>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}>🥩</div>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}><Beef size={22} aria-hidden="true" /></div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: '#ef4444' }}>{(tuikData[0]?.meatProduction || 0).toLocaleString('tr-TR')}</div>
                     <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px', fontWeight: '600' }}>Et Üretimi</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px' }}>(ton)</div>

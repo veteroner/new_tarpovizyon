@@ -3,6 +3,7 @@ import type { EggEconomicData } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
+import { BarChart3, Wallet, Wheat } from 'lucide-react';
 
 interface EggEconomicSectionProps {
   economicData: EggEconomicData[];
@@ -73,7 +74,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>ÜRETİCİ FİYATI</span>
-            <div style={{ fontSize: '1.5rem' }}>💰</div>
+            <div style={{ fontSize: '1.5rem' }}><Wallet size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#10b981' }}>{filteredData[0]?.yumurta_uretici_fiyati_tl_kg.toFixed(2)} ₺/kg</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
@@ -89,7 +90,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>KARLILIK ORANI</span>
-            <div style={{ fontSize: '1.5rem' }}>📊</div>
+            <div style={{ fontSize: '1.5rem' }}><BarChart3 size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: filteredData[0]?.karlilik >= 0 ? '#22c55e' : '#ef4444' }}>
             {filteredData[0]?.karlilik.toFixed(2)}%
@@ -99,7 +100,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>YEM PARİTESİ</span>
-            <div style={{ fontSize: '1.5rem' }}>🌾</div>
+            <div style={{ fontSize: '1.5rem' }}><Wheat size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#f59e0b' }}>{filteredData[0]?.parite_yumurta_yem_paritesi.toFixed(2)}</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>

@@ -12,6 +12,7 @@ import {
 } from './provincialLivestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { MapPin } from 'lucide-react';
 
 interface Props {
   selectedProvince: string | null;
@@ -333,7 +334,7 @@ export default function ProvincialDistrictsTab({
           borderRadius: '12px',
           border: '2px dashed var(--border)'
         }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.5 }}>📍</div>
+          <div style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.5 }}><MapPin size={22} aria-hidden="true" /></div>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
             İl Seçimi Gerekli
           </h3>

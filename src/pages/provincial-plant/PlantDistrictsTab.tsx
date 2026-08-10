@@ -13,6 +13,7 @@ import {
 } from './provincialPlantUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { MapPin } from 'lucide-react';
 
 interface Props {
   selectedProvince: string | null;
@@ -292,7 +293,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
           borderRadius: '12px',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}><MapPin size={22} aria-hidden="true" /></div>
           <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
             İlçe bazlı analiz için lütfen bir il seçiniz
           </p>

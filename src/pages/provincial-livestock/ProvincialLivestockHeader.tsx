@@ -1,3 +1,4 @@
+import { Beef, Map, TrendingUp, Trophy } from 'lucide-react';
 import {
   formatNumber,
   YEAR_COLUMNS,
@@ -63,7 +64,7 @@ export default function ProvincialLivestockHeader({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🐄</div>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}><Beef size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Toplam Hayvan Popülasyonu
           </div>
@@ -95,7 +96,7 @@ export default function ProvincialLivestockHeader({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏆</div>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}><Trophy size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Lider İl
           </div>
@@ -115,7 +116,7 @@ export default function ProvincialLivestockHeader({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📈</div>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}><TrendingUp size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             En Hızlı Büyüyen İl
           </div>
@@ -135,7 +136,7 @@ export default function ProvincialLivestockHeader({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🗺️</div>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}><Map size={22} aria-hidden="true" /></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Aktif İl Sayısı
           </div>

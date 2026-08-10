@@ -1,3 +1,4 @@
+import { Wheat } from 'lucide-react';
 import type {
   ProvincialData,
   AggregatedMetrics,
@@ -45,7 +46,7 @@ export function PlantHeader({
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '36px' }}>🌾</span>
+          <span style={{ fontSize: '36px' }}><Wheat size={22} aria-hidden="true" /></span>
           İl ve İlçe Bazlı Bitkisel Üretim Analizi
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>

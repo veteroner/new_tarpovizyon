@@ -14,7 +14,9 @@ import type { TuikEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
-import { BarChart3, Bird, Egg } from 'lucide-react';
+import {
+  BarChart3, Bird, Egg,
+} from 'lucide-react';
 
 interface EggTuikOverviewTabProps {
   tuikData: TuikEggData[];
@@ -94,7 +96,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
         <ChartCard title="🔄 Üretim Akışı: Tavuk → Yumurta (2025)" span={2} action={<ChartInsightButton title="🔄 Üretim Akışı: Tavuk → Yumurta (2025)" description="2025 tavuktan yumurtaya üretim akışı" data={tuikData} context={{ year: 2025 }} compact />}>
           <div style={{ padding: '30px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
             <div style={{ textAlign: 'center', flex: '1', minWidth: '220px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🐔</div>
+              <div style={{ fontSize: '3rem', marginBottom: '10px' }}><Bird size={22} aria-hidden="true" /></div>
               <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#10b981' }}>
                 {(tuikData[0]?.layerCount || 0).toLocaleString('tr-TR')}
               </div>
@@ -104,7 +106,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
             </div>
             <div style={{ fontSize: '2.5rem', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', flex: '1', minWidth: '220px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🥚</div>
+              <div style={{ fontSize: '3rem', marginBottom: '10px' }}><Egg size={22} aria-hidden="true" /></div>
               <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#f59e0b' }}>
                 {(tuikData[0]?.eggProduction || 0).toLocaleString('tr-TR')}
               </div>
@@ -114,7 +116,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
             </div>
             <div style={{ fontSize: '2.5rem', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', flex: '1', minWidth: '220px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📊</div>
+              <div style={{ fontSize: '3rem', marginBottom: '10px' }}><BarChart3 size={22} aria-hidden="true" /></div>
               <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#3b82f6' }}>
                 {tuikData[0]?.yieldPerBird.toFixed(0)}
               </div>

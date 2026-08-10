@@ -17,6 +17,7 @@ import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { Bird, Egg } from 'lucide-react';
 
 interface EggTuikYieldTabProps {
   tuikData: TuikEggData[];
@@ -157,7 +158,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
           {hasHatchData && (
             <>
               <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🥚</div>
+                <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}><Egg size={22} aria-hidden="true" /></div>
                 <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#f59e0b' }}>
                   {(hatchData[0]?.hatchedEggs || 0).toLocaleString('tr-TR')}
                 </div>
@@ -167,7 +168,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
             </>
           )}
           <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🐔</div>
+            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}><Bird size={22} aria-hidden="true" /></div>
             <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#10b981' }}>
               {tuikData[0]?.layerCount > 0 ? tuikData[0].layerCount.toLocaleString('tr-TR') : '—'}
             </div>
@@ -175,7 +176,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
           </div>
           <div style={{ fontSize: '2.5rem', color: 'var(--text-secondary)' }}>→</div>
           <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🥚</div>
+            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}><Egg size={22} aria-hidden="true" /></div>
             <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#3b82f6' }}>
               {(tuikData[0]?.eggProduction || 0).toLocaleString('tr-TR')}
             </div>

@@ -48,6 +48,20 @@
   }
 
   /*
+   * 250 px taban başta dışarıda bırakılmıştı ("grafik kabı olabilir" diye).
+   * Doğru sezgiydi ama fazla genişti: il bazında sayfalarda KPI kartları da
+   * 250 px tabanla kuruluyor ve 295 px'lik alanda tek sütuna düşüp her biri
+   * ~380 px yükseklikte dev kartlara dönüşüyordu.
+   *
+   * Grafik içerenleri ayıklayınca ikisi de doğru davranıyor: sayı kartları
+   * iki sütun, grafikler tek sütun.
+   */
+  [style*="minmax(250px"]:not(:has(.recharts-wrapper)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /*
    * Aynı sorunun sınıfsız hâli: sayfaların çoğu KPI'larını `.kpi-card` yerine
    * satır içi `linear-gradient` kutularla kuruyor (süt sayfasında 20 tane).
    * Bunlar 162 px'lik tek sayı kartları; tek sütuna dizilince sayfa 20.000 px'i
@@ -433,4 +447,59 @@ body {
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   margin-left: 2px;
+}
+
+/* ─── Filtre seçicileri ──────────────────────────────────────────────────── */
+/*
+ * `.filter-select` masaüstünde `min-width: 180px` taşıyor — orada doğru,
+ * seçenek adları ("Hasat Edilen Alan (Dekar)") sıkışmasın diye.
+ *
+ * Mobilde ise küçülmeyi ENGELLİYOR: kart 375 px ekranda ~300 px içerik
+ * genişliğinde, iki seçici yan yana 180+180+20 = 380 px istiyor. Flex
+ * küçültemediği için seçiciler kartın sağ kenarından ~58 px dışarı taşıyor
+ * ve kırpılıyor — kullanıcının bildirdiği durum buydu.
+ *
+ * Dar ekranda her filtre kendi satırında ve tam genişlikte. `min-width: 0`
+ * olmadan `width: 100%` yetmez: flex öğesinin varsayılan taban genişliği
+ * `auto`, yani içeriğinden küçülmez.
+ */
+@media (max-width: 767px) {
+  .date-filter {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .date-filter .filter-group {
+    /* Her filtre tek satır — yan yana sıkıştırmak etiketleri de kırpıyordu. */
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  /* `select` ve çoklu seçim için kullanılan `div.filter-select`, ikisi de. */
+  .filter-select {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /*
+   * Satır içi `flex: 1` verilmiş düğümler (dışa aktar düğmeleri gibi).
+   * `flex: 1` tek başına küçültmez: flex öğesinin en küçük genişliği
+   * varsayılan olarak İÇERİĞİ kadardır. İki "Excel"/"PDF" düğmesi 110 px'lik
+   * sütunda 128 px istiyor, kabından taşıyordu. `min-width: 0` bu davranışı
+   * kaldıran standart düzeltme.
+   */
+  [style*="flex: 1"] {
+    min-width: 0;
+  }
+
+  /* Ürün seçici de aynı kalıpta. */
+  .product-selector,
+  .selector-trigger {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }
