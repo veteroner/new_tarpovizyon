@@ -118,6 +118,12 @@
   padding: 0 16px calc(72px + env(safe-area-inset-bottom));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /*
+   * Kaydırma sona gelince ÜST kaba zincirlenmesin. Zincirlenirse belge
+   * yaylanmaya başlıyor ve sabit çubuklar onunla birlikte oynuyor.
+   * `contain` kaydırmayı engellemez, yalnızca dışarı taşmasını keser.
+   */
+  overscroll-behavior: contain;
 }
 
 /* ─── Gezinme çubuğu ─────────────────────────────────────────────────────── */

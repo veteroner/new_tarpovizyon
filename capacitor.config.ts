@@ -56,7 +56,32 @@ const config: CapacitorConfig = {
   },
 
   ios: {
-    contentInset: 'automatic',
+    /*
+     * ─── SABİT ÇUBUKLAR NEDEN OYNUYORDU ───────────────────────────────────
+     * `contentInset` iOS'un `contentInsetAdjustmentBehavior`'ına bağlanıyor.
+     * `automatic` iken WebView, kaydırma sırasında içeriğin boşluğunu
+     * KENDİLİĞİNDEN değiştiriyor; bu düzeltme tüm web içeriğini kaydırıyor —
+     * `position: fixed` olan alt sekme çubuğu ve üstteki güvenli alan dahil.
+     * Sonuç: sabit olması gereken çubuklar parmakla birlikte oynuyordu.
+     *
+     * Capacitor'ın varsayılanı zaten `never`; boşlukları biz
+     * `env(safe-area-inset-*)` ile kendimiz veriyoruz.
+     */
+    contentInset: 'never',
+
+    /*
+     * WebView'in KENDİ dış kaydırma görünümü kapatılıyor.
+     *
+     * Bu kaydırmayı KİLİTLEMEZ: sayfa içeriği `.ios-scroll` adlı CSS
+     * kabında kayıyor ve o olduğu gibi çalışıyor. Kapatılan şey, onun
+     * ÜSTÜNDEKİ ikinci yüzey — belgeyi bütün olarak kaydırıp yaylandıran,
+     * sabit çubukları da beraberinde oynatan native kaydırma.
+     *
+     * Native uygulamalarda da alt sekme çubuğu kaydırma görünümünün DIŞINDA
+     * durur; bu ayar tam olarak o yapıyı kuruyor.
+     */
+    scrollEnabled: false,
+
     scheme: 'TarpoVizyon',
   },
 };

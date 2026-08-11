@@ -39,14 +39,25 @@ ve stub'ı çağırdığı için hiçbir şey yapmıyor.
 
 ---
 
-## 2. TarpoVizyon Basic — **37 sayfa, 36'sı yayına hazır**
+## 2. TarpoVizyon Basic — **82 sayfa, 81'i yayına hazır**
+
+> **DÜZELTME (11 Ağu, ikinci tur):** Bu bölüm ilk yazıldığında "37 sayfa"
+> diyordu. Yanlıştı — sayfa listesini kaynaktan regex'le çıkarmıştım ve
+> ürün bazlı sayfaları (15 tarla bitkisi, 22 meyve, 6 sebze) kaçırmıştım.
+> Uygulamanın kendi menü verisi 82 diyor; doğru sayı bu. Eksik kalan 45
+> sayfa da tarandı: **45/45 sorunsuz** (her biri 3,3–3,5 ekran, 3 grafik,
+> hata yok, taşma yok). Ana sayfadaki sayı artık menüden hesaplanıyor.
 
 Ölçüm: **konsol hatası 0**, **boş/hata durumu 0**, **yatay taşma 0**
 (taşma bu turda düzeltildi — 9 sayfada tablolar kaydırılamıyordu).
 
 Sayfa boyu 0,8–5,1 ekran arasında — mobil için uygun aralık.
 
-### Yayınlanabilir (36)
+### Yayınlanabilir (81)
+
+Aşağıdaki tabloya ek olarak **43 ürün sayfası** (tarla bitkileri, meyveler,
+sebzeler) — hepsi aynı şablondan, her biri 3,3–3,5 ekran ve 3 grafik,
+tamamı sorunsuz.
 
 | Bölüm | Sayfa | Boy (ekran) | Veri |
 |---|---|---|---|
@@ -71,7 +82,7 @@ Sayfa boyu 0,8–5,1 ekran arasında — mobil için uygun aralık.
 - **Hayvansal ürünlerde verim** tablosu **2023**'te kalmış (iki yıl geride).
   Sayfa çalışıyor ama "güncel" demek doğru olmaz. Yayınlanacaksa üstünde
   dönem etiketi olmalı.
-- Ana sayfadaki "TarpoVizyon Basic · **20 rapor**" yazısı yanlış: **37** sayfa var.
+- Ana sayfadaki rapor sayısı artık menüden hesaplanıyor (**82**); eskiden elle yazılmış "20" duruyordu.
 
 ---
 
