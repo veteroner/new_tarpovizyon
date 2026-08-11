@@ -4,6 +4,7 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 import { useWeather } from '../hooks/useApi';
+import { BASIC_MENU } from '../../components/nav/menu';
 import {
   NavBar, ListGroup, ListRow, TileRow, StatTile,
 } from '../components/ui/IosList';
@@ -43,9 +44,13 @@ const VERI_KAYNAKLARI = [
  * erişilemiyordu. Ana sayfada kendi satırı var; Keşfet'te de tüm sayfaları
  * listeleniyor.
  */
+/* Rapor sayısı menüden SAYILIYOR: elle yazılan "20" gerçekte 37 sayfa
+   varken bayatlamıştı. */
+const BASIC_SAYFA = BASIC_MENU.reduce((n, k) => n + k.items.length, 0);
+
 const BASIC = {
   baslik: 'TarpoVizyon Basic',
-  alt: 'Özet göstergeler · 20 rapor',
+  alt: `Özet göstergeler · ${BASIC_SAYFA} rapor`,
   icon: LayoutGrid,
   renk: 'var(--ios-tint-deep)',
   yol: '/tarpovizyon-basic',

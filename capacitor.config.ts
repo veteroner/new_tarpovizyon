@@ -33,11 +33,21 @@ const config: CapacitorConfig = {
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true,
-      backgroundColor: '#0f172a',
+      /*
+       * Açılış zemini uygulamanın zeminiyle aynı (iOS systemGroupedBackground).
+       * Eskiden koyu lacivertti; uygulama açık temaya geçince açılışta koyu
+       * bir kare parlayıp hemen beyaza dönüyordu.
+       */
+      backgroundColor: '#f2f2f7',
     },
     StatusBar: {
+      /*
+       * Capacitor'ın adlandırması ters okunuyor: `DARK` = "koyu ZEMİN için
+       * açık yazı", `LIGHT` = "açık ZEMİN için koyu yazı". Uygulama açık
+       * temalı olduğu için doğru değer `LIGHT`.
+       */
       style: 'LIGHT',
-      backgroundColor: '#0f172a',
+      backgroundColor: '#f2f2f7',
     },
   },
 
