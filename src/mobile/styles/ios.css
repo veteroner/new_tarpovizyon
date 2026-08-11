@@ -87,7 +87,21 @@
 .ios-app {
   background: var(--ios-bg);
   color: var(--ios-label);
-  min-height: 100dvh;
+  /*
+   * ─── TEK KAYDIRMA YÜZEYİ ──────────────────────────────────────────────────
+   * `min-height` idi ve kabuk içeriğe göre BÜYÜYORDU: iç kap tüm boyuna
+   * açılıyor, kaydırma işini `html` üstleniyordu (ölçüldü: .ios-scroll
+   * 1352=1352 hiç kaymıyor, html 812/1546 kayıyor).
+   *
+   * iOS'ta bunun bedeli ağır: `100dvh` kaydırma sırasında değişiyor, sayfa
+   * yüksekliği anlık oynuyor ve ekran aşağı yukarı zıplıyor. Üstelik sabit
+   * sekme çubuğu ile belge kaydırması birbiriyle yarışıyor.
+   *
+   * `height` + `overflow: hidden` kabuğu ekrana çiviliyor; kaydıran tek yer
+   * `.ios-scroll` oluyor — uygulamalarda beklenen davranış bu.
+   */
+  height: 100dvh;
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   display: flex;
@@ -96,6 +110,9 @@
 
 .ios-scroll {
   flex: 1 1 auto;
+  /* Flex çocuğu varsayılan olarak içeriğinden küçülmez; bu olmadan kap yine
+     tüm içeriğe açılır ve kaydırma yine belgeye geçer. */
+  min-height: 0;
   /* Alt sekme çubuğu + ana ekran göstergesi kadar boşluk; içerik altında
      kaybolmasın (HIG: safe area). */
   padding: 0 16px calc(72px + env(safe-area-inset-bottom));
