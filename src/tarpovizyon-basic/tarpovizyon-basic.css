@@ -819,3 +819,19 @@
     line-height: 1.25;
   }
 }
+
+/* ─── Tablolar dar ekranda ───────────────────────────────────────────────── */
+/*
+ * `.tvb-table-wrap` zaten `overflow-x: auto` ama KAYDIRMIYORDU: tablo
+ * `width: 100%` ile kabın genişliğine sıkışıyor (315 px), hücreler ise
+ * `white-space: nowrap` yüzünden 406 px istiyor. Tablonun düzen kutusu 315
+ * kaldığı için sarmalayıcı "içerik sığıyor" sanıp kaydırma çubuğu açmıyor,
+ * hücreler de kutunun dışına taşıp ekrandan çıkıyordu (ölçüldü: 8 sayfada).
+ *
+ * `min-width: max-content` tabloyu gerçek genişliğine bırakıyor; sarmalayıcı
+ * artık taşmayı görüp yatay kaydırıyor.
+ */
+@media (max-width: 767px) {
+  .tvb-table-wrap { -webkit-overflow-scrolling: touch; }
+  .tvb-table { min-width: max-content; }
+}
