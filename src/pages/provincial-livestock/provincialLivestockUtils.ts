@@ -2,7 +2,18 @@ import type { RegionTotal } from '../../components/TurkeyHeatMap';
 
 // Constants
 export const TABLE_NAME = 'tuik_hayvancilik_canlihayvan';
-export const YEARS = Array.from({ length: 21 }, (_, i) => 2004 + i); // 2004-2024
+/*
+ * Yıl listesi VERİYE göre, takvime göre değil.
+ *
+ * `tuik_hayvancilik_canlihayvan` tablosunda y2004…y2025 sütunları var ve
+ * 2025 il düzeyinde DOLU (ölçüldü: Sığır 17,5 M · Koyun 46,5 M · Keçi 11,2 M).
+ * Liste 21'de kalınca 2025 verisi yüklü olmasına rağmen sayfada seçilemiyordu.
+ *
+ * Bilinçli olarak `new Date().getFullYear()` KULLANILMIYOR: TÜİK verisi bir
+ * yıl gecikmeli geliyor, takvimden türetmek henüz veri olmayan boş yıllar
+ * gösterirdi. Yeni yıl tabloya düştüğünde bu sayı elle artırılır.
+ */
+export const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 export const YEAR_COLUMNS = YEARS.map(y => `y${y}`);
 
 export const ANIMAL_GROUPS = [
