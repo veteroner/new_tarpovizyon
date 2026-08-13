@@ -31,7 +31,12 @@ const tabs: TabItem[] = [
   { path: '/m',          label: 'Ana Sayfa', icon: Home },
   { path: '/m/explore',  label: 'Keşfet',    icon: Compass },
   { path: '/m/market',   label: 'Piyasa',    icon: BarChart3 },
-  { path: '/m/ai',       label: 'AI',        icon: Bot },
+    /*
+   * Etiket "Asistan": "Agent" İŞ YAPAN bir asistan çağrıştırır (senin adına
+   * uyarı kurar, rapor gönderir); bizimki soru cevaplıyor. Ürün adı sayfanın
+   * içinde "TarpoVizyon AI" olarak duruyor — sekme çubuğunda uzun kalırdı.
+   */
+  { path: '/m/ai',       label: 'Asistan',   icon: Bot },
   { path: '/m/settings', label: 'Ayarlar',   icon: Settings },
 ];
 

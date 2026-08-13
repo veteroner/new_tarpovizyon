@@ -49,7 +49,14 @@ export default function MobileExplorePage() {
      * Pro sayfaları (kapsama göre) + Basic sayfaları (kapsamsız).
      * Basic mobil uygulamada hiçbir yerden erişilemiyordu.
      */
-    const tum = [...visibleMenu(kapsam), ...BASIC_MENU];
+    /*
+     * Basic ÖNCE geliyor: uygulamanın ana içeriği o (82 sayfa, en taze veri).
+     * Pro sayfaları arkasından, kapsam seçimine göre.
+     *
+     * `mobil = true`: yönetim ekranları (Veri Düzenle) mobil listede
+     * gösterilmiyor — D1'e yazan bir ekran, herkese açık uygulamada yeri yok.
+     */
+    const tum = [...BASIC_MENU, ...visibleMenu(kapsam, true)];
     const q = ara.trim().toLocaleLowerCase('tr');
     if (!q) return tum;
     return tum

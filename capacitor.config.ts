@@ -70,17 +70,22 @@ const config: CapacitorConfig = {
     contentInset: 'never',
 
     /*
-     * WebView'in KENDİ dış kaydırma görünümü kapatılıyor.
+     * ─── scrollEnabled NEDEN KAPATILMIYOR ─────────────────────────────────
+     * Sabit çubuklar oynamasın diye bir ara `false` yapılmıştı. Çubukları
+     * durdurdu ama İKİ ŞEYİ BOZDU:
      *
-     * Bu kaydırmayı KİLİTLEMEZ: sayfa içeriği `.ios-scroll` adlı CSS
-     * kabında kayıyor ve o olduğu gibi çalışıyor. Kapatılan şey, onun
-     * ÜSTÜNDEKİ ikinci yüzey — belgeyi bütün olarak kaydırıp yaylandıran,
-     * sabit çubukları da beraberinde oynatan native kaydırma.
+     *  1. Rasyon (ve kabuğun dışındaki her rota) hiç kaydırılamaz oldu —
+     *     onlar `min-h-screen` + sticky başlıkla BELGE kaydırmasına dayanıyor,
+     *     kendi CSS kaydırma kapları yok.
+     *  2. Klavye açılınca iOS odaklanan alanı göstermek için içeriği kaydırmak
+     *     istiyor; kaydırma kapalı olduğu için içerik kaymış hâlde takılıp
+     *     kalıyor, sağdan kesilme oluyordu.
      *
-     * Native uygulamalarda da alt sekme çubuğu kaydırma görünümünün DIŞINDA
-     * durur; bu ayar tam olarak o yapıyı kuruyor.
+     * Sabit çubuklar zaten bu ayara ihtiyaç duymuyor: kabuk
+     * `height: 100dvh; overflow: hidden` ile ekrana çivili, yani kabuk
+     * içindeki sayfalarda belgenin kaydıracağı bir şey yok. Kabuğun dışındaki
+     * sayfalar da native kaydırmayı kullanmaya devam ediyor.
      */
-    scrollEnabled: false,
 
     scheme: 'TarpoVizyon',
   },

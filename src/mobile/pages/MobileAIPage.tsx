@@ -79,7 +79,7 @@ export default function MobileAIPage() {
 
   return (
     <>
-      <NavBar title="AI Asistan" subtitle="Tarımsal yapay zekâ danışmanı" />
+      <NavBar title="TarpoVizyon AI" subtitle="Tarım ve hayvancılık asistanı" />
 
       <div className="ios-scroll ios-chat">
         {messages.length === 0 && !isLoading ? (

@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  Globe, MapPin, TrendingUp, Package, Sprout, Droplets, FlaskConical, CalendarDays,
-  LayoutGrid,
+  Sprout, Droplets, FlaskConical, CalendarDays, Calculator,
+  TrendingUp, Beef, MapPinned,
 } from 'lucide-react';
 import { useWeather } from '../hooks/useApi';
+import { useBugun } from '../hooks/useBugun';
 import { BASIC_MENU } from '../../components/nav/menu';
 import {
   NavBar, ListGroup, ListRow, TileRow, StatTile,
@@ -12,56 +13,32 @@ import {
 /**
  * Ana sayfa.
  *
- * ─── NE DEĞİŞTİ ─────────────────────────────────────────────────────────────
- * Eskiden gradyanlı kutu ızgarasıydı: her kutuda kendi rengi, kendi gradyanı
- * (emerald/blue/amber/purple), bir de renkli ikon. Sekiz kutu sekiz farklı
- * renk demekti; renk hiçbir şey söylemiyordu.
+ * ─── NEDEN YENİDEN DÜZENLENDİ ───────────────────────────────────────────────
+ * TarpoVizyon Basic artık uygulamanın KENDİSİ. Eski ana sayfada "Veri kaynağı →
+ * TarpoVizyon Basic" diye bir satır vardı; kullanıcı zaten onun içindeyken
+ * kendini işaret eden bir bağlantıydı.
  *
- * Şimdi iOS'un gruplu listesi. Kazanç sadece görsel değil: her satır artık
- * GÜNCEL DEĞERİ de taşıyor, yani kullanıcı sayfayı açmadan önce sayıyı
- * görüyor. Renk yalnızca kategori kimliğinde kaldı.
+ * Yeni yapı üç bölüm:
+ *
+ *   BUGÜN     — en taze üç sayı, doğrudan burada. Ana sayfa artık menü değil,
+ *               pano: uygulamayı açan kişi önce "ne oldu"yu görüyor.
+ *   BÖLÜMLER  — Basic'in dört ana grubu. Tek dokunuşla içeriğe giriyor.
+ *   ARAÇLAR   — hesaplayıcılar. Rasyon EKLENDİ; menüde vardı ama ana sayfada
+ *               yoktu, en çok kullanılan araç olmasına rağmen.
  */
-
-const VERI_KAYNAKLARI = [
-  {
-    baslik: 'Dünya',
-    alt: 'FAO · 200+ ülke',
-    icon: Globe,
-    renk: 'var(--ios-tint)',
-    yol: '/tarpovizyon/world/production',
-  },
-  {
-    baslik: 'Türkiye',
-    alt: 'TÜİK · il bazında',
-    icon: MapPin,
-    renk: 'var(--ios-red)',
-    yol: '/tarpovizyon/turkey/plant-production',
-  },
-];
 
 /*
- * Basic ayrı bir uygulama gibi duruyordu ve mobilde hiçbir yerden
- * erişilemiyordu. Ana sayfada kendi satırı var; Keşfet'te de tüm sayfaları
- * listeleniyor.
+ * Bölüm satırları BASIC_MENU'den türetiliyor, elle yazılmıyor: Basic'e yeni
+ * bir grup eklendiğinde ana sayfada kendiliğinden beliriyor.
+ *
+ * Her satır grubun İLK sayfasına gidiyor; oradan kabuktaki sayfa seçicisiyle
+ * grubun diğer sayfalarına geçiliyor.
  */
-/* Rapor sayısı menüden SAYILIYOR: elle yazılan "20" gerçekte 37 sayfa
-   varken bayatlamıştı. */
-const BASIC_SAYFA = BASIC_MENU.reduce((n, k) => n + k.items.length, 0);
-
-const BASIC = {
-  baslik: 'TarpoVizyon Basic',
-  alt: `Özet göstergeler · ${BASIC_SAYFA} rapor`,
-  icon: LayoutGrid,
-  renk: 'var(--ios-tint-deep)',
-  yol: '/tarpovizyon-basic',
-};
-
-const PIYASA = [
-  { baslik: 'Piyasa fiyatları', alt: 'Borsa ve vadeli', icon: TrendingUp, renk: 'var(--ios-orange)', yol: '/m/market' },
-  { baslik: 'Dış ticaret', alt: 'İthalat ve ihracat', icon: Package, renk: 'var(--ios-blue)', yol: '/tarpovizyon/turkey/trade?tab=overview' },
-];
+/* Sıra BASIC_MENU ile aynı: Makro, Hayvancılık, Bitkisel, İl Düzeyinde. */
+const BOLUM_IKON = [TrendingUp, Beef, Sprout, MapPinned];
 
 const ARACLAR = [
+  { baslik: 'Rasyon', alt: 'Yem karması hesapla', icon: Calculator, renk: 'var(--ios-tint-deep)', yol: '/rasyon' },
   { baslik: 'Hasat tahmini', icon: Sprout, renk: 'var(--ios-tint)', yol: '/hasat-tahmini' },
   { baslik: 'Sulama planı', icon: Droplets, renk: 'var(--ios-blue)', yol: '/sulama-plan' },
   { baslik: 'Gübre hesabı', icon: FlaskConical, renk: 'var(--ios-orange)', yol: '/gubre-hesap' },
@@ -71,60 +48,70 @@ const ARACLAR = [
 export default function MobileHomePage() {
   const navigate = useNavigate();
   // Şehir seçimi henüz ayarlarda yok; varsayılan Ankara.
-  const { data: hava } = useWeather('Ankara');
+  const { data: hava, isLoading: havaYukleniyor } = useWeather('Ankara');
+  const { data: bugun = [], isLoading: bugunYukleniyor } = useBugun();
 
-  const bugun = new Date().toLocaleDateString('tr-TR', {
+  const tarih = new Date().toLocaleDateString('tr-TR', {
     day: 'numeric', month: 'long', weekday: 'long',
   });
 
+  const bolumler = BASIC_MENU.map((k, i) => ({
+    baslik: k.title.replace(/^Basic · /, ''),
+    alt: `${k.items.length} rapor`,
+    icon: BOLUM_IKON[i % BOLUM_IKON.length],
+    yol: k.items[0]?.any ?? '/m/explore',
+  })).filter((b) => b.yol);
+
   return (
     <>
-      <NavBar title="TarpoVizyon" subtitle={bugun} />
+      <NavBar title="TarpoVizyon" subtitle={tarih} />
 
       <div className="ios-scroll">
-        {/*
-          * Özet sayılar en üstte: uygulamayı açan kişi önce "bugün ne oldu"yu
-          * görmeli, gezinmeyi sonra düşünmeli.
-          */}
+        <div className="ios-group-header">Bugün</div>
+
         <TileRow>
           <StatTile
             label="Hava durumu"
             value={hava ? `${Math.round(hava.temp)}°` : '—'}
-            sub={hava?.description ?? 'Yükleniyor'}
+            /*
+             * Hava alınamadığında "Yükleniyor" yazıp öylece kalıyordu; anahtar
+             * eksikse ya da istek düşerse sonsuza kadar öyle duruyordu.
+             * Artık yükleme ile başarısızlık ayrı.
+             */
+            sub={hava?.description ?? (havaYukleniyor ? 'Yükleniyor' : 'Ulaşılamadı')}
           />
-          <StatTile label="Tarım ÜFE" value="1 209" delta={0.6} sub="Haziran 2026" />
+          {bugun[0] && (
+            <StatTile label={bugun[0].etiket} value={bugun[0].deger} sub={bugun[0].alt} />
+          )}
         </TileRow>
 
-        <ListGroup header="Veri kaynağı">
-          <ListRow
-            key={BASIC.yol}
-            icon={<BASIC.icon size={16} strokeWidth={2.2} />}
-            iconColor={BASIC.renk}
-            title={BASIC.baslik}
-            subtitle={BASIC.alt}
-            onClick={() => navigate(BASIC.yol)}
-          />
-          {VERI_KAYNAKLARI.map((k) => (
-            <ListRow
-              key={k.yol}
-              icon={<k.icon size={16} strokeWidth={2.2} />}
-              iconColor={k.renk}
-              title={k.baslik}
-              subtitle={k.alt}
-              onClick={() => navigate(k.yol)}
-            />
-          ))}
-        </ListGroup>
+        {bugun.length > 1 && (
+          <ListGroup>
+            {bugun.slice(1).map((b) => (
+              <ListRow
+                key={b.yol}
+                title={b.etiket}
+                subtitle={b.alt}
+                value={b.deger}
+                onClick={() => navigate(b.yol)}
+              />
+            ))}
+          </ListGroup>
+        )}
 
-        <ListGroup header="Piyasa">
-          {PIYASA.map((k) => (
+        {!bugun.length && !bugunYukleniyor && (
+          <p className="ios-footnote">Göstergeler şu an alınamadı.</p>
+        )}
+
+        <ListGroup header="Bölümler">
+          {bolumler.map((b) => (
             <ListRow
-              key={k.yol}
-              icon={<k.icon size={16} strokeWidth={2.2} />}
-              iconColor={k.renk}
-              title={k.baslik}
-              subtitle={k.alt}
-              onClick={() => navigate(k.yol)}
+              key={b.baslik}
+              icon={<b.icon size={16} strokeWidth={2.2} />}
+              iconColor="var(--ios-tint)"
+              title={b.baslik}
+              subtitle={b.alt}
+              onClick={() => navigate(b.yol)}
             />
           ))}
         </ListGroup>
@@ -136,6 +123,7 @@ export default function MobileHomePage() {
               icon={<k.icon size={16} strokeWidth={2.2} />}
               iconColor={k.renk}
               title={k.baslik}
+              subtitle={k.alt}
               onClick={() => navigate(k.yol)}
             />
           ))}

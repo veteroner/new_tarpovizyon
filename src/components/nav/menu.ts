@@ -19,6 +19,8 @@ export type Kapsam = 'world' | 'turkey';
  */
 export type MenuItem = {
   label: string;
+  /** Mobil menüde gizlenir (yönetim ekranları). */
+  sadeceMasaustu?: boolean;
   /** Kapsamdan bağımsız tek yol (ör. AI Asistan). */
   any?: string;
   world?: string;
@@ -48,7 +50,11 @@ export const MENU: MenuCategory[] = [
       // ayrı bir dünya sayfası değil. Kapsamsız.
       { label: 'Panoya Genel Bakış', any: '/tarpovizyon/turkey/overview' },
       { label: 'Emtia Fiyatları', any: '/tarpovizyon/commodity-prices' },
-      { label: 'AI Asistan', any: '/tarpovizyon/ai-assistant' },
+      /*
+       * AI Asistan buradan KALDIRILDI: mobilde alt sekme çubuğunda kendi
+       * yeri var, menüde de durunca aynı ekrana iki ayrı yoldan gidiliyordu.
+       * Masaüstünde de sekme yok ama üst çubuktan erişiliyor.
+       */
     ],
   },
   {
@@ -127,7 +133,12 @@ export const MENU: MenuCategory[] = [
       { label: 'Gübre Hesap', any: '/gubre-hesap' },
       { label: 'Tarım Takvimi', any: '/tarim-takvim' },
       // Menüde yoktu.
-      { label: 'Veri Düzenle', any: '/tarpovizyon/veri-yukle' },
+      /*
+       * Veri Düzenle mobil menüde GÖSTERİLMİYOR (`sadeceMasaustu`).
+       * D1'e yazan bir yönetim ekranı; herkese açık bir mobil uygulamada
+       * listelenmemeli. Masaüstü panosunda yerinde duruyor.
+       */
+      { label: 'Veri Düzenle', any: '/tarpovizyon/veri-yukle', sadeceMasaustu: true },
     ],
   },
 ];
@@ -208,10 +219,13 @@ export function scopeSwitchTarget(
 }
 
 /** Kapsama göre görünür kategoriler (boş kalanlar elenir). */
-export function visibleMenu(kapsam: Kapsam): MenuCategory[] {
+export function visibleMenu(kapsam: Kapsam, mobil = false): MenuCategory[] {
   return MENU
     .filter((k) => !k.onlyIn || k.onlyIn === kapsam)
-    .map((k) => ({ ...k, items: k.items.filter((i) => hasScope(i, kapsam)) }))
+    .map((k) => ({
+      ...k,
+      items: k.items.filter((i) => hasScope(i, kapsam) && !(mobil && i.sadeceMasaustu)),
+    }))
     .filter((k) => k.items.length > 0);
 }
 

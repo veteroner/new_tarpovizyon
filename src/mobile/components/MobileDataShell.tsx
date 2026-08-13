@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import TabBar from './TabBar';
+import { klavyeyiIzle } from '../utils/klavye';
 import { NavBar } from './ui/IosList';
 import { locate, itemPath, KAPSAM_ADI } from '../../components/nav/menu';
 import '../styles/ios.css';
@@ -24,6 +26,8 @@ import '../styles/ios-data.css';
  * alıyor.
  */
 export default function MobileDataShell() {
+  useEffect(klavyeyiIzle, []);
+
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
 

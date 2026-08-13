@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import TabBar from './TabBar';
+import { klavyeyiIzle } from '../utils/klavye';
 import '../styles/ios.css';
 
 /**
@@ -19,6 +21,9 @@ import '../styles/ios.css';
  * kaydırma alanını ve sekme çubuğunu sağlıyor.
  */
 export default function MobileLayout() {
+  // Klavye yüksekliğini CSS'e taşır; sohbet yazma alanı buna göre yükseliyor.
+  useEffect(klavyeyiIzle, []);
+
   return (
     <div className="ios-app">
       <Outlet />

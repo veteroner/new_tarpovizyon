@@ -463,7 +463,8 @@
   flex-direction: column;
   gap: 8px;
   padding-top: 6px;
-  padding-bottom: calc(122px + env(safe-area-inset-bottom));
+  /* Klavye açıkken son mesaj yazma alanının altında kalmasın. */
+  padding-bottom: calc(var(--klavye, 0px) + 122px + env(safe-area-inset-bottom));
 }
 
 .ios-bubble {
@@ -555,12 +556,29 @@
 }
 .ios-chip:active { background: var(--ios-fill); }
 
-/* Yazma alanı — sekme çubuğunun tam üstünde. */
+/*
+ * Yazma alanı — sekme çubuğunun tam üstünde.
+ *
+ * ─── KLAVYE AÇILINCA NEDEN KAYIYORDU ────────────────────────────────────────
+ * `position: fixed` iOS'ta GÖRSEL görüntü alanını değil DÜZEN görüntü alanını
+ * baz alır. Klavye açılınca görsel alan küçülüyor ama düzen alanı aynı
+ * kaldığı için yazma alanı klavyenin ALTINDA kalıyor, sayfa da onu göstermeye
+ * çalışırken kayıyordu.
+ *
+ * `--klavye` değişkenini `visualViewport` olayları besliyor (bkz.
+ * mobile/utils/klavye.ts): klavye açıkken yüksekliği kadar yukarı çıkıyor.
+ * Destek yoksa değer 0 kalıyor ve davranış eskisi gibi oluyor.
+ */
 .ios-composer {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(49px + env(safe-area-inset-bottom));
+  bottom: calc(var(--klavye, 0px) + 49px + env(safe-area-inset-bottom));
+}
+
+/* Klavye açıkken sekme çubuğu gizli; yazma alanı onun yerini de alıyor. */
+.klavye-acik .ios-composer {
+  bottom: var(--klavye, 0px);
   z-index: 35;
   display: flex;
   align-items: flex-end;
@@ -603,6 +621,13 @@
 .ios-send:disabled { background: var(--ios-fill); color: var(--ios-label-3); cursor: default; }
 
 /* ─── Alt sekme çubuğu ───────────────────────────────────────────────────── */
+/*
+ * Klavye açıkken sekme çubuğu gizleniyor. Açık klavyenin üstünde asılı
+ * kalıyordu — iOS'ta hiçbir uygulama böyle yapmaz, yazarken sekme çubuğu
+ * çekilir.
+ */
+.klavye-acik .ios-tabbar { display: none; }
+
 .ios-tabbar {
   position: fixed;
   left: 0;
