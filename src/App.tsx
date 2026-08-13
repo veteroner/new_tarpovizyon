@@ -115,7 +115,7 @@ function AppContent() {
    * biniyordu. Ayrıca kendi sayfa-adı sözlüğünü taşıyor — menü tek kaynağa
    * indirildikten sonra dördüncü kopya oluyordu.
    */
-  const kabukluRota = isTarpoShellRoute || isTarpovizyonBasicPage
+  const kabukluRota = isTarpoShellRoute || isTarpovizyonBasicPage || isRasyonPage
     || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
   const showMobilePageHeader =
     isPlatform('capacitor') && !isMobilePage && !isProgramSelection && !kabukluRota;
@@ -166,7 +166,15 @@ function AppContent() {
           </Route>
           
           {/* TARPOL Rasyon (tam entegre) */}
-          <Route path="/rasyon/*" element={<RasyonApp />} />
+          {/*
+            * Rasyon mobilde kabuğun İÇİNDE — ama başlıksız. Kendi başlığında
+            * kendi menüsü var; kabuk da başlık çizerse ikisi üst üste biner.
+            * Kabuktan tek aldığı sekme çubuğu: Rasyon'a girince uygulamanın
+            * geri kalanına dönüş yolu kalmıyordu.
+            */}
+          <Route element={<DataShell desktop={<KabuksuzMasaustu />} basliksiz />}>
+            <Route path="/rasyon/*" element={<RasyonApp />} />
+          </Route>
 
           {/* TARPOVIZYON BASIC — Cloudflare D1 tabanlı, Looker raporu birebir kopyası */}
           {tarpovizyonBasicRoutes()}

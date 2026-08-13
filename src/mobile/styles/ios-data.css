@@ -126,3 +126,11 @@
   letter-spacing: -.024em;
   font-variant-numeric: tabular-nums;
 }
+
+/* ─── Rasyon kabuk içinde ────────────────────────────────────────────────── */
+/*
+ * Rasyon kendi düzenini `min-h-screen` (100vh) ile kuruyor. Kabuğun içinde
+ * kaydırma kabı zaten ~620 px; 100vh'lik bir kök altta koca bir boşluk
+ * bırakıyor. Kabuk yüksekliği kendisi yönettiği için buna gerek yok.
+ */
+.ios-data .min-h-screen { min-height: 0; }

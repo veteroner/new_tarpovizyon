@@ -17,12 +17,23 @@ import { useMobileViewport } from '../mobile/hooks/useMobileViewport';
  */
 const MobileDataShell = lazy(() => import('../mobile/components/MobileDataShell'));
 
-export default function DataShell({ desktop }: { desktop?: ReactNode }) {
+export default function DataShell({ desktop, basliksiz }: {
+  desktop?: ReactNode;
+  /**
+   * Gezinme çubuğunu çizme.
+   *
+   * Rasyon için: o bir alt uygulama ve KENDİ başlığı içinde kendi menüsünü
+   * taşıyor (Rasyon Oluştur, Kayıtlı Rasyonlar…). Kabuk da başlık çizerse iki
+   * başlık üst üste biniyor; onunkini gizlesek menüsü kayboluyor. Kabuk
+   * yalnızca sekme çubuğunu veriyor — kullanıcı Rasyon'dan çıkabilsin diye.
+   */
+  basliksiz?: boolean;
+}) {
   const mobil = useMobileViewport();
   if (!mobil) return <>{desktop ?? <TarpoShell />}</>;
   return (
     <Suspense fallback={null}>
-      <MobileDataShell />
+      <MobileDataShell basliksiz={basliksiz} />
     </Suspense>
   );
 }

@@ -25,7 +25,7 @@ import '../styles/ios-data.css';
  * yazmak gerekmiyor, menüye eklenen her sayfa doğru başlığı kendiliğinden
  * alıyor.
  */
-export default function MobileDataShell() {
+export default function MobileDataShell({ basliksiz }: { basliksiz?: boolean } = {}) {
   useEffect(klavyeyiIzle, []);
 
   const { pathname, search } = useLocation();
@@ -62,7 +62,7 @@ export default function MobileDataShell() {
 
   return (
     <div className="ios-app">
-      <NavBar
+      {!basliksiz && <NavBar
         title={baslik}
         subtitle={altBaslik}
         /*
@@ -71,9 +71,9 @@ export default function MobileDataShell() {
          * sabit bir hedefe atmak geldiği yeri kaybettirirdi.
          */
         onBack={() => navigate(-1)}
-      />
+      />}
       {/* Tek sayfalık kategoride seçici anlamsız; gizleniyor. */}
-      {kardesler.length > 1 && (
+      {!basliksiz && kardesler.length > 1 && (
         <div className="ios-sayfa-secici">
           <select
             value={aktifYol ?? ''}
