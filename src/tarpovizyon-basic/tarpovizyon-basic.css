@@ -835,3 +835,40 @@
   .tvb-table-wrap { -webkit-overflow-scrolling: touch; }
   .tvb-table { min-width: max-content; }
 }
+
+/* ─── Arama ve kademeli liste ────────────────────────────────────────────── */
+.tvb-arama {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  /* 16 px altı iOS'ta odaklanınca sayfayı yakınlaştırır. */
+  font: inherit;
+  font-size: 16px;
+  color: #111827;
+  outline: none;
+}
+.tvb-arama:focus { border-color: #1d4ed8; }
+.tvb-arama::placeholder { color: #5b6472; }
+
+.tvb-daha {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tvb-daha:active { background: #f3f4f6; }
+
+.tvb-bos { text-align: center; color: #51596b; padding: 18px 8px; }

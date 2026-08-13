@@ -1,11 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, CloudSun, CalendarClock, Moon, Globe, Shield,
-  Smartphone, FileText, Database, Trash2,
+  Moon, Globe, Shield, Smartphone, FileText, Database, Trash2,
 } from 'lucide-react';
 import { getAppInfo } from '../capacitor/app';
-import { isPlatform } from '../utils/platform';
 import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
 
 /**
@@ -14,56 +12,25 @@ import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
  * ─── NE DEĞİŞTİ ─────────────────────────────────────────────────────────────
  * Görsel olarak: her satır ayrı kenarlıklı bir kartken artık gruplu liste.
  *
- * Davranış olarak üç gerçek kusur düzeltildi:
+ * ─── HİÇBİR ŞEY YAPMAYAN DENETİMLER KALDIRILDI ──────────────────────────────
+ * Ekranda üç bildirim anahtarı vardı ama uygulamada bildirim ALTYAPISI YOK:
+ * `@capacitor/push-notifications` kurulu değil, vite onu no-op bir stub'a
+ * yönlendiriyor, FCM/APNs yapılandırması da yok. Anahtarlar yalnızca
+ * `localStorage`'a yazıyordu — kullanıcıya var olmayan bir özellik vaat
+ * ediyorlardı. Apple'ın inceleme kılavuzu işlevsiz arayüzü ret sebebi sayıyor
+ * (2.1). Bildirimler gerçekten kurulduğunda geri gelecekler.
  *
- *  1. Bildirim anahtarları YALNIZCA bellekte tutuluyordu — sekme değiştirip
- *     dönünce hepsi varsayılana sıfırlanıyordu. Artık cihazda saklanıyor.
- *  2. "Önbelleği Temizle" hiçbir şey yapmıyordu. Artık gerçekten temizliyor,
- *     üstelik geri alınamaz olduğu için önce onay soruyor.
- *  3. "Oturumu Kapat" ve "Lisanslar" hiçbir yere gitmiyordu. Uygulamada oturum
- *     yok, lisans sayfası da yok — hiçbir şey yapmayan düğme, olmayan
- *     düğmeden kötüdür; kaldırıldı.
+ * "Oturumu Kapat" ve "Lisanslar" da aynı sebeple kaldırılmıştı: uygulamada
+ * oturum yok, lisans sayfası yok.
+ *
+ * "Önbelleği Temizle" ise hiçbir şey yapmıyordu; artık gerçekten temizliyor
+ * ve geri alınamaz olduğu için önce onay soruyor.
  */
-
-const ANAHTAR = 'tarpo.bildirim';
-
-const BILDIRIMLER = [
-  { key: 'market_alerts', label: 'Piyasa bildirimleri', alt: 'Fiyat değişiminde haber ver', icon: Bell, renk: 'var(--ios-orange)' },
-  { key: 'weather_alerts', label: 'Hava durumu uyarıları', alt: 'Kritik hava olaylarında', icon: CloudSun, renk: 'var(--ios-blue)' },
-  { key: 'weekly_digest', label: 'Haftalık özet', alt: 'Her pazartesi rapor', icon: CalendarClock, renk: 'var(--ios-tint)' },
-];
-
-const VARSAYILAN = { market_alerts: true, weather_alerts: true, weekly_digest: true };
-
-/** iOS anahtarı. Rol `switch` — ekran okuyucu açık/kapalı diye okuyor. */
-function Switch({ on, onChange, label }: { on: boolean; onChange: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      className={`ios-switch${on ? ' is-on' : ''}`}
-      onClick={onChange}
-    >
-      <span className="ios-knob" />
-    </button>
-  );
-}
 
 export default function MobileSettingsPage() {
   const navigate = useNavigate();
   const [surum, setSurum] = useState('2.0.0');
   const [yapi, setYapi] = useState('7');
-
-  const [acik, setAcik] = useState<Record<string, boolean>>(() => {
-    try {
-      const kayit = localStorage.getItem(ANAHTAR);
-      return kayit ? { ...VARSAYILAN, ...JSON.parse(kayit) } : VARSAYILAN;
-    } catch {
-      return VARSAYILAN;
-    }
-  });
 
   useEffect(() => {
     getAppInfo().then((info) => {
@@ -72,52 +39,22 @@ export default function MobileSettingsPage() {
     });
   }, []);
 
-  const cevir = (key: string) => {
-    setAcik((p) => {
-      const yeni = { ...p, [key]: !p[key] };
-      try { localStorage.setItem(ANAHTAR, JSON.stringify(yeni)); } catch { /* özel mod */ }
-      return yeni;
-    });
-  };
-
   const [boyut, setBoyut] = useState(() => olcOnbellek());
 
   const temizle = () => {
     // Geri alınamaz: önce onay. (HIG — yıkıcı eylem doğrulanır.)
     if (!window.confirm('Çevrimdışı veriler silinecek. Devam edilsin mi?')) return;
     try {
-      // Tercihler korunuyor; yalnızca önbellek gidiyor.
-      const tercih = localStorage.getItem(ANAHTAR);
       localStorage.clear();
-      if (tercih) localStorage.setItem(ANAHTAR, tercih);
     } catch { /* yok say */ }
     setBoyut(olcOnbellek());
   };
-
-  const bildirimNotu = useMemo(
-    () => (isPlatform('capacitor') ? undefined : 'Web tarayıcıda bildirimler sınırlıdır.'),
-    [],
-  );
 
   return (
     <>
       <NavBar title="Ayarlar" subtitle="Tercihler ve bilgi" />
 
       <div className="ios-scroll">
-        <ListGroup header="Bildirimler">
-          {BILDIRIMLER.map((b) => (
-            <ListRow
-              key={b.key}
-              icon={<b.icon size={16} strokeWidth={2.2} />}
-              iconColor={b.renk}
-              title={b.label}
-              subtitle={b.alt}
-              value={<Switch on={!!acik[b.key]} onChange={() => cevir(b.key)} label={b.label} />}
-              showChevron={false}
-            />
-          ))}
-        </ListGroup>
-        {bildirimNotu && <p className="ios-footnote">{bildirimNotu}</p>}
 
         <ListGroup header="Genel">
           <ListRow icon={<Moon size={16} strokeWidth={2.2} />} iconColor="var(--ios-label-3)"
