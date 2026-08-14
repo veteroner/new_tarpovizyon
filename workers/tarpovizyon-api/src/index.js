@@ -553,11 +553,21 @@ async function tradeProductBreakdown(env, table, urunler, yil) {
 
 import { handleCatalog, handleSchema, handleRows } from './upload.js';
 import { TABLO_SAYFALARI } from './tabloSayfalari.js';
+import { handleAi } from './ai.js';
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const slug = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
+
+    /*
+     * ── AI ucu ────────────────────────────────────────────────────────────
+     * Aşağıdaki genel OPTIONS/ROUTES işleyişinden ÖNCE: kendi CORS'u
+     * (POST'a izin veren) ve kendi yöntem denetimi var. Genel `CORS_HEADERS`
+     * yalnızca GET'e izin verdiği için buraya düşerse tarayıcı ön kontrolü
+     * (preflight) başarısız olur.
+     */
+    if (slug === 'ai') return handleAi(request, env);
 
     // ── Yönetim uçları ──────────────────────────────────────────────────
     // Yazma ucu dar CORS ile korunuyor; okuma/şema uçları katalog bilgisi

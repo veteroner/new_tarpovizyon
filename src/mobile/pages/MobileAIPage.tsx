@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowUp, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { askAI } from '../services/ai';
+import { askAI, AIHatasi } from '../services/ai';
 import DynamicChart from '../../components/DynamicChart';
 import type { ChartConfig } from '../../components/DynamicChart';
 import { NavBar } from '../components/ui/IosList';
@@ -60,13 +60,18 @@ export default function MobileAIPage() {
     try {
       const cevap = await askAI(soru);
       setMessages((p) => [...p, {
-        id: `${Date.now() + 1}`, role: 'assistant', content: cevap.answer, timestamp: new Date(),
+        id: `${Date.now() + 1}`, role: 'assistant', content: cevap, timestamp: new Date(),
       }]);
-    } catch {
+    } catch (e) {
+      /*
+       * Servisin kendi mesajı gösteriliyor: zaman aşımı, ağ yok, hız sınırı ve
+       * yapılandırma eksiği farklı sorunlar. Hepsini tek "bağlantı kurulamadı"
+       * metnine indirmek, kullanıcıya da bize de yanlış yönü gösteriyordu.
+       */
       setMessages((p) => [...p, {
         id: `${Date.now() + 1}`,
         role: 'assistant',
-        content: 'Bağlantı kurulamadı. Lütfen tekrar deneyin.',
+        content: e instanceof AIHatasi ? e.message : 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
         timestamp: new Date(),
       }]);
     } finally {

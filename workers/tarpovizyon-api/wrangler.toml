@@ -2,6 +2,26 @@ name = "tarpovizyon-api"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
 
+# AI ucu için hız sınırı.
+#
+# ─── NEDEN BINDING, NEDEN ELDE SAYAÇ DEĞİL ───────────────────────────────────
+# Önce sayaç Worker belleğinde (module-scope Map) tutuluyordu. YERELDE
+# çalışıyordu ama CANLIDA hiç tetiklenmedi: 16 ardışık istek ölçüldü, hiçbiri
+# 429 almadı — Cloudflare istekleri farklı isolate'lara dağıttığı için her
+# istek boş bir sayaca düşüyordu. Yani koruma sadece kâğıt üstündeydi.
+#
+# `ratelimits` bindingi sayacı çalışma zamanına devrediyor; aynı Cloudflare
+# konumundaki TÜM isolate'lar aynı sayacı görüyor. (Sınır konum başına;
+# küresel tek bir kota değil — bu uç için fazlasıyla yeterli.)
+[[ratelimits]]
+name = "AI_LIMIT"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  # `period` yalnızca 10 veya 60 olabilir.
+  limit = 12
+  period = 60
+
 # Türkiye verileri (TÜİK, sektör tabloları, il düzeyi)
 [[d1_databases]]
 binding = "DB"

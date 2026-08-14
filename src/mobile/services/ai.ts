@@ -1,144 +1,96 @@
 /**
- * TarpoVizyon AI Chat Service
+ * TarpoVizyon AI istemcisi.
+ *
+ * ─── NEDEN YENİDEN YAZILDI ──────────────────────────────────────────────────
+ * Eski hâlinde üç ayrı kopukluk vardı ve üçü birbirini gizliyordu:
+ *
+ *   1. Adres `dersbende.com/api.php?...&api_key=dashboard_secret_key_2024`
+ *      idi — ÜÇÜNCÜ TARAF BİR SUNUCU ve ANAHTAR İSTEMCİ KODUNDA. Uygulama
+ *      paketini açan herkes anahtarı okuyabiliyordu.
+ *   2. İstek başarılı olsa bile yanıt ATILIYORDU: kod `data.answer` okuyordu,
+ *      uç ise `{ success, reply }` döndürüyor. Yani AI çalışsa da kullanıcı
+ *      onu hiç görmüyordu.
+ *   3. Her başarısızlıkta yedek olarak yedi anahtar kelimelik bir sözlük
+ *      devreye giriyordu. "Kedi nedir" ile "Süt nedir"in aynı yanıtı
+ *      vermesinin sebebi buydu; sözlük arızayı görünmez kılıyordu.
+ *
+ * Artık istek, uygulamanın zaten tüm verisini çektiği Worker'a gidiyor
+ * (`POST /api/ai`); sağlayıcı anahtarları orada, `wrangler secret` içinde.
+ * İstemcide hiçbir sır yok.
+ *
+ * ─── NEDEN YEREL SÖZLÜK YOK ─────────────────────────────────────────────────
+ * Sorulan soruyla ilgisi olmayan hazır bir metin, yanıt değil GÜRÜLTÜdür ve
+ * en kötüsü hatayı saklar. Arıza durumunda dürüst bir hata mesajı veriliyor.
  */
 
-const AI_API_URL = 'https://dersbende.com/api.php?action=ai_chat&api_key=dashboard_secret_key_2024';
+const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API
+  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
 
-interface AIResponse {
-  answer: string;
-  source: 'api' | 'local';
-}
+const AI_URL = `${API_BASE}/api/ai`;
 
-// Local fallback knowledge base
-const LOCAL_RESPONSES: Record<string, string> = {
-  buğday: `🌾 **Buğday Bilgileri**
+/*
+ * Sunucu tarafındaki bütçe 16 sn. İstemci ondan biraz uzun bekliyor: eşit
+ * olsaydı sunucunun son çare modeli tam yanıtı üretirken istemci isteği
+ * kesebilirdi.
+ */
+const ZAMAN_ASIMI_MS = 20_000;
 
-Türkiye'de buğday en önemli tahıl ürünüdür. Yıllık üretim yaklaşık 19-21 milyon ton civarındadır.
+/** Kullanıcıya gösterilebilir hata — sayfa bunun `message`'ını basıyor. */
+export class AIHatasi extends Error {}
 
-**Ekim Zamanı:** Ekim-Kasım ayları (kışlık), Mart-Nisan (yazlık)
-**Hasat:** Haziran-Temmuz
-**Başlıca İller:** Konya, Ankara, Diyarbakır, Şanlıurfa
-**Sulama:** Kuru tarımda yetişir, sulama verimde %30-50 artış sağlar`,
+/**
+ * Soruyu AI ucuna gönderir.
+ *
+ * @returns Modelin yanıtı (markdown).
+ * @throws {AIHatasi} Kullanıcıya gösterilmeye uygun bir mesajla.
+ */
+export async function askAI(question: string): Promise<string> {
+  const soru = question.trim();
+  if (!soru) throw new AIHatasi('Lütfen bir soru yazın.');
 
-  üretim: `📊 **Türkiye Tarımsal Üretim**
+  const controller = new AbortController();
+  const zamanlayici = setTimeout(() => controller.abort(), ZAMAN_ASIMI_MS);
 
-Türkiye, tarımsal üretimde dünyada ilk 10 ülke arasında yer alır.
-
-**Bitkisel Üretim:** ~120 milyon ton/yıl
-**Hayvansal Üretim:** ~25 milyon ton süt, ~1.2 milyon ton kırmızı et
-**Tarım Arazisi:** ~23.2 milyon hektar
-**İhracat:** ~25 milyar USD`,
-
-  organik: `🌿 **Organik Tarım**
-
-Organik tarım, kimyasal gübre ve pestisit kullanmadan üretim yapma yöntemidir.
-
-**Türkiye'de Durum:**
-- 80.000+ organik üretici
-- 500.000+ hektar organik arazi
-- En çok: Fındık, kayısı, pamuk, üzüm
-- AB'ye organik ihracat önemli`,
-
-  sulama: `💧 **Sulama Yöntemleri**
-
-1. **Damla Sulama:** En verimli (%90-95), su tasarrufu yüksek
-2. **Yağmurlama:** Orta verimlilik (%70-80)
-3. **Salma Sulama:** Geleneksel, su kaybı yüksek (%40-50)
-4. **Yeraltı Damla:** Yeni teknoloji, %50 su tasarrufu
-
-**Tavsiye:** Sebze ve meyve için damla sulama tercih edin.`,
-
-  gübre: `🧪 **Gübre Kullanımı**
-
-**Temel Besinler:** Azot (N), Fosfor (P), Potasyum (K)
-
-**Uygulama Zamanları:**
-- Taban gübresi: Ekim öncesi
-- Üst gübresi: Bitki büyüme döneminde
-- Yaprak gübresi: Çiçeklenme döneminde
-
-**Dikkat:** Toprak analizi yaptırmadan gübre kullanmayın!`,
-
-  hasat: `🌾 **Hasat Zamanları**
-
-**Tahıllar:** Haziran-Temmuz (buğday, arpa)
-**Sebzeler:** Mevsime göre değişir
-**Meyveler:** 
-- Kiraz: Mayıs-Haziran
-- Kayısı: Haziran-Temmuz  
-- Üzüm: Ağustos-Ekim
-- Elma: Eylül-Ekim
-- Fındık: Ağustos
-- Zeytin: Kasım-Aralık`,
-
-  iklim: `🌤️ **İklim ve Tarım**
-
-Türkiye'de 3 ana iklim kuşağı tarımı etkiler:
-
-**Akdeniz:** Narenciye, muz, sebze (kışlık)
-**Karasal:** Tahıl, baklagiller, şeker pancarı
-**Karadeniz:** Çay, fındık, kivi
-
-**İklim Değişikliği Etkileri:**
-- Sulanabilir arazilere talep artıyor
-- Yeni ürünler denenebilir (tropikal meyveler)
-- Kuraklık riski artıyor`,
-};
-
-function findLocalResponse(question: string): string | null {
-  const q = question.toLowerCase();
-
-  for (const [keyword, response] of Object.entries(LOCAL_RESPONSES)) {
-    if (q.includes(keyword)) {
-      return response;
-    }
-  }
-
-  return null;
-}
-
-export async function askAI(question: string): Promise<AIResponse> {
-  // Try API first
+  let res: Response;
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    const res = await fetch(AI_API_URL, {
+    res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: question }),
+      body: JSON.stringify({ message: soru }),
       signal: controller.signal,
     });
-
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.answer) {
-        return { answer: data.answer, source: 'api' };
-      }
-    }
-  } catch {
-    // API failed, fallback to local
+  } catch (e) {
+    // Ağ yok, DNS düşük, ya da zaman aşımı (abort) — ikisi ayrı mesaj hak ediyor.
+    throw new AIHatasi(
+      (e as Error)?.name === 'AbortError'
+        ? 'Yanıt çok uzun sürdü. Lütfen tekrar deneyin.'
+        : 'Bağlantı kurulamadı. İnternet bağlantınızı kontrol edin.',
+    );
+  } finally {
+    clearTimeout(zamanlayici);
   }
 
-  // Local fallback
-  const local = findLocalResponse(question);
-  if (local) {
-    return { answer: local, source: 'local' };
+  const data = await res.json().catch(() => null) as
+    { reply?: string; error?: string } | null;
+
+  if (!res.ok || !data?.reply) {
+    /*
+     * AI ucunun KENDİ ürettiği durumlarda sunucunun mesajı gösteriliyor:
+     * "yapılandırılmamış" (503), "çok fazla istek" (429), "yanıt veremiyor"
+     * (502) ayrı sorunlar; hepsini tek genel metne indirmek teşhisi
+     * imkânsızlaştırır.
+     *
+     * Diğer durumlarda (ör. yol yanlış → Worker'ın "Not found" yanıtı, ya da
+     * araya giren bir vekil sunucunun HTML hata sayfası) ham metin sohbete
+     * yazılmıyor: kullanıcıya hiçbir şey ifade etmiyor.
+     */
+    const ucunKendiHatasi = [400, 429, 502, 503].includes(res.status);
+    throw new AIHatasi(
+      (ucunKendiHatasi && data?.error)
+        ? data.error
+        : 'TarpoVizyon AI şu an yanıt veremiyor. Lütfen tekrar deneyin.',
+    );
   }
 
-  // Generic response
-  return {
-    answer: `Tarımsal konularda size yardımcı olmaya çalışıyorum. "${question}" sorunuz hakkında şu an detaylı bilgiye sahip değilim, ancak aşağıdaki konularda sorular sorabilirsiniz:
-
-• Buğday, mısır, arpa gibi tahıl üretimi
-• Organik tarım yöntemleri
-• Sulama teknikleri
-• Gübre kullanımı
-• Hasat zamanları
-• İklim ve tarım ilişkisi
-• Türkiye tarımsal üretim istatistikleri`,
-    source: 'local',
-  };
+  return data.reply;
 }
