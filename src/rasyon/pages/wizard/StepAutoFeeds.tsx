@@ -99,7 +99,20 @@ export default function StepAutoFeeds() {
             {selectedFeedDetails.map(({ sf, feed }) => {
               const hasPrice = sf.priceOverrideTLPerKg !== undefined && sf.priceOverrideTLPerKg > 0
               return (
-                <div key={feed.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                /*
+                 * ─── DAR EKRANDA NEDEN KATLANIYOR ──────────────────────────
+                 * Satır dört sütunluydu ve üçü SABİT genişlikteydi: onay
+                 * kutusu 20 + fiyat 128 + min 112 + boşluklar 36 + dolgu 24 =
+                 * 320 px. 375 px'lik telefonda yem adına ~55 px kalıyordu;
+                 * "Mısır Silajı (Yüksek Kalite)" gibi adlar sütunun dışına
+                 * taşıp fiyat kutusunun ÜSTÜNE biniyordu (telefonda görüldü).
+                 *
+                 * `flex-wrap` + girdileri saran `w-full sm:w-auto`: dar ekranda
+                 * iki girdi kendi satırına inip yarı yarıya genişliyor, ad tam
+                 * genişliği kullanıyor. sm ve üstünde düzen eskisi gibi tek
+                 * satır.
+                 */
+                <div key={feed.id} className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <button
                     type="button"
                     onClick={() => toggleFeed(feed.id)}
@@ -108,9 +121,11 @@ export default function StepAutoFeeds() {
                     <Check size={14} />
                   </button>
                   
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="font-medium text-gray-900">{feed.name}</div>
+                  <div className="flex-1 min-w-0 basis-40">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* `break-words`: "(Yüksek Kalite)" gibi uzun parçalar
+                          sütuna sığmadığında kırılsın, taşmasın. */}
+                      <div className="font-medium text-gray-900 break-words">{feed.name}</div>
                       {(() => {
                         const invItem = inventory.find(item => item.feedId === feed.id)
                         if (invItem) {
@@ -138,33 +153,37 @@ export default function StepAutoFeeds() {
                     </div>
                   </div>
 
-                  <div className="shrink-0 w-32">
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="₺/kg"
-                      value={sf.priceOverrideTLPerKg ?? ''}
-                      onChange={(e) => {
-                        const price = parsePrice(e.target.value)
-                        setFeed(feed.id, { priceOverrideTLPerKg: price })
-                      }}
-                      className={`input-field text-sm ${!hasPrice ? 'border-red-300 bg-red-50' : ''}`}
-                    />
-                  </div>
+                  {/* Dar ekranda kendi satırına iner (w-full), sm ve üstünde
+                      eskisi gibi satırın sağında sabit genişlikte kalır. */}
+                  <div className="flex w-full gap-3 sm:w-auto">
+                    <div className="flex-1 sm:flex-none sm:w-32">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="₺/kg"
+                        value={sf.priceOverrideTLPerKg ?? ''}
+                        onChange={(e) => {
+                          const price = parsePrice(e.target.value)
+                          setFeed(feed.id, { priceOverrideTLPerKg: price })
+                        }}
+                        className={`input-field text-sm w-full ${!hasPrice ? 'border-red-300 bg-red-50' : ''}`}
+                      />
+                    </div>
 
-                  <div className="shrink-0 w-28">
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="Min kg/gün"
-                      value={sf.minAsFedKgPerDay ?? ''}
-                      onChange={(e) => {
-                        const minAsFedKgPerDay = parseNonNegative(e.target.value)
-                        setFeed(feed.id, { minAsFedKgPerDay })
-                      }}
-                      className="input-field text-sm"
-                      title="Seçili yemin rasyonda mutlaka yer alması için minimum kullanım (kg/gün, yaş ağırlık). Boş bırakılırsa optimizer 0 seçebilir."
-                    />
+                    <div className="flex-1 sm:flex-none sm:w-28">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Min kg/gün"
+                        value={sf.minAsFedKgPerDay ?? ''}
+                        onChange={(e) => {
+                          const minAsFedKgPerDay = parseNonNegative(e.target.value)
+                          setFeed(feed.id, { minAsFedKgPerDay })
+                        }}
+                        className="input-field text-sm w-full"
+                        title="Seçili yemin rasyonda mutlaka yer alması için minimum kullanım (kg/gün, yaş ağırlık). Boş bırakılırsa optimizer 0 seçebilir."
+                      />
+                    </div>
                   </div>
                 </div>
               )

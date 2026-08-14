@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchProvinces, fetchDistricts, fetchCrops, fetchYieldData, fetchProvinceRanking } from '../services/api';
 import type { RegionTotal } from '../components/TurkeyHeatMap';
@@ -123,6 +123,29 @@ export function HasatTahminiPage(): React.ReactElement {
       setLoading(false);
       return;
     }
+    /*
+     * Geçmişe yazma BURADA — yani adım 4'e geçişin gerçekleştiği tek yerde.
+     *
+     * Eskiden bir effect'in içindeydi ve bağımlılığı her render'da yeniden
+     * üretilen `calculate(state)` nesnesiydi: effect `setHistory` çağırıyor,
+     * render tetikleniyor, yeni nesne bağımlılığı değiştiriyor, effect yine
+     * çalışıyordu. Sonsuz döngü ve "Maximum update depth exceeded" (React
+     * #185) — Sonuçlar adımına geçen herkes hata ekranına düşüyordu.
+     *
+     * Geçmiş kaydı bir OLAY ("kullanıcı sonuçlara geçti"), render'ın türevi
+     * değil; olayın olduğu yerde yazmak döngüyü kökten imkânsız kılıyor.
+     */
+    // `step: 4 as const` — düz `4` yazınca tip `number`a genişliyor ve
+    // `WizardState['step']` (1|2|3|4) ile uyuşmuyor.
+    const sonrakiDurum: WizardState = {
+      ...state, ilceData: toYD(ilceRes), ilData: toYD(ilRes), turkiyeData: toYD(trRes), step: 4 as const,
+    };
+    const sonuc = calculate(sonrakiDurum);
+    if (sonuc) {
+      saveToHistory(sonrakiDurum, sonuc);
+      setHistory(loadHistory());
+    }
+
     setState(s => ({ ...s, ilceData: toYD(ilceRes), ilData: toYD(ilRes), turkiyeData: toYD(trRes), step: 4 }));
     setLoading(false);
 
@@ -148,7 +171,14 @@ export function HasatTahminiPage(): React.ReactElement {
       const cmpResults = await Promise.all(cmpPromises);
       setState(s => ({ ...s, compareData: cmpResults }));
     }
-  }, [state.il, state.ilce, state.urun, state.compareUrunler]);
+    /*
+     * Bağımlılık artık `state`in TAMAMI. Geçmişe yazma buraya taşınınca
+     * callback yalnızca il/ilçe/ürünü değil, hesaplamaya giren tüm alanları
+     * (arazi, sulama, toprak kalitesi…) okumaya başladı; dar bağımlılık
+     * listesi bunları BAYAT closure'da bırakır ve geçmişe yanlış sayı yazardı.
+     * Bir düğmeye basıldığında çalışan callback'in yeniden kurulması bedelsiz.
+     */
+  }, [state]);
 
   // ── Navigation guards ──
   const goStep2 = () => {
@@ -181,18 +211,20 @@ export function HasatTahminiPage(): React.ReactElement {
     Object.keys(KATEGORILER).map(k => [k, urunList.filter(u => cropMatchesCategory(u, k)).length]),
   );
 
-  // ── Step-4 computed values ──
-  const calc    = state.step === 4 ? calculate(state) : null;
+  /*
+   * ── Step-4 computed values ──
+   *
+   * `calc` memolanıyor: `calculate` her çağrıda yeni bir nesne üretiyor ve bu
+   * değer aşağıda birçok yerde okunuyor. Geçmişe yazma artık bu değerin
+   * türevi DEĞİL (bkz. `fetchAndGoResults`), ama memo yine de gereksiz yeniden
+   * hesaplamayı önlüyor — `state` değişmedikçe sonuç da değişmiyor.
+   */
+  const calc = useMemo(
+    () => (state.step === 4 ? calculate(state) : null),
+    [state],
+  );
   const harvest = state.urun ? getHarvestCalendar(state.urun) : null;
   const sowing  = state.urun ? getSowingCalendar(state.urun) : null;
-
-  useEffect(() => {
-    if (calc && state.step === 4) {
-      saveToHistory(state, calc);
-      setHistory(loadHistory());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.step, calc]);
 
   const ydVal = (yd: YearData | null | undefined, yr: string): number | undefined => {
     if (!yd) return undefined;
