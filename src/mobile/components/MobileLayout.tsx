@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import TabBar from './TabBar';
 import { klavyeyiIzle } from '../utils/klavye';
+import { setPushNavigator } from '../capacitor/push';
 import '../styles/ios.css';
 
 /**
@@ -23,6 +24,15 @@ import '../styles/ios.css';
 export default function MobileLayout() {
   // Klavye yüksekliğini CSS'e taşır; sohbet yazma alanı buna göre yükseliyor.
   useEffect(klavyeyiIzle, []);
+
+  /*
+   * Push bildirimine dokunulunca gidilecek sayfayı bu navigator açıyor.
+   * OneSignal'ın tıklama işleyicisi React ağacının dışında; `useNavigate`'i
+   * ona buradan veriyoruz. Soğuk başlatmada (uygulama kapalıyken gelen
+   * tıklama) push modülü yolu saklıyor ve bu kayıt anında boşaltıyor.
+   */
+  const navigate = useNavigate();
+  useEffect(() => setPushNavigator(navigate), [navigate]);
 
   return (
     <div className="ios-app">

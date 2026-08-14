@@ -1,6 +1,7 @@
 import { initStatusBar } from './statusbar';
 import { hideSplash } from './splash';
 import { initAppListeners } from './app';
+import { initPush } from './push';
 import { isPlatform } from '../utils/platform';
 
 /**
@@ -27,7 +28,11 @@ export async function initCapacitor() {
     // 3. App lifecycle listeners (back button, deep links, state changes)
     initAppListeners();
 
-    // 4. Add mobile-app + mobile-native classes to html element for mobile-specific CSS
+    // 4. Push bildirimleri (OneSignal). Kendi try/catch'i var; init'i düşürmez.
+    //    Yönlendirme için navigator'ı bir üst bileşen kaydediyor (setPushNavigator).
+    await initPush();
+
+    // 5. Add mobile-app + mobile-native classes to html element for mobile-specific CSS
     document.documentElement.classList.add('mobile-app');
     document.documentElement.classList.add('mobile-native');
 

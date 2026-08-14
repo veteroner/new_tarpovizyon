@@ -51,6 +51,7 @@
     "jspdf": "^4.1.0",
     "mysql2": "^3.15.3",
     "node-tesseract-ocr": "^2.2.1",
+    "onesignal-cordova-plugin": "^5.5.2",
     "postcss": "^8.5.6",
     "puppeteer": "^24.37.3",
     "react-hook-form": "^7.71.1",

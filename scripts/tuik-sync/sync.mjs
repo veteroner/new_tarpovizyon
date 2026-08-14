@@ -18,6 +18,7 @@
  */
 
 import { DATASETS } from './datasets.mjs';
+import { bildirGerekiyorsa } from './bildirim.mjs';
 
 const TOKEN_URL = 'https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token';
 const SDMX_BASE = 'https://nsiws.tuik.gov.tr/rest/data/TR,';
@@ -436,6 +437,20 @@ async function main() {
   }
 
   await writeLog(startedAt, results);
+
+  /*
+   * Bildirim, log yazıldıktan SONRA: modül "önceki dönemi" loga bakarak
+   * buluyor ve `calisma_zamani < startedAt` ile bu çalışmanın kendi kaydını
+   * dışarıda bırakıyor. DRY_RUN'da log yazılmadığı için bildirim de anlamsız;
+   * atlanıyor.
+   */
+  if (!DRY_RUN) {
+    try {
+      await bildirGerekiyorsa(d1, results, startedAt);
+    } catch (e) {
+      console.error('Bildirim adımı hata verdi (senkron etkilenmedi):', e.message);
+    }
+  }
 
   for (const r of results) {
     const mark = r.status === 'ok' ? '✓' : '✗';

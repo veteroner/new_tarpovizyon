@@ -33,6 +33,8 @@ const YAZILAMAZ = new Set(['id', 'created_at', 'updated_at']);
 
 const q = (isim) => `"${String(isim).replace(/"/g, '""')}"`;
 
+import { bildirEllaYazim } from './bildirim.js';
+
 /** Tablonun gerçek sütunlarını veritabanından okur. */
 async function sutunlar(env, tablo) {
   const { results } = await env.DB.prepare(
@@ -156,6 +158,16 @@ export async function handleRows(request, env, ROUTES) {
 
   if (!ifadeler.length) return { status: 200, body: { guncellenen: 0, eklenen: 0 } };
   await env.DB.batch(ifadeler);
+
+  /*
+   * Yazma bittikten SONRA bildirim. İzlenen bir tabloya (çiğ süt / kırmızı et
+   * ekonomik göstergeleri) yeni bir DÖNEM eklendiyse push atıyor; aynı dönemin
+   * düzeltilmesinde atmıyor. Kendi try/catch'i var, yazmayı geri almaz. Anahtar
+   * yoksa sessiz. Await ediliyor çünkü admin yazımı seyrek ve kullanıcı
+   * tetiklemeli; küçük ek gecikme sorun değil.
+   */
+  await bildirEllaYazim(env, tablo, q);
+
   return {
     status: 200,
     body: { tablo, guncellenen: guncellenecek.length, eklenen: eklenecek.length },
