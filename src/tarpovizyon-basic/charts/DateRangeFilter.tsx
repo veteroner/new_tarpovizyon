@@ -34,20 +34,29 @@ export function useYearRangeFilter<T>(
       ? Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i)
       : [];
 
+  /*
+   * Başlıklı bir kutu içinde: filtrenin NEYİ etkilediği yazmıyordu ve sayfa
+   * geneline uygulanıyor sanılıyordu. Gerçekte yalnızca altındaki grafiği ve
+   * (varsa) o grafikten türeyen kartları daraltıyor; dış ticaret ve il
+   * sıralaması bölümleri kendi verilerini ayrı çekiyor.
+   */
   const control =
     yearOptions.length > 1 ? (
-      <div className="tvb-page__controls">
-        <div className="tvb-select">
-          <label>Başlangıç Yılı</label>
-          <select value={activeFrom ?? ''} onChange={(e) => setFrom(Number(e.target.value))}>
-            {yearOptions.filter((y) => activeTo === null || y <= activeTo).map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-        <div className="tvb-select">
-          <label>Bitiş Yılı</label>
-          <select value={activeTo ?? ''} onChange={(e) => setTo(Number(e.target.value))}>
-            {yearOptions.filter((y) => activeFrom === null || y >= activeFrom).map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+      <div className="tvb-aralik">
+        <div className="tvb-aralik__baslik">Veri aralığı</div>
+        <div className="tvb-page__controls">
+          <div className="tvb-select">
+            <label>Başlangıç Yılı</label>
+            <select value={activeFrom ?? ''} onChange={(e) => setFrom(Number(e.target.value))}>
+              {yearOptions.filter((y) => activeTo === null || y <= activeTo).map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <div className="tvb-select">
+            <label>Bitiş Yılı</label>
+            <select value={activeTo ?? ''} onChange={(e) => setTo(Number(e.target.value))}>
+              {yearOptions.filter((y) => activeFrom === null || y >= activeFrom).map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
         </div>
       </div>
     ) : null;

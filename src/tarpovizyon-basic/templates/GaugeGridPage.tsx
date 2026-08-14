@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
-import { GaugeChart } from '../charts/GaugeChart';
+import { OranCubugu } from '../charts/OranCubugu';
 
 export type GaugeGridPageConfig = {
   title: string;
@@ -23,20 +23,21 @@ export function GaugeGridPage({ config }: { config: GaugeGridPageConfig }) {
       <div className="tvb-page__banner">{title}</div>
       {isLoading && <p className="tvb-status">Yükleniyor…</p>}
       {!isLoading && row && (
-        <div className="tvb-tiles">
+        <div className="tvb-oran-liste">
           {gauges.map((g) => {
             const raw = Number(row[g.field]);
             if (!Number.isFinite(raw)) return null;
             return (
-              <div key={g.field} className="tvb-gauge-tile">
-                <GaugeChart
-                  label={g.label}
-                  percent={(raw / g.max) * 100}
-                  displayText={raw.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
-                  scaleLabels={['0', String(g.max)]}
-                  neutral
-                />
-              </div>
+              /* Miktar çubuğu: değer ham birimiyle yazılıyor, ölçek `max`e
+                 kadar. Eşik yok — burada aşılması gereken bir hedef yok. */
+              <OranCubugu
+                key={g.field}
+                label={g.label}
+                deger={raw}
+                max={g.max}
+                gosterim={raw.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
+                neutral
+              />
             );
           })}
         </div>

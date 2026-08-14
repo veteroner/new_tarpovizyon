@@ -145,7 +145,7 @@ const HAYVANSAL_SECTIONS: Section[] = [
           ],
           kpiField: 'buyukbas_sut_uretimi_ton', kpiLabel: 'Büyükbaş Süt Üretimi', kpiUnit: 'Ton',
           secondKpiField: 'kucukbas_sutu_uretimi_ton', secondKpiLabel: 'Küçükbaş Süt Üretimi',
-          gauge: { endpoint: 'tr/yeterlilikler', field: 'sut_ton', label: 'Yeterlilik Oranı' },
+          gauge: { endpoint: 'tr/yeterlilikler', field: 'sut_ton', label: 'Yeterlilik Oranı', donem: '2025' },
           tradeSection: {
             title: 'Süt ve Ürünleri Dış Ticareti',
             urunler: [
@@ -209,7 +209,7 @@ const HAYVANSAL_SECTIONS: Section[] = [
           ],
           kpiField: 'buyukbas_et_uretimi_ton', kpiLabel: 'Büyükbaş Et Üretimi', kpiUnit: 'Ton',
           secondKpiField: 'kucukbas_et_uretimi_ton', secondKpiLabel: 'Küçükbaş Et Üretimi',
-          gauge: { endpoint: 'tr/yeterlilikler', field: 'kirmizi_et_ton', label: 'Yeterlilik Oranı' },
+          gauge: { endpoint: 'tr/yeterlilikler', field: 'kirmizi_et_ton', label: 'Yeterlilik Oranı', donem: '2025' },
           tradeSection: {
             title: 'Kırmızı Et ve Canlı Hayvan Dış Ticareti',
             urunler: ['Damızlık Büyükbaş', 'Büyükbaş Kasaplık', 'Besilik Büyükbaş', 'Büyükbaş (sığır) Eti', 'Küçükbas Eti', 'Damızlık Küçükbaş', 'Küçükbaş Kasaplık'],
@@ -271,7 +271,7 @@ const HAYVANSAL_SECTIONS: Section[] = [
           title: 'PİLİÇ ETİ SEKTÖRÜ', endpoint: 'kanatli/uretimleri', xField: 'tarih', aggregateYearly: true,
           series: [{ key: 'tavuk_eti_ton', label: 'Tavuk Eti Üretimi (Ton)', type: 'bar' }],
           kpiField: 'tavuk_eti_ton', kpiLabel: 'Tavuk Eti Üretimi', kpiUnit: 'Ton',
-          gauge: { endpoint: 'tr/yeterlilikler', field: 'beyaz_et_ton', label: 'Yeterlilik Oranı' },
+          gauge: { endpoint: 'tr/yeterlilikler', field: 'beyaz_et_ton', label: 'Yeterlilik Oranı', donem: '2025' },
           tradeSection: { title: 'Yıllara Göre Piliç Eti Dış Ticareti', urunler: ['Piliç Eti'] },
         },
       },
@@ -281,7 +281,7 @@ const HAYVANSAL_SECTIONS: Section[] = [
           title: 'SOFRALIK YUMURTA SEKTÖRÜ', endpoint: 'kanatli/uretimleri', xField: 'tarih', aggregateYearly: true,
           series: [{ key: 'tavuk_yumurtasi_bin_adet', label: 'Tavuk Yumurtası Üretimi (Bin Adet)', type: 'bar' }],
           kpiField: 'tavuk_yumurtasi_bin_adet', kpiLabel: 'Yumurta Üretimi', kpiUnit: 'Bin Adet',
-          gauge: { endpoint: 'tr/yeterlilikler', field: 'yumurta_milyon_adet', label: 'Yeterlilik Oranı' },
+          gauge: { endpoint: 'tr/yeterlilikler', field: 'yumurta_milyon_adet', label: 'Yeterlilik Oranı', donem: '2025' },
           tradeSection: { title: 'Yıllara Göre Yumurta Dış Ticareti', urunler: ['Sofralik Tavuk Yumurtası (1000 Adet)', 'Kuluçkalık Tavuk Yumurtası (Adet)'] },
         },
       },

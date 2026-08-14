@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
 import { KpiCard, formatNumber } from '../charts/KpiCard';
-import { GaugeChart } from '../charts/GaugeChart';
+import { OranCubugu } from '../charts/OranCubugu';
 import { YearlyChart, type SeriesConfig } from '../charts/YearlyChart';
 import { TradeTrendSection } from '../charts/TradeTrendSection';
 import { HorizontalRankBar } from '../charts/HorizontalRankBar';
@@ -17,8 +17,15 @@ export type YearlyPageConfig = {
   kpiUnit?: string;
   secondKpiField?: string;
   secondKpiLabel?: string;
-  /** Self-sufficiency gauge sourced from its own endpoint (tr/yeterlilikler holds a ratio, e.g. 1.17 = 117%). */
-  gauge?: { endpoint: string; field: string; label: string; asRatio?: boolean };
+  /**
+   * Kendine yeterlilik oranı — kendi ucundan geliyor (`tr/yeterlilikler`
+   * oranı tutuyor: 1,17 = %117).
+   *
+   * `donem` ZORUNLU DEĞİL ama olmalı: tablo tarihsiz tek satır, yani sayının
+   * hangi yıla ait olduğu veriden okunamıyor. Yazılmazsa okuyucu bunu güncel
+   * sanar.
+   */
+  gauge?: { endpoint: string; field: string; label: string; asRatio?: boolean; donem?: string };
   /** Additional charts rendered below the main one from the same rows — e.g. a
    *  comparison page that also wants each series broken out on its own. */
   extraCharts?: { title: string; series: SeriesConfig[] }[];
@@ -56,8 +63,21 @@ function sortRows(rows: Row[], xField: string): Row[] {
   );
 }
 
+/**
+ * İçinde bulunulan yılın EKSİK olduğunu işaretleyen alan.
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * Aylık satırlar yıla toplanırken devam eden yıl da tam yılmış gibi
+ * toplanıyordu. Kanatlı verisinde 2026'nın yalnızca 6 ayı var; kart bunu
+ * 12 aylık 2025 ile karşılaştırıp "▼%51,04" yazıyordu. Üretimde böyle bir
+ * çöküş yok — sadece yılın yarısı henüz gerçekleşmemiş. Aynı yanılgı
+ * `aggregateYearly` kullanan HER sayfada vardı.
+ */
+const EKSIK = '__eksikYil';
+
 function aggregateByYear(rows: Row[], xField: string, fields: string[]): Row[] {
   const byYear = new Map<number, Row>();
+  const adet = new Map<number, number>();
   for (const r of rows) {
     const year = extractYear(r[xField]);
     if (year === null) continue;
@@ -67,21 +87,47 @@ function aggregateByYear(rows: Row[], xField: string, fields: string[]): Row[] {
       if (Number.isFinite(v)) acc[f] = (Number(acc[f]) || 0) + v;
     }
     byYear.set(year, acc);
+    adet.set(year, (adet.get(year) ?? 0) + 1);
   }
-  return Array.from(byYear.values()).sort((a, b) => Number(a[xField]) - Number(b[xField]));
+
+  /*
+   * "Tam yıl" kaç satır? Veri kümesine göre değişir (aylıksa 12, çeyreklikse
+   * 4), o yüzden sabit yazılmıyor: en sık görülen satır sayısı esas alınıyor.
+   * Bundan az satırı olan yıl eksik sayılıyor.
+   */
+  const sayilar = [...adet.values()];
+  const tamYil = sayilar.length ? Math.max(...sayilar) : 0;
+
+  return Array.from(byYear.values())
+    .map((r) => {
+      const y = Number(r[xField]);
+      return (adet.get(y) ?? 0) < tamYil ? { ...r, [EKSIK]: adet.get(y) ?? 0 } : r;
+    })
+    .sort((a, b) => Number(a[xField]) - Number(b[xField]));
 }
 
-/** Walks back from the end to find the latest row with a non-zero, finite value; returns it plus the prior comparable row. */
-function latestNonZero(rows: Row[], field: string): { value: number | null; pct: number | null } {
+/**
+ * Sondan geriye yürüyerek sıfırdan farklı son değeri bulur; önceki
+ * karşılaştırılabilir satırı da döndürür.
+ *
+ * `donem` de dönüyor: kart hangi yıla ait olduğunu YAZMALI. Yazmadığı sürece
+ * yıl aralığı filtresi kartı değiştirdiğinde bu görünmüyordu — başlangıç yılını
+ * oynatmak zaten kartı hiç etkilemiyor (değer sondan alınıyor), bitiş yılını
+ * oynatmak ise sessizce başka bir yılın sayısını gösteriyordu.
+ */
+function latestNonZero(rows: Row[], field: string, xField: string): { value: number | null; pct: number | null; donem: string | null } {
   for (let i = rows.length - 1; i >= 1; i--) {
+    // Eksik yıl ATLANIYOR: yarım yılın toplamını tam yılla kıyaslamak sahte
+    // bir düşüş üretiyor. Kart son TAMAMLANMIŞ yılı gösteriyor.
+    if (rows[i][EKSIK] !== undefined) continue;
     const v = Number(rows[i][field]);
     if (Number.isFinite(v) && v !== 0) {
       const p = Number(rows[i - 1][field]);
       const pct = Number.isFinite(p) && p !== 0 ? ((v - p) / p) * 100 : null;
-      return { value: v, pct };
+      return { value: v, pct, donem: String(rows[i][xField] ?? '') || null };
     }
   }
-  return { value: null, pct: null };
+  return { value: null, pct: null, donem: null };
 }
 
 function useProvincialRanking(config?: YearlyPageConfig['provincialRanking']) {
@@ -136,8 +182,14 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
   // previously lacked entirely (always rendered full history, no narrowing).
   const { filtered: filteredRows, control: dateControl } = useYearRangeFilter(rows, (r) => extractYear(r[xField]));
 
-  const kpi1 = kpiField ? latestNonZero(filteredRows, kpiField) : null;
-  const kpi2 = secondKpiField ? latestNonZero(filteredRows, secondKpiField) : null;
+  const kpi1 = kpiField ? latestNonZero(filteredRows, kpiField, xField) : null;
+  const kpi2 = secondKpiField ? latestNonZero(filteredRows, secondKpiField, xField) : null;
+  /* Süzülmüş aralıktaki son satır eksik bir yıl mı? (grafiğin altındaki not) */
+  const sonSatir = filteredRows[filteredRows.length - 1];
+  const eksikYil = sonSatir?.[EKSIK] !== undefined
+    ? { yil: String(sonSatir[xField]), adet: Number(sonSatir[EKSIK]) }
+    : null;
+
   const gaugeValue = useGauge(gauge);
   const rankings = useProvincialRanking(provincialRanking);
 
@@ -149,18 +201,55 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
 
       {!isLoading && (
         <>
+          {/*
+            * Yeterlilik oranı FİLTRENİN DIŞINDA duruyor. Kendi ucundan
+            * (`tr/yeterlilikler`) geliyor, tek satır ve tarihsiz — yıl aralığı
+            * seçicisinden hiç etkilenmiyor. Eskiden KPI kartlarıyla aynı
+            * kutudaydı ve filtrenin hemen altındaydı; filtreyi oynatan kişi
+            * bu sayının da değişmesini bekliyordu, hiç değişmiyordu.
+            */}
+          {gaugeValue !== null && (
+            <div className="tvb-oran-liste">
+              <OranCubugu
+                label={gauge?.label ?? 'Yeterlilik Oranı'}
+                deger={gaugeValue}
+                /* Ölçek %150'ye kadar: veri kümesindeki en yüksek oran %148
+                   (beyaz et). %100'de kesilseydi dördü de dolu görünürdü. */
+                max={150}
+                esik={100}
+                olcekEtiketleri={['%0', '%150']}
+                donem={gauge?.donem}
+              />
+            </div>
+          )}
+
+          {/*
+            * Filtre, etkilediği içeriğin HEMEN ÜSTÜNDE. Altındaki kartlar ve
+            * grafik ondan besleniyor; dış ticaret ve il sıralaması bölümleri
+            * ise kendi verilerini çekiyor ve aşağıda, ayrı bölümlerde duruyor.
+            */}
           {dateControl}
 
-          {(kpi1 || kpi2 || gaugeValue !== null) && (
+          {(kpi1 || kpi2) && (
             <div className="tvb-page__controls">
-              {gaugeValue !== null && <GaugeChart label={gauge?.label ?? 'Yeterlilik Oranı'} percent={gaugeValue} />}
-              {kpi1 && <KpiCard label={kpiLabel ?? kpiField ?? ''} value={formatNumber(kpi1.value)} suffix={kpiUnit} changePct={kpi1.pct} />}
-              {kpi2 && <KpiCard label={secondKpiLabel ?? secondKpiField ?? ''} value={formatNumber(kpi2.value)} suffix={kpiUnit} changePct={kpi2.pct} />}
+              {kpi1 && <KpiCard label={kpiLabel ?? kpiField ?? ''} value={formatNumber(kpi1.value)} suffix={kpiUnit} period={kpi1.donem ?? undefined} changePct={kpi1.pct} />}
+              {kpi2 && <KpiCard label={secondKpiLabel ?? secondKpiField ?? ''} value={formatNumber(kpi2.value)} suffix={kpiUnit} period={kpi2.donem ?? undefined} changePct={kpi2.pct} />}
             </div>
           )}
 
           <div className="tvb-section">
             <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} />
+            {/*
+              * Grafikteki son sütun eksik yılın toplamı — kırpılmıyor, veri
+              * gerçek. Ama açıklanmazsa "üretim yarıya düştü" gibi okunuyor;
+              * kartın neden bir önceki yılı gösterdiğini de bu not söylüyor.
+              */}
+            {eksikYil && (
+              <p className="tvb-status">
+                {eksikYil.yil} yılı henüz tamamlanmadı ({eksikYil.adet} dönem verisi);
+                sütunu bu yüzden kısa görünüyor. Üstteki kart son tamamlanmış yılı gösteriyor.
+              </p>
+            )}
           </div>
 
           {extraCharts?.map((c) => (
@@ -174,7 +263,9 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
 
           {rankings && (
             <div className="tvb-section">
-              <h3>{provincialRanking?.title}</h3>
+              {/* "En güncel yıl" açıkça yazılıyor: bu bölüm yukarıdaki yıl
+                  aralığından etkilenmiyor, kendi ucunun son yılını kullanıyor. */}
+              <h3>{provincialRanking?.title} <span className="tvb-not">(en güncel yıl)</span></h3>
               <div className="tvb-provincial-grid">
                 {rankings.map((r) => (
                   <div key={r.label}>

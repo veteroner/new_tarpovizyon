@@ -98,7 +98,14 @@ export default function MobileExplorePage() {
             {kat.items.map((item) => {
               const yol = itemPath(item, kapsam)!;
               return (
-                <ListRow key={yol} title={item.label} onClick={() => navigate(yol)} />
+                /*
+                 * Alt satırda BÖLÜM adı. "Basic · Hayvancılık" grubunda
+                 * "Ekonomik Göstergeler ve Maliyet Unsurları" İKİ KEZ geçiyordu
+                 * (Çiğ Süt ve Kırmızı Et) ve iki satır birebir aynı görünüyordu;
+                 * hangisine bastığın ancak sayfa açılınca anlaşılıyordu.
+                 * Aramada da aynı sorun vardı: eşleşen satırlar ayırt edilemiyordu.
+                 */
+                <ListRow key={yol} title={item.label} subtitle={item.bolum} onClick={() => navigate(yol)} />
               );
             })}
           </ListGroup>

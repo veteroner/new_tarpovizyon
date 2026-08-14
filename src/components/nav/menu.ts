@@ -19,6 +19,20 @@ export type Kapsam = 'world' | 'turkey';
  */
 export type MenuItem = {
   label: string;
+  /**
+   * Öğenin ait olduğu ALT BÖLÜM (ör. "Çiğ Süt Sektörü", "Meyveler").
+   *
+   * ─── NEDEN GEREKLİ ────────────────────────────────────────────────────────
+   * Basic'te kategoriler bölümlerden oluşuyor ama menü bunları düzleştiriyordu:
+   * "Hayvancılık" altında 6 bölümün 21 sayfası, "Bitkisel Üretim" altında 4
+   * bölümün 48 sayfası tek bir listeye iniyordu. Sonuç: "Ekonomik Göstergeler
+   * ve Maliyet Unsurları" hem Çiğ Süt hem Kırmızı Et bölümünde var ve seçicide
+   * ikisi birebir aynı görünüyordu — hangisine bastığın belli değildi.
+   *
+   * Bölüm adı burada durunca hem sayfa başlığında ("Çiğ Süt Sektörü · Ekonomik
+   * Göstergeler…") hem seçicide gruplama olarak kullanılabiliyor.
+   */
+  bolum?: string;
   /** Mobil menüde gizlenir (yönetim ekranları). */
   sadeceMasaustu?: boolean;
   /** Kapsamdan bağımsız tek yol (ör. AI Asistan). */
@@ -162,9 +176,15 @@ export const MENU: MenuCategory[] = [
 export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
   title: `Basic · ${grup.label}`,
   icon: LayoutGrid,
+  /*
+   * Bölüm adı `bolum` alanında TAŞINIYOR — düzleştirme sürüyor (kategori
+   * yapısı değişmedi) ama bilgi kaybolmuyor. Sayfa etiketleri `pages.ts`'te
+   * olduğu gibi kalıyor; bölüm bağlamını gösterim katmanı ekliyor.
+   */
   items: grup.sections.flatMap((bolum) =>
     bolum.pages.map((sayfa) => ({
       label: sayfa.label,
+      bolum: bolum.label,
       any: `/tarpovizyon-basic/${bolum.path}/${sayfa.path}`,
     })),
   ),

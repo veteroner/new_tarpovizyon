@@ -33,8 +33,17 @@ export default function MobileDataShell({ basliksiz }: { basliksiz?: boolean } =
 
   const yer = locate(pathname, search);
   const baslik = yer?.item.label ?? 'Veri';
+  /*
+   * Alt başlıkta BÖLÜM adı da var (varsa kategorinin yerine).
+   *
+   * "Ekonomik Göstergeler ve Maliyet Unsurları" başlığı Çiğ Süt, Kırmızı Et ve
+   * Kanatlı bölümlerinde ayrı ayrı geçiyor; yalnızca "Basic · Hayvancılık"
+   * yazan bir alt başlık bunları ayırmıyordu. Bölüm adı yazınca hangi sektörün
+   * sayfasında olduğun tek bakışta belli oluyor.
+   */
   const altBaslik = yer
-    ? [yer.kategori.title, yer.kapsam ? KAPSAM_ADI[yer.kapsam] : null].filter(Boolean).join(' · ')
+    ? [yer.item.bolum ?? yer.kategori.title, yer.kapsam ? KAPSAM_ADI[yer.kapsam] : null]
+      .filter(Boolean).join(' · ')
     : undefined;
 
   /*
@@ -54,9 +63,39 @@ export default function MobileDataShell({ basliksiz }: { basliksiz?: boolean } =
    * sayfada tek satır (44 pt) yer kaplıyor ve 40 öğede de 4 öğede de aynı
    * şekilde çalışıyor.
    */
+  /*
+   * `sadeceMasaustu` BURADA DA süzülüyor.
+   *
+   * Keşfet listesi `visibleMenu(kapsam, true)` ile süzüyordu ama bu seçici
+   * kategorinin ham öğelerini okuyordu; sonuç: "Veri Düzenle" mobil menüde
+   * gizliyken Araçlar'daki herhangi bir araca girildiğinde sayfa seçicisinde
+   * GÖRÜNÜYORDU (telefonda doğrulandı). D1'e yazan bir yönetim ekranı için
+   * açık bir kaçak.
+   */
   const kardesler = (yer?.kategori.items ?? [])
-    .map((item) => ({ label: item.label, yol: itemPath(item, yer!.kapsam ?? 'turkey') }))
-    .filter((x): x is { label: string; yol: string } => !!x.yol);
+    .filter((item) => !item.sadeceMasaustu)
+    .map((item) => ({ label: item.label, bolum: item.bolum, yol: itemPath(item, yer!.kapsam ?? 'turkey') }))
+    .filter((x): x is { label: string; bolum: string | undefined; yol: string } => !!x.yol);
+
+  /*
+   * Seçici BÖLÜMLERE ayrılıyor (`optgroup`).
+   *
+   * Düz listede Bitkisel Üretim'in 48 sayfası tek blok hâlinde geliyordu:
+   * Tarla Bitkileri / Meyveler / Sebzeler ayrımı hiç görünmüyor, aradığın
+   * ürünü bulmak için 48 satır taranıyordu. Hayvancılık'ta da altı sektörün
+   * 21 sayfası aynı torbadaydı.
+   *
+   * Sıra korunuyor: bölümler ilk göründükleri sırayla, sayfalar bölüm içindeki
+   * sıralarıyla. Bölümsüz öğeler (Basic dışı kategoriler) tek grupta kalıyor —
+   * onlarda zaten alt bölüm kavramı yok.
+   */
+  const bolumler = kardesler.reduce<{ ad?: string; sayfalar: typeof kardesler }[]>((liste, k) => {
+    const son = liste[liste.length - 1];
+    if (son && son.ad === k.bolum) son.sayfalar.push(k);
+    else liste.push({ ad: k.bolum, sayfalar: [k] });
+    return liste;
+  }, []);
+  const bolumluMu = bolumler.some((b) => b.ad);
 
   const aktifYol = kardesler.find((k) => k.yol.split('?')[0] === pathname)?.yol;
 
@@ -81,9 +120,17 @@ export default function MobileDataShell({ basliksiz }: { basliksiz?: boolean } =
             aria-label={`${yer?.kategori.title} bölümündeki sayfalar`}
           >
             {!aktifYol && <option value="">Sayfa seç…</option>}
-            {kardesler.map((k) => (
-              <option key={k.yol} value={k.yol}>{k.label}</option>
-            ))}
+            {bolumluMu
+              ? bolumler.map((b, i) => (
+                <optgroup key={b.ad ?? `grup-${i}`} label={b.ad ?? 'Diğer'}>
+                  {b.sayfalar.map((k) => (
+                    <option key={k.yol} value={k.yol}>{k.label}</option>
+                  ))}
+                </optgroup>
+              ))
+              : kardesler.map((k) => (
+                <option key={k.yol} value={k.yol}>{k.label}</option>
+              ))}
           </select>
         </div>
       )}

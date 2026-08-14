@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
-import { GaugeChart } from '../charts/GaugeChart';
+import { OranCubugu } from '../charts/OranCubugu';
 import { YearlyChart } from '../charts/YearlyChart';
 
 export type MakroOzetPageConfig = { title: string };
@@ -18,11 +18,14 @@ export function MakroOzetPage({ config }: { config: MakroOzetPageConfig }) {
     <div className="tvb-page">
       <div className="tvb-page__banner">{config.title}</div>
 
+      {/* Üçü de "tarımın toplam içindeki payı" — 0–100 arası, hedefi olmayan
+          oranlar. Eşik verilmiyor: burada "az" ya da "çok" diye bir yargı yok,
+          renk de bu yüzden yargısız. */}
       {v && (
-        <div className="tvb-gauge-row">
-          <GaugeChart label="GSYH PAY (%)" percent={Number(v.gsyh_pay)} neutral />
-          <GaugeChart label="İHRACATTAKİ PAY (%)" percent={Number(v.ihracat_pay)} neutral />
-          <GaugeChart label="İSTİHDAMDAKİ PAY (%)" percent={Number(v.istihdam_pay)} neutral />
+        <div className="tvb-oran-liste">
+          <OranCubugu label="TARIMIN GSYH'DEKİ PAYI" deger={Number(v.gsyh_pay)} olcekEtiketleri={['%0', '%100']} neutral />
+          <OranCubugu label="TARIMIN İHRACATTAKİ PAYI" deger={Number(v.ihracat_pay)} olcekEtiketleri={['%0', '%100']} neutral />
+          <OranCubugu label="TARIMIN İSTİHDAMDAKİ PAYI" deger={Number(v.istihdam_pay)} olcekEtiketleri={['%0', '%100']} neutral />
         </div>
       )}
 

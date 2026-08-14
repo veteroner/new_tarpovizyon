@@ -574,11 +574,6 @@
   left: 0;
   right: 0;
   bottom: calc(var(--klavye, 0px) + 49px + env(safe-area-inset-bottom));
-}
-
-/* Klavye açıkken sekme çubuğu gizli; yazma alanı onun yerini de alıyor. */
-.klavye-acik .ios-composer {
-  bottom: var(--klavye, 0px);
   z-index: 35;
   display: flex;
   align-items: flex-end;
@@ -588,6 +583,17 @@
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: .5px solid var(--ios-separator);
+}
+
+/*
+ * Klavye açıkken sekme çubuğu gizli; yazma alanı onun yerini de alıyor.
+ * BURAYA SADECE KONUM GİRER: görünüm özellikleri bir kez `.ios-composer`da
+ * tanımlı. Daha önce `display: flex` dahil hepsi yanlışlıkla bu bloğun içine
+ * düşmüştü; klavye kapalıyken kutu `display: block`a dönüyor, gönder tuşu
+ * girdinin altına kayıyordu.
+ */
+.klavye-acik .ios-composer {
+  bottom: var(--klavye, 0px);
 }
 .ios-composer input {
   flex: 1 1 auto;

@@ -562,21 +562,82 @@
   flex: 1;
 }
 
-.tvb-gauge-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 16px;
+/* ─── Oran çubukları ─────────────────────────────────────────────────────── */
+/*
+ * Yarım daire göstergelerin yerini aldı (bkz. charts/OranCubugu.tsx). Çubuklar
+ * her zaman ALT ALTA: yan yana dizilen üç çubuğun her biri kısalır ve %100
+ * eşiği ile değer arasındaki fark okunamaz hâle gelir — bu biçimin tüm amacı
+ * o farkı göstermek.
+ */
+.tvb-oran-liste {
+  display: grid;
+  gap: 14px;
   margin-bottom: 20px;
 }
-.tvb-gauge {
-  min-width: 220px;
+
+.tvb-oran__ust {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
 }
-.tvb-gauge__label {
+.tvb-oran__etiket {
   font-size: 12px;
   font-weight: 700;
   color: #51596b;
-  text-align: center;
+}
+.tvb-oran__deger {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tvb-oran__ray {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.tvb-oran__dolgu {
+  height: 100%;
+  border-radius: 6px;
+  transition: width .25s ease-out;
+}
+/* Eşik çizgisi dolgunun ÜSTÜNDE: değer eşiği geçtiğinde de görünür kalmalı,
+   yoksa "%100'ü ne kadar aştı" sorusunun referansı kaybolur. */
+.tvb-oran__esik {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: #1a1a2e;
+  opacity: .55;
+}
+
+.tvb-oran__olcek {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+}
+.tvb-oran__esik-etiket {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.tvb-oran__donem {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6b7280;
 }
 
 .tvb-gauge-tile {
@@ -584,6 +645,39 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 12px;
+}
+
+/* ─── Yıl aralığı filtresi ───────────────────────────────────────────────── */
+/*
+ * Kendi kutusunda ve başlıklı: iki açılır liste başlıksız durduğunda sayfanın
+ * TAMAMINI süzdüğü sanılıyordu. Kutu, filtrenin kapsamını görsel olarak da
+ * sınırlıyor — altındaki kart ve grafik onun içinde, aşağıdaki bağımsız
+ * bölümler dışında.
+ */
+.tvb-aralik {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+.tvb-aralik__baslik {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+.tvb-aralik .tvb-page__controls {
+  margin-bottom: 0;
+}
+
+/* Başlık içinde kapsam notu — "(en güncel yıl)" gibi. */
+.tvb-not {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
 }
 
 .tvb-ranking {
@@ -785,39 +879,17 @@
   .tvb-tile { padding: 12px; }
   .tvb-tile__value { font-size: 19px; }
   .tvb-section { padding: 12px; }
-  .tvb-gauge { min-width: 0; }
 }
 
-/* ─── Göstergeler dar ekranda ────────────────────────────────────────────── */
+/* ─── Oran çubukları dar ekranda ─────────────────────────────────────────── */
 /*
- * `.tvb-gauge { min-width: 220px }` masaüstünde doğru, ama 343 px'lik mobil
- * içerik alanına tek gösterge sığdırıyor: üç yarım daire alt alta 506 px
- * (ölçüldü) — neredeyse tam ekran, üç sayı için.
- *
- * Dar ekranda üçü yan yana. Yarım daire zaten geniş-basık bir biçim; 100 px
- * genişlikte de okunuyor, içindeki yüzde değeri de.
+ * Burada yapılacak fazla iş yok — çubuk zaten akışkan genişlikte ve alt alta.
+ * Sadece etiket/değer aynı satıra sığmadığında sıkışmasın diye küçültülüyor.
  */
 @media (max-width: 767px) {
-  .tvb-gauge-row {
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-
-  .tvb-gauge {
-    min-width: 0;
-    flex: 1 1 0;
-  }
-
-  .tvb-gauge svg {
-    width: 100%;
-    height: auto;
-    max-height: 84px;
-  }
-
-  .tvb-gauge__label {
-    font-size: 10.5px;
-    line-height: 1.25;
-  }
+  .tvb-oran-liste { gap: 12px; }
+  .tvb-oran__etiket { font-size: 11.5px; line-height: 1.25; }
+  .tvb-oran__deger { font-size: 18px; }
 }
 
 /* ─── Tablolar dar ekranda ───────────────────────────────────────────────── */
