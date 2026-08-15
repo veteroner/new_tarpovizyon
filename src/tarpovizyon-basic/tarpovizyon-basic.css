@@ -673,6 +673,35 @@
   margin-bottom: 0;
 }
 
+/* ─── Grafik göstergesi (legend) ──────────────────────────────────────────
+ * Recharts'ın kendi göstergesi grafiğin İÇİNDE ve mutlak konumluydu; kaç
+ * satır saracağı bilinemediği için çizim alanından yer yiyordu (ölçüldü:
+ * 96 px gösterge, çizim alanı konteynerin %53'ü). Bu blok grafiğin ALTINDA,
+ * normal akışta duruyor — satır sayısı arttıkça kutu uzuyor, grafik küçülmüyor.
+ */
+.tvb-gosterge {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  justify-content: center;
+  color: #51596b;
+}
+.tvb-gosterge li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+.tvb-gosterge__renk {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
 /* Başlık içinde kapsam notu — "(en güncel yıl)" gibi. */
 .tvb-not {
   font-size: 12px;

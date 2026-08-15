@@ -238,6 +238,10 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
           )}
 
           <div className="tvb-section">
+            {/* Tek serilik grafiğin göstergesi çizilmiyor (başlığı tekrar
+                ederdi); o yüzden seriyi başlık adlandırıyor. Çok serilide
+                başlık yok, gösterge zaten hepsini sayıyor. */}
+            {series.length === 1 && <h3>{series[0].label}</h3>}
             <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} />
             {/*
               * Grafikteki son sütun eksik yılın toplamı — kırpılmıyor, veri

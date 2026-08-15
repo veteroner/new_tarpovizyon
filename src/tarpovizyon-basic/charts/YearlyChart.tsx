@@ -1,4 +1,4 @@
-import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useContainerWidth } from './chartResponsive';
 
 const COLORS = ['#f59e0b', '#2563eb', '#16a34a', '#dc2626', '#7c3aed', '#0891b2'];
@@ -40,18 +40,24 @@ export function YearlyChart({
    */
   yDomain?: 'zero' | 'auto';
 }) {
-  // A single-series chart's legend just repeats the section's <h3> title
-  // above it verbatim — on mobile that long label wraps to 2 lines and,
-  // since Legend is absolutely positioned inside the fixed-height
-  // ResponsiveContainer, the overflow eats into the plot area instead of
-  // pushing the container taller. Multi-series legends (short labels like
-  // "Tarım-ÜFE") stay, but get a taller reserved band on narrow screens.
+  /*
+   * ─── GÖSTERGE NEDEN RECHARTS'IN DEĞİL, KENDİ HTML'İMİZ ──────────────────
+   * Recharts'ın `<Legend>`'i ResponsiveContainer'ın İÇİNDE ve mutlak konumlu.
+   * Kaç satır saracağı önceden bilinemediği için kod sabit bir bant ayırıyordu
+   * (48 px). Ölçüldü: 4 serilik grafikte gösterge GERÇEKTE 96 px kaplıyor,
+   * yani ayrılan bandın iki katı; konteyner sabit yükseklikte olduğu için
+   * fark doğrudan çizim alanından çıkıyordu — 300 px'lik kutuda çizim yalnızca
+   * 159 px (%53) kalıyordu. Grafiğin "küçük" görünmesinin sebebi buydu.
+   *
+   * Gösterge artık grafiğin ALTINDA, normal akışta bir HTML bloğu: kaç satır
+   * sararsa sarsın kutuyu uzatıyor, çizim alanından yer çalmıyor. Tek serilik
+   * grafiklerde hiç çizilmiyor — başlık zaten seriyi adlandırıyor.
+   */
   const showLegend = series.length > 1;
 
   const [containerRef, containerWidth] = useContainerWidth(600);
 
   const isNarrow = containerWidth < 480;
-  const legendHeight = showLegend ? (series.length > 2 || isNarrow ? 48 : 24) : 0;
   const fontSize = isNarrow ? 10 : 12;
   // Cap the number of visible X-axis ticks so date labels don't overlap —
   // `interval` is "skip this many ticks between shown ones" in Recharts.
@@ -76,8 +82,8 @@ export function YearlyChart({
 
   return (
     <div ref={containerRef}>
-      <ResponsiveContainer width="100%" height={(isNarrow ? 280 : 340) + legendHeight}>
-        <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8, bottom: legendHeight }}>
+      <ResponsiveContainer width="100%" height={isNarrow ? 280 : 340}>
+        <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f5" />
           <XAxis dataKey={xKey} interval={tickInterval} tick={{ fontSize }} tickMargin={6} />
           <YAxis
@@ -105,7 +111,6 @@ export function YearlyChart({
             wrapperStyle={{ zIndex: 20 }}
             allowEscapeViewBox={{ x: false, y: true }}
           />
-          {showLegend && <Legend wrapperStyle={{ paddingTop: 12, fontSize }} />}
           {series.map((s, i) =>
             s.type === 'line' ? (
               <Line
@@ -118,13 +123,46 @@ export function YearlyChart({
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
+                /* Çubuklarla aynı sebep — bkz. aşağıdaki Bar açıklaması.
+                   Çizgide takılma `stroke-dasharray: "0px 492px"` olarak
+                   görünüyordu: görünür kısım sıfır, yani çizgi tamamen
+                   görünmez. Ölçüldü ve doğrulandı. */
+                isAnimationActive={false}
               />
             ) : (
-              <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
+              /*
+               * `isAnimationActive={false}` ZORUNLU, süs değil.
+               *
+               * Gösterge Recharts'ın `<Legend>`'inden çıkarılınca çubukların
+               * giriş animasyonu BAŞLANGIÇTA TAKILI kaldı: `.recharts-bar-
+               * rectangle` grupları oluşuyor ama içlerindeki `<path>` hiç
+               * çizilmiyordu — 46 kutunun 46'sı boştu, grafik bomboş
+               * görünüyordu (üretim derlemesinde de aynı). Animasyon kapalıyken
+               * 46/46 dolu, en yüksek çubuk 252 px.
+               *
+               * Çizgiler etkilenmiyor; sorun yalnızca çubuk animasyonunda.
+               * Veri panosunda anında çizim zaten tercih edilir.
+               */
+              <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} isAnimationActive={false} />
             )
           )}
         </ComposedChart>
       </ResponsiveContainer>
+
+      {showLegend && (
+        <ul className="tvb-gosterge" style={{ fontSize }}>
+          {series.map((s, i) => (
+            <li key={s.key}>
+              <span
+                className="tvb-gosterge__renk"
+                style={{ background: COLORS[i % COLORS.length] }}
+                aria-hidden="true"
+              />
+              {s.label}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

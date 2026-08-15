@@ -97,14 +97,38 @@ const HAYVANSAL_SECTIONS: Section[] = [
       {
         path: 'hayvansal-urunlerde-verim', label: 'Hayvansal Ürünlerde Verim', template: 'yearly',
         config: {
+          /*
+           * ─── NEDEN HER ÜRÜN AYRI GRAFİKTE ────────────────────────────────
+           * Dört verim tek grafikteydi ve ölçekleri kıyaslanamaz: inek sütü
+           * ~3.000 Lt/baş, büyükbaş karkas ~250 kg, küçükbaş karkas ve bal ise
+           * ~20 kg. Süt sol eksende, diğer üçü 0–300'lük sağ eksendeydi; bu
+           * yüzden küçükbaş ve bal dibe yapışıp DÜMDÜZ çizgi oluyordu — yıllar
+           * içindeki değişimleri hiç okunmuyordu (telefonda görüldü).
+           *
+           * Çift eksen ayrıca iki seriyi görsel olarak kıyaslanabilir gösterip
+           * yanıltıyor: aynı yükseklikteki iki nokta farklı büyüklükler.
+           *
+           * Her ürün kendi grafiğinde, kendi ölçeğinde. Karşılaştırma yıllar
+           * arasında yapılıyor — ürünler arasında zaten yapılamaz (Lt/baş ile
+           * kg/kovan kıyaslanmaz).
+           */
           title: 'HAYVANSAL ÜRETİMDE VERİM', endpoint: 'tr/verimlilikler', xField: 'yil', xFormat: 'year',
-          // İnek sütü verimi (~3.000 Lt) sol eksende; karkas ve bal verimleri
-          // (Kg mertebesi) sağ eksende — tek eksende kg değerleri düz kalıyordu.
           series: [
             { key: 'cig_sut_verimi_lt', label: 'İnek Sütü Verimi (Lt/Baş)', type: 'bar' },
-            { key: 'buyukbas_karkas_et_verimi_kg', label: 'Büyükbaş Karkas Et Verimi (Kg)', type: 'line', axis: 'right' },
-            { key: 'kucukbas_karkas_et_verimi_kg', label: 'Küçükbaş Karkas Et Verimi (Kg)', type: 'line', axis: 'right' },
-            { key: 'bal_verimi_kg', label: 'Bal Verimi (Kg/Kovan)', type: 'line', axis: 'right' },
+          ],
+          extraCharts: [
+            {
+              title: 'Büyükbaş Karkas Et Verimi (Kg)',
+              series: [{ key: 'buyukbas_karkas_et_verimi_kg', label: 'Büyükbaş Karkas Et Verimi (Kg)', type: 'line' }],
+            },
+            {
+              title: 'Küçükbaş Karkas Et Verimi (Kg)',
+              series: [{ key: 'kucukbas_karkas_et_verimi_kg', label: 'Küçükbaş Karkas Et Verimi (Kg)', type: 'line' }],
+            },
+            {
+              title: 'Bal Verimi (Kg/Kovan)',
+              series: [{ key: 'bal_verimi_kg', label: 'Bal Verimi (Kg/Kovan)', type: 'line' }],
+            },
           ],
         },
       },
