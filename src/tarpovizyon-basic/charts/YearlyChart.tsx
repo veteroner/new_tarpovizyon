@@ -137,27 +137,9 @@ export function YearlyChart({
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
-                /* Çubuklarla aynı sebep — bkz. aşağıdaki Bar açıklaması.
-                   Çizgide takılma `stroke-dasharray: "0px 492px"` olarak
-                   görünüyordu: görünür kısım sıfır, yani çizgi tamamen
-                   görünmez. Ölçüldü ve doğrulandı. */
-                isAnimationActive={false}
               />
             ) : (
-              /*
-               * `isAnimationActive={false}` ZORUNLU, süs değil.
-               *
-               * Gösterge Recharts'ın `<Legend>`'inden çıkarılınca çubukların
-               * giriş animasyonu BAŞLANGIÇTA TAKILI kaldı: `.recharts-bar-
-               * rectangle` grupları oluşuyor ama içlerindeki `<path>` hiç
-               * çizilmiyordu — 46 kutunun 46'sı boştu, grafik bomboş
-               * görünüyordu (üretim derlemesinde de aynı). Animasyon kapalıyken
-               * 46/46 dolu, en yüksek çubuk 252 px.
-               *
-               * Çizgiler etkilenmiyor; sorun yalnızca çubuk animasyonunda.
-               * Veri panosunda anında çizim zaten tercih edilir.
-               */
-              <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+              <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
             )
           )}
         </ComposedChart>
