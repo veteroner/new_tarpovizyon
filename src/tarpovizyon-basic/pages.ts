@@ -112,9 +112,21 @@ const HAYVANSAL_SECTIONS: Section[] = [
            * arasında yapılıyor — ürünler arasında zaten yapılamaz (Lt/baş ile
            * kg/kovan kıyaslanmaz).
            */
+          /*
+           * Dördü de ÇİZGİ ve eksenler otomatik:
+           * - Veri türü "zaman içindeki eğilim"; bunun karşılığı çizgi grafiktir.
+           *   Süt tek başına çubuktu, diğer üçü çizgi — aynı sayfada iki farklı
+           *   biçim, aynı türden veri için tutarsızdı.
+           * - `yDomain: 'auto'`: bu seriler dar aralıklarda geziniyor (büyükbaş
+           *   190–255 kg, küçükbaş 18–21 kg). Sıfırdan başlayan eksen hepsini
+           *   üst şeride sıkıştırıp neredeyse düz çizgi gösteriyordu. Çizgide
+           *   amaç DEĞİŞİM olduğu için sıfır tabanı zorunlu değil (çubukta
+           *   olurdu — uzunluk değeri temsil eder).
+           */
           title: 'HAYVANSAL ÜRETİMDE VERİM', endpoint: 'tr/verimlilikler', xField: 'yil', xFormat: 'year',
+          yDomain: 'auto',
           series: [
-            { key: 'cig_sut_verimi_lt', label: 'İnek Sütü Verimi (Lt/Baş)', type: 'bar' },
+            { key: 'cig_sut_verimi_lt', label: 'İnek Sütü Verimi (Lt/Baş)', type: 'line' },
           ],
           extraCharts: [
             {

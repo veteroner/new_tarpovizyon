@@ -29,6 +29,20 @@ export type YearlyPageConfig = {
   /** Additional charts rendered below the main one from the same rows — e.g. a
    *  comparison page that also wants each series broken out on its own. */
   extraCharts?: { title: string; series: SeriesConfig[] }[];
+  /**
+   * Y ekseni sıfırdan mı başlasın, veriye göre mi ölçeklensin.
+   *
+   * ─── HANGİSİ NE ZAMAN ────────────────────────────────────────────────────
+   * ÇUBUK grafikte eksen SIFIRDAN başlamalı: çubuğun uzunluğu değerin kendisini
+   * temsil eder, taban kaydırılırsa oranlar yalan söyler. Bu yüzden varsayılan
+   * 'zero'.
+   *
+   * ÇİZGİ grafikte amaç DEĞİŞİMİ göstermektir; sıfır tabanı dar aralıklı
+   * serileri ekranın üst şeridine sıkıştırıp düzleştirir. Örnek: büyükbaş
+   * karkas verimi 190–255 kg arasında geziniyor ama 0–260 ekseninde neredeyse
+   * düz bir çizgi gibi duruyordu. 'auto' ekseni veriye oturtuyor (%8 pay ile).
+   */
+  yDomain?: 'zero' | 'auto';
   /** Aggregate monthly/date rows into yearly sums for a cleaner trend chart. */
   aggregateYearly?: boolean;
   /** Reformats a datetime xField into a compact axis label. */
@@ -161,7 +175,7 @@ function useGauge(gauge?: YearlyPageConfig['gauge']) {
 }
 
 export function YearlyPage({ config }: { config: YearlyPageConfig }) {
-  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection, provincialRanking, extraCharts } = config;
+  const { title, endpoint, xField, series, kpiField, kpiLabel, kpiUnit, secondKpiField, secondKpiLabel, gauge, aggregateYearly, xFormat, tradeSection, provincialRanking, extraCharts, yDomain } = config;
 
   const { data, isLoading } = useQuery({
     queryKey: ['tvb-yearly', endpoint],
@@ -242,7 +256,7 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
                 ederdi); o yüzden seriyi başlık adlandırıyor. Çok serilide
                 başlık yok, gösterge zaten hepsini sayıyor. */}
             {series.length === 1 && <h3>{series[0].label}</h3>}
-            <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} />
+            <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={series} yDomain={yDomain} />
             {/*
               * Grafikteki son sütun eksik yılın toplamı — kırpılmıyor, veri
               * gerçek. Ama açıklanmazsa "üretim yarıya düştü" gibi okunuyor;
@@ -259,7 +273,7 @@ export function YearlyPage({ config }: { config: YearlyPageConfig }) {
           {extraCharts?.map((c) => (
             <div className="tvb-section" key={c.title}>
               <h3>{c.title}</h3>
-              <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={c.series} />
+              <YearlyChart data={filteredRows as Record<string, number | string>[]} xKey={xField} series={c.series} yDomain={yDomain} />
             </div>
           ))}
 

@@ -66,9 +66,16 @@ export function YearlyChart({
 
   const hasRightAxis = series.some((s) => s.axis === 'right');
 
-  // For 'auto', derive a padded [min,max] from the actual series values so the
-  // line fills the plot area. Recharts' default number domain anchors at 0.
-  // Computed per axis so a dual-axis chart scales each side independently.
+  /*
+   * 'auto' için eksen sınırlarını veriye oturt — ama YUVARLAK sayılara.
+   *
+   * Ham min/max kullanılınca eksende "1.517 / 2.067 / 3.582" gibi rastgele
+   * değerler çıkıyordu; okuyucu bunları kıyaslamak için zihinsel yuvarlama
+   * yapmak zorunda kalıyor. Sınırlar 1/2/5×10ⁿ adımına oturtulunca eksen
+   * "1.500 / 2.000 / 2.500 / 3.000 / 3.500" gibi okunur değerlere düşüyor.
+   *
+   * Çift eksenli grafikte her taraf ayrı hesaplanıyor.
+   */
   const domainFor = (which: 'left' | 'right'): [number, number] | undefined => {
     if (yDomain !== 'auto') return undefined;
     const keys = series.filter((s) => (s.axis ?? 'left') === which).map((s) => s.key);
@@ -76,8 +83,15 @@ export function YearlyChart({
     if (!vals.length) return undefined;
     const min = Math.min(...vals);
     const max = Math.max(...vals);
-    const pad = (max - min || Math.abs(max) || 1) * 0.08;
-    return [Math.floor(min - pad), Math.ceil(max + pad)];
+    const aralik = max - min || Math.abs(max) || 1;
+
+    // Yaklaşık 4 aralık hedefleyip adımı 1/2/5×10ⁿ ailesine yuvarlıyoruz.
+    const kaba = aralik / 4;
+    const us = 10 ** Math.floor(Math.log10(kaba));
+    const oran = kaba / us;
+    const adim = (oran >= 5 ? 5 : oran >= 2 ? 2 : 1) * us;
+
+    return [Math.floor(min / adim) * adim, Math.ceil(max / adim) * adim];
   };
 
   return (
