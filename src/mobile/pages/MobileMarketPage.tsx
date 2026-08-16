@@ -136,12 +136,17 @@ export default function MobileMarketPage() {
         {!isLoading && !isError && gruplar.map(({ kat, items }) => (
           <ListGroup key={kat} header={KATEGORI_ADI[kat]}>
             {items.map((q) => (
+              /*
+               * Satır artık tıklanabilir: ürünün fiyat grafiğini açıyor.
+               * Chevron da geri geldi — dokunulabilir olduğunu gösteren
+               * işaret o; `showChevron={false}` kalsaydı satır ölü görünürdü.
+               */
               <ListRow
                 key={q.symbol}
                 title={q.name}
                 subtitle={q.currency}
                 value={<Fiyat quote={q} />}
-                showChevron={false}
+                onClick={() => navigate(`/m/market/${encodeURIComponent(q.symbol)}`)}
               />
             ))}
           </ListGroup>

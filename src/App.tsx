@@ -12,6 +12,7 @@ import MobilePageHeader from './mobile/components/MobilePageHeader';
 import MobileHomePage from './mobile/pages/MobileHomePage';
 import MobileExplorePage from './mobile/pages/MobileExplorePage';
 import MobileMarketPage from './mobile/pages/MobileMarketPage';
+import MobileCommodityPage from './mobile/pages/MobileCommodityPage';
 import MobileAIPage from './mobile/pages/MobileAIPage';
 import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
 const SelectionPage = lazy(() => import('./pages/SelectionPage').then(m => ({ default: m.SelectionPage })));
@@ -141,6 +142,12 @@ function AppContent() {
             <Route index element={<MobileHomePage />} />
             <Route path="explore" element={<MobileExplorePage />} />
             <Route path="market" element={<MobileMarketPage />} />
+            {/*
+              * Emtia detayı — Piyasa listesinden bir ürüne dokununca.
+              * Sembollerde `=` var (ZW=F); React Router yol parçasını kendisi
+              * çözüyor, bağlantı üretirken encodeURIComponent yeterli.
+              */}
+            <Route path="market/:sembol" element={<MobileCommodityPage />} />
             <Route path="ai" element={<MobileAIPage />} />
             <Route path="settings" element={<MobileSettingsPage />} />
           </Route>

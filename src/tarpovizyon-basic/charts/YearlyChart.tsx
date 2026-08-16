@@ -1,6 +1,20 @@
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useContainerWidth } from './chartResponsive';
 
+/*
+ * ─── GELİŞTİRME SUNUCUSUNDA GRAFİKLER BOŞ GÖRÜNÜR — HATA DEĞİL ──────────────
+ * `npm run dev` altında React StrictMode efektleri iki kez çalıştırıyor ve
+ * Recharts 3.x'in giriş animasyonu başlangıç karesinde donuyor: çizgilerde
+ * `stroke-dasharray: "0px <uzunluk>"` (görünür kısım sıfır), çubuklarda
+ * `.recharts-bar-rectangle` grupları boş kalıyor. Grafik bomboş görünüyor.
+ *
+ * ÜRETİM DERLEMESİNDE SORUN YOK — ölçüldü: aynı grafik `vite preview`de
+ * `stroke-dasharray: "1502px 0px"`, yani animasyon tamamlanıyor.
+ *
+ * Bu yüzden animasyonu kapatmayın: dev'deki boşluğa bakıp "animasyon bozuk"
+ * diye teşhis koymak yanlış olur (bir kez yapıldı ve geri alındı). Grafik
+ * doğrulaması ÜRETİM derlemesinde yapılmalı.
+ */
 const COLORS = ['#f59e0b', '#2563eb', '#16a34a', '#dc2626', '#7c3aed', '#0891b2'];
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 // Axis ticks abbreviate only millions+ (1,4 Mn / 2,1 Mr) so a wide value like

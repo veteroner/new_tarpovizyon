@@ -161,3 +161,48 @@ export async function fetchCommodities(): Promise<CommodityQuote[]> {
       return catOrder[a.category] - catOrder[b.category];
     });
 }
+
+/* ─── Geçmiş fiyat (grafik için) ────────────────────────────────────────────
+ *
+ * Piyasa listesi yalnızca ANLIK fiyatı veriyor; kullanıcı bir ürüne dokununca
+ * fiyatın seyrini görmek istiyor. Backend'in `commodity_chart` ucu bunu
+ * sağlıyor: kapanış serisi, seçilebilir aralıkla.
+ *
+ * Ölçülen aralıklar (2026-08): 5d→5 nokta, 1mo→23, 3mo→63, 6mo→125, 1y→251,
+ * max→268 (2000'den bugüne, aylığa seyreltilmiş).
+ *
+ * NOT: Bu uç, piyasa listesiyle AYNI üçüncü taraf sunucuda ve anahtar istemci
+ * kodunda açık duruyor (bkz. BACKEND_COMMODITY_URL). Yeni bir güvenlik açığı
+ * eklemiyor ama mevcut olanı da kapatmıyor; emtia uçlarının tümü Worker'a
+ * taşınmalı.
+ */
+
+export type Aralik = '1mo' | '3mo' | '6mo' | '1y' | 'max';
+
+export type FiyatNoktasi = {
+  /** Unix saniye. */
+  t: number;
+  /** Kapanış. */
+  c: number;
+};
+
+export async function fetchCommodityHistory(
+  symbol: string,
+  range: Aralik,
+): Promise<FiyatNoktasi[]> {
+  const url = 'https://dersbende.com/api.php?action=commodity_chart'
+    + '&api_key=dashboard_secret_key_2024'
+    + `&symbol=${encodeURIComponent(symbol)}&range=${range}`;
+
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`Grafik verisi alınamadı (${res.status})`);
+
+  const json = await res.json() as { success?: boolean; data?: FiyatNoktasi[]; error?: string };
+  if (!json.success || !Array.isArray(json.data)) {
+    throw new Error(json.error ?? 'Grafik verisi alınamadı');
+  }
+  // Sunucu sıralı gönderiyor ama garanti değil; grafik x ekseni artan olmalı.
+  return json.data
+    .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.c))
+    .sort((a, b) => a.t - b.t);
+}

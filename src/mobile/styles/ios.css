@@ -719,3 +719,23 @@
   text-overflow: ellipsis;
 }
 .ios-sayfa-secici select:focus-visible { outline: 2px solid var(--ios-tint); outline-offset: 1px; }
+
+/* ─── Emtia detay başlığı ─────────────────────────────────────────────────
+ * Fiyat ve günlük değişim, grafiğin üstünde tek bakışta okunacak boyutta.
+ * Sayı `tabular-nums`: aralık değiştikçe fiyat yeniden çizilirken sütun
+ * kaymasın.
+ */
+.ios-fiyat-basligi {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 4px 0;
+}
+.ios-fiyat-basligi__deger {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ios-label);
+}
