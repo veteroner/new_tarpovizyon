@@ -49,6 +49,7 @@ const LandUsePage = lazy(() => import('./pages/LandUsePage'));
 const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const VeriYuklePage = lazy(() => import('./pages/VeriYuklePage'));
+const VeriGirisiPage = lazy(() => import('./pages/VeriGirisiPage'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -271,6 +272,8 @@ function AppContent() {
 
             {/* Elle veri yükleme (TÜİK API'sinde olmayan seriler için). */}
             <Route path="/tarpovizyon/veri-yukle" element={<VeriYuklePage />} />
+            {/* Rehberli sektör fiyat girişi — ızgaranın yanında, onun yerine değil. */}
+            <Route path="/tarpovizyon/veri-girisi" element={<VeriGirisiPage />} />
 
             {/* Bilinmeyen /tarpovizyon adresleri: kabuk içinde kalsın, boş ekran olmasın. */}
             <Route path="*" element={<NotFoundPage />} />

@@ -153,6 +153,9 @@ export const MENU: MenuCategory[] = [
        * listelenmemeli. Masaüstü panosunda yerinde duruyor.
        */
       { label: 'Veri Düzenle', any: '/tarpovizyon/veri-yukle', sadeceMasaustu: true },
+      /* Sektör fiyatları için rehberli giriş; ızgaranın yerine değil yanına.
+         Oranları kendisi hesapladığı için aylık girişte tercih edilen ekran. */
+      { label: 'Sektör Fiyat Girişi', any: '/tarpovizyon/veri-girisi', sadeceMasaustu: true },
     ],
   },
 ];
