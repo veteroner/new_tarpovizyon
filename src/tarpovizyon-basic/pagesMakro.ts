@@ -67,6 +67,13 @@ export const MAKRO_SECTIONS: Section[] = [
             {
               chartTitle: 'Ana Gruplara Göre TÜFE Aylık Değişim Oranı (%)',
               endpoint: 'makro/tufe-aylik-snapshot', nameField: 'harcama_grubu', valueField: 'aylik_degisim',
+              /*
+               * Bu grafikte referans satırı yok ve trend serisi YILLIK değer
+               * tuttuğu için dönem eşleştirmeyle bulunamıyor. Ama üç tablo da
+               * `scripts/tufe-guncelle.mjs` ile tek bülten dosyasından
+               * yazılıyor — dönem tanım gereği trendin son ayı.
+               */
+              donemTrendinSonu: true,
             },
           ],
         },

@@ -19,6 +19,21 @@ export type IndexTrendPageConfig = {
     nameField: string;
     valueField: string;
     referenceName?: string;
+    /**
+     * Dönemi trendin son ayından al.
+     *
+     * ─── NE ZAMAN KULLANILIR ────────────────────────────────────────────────
+     * Normalde snapshot'ın dönemi DOĞRULANARAK bulunuyor: referans satırının
+     * değeri trend serisinde hangi aya denk geliyorsa o. Ama AYLIK değişim
+     * snapshot'ında bu işlemiyor — trend serisi YILLIK değişim tutuyor, aylık
+     * bir değer (1,78) hiçbir aya eşleşmez.
+     *
+     * Bu bayrak yalnızca snapshot'ın trendle AYNI kaynaktan, aynı anda
+     * yazıldığı biliniyorsa verilmeli. TÜFE'de öyle:
+     * `scripts/tufe-guncelle.mjs` üç tabloyu da tek bülten dosyasından
+     * yazıyor, dolayısıyla dönemleri tanım gereği aynı.
+     */
+    donemTrendinSonu?: boolean;
   }[];
 };
 
@@ -77,13 +92,22 @@ export function IndexTrendPage({ config }: { config: IndexTrendPageConfig }) {
       )}
 
       {snapshots.map((snap) => (
-        <SnapshotSection key={snap.endpoint + snap.chartTitle} snap={snap} periodByValue={periodByValue} />
+        <SnapshotSection
+          key={snap.endpoint + snap.chartTitle}
+          snap={snap}
+          periodByValue={periodByValue}
+          trendSonDonem={latestPeriod}
+        />
       ))}
     </div>
   );
 }
 
-function SnapshotSection({ snap, periodByValue }: { snap: IndexTrendPageConfig['snapshots'][number]; periodByValue: Map<string, string> }) {
+function SnapshotSection({ snap, periodByValue, trendSonDonem }: {
+  snap: IndexTrendPageConfig['snapshots'][number];
+  periodByValue: Map<string, string>;
+  trendSonDonem: string | null;
+}) {
   const { data } = useQuery({ queryKey: ['tvb-index-snapshot', snap.endpoint], queryFn: () => fetchRows(snap.endpoint, { limit: '100' }) });
   const items = (data ?? [])
     .map((r) => ({ name: String(r[snap.nameField] ?? ''), value: Number(r[snap.valueField]) }))
@@ -91,10 +115,20 @@ function SnapshotSection({ snap, periodByValue }: { snap: IndexTrendPageConfig['
 
   if (items.length === 0) return null;
 
-  // The snapshot's period = the trend month whose value equals the reference
-  // row's value. Only shown when we can match it, so we never guess a month.
+  /*
+   * Dönem iki yoldan bulunuyor, sırayla:
+   *
+   *  1. DOĞRULAMA (tercih edilen): referans satırının değeri trend serisinde
+   *     hangi aya denk geliyorsa o. Değer eşleştiği için bu bir kanıt.
+   *  2. `donemTrendinSonu` bayrağı: snapshot trendle aynı kaynaktan, aynı anda
+   *     yazılıyorsa trendin son ayı geçerlidir. Aylık değişim snapshot'ında
+   *     1. yol işlemiyor (trend yıllık değer tutuyor, aylık değer eşleşmez).
+   *
+   * Hiçbiri yoksa rozet ÇİZİLMİYOR — ay tahmin edilmiyor.
+   */
   const refItem = snap.referenceName ? items.find((i) => i.name === snap.referenceName) : undefined;
-  const period = refItem ? periodByValue.get(refItem.value.toFixed(2)) : undefined;
+  const eslesen = refItem ? periodByValue.get(refItem.value.toFixed(2)) : undefined;
+  const period = eslesen ?? (snap.donemTrendinSonu ? trendSonDonem ?? undefined : undefined);
 
   return (
     <div className="tvb-section">
