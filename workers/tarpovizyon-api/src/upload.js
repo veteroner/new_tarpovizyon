@@ -26,15 +26,15 @@
  * Kullanıcı hangi satırı düzenlediğini ekranda görüyor, tahmin yok.
  */
 
+import { totpDogrula } from './totp.js';
+import { bildirEllaYazim } from './bildirim.js';
+
 export const MAX_ROWS = 500;
 
 /** Yazmaya kapalı sütunlar — kimlik ve otomatik alanlar. */
 const YAZILAMAZ = new Set(['id', 'created_at', 'updated_at']);
 
 const q = (isim) => `"${String(isim).replace(/"/g, '""')}"`;
-
-import { bildirEllaYazim } from './bildirim.js';
-
 /** Tablonun gerçek sütunlarını veritabanından okur. */
 async function sutunlar(env, tablo) {
   const { results } = await env.DB.prepare(
@@ -95,11 +95,31 @@ function deger(tur, ham) {
 /**
  * Satır yazma. Gövde: { tablo, guncellenecek: [{id, ...}], eklenecek: [{...}] }
  */
+/*
+ * ─── YETKİ: TOTP TERCİH EDİLİR, SABİT ANAHTAR YEDEK ─────────────────────────
+ * `ADMIN_TOTP_SECRET` tanımlıysa tek seferlik kod (`x-admin-otp`) kabul
+ * ediliyor; sabit anahtar (`x-admin-key`) da çalışmaya devam ediyor ki geçiş
+ * sırasında kilitlenme olmasın.
+ *
+ * Sabit anahtarı tamamen kapatmak için `wrangler secret delete ADMIN_KEY`
+ * yeterli — o zaman yalnızca TOTP kalır. İkisi de tanımsızsa uç TAMAMEN
+ * KAPALI (fail-closed), eskisi gibi.
+ */
+async function yetkili(request, env) {
+  const sabit = env.ADMIN_KEY ?? '';
+  if (sabit && (request.headers.get('x-admin-key') ?? '') === sabit) return true;
+
+  const sir = env.ADMIN_TOTP_SECRET ?? '';
+  const kod = request.headers.get('x-admin-otp') ?? '';
+  if (sir && kod) return totpDogrula(sir, kod);
+
+  return false;
+}
+
 export async function handleRows(request, env, ROUTES) {
   if (request.method !== 'POST') return { status: 405, body: { error: 'Yalnızca POST' } };
 
-  const beklenen = env.ADMIN_KEY ?? '';
-  if (!beklenen || (request.headers.get('x-admin-key') ?? '') !== beklenen) {
+  if (!(await yetkili(request, env))) {
     return { status: 401, body: { error: 'Yetkisiz' } };
   }
 

@@ -40,6 +40,11 @@ export function useVeriIzgara() {
   const [sutunlar, setSutunlar] = useState<Sutun[]>([]);
   const [satirlar, setSatirlar] = useState<IzgaraSatir[]>([]);
   const [ilkHal, setIlkHal] = useState<Map<number, Record<string, unknown>>>(new Map());
+  /*
+   * Tek seferlik kod: SAKLANMIYOR. Sabit anahtar (localStorage'daki) Worker'da
+   * `ADMIN_KEY` silinene kadar yedek olarak duruyor; ikisinden biri yeterli.
+   */
+  const [otp, setOtp] = useState('');
   const [anahtar, setAnahtar] = useState(() => localStorage.getItem(ANAHTAR_DEPO) ?? '');
   const [yukleniyor, setYukleniyor] = useState(false);
   const [durum, setDurum] = useState<{ tip: 'bos' | 'ok' | 'hata'; mesaj: string }>(
@@ -197,7 +202,7 @@ export function useVeriIzgara() {
 
   const kaydet = useCallback(async () => {
     const { guncellenecek, eklenecek } = degisiklikler;
-    if (!anahtar || (!guncellenecek.length && !eklenecek.length)) return;
+    if ((!otp && !anahtar) || (!guncellenecek.length && !eklenecek.length)) return;
     setYukleniyor(true);
     setDurum({ tip: 'bos', mesaj: 'Kaydediliyor…' });
     try {
@@ -214,7 +219,11 @@ export function useVeriIzgara() {
         if (!p.guncellenecek.length && !p.eklenecek.length) continue;
         const r = await fetch(`${API_BASE}/api/admin/rows`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-admin-key': anahtar },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(otp ? { 'x-admin-otp': otp } : {}),
+            ...(anahtar ? { 'x-admin-key': anahtar } : {}),
+          },
           body: JSON.stringify({ tablo: seciliTablo, ...p }),
         });
         const d = await r.json();
@@ -228,11 +237,12 @@ export function useVeriIzgara() {
     } finally {
       setYukleniyor(false);
     }
-  }, [degisiklikler, anahtar, seciliTablo, tabloSec]);
+  }, [degisiklikler, otp, anahtar, seciliTablo, tabloSec]);
 
   return {
     tablolar, seciliTablo, tabloSec,
     sutunlar, yazilabilirSutunlar, satirlar,
+    otp, setOtp,
     anahtar, anahtarKaydet,
     hucreDegistir, hucreDegisti, satirEkle, satirSil, dosyaAktar,
     degisiklikler, kaydet, yukleniyor, durum,

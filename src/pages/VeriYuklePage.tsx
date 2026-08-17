@@ -30,7 +30,7 @@ export default function VeriYuklePage() {
   const {
     tablolar, seciliTablo, tabloSec,
     sutunlar, yazilabilirSutunlar, satirlar,
-    anahtar, anahtarKaydet,
+    otp, setOtp, anahtar, anahtarKaydet,
     hucreDegistir, hucreDegisti, satirEkle, satirSil, dosyaAktar,
     degisiklikler, kaydet, yukleniyor, durum,
   } = useVeriIzgara();
@@ -60,15 +60,33 @@ export default function VeriYuklePage() {
         </p>
       </div>
 
-      {/* Anahtar */}
+      {/* Giriş: tek seferlik kod (tercih edilen) + sabit anahtar (yedek) */}
       <div style={kutu}>
-        <label style={{ fontWeight: 600, fontSize: '0.9rem', display: 'block', marginBottom: 6 }}>
-          Yönetici anahtarı
+        <label htmlFor="izgara-otp" style={{ fontWeight: 600, fontSize: '0.9rem', display: 'block', marginBottom: 6 }}>
+          Tek seferlik kod
         </label>
-        <input type="password" value={anahtar} autoComplete="off"
-          onChange={(e) => anahtarKaydet(e.target.value)}
-          placeholder="Anahtarı yapıştır" className="filter-select"
-          style={{ width: '100%', maxWidth: 420 }} />
+        <input
+          id="izgara-otp" value={otp}
+          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          inputMode="numeric" autoComplete="one-time-code" placeholder="000000"
+          className="filter-select"
+          style={{
+            width: '100%', maxWidth: 180, fontSize: '1.3rem',
+            letterSpacing: '0.35em', fontVariantNumeric: 'tabular-nums',
+          }} />
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+          Kimlik doğrulayıcı uygulamandaki 6 haneli kod. Saklanmaz, her kayıtta yeniden girilir.
+        </p>
+
+        <details style={{ marginTop: 12 }}>
+          <summary style={{ cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+            Sabit yönetici anahtarı (yedek)
+          </summary>
+          <input type="password" value={anahtar} autoComplete="off"
+            onChange={(e) => anahtarKaydet(e.target.value)}
+            placeholder="Anahtarı yapıştır" className="filter-select"
+            style={{ width: '100%', maxWidth: 420, marginTop: 8 }} />
+        </details>
       </div>
 
       {/* Tablo seçimi */}
@@ -193,17 +211,17 @@ export default function VeriYuklePage() {
               {yeniSayisi} satır <strong>yeni</strong>
             </span>
             <button type="button" onClick={kaydet}
-              disabled={!kaydedilecek || !anahtar || yukleniyor}
+              disabled={!kaydedilecek || (!otp && !anahtar) || yukleniyor}
               style={{
                 minHeight: 44, padding: '0 22px', borderRadius: 999, border: 'none',
-                background: kaydedilecek && anahtar && !yukleniyor ? 'var(--accent, #16a34a)' : 'var(--border)',
+                background: kaydedilecek && (otp || anahtar) && !yukleniyor ? 'var(--accent, #16a34a)' : 'var(--border)',
                 color: '#fff', fontWeight: 700,
-                cursor: kaydedilecek && anahtar && !yukleniyor ? 'pointer' : 'not-allowed',
+                cursor: kaydedilecek && (otp || anahtar) && !yukleniyor ? 'pointer' : 'not-allowed',
               }}>
               {yukleniyor ? 'Kaydediliyor…' : 'Veritabanına kaydet'}
             </button>
-            {!anahtar && (
-              <span style={{ color: '#ef4444', fontSize: '0.8rem' }}>Önce yönetici anahtarını gir.</span>
+            {!otp && !anahtar && (
+              <span style={{ color: '#ef4444', fontSize: '0.8rem' }}>Önce tek seferlik kodu gir.</span>
             )}
           </div>
         </div>

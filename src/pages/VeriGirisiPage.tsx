@@ -48,6 +48,16 @@ const goster = (v: number | null, basamak = 2) =>
   v === null ? '—' : v.toLocaleString('tr-TR', { maximumFractionDigits: basamak });
 
 export default function VeriGirisiPage() {
+  /*
+   * ─── GİRİŞ: TEK SEFERLİK KOD ──────────────────────────────────────────────
+   * Sabit yönetici anahtarı localStorage'da kalıcı duruyordu: sızarsa süresiz
+   * geçerli. Artık kimlik doğrulayıcıdan (Apple Şifreler, 1Password…) okunan
+   * 6 haneli kod gönderiliyor ve SAKLANMIYOR — her yazmada yeniden giriliyor.
+   *
+   * Sabit anahtar alanı, Worker'da `ADMIN_KEY` silinene kadar yedek olarak
+   * duruyor; ikisinden biri yeterli.
+   */
+  const [otp, setOtp] = useState('');
   const [anahtar, setAnahtar] = useState(() => localStorage.getItem(ANAHTAR_DEPO) ?? '');
   const [formTablo, setFormTablo] = useState<string>(SEKTOR_FORMLARI[0].tablo);
   const [satirlar, setSatirlar] = useState<Satir[]>([]);
@@ -125,7 +135,11 @@ export default function VeriGirisiPage() {
     try {
       const r = await fetch(`${API_BASE}/api/admin/rows`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': anahtar },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(otp ? { 'x-admin-otp': otp } : {}),
+          ...(anahtar ? { 'x-admin-key': anahtar } : {}),
+        },
         body: JSON.stringify(govde),
       });
       const j = await r.json();
@@ -178,14 +192,36 @@ export default function VeriGirisiPage() {
         </p>
       </div>
 
-      {/* Anahtar */}
+      {/* Giriş: tek seferlik kod (tercih edilen) + sabit anahtar (yedek) */}
       <div style={kutu}>
-        <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 6 }}>Yönetici anahtarı</label>
+        <label htmlFor="otp-kod" style={{ display: 'block', fontSize: '0.85rem', marginBottom: 6 }}>
+          Tek seferlik kod
+        </label>
         <input
-          type="password" value={anahtar} onChange={(e) => anahtarYaz(e.target.value)}
-          placeholder="Anahtarı yapıştır" className="filter-select"
-          style={{ width: '100%', maxWidth: 380 }}
+          id="otp-kod"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          inputMode="numeric" autoComplete="one-time-code" placeholder="000000"
+          className="filter-select"
+          style={{
+            width: '100%', maxWidth: 180, fontSize: '1.3rem',
+            letterSpacing: '0.35em', fontVariantNumeric: 'tabular-nums',
+          }}
         />
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748b)', margin: '6px 0 0' }}>
+          Kimlik doğrulayıcı uygulamandaki 6 haneli kod. Saklanmaz, her kayıtta yeniden girilir.
+        </p>
+
+        <details style={{ marginTop: 12 }}>
+          <summary style={{ cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-muted, #64748b)' }}>
+            Sabit yönetici anahtarı (yedek)
+          </summary>
+          <input
+            type="password" value={anahtar} onChange={(e) => anahtarYaz(e.target.value)}
+            placeholder="Anahtarı yapıştır" className="filter-select" autoComplete="off"
+            style={{ width: '100%', maxWidth: 380, marginTop: 8 }}
+          />
+        </details>
       </div>
 
       {/* Tablo seçimi */}
@@ -231,11 +267,11 @@ export default function VeriGirisiPage() {
             })}
           </div>
           <button
-            type="button" onClick={bozuklariDuzelt} disabled={!anahtar || yukleniyor}
+            type="button" onClick={bozuklariDuzelt} disabled={(!otp && !anahtar) || yukleniyor}
             style={{
               minHeight: 40, padding: '0 18px', borderRadius: 999, border: 'none', fontWeight: 700,
-              background: anahtar && !yukleniyor ? '#f59e0b' : 'var(--border)', color: '#fff',
-              cursor: anahtar && !yukleniyor ? 'pointer' : 'not-allowed',
+              background: (otp || anahtar) && !yukleniyor ? '#f59e0b' : 'var(--border)', color: '#fff',
+              cursor: (otp || anahtar) && !yukleniyor ? 'pointer' : 'not-allowed',
             }}
           >
             {yukleniyor ? 'Düzeltiliyor…' : 'Hesaplanan değerleri düzelt'}
@@ -318,11 +354,11 @@ export default function VeriGirisiPage() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
           <button
             type="button" onClick={kaydet}
-            disabled={!anahtar || yukleniyor || eksikZorunlu.length > 0}
+            disabled={(!otp && !anahtar) || yukleniyor || eksikZorunlu.length > 0}
             style={{
               minHeight: 44, padding: '0 22px', borderRadius: 999, border: 'none', fontWeight: 700, color: '#fff',
-              background: anahtar && !yukleniyor && !eksikZorunlu.length ? 'var(--accent, #16a34a)' : 'var(--border)',
-              cursor: anahtar && !yukleniyor && !eksikZorunlu.length ? 'pointer' : 'not-allowed',
+              background: (otp || anahtar) && !yukleniyor && !eksikZorunlu.length ? 'var(--accent, #16a34a)' : 'var(--border)',
+              cursor: (otp || anahtar) && !yukleniyor && !eksikZorunlu.length ? 'pointer' : 'not-allowed',
             }}
           >
             {yukleniyor ? 'Kaydediliyor…' : `${donemMetni(yil, ay)} olarak kaydet`}
@@ -332,7 +368,7 @@ export default function VeriGirisiPage() {
               Zorunlu: {eksikZorunlu.map((x) => x.etiket).join(', ')}
             </span>
           )}
-          {!anahtar && <span style={{ color: '#ef4444', fontSize: '0.82rem' }}>Önce yönetici anahtarını gir.</span>}
+          {!otp && !anahtar && <span style={{ color: '#ef4444', fontSize: '0.82rem' }}>Önce tek seferlik kodu gir.</span>}
         </div>
       </div>
 
