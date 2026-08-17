@@ -45,6 +45,32 @@ if (!yil || !ay || !url) {
 
 const API = process.env.TARPOVIZYON_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
 
+/*
+ * ─── BÜLTEN ADI → D1 ADI ────────────────────────────────────────────────────
+ * Bülten resmî uzun adları kullanıyor ("Konut, su, elektrik, gaz ve diğer
+ * yakıtlar"), D1 kısa adları ("Konut"). Eşleme SIRAYA DEĞİL, desene göre:
+ * TÜİK grup sırasını değiştirirse konum eşlemesi sessizce yanlış veri yazardı.
+ *
+ * `tufe_yillik_snapshot` 14 satır (TÜFE genel dahil), `tufe_aylik_snapshot`
+ * 13 satır (genel endeks yok) — bülten satırı ikisinde de aynı.
+ */
+const GRUPLAR = [
+  { re: /^TÜFE/, d1: 'TÜFE (Genel Endeks)', genel: true },
+  { re: /^Gıda ve alkolsüz/, d1: 'Gıda ve alkolsüz içecekler' },
+  { re: /^Alkollü içecekler/, d1: 'Alkollü içecekler ve tütün' },
+  { re: /^Giyim ve ayakkabı/, d1: 'Giyim ve ayakkabı' },
+  { re: /^Konut/, d1: 'Konut' },
+  { re: /^Mobilya/, d1: 'Mobilya ve ev eşyası' },
+  { re: /^Sağlık/, d1: 'Sağlık' },
+  { re: /^Ulaştırma/, d1: 'Ulaştırma' },
+  { re: /^Bilgi ve iletişim/, d1: 'Bilgi ve iletişim' },
+  { re: /^Eğlence/, d1: 'Eğlence ve kültür' },
+  { re: /^Eğitim/, d1: 'Eğitim' },
+  { re: /^Lokantalar/, d1: 'Lokanta ve konaklama' },
+  { re: /^Sigorta ve finansal/, d1: 'Sigorta ve finansal hizmetler' },
+  { re: /^Kişisel bakım/, d1: 'Çeşitli mal ve hizmetler' },
+];
+
 /** Bültenin "ana harcama grupları" tablosundan TÜFE ve Gıda yıllık değişimi. */
 async function bultendenOku(indirmeUrl) {
   const r = await fetch(indirmeUrl);
@@ -68,7 +94,23 @@ async function bultendenOku(indirmeUrl) {
     throw new Error('Tablo düzeni tanınmadı: TÜFE / Gıda satırı bulunamadı.');
   }
   const say = (v) => Number(String(v ?? '').replace(',', '.'));
-  return { tufe: say(tufeSatir[4]), gida: say(gidaSatir[4]) };
+
+  /*
+   * Grup kırılımı da aynı tablodan: sütun 2 = bir önceki aya göre (aylık %),
+   * sütun 4 = bir önceki yılın aynı ayına göre (yıllık %). Sayfadaki iki
+   * "ana gruplara göre" grafiği bunlardan besleniyor; aynı dosyadan
+   * okunduğu için trend grafiğiyle ASLA farklı döneme düşemezler.
+   */
+  const gruplar = [];
+  for (const g of GRUPLAR) {
+    const r2 = satir(g.re);
+    if (!r2) {
+      throw new Error(`Grup bulunamadı: ${g.d1}. TÜİK tablo düzenini değiştirmiş olabilir.`);
+    }
+    gruplar.push({ d1: g.d1, genel: Boolean(g.genel), aylik: say(r2[2]), yillik: say(r2[4]) });
+  }
+
+  return { tufe: say(tufeSatir[4]), gida: say(gidaSatir[4]), gruplar };
 }
 
 /** D1'deki mevcut seri — hem mükerrer kontrolü hem güvenlik kontrolü için. */
@@ -78,18 +120,15 @@ async function mevcutSeri() {
   return (await r.json()).data ?? [];
 }
 
-const { tufe, gida } = await bultendenOku(url);
+const { tufe, gida, gruplar } = await bultendenOku(url);
 if (!Number.isFinite(tufe) || !Number.isFinite(gida)) {
   throw new Error(`Sayı ayrıştırılamadı: tufe=${tufe} gida=${gida}`);
 }
 console.log(`Bültenden okundu: ${yil}-${String(ay).padStart(2, '0')} → TÜFE %${tufe}, Gıda %${gida}`);
+console.log(`Ana harcama grubu: ${gruplar.length} satır ayrıştırıldı.`);
 
 const seri = await mevcutSeri();
 const zatenVar = seri.find((s) => Number(s.yil) === yil && Number(s.ay) === ay);
-if (zatenVar) {
-  console.log(`Bu dönem D1'de ZATEN VAR (tufe=${zatenVar.tufe}, gida=${zatenVar.gida_alkolsuz}). Yazılmadı.`);
-  process.exit(0);
-}
 
 /*
  * ─── GÜVENLİK KONTROLÜ ──────────────────────────────────────────────────────
@@ -101,25 +140,57 @@ if (zatenVar) {
  * ayının BEKLENEN ay olduğunu doğruluyoruz (ör. Temmuz yazılacaksa son ay
  * Haziran olmalı) — atlanmış ay varsa uyarıyoruz.
  */
-const sonSatir = [...seri].sort((a, b) => (a.yil * 100 + a.ay) - (b.yil * 100 + b.ay)).at(-1);
-const beklenen = ay === 1 ? { yil: yil - 1, ay: 12 } : { yil, ay: ay - 1 };
-if (!sonSatir || Number(sonSatir.yil) !== beklenen.yil || Number(sonSatir.ay) !== beklenen.ay) {
-  console.error(`DURDU: D1'in son dönemi ${sonSatir?.yil}-${sonSatir?.ay}, `
-    + `beklenen ${beklenen.yil}-${beklenen.ay}. Arada atlanmış ay var — önce onu yükle.`);
-  process.exit(1);
+if (!zatenVar) {
+  const sonSatir = [...seri].sort((a, b) => (a.yil * 100 + a.ay) - (b.yil * 100 + b.ay)).at(-1);
+  const beklenen = ay === 1 ? { yil: yil - 1, ay: 12 } : { yil, ay: ay - 1 };
+  if (!sonSatir || Number(sonSatir.yil) !== beklenen.yil || Number(sonSatir.ay) !== beklenen.ay) {
+    console.error(`DURDU: D1'in son dönemi ${sonSatir?.yil}-${sonSatir?.ay}, `
+      + `beklenen ${beklenen.yil}-${beklenen.ay}. Arada atlanmış ay var — önce onu yükle.`);
+    process.exit(1);
+  }
+} else {
+  console.log(`Aylık seri: ${yil}-${ay} zaten var (tufe=${zatenVar.tufe}), tekrar yazılmayacak.`);
 }
 
-const sql = `INSERT INTO tufe_aylik (yil, ay, tufe, gida_alkolsuz)
+const tirnak = (s) => `'${String(s).replace(/'/g, "''")}'`;
+
+/*
+ * ─── SNAPSHOT'LAR NEDEN HER SEFERİNDE SIFIRLANIYOR ──────────────────────────
+ * `tufe_yillik_snapshot` / `tufe_aylik_snapshot` bir SERİ değil, TEK DÖNEMİN
+ * fotoğrafı: sayfadaki "Ana Gruplara Göre" grafikleri bunlardan besleniyor.
+ * Dönem sütunları yok, o yüzden birikmemeleri gerekiyor — DELETE + INSERT.
+ *
+ * Aylık seriyle AYNI dosyadan yazılıyorlar; böylece trend grafiği Temmuz'u,
+ * grup grafikleri Mayıs'ı gösteren duruma (2026-08'de yaşandı) bir daha
+ * düşülmüyor.
+ */
+const sqlParcalari = [];
+
+if (!zatenVar) {
+  sqlParcalari.push(`INSERT INTO tufe_aylik (yil, ay, tufe, gida_alkolsuz)
 SELECT ${yil}, ${ay}, ${tufe}, ${gida}
-WHERE NOT EXISTS (SELECT 1 FROM tufe_aylik WHERE yil=${yil} AND ay=${ay});`;
+WHERE NOT EXISTS (SELECT 1 FROM tufe_aylik WHERE yil=${yil} AND ay=${ay});`);
+}
+
+sqlParcalari.push(
+  'DELETE FROM tufe_yillik_snapshot;',
+  'INSERT INTO tufe_yillik_snapshot (harcama_grubu, yillik_degisim) VALUES\n'
+    + gruplar.map((g) => `(${tirnak(g.d1)}, ${g.yillik})`).join(',\n') + ';',
+  'DELETE FROM tufe_aylik_snapshot;',
+  // Aylık grafikte genel endeks yok — 13 satır (bkz. GRUPLAR yorumu).
+  'INSERT INTO tufe_aylik_snapshot (harcama_grubu, aylik_degisim) VALUES\n'
+    + gruplar.filter((g) => !g.genel).map((g) => `(${tirnak(g.d1)}, ${g.aylik})`).join(',\n') + ';',
+);
+
+const sql = sqlParcalari.join('\n');
 
 if (!yaz) {
-  console.log('\n--- D1\'e yazmak için (--yaz ile otomatik de yapılır) ---');
-  console.log(`cd workers/tarpovizyon-api && npx wrangler d1 execute tarpovizyon-basic --remote --command "${sql.replace(/\n/g, ' ')}"`);
+  console.log('\n--- Çalıştırılacak SQL (--yaz ile otomatik uygulanır) ---\n');
+  console.log(sql);
   process.exit(0);
 }
 
 const { execFileSync } = await import('node:child_process');
 execFileSync('npx', ['wrangler', 'd1', 'execute', 'tarpovizyon-basic', '--remote', '--command', sql],
   { cwd: 'workers/tarpovizyon-api', stdio: 'inherit', env: { ...process.env, LANG: 'en_US.UTF-8' } });
-console.log('Yazıldı.');
+console.log('\nYazıldı: aylık seri + iki snapshot tablosu.');
