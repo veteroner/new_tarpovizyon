@@ -460,12 +460,53 @@ async function main() {
     console.log(`${mark} ${r.dataset}: ${detail}`);
   }
 
+  await elleTablolariDenetle();
+
   const failed = results.filter((r) => r.status === 'error');
   if (failed.length) {
     console.error(`\n${failed.length} veri seti başarısız.`);
     process.exit(1);
   }
   console.log('\nSenkron tamam.');
+}
+
+/**
+ * Otomatik tazelenemeyen tabloların geride kalıp kalmadığını RAPORLAR.
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * TÜFE, TÜİK'in SDMX kataloğunda yok; yalnızca haber bülteninde yayımlanıyor
+ * ve bültenin JSON uçları Node'dan 404 dönüyor (WAF). Yani bu tablo elle
+ * güncelleniyor — ve tam da bu yüzden İKİ AY geride kaldığı fark edilmedi
+ * (Mayıs'ta kalmışken Temmuz yayımlanmıştı).
+ *
+ * Burada veri ÇEKİLMİYOR, yalnızca gecikme ölçülüp uyarı basılıyor: senkron
+ * her gün çalıştığı için gecikme en geç ertesi gün görünür oluyor.
+ * Senkronu ASLA düşürmüyor — bu bir bilgi mesajı, hata değil.
+ */
+async function elleTablolariDenetle() {
+  const ELLE = [
+    { tablo: 'tufe_aylik', ad: 'TÜFE (aylık)', gecikmeAy: 2,
+      komut: 'node scripts/tufe-guncelle.mjs --yil <yıl> --ay <ay> --url "<bülten-xls>"' },
+  ];
+
+  for (const t of ELLE) {
+    try {
+      const satirlar = await d1(`SELECT MAX(yil * 100 + ay) AS son FROM ${t.tablo}`);
+      const son = satirlar?.[0]?.son;
+      if (!son) continue;
+      const sonYil = Math.floor(son / 100);
+      const sonAy = son % 100;
+
+      const simdi = new Date();
+      const gecenAy = (simdi.getFullYear() - sonYil) * 12 + (simdi.getMonth() + 1 - sonAy);
+      if (gecenAy > t.gecikmeAy) {
+        console.warn(`\n⚠ ${t.ad}: son dönem ${sonYil}-${String(sonAy).padStart(2, '0')} `
+          + `(${gecenAy} ay geride). Elle güncellenmeli:\n   ${t.komut}`);
+      }
+    } catch (e) {
+      console.error(`Elle tablo denetimi atlandı (${t.tablo}): ${e.message}`);
+    }
+  }
 }
 
 main().catch((e) => {
