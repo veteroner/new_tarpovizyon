@@ -132,7 +132,8 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
 
       const ilHaritasi = new Map<string, Record<string, number | string>>();
       for (const r of cityRaw) {
-        const il = String(r.il ?? '');
+        // Sorgu `yer` ile gruplanıyor: duzeykod=3'te il adı orada, `il` BOŞ.
+          const il = String(r.yer ?? '');
         if (!il || TOPLAM_SATIRLARI.includes(il)) continue;
         const kayit = ilHaritasi.get(il) ?? { il, sigir: 0, manda: 0, koyun: 0, keci: 0, etTavugu: 0, yumurtaTavugu: 0 };
         const grup = String(r.grup ?? '');

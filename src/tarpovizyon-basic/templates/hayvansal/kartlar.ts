@@ -34,6 +34,12 @@ export type KartTanimi = {
    * ve başlıkta bu açıkça yazıyor.
    */
   dunyaFiyat?: { kod: number; label: string }[];
+  /** Kırmızı ette tür dağılımı ve türlere göre yıllık üretim (özetten taşındı). */
+  etKirilimi?: boolean;
+  /** Aylık kanatlı serisinden hangi alan gösterilsin (özetten taşındı). */
+  aylikAlan?: string;
+  /** İl haritasında hangi hayvanlar toplansın (özetten taşındı). */
+  haritaTurleri?: ('sigir' | 'manda' | 'koyun' | 'keci')[];
   /** Detayın altındaki yönlendirme: Basic bölüm yolu ve ilk sayfası. */
   sektor?: { label: string; yol: string };
 };
@@ -58,6 +64,7 @@ export const KARTLAR: KartTanimi[] = [
     fiyatUrunleri: ['Süt sığırları, canlı', 'Diğer sığır, manda (süt için yetiştirilenler hariç) ve bizonlar, canlı'],
     sektor: KIRMIZI_ET_SEKTORU,
     dunyaFiyat: [{ kod: 867, label: 'Sığır Eti' }],
+    haritaTurleri: ['sigir', 'manda'],
   },
   {
     id: 'kucukbas',
@@ -73,6 +80,7 @@ export const KARTLAR: KartTanimi[] = [
     fiyatUrunleri: ['Koyun, canlı', 'Keçi, canlı'],
     sektor: KIRMIZI_ET_SEKTORU,
     dunyaFiyat: [{ kod: 977, label: 'Koyun Eti' }, { kod: 1017, label: 'Keçi Eti' }],
+    haritaTurleri: ['koyun', 'keci'],
   },
   {
     id: 'kirmizi-et',
@@ -84,6 +92,7 @@ export const KARTLAR: KartTanimi[] = [
     dunyaSirasi: 'sigir-eti',
     sektor: KIRMIZI_ET_SEKTORU,
     dunyaFiyat: [{ kod: 867, label: 'Sığır Eti' }, { kod: 977, label: 'Koyun Eti' }],
+    etKirilimi: true,
   },
   {
     id: 'cig-sut',
@@ -107,6 +116,7 @@ export const KARTLAR: KartTanimi[] = [
     dunyaSirasi: 'tavuk-eti',
     sektor: KANATLI_SEKTORU,
     dunyaFiyat: [{ kod: 1058, label: 'Tavuk Eti' }],
+    aylikAlan: 'Tavuk Eti (ton)',
   },
   {
     id: 'yumurta',
@@ -117,6 +127,7 @@ export const KARTLAR: KartTanimi[] = [
     alan: 'yumurta_milyon_adet',
     sektor: KANATLI_SEKTORU,
     dunyaFiyat: [{ kod: 1062, label: 'Yumurta' }],
+    aylikAlan: 'Yumurta (M adet)',
   },
   {
     id: 'bal',

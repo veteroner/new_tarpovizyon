@@ -1,6 +1,9 @@
 import { Link, useParams } from 'react-router-dom';
 import { YearlyChart } from '../../charts/YearlyChart';
 import { RankingBlock } from '../../charts/RankingBlock';
+import { ProportionBar } from '../../charts/ProportionBar';
+import { TurkeyProvinceMap } from '../../charts/TurkeyProvinceMap';
+import { COLORS } from '../../../pages/turkeyAnimalProduction/turkeyAnimalProductionTypes';
 import { KARTLAR, kartBul } from './kartlar';
 import { useHayvansalKartlar, useFiyatSerisi, useDunyaFiyat, type YilSatiri } from './useHayvansalKartlar';
 import { useTurkeyAnimalProductionData } from '../../../pages/turkeyAnimalProduction/useTurkeyAnimalProductionData';
@@ -22,7 +25,10 @@ export function HayvansalDetayPage() {
   const { yukleniyor, varlik, uretim } = useHayvansalKartlar();
   const fiyat = useFiyatSerisi(kart?.fiyatUrunleri);
   const dunyaFiyat = useDunyaFiyat(kart?.dunyaFiyat);
-  const { worldBeefRanking, worldMilkRanking, worldChickenRanking } = useTurkeyAnimalProductionData();
+  const {
+    worldBeefRanking, worldMilkRanking, worldChickenRanking,
+    redMeatBreakdown, redMeatTrendData, poultryMonthlyData, cityData,
+  } = useTurkeyAnimalProductionData();
 
   if (!kart) {
     return (
@@ -136,6 +142,21 @@ export function HayvansalDetayPage() {
     return { ...g, tr, sonYil, siralama, trSira: trSira >= 0 ? trSira + 1 : null, trDeger };
   }).filter((g) => g.tr.length || g.siralama.length);
 
+  /* ─── ÖZETTEN TAŞINAN BLOKLAR ─────────────────────────────────────────────
+   * Bu grafikler önce iniş sayfasındaydı; orası yalnızca kartlardan oluşsun
+   * diye ilgili kartın detayına taşındı. İçerik değişmedi, yeri değişti.
+   */
+  const etDagilimi = kart.etKirilimi
+    ? redMeatBreakdown.map((d) => ({ name: d.name, value: d.value, color: COLORS[d.name] ?? '#94a3b8' }))
+    : [];
+
+  const haritaDegerleri: Record<string, number> = {};
+  if (kart.haritaTurleri) {
+    for (const il of cityData ?? []) {
+      haritaDegerleri[il.il] = kart.haritaTurleri.reduce((t2, tur) => t2 + (il[tur] ?? 0), 0);
+    }
+  }
+
   const komsular = KARTLAR.filter((k) => k.grup === kart.grup);
   const sira = komsular.findIndex((k) => k.id === kart.id);
   const onceki_kart = komsular[sira - 1];
@@ -180,6 +201,48 @@ export function HayvansalDetayPage() {
             series={kart.kirilim!.map((k) => ({ key: k.label, label: k.label, type: 'line' as const }))}
             yDomain="auto"
           />
+        </div>
+      )}
+
+      {etDagilimi.length > 0 && (
+        <div className="tvb-section">
+          <h3>Kırmızı Et Üretiminin Tür Dağılımı</h3>
+          <ProportionBar items={etDagilimi} />
+        </div>
+      )}
+
+      {kart.etKirilimi && redMeatTrendData.length > 0 && (
+        <div className="tvb-section">
+          <h3>Türlere Göre Yıllık Üretim (ton)</h3>
+          <YearlyChart
+            data={redMeatTrendData as unknown as Record<string, number | string>[]}
+            xKey="yil"
+            series={[
+              { key: 'Sığır', label: 'Sığır', type: 'bar', stack: 'et' },
+              { key: 'Koyun', label: 'Koyun', type: 'bar', stack: 'et' },
+              { key: 'Keçi', label: 'Keçi', type: 'bar', stack: 'et' },
+              { key: 'Manda', label: 'Manda', type: 'bar', stack: 'et' },
+            ]}
+          />
+        </div>
+      )}
+
+      {kart.aylikAlan && poultryMonthlyData.length > 0 && (
+        <div className="tvb-section">
+          <h3>Aylık Üretim</h3>
+          <YearlyChart
+            data={poultryMonthlyData as unknown as Record<string, number | string>[]}
+            xKey="ay"
+            series={[{ key: kart.aylikAlan, label: kart.aylikAlan, type: 'line' }]}
+            yDomain="auto"
+          />
+        </div>
+      )}
+
+      {Object.keys(haritaDegerleri).length > 0 && (
+        <div className="tvb-section">
+          <h3>İllere Göre Dağılım (baş)</h3>
+          <TurkeyProvinceMap values={haritaDegerleri} />
         </div>
       )}
 
