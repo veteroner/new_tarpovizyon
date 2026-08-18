@@ -2,19 +2,20 @@
 /**
  * FAO yıllık veri setleri → D1 (`tarpovizyon-dunya`).
  *
- *   node scripts/fao-sync/sync.mjs                  # tümünü denetle, yazma
- *   node scripts/fao-sync/sync.mjs --yaz            # eksik yılları yükle
- *   node scripts/fao-sync/sync.mjs --set pestisit --yaz
+ *   node scripts/fao-sync/sync.mjs                     # tümünü denetle, yazma
+ *   node scripts/fao-sync/sync.mjs --yaz               # eksik yılları yükle
+ *   node scripts/fao-sync/sync.mjs --set nufus --yaz
  *
- * Ayrıntılı gerekçeler `tanimlar.mjs` başında.
+ * Gerekçeler ve tablo biçimleri `tanimlar.mjs` başında; CSV akışı `csv.mjs`.
  */
 
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdirSync, existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BULK_KOK, TANIMLAR } from './tanimlar.mjs';
+import { csvSatirlari } from './csv.mjs';
 
 const calistir = promisify(execFile);
 const KOK = new URL('../../workers/tarpovizyon-api/', import.meta.url).pathname;
@@ -61,7 +62,7 @@ const n = (v) => {
   return Number.isFinite(x) ? String(x) : 'NULL';
 };
 
-/* ─── bulk indirme ve CSV ─────────────────────────────────────────────────── */
+/* ─── bulk indirme ────────────────────────────────────────────────────────── */
 
 async function bulkIndir(dosya) {
   mkdirSync(ONBELLEK, { recursive: true });
@@ -77,36 +78,147 @@ async function bulkIndir(dosya) {
   return yerel;
 }
 
-/**
- * Zip içindeki tek CSV'yi metin olarak verir (macOS/Linux `unzip`).
- * FAO dosyaları UTF-8; latin1 okumak 'Türkiye'yi 'TÃ¼rkiye' yapıyor ve hata
- * vermeden veritabanına bozuk yazıyor.
+/*
+ * BÖLGE/DÜNYA TOPLAMLARI ATLANIR. Bulk dosyalarda ülke satırlarının yanında
+ * toplam satırları da var (Area Code >= 5000: World, kıtalar, gelir grupları;
+ * gübrede 51000+). D1 yalnızca ÜLKELERİ tutuyor — toplamları da yazmak satır
+ * sayısını %12-28, değer toplamını 2-3 kat şişiriyordu.
  */
-async function csvOku(zipYolu) {
-  const { stdout: liste } = await calistir('unzip', ['-Z1', zipYolu], { maxBuffer: 4 * 1024 * 1024 });
-  const csv = liste.split('\n').find((x) => /\.csv$/i.test(x.trim()));
-  if (!csv) throw new Error(`zip içinde CSV yok: ${zipYolu}`);
-  const { stdout } = await calistir('unzip', ['-p', zipYolu, csv.trim()],
-    { maxBuffer: 1024 * 1024 * 1024, encoding: 'utf8' });
-  return stdout;
+const ULKE_SINIRI = 5000;
+
+/* ─── tek geçişte dosya okuma ─────────────────────────────────────────────── */
+
+/**
+ * Dosyayı BİR KEZ dolaşıp hem yeni yılın satırlarını hem çapa yılının
+ * değerlerini toplar. Üretim dosyası ~1,5 GB metin; iki kez okumak da tek
+ * parça belleğe almak da çalışmıyor.
+ */
+async function dosyaTara(zip, t, sonYil, urunKodlari) {
+  const ustYil = t.ustYil ? t.ustYil() : Infinity;
+  const it = csvSatirlari(zip);
+  const ilk = await it.next();
+  const baslik = ilk.value.map((x) => x.trim());
+  const I = (adi) => {
+    const i = baslik.indexOf(adi);
+    if (i < 0) throw new Error(`CSV'de sütun yok: ${adi} (mevcut: ${baslik.join(',')})`);
+    return i;
+  };
+
+  const pivot = t.bicim === 'pivot';
+  const kolon = pivot
+    ? { ...Object.fromEntries(Object.entries(t.anahtar).map(([d, c]) => [d, I(c)])),
+      ...Object.fromEntries(Object.entries(t.tasinan).map(([d, c]) => [d, I(c)])),
+      yayilan: I(t.yayilanSutun ?? 'Element Code'),
+      value: I('Value'), year: I('Year'), areacode: I('Area Code'),
+      unit: I('Unit'),
+      urunKod: t.urunKodAlani ? I(t.urunKodAlani) : -1 }
+    : Object.fromEntries(Object.entries(t.esleme).map(([d, c]) => [d, I(c)]));
+
+  const yeni = new Map();      // pivot: anahtar → satır | duz: sıra → satır
+  const capa = new Map();      // anahtar → değer(ler)
+  let dosyaSonYil = 0;
+  let sira = 0;
+
+  for await (const r of it) {
+    if (r.length < 3) continue;
+    if (Number(r[kolon.areacode]) >= ULKE_SINIRI) continue;
+    // Kapsam D1'den geliyorsa listede olmayan ürünü almıyoruz.
+    if (urunKodlari && kolon.urunKod >= 0 && !urunKodlari.has(Number(r[kolon.urunKod]))) continue;
+    const yil = Number(r[kolon.year]);
+    if (!Number.isFinite(yil)) continue;
+    if (yil > dosyaSonYil) dosyaSonYil = yil;
+
+    const yeniMi = yil > sonYil && yil <= ustYil;
+    const capaMi = yil === sonYil;
+    if (!yeniMi && !capaMi) continue;
+
+    if (pivot) {
+      const ak = Object.keys(t.anahtar).map((d) => r[kolon[d]]).join('|');
+      const hedef = yeniMi ? yeni : capa;
+      let satir = hedef.get(ak);
+      if (!satir) {
+        satir = {};
+        for (const d of Object.keys(t.anahtar)) satir[d] = r[kolon[d]];
+        for (const d of Object.keys(t.tasinan)) satir[d] = r[kolon[d]];
+        hedef.set(ak, satir);
+      }
+      /*
+       * Yayılan boyutun kodu hangi sütuna gidiyor? Değer tek sütuna da
+       * gidebilir (nüfus), değer+birim çiftine de (işlenmiş üretim).
+       */
+      const hedefSutun = t.elementSutun[Number(r[kolon.yayilan])];
+      if (hedefSutun) {
+        if (typeof hedefSutun === 'string') satir[hedefSutun] = r[kolon.value];
+        else {
+          satir[hedefSutun.deger] = r[kolon.value];
+          if (hedefSutun.birim) satir[hedefSutun.birim] = r[kolon.unit];
+        }
+      }
+    } else {
+      const ak = `${r[kolon.areacode]}|${r[kolon.itemcode]}|${r[kolon.elementcode]}`;
+      if (yeniMi) { const o = {}; for (const [d, i] of Object.entries(kolon)) o[d] = r[i]; yeni.set(sira++, o); }
+      else capa.set(ak, Number(r[kolon.value]));
+    }
+  }
+  return { yeni, capa, dosyaSonYil, pivot };
 }
 
-/** Tırnaklı CSV ayrıştırıcı — Value ve Item alanlarında virgül olabiliyor. */
-function csvAyristir(metin) {
-  const satirlar = [];
-  let alan = ''; let satir = []; let tirnak = false;
-  for (let i = 0; i < metin.length; i++) {
-    const c = metin[i];
-    if (tirnak) {
-      if (c === '"') { if (metin[i + 1] === '"') { alan += '"'; i++; } else tirnak = false; }
-      else alan += c;
-    } else if (c === '"') tirnak = true;
-    else if (c === ',') { satir.push(alan); alan = ''; }
-    else if (c === '\n') { satir.push(alan); satirlar.push(satir); satir = []; alan = ''; }
-    else if (c !== '\r') alan += c;
+/* ─── çapa doğrulaması ────────────────────────────────────────────────────── */
+
+/**
+ * Yeni yılı yazmadan önce, D1'de ZATEN OLAN son yılı aynı eşlemeyle dosyadan
+ * üretip karşılaştırıyoruz. Sütun/element eşlemesini yanlış yapmak hata vermez,
+ * sessizce yanlış veri yazar.
+ *
+ * TOPLAM karşılaştırmıyoruz: FAO geçmişi ciddi revize ediyor (pestisitte
+ * satırların ~%23'ü değişmiş). Eşlemenin doğruluğunu ANAHTAR EŞLEŞMESİ ve
+ * ORTANCA ORAN gösterir — yanlış sütun/birim alınsaydı oran 1'den uzaklaşırdı.
+ */
+function capaKarsilastir(d1Satir, capa, t, capaYil) {
+  let eslesen = 0; let ayni = 0;
+  const oranlar = [];
+
+  for (const r of d1Satir) {
+    let dosyaDegerleri;
+    if (t.bicim === 'pivot') {
+      const ak = Object.keys(t.anahtar).map((d) => String(r[d])).join('|');
+      const o = capa.get(ak);
+      if (!o) continue;
+      dosyaDegerleri = Object.values(t.elementSutun)
+        .map((c) => (typeof c === 'string' ? c : c.deger))
+        .map((c) => [Number(o[c]), Number(r[c])]);
+    } else {
+      const v = capa.get(`${r.areacode}|${r.itemcode}|${r.elementcode}`);
+      if (v === undefined) continue;
+      dosyaDegerleri = [[v, Number(r.value)]];
+    }
+    eslesen += 1;
+    let hepsiAyni = true;
+    for (const [dosya, d1] of dosyaDegerleri) {
+      if (!Number.isFinite(dosya) && !Number.isFinite(d1)) continue;
+      const buyuk = Math.max(Math.abs(dosya), Math.abs(d1), 1e-9);
+      if (Math.abs(dosya - d1) / buyuk >= 0.001) hepsiAyni = false;
+      if (Number.isFinite(dosya) && Number.isFinite(d1) && d1 !== 0) oranlar.push(dosya / d1);
+    }
+    if (hepsiAyni) ayni += 1;
   }
-  if (alan || satir.length) { satir.push(alan); satirlar.push(satir); }
-  return satirlar;
+
+  oranlar.sort((a, b) => a - b);
+  const ortanca = oranlar.length ? oranlar[Math.floor(oranlar.length / 2)] : 1;
+  const anahtarOran = d1Satir.length ? (eslesen / d1Satir.length) * 100 : 0;
+  const ayniOran = eslesen ? (ayni / eslesen) * 100 : 0;
+
+  console.log(`   çapa ${capaYil}: anahtar eşleşmesi %${anahtarOran.toFixed(1)}`
+    + ` (${eslesen.toLocaleString('tr-TR')}/${d1Satir.length.toLocaleString('tr-TR')}),`
+    + ` değeri birebir aynı %${ayniOran.toFixed(1)}, ortanca oran ${ortanca.toFixed(3)}`);
+
+  /*
+   * Eşik neden 95 değil 70: D1'de olup dosyada artık bulunmayan alanlar
+   * olabiliyor (FAO ülke/bölge tanımlarını değiştiriyor) — nüfusta 264 satırın
+   * 28'i böyle. Eşlemenin doğruluğunun ASIL kanıtı ORTANCA ORAN: yanlış sütunu
+   * ya da yanlış birimi alsaydık 1'den uzaklaşırdı.
+   */
+  return anahtarOran >= 70 && ortanca >= 0.99 && ortanca <= 1.01;
 }
 
 /* ─── senkron ─────────────────────────────────────────────────────────────── */
@@ -114,96 +226,29 @@ function csvAyristir(metin) {
 async function setIsle(ad, t) {
   console.log(`\n── ${ad} → ${t.tablo} ──`);
 
-  const [mevcut] = await sorgu(`SELECT MAX(year) son, COUNT(*) n FROM ${t.tablo}`);
+  const yilSutun = t.bicim === 'pivot' ? Object.keys(t.anahtar).find((k) => /year|yil/i.test(k)) : 'year';
+  const [mevcut] = await sorgu(`SELECT MAX(${yilSutun}) son, COUNT(*) n FROM ${t.tablo}`);
   const sonYil = Number(mevcut.son);
   console.log(`   D1: son yıl ${sonYil}, ${Number(mevcut.n).toLocaleString('tr-TR')} satır`);
 
+  const urunKodlari = t.urunKodlariD1
+    ? new Set((await sorgu(t.urunKodlariD1)).map((x) => Number(x.k)))
+    : null;
+  if (urunKodlari) console.log(`   kapsam: D1'den ${urunKodlari.size} ürün kodu`);
+
   const zip = await bulkIndir(t.dosya);
-  const satirlar = csvAyristir(await csvOku(zip));
-  const baslik = satirlar[0].map((x) => x.trim());
-  const idx = (adi) => {
-    const i = baslik.indexOf(adi);
-    if (i < 0) throw new Error(`CSV'de sütun yok: ${adi} (mevcut: ${baslik.join(',')})`);
-    return i;
-  };
-  const kolon = Object.fromEntries(Object.entries(t.esleme).map(([d1, csv]) => [d1, idx(csv)]));
+  const { yeni, capa, dosyaSonYil } = await dosyaTara(zip, t, sonYil, urunKodlari);
+  console.log(`   FAO: son yıl ${dosyaSonYil}, eklenecek ${yeni.size.toLocaleString('tr-TR')} satır`);
 
-  /*
-   * BÖLGE/DÜNYA TOPLAMLARI ATLANIR. FAO bulk dosyalarında ülke satırlarının
-   * yanında toplam satırları da var (Area Code >= 5000: World, kıtalar, gelir
-   * grupları; gübrede 51000+). D1 yalnızca ÜLKELERİ tutuyor — toplamları da
-   * yazmak satır sayısını %12-28, değer toplamını 2-3 kat şişiriyordu.
-   */
-  const ulkeSatiri = (r) => Number(r[kolon.areacode]) < 5000;
-
-  const yeni = satirlar.slice(1)
-    .filter((r) => r.length > 2 && ulkeSatiri(r) && Number(r[kolon.year]) > sonYil);
-  // Math.max(...dizi) 200 bin elemanda yığını taşırıyor; döngüyle bul.
-  let dosyaSonYil = 0;
-  for (let i = 1; i < satirlar.length; i++) {
-    const y = Number(satirlar[i][kolon.year]);
-    if (Number.isFinite(y) && y > dosyaSonYil) dosyaSonYil = y;
-  }
-  console.log(`   FAO: son yıl ${dosyaSonYil}, eklenecek ${yeni.length.toLocaleString('tr-TR')} satır`);
-
-  /*
-   * EŞLEME DOĞRULAMASI. Yeni yılı yazmadan önce, D1'de ZATEN OLAN son yılı
-   * dosyadan aynı eşlemeyle üretip karşılaştırıyoruz. Sütunları yanlış
-   * eşlemek hata vermez, sessizce yanlış veri yazar; bu kontrol onu yakalar.
-   */
-  const capaYil = sonYil;
-  const dosyaCapa = new Map();
-  for (let i = 1; i < satirlar.length; i++) {
-    const r = satirlar[i];
-    if (Number(r[kolon.year]) !== capaYil || !ulkeSatiri(r)) continue;
-    dosyaCapa.set(`${r[kolon.areacode]}|${r[kolon.itemcode]}|${r[kolon.elementcode]}`,
-      Number(r[kolon.value]));
-  }
-  const d1Capa = await sorgu(`SELECT areacode, itemcode, elementcode, value
-    FROM ${t.tablo} WHERE year=${capaYil}`);
-
-  /*
-   * Toplamları karşılaştırmak yanıltıcı: FAO geçmiş yılları revize ediyor ve
-   * D1 daha eski bir sürümden gelmiş olabiliyor. Bu yüzden SATIR EŞLEŞTİRİP
-   * eşleşenlerin DEĞERİNE bakıyoruz — sütun eşlemesi yanlışsa değerler tutmaz,
-   * revizyon ise yalnızca birkaç satır kayar.
-   */
-  let eslesen = 0; let ayni = 0;
-  const oranlar = [];
-  for (const r of d1Capa) {
-    const v = dosyaCapa.get(`${r.areacode}|${r.itemcode}|${r.elementcode}`);
-    if (v === undefined) continue;
-    eslesen += 1;
-    const d = Number(r.value);
-    if (!Number.isFinite(v) && !Number.isFinite(d)) { ayni += 1; continue; }
-    const buyuk = Math.max(Math.abs(v), Math.abs(d), 1e-9);
-    if (Math.abs(v - d) / buyuk < 0.001) ayni += 1;
-    if (Number.isFinite(v) && Number.isFinite(d) && d !== 0) oranlar.push(v / d);
-  }
-  oranlar.sort((a, b) => a - b);
-  const ortancaOran = oranlar.length ? oranlar[Math.floor(oranlar.length / 2)] : 1;
-  const ayniOran = eslesen ? (ayni / eslesen) * 100 : 0;
-  const anahtarOran = d1Capa.length ? (eslesen / d1Capa.length) * 100 : 0;
-
-  console.log(`   çapa ${capaYil}: anahtar eşleşmesi %${anahtarOran.toFixed(1)}`
-    + ` (${eslesen.toLocaleString('tr-TR')}/${d1Capa.length.toLocaleString('tr-TR')}),`
-    + ` değeri birebir aynı %${ayniOran.toFixed(1)}, ortanca oran ${ortancaOran.toFixed(3)}`);
-
-  /*
-   * Eşleme doğruluğunun asıl kanıtı ANAHTAR EŞLEŞMESİ ve ORTANCA ORAN.
-   * FAO geçmiş yılları epey revize ediyor (pestisitte satırların ~%23'ü
-   * değişmiş), o yüzden "birebir aynı" oranı düşük olabilir ve bu normaldir.
-   * Ama yanlış sütunu eşleseydik anahtarlar tutmaz, yanlış birimi alsaydık
-   * ortanca oran 1'den uzaklaşırdı (ör. 1000).
-   */
-  if (anahtarOran < 95 || ortancaOran < 0.99 || ortancaOran > 1.01) {
-    console.log('   ✗ ÇAPA TUTMADI — sütun/birim eşlemesi şüpheli, yazılmadı');
+  const d1Capa = await sorgu(`SELECT * FROM ${t.tablo} WHERE ${yilSutun}=${sonYil}`);
+  if (!capaKarsilastir(d1Capa, capa, t, sonYil)) {
+    console.log('   ✗ ÇAPA TUTMADI — eşleme şüpheli, yazılmadı');
     process.exitCode = 1;
     return;
   }
   console.log('   ✓ çapa tuttu (kalan fark FAO revizyonu)');
 
-  if (!yeni.length) { console.log('   ✓ güncel'); return; }
+  if (!yeni.size) { console.log('   ✓ güncel'); return; }
   if (!YAZ) { console.log('   (--yaz verilmedi)'); return; }
 
   // Türkçe çevirileri mevcut satırlardan taşı.
@@ -217,13 +262,19 @@ async function setIsle(ad, t) {
     ceviriler[trSutun] = { kodSutun, harita: h };
   }
 
-  const d1Sutun = [...Object.keys(t.esleme), ...Object.keys(t.sabit ?? {}), ...Object.keys(t.ceviri ?? {})];
-  const SAYISAL = new Set(['areacode', 'itemcode', 'elementcode', 'year', 'value']);
+  const d1Sutun = t.bicim === 'pivot'
+    ? [...Object.keys(t.anahtar), ...Object.keys(t.tasinan),
+      ...Object.values(t.elementSutun).flatMap((c) => (typeof c === 'string' ? [c] : [c.deger, c.birim].filter(Boolean))),
+      ...Object.keys(t.sabit ?? {}), ...Object.keys(t.ceviri ?? {})]
+    : [...Object.keys(t.esleme), ...Object.keys(t.sabit ?? {}), ...Object.keys(t.ceviri ?? {})];
+
+  const SAYISAL = new Set(['areacode', 'itemcode', 'elementcode', 'year', 'yearcode', 'value',
+    ...(t.bicim === 'pivot'
+      ? Object.values(t.elementSutun).map((c) => (typeof c === 'string' ? c : c.deger))
+      : [])]);
 
   let cevirisiz = 0;
-  const degerler = yeni.map((r) => {
-    const satir = {};
-    for (const [d1c, i] of Object.entries(kolon)) satir[d1c] = r[i];
+  const degerler = [...yeni.values()].map((satir) => {
     Object.assign(satir, t.sabit ?? {});
     for (const [trSutun, { kodSutun, harita }] of Object.entries(ceviriler)) {
       const tr = harita.get(String(satir[kodSutun]));
@@ -232,14 +283,13 @@ async function setIsle(ad, t) {
     }
     return `(${d1Sutun.map((c) => (SAYISAL.has(c) ? n(satir[c]) : s(satir[c]))).join(',')})`;
   });
-
   if (cevirisiz) console.log(`   ⚠ ${cevirisiz} alanda Türkçe çeviri bulunamadı (boş yazıldı)`);
 
+  const alintili = d1Sutun.map((c) => `"${c}"`).join(',');
   const parca = [];
   for (let i = 0; i < degerler.length; i += 200) {
-    parca.push(`INSERT INTO ${t.tablo} (${d1Sutun.join(',')}) VALUES\n${degerler.slice(i, i + 200).join(',\n')};`);
+    parca.push(`INSERT INTO ${t.tablo} (${alintili}) VALUES\n${degerler.slice(i, i + 200).join(',\n')};`);
   }
-  // D1 tek istekte çok büyük dosyayı sevmiyor; öbekler hâlinde gönder.
   for (let i = 0; i < parca.length; i += 40) {
     // eslint-disable-next-line no-await-in-loop
     await dosyaCalistir(parca.slice(i, i + 40).join('\n'));
@@ -247,7 +297,7 @@ async function setIsle(ad, t) {
   }
   process.stdout.write('\n');
 
-  const [sonra] = await sorgu(`SELECT MAX(year) son, COUNT(*) n FROM ${t.tablo}`);
+  const [sonra] = await sorgu(`SELECT MAX(${yilSutun}) son, COUNT(*) n FROM ${t.tablo}`);
   console.log(`   ✓ D1: son yıl ${sonra.son}, ${Number(sonra.n).toLocaleString('tr-TR')} satır`);
 }
 
