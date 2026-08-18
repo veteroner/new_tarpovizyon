@@ -106,9 +106,14 @@ export function HayvansalDetayPage() {
    */
   const TURKIYE = 223;
   const dunyaBloklari = (dunyaFiyat.data ?? []).map((g) => {
+    /*
+     * FAO değeri USD/TON. Ekranda USD/KG gösteriliyor: "15.363" baş fiyatı
+     * gibi okunuyordu, "15,4" ise etin kilosu olarak anında anlaşılıyor.
+     */
+    const kg = (v: unknown) => Number(v) / 1000;
     const tr = g.satirlar
       .filter((r) => Number(r.areacode) === TURKIYE && Number(r.value) > 0)
-      .map((r) => ({ yil: Number(r.year), [g.label]: Number(r.value) }))
+      .map((r) => ({ yil: Number(r.year), [g.label]: kg(r.value) }))
       .sort((a, b) => a.yil - b.yil);
     /*
      * Sıralama yılı: TÜRKİYE'NİN VERİSİ OLAN son yıl. FAO ülkeleri farklı
@@ -124,7 +129,7 @@ export function HayvansalDetayPage() {
       : Math.max(0, ...g.satirlar.map((r) => Number(r.year)).filter(Number.isFinite));
     const oYil = g.satirlar.filter((r) => Number(r.year) === sonYil && Number(r.value) > 0);
     const siralama = oYil
-      .map((r) => ({ name: String(r.area), value: Number(r.value) }))
+      .map((r) => ({ name: String(r.area), value: kg(r.value) }))
       .sort((a, b) => b.value - a.value);
     const trSira = siralama.findIndex((x) => x.name === 'Türkiye');
     const trDeger = siralama[trSira]?.value ?? null;
@@ -206,24 +211,24 @@ export function HayvansalDetayPage() {
 
       {dunyaBloklari.map((g) => (
         <div className="tvb-section" key={g.kod}>
-          <h3>Dünya Fiyatı — {g.label} (FAO, USD/ton)</h3>
+          <h3>Dünya Fiyatı — {g.label} (FAO üretici fiyatı, USD/kg)</h3>
           {g.tr.length > 0 && (
             <YearlyChart
               data={g.tr}
               xKey="yil"
-              series={[{ key: g.label, label: `Türkiye — ${g.label}`, type: 'line' }]}
+              series={[{ key: g.label, label: `Türkiye — ${g.label} (USD/kg)`, type: 'line' }]}
               yDomain="auto"
             />
           )}
           {g.trSira && (
             <p className="tvb-status">
-              {g.sonYil}: Türkiye {para.format(g.trDeger as number)} USD/ton —
+              {g.sonYil}: Türkiye {para.format(g.trDeger as number)} USD/kg —
               {' '}{g.siralama.length} ülke arasında {g.trSira}. sırada
             </p>
           )}
           {g.siralama.length > 0 && (
             <>
-              <h4>{g.sonYil} — En Yüksek Fiyatlı Ülkeler</h4>
+              <h4>{g.sonYil} — En Yüksek Fiyatlı Ülkeler (USD/kg)</h4>
               <RankingBlock items={g.siralama} topN={10} />
             </>
           )}
