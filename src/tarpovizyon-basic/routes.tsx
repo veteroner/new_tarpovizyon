@@ -3,6 +3,7 @@ import { BasicShell } from './BasicShell';
 import DataShell from '../components/DataShell';
 import { PageRenderer } from './PageRenderer';
 import { HayvansalDetayPage } from './templates/hayvansal/HayvansalDetayPage';
+import { BitkiselDetayPage } from './templates/bitkisel/BitkiselDetayPage';
 import { SECTIONS } from './pages';
 
 const firstPage = SECTIONS[0].pages[0];
@@ -24,6 +25,7 @@ export function tarpovizyonBasicRoutes() {
         * tuşu doğal çalışıyor.
         */}
       <Route path="genel/hayvansal-uretim/:kartId" element={<HayvansalDetayPage />} />
+      <Route path="bitkisel-genel/uretim-ozeti/:kartId" element={<BitkiselDetayPage />} />
       {SECTIONS.map((section) =>
         section.pages.map((page) => (
           <Route

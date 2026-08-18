@@ -18,6 +18,7 @@ import type { IlCografiIsaretPageConfig } from './templates/IlCografiIsaretPage'
 export type PageDef =
   /* Yapılandırma almıyor: sayfanın tamamı tek bir özet görünümü. */
   | { path: string; label: string; template: 'hayvansal-uretim-ozet'; config?: undefined }
+  | { path: string; label: string; template: 'bitkisel-uretim-ozet'; config?: undefined }
   | { path: string; label: string; template: 'ranking'; config: RankingPageConfig }
   | { path: string; label: string; template: 'yearly'; config: YearlyPageConfig }
   | { path: string; label: string; template: 'stat-tiles'; config: StatTilesPageConfig }

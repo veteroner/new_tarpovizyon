@@ -17,12 +17,15 @@ import { IlAricilikPage } from './templates/IlAricilikPage';
 import { HavzaUrunDeseniPage } from './templates/HavzaUrunDeseniPage';
 import { IlCografiIsaretPage } from './templates/IlCografiIsaretPage';
 import { HayvansalUretimOzetPage } from './templates/HayvansalUretimOzetPage';
+import { BitkiselOzetPage } from './templates/bitkisel/BitkiselOzetPage';
 
 export function PageRenderer({ page }: { page: PageDef }) {
   switch (page.template) {
     // Yapılandırma almıyor: sayfanın tamamı tek bir özet görünümü.
     case 'hayvansal-uretim-ozet':
       return <HayvansalUretimOzetPage />;
+    case 'bitkisel-uretim-ozet':
+      return <BitkiselOzetPage />;
     case 'ranking':
       return <RankingPage config={page.config} />;
     case 'yearly':

@@ -84,6 +84,13 @@ export const BITKISEL_SECTIONS: Section[] = [
     path: 'bitkisel-genel',
     pages: [
       {
+        /*
+         * Bitkiselin İNİŞ sayfası: ürün grubu kartları. Hayvancılıktaki mantığın
+         * aynısı — önce "durum ne", sonra kartlara basınca detay.
+         */
+        path: 'uretim-ozeti', label: 'Bitkisel Üretim (Özet)', template: 'bitkisel-uretim-ozet',
+      },
+      {
         path: 'kuresel-uretim', label: 'Küresel Üretim Verileri', template: 'ranking',
         config: {
           title: 'KÜRESEL ÜRETİM VERİLERİ', endpoint: 'bitkisel/global-uretim', nameField: 'ulke', valueField: 'uretim_ton',

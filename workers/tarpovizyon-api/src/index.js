@@ -457,7 +457,8 @@ async function gfeLatestSnapshot(env) {
 
 async function uretimDetayYillik(env, urunler, unsur) {
   const placeholders = urunler.map(() => '?').join(',');
-  const sql = `SELECT yil, SUM(deger) deger FROM bitkisel_tr_uretim_detay
+  const sql = `SELECT yil, SUM(deger) deger, COUNT(DISTINCT urun) urun_sayisi
+                 FROM bitkisel_tr_uretim_detay
                WHERE unsur = ? AND urun IN (${placeholders}) GROUP BY yil ORDER BY yil ASC`;
   const { results } = await env.DB.prepare(sql).bind(unsur, ...urunler).all();
   return results;
