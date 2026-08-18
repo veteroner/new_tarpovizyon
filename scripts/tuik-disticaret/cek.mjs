@@ -46,9 +46,13 @@
  * Bu yüzden dönem/yön/kod filtresi ÖLÇÜMÜN İÇİNDE set analiziyle veriliyor.
  */
 
-import { qlikOturum, APP_OZEL_TR } from './qlik.mjs';
+import { qlikOturum, APP } from './qlik.mjs';
 import { MOTOR } from './motor.mjs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir, s, n } from './d1.mjs';
+
+/** Onarım öncesi silinen satırların yedeği buraya yazılıyor. */
+const YEDEK_DIZIN = new URL('./yedek/', import.meta.url).pathname;
 
 const TABLOLAR = { hayvansal: 'tuik_ticaret_hayvansal', bitkisel: 'tuik_ticaret_bitkisel' };
 
@@ -67,8 +71,15 @@ const arg = process.argv.slice(2);
 const deger = (a) => { const i = arg.indexOf(a); return i >= 0 ? arg[i + 1] : null; };
 const YAZ = arg.includes('--yaz');
 const DOGRULA = arg.includes('--dogrula');
+const KARSILASTIR = arg.includes('--karsilastir');
 const OTOMATIK = arg.includes('--otomatik');
 const SECILEN = deger('--tablo');
+/*
+ * --onar: dönem D1'de zaten varsa ÖNCE YEDEKLEYİP siler, sonra yeniden yazar.
+ * Normalde yazma, var olan dönemi ikizlememek için reddediliyor; onarım bunu
+ * bilerek aşan tek yol. Yedek dosyası olmadan silme yapmıyor.
+ */
+const ONAR = arg.includes('--onar');
 
 /* ─── D1'den kapsam ───────────────────────────────────────────────────────── */
 
@@ -150,7 +161,7 @@ async function alandanCek(oturum, { alan, kodlar, yil, ay }) {
       }
     }
     return cikti;
-  }, { appId: APP_OZEL_TR, alan, kodlar, yil, ay });
+  }, { appId: APP, alan, kodlar, yil, ay });
 }
 
 /* ─── seviyeleri kur ──────────────────────────────────────────────────────── */
@@ -303,15 +314,30 @@ async function tabloIsle(oturum, ad, { yil, ay, yaz, karsilastir }) {
         + ` ${String(d.n).padStart(5)} ${para(d.ihr).padStart(16)}   %${f.toFixed(2)}`);
     }
     console.log(hepsiIyi ? '\n   ✓ EŞLEŞTİ — yöntem doğru' : '\n   ✗ SAPMA VAR — yazma');
+    // CI'da sessizce geçmesin: çapa dönem tutmuyorsa iş kırmızı yanmalı.
+    if (!hepsiIyi) process.exitCode = 1;
     return { eslesti: hepsiIyi };
   }
 
   if (yaz) {
     const mevcut = await d1Ozet(tablo, yil, ay);
     const varOlan = [...mevcut.values()].reduce((t, x) => t + x.n, 0);
-    if (varOlan > 0) {
+    if (varOlan > 0 && !ONAR) {
       console.log(`   ⚠ bu dönemde zaten ${varOlan} satır var — ikizlenmesin diye YAZILMADI`);
       return { yazildi: 0 };
+    }
+    if (varOlan > 0) {
+      // Geri dönülebilir olsun: silmeden önce mevcut satırları dosyaya al.
+      const eski = await sorgu(`SELECT * FROM ${tablo} WHERE yil=${yil} AND ay=${ay}`);
+      const yedek = `${YEDEK_DIZIN}/${tablo}-${yil}-${String(ay).padStart(2, '0')}.json`;
+      mkdirSync(YEDEK_DIZIN, { recursive: true });
+      writeFileSync(yedek, JSON.stringify(eski, null, 1));
+      if (eski.length !== varOlan) throw new Error(`yedek eksik: ${eski.length}/${varOlan} satır okundu`);
+      console.log(`   yedek: ${yedek} (${eski.length} satır)`);
+      await dosyaCalistir(`DELETE FROM ${tablo} WHERE yil=${yil} AND ay=${ay};`);
+      const kalan = [...(await d1Ozet(tablo, yil, ay)).values()].reduce((t, x) => t + x.n, 0);
+      if (kalan) throw new Error(`silme tamamlanmadı, ${kalan} satır kaldı`);
+      console.log(`   ✓ eski ${varOlan} satır silindi`);
     }
     if (!satirlar.length) { console.log('   ⚠ satır yok, yazılmadı'); return { yazildi: 0 }; }
     await dosyaCalistir(insertSql(tablo, satirlar));
@@ -351,8 +377,18 @@ try {
     }
   } else {
     const yil = Number(deger('--yil')); const ay = Number(deger('--ay'));
-    if (!yil || !ay) throw new Error('--yil ve --ay gerekli (ya da --otomatik / --dogrula)');
-    for (const a of adlar) await tabloIsle(oturum, a, { yil, ay, yaz: YAZ });
+    // --aylar 1,2,3 : birden çok dönemi TEK tarayıcı oturumunda işle (onarımda
+    // her ay için ayrı Chromium açmak dakikalar kaybettiriyor).
+    const aylar = deger('--aylar')
+      ? deger('--aylar').split(',').map((x) => Number(x.trim())).filter(Boolean)
+      : (ay ? [ay] : []);
+    if (!yil || !aylar.length) throw new Error('--yil ve --ay/--aylar gerekli (ya da --otomatik / --dogrula)');
+    for (const m of aylar) {
+      for (const a of adlar) {
+        // eslint-disable-next-line no-await-in-loop
+        await tabloIsle(oturum, a, { yil, ay: m, yaz: YAZ, karsilastir: KARSILASTIR });
+      }
+    }
   }
 } finally {
   await oturum.kapat();

@@ -24,10 +24,22 @@ import { chromium } from 'playwright';
 
 export const MASHUP = 'https://bi.tuik.gov.tr/extensions/tuik-mashup/index.html?report_type=2';
 
-/** Özel Ticaret Sistemi (D1'deki tablolar bu sistemle uyumlu). */
-export const APP_OZEL_TR = '8db826a9-59f2-4a33-a91e-88ca417dddf9';
-/** Genel Ticaret Sistemi — şimdilik kullanılmıyor, referans olsun diye. */
+/*
+ * ─── HANGİ TİCARET SİSTEMİ ──────────────────────────────────────────────────
+ * TÜİK aynı veriyi iki sistemde yayımlıyor ve rakamlar FARKLI:
+ *
+ *   Genel Ticaret Sistemi — serbest bölge/antrepo hareketleri DAHİL
+ *   Özel  Ticaret Sistemi — bunlar HARİÇ (daha küçük)
+ *
+ * D1'deki tarihsel veri GENEL'den geliyor. Ölçüldü — 2025-05, her iki tablo,
+ * ihracat ve ithalat: GENEL %0,00 (birebir), ÖZEL bitkiselde %-18,7,
+ * hayvansalda %-8,3 sapıyor. Yanlış uygulamayı seçmek hata vermez, sadece
+ * sistematik olarak düşük değer yazar — bu yüzden varsayılan burada sabit.
+ */
 export const APP_GENEL_TR = 'bd4b4757-a3c9-45ba-b4fb-5c8d7e2d2c42';
+export const APP_OZEL_TR = '8db826a9-59f2-4a33-a91e-88ca417dddf9';
+/** Çekimde kullanılan uygulama. */
+export const APP = APP_GENEL_TR;
 
 /**
  * Tarayıcıyı açar, mashup'ı yükler ve Qlik API'sini hazır hale getirir.

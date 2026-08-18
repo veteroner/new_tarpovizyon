@@ -42,14 +42,20 @@ jobs:
           npm install --no-save --no-audit --no-fund --legacy-peer-deps playwright
           npx playwright install --with-deps chromium
 
-      # Önce doğrulama: D1'de VAR OLAN son dönemi yeniden çekip karşılaştırıyoruz.
-      # Tutmuyorsa TÜİK uygulamasında bir şey değişmiş demektir — bunu yeni veri
-      # yazmadan ÖNCE görmek istiyoruz.
-      - name: Yöntemi doğrula
+      # Önce doğrulama: SABİT bir referans dönemi (2025-05) yeniden çekip
+      # D1'dekiyle karşılaştırıyoruz. Bu dönem 2026-08'de birebir tuttuğu
+      # doğrulanmış bir çapa — tutmuyorsa TÜİK tarafında bir şey değişmiş
+      # demektir ve bunu YENİ VERİ YAZMADAN ÖNCE görmek istiyoruz.
+      #
+      # Son dönemi doğrulamak işe yaramaz: onu da bu betik yazdığı için kendini
+      # doğrular, hiçbir şey kanıtlamaz.
+      - name: Yöntemi doğrula (2025-05 çapası)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: node scripts/tuik-disticaret/cek.mjs --dogrula --tablo hayvansal
+        run: |
+          node scripts/tuik-disticaret/cek.mjs --tablo hayvansal --yil 2025 --ay 5 --karsilastir
+          node scripts/tuik-disticaret/cek.mjs --tablo bitkisel  --yil 2025 --ay 5 --karsilastir
 
       - name: Yeni dönemi çek
         env:
