@@ -16,9 +16,13 @@ import { IlHayvansalUretimPage } from './templates/IlHayvansalUretimPage';
 import { IlAricilikPage } from './templates/IlAricilikPage';
 import { HavzaUrunDeseniPage } from './templates/HavzaUrunDeseniPage';
 import { IlCografiIsaretPage } from './templates/IlCografiIsaretPage';
+import { HayvansalUretimOzetPage } from './templates/HayvansalUretimOzetPage';
 
 export function PageRenderer({ page }: { page: PageDef }) {
   switch (page.template) {
+    // Yapılandırma almıyor: sayfanın tamamı tek bir özet görünümü.
+    case 'hayvansal-uretim-ozet':
+      return <HayvansalUretimOzetPage />;
     case 'ranking':
       return <RankingPage config={page.config} />;
     case 'yearly':

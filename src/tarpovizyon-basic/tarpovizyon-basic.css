@@ -973,3 +973,101 @@
 .tvb-daha:active { background: #f3f4f6; }
 
 .tvb-bos { text-align: center; color: #51596b; padding: 18px 8px; }
+
+/* ─── Bölüm kategorileri ("Bu bölümde ayrıca") ─────────────────────────────
+ * İniş sayfasının altındaki keşif şeridi. Ayrı bir menü EKRANI yerine burada
+ * duruyor: giren kişi önce veriyi görüyor, "başka ne var" sorusu fazladan tık
+ * olmadan aynı ekranda cevaplanıyor.
+ */
+.tvb-kategoriler__izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.tvb-kategoriler__kart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: inherit;
+  text-decoration: none;
+  /* Dokunma hedefi: Apple HIG 44pt asgarisinin üstünde kalsın. */
+  min-height: 64px;
+  justify-content: center;
+}
+
+.tvb-kategoriler__kart:hover,
+.tvb-kategoriler__kart:focus-visible {
+  border-color: var(--accent, #16a34a);
+}
+
+.tvb-kategoriler__ad { font-weight: 600; font-size: 0.9rem; }
+.tvb-kategoriler__adet { font-size: 0.78rem; color: var(--text-secondary); }
+
+/* Dünya sıralamaları yan yana; dar ekranda alt alta. */
+.tvb-ozet__siralamalar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.tvb-ozet__siralamalar h4 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Tıklanabilir künye kartları ─────────────────────────────────────────── */
+.tvb-kartlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.tvb-kart {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  color: inherit;
+  text-decoration: none;
+  /* Dokunma hedefi Apple HIG asgarisinin (44pt) belirgin üstünde. */
+  min-height: 108px;
+  position: relative;
+}
+.tvb-kart:hover, .tvb-kart:focus-visible { border-color: var(--accent, #16a34a); }
+
+.tvb-kart__ad { font-size: 0.8rem; color: var(--text-secondary); }
+.tvb-kart__deger {
+  font-size: 1.25rem; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tvb-kart__deger small { font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); }
+.tvb-kart__degisim { font-size: 0.75rem; }
+.tvb-kart__degisim small { font-size: 0.68rem; color: var(--text-secondary); }
+.tvb-kart__degisim--artan { color: #16a34a; }
+.tvb-kart__degisim--azalan { color: #ef4444; }
+.tvb-kart__mini { width: 100%; height: 26px; margin-top: auto; }
+.tvb-kart__donem { font-size: 0.7rem; color: var(--text-secondary); }
+
+/* ─── Kart detayı ─────────────────────────────────────────────────────────── */
+.tvb-detay__kunye {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding: 12px 0 4px;
+}
+.tvb-detay__deger {
+  font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.tvb-detay__deger small { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); }
+
+.tvb-detay__gezinme {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 12px 0;
+}
+.tvb-detay__gezinme a { font-size: 0.88rem; }

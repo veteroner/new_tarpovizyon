@@ -47,6 +47,8 @@ export interface UseTurkeyAnimalProductionDataReturn {
   worldMilkRanking: WorldRankingItem[];
   worldChickenRanking: WorldRankingItem[];
   mapData: { name: string; value: number }[];
+  /** İl bazında ham veri — Basic'in iniş sayfası il haritası çiziyor. */
+  cityData: CityData[];
   // Intelligence metrics
   cagr5Year: number;
   forecastRedMeat: number;
@@ -103,7 +105,13 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         fetchRows('kanatli/uretimleri', { limit: 500 }),
         // SUM(CASE WHEN grup=… ) pivotu: grup/kategori kırılımı çekilip
         // istemcide pivotlanıyor.
-        fetchAgg(R_CANLI, { groupBy: ['il', 'grup', 'kategori'], sum: ['y2024'], where: { duzeykod: 3 } }),
+        /*
+           * DİKKAT — 'il' DEĞİL 'yer'. duzeykod=3 (il düzeyi) satırlarında il
+           * adı `yer` sütununda duruyor ve `il` BOŞ; ilçe satırlarında tam
+           * tersi. 'il' ile gruplayınca tek bir boş anahtar dönüyor ve harita
+           * sessizce boş kalıyordu.
+           */
+          fetchAgg(R_CANLI, { groupBy: ['yer', 'grup', 'kategori'], sum: ['y2024'], where: { duzeykod: 3 } }),
         // NOT: MySQL'de Kovan sayıları '487.085' gibi METİNDİ ve sorgu
         // REPLACE(…,'.','') uyguluyordu. D1'de sayısal — nokta silmek ondalıklı
         // Balmumu değerini bozardı, doğrudan toplanıyor.
@@ -384,6 +392,9 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
     kpiData, historicalChartData, redMeatBreakdown, redMeatTrendData,
     buyukbasKucukbasData, poultryMonthlyData,
     worldBeefRanking, worldMilkRanking, worldChickenRanking, mapData,
+    // Basic'in iniş sayfası İL bazında harita çiziyor; mapData bölgeye toplanmış
+    // olduğu için ham il verisi de veriliyor. Yalnızca ekleme, Pro etkilenmiyor.
+    cityData,
     cagr5Year, forecastRedMeat, milkProductivityTrend, growthStrategy,
   };
 }

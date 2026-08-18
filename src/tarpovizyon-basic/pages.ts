@@ -7,72 +7,15 @@ export type { PageDef, Section, NavGroup };
 
 const HAYVANSAL_SECTIONS: Section[] = [
   {
-    label: 'Küresel Hayvancılık Verileri',
-    path: 'kuresel',
-    pages: [
-      {
-        path: 'hayvansal-urunler', label: 'Hayvansal Ürünler', template: 'ranking',
-        config: { title: 'KÜRESEL ÜRETİM VERİLERİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Üretim Miktarı', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün' },
-      },
-      {
-        path: 'hayvan-varliklari', label: 'Hayvan Varlıkları', template: 'ranking',
-        config: { title: 'KÜRESEL HAYVAN VARLIKLARI', endpoint: 'global/hayvan-sayilari-detay', nameField: 'ulke', valueField: 'deger', kpiLabel: 'Toplam Hayvan Varlığı', filterField: 'hayvan_turu', filterLabel: 'Hayvan' },
-      },
-      {
-        path: 'sigir-karkas-et-verimleri', label: 'Sığır Karkas Et Verimleri', template: 'ranking',
-        config: { title: 'ÜLKELERE GÖRE SIĞIR KARKAS ET VERİMLERİ', endpoint: 'global/karkas-agirligi', nameField: 'ulke', valueField: 'karkas_verimi_kg', kpiLabel: 'Karkas Verimi', kpiUnit: 'Kg', kpiAggregation: 'none' },
-      },
-      {
-        path: 'sigir-eti-uretimi', label: 'Ülkelere Göre Sığır Eti Üretimi', template: 'ranking',
-        config: { title: 'ÜLKELERE GÖRE SIĞIR ETİ ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Sığır Eti Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığır Eti (Manda Hariç)' },
-      },
-      {
-        path: 'inek-sutu-verimleri', label: 'İnek Sütü Verimleri', template: 'ranking',
-        config: { title: 'ÜLKELERE GÖRE ÇİĞ SÜT ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Çiğ Süt Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığırların çiğ sütü' },
-      },
-      {
-        path: 'kisi-basi-et-tuketimi', label: 'Kişi Başı Et Tüketimi', template: 'stacked-comparison',
-        config: {
-          title: 'ÜLKELERE GÖRE KİŞİ BAŞI ET TÜKETİMİ (KG)', endpoint: 'global/et-tuketimi-karsilastirma', nameField: 'ulke',
-          series: [
-            { key: 'sigir_eti', label: 'Sığır Eti' },
-            { key: 'domuz_eti', label: 'Domuz Eti' },
-            { key: 'kanatli_eti', label: 'Kanatlı Eti' },
-            { key: 'balik_deniz_urunleri', label: 'Balık ve Deniz Ürünleri' },
-            { key: 'koyun_keci_eti', label: 'Koyun Keçi Eti' },
-          ],
-        },
-      },
-      {
-        path: 'karkas-et-fiyatlari', label: 'Karkas Et Fiyatları', template: 'stat-tiles',
-        config: {
-          title: 'TÜRKİYE KARKAS ET FİYAT GÖSTERGELERİ', endpoint: 'kirmizi-et/ekonomik-gostergeler', dateField: 'tarih',
-          tiles: [
-            { field: 'dana_karkas_fiyati_tl_kg', label: 'Dana Karkas Fiyatı', unit: 'TL/Kg' },
-            { field: 'kuzu_karkas_fiyati_tl_kg', label: 'Kuzu Karkas Fiyatı', unit: 'TL/Kg' },
-            { field: 'dana_karkas_maliyet_tl_kg', label: 'Dana Karkas Maliyeti', unit: 'TL/Kg' },
-            { field: 'karkas_paritesi', label: 'Karkas Paritesi' },
-          ],
-        },
-      },
-      {
-        path: 'cig-sut-fiyatlari', label: 'Çiğ Süt Fiyatları', template: 'stat-tiles',
-        config: {
-          title: 'TÜRKİYE ÇİĞ SÜT FİYAT GÖSTERGELERİ', endpoint: 'cig-sut/ekonomik-gostergeler', dateField: 'tarih',
-          tiles: [
-            { field: 'uretim_maliyeti_tl_lt', label: 'Üretim Maliyeti', unit: 'TL/Lt' },
-            { field: 'usk_tavsiye_fiyat_tl_lt', label: 'USK Tavsiye Fiyatı', unit: 'TL/Lt' },
-            { field: 'sut_yem_paritesi', label: 'Süt/Yem Paritesi' },
-            { field: 'karlilik', label: 'Karlılık' },
-          ],
-        },
-      },
-    ],
-  },
-  {
     label: 'Genel Hayvancılık Verileri',
     path: 'genel',
     pages: [
+      /*
+       * Hayvancılığın İNİŞ sayfası. Daha önce bölüme girince rastgele bir alt
+       * sayfa açılıyordu; bu sayfa önce Türkiye özetini gösteriyor, en altındaki
+       * kategori şeridi de bölümün geri kalanını duyuruyor.
+       */
+      { path: 'hayvansal-uretim', label: 'Hayvansal Üretim (Özet)', template: 'hayvansal-uretim-ozet' },
       {
         path: 'turkiye-hayvan-varligi', label: 'Türkiye Hayvan Varlığı', template: 'yearly',
         config: {
@@ -155,6 +98,69 @@ const HAYVANSAL_SECTIONS: Section[] = [
             { field: 'yumurta_adet', label: 'Yumurta Tüketimi (Adet)', max: 300 },
             { field: 'bal_kg', label: 'Bal Tüketimi (Kg)', max: 5 },
             { field: 'balik_deniz_urunleri', label: 'Balık ve Deniz Ürünleri (Kg)', max: 20 },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    label: 'Küresel Hayvancılık Verileri',
+    path: 'kuresel',
+    pages: [
+      {
+        path: 'hayvansal-urunler', label: 'Hayvansal Ürünler', template: 'ranking',
+        config: { title: 'KÜRESEL ÜRETİM VERİLERİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Üretim Miktarı', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün' },
+      },
+      {
+        path: 'hayvan-varliklari', label: 'Hayvan Varlıkları', template: 'ranking',
+        config: { title: 'KÜRESEL HAYVAN VARLIKLARI', endpoint: 'global/hayvan-sayilari-detay', nameField: 'ulke', valueField: 'deger', kpiLabel: 'Toplam Hayvan Varlığı', filterField: 'hayvan_turu', filterLabel: 'Hayvan' },
+      },
+      {
+        path: 'sigir-karkas-et-verimleri', label: 'Sığır Karkas Et Verimleri', template: 'ranking',
+        config: { title: 'ÜLKELERE GÖRE SIĞIR KARKAS ET VERİMLERİ', endpoint: 'global/karkas-agirligi', nameField: 'ulke', valueField: 'karkas_verimi_kg', kpiLabel: 'Karkas Verimi', kpiUnit: 'Kg', kpiAggregation: 'none' },
+      },
+      {
+        path: 'sigir-eti-uretimi', label: 'Ülkelere Göre Sığır Eti Üretimi', template: 'ranking',
+        config: { title: 'ÜLKELERE GÖRE SIĞIR ETİ ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Sığır Eti Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığır Eti (Manda Hariç)' },
+      },
+      {
+        path: 'inek-sutu-verimleri', label: 'İnek Sütü Verimleri', template: 'ranking',
+        config: { title: 'ÜLKELERE GÖRE ÇİĞ SÜT ÜRETİMİ', endpoint: 'global/uretim', nameField: 'ulke', valueField: 'uretim_miktari_ton', kpiLabel: 'Çiğ Süt Üretimi', kpiUnit: 'Ton', filterField: 'urun', filterLabel: 'Ürün', defaultFilterValue: 'Sığırların çiğ sütü' },
+      },
+      {
+        path: 'kisi-basi-et-tuketimi', label: 'Kişi Başı Et Tüketimi', template: 'stacked-comparison',
+        config: {
+          title: 'ÜLKELERE GÖRE KİŞİ BAŞI ET TÜKETİMİ (KG)', endpoint: 'global/et-tuketimi-karsilastirma', nameField: 'ulke',
+          series: [
+            { key: 'sigir_eti', label: 'Sığır Eti' },
+            { key: 'domuz_eti', label: 'Domuz Eti' },
+            { key: 'kanatli_eti', label: 'Kanatlı Eti' },
+            { key: 'balik_deniz_urunleri', label: 'Balık ve Deniz Ürünleri' },
+            { key: 'koyun_keci_eti', label: 'Koyun Keçi Eti' },
+          ],
+        },
+      },
+      {
+        path: 'karkas-et-fiyatlari', label: 'Karkas Et Fiyatları', template: 'stat-tiles',
+        config: {
+          title: 'TÜRKİYE KARKAS ET FİYAT GÖSTERGELERİ', endpoint: 'kirmizi-et/ekonomik-gostergeler', dateField: 'tarih',
+          tiles: [
+            { field: 'dana_karkas_fiyati_tl_kg', label: 'Dana Karkas Fiyatı', unit: 'TL/Kg' },
+            { field: 'kuzu_karkas_fiyati_tl_kg', label: 'Kuzu Karkas Fiyatı', unit: 'TL/Kg' },
+            { field: 'dana_karkas_maliyet_tl_kg', label: 'Dana Karkas Maliyeti', unit: 'TL/Kg' },
+            { field: 'karkas_paritesi', label: 'Karkas Paritesi' },
+          ],
+        },
+      },
+      {
+        path: 'cig-sut-fiyatlari', label: 'Çiğ Süt Fiyatları', template: 'stat-tiles',
+        config: {
+          title: 'TÜRKİYE ÇİĞ SÜT FİYAT GÖSTERGELERİ', endpoint: 'cig-sut/ekonomik-gostergeler', dateField: 'tarih',
+          tiles: [
+            { field: 'uretim_maliyeti_tl_lt', label: 'Üretim Maliyeti', unit: 'TL/Lt' },
+            { field: 'usk_tavsiye_fiyat_tl_lt', label: 'USK Tavsiye Fiyatı', unit: 'TL/Lt' },
+            { field: 'sut_yem_paritesi', label: 'Süt/Yem Paritesi' },
+            { field: 'karlilik', label: 'Karlılık' },
           ],
         },
       },

@@ -1,6 +1,14 @@
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
-export type StatTile = { label: string; value: number | null; unit?: string; changePct?: number | null; period?: string };
+export type StatTile = {
+  label: string; value: number | null; unit?: string; changePct?: number | null; period?: string;
+  /**
+   * Değişimin neye göre olduğu. Varsayılan aylık, çünkü bu ızgarayı kullanan
+   * sayfaların çoğu aylık seri gösteriyor; yıllık veride bu etiket yanıltıcı
+   * olduğu için sayfa kendi metnini verebiliyor.
+   */
+  changeLabel?: string;
+};
 
 export function StatTileGrid({ tiles }: { tiles: StatTile[] }) {
   return (
@@ -18,7 +26,7 @@ export function StatTileGrid({ tiles }: { tiles: StatTile[] }) {
             </div>
             {hasChange && (
               <div className={`tvb-tile__change ${positive ? 'tvb-tile__change--up' : 'tvb-tile__change--down'}`}>
-                {positive ? '▲' : '▼'} {numberFmt.format(Math.abs(t.changePct as number))}% geçen aya göre
+                {positive ? '▲' : '▼'} {numberFmt.format(Math.abs(t.changePct as number))}% {t.changeLabel ?? 'geçen aya göre'}
               </div>
             )}
           </div>
