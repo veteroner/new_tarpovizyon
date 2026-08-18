@@ -27,6 +27,13 @@ export type KartTanimi = {
   fiyatUrunleri?: string[];
   /** Dünya sıralaması: hangi FAO ürün adı (hook'taki hazır listelerden). */
   dunyaSirasi?: 'sigir-eti' | 'sut' | 'tavuk-eti';
+  /**
+   * Dünya fiyatı için FAO ürün kodları (`fao/uretici-fiyat`, USD/ton).
+   * NOT: FAO üretici fiyatlarında CANLI HAYVAN fiyatı yok, ET fiyatı var —
+   * hayvan varlığı kartlarında en yakın karşılık olarak et fiyatı gösteriliyor
+   * ve başlıkta bu açıkça yazıyor.
+   */
+  dunyaFiyat?: { kod: number; label: string }[];
   /** Detayın altındaki yönlendirme: Basic bölüm yolu ve ilk sayfası. */
   sektor?: { label: string; yol: string };
 };
@@ -50,6 +57,7 @@ export const KARTLAR: KartTanimi[] = [
     // TÜİK'te canlı hayvan fiyatı iki ayrı maddede: süt sığırı ve diğer sığır/manda.
     fiyatUrunleri: ['Süt sığırları, canlı', 'Diğer sığır, manda (süt için yetiştirilenler hariç) ve bizonlar, canlı'],
     sektor: KIRMIZI_ET_SEKTORU,
+    dunyaFiyat: [{ kod: 867, label: 'Sığır Eti' }],
   },
   {
     id: 'kucukbas',
@@ -64,6 +72,7 @@ export const KARTLAR: KartTanimi[] = [
     ],
     fiyatUrunleri: ['Koyun, canlı', 'Keçi, canlı'],
     sektor: KIRMIZI_ET_SEKTORU,
+    dunyaFiyat: [{ kod: 977, label: 'Koyun Eti' }, { kod: 1017, label: 'Keçi Eti' }],
   },
   {
     id: 'kirmizi-et',
@@ -74,6 +83,7 @@ export const KARTLAR: KartTanimi[] = [
     alan: 'kirmizi_et_uretimi',
     dunyaSirasi: 'sigir-eti',
     sektor: KIRMIZI_ET_SEKTORU,
+    dunyaFiyat: [{ kod: 867, label: 'Sığır Eti' }, { kod: 977, label: 'Koyun Eti' }],
   },
   {
     id: 'cig-sut',
@@ -85,6 +95,7 @@ export const KARTLAR: KartTanimi[] = [
     fiyatUrunleri: ['Süt, sığırdan elde edilen (manda sütü hariç), işlenmemiş', 'Koyun sütü, işlenmemiş', 'Keçi sütü, işlenmemiş'],
     dunyaSirasi: 'sut',
     sektor: CIG_SUT_SEKTORU,
+    dunyaFiyat: [{ kod: 882, label: 'İnek Sütü' }],
   },
   {
     id: 'beyaz-et',
@@ -95,6 +106,7 @@ export const KARTLAR: KartTanimi[] = [
     alan: 'kanatli_eti_ton',
     dunyaSirasi: 'tavuk-eti',
     sektor: KANATLI_SEKTORU,
+    dunyaFiyat: [{ kod: 1058, label: 'Tavuk Eti' }],
   },
   {
     id: 'yumurta',
@@ -104,6 +116,7 @@ export const KARTLAR: KartTanimi[] = [
     kaynak: 'uretim',
     alan: 'yumurta_milyon_adet',
     sektor: KANATLI_SEKTORU,
+    dunyaFiyat: [{ kod: 1062, label: 'Yumurta' }],
   },
   {
     id: 'bal',
@@ -112,6 +125,7 @@ export const KARTLAR: KartTanimi[] = [
     grup: 'uretim',
     kaynak: 'uretim',
     alan: 'bal_uretimi',
+    dunyaFiyat: [{ kod: 1182, label: 'Bal' }],
   },
 ];
 

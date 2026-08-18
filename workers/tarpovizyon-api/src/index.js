@@ -99,6 +99,11 @@ const ROUTES = {
   'fao/land-cover': { db: 'DUNYA', table: 'fao_land_cover', filters: [], order: 'rowid ASC', maxLimit: 10000 },
   'fao/input-gubre-ticari': { db: 'DUNYA', table: 'fao_input_gubre_ticari', filters: [], order: 'rowid ASC', maxLimit: 10000 },
   'fao/input-pestisit-use': { db: 'DUNYA', table: 'fao_input_pestisit_use', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  /*
+   * FAO üretici fiyatları — USD/ton, yıllık. Ülkeler arası karşılaştırma için
+   * (LCU değil USD yüklendi). Ürün ve ülke süzgeçli.
+   */
+  'fao/uretici-fiyat': { db: 'DUNYA', table: 'fao_uretici_fiyat', filters: ['areacode', 'area', 'itemcode', 'item', 'year'], order: 'year ASC', maxLimit: 10000 },
   'fao/nufus': { db: 'DUNYA', table: 'fao_nufus', filters: [], order: 'rowid ASC', maxLimit: 10000 },
   'fao/nufus-istihdam-tarim': { db: 'DUNYA', table: 'fao_nufus_istihdam_tarim', filters: [], order: 'rowid ASC', maxLimit: 10000 },
 

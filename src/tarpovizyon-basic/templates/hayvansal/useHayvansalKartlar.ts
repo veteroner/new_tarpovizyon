@@ -55,3 +55,23 @@ export function useFiyatSerisi(urunler: string[] | undefined) {
     },
   });
 }
+
+/**
+ * FAO üretici fiyatı (USD/ton, yıllık) — ürün kodu başına.
+ * Hem Türkiye'nin serisi hem son yılın ülke sıralaması buradan çıkıyor.
+ */
+export function useDunyaFiyat(kodlar: { kod: number; label: string }[] | undefined) {
+  return useQuery({
+    enabled: !!kodlar?.length,
+    queryKey: ['tvb-fao-fiyat', kodlar?.map((k) => k.kod).join('|')],
+    queryFn: async () => {
+      const parcalar = await Promise.all(
+        (kodlar ?? []).map(async (k) => ({
+          ...k,
+          satirlar: await fetchRows('fao/uretici-fiyat', { itemcode: String(k.kod), limit: '10000' }),
+        })),
+      );
+      return parcalar;
+    },
+  });
+}

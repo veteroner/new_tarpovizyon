@@ -67,6 +67,26 @@ export const TANIMLAR = {
     ceviri: { element_tr: 'elementcode', item_tr: 'itemcode' },
   },
 
+  'uretici-fiyat': {
+    bicim: 'duz',
+    tablo: 'fao_uretici_fiyat',
+    dosya: 'Prices_E_All_Data_(Normalized).zip',
+    esleme: {
+      areacode: 'Area Code', area: 'Area',
+      itemcode: 'Item Code', item: 'Item',
+      elementcode: 'Element Code', element: 'Element',
+      year: 'Year', unit: 'Unit', value: 'Value',
+    },
+    /*
+     * Dosyada dört element var: LCU/ton, SLC/ton, USD/ton ve endeks. Yalnızca
+     * USD/ton alınıyor — ülkeler arası karşılaştırma ancak ortak para biriminde
+     * anlamlı. Ayrıca "Annual value" dışındaki aylık satırlar atlanıyor;
+     * uygulamada yıllık seri kullanılıyor ve hepsini almak tabloyu 3-4 katına
+     * çıkarırdı.
+     */
+    suzgec: { 'Element Code': (v) => Number(v) === 5532, Months: (v) => v === 'Annual value' },
+  },
+
   /* ─── pivot tablolar ────────────────────────────────────────────────────── */
 
   'nufus': {

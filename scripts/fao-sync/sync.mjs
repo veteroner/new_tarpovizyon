@@ -114,6 +114,9 @@ async function dosyaTara(zip, t, sonYil, urunKodlari) {
       urunKod: t.urunKodAlani ? I(t.urunKodAlani) : -1 }
     : Object.fromEntries(Object.entries(t.esleme).map(([d, c]) => [d, I(c)]));
 
+  // Tanımdaki satır süzgeci (ör. yalnızca USD/ton, yalnızca yıllık).
+  const suzgecler = Object.entries(t.suzgec ?? {}).map(([csvSutun, kontrol]) => [I(csvSutun), kontrol]);
+
   const yeni = new Map();      // pivot: anahtar → satır | duz: sıra → satır
   const capa = new Map();      // anahtar → değer(ler)
   let dosyaSonYil = 0;
@@ -122,6 +125,7 @@ async function dosyaTara(zip, t, sonYil, urunKodlari) {
   for await (const r of it) {
     if (r.length < 3) continue;
     if (Number(r[kolon.areacode]) >= ULKE_SINIRI) continue;
+    if (suzgecler.some(([i, kontrol]) => !kontrol(r[i]))) continue;
     // Kapsam D1'den geliyorsa listede olmayan ürünü almıyoruz.
     if (urunKodlari && kolon.urunKod >= 0 && !urunKodlari.has(Number(r[kolon.urunKod]))) continue;
     const yil = Number(r[kolon.year]);
@@ -240,6 +244,13 @@ async function setIsle(ad, t) {
   const { yeni, capa, dosyaSonYil } = await dosyaTara(zip, t, sonYil, urunKodlari);
   console.log(`   FAO: son yıl ${dosyaSonYil}, eklenecek ${yeni.size.toLocaleString('tr-TR')} satır`);
 
+  /*
+   * Tablo BOŞSA çapa yok — karşılaştıracak veri bulunmuyor. İlk yüklemede bu
+   * normal; doğrulama bir sonraki çalıştırmadan itibaren devreye giriyor.
+   */
+  if (!Number(mevcut.n)) {
+    console.log('   ⚠ tablo boş — ilk yükleme, çapa doğrulaması yapılamıyor');
+  } else {
   const d1Capa = await sorgu(`SELECT * FROM ${t.tablo} WHERE ${yilSutun}=${sonYil}`);
   if (!capaKarsilastir(d1Capa, capa, t, sonYil)) {
     console.log('   ✗ ÇAPA TUTMADI — eşleme şüpheli, yazılmadı');
@@ -247,6 +258,7 @@ async function setIsle(ad, t) {
     return;
   }
   console.log('   ✓ çapa tuttu (kalan fark FAO revizyonu)');
+  }
 
   if (!yeni.size) { console.log('   ✓ güncel'); return; }
   if (!YAZ) { console.log('   (--yaz verilmedi)'); return; }

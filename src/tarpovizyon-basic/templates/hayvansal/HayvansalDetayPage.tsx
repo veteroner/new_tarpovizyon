@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { YearlyChart } from '../../charts/YearlyChart';
 import { RankingBlock } from '../../charts/RankingBlock';
 import { KARTLAR, kartBul } from './kartlar';
-import { useHayvansalKartlar, useFiyatSerisi, type YilSatiri } from './useHayvansalKartlar';
+import { useHayvansalKartlar, useFiyatSerisi, useDunyaFiyat, type YilSatiri } from './useHayvansalKartlar';
 import { useTurkeyAnimalProductionData } from '../../../pages/turkeyAnimalProduction/useTurkeyAnimalProductionData';
 
 /**
@@ -21,6 +21,7 @@ export function HayvansalDetayPage() {
   const kart = kartBul(String(kartId));
   const { yukleniyor, varlik, uretim } = useHayvansalKartlar();
   const fiyat = useFiyatSerisi(kart?.fiyatUrunleri);
+  const dunyaFiyat = useDunyaFiyat(kart?.dunyaFiyat);
   const { worldBeefRanking, worldMilkRanking, worldChickenRanking } = useTurkeyAnimalProductionData();
 
   if (!kart) {
@@ -98,6 +99,38 @@ export function HayvansalDetayPage() {
     });
   })();
 
+  /*
+   * Dünya fiyatı: Türkiye'nin USD/ton serisi + son yılın ülke sıralaması.
+   * FAO üretici fiyatlarında canlı hayvan fiyatı yok, ET fiyatı var — bu yüzden
+   * hayvan varlığı kartlarında başlık "et fiyatı" diyor, yanıltmasın.
+   */
+  const TURKIYE = 223;
+  const dunyaBloklari = (dunyaFiyat.data ?? []).map((g) => {
+    const tr = g.satirlar
+      .filter((r) => Number(r.areacode) === TURKIYE && Number(r.value) > 0)
+      .map((r) => ({ yil: Number(r.year), [g.label]: Number(r.value) }))
+      .sort((a, b) => a.yil - b.yil);
+    /*
+     * Sıralama yılı: TÜRKİYE'NİN VERİSİ OLAN son yıl. FAO ülkeleri farklı
+     * yıllara kadar yayımlıyor (sığır etinde Türkiye 2022'de bitiyor, dosyada
+     * 2024 var). Dosyanın son yılını kullanmak Türkiye'nin hiç görünmediği bir
+     * sıralama üretiyordu — karşılaştırma da anlamını yitiriyordu.
+     */
+    const trYillar = g.satirlar
+      .filter((r) => Number(r.areacode) === TURKIYE && Number(r.value) > 0)
+      .map((r) => Number(r.year));
+    const sonYil = trYillar.length
+      ? Math.max(...trYillar)
+      : Math.max(0, ...g.satirlar.map((r) => Number(r.year)).filter(Number.isFinite));
+    const oYil = g.satirlar.filter((r) => Number(r.year) === sonYil && Number(r.value) > 0);
+    const siralama = oYil
+      .map((r) => ({ name: String(r.area), value: Number(r.value) }))
+      .sort((a, b) => b.value - a.value);
+    const trSira = siralama.findIndex((x) => x.name === 'Türkiye');
+    const trDeger = siralama[trSira]?.value ?? null;
+    return { ...g, tr, sonYil, siralama, trSira: trSira >= 0 ? trSira + 1 : null, trDeger };
+  }).filter((g) => g.tr.length || g.siralama.length);
+
   const komsular = KARTLAR.filter((k) => k.grup === kart.grup);
   const sira = komsular.findIndex((k) => k.id === kart.id);
   const onceki_kart = komsular[sira - 1];
@@ -168,6 +201,32 @@ export function HayvansalDetayPage() {
               return sonKayit ? `${u}: ${para.format(Number(sonKayit[u]))} ${g.birim}` : null;
             }).filter(Boolean).join(' · ')}
           </p>
+        </div>
+      ))}
+
+      {dunyaBloklari.map((g) => (
+        <div className="tvb-section" key={g.kod}>
+          <h3>Dünya Fiyatı — {g.label} (FAO, USD/ton)</h3>
+          {g.tr.length > 0 && (
+            <YearlyChart
+              data={g.tr}
+              xKey="yil"
+              series={[{ key: g.label, label: `Türkiye — ${g.label}`, type: 'line' }]}
+              yDomain="auto"
+            />
+          )}
+          {g.trSira && (
+            <p className="tvb-status">
+              {g.sonYil}: Türkiye {para.format(g.trDeger as number)} USD/ton —
+              {' '}{g.siralama.length} ülke arasında {g.trSira}. sırada
+            </p>
+          )}
+          {g.siralama.length > 0 && (
+            <>
+              <h4>{g.sonYil} — En Yüksek Fiyatlı Ülkeler</h4>
+              <RankingBlock items={g.siralama} topN={10} />
+            </>
+          )}
         </div>
       ))}
 
