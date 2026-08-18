@@ -50,11 +50,10 @@ import { qlikOturum, APP } from './qlik.mjs';
 import { MOTOR } from './motor.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir, s, n } from './d1.mjs';
-
-/** Onarım öncesi silinen satırların yedeği buraya yazılıyor. */
-const YEDEK_DIZIN = new URL('./yedek/', import.meta.url).pathname;
+import { ikiziYaz, YEDEK_DIZIN } from './ikizler.mjs';
 
 const TABLOLAR = { hayvansal: 'tuik_ticaret_hayvansal', bitkisel: 'tuik_ticaret_bitkisel' };
+
 
 /** Kod uzunluğu → Qlik alanı. */
 function kodAlani(kod) {
@@ -344,6 +343,8 @@ async function tabloIsle(oturum, ad, { yil, ay, yaz, karsilastir }) {
     const sonra = await d1Ozet(tablo, yil, ay);
     const toplam = [...sonra.values()].reduce((t, x) => t + x.n, 0);
     console.log(`   ✓ yazıldı — D1'de ${toplam} satır`);
+
+    await ikiziYaz(ad, yil, ay, satirlar);
     return { yazildi: toplam };
   }
 
