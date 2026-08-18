@@ -1,0 +1,60 @@
+name: TÜİK dış ticaret → D1
+
+# TÜİK dış ticaret istatistiklerini ayın sonunda, bir önceki ayı kapsayacak
+# şekilde yayımlıyor (ör. haziran verisi temmuz sonunda). Yayın gününü tahmin
+# etmek yerine her gün bakıyoruz: iş idempotent — D1'de o dönem zaten varsa
+# hiçbir şey yazmıyor, yeni dönem yoksa boş satırla çıkıyor.
+#
+# ─── NEDEN AYRI BİR İŞ ──────────────────────────────────────────────────────
+# `tuik-sync.yml` SDMX servisini kullanıyor. Dış ticaretin ürün×ülke kırılımı
+# SDMX'te YOK (406 veri akışının hiçbirinde); yalnızca bi.tuik.gov.tr'deki Qlik
+# Sense uygulamasında. Oraya erişim gerçek tarayıcı gerektiriyor (Node'un düz
+# WebSocket'i 403 alıyor), o yüzden bu iş Playwright + Chromium indiriyor ve
+# daha uzun sürüyor. İkisini aynı işe koymak SDMX senkronunu da yavaşlatırdı.
+
+on:
+  schedule:
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+    inputs:
+      yaz:
+        description: "D1'e yaz (kapalıysa sadece rapor)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: tuik-disticaret
+  cancel-in-progress: false
+
+jobs:
+  cek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Playwright ve Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund --legacy-peer-deps playwright
+          npx playwright install --with-deps chromium
+
+      # Önce doğrulama: D1'de VAR OLAN son dönemi yeniden çekip karşılaştırıyoruz.
+      # Tutmuyorsa TÜİK uygulamasında bir şey değişmiş demektir — bunu yeni veri
+      # yazmadan ÖNCE görmek istiyoruz.
+      - name: Yöntemi doğrula
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/tuik-disticaret/cek.mjs --dogrula --tablo hayvansal
+
+      - name: Yeni dönemi çek
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node scripts/tuik-disticaret/cek.mjs --otomatik \
+            ${{ (github.event_name == 'schedule' || inputs.yaz) && '--yaz' || '' }}
