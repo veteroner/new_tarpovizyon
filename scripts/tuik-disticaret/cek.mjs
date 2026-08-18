@@ -51,6 +51,7 @@ import { MOTOR } from './motor.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir, s, n } from './d1.mjs';
 import { ikiziYaz, YEDEK_DIZIN } from './ikizler.mjs';
+import { satiriNormalleştir } from './birimler.mjs';
 
 const TABLOLAR = { hayvansal: 'tuik_ticaret_hayvansal', bitkisel: 'tuik_ticaret_bitkisel' };
 
@@ -131,13 +132,27 @@ async function alandanCek(oturum, { alan, kodlar, yil, ay }) {
     const kume = K.map((c) => `'${c}'`).join(',');
     const set = (yon) => `{<YIL={'${Y}'}, AY={'${M}'}, IHRITH={'${yon}'}, ${A}={${kume}}>}`;
 
+    /*
+     * ─── İKİ MİKTAR ALANI ───────────────────────────────────────────────────
+     * TÜİK her satır için iki miktar tutuyor: MIKTAR_1 her zaman KİLOGRAM,
+     * MIKTAR_2 ise varsa ikincil birim (adet, baş, bin adet, litre…). Hangisinin
+     * geçerli olduğunu OLCU_ADI söylüyor: 'KG/ADET' → ikincil ADET,
+     * 'KG' → yalnızca kilogram.
+     *
+     * D1 İKİNCİL birimi kullanıyor (ölçüldü, 2025-05 kod 4071100: D1 68.215.680
+     * = MIKTAR_2; MIKTAR_1 ise 4.311.693 kg). MIKTAR_1'i almak yumurta ve canlı
+     * hayvanda miktarı ~1000 kat saptırıyor ve hata vermiyor.
+     */
     const kup = await app.createGenericObject({
       qInfo: { qType: 'DT_' + A },
       qHyperCubeDef: {
-        qDimensions: [A, 'ULKE_KODU'].map((f) => ({ qDef: { qFieldDefs: [f] }, qNullSuppression: true })),
+        qDimensions: [A, 'ULKE_KODU', 'OLCU_ADI']
+          .map((f) => ({ qDef: { qFieldDefs: [f] }, qNullSuppression: true })),
         qMeasures: [
-          `Sum(${set('İhracat')} MIKTAR_1)`, `Sum(${set('İhracat')} DOLAR)`,
-          `Sum(${set('İthalat')} MIKTAR_1)`, `Sum(${set('İthalat')} DOLAR)`,
+          `Sum(${set('İhracat')} MIKTAR_1)`, `Sum(${set('İhracat')} MIKTAR_2)`,
+          `Sum(${set('İhracat')} DOLAR)`,
+          `Sum(${set('İthalat')} MIKTAR_1)`, `Sum(${set('İthalat')} MIKTAR_2)`,
+          `Sum(${set('İthalat')} DOLAR)`,
         ].map((e) => ({ qDef: { qDef: e } })),
         qInitialDataFetch: [],
         qSuppressZero: true,
@@ -154,9 +169,10 @@ async function alandanCek(oturum, { alan, kodlar, yil, ay }) {
         qTop: ust, qLeft: 0, qWidth: gen, qHeight: Math.min(sayfaBoy, adet - ust),
       }]);
       for (const r of sayfa[0].qMatrix) {
-        cikti.push([r[0].qText, r[1].qText,
-          r[2].qIsNull ? 0 : r[2].qNum, r[3].qIsNull ? 0 : r[3].qNum,
-          r[4].qIsNull ? 0 : r[4].qNum, r[5].qIsNull ? 0 : r[5].qNum]);
+        const s = (i) => (r[i].qIsNull ? 0 : r[i].qNum);
+        // [kod, ulkeKod, olcuAdi, ihrKg, ihrIkincil, ihrDolar, ithKg, ithIkincil, ithDolar]
+        cikti.push([r[0].qText, r[1].qText, r[2].qText,
+          s(3), s(4), s(5), s(6), s(7), s(8)]);
       }
     }
     return cikti;
@@ -186,16 +202,48 @@ function seviyeleriUret(ham, { yil, ay, kapsam, ulkeler }) {
   const s4 = new Map(); // tüm  × ürün
   const kapsamDisi = new Set();
 
-  for (const [kodMetni, ulkeMetni, ihrMik, ihrDolar, ithMik, ithDolar] of ham) {
+  const kodBirim = new Map();     // kod → D1'in kullandığı birim etiketi
+
+  for (const [kodMetni, ulkeMetni, olcuAdi, ihrKg, ihrIk, ihrDolar, ithKg, ithIk, ithDolar] of ham) {
     const kod = Number(String(kodMetni).replace(/\D/g, ''));
     const k = kapsam.get(kod);
     if (!k) { kapsamDisi.add(kod); continue; }
     const ulke = Number(ulkeMetni);
-    const o = { ihrMik, ihrDolar, ithMik, ithDolar };
+
+    /*
+     * Birim ve miktar OLCU_ADI'ndan geliyor: eğik çizgiden SONRA anlamlı bir
+     * ikincil birim varsa (KG/ADET, KG/BAŞ, KG/1000ADET) miktar MIKTAR_2 ve
+     * etiket o ikincil birim; yoksa (KG, ya da zeytindeki 'KG/') miktar
+     * MIKTAR_1 ve etiket OLCU_ADI'nın kendisi. Bu kural D1'in 2025 verisini
+     * birebir üretiyor.
+     */
+    const ikincil = String(olcuAdi ?? '').split('/').slice(1).join('/').trim();
+    /*
+     * İkincil birim yine bir KÜTLE birimiyse (zeytindeki 'KG/KG NET EDA' gibi)
+     * D1 gerçek kilogramı kullanıyor ve etiketi 'KG/' diye kısaltıyor. Sadece
+     * gerçekten farklı bir birim varsa (ADET, BAŞ, 1000ADET…) MIKTAR_2'ye
+     * geçiliyor. İkisi de 2025-05'te birebir doğrulandı.
+     */
+    const gercekIkincil = ikincil.length > 0 && !/^KG\b/i.test(ikincil);
+    const o = gercekIkincil
+      ? { ihrMik: ihrIk, ihrDolar, ithMik: ithIk, ithDolar }
+      : { ihrMik: ihrKg, ihrDolar, ithMik: ithKg, ithDolar };
+    if (!kodBirim.has(kod)) {
+      kodBirim.set(kod, gercekIkincil ? ikincil
+        : (ikincil.length > 0 ? 'KG/' : (olcuAdi || k.birim)));
+    }
+
     ekle(s1, `${kod}|${ulke}`, o);
     ekle(s2, `${k.ana_urun}|${ulke}`, o);
     ekle(s3, `${kod}`, o);
     ekle(s4, `${k.ana_urun}`, o);
+  }
+
+  /** Grup seviyesi etiketi: gruptaki kodların birimi (hepsi aynıysa o, değilse D1'inki). */
+  const grupBirimCanli = new Map();
+  for (const [kod, b] of kodBirim) {
+    const ana = kapsam.get(kod)?.ana_urun;
+    if (ana && !grupBirimCanli.has(ana)) grupBirimCanli.set(ana, b);
   }
 
   const satirlar = [];
@@ -209,18 +257,22 @@ function seviyeleriUret(ham, { yil, ay, kapsam, ulkeler }) {
   for (const [a, o] of s1) {
     const [kod, ulke] = a.split('|').map(Number);
     const k = kapsam.get(kod);
-    it('ülke', 'alt ürün', k.ana_urun, kod, k.alt_urun, ulke, ulkeler.get(ulke) ?? '', k.birim, o);
+    it('ülke', 'alt ürün', k.ana_urun, kod, k.alt_urun, ulke, ulkeler.get(ulke) ?? '', kodBirim.get(kod) ?? k.birim, o);
   }
   for (const [a, o] of s2) {
     const i = a.lastIndexOf('|');
     const ana = a.slice(0, i); const ulke = Number(a.slice(i + 1));
-    it('ülke', 'ürün', ana, 0, '', ulke, ulkeler.get(ulke) ?? '', grupBirim.get(ana), o);
+    it('ülke', 'ürün', ana, 0, '', ulke, ulkeler.get(ulke) ?? '', grupBirimCanli.get(ana) ?? grupBirim.get(ana), o);
   }
   for (const [a, o] of s3) {
     const kod = Number(a); const k = kapsam.get(kod);
-    it('tüm', 'alt ürün', k.ana_urun, kod, k.alt_urun, 0, '', k.birim, o);
+    it('tüm', 'alt ürün', k.ana_urun, kod, k.alt_urun, 0, '', kodBirim.get(kod) ?? k.birim, o);
   }
-  for (const [ana, o] of s4) it('tüm', 'ürün', ana, 0, '', 0, '', grupBirim.get(ana), o);
+  for (const [ana, o] of s4) it('tüm', 'ürün', ana, 0, '', 0, '', grupBirimCanli.get(ana) ?? grupBirim.get(ana), o);
+
+  // Birim normalleştirmesi: canlı hayvan BAŞ, yumurta bin adet ('birimler.mjs').
+  // Geçmişe de aynı kural uygulandı; buradan geçmezse seri yeniden ikiye bölünür.
+  for (const r of satirlar) satiriNormalleştir(r);
 
   return { satirlar, kapsamDisi: [...kapsamDisi] };
 }
@@ -312,7 +364,37 @@ async function tabloIsle(oturum, ad, { yil, ay, yaz, karsilastir }) {
       console.log(`   ${a.padEnd(16)} ${String(c.n).padStart(5)} ${para(c.ihr).padStart(16)}`
         + ` ${String(d.n).padStart(5)} ${para(d.ihr).padStart(16)}   %${f.toFixed(2)}`);
     }
-    console.log(hepsiIyi ? '\n   ✓ EŞLEŞTİ — yöntem doğru' : '\n   ✗ SAPMA VAR — yazma');
+    /*
+     * MİKTAR DENETİMİ — bunu atlamak pahalıya patladı.
+     * Yalnızca $ değerini karşılaştırmak yetmiyor: TÜİK her satırda iki miktar
+     * tutuyor (kilogram ve ikincil birim) ve yanlışını almak DEĞERİ hiç
+     * bozmadan miktarı ~1000 kat saptırıyor. Bu yüzden birim bazında da
+     * karşılaştırıyoruz.
+     */
+    const d1Birim = new Map((await sorgu(`SELECT miktar_birim b,
+      COALESCE(SUM(ihracat_mik),0) mik, COUNT(*) n FROM ${tablo}
+      WHERE yil=${yil} AND ay=${ay} AND duzey_1='tüm' AND duzey_2='alt ürün'
+      GROUP BY miktar_birim`)).map((r) => [r.b, { mik: Number(r.mik), n: Number(r.n) }]));
+
+    const cekBirim = new Map();
+    for (const r of satirlar) {
+      if (r.duzey_1 !== 'tüm' || r.duzey_2 !== 'alt ürün') continue;
+      const v = cekBirim.get(r.miktar_birim) ?? { mik: 0, n: 0 };
+      v.mik += r.ihracat_mik; v.n += 1;
+      cekBirim.set(r.miktar_birim, v);
+    }
+
+    console.log('\n   birim        çekilen miktar        D1 miktar        fark');
+    for (const b of new Set([...cekBirim.keys(), ...d1Birim.keys()])) {
+      const c = cekBirim.get(b) ?? { mik: 0, n: 0 };
+      const d = d1Birim.get(b) ?? { mik: 0, n: 0 };
+      const f = d.mik ? ((c.mik - d.mik) / d.mik) * 100 : (c.mik ? 100 : 0);
+      if (Math.abs(f) > 0.5) hepsiIyi = false;
+      console.log(`   ${String(b).padEnd(11)} ${c.mik.toLocaleString('tr-TR').padStart(18)}`
+        + ` ${d.mik.toLocaleString('tr-TR').padStart(16)}   %${f.toFixed(2)}`);
+    }
+
+    console.log(hepsiIyi ? '\n   ✓ EŞLEŞTİ — değer ve miktar' : '\n   ✗ SAPMA VAR — yazma');
     // CI'da sessizce geçmesin: çapa dönem tutmuyorsa iş kırmızı yanmalı.
     if (!hepsiIyi) process.exitCode = 1;
     return { eslesti: hepsiIyi };
