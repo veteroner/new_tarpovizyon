@@ -24,6 +24,14 @@ export type BitkiselKart = {
   urunler: string[];
   /** Grup içi sıralama: görünen ad → o ürünün detay adları. */
   parcalar: { label: string; urunler: string[] }[];
+  /**
+   * TÜİK bülteninin grup satırı (`bitkisel/bulten-grup`) — gerçekleşme +
+   * TAHMİN serisi buradan geliyor. Yalnızca bültenle TEMİZ eşleşen gruplarda
+   * dolu: "Baklagiller" bültende patates ve kök bitkilerle aynı satırda,
+   * "Endüstriyel Bitkiler" ise şeker pancarı/tekstil diye dağılmış — o ikisi
+   * bindirme almıyor, uydurmaktansa göstermemek doğru.
+   */
+  bulten?: { dosya: string; grup: string };
   /** Detayın altındaki yönlendirme. */
   sektor: { label: string; yol: string };
 };
@@ -84,6 +92,7 @@ export const BITKISEL_KARTLAR: BitkiselKart[] = [
       { label: 'Mısır', urunler: P.misir },
       { label: 'Çeltik', urunler: P.celtik },
     ]),
+    bulten: { dosya: 'tahillar', grup: 'Tahıllar' },
   },
   {
     id: 'baklagiller', label: 'Baklagiller', sektor: TARLA,
@@ -102,6 +111,7 @@ export const BITKISEL_KARTLAR: BitkiselKart[] = [
       { label: 'Kolza (Kanola)', urunler: P.kolza },
       { label: 'Aspir', urunler: P.aspir },
     ]),
+    bulten: { dosya: 'tahillar', grup: 'Yağlı tohumlar' },
   },
   {
     id: 'endustriyel', label: 'Endüstriyel Bitkiler', sektor: TARLA,
@@ -135,6 +145,7 @@ export const BITKISEL_KARTLAR: BitkiselKart[] = [
       { label: 'Muz', urunler: P.muz },
       { label: 'Çilek', urunler: P.cilek },
     ]),
+    bulten: { dosya: 'meyveler', grup: 'Toplam' },
   },
   {
     id: 'sebzeler', label: 'Sebzeler', sektor: SEBZE,
@@ -147,6 +158,7 @@ export const BITKISEL_KARTLAR: BitkiselKart[] = [
       { label: 'Soğan (Kuru)', urunler: P.sogan },
       { label: 'Sarımsak', urunler: P.sarimsak },
     ]),
+    bulten: { dosya: 'sebzeler', grup: 'Toplam' },
   },
 ];
 

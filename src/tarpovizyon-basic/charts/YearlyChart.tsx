@@ -35,6 +35,8 @@ export type SeriesConfig = {
   /** Bars sharing a stack id stack on top of each other (e.g. büyükbaş +
    *  küçükbaş süt → total production composition) instead of standing apart. */
   stack?: string;
+  /** Kesikli çizgi — gerçekleşme değil TAHMİN olan seriler için. */
+  kesikli?: boolean;
 };
 
 export function YearlyChart({
@@ -150,7 +152,10 @@ export function YearlyChart({
                 stroke={COLORS[i % COLORS.length]}
                 strokeWidth={2}
                 dot={false}
+                strokeDasharray={s.kesikli ? '6 4' : undefined}
                 activeDot={{ r: 4 }}
+                /* Tahmin serisi geçmiş yıllarda boş; boşluğu atlayıp çizsin. */
+                connectNulls
               />
             ) : (
               <Bar key={s.key} yAxisId={s.axis ?? 'left'} stackId={s.stack} dataKey={s.key} name={s.label} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />

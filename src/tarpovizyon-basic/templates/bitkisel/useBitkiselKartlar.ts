@@ -83,3 +83,22 @@ export function useAlanVerim(kart: BitkiselKart | undefined) {
   });
   return { alan: alan.data ?? [], verim: verim.data ?? [] };
 }
+
+/** Bülten grup serisi: gerçekleşme + tahmin (ayrı işaretli). */
+export function useBultenSerisi(bulten: { dosya: string; grup: string } | undefined) {
+  return useQuery({
+    enabled: !!bulten,
+    queryKey: ['tvb-bitkisel-bulten', bulten?.dosya, bulten?.grup],
+    queryFn: async (): Promise<{ yil: number; deger: number; tahmin: number }[]> => {
+      const url = new URL(`${API_BASE}/api/bitkisel/bulten-grup`);
+      url.searchParams.set('dosya', bulten!.dosya);
+      url.searchParams.set('grup', bulten!.grup);
+      url.searchParams.set('limit', '200');
+      const r = await fetch(url.toString());
+      if (!r.ok) return [];
+      return ((await r.json()).data ?? []).map((x: Record<string, unknown>) => ({
+        yil: Number(x.yil), deger: Number(x.deger), tahmin: Number(x.tahmin),
+      }));
+    },
+  });
+}

@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { YearlyChart } from '../../charts/YearlyChart';
 import { RankingBlock } from '../../charts/RankingBlock';
 import { BITKISEL_KARTLAR, bitkiselKartBul } from './kartlar';
-import { useBitkiselKartlar, useGrupParcalari, useAlanVerim, type YilDeger } from './useBitkiselKartlar';
+import { useBitkiselKartlar, useGrupParcalari, useAlanVerim, useBultenSerisi, type YilDeger } from './useBitkiselKartlar';
 
 /**
  * Ürün grubu detayı — hayvancılık detayıyla aynı iskelet:
@@ -29,6 +29,7 @@ export function BitkiselDetayPage() {
   const { yukleniyor, seriler } = useBitkiselKartlar();
   const { parcalar } = useGrupParcalari(kart);
   const { alan, verim } = useAlanVerim(kart);
+  const bulten = useBultenSerisi(kart?.bulten);
 
   if (!kart) {
     return (
@@ -56,6 +57,31 @@ export function BitkiselDetayPage() {
   const seriGrafik = (veri: YilDeger[], label: string) =>
     veri.filter((d) => d.deger > 0).map((d) => ({ yil: d.yil, [label]: d.deger }));
 
+  /* Üç seriyi yıl ekseninde birleştir; olmayan yıl boş kalıyor. */
+  const bultenHepsi = bulten.data ?? [];
+  const bultenGercek = bultenHepsi.filter((b) => !b.tahmin);
+  const bultenTahmin = bultenHepsi.filter((b) => b.tahmin);
+  const birlesikSeri = (() => {
+    const yillar = new Map<number, Record<string, number | string>>();
+    const koy = (yil: number, alan: string, deger: number) => {
+      const k = yillar.get(yil) ?? { yil };
+      k[alan] = deger;
+      yillar.set(yil, k);
+    };
+    for (const d of toplam) if (d.deger > 0) koy(d.yil, 'Üretim', d.deger);
+    for (const b of bultenGercek) koy(b.yil, 'Bülten', b.deger);
+    /*
+     * Tahmin çizgisi havada durmasın diye bir önceki yılın bülten değerinden
+     * başlatılıyor; böylece kesikli çizgi gerçekleşmenin ucundan devam ediyor.
+     */
+    for (const b of bultenTahmin) {
+      koy(b.yil, 'Tahmin', b.deger);
+      const oncekiB = bultenGercek.find((x) => x.yil === b.yil - 1);
+      if (oncekiB) koy(oncekiB.yil, 'Tahmin', oncekiB.deger);
+    }
+    return [...yillar.values()].sort((a, b) => Number(a.yil) - Number(b.yil));
+  })();
+
   return (
     <div className="tvb-page">
       <div className="tvb-page__banner tvb-page__banner--orange">{kart.label}</div>
@@ -81,12 +107,27 @@ export function BitkiselDetayPage() {
       {toplam.length > 0 && (
         <div className="tvb-section">
           <h3>{kart.label} — Toplam Üretim (ton)</h3>
+          {/*
+            * Üç ayrı seri, bilerek ayrı: ürün toplamı (D1 detay tablosu),
+            * bültenin gerçekleşme rakamı ve bültenin TAHMİNİ. Tahmin kesikli
+            * çizgi ve kendi adıyla duruyor — gerçekleşmeyle karıştırılmasın.
+            */}
           <YearlyChart
-            data={seriGrafik(toplam, 'Üretim')}
+            data={birlesikSeri}
             xKey="yil"
-            series={[{ key: 'Üretim', label: 'Üretim (ton)', type: 'line' }]}
+            series={[
+              { key: 'Üretim', label: 'Üretim (ürün toplamı)', type: 'line' },
+              ...(bultenGercek.length ? [{ key: 'Bülten', label: 'TÜİK bülteni', type: 'line' as const }] : []),
+              ...(bultenTahmin.length ? [{ key: 'Tahmin', label: 'TÜİK tahmini', type: 'line' as const, kesikli: true }] : []),
+            ]}
             yDomain="auto"
           />
+          {bultenTahmin.length > 0 && (
+            <p className="tvb-status">
+              Kesikli çizgi TÜİK'in {bultenTahmin[0].yil} 1. tahminidir —
+              {' '}gerçekleşme değildir.
+            </p>
+          )}
         </div>
       )}
 

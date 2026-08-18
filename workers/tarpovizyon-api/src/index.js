@@ -56,6 +56,11 @@ const ROUTES = {
   'makro/tufe-aylik': { table: 'tufe_aylik', filters: [], order: 'yil ASC, ay ASC' },
   'makro/tufe-yillik-snapshot': { table: 'tufe_yillik_snapshot', filters: [], order: 'id ASC' },
   'makro/tufe-aylik-snapshot': { table: 'tufe_aylik_snapshot', filters: [], order: 'id ASC' },
+  /*
+   * TÜİK bülteninin GRUP toplamları (bitkisel üretim tahmini). Ürün tablosuna
+   * karışmasın diye ayrı; `tahmin=1` satırları GERÇEKLEŞME DEĞİL.
+   */
+  'bitkisel/bulten-grup': { table: 'bitkisel_bulten_grup', filters: ['dosya', 'grup', 'yil', 'tahmin'], order: 'yil ASC' },
   'makro/fao-urunler-aylik': { table: 'fao_urunler_aylik', filters: [], order: 'yil ASC, ay ASC' },
 
   'il-duzeyinde/bitkisel-uretim': { table: 'il_bitkisel_uretim', filters: ['il', 'urun', 'urun_grup'], order: 'uretim_ton DESC', maxLimit: 10000 },
