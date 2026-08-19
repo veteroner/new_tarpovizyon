@@ -36,15 +36,20 @@ function Kart({ kart, veri, tahmin }: {
   return (
     <Link to={`/tarpovizyon-basic/bitkisel-genel/uretim-ozeti/${kart.id}`} className="tvb-kart">
       <span className="tvb-kart__ad">{kart.label}</span>
+      {/*
+        * Yıl DEĞERİN YANINDA, ayrı satırda değil. Kartlar farklı yıllarda
+        * olabiliyor (2025'i tamamlanan grup 2025, diğerleri 2024) — yani yıl
+        * gerekli bilgi; ama tek başına bir satırda başıboş duruyordu.
+        */}
       <span className="tvb-kart__deger">
         {son ? sayi.format(son.deger) : '—'}<small> ton</small>
+        {son && <small className="tvb-kart__yil"> · {son.yil}</small>}
       </span>
       {degisim !== null && (
         <span className={`tvb-kart__degisim ${artan ? 'tvb-kart__degisim--artan' : 'tvb-kart__degisim--azalan'}`}>
           {artan ? '▲' : '▼'} {Math.abs(degisim).toFixed(1)}% <small>geçen yıla göre</small>
         </span>
       )}
-      {son && <span className="tvb-kart__donem">{son.yil}</span>}
       {/*
         * TAHMİN AYRI SATIRDA ve ayrı renkte. Ana rakam gerçekleşme olarak
         * kalıyor; tahmini künye yerine koymak, olmamış bir üretimi olmuş gibi

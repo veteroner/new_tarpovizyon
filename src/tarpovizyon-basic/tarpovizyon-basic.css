@@ -1077,3 +1077,6 @@
   font-style: italic;
   color: var(--text-secondary);
 }
+
+/* Kart değerinin yanındaki yıl — rakamla aynı satırda, ondan sönük. */
+.tvb-kart__yil { font-weight: 500; color: var(--text-secondary); }

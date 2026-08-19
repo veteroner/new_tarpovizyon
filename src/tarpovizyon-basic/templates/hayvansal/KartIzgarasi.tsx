@@ -31,16 +31,17 @@ function Kart({ kart, veri }: { kart: KartTanimi; veri: { yil: number; deger: nu
   return (
     <Link to={`/tarpovizyon-basic/genel/hayvansal-uretim/${kart.id}`} className="tvb-kart">
       <span className="tvb-kart__ad">{kart.label}</span>
+      {/* Yıl değerin yanında — ayrı satırda başıboş duruyordu. */}
       <span className="tvb-kart__deger">
         {son ? sayi.format(son.deger) : '—'}
         <small> {kart.birim}</small>
+        {son && <small className="tvb-kart__yil"> · {son.yil}</small>}
       </span>
       {degisim !== null && (
         <span className={`tvb-kart__degisim ${artan ? 'tvb-kart__degisim--artan' : 'tvb-kart__degisim--azalan'}`}>
           {artan ? '▲' : '▼'} {Math.abs(degisim).toFixed(1)}% <small>geçen yıla göre</small>
         </span>
       )}
-      {son && <span className="tvb-kart__donem">{son.yil}</span>}
     </Link>
   );
 }
