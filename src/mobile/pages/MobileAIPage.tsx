@@ -1,16 +1,35 @@
-import { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowUp, Loader2, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { askAI, AIHatasi } from '../services/ai';
 import DynamicChart from '../../components/DynamicChart';
 import type { ChartConfig } from '../../components/DynamicChart';
 import { NavBar } from '../components/ui/IosList';
+import { BASIC_MENU } from '../../components/nav/menu';
+import { sayfaBul, type ModelSonucu } from '../../components/nav/modelArama';
 
 /**
  * AI Asistan — sohbet.
  *
- * ─── NE DEĞİŞTİ ─────────────────────────────────────────────────────────────
+ * ─── NEDEN CEVABIN ALTINDA SAYFA BAĞLANTISI VAR ─────────────────────────────
+ * Model, uygulamanın verisine bakmıyor; kendi ezberinden konuşuyor. Ölçülen
+ * örnek: "süt üretimi" sorusuna "İnek Sütü ~19,5–21 milyon ton" dedi, oysa
+ * uygulamanın kendi doğrulanmış rakamı çiğ sütte 21.379.088 ton (2025) olarak
+ * bir dokunuş ötede duruyordu.
+ *
+ * Üstelik ekran çıkmaz sokaktı: sistem istemi cevabın sonuna "En güncel
+ * veriler için TarpoVizyon platformunu ziyaret edin" ekliyordu — kullanıcı
+ * ZATEN platformun içindeyken. Sayfaya götüren hiçbir bağlantı yoktu.
+ *
+ * Artık her cevabın altında ilgili sayfa duruyor ve tek dokunuşla açılıyor.
+ *
+ * DİKKAT: bu, modelin yanlış rakam söylemesini ENGELLEMİYOR — doğruyu yanına
+ * koyuyor. Rakamın kendisini düzeltmek, cevabı üretmeden önce modele bizim
+ * verimizi vermeyi gerektiriyor; o ayrı bir adım.
+ *
+ * ─── NE DEĞİŞTİ (daha önce) ─────────────────────────────────────────────────
  * Her balonun yanında 28 px'lik bir avatar kutusu vardı (🤖 / 👤). Sohbette
  * kimin konuştuğunu balonun HİZASI ve rengi zaten söylüyor; avatar her satırda
  * tekrar eden gürültüydü ve metne kalan genişliği daraltıyordu. iOS Mesajlar
@@ -28,6 +47,8 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  /** Cevabın altında gösterilecek uygulama sayfası; aranıyorsa 'araniyor'. */
+  ilgili?: ModelSonucu | null | 'araniyor';
 }
 
 const ONERILER = [
@@ -38,10 +59,13 @@ const ONERILER = [
 ];
 
 export default function MobileAIPage() {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const sonRef = useRef<HTMLDivElement>(null);
+
+  const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
 
   useEffect(() => {
     sonRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,9 +83,23 @@ export default function MobileAIPage() {
 
     try {
       const cevap = await askAI(soru);
+      const cevapId = `${Date.now() + 1}`;
       setMessages((p) => [...p, {
-        id: `${Date.now() + 1}`, role: 'assistant', content: cevap, timestamp: new Date(),
+        id: cevapId, role: 'assistant', content: cevap, timestamp: new Date(), ilgili: 'araniyor',
       }]);
+
+      /*
+       * Sayfa arama cevabı BEKLETMİYOR: cevap ekrana basıldıktan sonra
+       * arkada çalışıyor, bulununca altına iliştiriliyor. Bekletseydik
+       * kullanıcı iki model çağrısının toplam süresini beklerdi.
+       *
+       * Soru tam bir cümle olduğu için doğrudan modele soruluyor; yerel
+       * arama kelime eşleştirmesi yapıyor ve cümledeki taşıyıcı kelimeler
+       * ("nedir", "ne kadar") onu yanıltıyor. Aynı soru önbellekten geliyor.
+       */
+      sayfaBul(soru, tumOgeler)
+        .then((s) => setMessages((p) => p.map((m) => (m.id === cevapId ? { ...m, ilgili: s } : m))))
+        .catch(() => setMessages((p) => p.map((m) => (m.id === cevapId ? { ...m, ilgili: null } : m))));
     } catch (e) {
       /*
        * Servisin kendi mesajı gösteriliyor: zaman aşımı, ağ yok, hız sınırı ve
@@ -128,6 +166,24 @@ export default function MobileAIPage() {
                     {msg.content}
                   </ReactMarkdown>
                 </div>
+              )}
+              {/*
+                * İlgili sayfa balonun İÇİNDE, saatin üstünde: cevabın parçası,
+                * ayrı bir mesaj değil. Model rakamı ezberinden söylüyor;
+                * doğrulanmış hâli burada.
+                */}
+              {msg.role === 'assistant' && msg.ilgili && msg.ilgili !== 'araniyor' && (
+                <button
+                  type="button"
+                  className="ios-kaynak"
+                  onClick={() => navigate((msg.ilgili as ModelSonucu).yol)}
+                >
+                  <span className="ios-kaynak-ust">Uygulamadaki doğrulanmış verisi</span>
+                  <span className="ios-kaynak-ad">
+                    {(msg.ilgili as ModelSonucu).ad}
+                    <ChevronRight size={15} aria-hidden="true" />
+                  </span>
+                </button>
               )}
               <span className="ios-bubble-time">{saat(msg.timestamp)}</span>
             </div>

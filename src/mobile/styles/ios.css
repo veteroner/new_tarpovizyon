@@ -739,3 +739,39 @@
   font-variant-numeric: tabular-nums;
   color: var(--ios-label);
 }
+
+/* ─── AI cevabının altındaki "doğrulanmış verisi" kartı ──────────────────────
+ * Balonun içinde ama ondan ayrılmış: model cevabı ile uygulamanın kendi
+ * verisi aynı şey değil ve okuyanın bunu görmesi gerekiyor. Hafif zemin +
+ * ince çizgi, ayrı bir mesaj balonu gibi görünmeden ayırıyor.
+ */
+.ios-kaynak {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  margin: 10px 0 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--ios-separator);
+  border-radius: 11px;
+  background: var(--ios-bg);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ios-kaynak-ust {
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ios-label-3);
+}
+.ios-kaynak-ad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ios-tint-deep, var(--ios-tint));
+}

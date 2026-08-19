@@ -565,6 +565,7 @@ async function tradeProductBreakdown(env, table, urunler, yil) {
 import { handleCatalog, handleSchema, handleRows } from './upload.js';
 import { TABLO_SAYFALARI } from './tabloSayfalari.js';
 import { handleAi } from './ai.js';
+import { handleSayfaBul } from './sayfaBul.js';
 
 export default {
   async fetch(request, env) {
@@ -579,6 +580,8 @@ export default {
      * (preflight) başarısız olur.
      */
     if (slug === 'ai') return handleAi(request, env);
+    // Arama kutusu ve AI cevabı için sayfa bulucu — aynı CORS gerekçesi.
+    if (slug === 'sayfa-bul') return handleSayfaBul(request, env);
 
     // ── Yönetim uçları ──────────────────────────────────────────────────
     // Yazma ucu dar CORS ile korunuyor; okuma/şema uçları katalog bilgisi

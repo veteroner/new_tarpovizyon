@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Capacitor } from '@capacitor/core';
 import type { MenuItem } from './menu';
 
 /**
@@ -23,20 +22,16 @@ import type { MenuItem } from './menu';
  */
 
 /**
- * Uygulama sunucusu.
+ * Uç, uygulamanın veri Worker'ında — AI ucuyla aynı yerde.
  *
- * Web'de göreli yol yeterli: Netlify `/api.php?action=sayfa_bul` isteğini
- * function'a yönlendiriyor (netlify.toml). Native kabukta ise sayfa
- * `capacitor://` ya da `https://localhost` üzerinden açılıyor ve göreli yol
- * telefonun kendi içine gider — bu yüzden orada mutlak adres şart.
+ * Önce Netlify function'a konmuştu ve native için üretim adresi koda
+ * gömülmüştü. Yanlıştı: `workers/.../ai.js` aynı sorunu daha önce çözmüş ve
+ * gerekçesini yazmış — native kabuğun Netlify kökeni yok, `capacitor://`
+ * üzerinden `/api.php` yönlendirmesi hiç çalışmıyor. Uygulama zaten bütün
+ * verisini bu Worker'dan çekiyor, yani gömülü adrese de gerek kalmıyor.
  */
-const CANLI = 'https://newtarpovizyon.netlify.app';
-
-const sunucu = (): string => {
-  const ayarli = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, '');
-  if (ayarli) return ayarli;
-  return Capacitor.isNativePlatform() ? CANLI : '';
-};
+const UC = `${(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
+  ?? 'https://tarpovizyon-api.veteroner.workers.dev'}/api/sayfa-bul`;
 
 /** Bundan kısa sorgu modele gitmiyor: iki harf herkesin yolunun üstünde. */
 const EN_AZ_HARF = 3;
@@ -78,7 +73,7 @@ export async function sayfaBul(
   const gecerliYollar = new Set(ogeler.map((o) => o.any).filter(Boolean) as string[]);
 
   try {
-    const yanit = await fetch(`${sunucu()}/api.php?action=sayfa_bul`, {
+    const yanit = await fetch(UC, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal,

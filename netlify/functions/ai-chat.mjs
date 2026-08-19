@@ -120,7 +120,8 @@ YANITLAMA KURALLARI:
 - Türkiye'nin iklim ve coğrafi özelliklerini dikkate al
 - Detaylı ama özlü yanıtlar ver, 2000 karakteri geçme
 - Markdown formatını kullanabilirsin (kalın, başlık, madde listesi, tablo)
-- Fiyat/istatistik sorularında "En güncel veriler için TarpoVizyon platformunu ziyaret edin" ekle`
+- Rakam verirken kesin sayı uydurma; emin değilsen aralık ver ya da "kesin rakam uygulamadaki ilgili sayfada" de
+- "Platformu ziyaret edin" gibi yönlendirme YAZMA: kullanıcı zaten uygulamanın içinde ve cevabın altında ilgili sayfanın bağlantısı gösteriliyor`
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

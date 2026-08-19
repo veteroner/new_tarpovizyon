@@ -1,8 +1,14 @@
 /**
- * sayfa-bul.mjs — "Kullanıcı ne aradı, hangi sayfaya gitmeli?" (Netlify Function)
+ * Sayfa bulucu — Worker ucu (`POST /api/sayfa-bul`).
  *
- * Frontend `/api.php?action=sayfa_bul` isteğini karşılar (netlify.toml redirect).
- * Anahtarlar ortam değişkeninden, ai-chat ile aynı (hardcode YOK):
+ * ─── NEDEN WORKER, NEDEN NETLIFY DEĞİL ──────────────────────────────────────
+ * Önce Netlify function olarak yazıldı ve native uygulama için üretim adresi
+ * koda gömüldü. Yanlıştı: `ai.js` aynı sorunu daha önce çözmüş ve gerekçesini
+ * de yazmış — native kabuğun Netlify kökeni yok, `capacitor://` üzerinden
+ * `/api.php` yönlendirmesi hiç çalışmıyor. Uygulama zaten bütün verisini bu
+ * Worker'dan çekiyor; tek köken, gömülü adres yok.
+ *
+ * Anahtarlar `ai.js` ile aynı secret'lar (istemcide sıfır sır):
  *   TARPOL_AI_KEY → Gemini,  TARPOL_GROQ_KEY → Groq
  *
  * ─── NEDEN AYRI BİR FUNCTION ────────────────────────────────────────────────
@@ -46,6 +52,12 @@ const MAX_TOKENS = 48
 /** İstemci listesi bundan uzunsa kesiliyor — istek gövdesi şişmesin. */
 const EN_FAZLA_SAYFA = 200
 
+/*
+ * CORS: `ai.js` ile aynı gerekçe — native kabuğun kökeni sabit değil
+ * (iOS'ta özel şema, Android'de https://localhost), bu yüzden `*`.
+ * Genel okuma CORS'u yalnızca GET'e izin verdiği için POST ucu kendi
+ * başlıklarını taşımak zorunda; yoksa tarayıcı ön kontrolü düşüyor.
+ */
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -127,9 +139,29 @@ function numaraCoz(text, adet) {
   return Number.isInteger(n) && n >= 1 && n <= adet ? n : 0
 }
 
-export default async (req) => {
-  if (req.method === 'OPTIONS') return new Response('', { status: 204, headers: CORS })
+/**
+ * Hız sınırı — `ai.js` ile AYNI binding.
+ *
+ * Bu uç kimlik doğrulaması istemiyor ve her istek ücretli bir model çağrısı
+ * demek; sınırsız bırakmak, adresi gören birinin faturayı yazması demekti.
+ *
+ * Binding tanımlı değilse istek engellenmiyor: eksik bir koruma yüzünden
+ * çalışan bir özelliği kapatmak daha kötü olurdu (ai.js'teki aynı tercih).
+ */
+async function hizSiniriAsildi(req, env) {
+  if (!env.AI_LIMIT) return false
+  const ip = req.headers.get('CF-Connecting-IP') ?? 'bilinmeyen'
+  const { success } = await env.AI_LIMIT.limit({ key: `sayfabul:${ip}` })
+  return !success
+}
+
+export async function handleSayfaBul(req, env) {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS })
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405)
+
+  if (await hizSiniriAsildi(req, env)) {
+    return json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, 429)
+  }
 
   let body = null
   try { body = await req.json() } catch { body = null }
@@ -146,7 +178,7 @@ export default async (req) => {
   })).filter((s) => s.yol && s.ad)
   if (!sayfalar.length) return json({ error: 'sayfalar required' }, 400)
 
-  const anahtarlar = { gemini: process.env.TARPOL_AI_KEY, groq: process.env.TARPOL_GROQ_KEY }
+  const anahtarlar = { gemini: env.TARPOL_AI_KEY, groq: env.TARPOL_GROQ_KEY }
   const metin = istem(soru, sayfalar)
   const basladi = Date.now()
 
