@@ -1080,3 +1080,92 @@
 
 /* Kart değerinin yanındaki yıl — rakamla aynı satırda, ondan sönük. */
 .tvb-kart__yil { font-weight: 500; color: var(--text-secondary); }
+
+/* ─── Başlıktaki sayfa arama kutusu ──────────────────────────────────────────
+ * Kutu DOLU beyaz, metin koyu.
+ *
+ * Önce yeşil şeride karışsın diye saydam beyaz (%15) zemin ve beyaz metin
+ * denendi; ölçüldüğünde kontrast 2,7:1 çıktı — WCAG'nin 4,5 eşiğinin epey
+ * altında ve ekranda gerçekten okunmuyordu. Dolu zemin hem okunuyor hem
+ * yazılabilir bir alan olduğunu şeridin geri kalanından ayırarak söylüyor.
+ *
+ * Açılır liste de yüzey renginde: içeriği sayfa listesi, yani başlığın değil
+ * gövdenin parçası.
+ */
+.tvb-arama {
+  position: relative;
+  flex-shrink: 0;
+  width: min(280px, 38vw);
+  display: flex;
+  align-items: center;
+}
+.tvb-arama__ikon {
+  position: absolute;
+  left: 9px;
+  color: #64748b;
+  pointer-events: none;
+}
+.tvb-arama__giris {
+  width: 100%;
+  padding: 6px 10px 6px 30px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 13px;
+  font-family: inherit;
+}
+.tvb-arama__giris::placeholder { color: #64748b; }
+.tvb-arama__giris:focus {
+  outline: 2px solid #0f172a;
+  outline-offset: 2px;
+}
+
+.tvb-arama__liste {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface, #fff);
+  color: var(--text-primary, #111);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden auto;
+  max-height: min(60vh, 420px);
+  z-index: 40;
+}
+.tvb-arama__baslik,
+.tvb-arama__dipnot {
+  padding: 7px 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #64748b);
+  background: var(--surface-2, #f8fafc);
+}
+.tvb-arama__dipnot { text-transform: none; letter-spacing: 0; }
+.tvb-arama__satir {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+.tvb-arama__satir--secili { background: var(--surface-2, #f1f5f9); }
+.tvb-arama__ad { font-size: 0.86rem; font-weight: 500; }
+.tvb-arama__bolum { font-size: 0.74rem; color: var(--text-secondary, #64748b); }
+.tvb-arama__bos { padding: 14px 12px; font-size: 0.84rem; color: var(--text-secondary, #64748b); }
+
+/* Dar ekranda menü düğmesiyle yan yana sığmıyor; kutu alt satıra iniyor. */
+@media (max-width: 560px) {
+  .tvb-header { flex-wrap: wrap; }
+  .tvb-header h1 { flex: 1 1 auto; }
+  .tvb-arama { order: 3; width: 100%; }
+}

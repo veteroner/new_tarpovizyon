@@ -33,6 +33,17 @@ export type MenuItem = {
    * Göstergeler…") hem seçicide gruplama olarak kullanılabiliyor.
    */
   bolum?: string;
+  /**
+   * Sayfanın İÇİNDEKİ etiketler — seri adları, metrik adları, blok başlıkları.
+   * Yalnızca arama için; hiçbir yerde gösterilmiyor.
+   *
+   * ─── NEDEN GEREKLİ ────────────────────────────────────────────────────────
+   * Arama yalnızca sayfa ve bölüm adına bakınca "manda" sorgusu manda serisini
+   * çizen "Türkiye Hayvan Varlığı" sayfasını bulamıyordu; adı "manda" ile
+   * BAŞLADIĞI için "Mandalina" geliyordu. Oysa manda o sayfada bir seri
+   * etiketi olarak zaten duruyor.
+   */
+  icerik?: string[];
   /** Mobil menüde gizlenir (yönetim ekranları). */
   sadeceMasaustu?: boolean;
   /** Kapsamdan bağımsız tek yol (ör. AI Asistan). */
@@ -176,6 +187,43 @@ export const MENU: MenuCategory[] = [
  * Basic sayfalarının kapsamı yok — hepsi `any`, Dünya/Türkiye ayrımına
  * girmiyorlar.
  */
+/**
+ * Sayfa yapılandırmasından insan okuyabilir etiketleri toplar.
+ *
+ * ─── NEDEN GENEL BİR GEZİCİ ─────────────────────────────────────────────────
+ * `PageDef.config` 18 farklı şablon tipinden biri olabiliyor ve her birinin
+ * kendi şekli var (`series[].label`, `provincialRanking.metrics[].label`,
+ * `title`, iç içe bloklar…). Hepsini tek tek okumak, yeni bir şablon
+ * eklendiğinde sessizce eksik kalan bir liste demekti.
+ *
+ * Bunun yerine ağaç geziliyor ve YALNIZCA insan tarafından okunan anahtarların
+ * değerleri alınıyor. `endpoint`, `key`, `field` gibi teknik alanlar dışarıda:
+ * onlar aramada gürültü yapar ("tr/hayvan-varliklari" hiç kimsenin yazacağı
+ * şey değil).
+ */
+const ETIKET_ANAHTARI = new Set(['label', 'title', 'baslik', 'ad']);
+
+function icerikEtiketleri(config: unknown): string[] {
+  const bulunan = new Set<string>();
+  const gez = (dugum: unknown, derinlik: number) => {
+    if (!dugum || typeof dugum !== 'object' || derinlik > 6) return;
+    if (Array.isArray(dugum)) {
+      dugum.forEach((c) => gez(c, derinlik + 1));
+      return;
+    }
+    for (const [anahtar, deger] of Object.entries(dugum)) {
+      if (typeof deger === 'string') {
+        // Uzun metinler açıklama/dipnot; arama havuzunu şişiriyorlar.
+        if (ETIKET_ANAHTARI.has(anahtar) && deger.length <= 60) bulunan.add(deger);
+      } else {
+        gez(deger, derinlik + 1);
+      }
+    }
+  };
+  gez(config, 0);
+  return [...bulunan];
+}
+
 export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
   title: `Basic · ${grup.label}`,
   icon: LayoutGrid,
@@ -188,6 +236,7 @@ export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
     bolum.pages.map((sayfa) => ({
       label: sayfa.label,
       bolum: bolum.label,
+      icerik: icerikEtiketleri(sayfa.config),
       any: `/tarpovizyon-basic/${bolum.path}/${sayfa.path}`,
     })),
   ),

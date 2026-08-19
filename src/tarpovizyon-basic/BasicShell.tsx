@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NAV_GROUPS } from './pages';
+import { BasicArama } from './BasicArama';
 import type { Section } from './types';
 import './tarpovizyon-basic.css';
 
@@ -90,6 +91,7 @@ export function BasicShell() {
       <header className="tvb-header">
         <button className="tvb-back" onClick={() => navigate('/')}>← TARPOL</button>
         <h1>TarpoVizyon Basic</h1>
+        <BasicArama />
         <button
           className="tvb-menu-toggle"
           onClick={() => setMobileOpen((v) => !v)}
