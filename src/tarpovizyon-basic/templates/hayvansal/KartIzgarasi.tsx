@@ -3,12 +3,11 @@ import { KARTLAR, type KartTanimi } from './kartlar';
 import type { YilSatiri } from './useHayvansalKartlar';
 
 /**
- * Tıklanabilir künye kartları.
+ * Tıklanabilir künye kartları: son değer, dönem ve geçen yıla göre değişim.
  *
- * Her kartta son değer, geçen yıla göre değişim ve son 8 yılın MİNİ ÇİZGİSİ
- * var. Mini çizgi iki işi birden yapıyor: yönü tıklamadan gösteriyor ve kartın
- * tıklanabilir olduğunu sezdiriyor — düz bir rakam kutusu tıklanabilir
- * durmuyor.
+ * Önce kartlarda son 8 yılın mini çizgisi de vardı; kaldırıldı. Ölçeksiz ve
+ * birkaç noktalı bir çizgi küçük dalgalanmayı dramatik gösteriyor, üstelik
+ * zaten yazan değişim yüzdesinin üstüne bir bilgi katmıyordu.
  */
 
 const sayi = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
@@ -19,30 +18,6 @@ function seri(kart: KartTanimi, varlik: YilSatiri[], uretim: YilSatiri[]) {
   return kaynak
     .map((r) => ({ yil: r.yil, deger: Number(r[kart.alan]) }))
     .filter((d) => Number.isFinite(d.deger) && d.deger > 0);
-}
-
-/** Basit sparkline — kütüphane çağırmadan, kart boyutunda okunur kalsın diye. */
-function MiniCizgi({ degerler }: { degerler: number[] }) {
-  if (degerler.length < 2) return null;
-  const enAz = Math.min(...degerler);
-  const enCok = Math.max(...degerler);
-  const aralik = enCok - enAz || 1;
-  const G = 100; const Y = 28;
-  const noktalar = degerler
-    .map((v, i) => `${(i / (degerler.length - 1)) * G},${Y - ((v - enAz) / aralik) * Y}`)
-    .join(' ');
-  const artiyor = degerler[degerler.length - 1] >= degerler[0];
-  return (
-    <svg viewBox={`0 0 ${G} ${Y}`} className="tvb-kart__mini" preserveAspectRatio="none" aria-hidden="true">
-      <polyline
-        points={noktalar}
-        fill="none"
-        stroke={artiyor ? '#16a34a' : '#ef4444'}
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
 }
 
 function Kart({ kart, veri }: { kart: KartTanimi; veri: { yil: number; deger: number }[] }) {
@@ -65,7 +40,6 @@ function Kart({ kart, veri }: { kart: KartTanimi; veri: { yil: number; deger: nu
           {artan ? '▲' : '▼'} {Math.abs(degisim).toFixed(1)}% <small>geçen yıla göre</small>
         </span>
       )}
-      <MiniCizgi degerler={veri.slice(-8).map((d) => d.deger)} />
       {son && <span className="tvb-kart__donem">{son.yil}</span>}
     </Link>
   );

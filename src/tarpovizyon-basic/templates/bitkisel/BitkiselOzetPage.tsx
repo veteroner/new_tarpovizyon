@@ -22,22 +22,6 @@ function sonDolu(veri: YilDeger[]) {
   return { son: undefined, onceki: undefined };
 }
 
-function MiniCizgi({ degerler }: { degerler: number[] }) {
-  if (degerler.length < 2) return null;
-  const enAz = Math.min(...degerler);
-  const aralik = Math.max(...degerler) - enAz || 1;
-  const G = 100; const Y = 28;
-  const noktalar = degerler
-    .map((v, i) => `${(i / (degerler.length - 1)) * G},${Y - ((v - enAz) / aralik) * Y}`).join(' ');
-  const artiyor = degerler[degerler.length - 1] >= degerler[0];
-  return (
-    <svg viewBox={`0 0 ${G} ${Y}`} className="tvb-kart__mini" preserveAspectRatio="none" aria-hidden="true">
-      <polyline points={noktalar} fill="none" stroke={artiyor ? '#16a34a' : '#ef4444'}
-        strokeWidth="2" vectorEffect="non-scaling-stroke" />
-    </svg>
-  );
-}
-
 function Kart({ kart, veri, tahmin }: {
   kart: BitkiselKart;
   veri: YilDeger[];
@@ -60,7 +44,6 @@ function Kart({ kart, veri, tahmin }: {
           {artan ? '▲' : '▼'} {Math.abs(degisim).toFixed(1)}% <small>geçen yıla göre</small>
         </span>
       )}
-      <MiniCizgi degerler={veri.filter((d) => d.deger > 0).slice(-8).map((d) => d.deger)} />
       {son && <span className="tvb-kart__donem">{son.yil}</span>}
       {/*
         * TAHMİN AYRI SATIRDA ve ayrı renkte. Ana rakam gerçekleşme olarak
