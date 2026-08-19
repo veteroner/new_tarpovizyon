@@ -80,6 +80,8 @@ const MIN_VIABLE_MS = 1500;
  * Soru uzunluğu tavanı. Sağlayıcıya giden token'ı ve dolayısıyla maliyeti
  * sınırlar; 2.000 karakter, en uzun gerçek tarım sorusunun kat kat üstünde.
  */
+/** Uygulama verisi bloğu için üst sınır. */
+const MAX_VERI = 2000;
 const MAX_SORU = 2000;
 
 /*
@@ -150,7 +152,8 @@ YANITLAMA KURALLARI:
 - Türkiye'nin iklim ve coğrafi özelliklerini dikkate al
 - Detaylı ama özlü yanıtlar ver, 2000 karakteri geçme
 - Markdown formatını kullanabilirsin (kalın, başlık, madde listesi, tablo)
-- Rakam verirken kesin sayı uydurma; emin değilsen aralık ver ya da "kesin rakam uygulamadaki ilgili sayfada" de
+- Soruda "UYGULAMANIN KENDİ VERİSİ" bloğu VARSA rakamları YALNIZCA oradan al; kendi bildiğin sayıyı yazma, blok ile çelişme
+- O blok yoksa kesin sayı uydurma; emin değilsen aralık ver ya da "kesin rakam uygulamadaki ilgili sayfada" de
 - "Platformu ziyaret edin" gibi yönlendirme YAZMA: kullanıcı zaten uygulamanın içinde ve cevabın altında ilgili sayfanın bağlantısı gösteriliyor`;
 
 /*
@@ -285,6 +288,19 @@ export async function handleAi(request, env) {
   const message = String(body?.message ?? '').trim().slice(0, MAX_SORU);
   if (!message) return json({ error: 'message required' }, 400);
 
+  /*
+   * İstemcinin gönderdiği UYGULAMA VERİSİ. İsteğe bağlı: gelmezse model
+   * eskisi gibi kendi bilgisinden cevaplıyor, gelirse rakamları buradan
+   * alması isteniyor.
+   *
+   * Kısıt şart: uç herkese açık ve gövde sınırsız olsaydı, buraya istediğini
+   * yazan biri modele istediğini söyletebilirdi. Uzunluk kırpılıyor.
+   */
+  const veri = String(body?.veri ?? '').trim().slice(0, MAX_VERI);
+  const istem = veri
+    ? `${message}\n\n--- UYGULAMANIN KENDİ VERİSİ (yetkili kaynak) ---\n${veri}`
+    : message;
+
   const keys = {
     gemini: env.TARPOL_AI_KEY,
     groq: env.TARPOL_GROQ_KEY,
@@ -309,8 +325,8 @@ export async function handleAi(request, env) {
     if (!apiKey || timeoutMs < MIN_VIABLE_MS) return false;
     try {
       const r = m.p === 'gemini'
-        ? await callGemini(m, message, apiKey, timeoutMs)
-        : await callGroq(m, message, apiKey, timeoutMs);
+        ? await callGemini(m, istem, apiKey, timeoutMs)
+        : await callGroq(m, istem, apiKey, timeoutMs);
       if (r.ok) {
         answer = r.text;
         usedModel = m.id;

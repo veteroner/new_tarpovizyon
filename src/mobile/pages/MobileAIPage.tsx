@@ -9,25 +9,29 @@ import type { ChartConfig } from '../../components/DynamicChart';
 import { NavBar } from '../components/ui/IosList';
 import { BASIC_MENU } from '../../components/nav/menu';
 import { sayfaBul, type ModelSonucu } from '../../components/nav/modelArama';
+import { sayfaVerisi } from '../../components/nav/sayfaVerisi';
 
 /**
  * AI Asistan — sohbet.
  *
- * ─── NEDEN CEVABIN ALTINDA SAYFA BAĞLANTISI VAR ─────────────────────────────
- * Model, uygulamanın verisine bakmıyor; kendi ezberinden konuşuyor. Ölçülen
- * örnek: "süt üretimi" sorusuna "İnek Sütü ~19,5–21 milyon ton" dedi, oysa
- * uygulamanın kendi doğrulanmış rakamı çiğ sütte 21.379.088 ton (2025) olarak
- * bir dokunuş ötede duruyordu.
+ * ─── CEVAP UYGULAMANIN KENDİ VERİSİYLE ÜRETİLİYOR ───────────────────────────
+ * Model eskiden uygulamanın verisine hiç bakmıyor, kendi ezberinden
+ * konuşuyordu. Ölçülen örnek: "süt üretimi" sorusuna "~19,5–21 milyon ton"
+ * dedi; uygulamanın kendi doğrulanmış rakamı çiğ sütte 21.379.088 ton (2025)
+ * olarak bir dokunuş ötede duruyordu.
  *
  * Üstelik ekran çıkmaz sokaktı: sistem istemi cevabın sonuna "En güncel
  * veriler için TarpoVizyon platformunu ziyaret edin" ekliyordu — kullanıcı
  * ZATEN platformun içindeyken. Sayfaya götüren hiçbir bağlantı yoktu.
  *
- * Artık her cevabın altında ilgili sayfa duruyor ve tek dokunuşla açılıyor.
+ * Şimdi sıra şöyle: soru → ilgili sayfa bulunur → o sayfanın ucundan son
+ * satırlar çekilir → model cevabı BU satırlarla üretir. Cevabın altında da
+ * rakamların geldiği sayfa duruyor, tek dokunuşla açılıyor.
  *
- * DİKKAT: bu, modelin yanlış rakam söylemesini ENGELLEMİYOR — doğruyu yanına
- * koyuyor. Rakamın kendisini düzeltmek, cevabı üretmeden önce modele bizim
- * verimizi vermeyi gerektiriyor; o ayrı bir adım.
+ * Besleme başarısız olursa (uç yok, istek düşer, süre yetmez) cevap yine
+ * üretiliyor ama beslemesiz; kart o zaman "Rakamların kaynağı" değil
+ * "İlgili sayfa" diyor. İki durumu aynı göstermek, beslenmemiş bir cevabı
+ * doğrulanmış gibi sunmak olurdu.
  *
  * ─── NE DEĞİŞTİ (daha önce) ─────────────────────────────────────────────────
  * Her balonun yanında 28 px'lik bir avatar kutusu vardı (🤖 / 👤). Sohbette
@@ -47,8 +51,25 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  /** Cevabın altında gösterilecek uygulama sayfası; aranıyorsa 'araniyor'. */
-  ilgili?: ModelSonucu | null | 'araniyor';
+  /** Cevabın altında gösterilecek uygulama sayfası. */
+  ilgili?: ModelSonucu | null;
+  /** Cevap uygulamanın kendi verisiyle mi üretildi? Kartın metnini belirliyor. */
+  beslendi?: boolean;
+}
+
+/**
+ * Besleme için üst sınırlar. Aşılırsa besleme atlanıyor ve cevap yine
+ * üretiliyor: veri gelmedi diye kullanıcıyı cevapsız bırakmak daha kötü.
+ */
+const SAYFA_BULMA_MS = 3500;
+const VERI_CEKME_MS = 2500;
+
+/** Söz verilen sürede bitmezse null döner; işi iptal etmiyor, beklemeyi bırakıyor. */
+function sinirliSure<T>(is: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    is.catch(() => null),
+    new Promise<null>((coz) => setTimeout(() => coz(null), ms)),
+  ]);
 }
 
 const ONERILER = [
@@ -63,6 +84,8 @@ export default function MobileAIPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  /* Yükleme balonundaki metin: besleme mi sürüyor, cevap mı yazılıyor. */
+  const [asama, setAsama] = useState<'veri' | 'cevap'>('cevap');
   const sonRef = useRef<HTMLDivElement>(null);
 
   const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
@@ -82,24 +105,31 @@ export default function MobileAIPage() {
     setIsLoading(true);
 
     try {
-      const cevap = await askAI(soru);
-      const cevapId = `${Date.now() + 1}`;
-      setMessages((p) => [...p, {
-        id: cevapId, role: 'assistant', content: cevap, timestamp: new Date(), ilgili: 'araniyor',
-      }]);
-
       /*
-       * Sayfa arama cevabı BEKLETMİYOR: cevap ekrana basıldıktan sonra
-       * arkada çalışıyor, bulununca altına iliştiriliyor. Bekletseydik
-       * kullanıcı iki model çağrısının toplam süresini beklerdi.
+       * ─── BESLEME CEVAPTAN ÖNCE ────────────────────────────────────────
+       * Model rakamı uydurmasın diye gerçek veriyi cevap ÜRETİLMEDEN önce
+       * görmesi gerekiyor. Önce ilgili sayfa bulunuyor, sonra o sayfanın
+       * ucundan son satırlar çekilip modele veriliyor.
        *
-       * Soru tam bir cümle olduğu için doğrudan modele soruluyor; yerel
-       * arama kelime eşleştirmesi yapıyor ve cümledeki taşıyıcı kelimeler
-       * ("nedir", "ne kadar") onu yanıltıyor. Aynı soru önbellekten geliyor.
+       * Ama bu her soruyu geciktirmemeli: "buğday ekim zamanı ne zaman"
+       * sorusunun beslemeye ihtiyacı yok ve kullanıcı boşuna bekler. Bu
+       * yüzden besleme SÜRE SINIRLI — yetişmezse cevap beslemesiz üretiliyor.
        */
-      sayfaBul(soru, tumOgeler)
-        .then((s) => setMessages((p) => p.map((m) => (m.id === cevapId ? { ...m, ilgili: s } : m))))
-        .catch(() => setMessages((p) => p.map((m) => (m.id === cevapId ? { ...m, ilgili: null } : m))));
+      setAsama('veri');
+      const sayfa = await sinirliSure(sayfaBul(soru, tumOgeler), SAYFA_BULMA_MS);
+      const oge = sayfa ? tumOgeler.find((o) => o.any === sayfa.yol) : undefined;
+      const veri = oge ? await sinirliSure(sayfaVerisi(oge), VERI_CEKME_MS) : null;
+
+      setAsama('cevap');
+      const cevap = await askAI(soru, veri);
+      setMessages((p) => [...p, {
+        id: `${Date.now() + 1}`,
+        role: 'assistant',
+        content: cevap,
+        timestamp: new Date(),
+        ilgili: sayfa,
+        beslendi: Boolean(veri),
+      }]);
     } catch (e) {
       /*
        * Servisin kendi mesajı gösteriliyor: zaman aşımı, ağ yok, hız sınırı ve
@@ -172,15 +202,23 @@ export default function MobileAIPage() {
                 * ayrı bir mesaj değil. Model rakamı ezberinden söylüyor;
                 * doğrulanmış hâli burada.
                 */}
-              {msg.role === 'assistant' && msg.ilgili && msg.ilgili !== 'araniyor' && (
+              {msg.role === 'assistant' && msg.ilgili && (
                 <button
                   type="button"
                   className="ios-kaynak"
-                  onClick={() => navigate((msg.ilgili as ModelSonucu).yol)}
+                  onClick={() => navigate(msg.ilgili!.yol)}
                 >
-                  <span className="ios-kaynak-ust">Uygulamadaki doğrulanmış verisi</span>
+                  {/*
+                    * Metin, cevabın nasıl üretildiğini söylüyor. "Kaynak"
+                    * ile "ilgili sayfa" aynı şey değil: besleme yapıldıysa
+                    * rakamlar gerçekten o sayfadan geliyor, yapılmadıysa
+                    * sayfa yalnızca konuyla ilgili.
+                    */}
+                  <span className="ios-kaynak-ust">
+                    {msg.beslendi ? 'Rakamların kaynağı' : 'İlgili sayfa'}
+                  </span>
                   <span className="ios-kaynak-ad">
-                    {(msg.ilgili as ModelSonucu).ad}
+                    {msg.ilgili.ad}
                     <ChevronRight size={15} aria-hidden="true" />
                   </span>
                 </button>
@@ -193,7 +231,9 @@ export default function MobileAIPage() {
         {isLoading && (
           <div className="ios-bubble ios-bubble-assistant" aria-live="polite">
             <Loader2 size={16} className="ios-spin" aria-hidden="true" />
-            <span className="sr-only">Yanıt hazırlanıyor</span>
+            <span className="ios-yukleniyor">
+              {asama === 'veri' ? 'İlgili veriler alınıyor…' : 'Yanıt yazılıyor…'}
+            </span>
           </div>
         )}
 

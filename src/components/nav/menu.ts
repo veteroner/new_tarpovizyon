@@ -44,6 +44,15 @@ export type MenuItem = {
    * etiketi olarak zaten duruyor.
    */
   icerik?: string[];
+  /**
+   * Sayfanın veri ucu (`api/...`). AI cevabını uygulamanın kendi rakamıyla
+   * beslemek için kullanılıyor; ucu olmayan sayfa beslenmiyor.
+   *
+   * Yalnızca yapılandırmanın ÜST seviyesindeki `endpoint` alınıyor. İç
+   * bloklardaki uçlar (il sıralaması gibi) sayfanın ana verisi değil; onları
+   * da toplasak modele hangi rakamın ana rakam olduğu belirsiz giderdi.
+   */
+  uc?: string;
   /** Mobil menüde gizlenir (yönetim ekranları). */
   sadeceMasaustu?: boolean;
   /** Kapsamdan bağımsız tek yol (ör. AI Asistan). */
@@ -224,6 +233,13 @@ function icerikEtiketleri(config: unknown): string[] {
   return [...bulunan];
 }
 
+/** Sayfanın ANA veri ucu — yalnızca üst seviyedeki `endpoint`. */
+function anaUc(config: unknown): string | undefined {
+  if (!config || typeof config !== 'object') return undefined;
+  const uc = (config as { endpoint?: unknown }).endpoint;
+  return typeof uc === 'string' && uc ? uc : undefined;
+}
+
 export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
   title: `Basic · ${grup.label}`,
   icon: LayoutGrid,
@@ -237,6 +253,7 @@ export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
       label: sayfa.label,
       bolum: bolum.label,
       icerik: icerikEtiketleri(sayfa.config),
+      uc: anaUc(sayfa.config),
       any: `/tarpovizyon-basic/${bolum.path}/${sayfa.path}`,
     })),
   ),

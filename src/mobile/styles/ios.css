@@ -775,3 +775,4 @@
   font-weight: 600;
   color: var(--ios-tint-deep, var(--ios-tint));
 }
+.ios-yukleniyor { font-size: 14px; color: var(--ios-label-3); margin-left: 8px; }

@@ -41,10 +41,12 @@ export class AIHatasi extends Error {}
 /**
  * Soruyu AI ucuna gönderir.
  *
+ * @param veri İsteğe bağlı uygulama verisi. Verilirse model rakamları
+ *   ORADAN alıyor; verilmezse eskisi gibi kendi bilgisinden cevaplıyor.
  * @returns Modelin yanıtı (markdown).
  * @throws {AIHatasi} Kullanıcıya gösterilmeye uygun bir mesajla.
  */
-export async function askAI(question: string): Promise<string> {
+export async function askAI(question: string, veri?: string | null): Promise<string> {
   const soru = question.trim();
   if (!soru) throw new AIHatasi('Lütfen bir soru yazın.');
 
@@ -56,7 +58,7 @@ export async function askAI(question: string): Promise<string> {
     res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: soru }),
+      body: JSON.stringify(veri ? { message: soru, veri } : { message: soru }),
       signal: controller.signal,
     });
   } catch (e) {
