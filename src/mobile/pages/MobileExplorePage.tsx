@@ -1,13 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import {
-  visibleMenu, itemPath, KAPSAM_ADI, BASIC_MENU, type Kapsam,
-} from '../../components/nav/menu';
-import { NavBar, ListGroup, ListRow, Segmented } from '../components/ui/IosList';
+import { BASIC_MENU } from '../../components/nav/menu';
+import { eslesiyorMu, sorguKelimeleri } from '../../components/nav/arama';
+import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
 
 /**
- * Keşfet — tüm veri sayfalarının listesi.
+ * Keşfet — veri sayfalarının listesi ve arama.
  *
  * ─── NEDEN YENİDEN YAZILDI ──────────────────────────────────────────────────
  * Bu sayfa kendi menü ağacını taşıyordu: 40+ modül, her biri kendi ikon rengi
@@ -18,51 +17,46 @@ import { NavBar, ListGroup, ListRow, Segmented } from '../components/ui/IosList'
  * Artık aynı kaynağı okuyor. Yeni bir sayfa menüye eklendiğinde mobilde de
  * kendiliğinden çıkıyor.
  *
- * Kapsam (Dünya/Türkiye) segment kontrolüyle — masaüstündeki gibi menüyü
- * baştan aşağı değiştirmiyor, aynı listenin kapsamını değiştiriyor.
+ * ─── NEDEN YALNIZCA BASIC ───────────────────────────────────────────────────
+ * Liste eskiden Basic'in yanına Pro sayfalarını da (`visibleMenu`) ekliyordu.
+ * Pro ayrı bir sürümde, kupon kodlu abonelikle gelecek; bu yayında uygulamanın
+ * hiçbir yerinde görünmemesi gerekiyor. Mobil ana sayfa zaten yalnızca
+ * `BASIC_MENU` okuyor, yani Pro'nun mobile sızdığı TEK yer burasıydı.
+ *
+ * Kapsam (Türkiye/Dünya) seçicisi de bu yüzden kalktı: yalnızca Pro
+ * sayfalarını süzüyordu, Basic kapsamsız. Pro gidince süzecek bir şey kalmadı
+ * ve kontrol hiçbir işe yaramayan bir düğmeye dönüşüyordu.
  */
-
-const KAPSAMLAR = [
-  { id: 'turkey' as Kapsam, label: KAPSAM_ADI.turkey },
-  { id: 'world' as Kapsam, label: KAPSAM_ADI.world },
-];
 
 export default function MobileExplorePage() {
   const navigate = useNavigate();
-  /*
-   * Kapsam oturum boyunca hatırlanıyor. Eskiden bileşen durumundaydı: bir
-   * dünya sayfasına girip geri dönünce Keşfet yeniden kuruluyor ve seçim
-   * Türkiye'ye sıfırlanıyordu — kullanıcı her seferinde Dünya'ya basmak
-   * zorunda kalıyordu.
-   */
-  const [kapsam, setKapsam] = useState<Kapsam>(
-    () => (sessionStorage.getItem('tarpo.kapsam') as Kapsam) ?? 'turkey',
-  );
-  const kapsamSec = (k: Kapsam) => {
-    setKapsam(k);
-    try { sessionStorage.setItem('tarpo.kapsam', k); } catch { /* özel mod */ }
-  };
   const [ara, setAra] = useState('');
+
+  /* Karşılığı olmayan kelimeleri elemek listenin TAMAMINI görmeyi gerektiriyor. */
+  const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
 
   const kategoriler = useMemo(() => {
     /*
-     * Pro sayfaları (kapsama göre) + Basic sayfaları (kapsamsız).
-     * Basic mobil uygulamada hiçbir yerden erişilemiyordu.
+     * Sorgu bir kez çözümleniyor, her öğe için değil.
+     * Eşleştirme kurallarının gerekçesi `nav/arama.ts` başında.
      */
+    const sorgu = sorguKelimeleri(tumOgeler, ara);
+    if (sorgu === null) return BASIC_MENU;
     /*
-     * Basic ÖNCE geliyor: uygulamanın ana içeriği o (82 sayfa, en taze veri).
-     * Pro sayfaları arkasından, kapsam seçimine göre.
-     *
-     * `mobil = true`: yönetim ekranları (Veri Düzenle) mobil listede
-     * gösterilmiyor — D1'e yazan bir ekran, herkese açık uygulamada yeri yok.
+     * Boş dizi "hiçbir kelime tutmadı" demek. Bunu ayrıca yakalamak şart:
+     * `[].every(...)` true döner, yani süzgeç her şeyi geçirirdi — kullanıcı
+     * anlamsız bir şey yazınca 84 sayfanın tamamını görürdü.
      */
-    const tum = [...BASIC_MENU, ...visibleMenu(kapsam, true)];
-    const q = ara.trim().toLocaleLowerCase('tr');
-    if (!q) return tum;
-    return tum
-      .map((k) => ({ ...k, items: k.items.filter((i) => i.label.toLocaleLowerCase('tr').includes(q)) }))
+    if (!sorgu.length) return [];
+
+    const suz = (hepsi: boolean) => BASIC_MENU
+      .map((k) => ({ ...k, items: k.items.filter((i) => eslesiyorMu(i, sorgu, hepsi)) }))
       .filter((k) => k.items.length > 0);
-  }, [kapsam, ara]);
+
+    /* Önce katı eşleşme; hiç sonuç yoksa tek kelime yetsin. Gerekçe: arama.ts. */
+    const kati = suz(true);
+    return kati.length ? kati : suz(false);
+  }, [ara, tumOgeler]);
 
   const toplam = kategoriler.reduce((n, k) => n + k.items.length, 0);
 
@@ -83,10 +77,6 @@ export default function MobileExplorePage() {
           />
         </div>
 
-        <div style={{ marginTop: 10 }}>
-          <Segmented options={KAPSAMLAR} value={kapsam} onChange={kapsamSec} label="Kapsam" />
-        </div>
-
         {/*
           * Satırlarda ikon YOK. Kategorinin ikonunu her satırda tekrarlamak
           * on tane özdeş yeşil kare demekti — hiçbir satırı diğerinden
@@ -96,7 +86,8 @@ export default function MobileExplorePage() {
         {kategoriler.map((kat) => (
           <ListGroup key={kat.title} header={kat.title}>
             {kat.items.map((item) => {
-              const yol = itemPath(item, kapsam)!;
+              // BASIC_MENU her öğeye `any` yazıyor — Basic sayfaları kapsamsız.
+              const yol = item.any!;
               return (
                 /*
                  * Alt satırda BÖLÜM adı. "Basic · Hayvancılık" grubunda
