@@ -24,6 +24,16 @@
   status = 200
   force = true
 
+# Arama kutusu → sayfa bulucu. ai-chat'ten AYRI bir function: o serbest metin
+# üretir, bu kapalı bir listeden seçer. Anahtarlar aynı env değişkenleri.
+# Bu kural da genel /api.php kuralından ÖNCE gelmeli.
+[[redirects]]
+  from = "/api.php"
+  query = { action = "sayfa_bul" }
+  to = "/.netlify/functions/sayfa-bul"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/api.php"
   to = "https://dersbende.com/api.php"

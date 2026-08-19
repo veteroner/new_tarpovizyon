@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASIC_MENU, type MenuItem } from '../components/nav/menu';
 import { ara } from '../components/nav/arama';
+import { useModelArama } from '../components/nav/modelArama';
 
 /**
  * Masaüstü başlığındaki sayfa arama kutusu.
@@ -34,6 +35,10 @@ export function BasicArama() {
   const oneriler = cikti.bos ? [] : cikti.oneriler;
   const gosterilen = sonuclar.length ? sonuclar : oneriler;
   const listeAcik = acik && !cikti.bos;
+
+  /* Model yalnızca yerel arama boş kaldığında soruluyor. Gerekçe: modelArama.ts */
+  const yerelBos = !cikti.bos && cikti.sonuclar.length === 0;
+  const model = useModelArama(tumOgeler, metin, yerelBos);
 
   /* Sorgu değişince imleç başa dönmeli; yoksa eski satır seçili kalıyor. */
   useEffect(() => { setImlec(0); }, [metin]);
@@ -121,8 +126,30 @@ export function BasicArama() {
             </button>
           ))}
 
-          {!gosterilen.length && (
+          {!gosterilen.length && !model.araniyor && !model.sonuc && (
             <div className="tvb-arama__bos">“{metin.trim()}” için sonuç yok.</div>
+          )}
+
+          {/*
+            * Model önerisi AYRI başlık altında ve en altta: yerel eşleşme
+            * kesin, bu bir tahmin. Aynı listede göstermek kullanıcının
+            * hangisine ne kadar güveneceğini bilememesi demekti.
+            */}
+          {yerelBos && model.araniyor && (
+            <div className="tvb-arama__bos">Yapay zekâya soruluyor…</div>
+          )}
+          {yerelBos && model.sonuc && (
+            <>
+              <div className="tvb-arama__baslik">Yapay zekânın önerisi</div>
+              <button
+                type="button"
+                className="tvb-arama__satir"
+                onClick={() => { navigate(model.sonuc!.yol); setMetin(''); setAcik(false); }}
+              >
+                <span className="tvb-arama__ad">{model.sonuc.ad}</span>
+                <span className="tvb-arama__bolum">Aradığınız bu olabilir</span>
+              </button>
+            </>
           )}
 
           {cikti.sonuclar.length > EN_FAZLA && (

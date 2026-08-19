@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { BASIC_MENU, type MenuItem } from '../../components/nav/menu';
 import { ara as aramaYap } from '../../components/nav/arama';
+import { useModelArama } from '../../components/nav/modelArama';
 import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
 
 /**
@@ -36,6 +37,13 @@ export default function MobileExplorePage() {
   const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
 
   const cikti = useMemo(() => aramaYap(tumOgeler, ara), [ara, tumOgeler]);
+
+  /*
+   * Model YALNIZCA yerel arama boş kaldığında soruluyor. Bir sonuç varsa
+   * anında, bedava ve kesin olan o; modele sormanın hiçbir faydası yok.
+   */
+  const yerelBos = !cikti.bos && cikti.sonuclar.length === 0;
+  const model = useModelArama(tumOgeler, ara, yerelBos);
 
   const toplam = cikti.bos
     ? tumOgeler.length
@@ -98,7 +106,7 @@ export default function MobileExplorePage() {
           * uygulamada olmadığını sanıp vazgeçiyordu; çoğu zaman tek harf
           * eksikti.
           */}
-        {!cikti.bos && !cikti.sonuclar.length && (
+        {yerelBos && (
           <>
             <p style={{ color: 'var(--ios-label-3)', padding: '24px 4px 4px', textAlign: 'center' }}>
               “{ara.trim()}” için sonuç yok.
@@ -106,6 +114,25 @@ export default function MobileExplorePage() {
             {cikti.oneriler.length > 0 && (
               <ListGroup header="Bunu mu demek istediniz?">
                 {cikti.oneriler.map(satir)}
+              </ListGroup>
+            )}
+            {/*
+              * Model katmanı en altta ve AYRI başlıkla: yerel arama kesin,
+              * bu bir tahmin. İkisini aynı listede göstermek, kullanıcının
+              * hangisine ne kadar güveneceğini bilememesi demekti.
+              */}
+            {model.araniyor && (
+              <p style={{ color: 'var(--ios-label-3)', padding: '12px 4px', textAlign: 'center', fontSize: 13 }}>
+                Yapay zekâya soruluyor…
+              </p>
+            )}
+            {model.sonuc && (
+              <ListGroup header="Yapay zekânın önerisi">
+                <ListRow
+                  title={model.sonuc.ad}
+                  subtitle="Aradığınız bu olabilir"
+                  onClick={() => navigate(model.sonuc!.yol)}
+                />
               </ListGroup>
             )}
           </>
