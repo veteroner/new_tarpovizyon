@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { BolumKategorileri } from '../../charts/BolumKategorileri';
-import { useBitkiselKartlar, type YilDeger } from './useBitkiselKartlar';
+import { useBitkiselKartlar, useTumBultenler, type YilDeger } from './useBitkiselKartlar';
 import type { BitkiselKart } from './kartlar';
 
 /**
@@ -38,7 +38,12 @@ function MiniCizgi({ degerler }: { degerler: number[] }) {
   );
 }
 
-function Kart({ kart, veri }: { kart: BitkiselKart; veri: YilDeger[] }) {
+function Kart({ kart, veri, tahmin }: {
+  kart: BitkiselKart;
+  veri: YilDeger[];
+  /** TÜİK'in gelecek yıl tahmini — varsa kartın altında ayrı satırda. */
+  tahmin?: { yil: number; deger: number; oncekiDeger?: number };
+}) {
   const { son, onceki } = sonDolu(veri);
   const degisim = son && onceki && onceki.deger !== 0
     ? ((son.deger - onceki.deger) / onceki.deger) * 100 : null;
@@ -57,6 +62,20 @@ function Kart({ kart, veri }: { kart: BitkiselKart; veri: YilDeger[] }) {
       )}
       <MiniCizgi degerler={veri.filter((d) => d.deger > 0).slice(-8).map((d) => d.deger)} />
       {son && <span className="tvb-kart__donem">{son.yil}</span>}
+      {/*
+        * TAHMİN AYRI SATIRDA ve ayrı renkte. Ana rakam gerçekleşme olarak
+        * kalıyor; tahmini künye yerine koymak, olmamış bir üretimi olmuş gibi
+        * gösterirdi.
+        */}
+      {tahmin && (
+        <span className="tvb-kart__tahmin">
+          {tahmin.yil} tahmini: {sayi.format(tahmin.deger)} ton
+          {Number.isFinite(tahmin.oncekiDeger) && (tahmin.oncekiDeger as number) > 0 && (
+            <> ({tahmin.deger >= (tahmin.oncekiDeger as number) ? '▲' : '▼'}
+              {' '}{Math.abs(((tahmin.deger - (tahmin.oncekiDeger as number)) / (tahmin.oncekiDeger as number)) * 100).toFixed(1)}%)</>
+          )}
+        </span>
+      )}
       <span className="tvb-kart__donem">{kart.parcalar.length} ürün</span>
     </Link>
   );
@@ -64,6 +83,7 @@ function Kart({ kart, veri }: { kart: BitkiselKart; veri: YilDeger[] }) {
 
 export function BitkiselOzetPage() {
   const { yukleniyor, seriler } = useBitkiselKartlar();
+  const bultenler = useTumBultenler();
 
   return (
     <div className="tvb-page">
@@ -74,7 +94,9 @@ export function BitkiselOzetPage() {
           <div className="tvb-section">
             <h3>Ürün Grupları</h3>
             <div className="tvb-kartlar">
-              {seriler.map(({ kart, veri }) => <Kart key={kart.id} kart={kart} veri={veri} />)}
+              {seriler.map(({ kart, veri }) => (
+                <Kart key={kart.id} kart={kart} veri={veri} tahmin={bultenler[kart.id]} />
+              ))}
             </div>
           </div>
         )}

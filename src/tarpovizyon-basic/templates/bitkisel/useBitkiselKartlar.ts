@@ -102,3 +102,41 @@ export function useBultenSerisi(bulten: { dosya: string; grup: string } | undefi
     },
   });
 }
+
+export type BultenSatiri = { yil: number; deger: number; tahmin: number };
+
+/**
+ * Tüm kartların bülten TAHMİNİ — iniş sayfası için.
+ * Bülten eşlemesi olmayan kartlar (baklagiller, endüstriyel) listede yok;
+ * kartlarında tahmin satırı da görünmüyor.
+ */
+export function useTumBultenler(): Record<string, { yil: number; deger: number; oncekiDeger?: number }> {
+  const kartlar = BITKISEL_KARTLAR.filter((k) => k.bulten);
+  const sorgular = useQueries({
+    queries: kartlar.map((k) => ({
+      queryKey: ['tvb-bitkisel-bulten', k.bulten!.dosya, k.bulten!.grup],
+      queryFn: async (): Promise<BultenSatiri[]> => {
+        const url = new URL(`${API_BASE}/api/bitkisel/bulten-grup`);
+        url.searchParams.set('dosya', k.bulten!.dosya);
+        url.searchParams.set('grup', k.bulten!.grup);
+        url.searchParams.set('limit', '200');
+        const r = await fetch(url.toString());
+        if (!r.ok) return [];
+        return ((await r.json()).data ?? []).map((x: Record<string, unknown>) => ({
+          yil: Number(x.yil), deger: Number(x.deger), tahmin: Number(x.tahmin),
+        }));
+      },
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const cikti: Record<string, { yil: number; deger: number; oncekiDeger?: number }> = {};
+  kartlar.forEach((k, i) => {
+    const satir: BultenSatiri[] = sorgular[i].data ?? [];
+    const t = satir.filter((x) => x.tahmin).sort((a, b) => b.yil - a.yil)[0];
+    if (!t) return;
+    const onceki = satir.find((x) => !x.tahmin && x.yil === t.yil - 1);
+    cikti[k.id] = { yil: t.yil, deger: t.deger, oncekiDeger: onceki?.deger };
+  });
+  return cikti;
+}
