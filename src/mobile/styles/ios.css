@@ -778,3 +778,24 @@
 .ios-yukleniyor { font-size: 14px; color: var(--ios-label-3); margin-left: 8px; }
 /* Ardışık kaynak kartları arasındaki boşluk daralıyor — tek blok gibi dursun. */
 .ios-kaynak + .ios-kaynak { margin-top: 4px; }
+
+/* ─── Sesli oku düğmesi ──────────────────────────────────────────────────────
+ * Balonun içinde, metnin altında. Ayrı bir eylem olduğu için çerçeveli ama
+ * cevabın parçası olduğu için küçük ve sönük — okumanın önüne geçmemeli.
+ */
+.ios-oku {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--ios-separator);
+  border-radius: 999px;
+  background: var(--ios-bg);
+  color: var(--ios-tint-deep, var(--ios-tint));
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ios-oku:active { opacity: 0.6; }

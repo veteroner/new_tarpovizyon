@@ -10,6 +10,7 @@ import { NavBar } from '../components/ui/IosList';
 import { BASIC_MENU } from '../../components/nav/menu';
 import { sayfalarBul, type ModelSonucu } from '../../components/nav/modelArama';
 import { sayfalarVerisi } from '../../components/nav/sayfaVerisi';
+import { OkuDugmesi } from '../../components/ses/OkuDugmesi';
 
 /**
  * AI Asistan — sohbet.
@@ -218,6 +219,12 @@ export default function MobileAIPage() {
                 * ayrı bir mesaj değil. Model rakamı ezberinden söylüyor;
                 * doğrulanmış hâli burada.
                 */}
+              {/*
+                * Okuma düğmesi cevabın hemen altında, kaynak kartlarından
+                * ÖNCE: okunacak olan cevabın kendisi, kartlar değil.
+                */}
+              {msg.role === 'assistant' && <OkuDugmesi metin={msg.content} />}
+
               {msg.role === 'assistant' && msg.ilgili?.map((sayfa, i) => (
                 <button
                   key={sayfa.yol}
