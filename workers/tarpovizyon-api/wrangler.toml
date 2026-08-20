@@ -13,6 +13,19 @@ compatibility_date = "2026-01-01"
 # `ratelimits` bindingi sayacı çalışma zamanına devrediyor; aynı Cloudflare
 # konumundaki TÜM isolate'lar aynı sayacı görüyor. (Sınır konum başına;
 # küresel tek bir kota değil — bu uç için fazlasıyla yeterli.)
+# ── Okuma uçları ────────────────────────────────────────────────────────
+# AI'dan AYRI sayaç: AI çağrısı para, okuma çağrısı D1 satırı demek. Aynı
+# sayacı paylaşsalardı sayfa gezen sıradan kullanıcı asistanın hakkını yerdi.
+# Eşik yüksek çünkü bir sayfa açılışı birkaç uç birden çağırabiliyor;
+# amaç kullanıcıyı değil kazımayı durdurmak.
+[[ratelimits]]
+name = "OKUMA_LIMIT"
+namespace_id = "1002"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
 [[ratelimits]]
 name = "AI_LIMIT"
 namespace_id = "1001"

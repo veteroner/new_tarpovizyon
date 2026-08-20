@@ -568,7 +568,7 @@ import { handleAi } from './ai.js';
 import { handleSayfaBul } from './sayfaBul.js';
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const slug = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
 
@@ -604,6 +604,72 @@ export default {
       return json(body, status);
     }
 
+    /*
+     * ─── BURADAN SONRASI OKUMA: ÖNBELLEK + HIZ SINIRI ─────────────────────
+     *
+     * Okuma uçlarında ne önbellek ne hız sınırı vardı; her istek doğrudan
+     * D1'e gidiyordu. Tek istekte 10.000 satıra kadar dönebildiği için
+     * günlük satır okuma kotası birkaç yüz kaba istekle tükenebilirdi —
+     * "bizi patlatmasınlar" endişesinin gerçek yeri burasıydı, ana sayfa
+     * değil. Ana sayfa Worker'ı korumaz: adres doğrudan çağrılabilir.
+     *
+     * ÖNBELLEK ÖNCE, SINIR SONRA: önbellekten dönen yanıt D1'e hiç
+     * dokunmuyor ve bize maliyeti yok; onu sınırlamak, sıradan kullanıcıyı
+     * bedeli olmayan bir şey için cezalandırmak olurdu.
+     */
+    if (request.method === 'GET') {
+      const onbellek = caches.default;
+      const hazir = await onbellek.match(request);
+      if (hazir) return hazir;
+
+      if (await okumaSiniriAsildi(request, env)) {
+        return json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, 429);
+      }
+
+      const yanit = await okumaCevabi(request, env, url, slug);
+      /*
+       * Yalnızca BAŞARILI yanıt saklanıyor. Hatayı önbelleğe almak, geçici
+       * bir D1 arızasını saatlerce kalıcı hâle getirirdi.
+       */
+      if (yanit.ok) {
+        const saklanacak = new Response(yanit.clone().body, yanit);
+        saklanacak.headers.set('Cache-Control', `public, max-age=${ONBELLEK_SN}`);
+        ctx?.waitUntil?.(onbellek.put(request, saklanacak.clone()));
+        return saklanacak;
+      }
+      return yanit;
+    }
+
+    return okumaCevabi(request, env, url, slug);
+  },
+};
+
+/**
+ * Okuma yanıtının önbellekte kalma süresi.
+ *
+ * Veri günde en fazla bir kez tazeleniyor (senkron işleri günlük), yani
+ * bir saatlik önbellek hiçbir tazeliği kaçırmıyor ama aynı sorgunun
+ * tekrarını D1'e hiç indirmiyor.
+ */
+const ONBELLEK_SN = 3600;
+
+/**
+ * Okuma uçları için hız sınırı — AI'dan AYRI ve daha yüksek eşikli.
+ *
+ * AI çağrısı para demek, okuma çağrısı D1 satırı demek; ikisi aynı sayacı
+ * paylaşsaydı sayfa gezen sıradan kullanıcı asistanın hakkını yerdi.
+ * Binding tanımlı değilse istek engellenmiyor: eksik bir koruma yüzünden
+ * çalışan bir uygulamayı kapatmak daha kötü olurdu.
+ */
+async function okumaSiniriAsildi(request, env) {
+  if (!env.OKUMA_LIMIT) return false;
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'bilinmeyen';
+  const { success } = await env.OKUMA_LIMIT.limit({ key: `okuma:${ip}` });
+  return !success;
+}
+
+/** Okuma uçlarının asıl işi; önbellek ve sınır bunun etrafında. */
+async function okumaCevabi(request, env, url, slug) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
 
     if (slug === '' || slug === 'routes') {
@@ -719,5 +785,4 @@ export default {
     } catch (err) {
       return json({ error: String(err) }, 500);
     }
-  },
-};
+  }
