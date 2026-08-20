@@ -71,6 +71,36 @@ const ISLER = {
   tufe_aylik: 'TÜFE betiği (elle, aylık)',
   tufe_yillik_snapshot: 'TÜFE betiği (elle, aylık)',
   tufe_aylik_snapshot: 'TÜFE betiği (elle, aylık)',
+
+  /*
+   * ─── BU İKİ İŞ HARİTADA YOKTU ─────────────────────────────────────────
+   * Denetim yalnızca üç işi biliyordu ve depoda dört tane var. Sonuç:
+   * `.github/workflows/fao-yillik.yml` ile `tuik-disticaret.yml`in
+   * tazelediği 12 tablo "öksüz" diye raporlanıyordu.
+   *
+   * Zararsız bir eksik değildi — rapora bakıp karar veriliyor. Gübre,
+   * pestisit, arazi örtüsü ve üretici fiyat tabloları bakımsız sanılıp
+   * elenebilirdi; oysa hepsinin haftalık işi var ve 2024'te olmalarının
+   * sebebi FAO'nun kendisinin 2024'te olması.
+   *
+   * Yeni bir iş eklenince BURASI DA güncellenmeli.
+   */
+
+  // .github/workflows/fao-yillik.yml → scripts/fao-sync/sync.mjs (haftalık)
+  fao_land_cover: 'FAO yıllık senkron (haftalık)',
+  fao_input_pestisit_use: 'FAO yıllık senkron (haftalık)',
+  fao_input_gubre_ticari: 'FAO yıllık senkron (haftalık)',
+  fao_uretici_fiyat: 'FAO yıllık senkron (haftalık)',
+  fao_nufus: 'FAO yıllık senkron (haftalık)',
+  fao_nufus_istihdam_tarim: 'FAO yıllık senkron (haftalık)',
+  fao_uretim_bitkisel_islenmis: 'FAO yıllık senkron (haftalık)',
+  fao_uretim_hayvansal_islenmis: 'FAO yıllık senkron (haftalık)',
+
+  // .github/workflows/tuik-disticaret.yml → scripts/tuik-disticaret/cek.mjs (günlük)
+  tuik_ticaret_bitkisel: 'TÜİK dış ticaret (günlük)',
+  tuik_ticaret_hayvansal: 'TÜİK dış ticaret (günlük)',
+  bitkisel_tr_dis_ticaret: 'TÜİK dış ticaret (günlük, ikiz)',
+  tr_dis_ticaret_hayvansal: 'TÜİK dış ticaret (günlük, ikiz)',
 };
 
 const rapor = [];
