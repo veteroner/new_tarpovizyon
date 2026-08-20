@@ -1,157 +1,171 @@
-.program-selection {
-  min-height: 100vh;
-  background: linear-gradient(160deg, #052e16 0%, #064e3b 100%);
+/*
+ * TARPOL giriş sayfası.
+ *
+ * ─── NEDEN AÇIK ZEMİN ───────────────────────────────────────────────────────
+ * Sayfa koyu yeşil bir zemindi, ama tıklandığında açılan her şey (veri
+ * sayfaları, araçlar, mobil uygulama) açık zeminli. Giriş ile içerisi
+ * birbirine hiç benzemiyordu; kullanıcı başka bir siteye geçmiş gibi
+ * oluyordu. Artık uygulamanın kendi paletinde.
+ *
+ * Renk değerleri mobil kabuğun belirteçleriyle aynı aileden:
+ * zemin #f2f2f7, kart beyaz, vurgu #16a34a.
+ */
+
+.tarpol-giris {
+  min-height: 100dvh;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  padding: clamp(28px, 6vw, 64px) 20px calc(40px + env(safe-area-inset-bottom));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tarpol-giris__kap {
+  max-width: 900px;
+  margin: 0 auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  flex-direction: column;
+  gap: 26px;
 }
 
-.program-selection__container {
-  max-width: 1200px;
-  width: 100%;
-}
+.tarpol-giris__ust { text-align: center; }
 
-.program-selection__header {
-  text-align: center;
-  margin-bottom: 4rem;
-  color: white;
-}
-
-.program-selection__title {
-  font-size: 2.5rem;
-  font-weight: 900;
+.tarpol-giris__ad {
   margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  letter-spacing: 0.05em;
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #14532d;
 }
 
-.program-selection__subtitle {
-  font-size: 1.25rem;
-  margin-top: 0.5rem;
-  opacity: 0.95;
-  font-weight: 500;
-}
-
-.program-selection__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.program-card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.75rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.program-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--accent-color);
-  transform: scaleX(0);
-  transition: transform 0.2s ease;
-}
-
-.program-card:hover::before {
-  transform: scaleX(1);
-}
-
-.program-card:hover {
-  border-color: rgba(22, 163, 74, 0.4);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-}
-
-.program-card__icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1rem;
-  background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black));
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  transition: box-shadow 0.15s ease;
-}
-
-.program-card:hover .program-card__icon {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.program-card__title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 0.5rem;
-}
-
-.program-card__description {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--accent-color);
-  margin: 0 0 0.5rem;
-}
-
-.program-card__subtitle {
-  font-size: 0.875rem;
-  color: #666;
-  margin: 0 0 1rem;
-  line-height: 1.5;
-}
-
-.program-card__action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: var(--accent-color);
+.tarpol-giris__alt {
+  margin: 6px 0 0;
   font-size: 1rem;
-  transition: gap 0.3s ease;
+  color: #51596b;
 }
 
-.program-card:hover .program-card__action {
-  gap: 0.75rem;
+/* ─── Ana kart: veri platformu ─────────────────────────────────────────────
+ * Yatay ve geniş; araç kartlarından belirgin şekilde ayrı dursun diye yeşil
+ * bir zemin ve kalın çerçeve yerine dolu renk kullanıldı.
+ */
+.tarpol-ana {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 22px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(21, 128, 61, 0.22);
+  font-family: inherit;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.tarpol-ana:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(21, 128, 61, 0.28);
+}
+.tarpol-ana:active { transform: translateY(0); }
+
+.tarpol-ana__ikon {
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.program-selection__footer {
+.tarpol-ana__govde { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+.tarpol-ana__ad { font-size: 1.3rem; font-weight: 700; }
+.tarpol-ana__aciklama { font-size: 0.94rem; line-height: 1.45; color: rgba(255, 255, 255, 0.92); }
+.tarpol-ana__etiket { font-size: 0.8rem; color: rgba(255, 255, 255, 0.75); }
+.tarpol-ana__ok { flex-shrink: 0; font-size: 1.4rem; opacity: 0.8; }
+
+/* ─── Araç ızgarası ───────────────────────────────────────────────────────── */
+
+.tarpol-giris__baslik {
+  margin: 4px 0 -8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b6472;
+}
+
+/*
+ * Sütun sayısı elle veriliyor, `auto-fit` ile değil.
+ *
+ * Araç sayısı beş — asal. auto-fit dört sütun seçtiğinde beşinci kart tek
+ * başına ikinci sıraya düşüyor ve sıradan değil, unutulmuş gibi duruyordu.
+ * Dört hiç kullanılmıyor: geniş ekranda beşi tek sıra, dar ekranda 3+2. Her
+ * ikisi de dengeli. (768px altı zaten mobil kabuğa yönleniyor; iki sütun,
+ * tablette masaüstü modunu açanlar için emniyet kemeri.)
+ */
+.tarpol-izgara {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1000px) {
+  .tarpol-izgara { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .tarpol-izgara { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.tarpol-kart {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid #e3e5ea;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.tarpol-kart:hover {
+  border-color: var(--vurgu, #16a34a);
+  transform: translateY(-2px);
+}
+.tarpol-kart:active { transform: translateY(0); }
+
+.tarpol-kart__ikon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  /* İkon rengi araca özel: listede aranan şeyi renkten tanımak kolaylaşıyor. */
+  color: var(--vurgu, #16a34a);
+  background: color-mix(in srgb, var(--vurgu, #16a34a) 12%, transparent);
+}
+
+.tarpol-kart__ad { font-size: 1rem; font-weight: 650; }
+.tarpol-kart__aciklama { font-size: 0.84rem; line-height: 1.4; color: #51596b; }
+
+.tarpol-giris__dip {
+  margin-top: 10px;
   text-align: center;
-  color: white;
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 0.78rem;
+  color: #5b6472;
+}
+.tarpol-giris__dip p { margin: 0; }
+
+/* Dar ekranda ana kart dikeye dönüyor; yatayda ok ve metin sıkışıyordu. */
+@media (max-width: 520px) {
+  .tarpol-ana { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .tarpol-ana__ok { display: none; }
 }
 
-.program-selection__footer p {
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  .program-selection__title {
-    font-size: 1.75rem;
-  }
-
-  .program-selection__subtitle {
-    font-size: 1rem;
-  }
-
-  .program-selection__grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .program-card {
-    padding: 2rem 1.5rem;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .tarpol-ana, .tarpol-kart { transition: none; }
+  .tarpol-ana:hover, .tarpol-kart:hover { transform: none; }
 }

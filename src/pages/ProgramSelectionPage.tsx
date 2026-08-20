@@ -1,113 +1,130 @@
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Calculator, Wheat, Droplets, FlaskConical, Calendar, Beef } from 'lucide-react';
+import { Calculator, Wheat, Droplets, FlaskConical, Calendar, BarChart3 } from 'lucide-react';
 import './ProgramSelectionPage.css';
+
+/**
+ * TARPOL giriş sayfası — sitenin kök adresi.
+ *
+ * ─── NE DEĞİŞTİ ─────────────────────────────────────────────────────────────
+ * Sayfa yedi kartı eşit ağırlıkta, koyu yeşil bir zeminde ve her biri ayrı
+ * renkte gösteriyordu. İki sorunu vardı:
+ *
+ *   • PRO SÜRÜM HERKESE AÇIKTI. "Tarpovizyon — Tarım İstihbarat ve Analiz
+ *     Platformu" kartı listede duruyordu; oysa Pro yayınlanmadı ve ayrı bir
+ *     sürüm olarak, lisansla gelecek. Kart kaldırıldı — adres hâlâ çalışıyor,
+ *     yalnızca vitrinde durmuyor.
+ *
+ *   • "Basic" ADI DIŞARI SIZIYORDU. Ziyaretçi elindekinin "basit sürüm"
+ *     olduğunu öğrenmek zorunda değil; ayrım bizim iç ayrımımız. Açıklamadaki
+ *     "Looker Studio raporunun D1 tabanlı arayüzü" gibi iç jargon da gitti —
+ *     kullanıcıya verinin nereden taşındığı değil, ne bulacağı söylenmeli.
+ *
+ * ─── HİYERARŞİ ──────────────────────────────────────────────────────────────
+ * Veri platformu artık tek başına ve büyük; araçlar altında ikinci sırada.
+ * Yedi eşit kart, hepsini eşit derecede önemsiz gösteriyordu — oysa siteye
+ * gelenlerin çoğu veriye geliyor, araçlar yanında duran şeyler.
+ */
+
+const ARACLAR = [
+  {
+    id: 'rasyon',
+    title: 'Rasyon',
+    description: 'Hayvan besleme ve rasyon optimizasyonu',
+    icon: Calculator,
+    color: '#16a34a',
+    path: '/rasyon',
+  },
+  {
+    id: 'hasat',
+    title: 'Hasat Tahmini',
+    description: 'Geçmiş veriye dayalı verim ve hasat tahmini',
+    icon: Wheat,
+    color: '#d97706',
+    path: '/hasat-tahmini',
+  },
+  {
+    id: 'sulama',
+    title: 'Sulama Planlayıcı',
+    description: 'Su ihtiyacı ve sulama programı hesaplama',
+    icon: Droplets,
+    color: '#2563eb',
+    path: '/sulama-plan',
+  },
+  {
+    id: 'gubre',
+    title: 'Gübre Hesaplayıcı',
+    description: 'Toprak analizine göre NPK reçetesi',
+    icon: FlaskConical,
+    color: '#7c3aed',
+    path: '/gubre-hesap',
+  },
+  {
+    id: 'takvim',
+    title: 'Tarımsal Takvim',
+    description: 'Bölgesel görev ve sezon planlayıcı',
+    icon: Calendar,
+    color: '#db2777',
+    path: '/tarim-takvim',
+  },
+];
 
 export function ProgramSelectionPage() {
   const navigate = useNavigate();
 
-  const programs = [
-    {
-      id: 'tarpovizyon',
-      title: 'Tarpovizyon',
-      description: 'Tarım İstihbarat ve Analiz Platformu',
-      subtitle: 'Dünya ve Türkiye tarım verileri, üretim, ticaret analizleri',
-      icon: BarChart3,
-      color: '#667eea',
-      path: '/tarpovizyon',
-    },
-    {
-      id: 'tarpovizyon-basic',
-      title: 'TarpoVizyon Basic',
-      description: 'Hayvansal ve Bitkisel Üretim Raporu (Basit Sürüm)',
-      subtitle: 'Looker Studio raporunun Cloudflare D1 tabanlı yeni arayüzü',
-      icon: Beef,
-      color: '#0891b2',
-      path: '/tarpovizyon-basic',
-    },
-    {
-      id: 'rasyon',
-      title: 'TarpoRasyon',
-      description: 'Hayvan Besleme ve Rasyon Optimizasyonu',
-      subtitle: 'NRC 2021 standartlarına uygun akıllı rasyon hesaplama',
-      icon: Calculator,
-      color: '#16a34a',
-      path: '/rasyon',
-    },
-    {
-      id: 'hasat',
-      title: 'Hasat Tahmini',
-      description: 'Tarihsel veriye dayalı verim ve hasat karar desteği',
-      subtitle: 'Güven skorlu istatistiksel verim tahmini (ilçe/il/Türkiye verisi)',
-      icon: Wheat,
-      color: '#f59e0b',
-      path: '/hasat-tahmini',
-    },
-    {
-      id: 'sulama',
-      title: 'Sulama Planlayıcı',
-      description: 'Su İhtiyacı ve Sulama Programı Hesaplama',
-      subtitle: 'ETo/ETc hesaplamaları ile optimize sulama planlaması',
-      icon: Droplets,
-      color: '#3b82f6',
-      path: '/sulama-plan',
-    },
-    {
-      id: 'gubre',
-      title: 'Gübre Hesaplayıcı',
-      description: 'Ön reçete ve besin ihtiyacı planlama aracı',
-      subtitle: 'Toprak analizi bazlı NPK reçetesi — kimyasal & organik karşılaştırmalı',
-      icon: FlaskConical,
-      color: '#a855f7',
-      path: '/gubre-hesap',
-    },
-    {
-      id: 'takvim',
-      title: 'Tarımsal Takvim',
-      description: 'Bölgesel tarımsal görev ve sezon planlayıcı',
-      subtitle: 'Hava etkili uyarılar, ICS dışa aktarma, 7 iklim bölgesi desteği',
-      icon: Calendar,
-      color: '#ec4899',
-      path: '/tarim-takvim',
-    },
-  ];
-
   return (
-    <div className="program-selection">
-      <div className="program-selection__container">
-        <header className="program-selection__header">
-          <h1 className="program-selection__title">TARPOL</h1>
-          <p className="program-selection__subtitle">Tarım Politika ve Yönetim Araçları</p>
+    <div className="tarpol-giris">
+      <div className="tarpol-giris__kap">
+        <header className="tarpol-giris__ust">
+          <h1 className="tarpol-giris__ad">TARPOL</h1>
+          <p className="tarpol-giris__alt">Tarım Politika ve Yönetim Araçları</p>
         </header>
 
-        <div className="program-selection__grid">
-          {programs.map((program) => {
-            const Icon = program.icon;
+        {/*
+          * Veri platformu tek başına ve geniş: siteye gelenlerin çoğunun
+          * aradığı şey bu. Araçlar altında, kendi ızgarasında.
+          */}
+        <button
+          type="button"
+          className="tarpol-ana"
+          onClick={() => navigate('/tarpovizyon-basic')}
+        >
+          <span className="tarpol-ana__ikon"><BarChart3 size={30} /></span>
+          <span className="tarpol-ana__govde">
+            <span className="tarpol-ana__ad">TarpoVizyon</span>
+            <span className="tarpol-ana__aciklama">
+              Türkiye ve dünya tarım verileri — üretim, fiyat, dış ticaret ve
+              il bazında istatistikler
+            </span>
+            <span className="tarpol-ana__etiket">
+              84 veri sayfası · TÜİK ve FAO kaynaklı · yapay zekâ asistanı
+            </span>
+          </span>
+          <span className="tarpol-ana__ok" aria-hidden="true">→</span>
+        </button>
+
+        <h2 className="tarpol-giris__baslik">Araçlar</h2>
+
+        <div className="tarpol-izgara">
+          {ARACLAR.map((a) => {
+            const Ikon = a.icon;
             return (
               <button
-                key={program.id}
-                className="program-card"
-                onClick={() => navigate(program.path)}
-                style={{ '--accent-color': program.color } as React.CSSProperties}
+                key={a.id}
+                type="button"
+                className="tarpol-kart"
+                onClick={() => navigate(a.path)}
+                style={{ '--vurgu': a.color } as React.CSSProperties}
               >
-                <div className="program-card__icon">
-                  <Icon size={48} />
-                </div>
-                <h2 className="program-card__title">{program.title}</h2>
-                <p className="program-card__description">{program.description}</p>
-                <p className="program-card__subtitle">{program.subtitle}</p>
-                <div className="program-card__action">
-                  <span>Başla</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="m9 18 6-6-6-6"/>
-                  </svg>
-                </div>
+                <span className="tarpol-kart__ikon"><Ikon size={22} /></span>
+                <span className="tarpol-kart__ad">{a.title}</span>
+                <span className="tarpol-kart__aciklama">{a.description}</span>
               </button>
             );
           })}
         </div>
 
-        <footer className="program-selection__footer">
-          <p>© 2026 TARPOL - Tarım Politika ve Yönetim Araçları</p>
+        <footer className="tarpol-giris__dip">
+          <p>© 2026 TARPOL · Tarım Politika ve Yönetim Araçları</p>
         </footer>
       </div>
     </div>
