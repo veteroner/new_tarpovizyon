@@ -56,7 +56,7 @@ export default function MobileHomePage() {
   });
 
   const bolumler = BASIC_MENU.map((k, i) => ({
-    baslik: k.title.replace(/^Basic · /, ''),
+    baslik: k.title,
     alt: `${k.items.length} rapor`,
     icon: BOLUM_IKON[i % BOLUM_IKON.length],
     yol: k.items[0]?.any ?? '/m/explore',

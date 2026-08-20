@@ -90,7 +90,7 @@ export function BasicShell() {
     <div className="tvb-shell">
       <header className="tvb-header">
         <button className="tvb-back" onClick={() => navigate('/')}>← TARPOL</button>
-        <h1>TarpoVizyon Basic</h1>
+        <h1>TarpoVizyon</h1>
         <BasicArama />
         <button
           className="tvb-menu-toggle"

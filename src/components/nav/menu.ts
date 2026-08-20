@@ -241,7 +241,13 @@ function anaUc(config: unknown): string | undefined {
 }
 
 export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
-  title: `Basic · ${grup.label}`,
+  /*
+   * Kategori adı SADE. Önce "Basic · Hayvancılık" yazıyordu; kullanıcı
+   * uygulamanın "Basic sürüm" olduğunu bilmiyor ve bilmesine de gerek yok —
+   * Pro ayrı bir sürüm olarak çıkana kadar bu ayrım yalnızca bizim iç
+   * ayrımımız. Ekranda görünen her yerde yalnızca bölüm adı var.
+   */
+  title: grup.label,
   icon: LayoutGrid,
   /*
    * Bölüm adı `bolum` alanında TAŞINIYOR — düzleştirme sürüyor (kategori
