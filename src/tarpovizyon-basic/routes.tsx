@@ -1,11 +1,12 @@
-import { Route } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import { BasicShell } from './BasicShell';
 import DataShell from '../components/DataShell';
 import { PageRenderer } from './PageRenderer';
 import { HayvansalDetayPage } from './templates/hayvansal/HayvansalDetayPage';
 import { BitkiselDetayPage } from './templates/bitkisel/BitkiselDetayPage';
 import { SECTIONS } from './pages';
-import { GirisSayfasi } from './GirisSayfasi';
+
+const firstPage = SECTIONS[0].pages[0];
 
 export function tarpovizyonBasicRoutes() {
   return (
@@ -16,12 +17,7 @@ export function tarpovizyonBasicRoutes() {
      * uygulamadan kopuk duruyordu.
      */
     <Route path="/tarpovizyon-basic" element={<DataShell desktop={<BasicShell />} />}>
-      {/*
-        * Kök adres artık GİRİŞ SAYFASI. Eskiden doğrudan ilk veri sayfasına
-        * yönlendiriyordu ve siteye gelen kişi ne olduğunu anlamadan bir
-        * tablonun ortasına düşüyordu.
-        */}
-      <Route index element={<GirisSayfasi />} />
+      <Route index element={<Navigate to={`${SECTIONS[0].path}/${firstPage.path}`} replace />} />
       {/*
         * Kart detayları. SECTIONS'a girmiyorlar çünkü menüde ayrı birer madde
         * olarak durmaları gerekmiyor — iniş sayfasındaki kartlara basınca

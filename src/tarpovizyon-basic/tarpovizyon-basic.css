@@ -1169,27 +1169,3 @@
   .tvb-header h1 { flex: 1 1 auto; }
   .tvb-arama { order: 3; width: 100%; }
 }
-
-/* ─── Web giriş sayfası ──────────────────────────────────────────────────────
- * Sade tutuldu: bu bir pazarlama sayfası değil, "nereye geldin ve elinde ne
- * var" sorusunun cevabı. Büyük bir kahraman görseli, veriye ulaşmak isteyen
- * kullanıcıyı bir ekran aşağı iterdi.
- */
-.tvb-giris__ust { padding: 4px 0 4px; }
-.tvb-giris__ust h2 {
-  margin: 0 0 6px;
-  font-size: 1.5rem;
-  line-height: 1.25;
-}
-.tvb-giris__ust p {
-  margin: 0;
-  max-width: 46rem;
-  color: var(--text-secondary, #64748b);
-  line-height: 1.6;
-}
-.tvb-giris__not {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: var(--text-secondary, #64748b);
-  line-height: 1.5;
-}
