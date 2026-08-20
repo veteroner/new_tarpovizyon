@@ -906,3 +906,11 @@
   font-size: 16px;
   line-height: 1.4;
 }
+.ses-ekran__hata {
+  margin: 0;
+  max-width: 22rem;
+  text-align: center;
+  color: var(--ios-orange);
+  font-size: 14px;
+  line-height: 1.45;
+}

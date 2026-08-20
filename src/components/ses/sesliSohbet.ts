@@ -1,5 +1,7 @@
 import { dinlemeyeBasla, dinlemeyiDurdur } from './dinleme';
-import { konus, durdur as konusmayiDurdur, konusmaDinle, sesKilidiniAc } from './konusma';
+import {
+  konus, durdur as konusmayiDurdur, konusmaDinle, sesKilidiniAc, sonOkumaSesliMiydi,
+} from './konusma';
 
 /**
  * Eller serbest sesli sohbet — dinle, düşün, cevapla, yeniden dinle.
@@ -24,7 +26,14 @@ export type Asama =
   /** Soru alındı, cevap hazırlanıyor. */
   | 'dusunuyor'
   /** Cevap okunuyor. */
-  | 'konusuyor';
+  | 'konusuyor'
+  /**
+   * Bir şey ters gitti ve kullanıcının görmesi gerekiyor.
+   *
+   * Ayrı bir aşama olması şart: hatayı 'kapali' ile bildirmek ekranı
+   * gizliyor ve mesaj hiç görünmüyordu.
+   */
+  | 'hata';
 
 export type SohbetDurumu = {
   asama: Asama;
@@ -46,6 +55,19 @@ const dinleyiciler = new Set<Dinleyici>();
  * cevabı, yeni oturumun üstüne yazamasın diye her adımda kontrol ediliyor.
  */
 let oturum = 0;
+
+/**
+ * Tanıyıcı sustuktan sonra konuşmadan önce beklenen süre.
+ *
+ * ─── NEDEN ────────────────────────────────────────────────────────────────
+ * iOS cihazda ölçüldü: tanıma bittikten hemen sonra sentezleyici çağrılınca
+ * ses ÇIKMIYOR ama hata da vermiyor — konuşma anında "bitmiş" görünüyor ve
+ * sohbet hiçbir şey duyulmadan yeniden dinlemeye dönüyordu. Sebebi ses
+ * oturumunun hâlâ kayıt modunda olması; bırakması bir an sürüyor.
+ */
+const SES_OTURUMU_BEKLEME_MS = 500;
+
+const bekle = (ms: number) => new Promise<void>((c) => setTimeout(c, ms));
 
 /** Cevabı üretecek işlev; UI kurarken veriliyor (menü ve API'ye orası erişiyor). */
 type Cevaplayici = (soru: string) => Promise<string>;
@@ -128,8 +150,22 @@ async function tur(benimOturum: number): Promise<void> {
   }
 
   guncelle({ asama: 'konusuyor', cevap });
+  /* Ses oturumu kayıttan çıkana kadar bekle; gerekçe yukarıda. */
+  await bekle(SES_OTURUMU_BEKLEME_MS);
+  if (benimOturum !== oturum) return;
+
   await cevabiOku(cevap);
   if (benimOturum !== oturum) return;
+
+  /*
+   * Ses gerçekten çıktı mı? Çıkmadıysa DÖNGÜYE DEVAM EDİLMİYOR.
+   * Aksi hâlde sohbet sessizce dinle–düşün–dinle diye dönüyor, kullanıcı
+   * hiçbir şey duymuyor ve neyin bozuk olduğunu anlayamıyor.
+   */
+  if (!sonOkumaSesliMiydi()) {
+    sesKapaliBildir('Ses çıkışı çalışmadı. Cihazın sesi açık mı, Türkçe ses yüklü mü?');
+    return;
+  }
 
   /* Cevap bitti — sıra yine kullanıcıda. */
   void tur(benimOturum);
@@ -146,6 +182,18 @@ export function sohbetiBaslat(): void {
   sesKilidiniAc();
   oturum += 1;
   void tur(oturum);
+}
+
+/**
+ * Ses çıkmadığı için kapatma — hata mesajı EKRANDA KALSIN diye normal
+ * kapatmadan ayrı. `sohbetiKapat()` durumu tamamen sıfırlıyor ve hata da
+ * silinip kullanıcı sebebi göremiyordu.
+ */
+function sesKapaliBildir(mesaj: string): void {
+  oturum += 1;
+  void dinlemeyiDurdur();
+  konusmayiDurdur();
+  guncelle({ asama: 'hata', hata: mesaj });
 }
 
 /** Sohbeti kapatır: mikrofon, sentezleyici ve bekleyen cevap iptal. */

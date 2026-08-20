@@ -50,11 +50,19 @@ export function konusmaDinle(d: Dinleyici): () => void {
   return () => { dinleyiciler.delete(d); };
 }
 
-/** Sessiz bir ses çalarak kilidi açar. Kullanıcı dokunuşu içinde çağrılmalı. */
+/**
+ * Sessiz bir ses çalarak kilidi açar. Kullanıcı dokunuşu içinde çağrılmalı.
+ *
+ * ─── METİN BOŞ DEĞİL, BOŞLUK ────────────────────────────────────────────────
+ * Önce boş dize kullanılıyordu. iOS cihazda ölçüldü: boş metin SSML sanılıp
+ * ayrıştırılmaya çalışılıyor ve düşüyor —
+ *   Could not parse SSML: No single root node found. Found 0 nodes at top-level
+ * Tek boşluk aynı işi görüyor, ayrıştırıcı da mutlu.
+ */
 export function sesKilidiniAc(): void {
   if (!desteklenir || kilitAcik) return;
   try {
-    const bos = new SpeechSynthesisUtterance('');
+    const bos = new SpeechSynthesisUtterance(' ');
     bos.volume = 0;
     window.speechSynthesis.speak(bos);
     kilitAcik = true;
@@ -78,10 +86,26 @@ function turkceSes(): SpeechSynthesisVoice | null {
   return tr.find((v) => v.localService) ?? tr[0];
 }
 
+/**
+ * Konuşmanın GERÇEKTEN olup olmadığını anlamak için en kısa süre.
+ *
+ * iOS cihazda ölçüldü: tanıyıcı ses oturumunu bırakmadan sentezleyici
+ * çağrılınca `speak()` hata vermiyor ama ses de çıkmıyor — `onend` neredeyse
+ * anında geliyor. Sesli sohbet bunu "cevap okundu" sanıp yeniden dinlemeye
+ * dönüyor ve kullanıcı hiçbir şey duymadan döngüye giriyordu.
+ *
+ * Bir cümlenin okunması en kötü ihtimalle bunun üstünde sürer.
+ */
+const EN_KISA_KONUSMA_MS = 400;
+
 export type KonusSecenek = {
   /** 0.1–10 arası. Varsayılan biraz yavaş: rakam dolu cümleler hızlı okununca anlaşılmıyor. */
   hiz?: number;
 };
+
+/** Son okumanın gerçekten sesli olup olmadığı; sessiz başarısızlıkta false. */
+let sonOkumaSesliydi = true;
+export const sonOkumaSesliMiydi = () => sonOkumaSesliydi;
 
 /**
  * Metni okur. Zaten konuşuyorsa öncekini keser.
@@ -101,14 +125,27 @@ export function konus(ham: string, secenek: KonusSecenek = {}): boolean {
   const ses = turkceSes();
   if (ses) soz.voice = ses;
 
-  soz.onend = () => { if (benimNeslim === nesil) bildir(false); };
-  soz.onerror = () => { if (benimNeslim === nesil) bildir(false); };
+  const basladi = Date.now();
+  const bitir = () => {
+    if (benimNeslim !== nesil) return;
+    /*
+     * Uzun bir metin göz açıp kapayıncaya kadar "bitmişse" aslında hiç
+     * okunmamıştır. Bunu ayırt etmek şart: sesli sohbet aksi hâlde sessiz
+     * bir döngüye giriyor.
+     */
+    sonOkumaSesliydi = !(metin.length > 20 && Date.now() - basladi < EN_KISA_KONUSMA_MS);
+    bildir(false);
+  };
+  soz.onend = bitir;
+  soz.onerror = bitir;
 
   try {
+    sonOkumaSesliydi = true;
     window.speechSynthesis.speak(soz);
     bildir(true);
     return true;
   } catch {
+    sonOkumaSesliydi = false;
     bildir(false);
     return false;
   }

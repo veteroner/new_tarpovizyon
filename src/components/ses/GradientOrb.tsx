@@ -271,7 +271,23 @@ export function GradientOrb({ ayar: gelen }: { ayar?: OrbAyar }) {
         * bırakılsa dokuz kat fazla iş yapıp pili yakardı. Parıltılı bir
         * kürede çözünürlük farkı zaten görünmüyor.
         */}
-      <Canvas gl={{ antialias: true, alpha: false }} dpr={[1, 1.5]}>
+      <Canvas
+        gl={{ antialias: true, alpha: false }}
+        dpr={[1, 1.5]}
+        onCreated={({ gl }) => {
+          /*
+           * Bağlam kaybını KURTAR. Cihaz kaydında görüldü:
+           *   THREE.WebGLRenderer: Context Lost.
+           * Uygulama arka plana geçince (izin penceresi de arka plana
+           * atıyor) tarayıcı WebGL bağlamını alıyor. Varsayılan davranışta
+           * geri gelmiyor ve küre oturumun geri kalanında siyah kalıyor.
+           *
+           * `preventDefault` bağlamın geri verilebilmesini sağlıyor; three
+           * `webglcontextrestored` olayında kendini yeniden kuruyor.
+           */
+          gl.domElement.addEventListener('webglcontextlost', (o) => o.preventDefault(), false);
+        }}
+      >
         <color attach="background" args={[ayar.arka]} />
         <Sahne ayar={ayar} hareketli={hareketli} />
       </Canvas>

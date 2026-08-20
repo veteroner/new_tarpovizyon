@@ -37,12 +37,14 @@ const TON: Record<string, number> = {
   dinliyor: 150,   // yeşile kayan: sıra sende
   dusunuyor: 40,   // sıcak: çalışıyor
   konusuyor: 0,    // özgün mor/mavi
+  hata: 200,       // soğuk: durdu
 };
 
 const YAZI: Record<string, string> = {
   dinliyor: 'Dinliyorum…',
   dusunuyor: 'Düşünüyorum…',
   konusuyor: 'Konuşuyorum…',
+  hata: 'Sohbet durdu',
 };
 
 export function KonusmaEkrani() {
@@ -96,9 +98,16 @@ export function KonusmaEkrani() {
         * Duyulan söz ekranda: tanıma hata yaptığında kullanıcı NEDEN alakasız
         * bir cevap geldiğini ancak böyle anlayabiliyor.
         */}
-      {sohbetAcik && sohbet.soru && (
+      {sohbetAcik && sohbet.asama !== 'hata' && sohbet.soru && (
         <p className="ses-ekran__soru">“{sohbet.soru}”</p>
       )}
+
+      {/*
+        * Hata METİN olarak gösteriliyor, sessizce kapanmıyor. Sohbet
+        * duruyorsa kullanıcı sebebini görmeli; yoksa "bozuk" diye
+        * vazgeçiyor.
+        */}
+      {sohbet.hata && <p className="ses-ekran__hata">{sohbet.hata}</p>}
 
       <button
         type="button"
@@ -106,7 +115,9 @@ export function KonusmaEkrani() {
         onClick={(e) => { e.stopPropagation(); kapat(); }}
       >
         <Square size={15} fill="currentColor" aria-hidden="true" />
-        <span>{sohbetAcik ? 'Sohbeti bitir' : 'Durdur'}</span>
+        <span>
+          {sohbet.asama === 'hata' ? 'Kapat' : (sohbetAcik ? 'Sohbeti bitir' : 'Durdur')}
+        </span>
       </button>
     </div>
   );
