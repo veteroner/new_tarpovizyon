@@ -12,7 +12,7 @@
     "preview": "vite preview --port 5000",
     "api": "node server.js",
     "start": "node server.js",
-    "cap:sync": "npx cap sync",
+    "cap:sync": "find dist ios/App/App/public android/app/src/main/assets/public -name '._*' -delete 2>/dev/null; LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",
     "cap:build": "npm run build && npx cap sync",
