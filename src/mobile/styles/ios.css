@@ -873,3 +873,36 @@
   cursor: pointer;
 }
 .ses-ekran__durdur:active { opacity: 0.6; }
+
+/* Sesli sohbet başlatma düğmesi — sohbet listesinin üstünde, tam genişlik. */
+.ios-sesli-sohbet {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 16px 0;
+  padding: 11px;
+  border: none;
+  border-radius: 12px;
+  background: var(--ios-tint);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ios-sesli-sohbet:active { opacity: 0.75; }
+
+/* Aşamaya göre kürenin dış parıltısı — renk tek başına yeterince belirgin değil. */
+.ses-ekran__orb--dinliyor { box-shadow: 0 0 60px rgba(52, 199, 89, 0.28); }
+.ses-ekran__orb--dusunuyor { box-shadow: 0 0 60px rgba(255, 159, 10, 0.24); }
+.ses-ekran__orb--konusuyor { box-shadow: 0 0 60px rgba(140, 110, 255, 0.28); }
+
+.ses-ekran__soru {
+  margin: 0;
+  max-width: 22rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 16px;
+  line-height: 1.4;
+}

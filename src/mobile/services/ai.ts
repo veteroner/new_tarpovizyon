@@ -43,10 +43,16 @@ export class AIHatasi extends Error {}
  *
  * @param veri İsteğe bağlı uygulama verisi. Verilirse model rakamları
  *   ORADAN alıyor; verilmezse eskisi gibi kendi bilgisinden cevaplıyor.
+ * @param kisa Sesli sohbet için: cevap KISA olmalı. 2000 karakterlik bir
+ *   cevabı dinlemek iki dakika sürüyor ve kimse sonunu beklemiyor.
  * @returns Modelin yanıtı (markdown).
  * @throws {AIHatasi} Kullanıcıya gösterilmeye uygun bir mesajla.
  */
-export async function askAI(question: string, veri?: string | null): Promise<string> {
+export async function askAI(
+  question: string,
+  veri?: string | null,
+  kisa = false,
+): Promise<string> {
   const soru = question.trim();
   if (!soru) throw new AIHatasi('Lütfen bir soru yazın.');
 
@@ -58,7 +64,7 @@ export async function askAI(question: string, veri?: string | null): Promise<str
     res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(veri ? { message: soru, veri } : { message: soru }),
+      body: JSON.stringify({ message: soru, ...(veri ? { veri } : {}), ...(kisa ? { kisa: true } : {}) }),
       signal: controller.signal,
     });
   } catch (e) {

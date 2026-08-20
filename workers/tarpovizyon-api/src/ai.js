@@ -297,9 +297,21 @@ export async function handleAi(request, env) {
    * yazan biri modele istediğini söyletebilirdi. Uzunluk kırpılıyor.
    */
   const veri = String(body?.veri ?? '').trim().slice(0, MAX_VERI);
-  const istem = veri
+
+  /*
+   * SESLİ MOD. Cevap okunacaksa kısa olmalı: 2000 karakterlik bir metni
+   * dinlemek iki dakika sürüyor ve sohbette kimse sonunu beklemiyor.
+   * Madde ve tablo da yasak — sesli okunduğunda yapı duyulmuyor, yalnızca
+   * "yıldız yıldız" gürültüsü kalıyor.
+   */
+  const kisa = body?.kisa === true;
+  const kisaKural = kisa
+    ? '\n\n--- BU CEVAP SESLİ OKUNACAK ---\nEn fazla 3 cümle yaz. Madde listesi, tablo ve başlık KULLANMA. Doğrudan konuş.'
+    : '';
+
+  const istem = (veri
     ? `${message}\n\n--- UYGULAMANIN KENDİ VERİSİ (yetkili kaynak) ---\n${veri}`
-    : message;
+    : message) + kisaKural;
 
   const keys = {
     gemini: env.TARPOL_AI_KEY,

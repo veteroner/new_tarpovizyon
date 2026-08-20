@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowUp, Loader2, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { askAI, AIHatasi } from '../services/ai';
+import { AIHatasi } from '../services/ai';
 import DynamicChart from '../../components/DynamicChart';
 import type { ChartConfig } from '../../components/DynamicChart';
 import { NavBar } from '../components/ui/IosList';
 import { BASIC_MENU } from '../../components/nav/menu';
-import { sayfalarBul, type ModelSonucu } from '../../components/nav/modelArama';
-import { sayfalarVerisi } from '../../components/nav/sayfaVerisi';
+import type { ModelSonucu } from '../../components/nav/modelArama';
+import { asistanaSor } from '../services/asistan';
 import { OkuDugmesi } from '../../components/ses/OkuDugmesi';
 import { MikrofonDugmesi } from '../../components/ses/MikrofonDugmesi';
+import { AudioLines } from 'lucide-react';
+import { cevaplayiciAyarla, sohbetiBaslat } from '../../components/ses/sesliSohbet';
 
 /**
  * AI Asistan — sohbet.
@@ -59,30 +61,6 @@ interface Message {
   beslendi?: boolean;
 }
 
-/**
- * Besleme için üst sınırlar. Aşılırsa besleme atlanıyor ve cevap yine
- * üretiliyor: veri gelmedi diye kullanıcıyı cevapsız bırakmak daha kötü.
- */
-const SAYFA_BULMA_MS = 3500;
-const VERI_CEKME_MS = 3000;
-/**
- * Beslemede kaç sayfaya bakılıyor.
- *
- * Tek sayfa, iki konuya dokunan soruları yarım bırakıyordu: "süt ve et
- * üretimini karşılaştır" sorusunda model bir tarafı gerçek veriden, öbür
- * tarafı ezberinden söylüyordu — ve cevapta bu ikisi ayırt edilemiyordu.
- *
- * Üçten fazlası bağlamı şişirip asıl konunun verisini kısıyor.
- */
-const EN_FAZLA_SAYFA = 3;
-
-/** Söz verilen sürede bitmezse null döner; işi iptal etmiyor, beklemeyi bırakıyor. */
-function sinirliSure<T>(is: Promise<T>, ms: number): Promise<T | null> {
-  return Promise.race([
-    is.catch(() => null),
-    new Promise<null>((coz) => setTimeout(() => coz(null), ms)),
-  ]);
-}
 
 const ONERILER = [
   'Buğday ekim zamanı ne zaman?',
@@ -106,6 +84,26 @@ export default function MobileAIPage() {
     sonRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  /*
+   * Sesli sohbet döngüsü cevabı nereden alacağını bilmiyor — menüye ve
+   * API'ye erişimi olan taraf burası. Cevaplayıcı burada bağlanıyor ve
+   * sonuç sohbet geçmişine de yazılıyor: kullanıcı konuşmayı bitirince
+   * ne konuşulduğunu ekranda bulabilmeli.
+   */
+  useEffect(() => {
+    cevaplayiciAyarla(async (soru) => {
+      setMessages((p) => [...p, {
+        id: `${Date.now()}s`, role: 'user', content: soru, timestamp: new Date(),
+      }]);
+      const { cevap, sayfalar, beslendi } = await asistanaSor(soru, tumOgeler, { sesli: true });
+      setMessages((p) => [...p, {
+        id: `${Date.now() + 1}s`, role: 'assistant', content: cevap,
+        timestamp: new Date(), ilgili: sayfalar, beslendi,
+      }]);
+      return cevap;
+    });
+  }, [tumOgeler]);
+
   const gonder = async (text?: string) => {
     const soru = (text ?? input).trim();
     if (!soru || isLoading) return;
@@ -117,36 +115,17 @@ export default function MobileAIPage() {
     setIsLoading(true);
 
     try {
-      /*
-       * ─── BESLEME CEVAPTAN ÖNCE ────────────────────────────────────────
-       * Model rakamı uydurmasın diye gerçek veriyi cevap ÜRETİLMEDEN önce
-       * görmesi gerekiyor. Önce ilgili sayfa bulunuyor, sonra o sayfanın
-       * ucundan son satırlar çekilip modele veriliyor.
-       *
-       * Ama bu her soruyu geciktirmemeli: "buğday ekim zamanı ne zaman"
-       * sorusunun beslemeye ihtiyacı yok ve kullanıcı boşuna bekler. Bu
-       * yüzden besleme SÜRE SINIRLI — yetişmezse cevap beslemesiz üretiliyor.
-       */
+      /* Besleme + cevap akışı `services/asistan.ts`'te; sesli sohbet de aynısını kullanıyor. */
       setAsama('veri');
-      const sayfalar = await sinirliSure(
-        sayfalarBul(soru, tumOgeler, EN_FAZLA_SAYFA), SAYFA_BULMA_MS,
-      ) ?? [];
-      const ogeler = sayfalar
-        .map((s) => tumOgeler.find((o) => o.any === s.yol))
-        .filter((o): o is typeof tumOgeler[number] => Boolean(o));
-      const veri = ogeler.length
-        ? await sinirliSure(sayfalarVerisi(ogeler), VERI_CEKME_MS)
-        : null;
-
+      const { cevap, sayfalar, beslendi } = await asistanaSor(soru, tumOgeler);
       setAsama('cevap');
-      const cevap = await askAI(soru, veri);
       setMessages((p) => [...p, {
         id: `${Date.now() + 1}`,
         role: 'assistant',
         content: cevap,
         timestamp: new Date(),
         ilgili: sayfalar,
-        beslendi: Boolean(veri),
+        beslendi,
       }]);
     } catch (e) {
       /*
@@ -171,6 +150,15 @@ export default function MobileAIPage() {
   return (
     <>
       <NavBar title="TarpoVizyon AI" subtitle="Tarım ve hayvancılık asistanı" />
+
+      {/*
+        * Sesli sohbet düğmesi sohbetin ÜSTÜNDE ve geniş: eller serbest
+        * kullanılacak bir özellik, küçük bir simgeyle nişan almak gerekmemeli.
+        */}
+      <button type="button" className="ios-sesli-sohbet" onClick={() => sohbetiBaslat()}>
+        <AudioLines size={17} aria-hidden="true" />
+        <span>Sesli sohbet</span>
+      </button>
 
       <div className="ios-scroll ios-chat">
         {messages.length === 0 && !isLoading ? (
