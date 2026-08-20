@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { BASIC_MENU, type MenuItem } from '../../components/nav/menu';
 import { ara as aramaYap } from '../../components/nav/arama';
 import { useModelArama } from '../../components/nav/modelArama';
+import { MikrofonDugmesi } from '../../components/ses/MikrofonDugmesi';
 import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
 
 /**
@@ -79,6 +80,8 @@ export default function MobileExplorePage() {
             placeholder="Sayfa ara"
             aria-label="Sayfa ara"
           />
+          {/* Konuşulan metin doğrudan aramaya yazılıyor; süzme zaten anlık. */}
+          <MikrofonDugmesi onMetin={setAra} onAraMetin={setAra} />
         </div>
 
         {/*

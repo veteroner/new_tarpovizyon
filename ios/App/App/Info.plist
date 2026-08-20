@@ -49,5 +49,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Sorunuzu yazmak yerine söyleyebilmeniz için mikrofona erişim gerekiyor.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Söylediklerinizi yazıya çevirip asistana iletmek için konuşma tanıma kullanılıyor.</string>
 </dict>
 </plist>

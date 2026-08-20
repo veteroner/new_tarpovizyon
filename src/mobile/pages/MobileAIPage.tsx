@@ -11,6 +11,7 @@ import { BASIC_MENU } from '../../components/nav/menu';
 import { sayfalarBul, type ModelSonucu } from '../../components/nav/modelArama';
 import { sayfalarVerisi } from '../../components/nav/sayfaVerisi';
 import { OkuDugmesi } from '../../components/ses/OkuDugmesi';
+import { MikrofonDugmesi } from '../../components/ses/MikrofonDugmesi';
 
 /**
  * AI Asistan — sohbet.
@@ -283,6 +284,12 @@ export default function MobileAIPage() {
           aria-label="Sorunuz"
           enterKeyHint="send"
         />
+        {/*
+          * Mikrofon kutunun İÇİNDE, gönder düğmesinden ayrı. Konuşulan
+          * metin kutuya yazılıyor ve GÖNDERİLMİYOR: tanıma hata yapabilir,
+          * kullanıcı göndermeden önce görüp düzeltebilmeli.
+          */}
+        <MikrofonDugmesi onMetin={setInput} onAraMetin={setInput} />
         <button
           type="submit"
           className="ios-send"

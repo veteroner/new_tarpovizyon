@@ -32,4 +32,17 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Sesli soru: konuşmayı yazıya çeviren asistan girişi için. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!--
+      Android 11+ paket görünürlüğü: bu olmadan sistem konuşma tanıyıcısı
+      "yok" görünüyor ve mikrofon düğmesi hiç çıkmıyor.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 </manifest>

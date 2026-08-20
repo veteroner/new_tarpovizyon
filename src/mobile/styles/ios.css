@@ -799,3 +799,26 @@
   cursor: pointer;
 }
 .ios-oku:active { opacity: 0.6; }
+
+/* ─── Mikrofon düğmesi ───────────────────────────────────────────────────────
+ * Yazma kutusunun içinde, gönder düğmesinin solunda. Dinlerken renk
+ * değiştiriyor — kayıt yapan bir düğmenin açık olduğu bir bakışta
+ * anlaşılmalı.
+ */
+.ios-mikrofon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--ios-fill);
+  color: var(--ios-label-2);
+  cursor: pointer;
+}
+.ios-mikrofon--acik { background: var(--ios-red); color: #fff; }
+.ios-mikrofon:active { opacity: 0.65; }
+/* Arama kutusundaki mikrofon biraz küçülüyor — kutu yüksekliğini bozmasın. */
+.ios-search .ios-mikrofon { width: 28px; height: 28px; background: transparent; }
+.ios-search .ios-mikrofon--acik { background: var(--ios-red); }
