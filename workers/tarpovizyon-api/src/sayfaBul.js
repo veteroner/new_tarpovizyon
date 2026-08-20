@@ -37,15 +37,27 @@
  * `tokens` bilerek çok küçük — beklenen çıktı tek satırlık bir yol.
  */
 const MODELS = [
-  { p: 'gemini', id: 'gemini-3.1-flash-lite', ms: 3000 },
-  { p: 'groq', id: 'openai/gpt-oss-120b', ms: 3000 },
-  { p: 'groq', id: 'llama-3.1-8b-instant', ms: 2500 },
-  { p: 'gemini', id: 'gemini-2.5-flash-lite', ms: 2500 },
+  { p: 'gemini', id: 'gemini-3.1-flash-lite', ms: 1800 },
+  { p: 'groq', id: 'openai/gpt-oss-120b', ms: 1800 },
+  { p: 'groq', id: 'llama-3.1-8b-instant', ms: 1500 },
+  { p: 'gemini', id: 'gemini-2.5-flash-lite', ms: 1500 },
 ]
 
-/** Arama kutusunda bekleyen kullanıcı için üst sınır. */
-const TOTAL_BUDGET_MS = 7000
-const MIN_VIABLE_MS = 1200
+/**
+ * Arama kutusunda ve sesli sohbette bekleyen kullanıcı için üst sınır.
+ *
+ * ─── MODEL BAŞINA SÜRE NEDEN KISA ───────────────────────────────────────────
+ * Model başına 3 sn verilmişti ve canlıda ölçüldüğünde uç 0,8–4,3 sn arasında
+ * salınıyordu: ilk model yavaşladığında ona 3 sn harcanıyor, sonra sıradakine
+ * geçiliyordu. İstemci 3,5 sn'de vazgeçtiği için besleme SESSİZCE atlanıyor
+ * ve asistan ezberinden cevap veriyordu.
+ *
+ * 84 başlıktan birini seçmek çalışan bir model için saniyenin altında bir iş.
+ * Süre kısaltılınca yavaş model erken bırakılıyor ve zincir hızlı olana daha
+ * çabuk iniyor — toplam süre düşüyor, doğruluk düşmüyor.
+ */
+const TOTAL_BUDGET_MS = 6000
+const MIN_VIABLE_MS = 1000
 /** Tek satır yol için fazlasıyla yeterli; uzun cevap zaten hatalı cevaptır. */
 const MAX_TOKENS = 48
 

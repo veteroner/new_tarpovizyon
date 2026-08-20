@@ -13,9 +13,21 @@ import type { MenuItem } from '../../components/nav/menu';
  * demekti.
  */
 
-/** Besleme için üst sınırlar; aşılırsa besleme atlanır, cevap yine üretilir. */
-const SAYFA_BULMA_MS = 3500;
-const VERI_CEKME_MS = 3000;
+/**
+ * Besleme için üst sınırlar; aşılırsa besleme atlanır, cevap yine üretilir.
+ *
+ * ─── SÜRELER ÖLÇÜLEREK SEÇİLDİ ──────────────────────────────────────────────
+ * Önce 3,5 sn verilmişti. Canlı uç ölçüldüğünde 0,8–4,3 sn arasında
+ * salınıyor: beş denemenin ikisi sınırı aşıyordu. Sonuç, cihazda görüldü —
+ * besleme sessizce atlanıyor ve asistan "yaklaşık 23 milyon ton" gibi
+ * ezberden cevap veriyordu, üstelik kaynak kartı da çıkmıyordu.
+ *
+ * Sunucu tarafında model başına süre kısaltıldı; buradaki sınır da gerçek
+ * dağılımın üstüne çekildi. Telefonun mobil veriyle bağlandığı da hesaba
+ * katılmalı — masaüstünde ölçülen süre orada daha uzun.
+ */
+const SAYFA_BULMA_MS = 7000;
+const VERI_CEKME_MS = 3500;
 
 /**
  * SESLİ modda süreler kısa.
@@ -25,8 +37,8 @@ const VERI_CEKME_MS = 3000;
  * sanıyor. Besleme yetişmezse cevap beslemesiz veriliyor: geç gelen doğru
  * rakam, zamanında gelen cevaptan iyi değil.
  */
-const SESLI_SAYFA_MS = 2000;
-const SESLI_VERI_MS = 1500;
+const SESLI_SAYFA_MS = 5000;
+const SESLI_VERI_MS = 2500;
 
 /** Beslemede kaç sayfaya bakılıyor. */
 const EN_FAZLA_SAYFA = 3;
