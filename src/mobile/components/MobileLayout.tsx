@@ -4,6 +4,7 @@ import TabBar from './TabBar';
 import { klavyeyiIzle } from '../utils/klavye';
 import { setPushNavigator } from '../capacitor/push';
 import '../styles/ios.css';
+import { KonusmaEkrani } from '../../components/ses/KonusmaEkrani';
 
 /**
  * Mobil uygulama kabuğu.
@@ -38,6 +39,13 @@ export default function MobileLayout() {
     <div className="ios-app">
       <Outlet />
       <TabBar />
+      {/*
+        * Konuşma ekranı KABUKTA, sayfada değil: okuma sürerken kullanıcı
+        * sekme değiştirebiliyor ve ses arkada devam ediyordu. Burada
+        * durunca hangi sekmede olursak olalım öne geliyor ve durdurma
+        * hedefi hep elde kalıyor.
+        */}
+      <KonusmaEkrani />
     </div>
   );
 }

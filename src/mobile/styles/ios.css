@@ -822,3 +822,54 @@
 /* Arama kutusundaki mikrofon biraz küçülüyor — kutu yüksekliğini bozmasın. */
 .ios-search .ios-mikrofon { width: 28px; height: 28px; background: transparent; }
 .ios-search .ios-mikrofon--acik { background: var(--ios-red); }
+
+/* ─── Asistan konuşurken açılan ekran ────────────────────────────────────────
+ * Tam ekran ve koyu: küre kendi karanlığında parlıyor, açık zeminde
+ * parıltısı kayboluyordu. Sekme çubuğunun da üstünde — konuşurken sekme
+ * değiştirmek sesi arkada bırakırdı.
+ */
+.ses-ekran {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 28px);
+}
+.ses-ekran__orb {
+  width: min(72vw, 300px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+/* Küre inene kadar duran sönük daire. */
+.ses-ekran__yedek {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #2a2140 0%, #0a0a0a 70%);
+}
+.ses-ekran__yazi {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 15px;
+}
+.ses-ekran__durdur {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ses-ekran__durdur:active { opacity: 0.6; }
