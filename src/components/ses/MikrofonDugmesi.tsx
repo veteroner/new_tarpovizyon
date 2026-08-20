@@ -39,7 +39,16 @@ export function MikrofonDugmesi({ onMetin, onAraMetin }: Props) {
   if (!destek) return null;
 
   const tikla = async () => {
-    if (dinliyor) { await dinlemeyiDurdur(); return; }
+    if (dinliyor) {
+      /*
+       * Durum HEMEN sıfırlanıyor, geri çağrıyı beklemeden. Cihazda görüldü:
+       * bildirim gecikince ya da hiç gelmeyince düğme kırmızıda kilitli
+       * kalıyor ve kullanıcı mikrofonun kapanmadığını sanıyordu.
+       */
+      setDinliyor(false);
+      await dinlemeyiDurdur();
+      return;
+    }
     sonAra.current = '';
     const basladi = await dinlemeyeBasla(
       (metin, kesin) => {

@@ -73,6 +73,27 @@ export async function dinlemeDestekleniyorMu(): Promise<boolean> {
 let webTanima: WebTanima | null = null;
 let etkin = false;
 
+/**
+ * Oturumun "bitti" bildirimi — bir kez ve MUTLAKA çağrılıyor.
+ *
+ * ─── NEDEN MODÜL SEVİYESİNDE ────────────────────────────────────────────────
+ * Önce bitiş yalnızca native olayından geliyordu ve `dinlemeyiDurdur()`
+ * arayüze hiç haber vermiyordu. Üstüne `if (!etkin) return` erken çıkışı
+ * vardı: tanıyıcı kendiliğinden bittiyse durdurma hiçbir şey yapmıyor, arayüz
+ * de "dinliyor" durumunda kilitli kalıyordu. Cihazda görüldü — kırmızı durdur
+ * düğmesine basmak mikrofonu kapatmıyordu.
+ *
+ * Artık bitiş tek yerden ve tek kez veriliyor; olay gelse de gelmese de.
+ */
+let bittiGeriCagri: (() => void) | null = null;
+
+function bitirBildir() {
+  const f = bittiGeriCagri;
+  bittiGeriCagri = null;   // ikinci kez çağrılmasın
+  etkin = false;
+  f?.();
+}
+
 export const dinliyorMu = () => etkin;
 
 /**
@@ -85,6 +106,7 @@ export const dinliyorMu = () => etkin;
  */
 export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<boolean> {
   if (etkin) return false;
+  bittiGeriCagri = onBitti;
 
   if (nativeVar) {
     try {
@@ -105,7 +127,7 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
         if (m) onSonuc(m, false);
       });
       await NativeTanima.addListener('listeningState', (veri: { status?: string }) => {
-        if (veri?.status === 'stopped') { etkin = false; onBitti(); }
+        if (veri?.status === 'stopped') bitirBildir();
       });
 
       etkin = true;
@@ -125,12 +147,13 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
 
       return true;
     } catch {
+      bittiGeriCagri = null;
       etkin = false;
       return false;
     }
   }
 
-  if (!WebTanimaCtor) return false;
+  if (!WebTanimaCtor) { bittiGeriCagri = null; return false; }
   const tanima = new WebTanimaCtor();
   webTanima = tanima;
   tanima.lang = 'tr-TR';
@@ -144,27 +167,39 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
       onSonuc(s[0].transcript, s.isFinal);
     }
   };
-  tanima.onerror = () => { etkin = false; webTanima = null; onBitti(); };
-  tanima.onend = () => { etkin = false; webTanima = null; onBitti(); };
+  tanima.onerror = () => { webTanima = null; bitirBildir(); };
+  tanima.onend = () => { webTanima = null; bitirBildir(); };
 
   try {
     tanima.start();
     etkin = true;
     return true;
   } catch {
-    etkin = false;
     webTanima = null;
+    bittiGeriCagri = null;
+    etkin = false;
     return false;
   }
 }
 
-/** Dinlemeyi durdurur. */
+/**
+ * Dinlemeyi durdurur.
+ *
+ * ERKEN ÇIKIŞ YOK: `etkin` false olsa bile durdurma denenip bitiş
+ * bildiriliyor. Aksi hâlde tanıyıcı kendiliğinden bittiğinde arayüz
+ * "dinliyor"da kilitli kalıyordu.
+ */
 export async function dinlemeyiDurdur(): Promise<void> {
-  if (!etkin) return;
   if (nativeVar) {
     try { await NativeTanima.stop(); } catch { /* zaten durmuş */ }
-    etkin = false;
+    try { await NativeTanima.removeAllListeners(); } catch { /* yok */ }
+    bitirBildir();
     return;
   }
   try { webTanima?.stop(); } catch { /* zaten durmuş */ }
+  /*
+   * Web'de `onend` genelde geliyor ama garanti değil (izin reddi, sekme
+   * arkaya alınması). Bir tur bekleyip hâlâ bildirilmediyse elle bitiriyoruz.
+   */
+  setTimeout(() => { if (bittiGeriCagri) bitirBildir(); }, 300);
 }
