@@ -70,20 +70,75 @@ export function sesKilidiniAc(): void {
 }
 
 /**
+ * Bilinen ERKEK Türkçe ses adları.
+ *
+ * ─── NEDEN AD LİSTESİ ───────────────────────────────────────────────────────
+ * Web Speech API sesin cinsiyetini SÖYLEMİYOR — elimizde yalnızca ad ve dil
+ * var. Cinsiyeti anlamanın tek yolu bilinen adları tanımak.
+ *
+ * Liste platformlara göre: Tolga/Ahmet Microsoft (Edge, Windows), Cem ve
+ * Yusuf Apple tarafında görülebiliyor, Erkan/Volkan bazı Android
+ * kurulumlarında. Hiçbiri garanti değil; cihazda yoksa liste sessizce
+ * atlanıyor.
+ */
+const ERKEK_SESLER = ['tolga', 'ahmet', 'cem', 'yusuf', 'erkan', 'volkan', 'burak', 'emre'];
+
+/** Kullanıcı elle seçtiyse o sesin adı; boşsa otomatik. */
+const SES_ANAHTARI = 'tarpo.ses.adi';
+
+/** Cihazdaki Türkçe sesler — ayarlarda listelemek için. */
+export function turkceSesler(): SpeechSynthesisVoice[] {
+  if (!desteklenir) return [];
+  return window.speechSynthesis.getVoices().filter((v) => /^tr(-|_|$)/i.test(v.lang));
+}
+
+export function seciliSesAdi(): string {
+  try { return localStorage.getItem(SES_ANAHTARI) ?? ''; } catch { return ''; }
+}
+
+export function sesiSec(ad: string): void {
+  try {
+    if (ad) localStorage.setItem(SES_ANAHTARI, ad);
+    else localStorage.removeItem(SES_ANAHTARI);
+  } catch { /* özel mod */ }
+}
+
+/** Bu ses erkek adlarından biri mi? */
+export const erkekSesMi = (v: SpeechSynthesisVoice): boolean =>
+  ERKEK_SESLER.some((ad) => v.name.toLocaleLowerCase('tr').includes(ad));
+
+/**
  * Türkçe ses seçer.
  *
  * Sesler ilk çağrıda boş gelebiliyor (eşzamansız yükleniyorlar), bu yüzden
  * seçim her seferinde yeniden yapılıyor — bir kez önbelleğe alsaydık ilk
  * okuma sesi bulamayıp varsayılan İngilizce sesle okurdu.
  *
- * Cihazda yerleşik ses tercih ediliyor: ağdan gelen sesler çevrimdışında
- * çalışmıyor ve sahadaki kullanıcının çektiği garanti değil.
+ * Sıra:
+ *   1. Kullanıcının ayarlardan seçtiği ses (varsa ve hâlâ yüklüyse)
+ *   2. Cihazda YERLEŞİK erkek ses
+ *   3. Herhangi bir erkek ses
+ *   4. Cihazda yerleşik herhangi bir Türkçe ses
+ *
+ * Yerleşik olan öne alınıyor: ağdan gelen sesler çevrimdışında çalışmıyor
+ * ve sahadaki kullanıcının çektiği garanti değil.
  */
 function turkceSes(): SpeechSynthesisVoice | null {
-  const hepsi = window.speechSynthesis.getVoices();
-  const tr = hepsi.filter((v) => /^tr(-|_|$)/i.test(v.lang));
+  const tr = turkceSesler();
   if (!tr.length) return null;
-  return tr.find((v) => v.localService) ?? tr[0];
+
+  const secilen = seciliSesAdi();
+  if (secilen) {
+    const v = tr.find((x) => x.name === secilen);
+    if (v) return v;
+    /* Seçilen ses artık yoksa (kaldırılmış olabilir) otomatiğe düşülüyor. */
+  }
+
+  const erkekler = tr.filter(erkekSesMi);
+  return erkekler.find((v) => v.localService)
+    ?? erkekler[0]
+    ?? tr.find((v) => v.localService)
+    ?? tr[0];
 }
 
 /**
@@ -122,8 +177,16 @@ export function konus(ham: string, secenek: KonusSecenek = {}): boolean {
   const soz = new SpeechSynthesisUtterance(metin);
   soz.lang = 'tr-TR';
   soz.rate = secenek.hiz ?? 0.95;
-  const ses = turkceSes();
-  if (ses) soz.voice = ses;
+  /*
+   * Ses ataması KORUMALI. Sürücü bozuk ya da beklenmedik bir nesne
+   * döndürürse atama istisna fırlatıyor; korumasız bırakılırsa `konus()`
+   * fırlatıyor ve sesli sohbet döngüsü ortasında kırılıyordu. Ses
+   * atanamazsa `lang` yeterli — işletim sistemi Türkçe bir ses seçiyor.
+   */
+  try {
+    const ses = turkceSes();
+    if (ses) soz.voice = ses;
+  } catch { /* varsayılan sesle devam */ }
 
   const basladi = Date.now();
   const bitir = () => {

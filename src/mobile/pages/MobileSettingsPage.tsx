@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getAppInfo } from '../capacitor/app';
 import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
+import { SesSecici } from '../../components/ses/SesSecici';
 
 /**
  * Ayarlar.
@@ -63,6 +64,15 @@ export default function MobileSettingsPage() {
             title="Dil" value="Türkçe" showChevron={false} />
           <ListRow icon={<Database size={16} strokeWidth={2.2} />} iconColor="var(--ios-tint)"
             title="Çevrimdışı veri" value={boyut} showChevron={false} />
+        </ListGroup>
+
+        {/*
+          * Ses seçimi ayrı bir grup: hangi seslerin yüklü olduğu cihazdan
+          * cihaza değişiyor ve API cinsiyet bilgisi vermiyor. Kullanıcı
+          * kendi telefonunda ne varsa görüp dinleyerek seçiyor.
+          */}
+        <ListGroup header="Asistan sesi">
+          <SesSecici />
         </ListGroup>
 
         <ListGroup header="Hakkında">
