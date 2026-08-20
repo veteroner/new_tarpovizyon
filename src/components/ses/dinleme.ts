@@ -23,6 +23,33 @@ import { SpeechRecognition as NativeTanima } from '@capacitor-community/speech-r
 type Sonuc = (metin: string, kesin: boolean) => void;
 type Bitti = () => void;
 
+export type DinlemeSecenek = {
+  /**
+   * Bu kadar süre yeni bir kelime gelmezse dinleme kendiliğinden bitiyor.
+   *
+   * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────
+   * iOS'ta SFSpeechRecognizer sessizlikte KENDİLİĞİNDEN DURMUYOR; `stop()`
+   * çağrılana kadar mikrofon açık kalıyor. Cihazda görüldü: kullanıcı sorusunu
+   * bitiriyor, yazı ekranda duruyor ama sohbet "Dinliyorum…" aşamasında
+   * kilitleniyor ve cevaba hiç geçmiyor.
+   *
+   * Android'in yerleşik sessizlik algılaması var; orada bu sayaç zaten
+   * tetiklenmeden önce tanıyıcı bitiyor. Yani iki platformda da doğru
+   * çalışıyor, iOS'ta ise TEK çalışan mekanizma bu.
+   */
+  sessizlikMs?: number;
+  /** Hiç konuşulmazsa bu süre sonunda vazgeçiliyor. */
+  ilkSesBeklemeMs?: number;
+  /** Mutlak üst sınır — mikrofon hiçbir koşulda bundan uzun açık kalmasın. */
+  enFazlaMs?: number;
+};
+
+const VARSAYILAN_SECENEK: Required<DinlemeSecenek> = {
+  sessizlikMs: 1800,
+  ilkSesBeklemeMs: 7000,
+  enFazlaMs: 25000,
+};
+
 /*
  * Web Speech tipleri elle tanımlı: TS'in DOM kütüphanesinde bu API her
  * sürümde bulunmuyor ve `lib` ayarına bağlı. İhtiyacımız olan kadarı.
@@ -87,7 +114,17 @@ let etkin = false;
  */
 let bittiGeriCagri: (() => void) | null = null;
 
+/** Sessizlik ve üst sınır sayaçları. */
+let sessizlikSayaci: ReturnType<typeof setTimeout> | null = null;
+let enFazlaSayaci: ReturnType<typeof setTimeout> | null = null;
+
+function sayaclariTemizle() {
+  if (sessizlikSayaci) { clearTimeout(sessizlikSayaci); sessizlikSayaci = null; }
+  if (enFazlaSayaci) { clearTimeout(enFazlaSayaci); enFazlaSayaci = null; }
+}
+
 function bitirBildir() {
+  sayaclariTemizle();
   const f = bittiGeriCagri;
   bittiGeriCagri = null;   // ikinci kez çağrılmasın
   etkin = false;
@@ -104,9 +141,34 @@ export const dinliyorMu = () => etkin;
  * Yalnızca kesin sonucu göstermek, birkaç saniye boyunca hiçbir şey olmuyor
  * gibi hissettiriyor.
  */
-export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<boolean> {
+export async function dinlemeyeBasla(
+  onSonuc: Sonuc,
+  onBitti: Bitti,
+  secenek: DinlemeSecenek = {},
+): Promise<boolean> {
   if (etkin) return false;
   bittiGeriCagri = onBitti;
+
+  const ayar = { ...VARSAYILAN_SECENEK, ...secenek };
+
+  /*
+   * Her yeni kelimede sessizlik sayacı sıfırlanıyor; kullanıcı susunca
+   * sayaç dolup dinlemeyi bitiriyor. Gerekçesi `DinlemeSecenek` başında.
+   */
+  const sessizligiErtele = () => {
+    if (sessizlikSayaci) clearTimeout(sessizlikSayaci);
+    sessizlikSayaci = setTimeout(() => { void dinlemeyiDurdur(); }, ayar.sessizlikMs);
+  };
+
+  const sonucSar: Sonuc = (metin, kesin) => {
+    sessizligiErtele();
+    onSonuc(metin, kesin);
+  };
+
+  sayaclariTemizle();
+  /* Hiç konuşulmazsa da bitmeli; ilk ses gelene kadar daha uzun bekleniyor. */
+  sessizlikSayaci = setTimeout(() => { void dinlemeyiDurdur(); }, ayar.ilkSesBeklemeMs);
+  enFazlaSayaci = setTimeout(() => { void dinlemeyiDurdur(); }, ayar.enFazlaMs);
 
   if (nativeVar) {
     try {
@@ -124,7 +186,7 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
       await NativeTanima.removeAllListeners();
       await NativeTanima.addListener('partialResults', (veri: { matches?: string[] }) => {
         const m = veri?.matches?.[0];
-        if (m) onSonuc(m, false);
+        if (m) sonucSar(m, false);
       });
       await NativeTanima.addListener('listeningState', (veri: { status?: string }) => {
         if (veri?.status === 'stopped') bitirBildir();
@@ -142,18 +204,19 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
         popup: false,
       }).then((sonuc: { matches?: string[] }) => {
         const m = sonuc?.matches?.[0];
-        if (m) onSonuc(m, true);
+        if (m) sonucSar(m, true);
       }).catch(() => { /* iptal ya da sessizlik — onBitti listener'dan gelir */ });
 
       return true;
     } catch {
+      sayaclariTemizle();
       bittiGeriCagri = null;
       etkin = false;
       return false;
     }
   }
 
-  if (!WebTanimaCtor) { bittiGeriCagri = null; return false; }
+  if (!WebTanimaCtor) { sayaclariTemizle(); bittiGeriCagri = null; return false; }
   const tanima = new WebTanimaCtor();
   webTanima = tanima;
   tanima.lang = 'tr-TR';
@@ -164,7 +227,7 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
   tanima.onresult = (olay: WebSonucOlayi) => {
     for (let i = olay.resultIndex; i < olay.results.length; i++) {
       const s = olay.results[i];
-      onSonuc(s[0].transcript, s.isFinal);
+      sonucSar(s[0].transcript, s.isFinal);
     }
   };
   tanima.onerror = () => { webTanima = null; bitirBildir(); };
@@ -175,6 +238,7 @@ export async function dinlemeyeBasla(onSonuc: Sonuc, onBitti: Bitti): Promise<bo
     etkin = true;
     return true;
   } catch {
+    sayaclariTemizle();
     webTanima = null;
     bittiGeriCagri = null;
     etkin = false;
