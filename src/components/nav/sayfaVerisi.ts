@@ -23,8 +23,11 @@ import type { MenuItem } from './menu';
 
 /** Modele gidecek satır sayısı — son yıllar. */
 const SATIR = 10;
-/** Metin bundan uzun olamaz; uzun bağlam hem pahalı hem modeli dağıtıyor. */
-const EN_FAZLA_HARF = 1400;
+/**
+ * Tüm sayfalar için TOPLAM bütçe. Worker tarafındaki sınırın (2000) altında
+ * kalmalı; aşarsa orada kırpılır ve hangi sayfanın kırpıldığını bilemeyiz.
+ */
+export const TOPLAM_BUTCE = 1800;
 
 /**
  * Satırı `alan=değer` çiftlerine çevirir; boş sütunlar hiç yazılmıyor.
@@ -50,7 +53,10 @@ function satirMetni(r: Row): string {
  * Uç yoksa, boş dönerse ya da istek düşerse `null` — besleme atlanır,
  * cevap yine üretilir. Veri gelmedi diye AI'ı susturmak daha kötü olurdu.
  */
-export async function sayfaVerisi(sayfa: MenuItem): Promise<string | null> {
+export async function sayfaVerisi(
+  sayfa: MenuItem,
+  butce = TOPLAM_BUTCE,
+): Promise<string | null> {
   if (!sayfa.uc) return null;
   try {
     const satirlar = await fetchRows(sayfa.uc);
@@ -74,7 +80,7 @@ export async function sayfaVerisi(sayfa: MenuItem): Promise<string | null> {
      * eskiler dışarıda kalıyor. Çıktı yine kronolojik sırada.
      */
     const secilen: string[] = [];
-    let kalan = EN_FAZLA_HARF - baslik.length;
+    let kalan = butce - baslik.length;
     for (let i = son.length - 1; i >= 0; i--) {
       const satir = satirMetni(son[i]);
       if (satir.length + 1 > kalan) break;
@@ -86,4 +92,35 @@ export async function sayfaVerisi(sayfa: MenuItem): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Birden çok sayfanın verisini tek bir bloğa toplar.
+ *
+ * ─── NEDEN BİRDEN ÇOK ───────────────────────────────────────────────────────
+ * Tek sayfa beslemesi "süt ve et üretimini karşılaştır" gibi soruları yarım
+ * bırakıyordu: model bir tarafı gerçek veriden, öbür tarafı ezberinden
+ * söylüyordu ve bu ikisi cevapta AYIRT EDİLEMİYORDU.
+ *
+ * ─── BÜTÇE PAYLAŞTIRILIYOR ──────────────────────────────────────────────────
+ * Sayfa başına sabit bir sınır vermek toplamı sunucudaki sınırın üstüne
+ * çıkarırdı ve kırpma orada, bizim göremediğimiz bir yerde olurdu. Bütçe
+ * burada bölünüyor: ilk sayfa (en alakalı olan) en büyük payı alıyor.
+ */
+export async function sayfalarVerisi(sayfalar: MenuItem[]): Promise<string | null> {
+  const ucluler = sayfalar.filter((s) => s.uc);
+  if (!ucluler.length) return null;
+
+  /*
+   * Paylar 3/2/1 oranında: model sayfaları alaka sırasına göre veriyor ve
+   * eşit bölmek, asıl sorulan konunun verisini kısıp yan konuya yer açardı.
+   */
+  const agirlik = ucluler.map((_, i) => ucluler.length - i);
+  const toplamAgirlik = agirlik.reduce((a, b) => a + b, 0);
+
+  const parcalar = await Promise.all(
+    ucluler.map((s, i) => sayfaVerisi(s, Math.floor((TOPLAM_BUTCE * agirlik[i]) / toplamAgirlik))),
+  );
+  const dolu = parcalar.filter((p): p is string => Boolean(p));
+  return dolu.length ? dolu.join('\n\n') : null;
 }

@@ -51,6 +51,8 @@ const MAX_TOKENS = 48
 
 /** İstemci listesi bundan uzunsa kesiliyor — istek gövdesi şişmesin. */
 const EN_FAZLA_SAYFA = 200
+/** Tek istekte döndürülebilecek en çok sayfa. Daha fazlası bağlamı şişiriyor. */
+const EN_FAZLA_SONUC = 3
 
 /*
  * CORS: `ai.js` ile aynı gerekçe — native kabuğun kökeni sabit değil
@@ -69,15 +71,32 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
   headers: { 'Content-Type': 'application/json', ...CORS },
 })
 
-function istem(soru, sayfalar) {
-  const liste = sayfalar.map((s, i) => `${i + 1}. ${s.ad}${s.bolum ? ` (${s.bolum})` : ''}`).join('\n');
+function istem(soru, sayfalar, adet) {
+  const liste = sayfalar.map((s, i) => `${i + 1}. ${s.ad}${s.bolum ? ` (${s.bolum})` : ''}`).join('\n')
+  /*
+   * Tek sayfa ve çok sayfa için AYRI istem.
+   *
+   * Tek sayfalık hâlde "en fazla 1 numara yaz" demek modeli tereddüde
+   * düşürüyor; arama kutusu her zaman tek sonuç istiyor ve kesin bir emir
+   * daha iyi çalışıyor. Çok sayfa yalnızca AI cevabını beslerken gerekiyor:
+   * "süt ve et üretimini karşılaştır" gibi sorular iki ayrı sayfadan
+   * besleniyor.
+   */
+  const emir = adet <= 1
+    ? `Kullanıcının aradığı veriyi en iyi gösteren sayfanın NUMARASINI yaz.
+Sadece numarayı yaz, başka hiçbir şey yazma.
+Listede gerçekten uygun bir sayfa yoksa sadece 0 yaz.`
+    : `Soruyu cevaplamak için gereken sayfaların NUMARALARINI yaz, en fazla ${adet} tane.
+En alakalı olan başta olsun, virgülle ayır (örnek: 12,4).
+Yalnızca GERÇEKTEN gereken sayfaları yaz — soru tek konuya bakıyorsa tek numara yeter.
+Sadece numaraları yaz, başka hiçbir şey yazma.
+Listede gerçekten uygun bir sayfa yoksa sadece 0 yaz.`
+
   return `Aşağıda bir tarım veri uygulamasındaki sayfaların listesi var.
 
-Kullanıcı arama kutusuna şunu yazdı: "${soru}"
+Kullanıcı şunu sordu: "${soru}"
 
-Kullanıcının aradığı veriyi en iyi gösteren sayfanın NUMARASINI yaz.
-Sadece numarayı yaz, başka hiçbir şey yazma.
-Listede gerçekten uygun bir sayfa yoksa sadece 0 yaz.
+${emir}
 
 SAYFALAR:
 ${liste}`
@@ -127,16 +146,25 @@ async function groq(m, metin, apiKey, timeoutMs) {
 }
 
 /**
- * Modelin cevabından sayfa numarasını çıkarır.
- * Model bazen "3" yerine "Cevap: 3" ya da "<think>…</think> 3" yazıyor;
- * ilk sayı alınıyor. Aralık dışı her şey "bulamadım" sayılıyor.
+ * Modelin cevabından sayfa numaralarını çıkarır.
+ *
+ * Model bazen "3" yerine "Cevap: 3" ya da "<think>…</think> 3,7" yazıyor;
+ * metindeki bütün sayılar sırayla alınıyor. ARALIK DIŞI olanlar atılıyor —
+ * modelin listede olmayan bir sayfaya yönlendirmesinin önündeki ilk engel bu.
+ * Tekrar edenler de eleniyor: aynı sayfayı iki kez beslemek bağlamı boşuna
+ * şişirirdi.
  */
-function numaraCoz(text, adet) {
+function numaralariCoz(text, sayfaAdedi, enFazla) {
   const temiz = String(text).replace(/<think>[\s\S]*?<\/think>/gi, '')
-  const eslesme = temiz.match(/\d+/)
-  if (!eslesme) return 0
-  const n = Number(eslesme[0])
-  return Number.isInteger(n) && n >= 1 && n <= adet ? n : 0
+  const bulunan = []
+  for (const ham of temiz.match(/\d+/g) ?? []) {
+    const n = Number(ham)
+    if (!Number.isInteger(n) || n < 1 || n > sayfaAdedi) continue
+    if (bulunan.includes(n)) continue
+    bulunan.push(n)
+    if (bulunan.length >= enFazla) break
+  }
+  return bulunan
 }
 
 /**
@@ -178,11 +206,18 @@ export async function handleSayfaBul(req, env) {
   })).filter((s) => s.yol && s.ad)
   if (!sayfalar.length) return json({ error: 'sayfalar required' }, 400)
 
+  /*
+   * Kaç sayfa isteniyor. Arama kutusu 1 istiyor (tek sonuç gösteriyor), AI
+   * cevabını beslerken birden çok gerekiyor. Varsayılan 1 — parametreyi
+   * göndermeyen eski istemci aynı davranışı görüyor.
+   */
+  const adet = Math.min(Math.max(Number(body?.adet) || 1, 1), EN_FAZLA_SONUC)
+
   const anahtarlar = { gemini: env.TARPOL_AI_KEY, groq: env.TARPOL_GROQ_KEY }
-  const metin = istem(soru, sayfalar)
+  const metin = istem(soru, sayfalar, adet)
   const basladi = Date.now()
 
-  let secilen = null
+  let secilen = []
   let kullanilan = null
 
   for (const m of MODELS) {
@@ -195,14 +230,14 @@ export async function handleSayfaBul(req, env) {
         ? await gemini(m, metin, apiKey, sure)
         : await groq(m, metin, apiKey, sure)
       if (!r.ok) continue
-      const n = numaraCoz(r.text, sayfalar.length)
+      const nler = numaralariCoz(r.text, sayfalar.length, adet)
       kullanilan = m.id
       /*
-       * n === 0 "listede yok" demek ve bu GEÇERLİ bir cevap — sıradaki modele
-       * geçilmiyor. Aksi hâlde zincir, doğru şekilde "yok" diyen modeli atlayıp
-       * uydurmaya daha yatkın olana kadar iniyordu.
+       * Boş liste "listede yok" demek ve bu GEÇERLİ bir cevap — sıradaki
+       * modele geçilmiyor. Aksi hâlde zincir, doğru şekilde "yok" diyen
+       * modeli atlayıp uydurmaya daha yatkın olana kadar iniyordu.
        */
-      secilen = n === 0 ? null : sayfalar[n - 1]
+      secilen = nler.map((n) => sayfalar[n - 1])
       break
     } catch {
       // timeout ya da ağ hatası → sıradaki model
@@ -210,5 +245,15 @@ export async function handleSayfaBul(req, env) {
   }
 
   if (!kullanilan) return json({ error: 'model yanıt vermedi' }, 502)
-  return json({ success: true, yol: secilen?.yol ?? null, ad: secilen?.ad ?? null, engine: kullanilan })
+  /*
+   * `yol`/`ad` ilk sonucu taşıyor: arama kutusu bu alanları okuyor ve
+   * `adet` göndermiyor. Çoklu isteyen `sayfalar` dizisini okuyor.
+   */
+  return json({
+    success: true,
+    yol: secilen[0]?.yol ?? null,
+    ad: secilen[0]?.ad ?? null,
+    sayfalar: secilen.map((s) => ({ yol: s.yol, ad: s.ad })),
+    engine: kullanilan,
+  })
 }

@@ -776,3 +776,5 @@
   color: var(--ios-tint-deep, var(--ios-tint));
 }
 .ios-yukleniyor { font-size: 14px; color: var(--ios-label-3); margin-left: 8px; }
+/* Ardışık kaynak kartları arasındaki boşluk daralıyor — tek blok gibi dursun. */
+.ios-kaynak + .ios-kaynak { margin-top: 4px; }

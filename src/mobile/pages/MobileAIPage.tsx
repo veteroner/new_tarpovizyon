@@ -8,8 +8,8 @@ import DynamicChart from '../../components/DynamicChart';
 import type { ChartConfig } from '../../components/DynamicChart';
 import { NavBar } from '../components/ui/IosList';
 import { BASIC_MENU } from '../../components/nav/menu';
-import { sayfaBul, type ModelSonucu } from '../../components/nav/modelArama';
-import { sayfaVerisi } from '../../components/nav/sayfaVerisi';
+import { sayfalarBul, type ModelSonucu } from '../../components/nav/modelArama';
+import { sayfalarVerisi } from '../../components/nav/sayfaVerisi';
 
 /**
  * AI Asistan — sohbet.
@@ -51,8 +51,8 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  /** Cevabın altında gösterilecek uygulama sayfası. */
-  ilgili?: ModelSonucu | null;
+  /** Cevabın altında gösterilecek uygulama sayfaları (en fazla 3). */
+  ilgili?: ModelSonucu[];
   /** Cevap uygulamanın kendi verisiyle mi üretildi? Kartın metnini belirliyor. */
   beslendi?: boolean;
 }
@@ -62,7 +62,17 @@ interface Message {
  * üretiliyor: veri gelmedi diye kullanıcıyı cevapsız bırakmak daha kötü.
  */
 const SAYFA_BULMA_MS = 3500;
-const VERI_CEKME_MS = 2500;
+const VERI_CEKME_MS = 3000;
+/**
+ * Beslemede kaç sayfaya bakılıyor.
+ *
+ * Tek sayfa, iki konuya dokunan soruları yarım bırakıyordu: "süt ve et
+ * üretimini karşılaştır" sorusunda model bir tarafı gerçek veriden, öbür
+ * tarafı ezberinden söylüyordu — ve cevapta bu ikisi ayırt edilemiyordu.
+ *
+ * Üçten fazlası bağlamı şişirip asıl konunun verisini kısıyor.
+ */
+const EN_FAZLA_SAYFA = 3;
 
 /** Söz verilen sürede bitmezse null döner; işi iptal etmiyor, beklemeyi bırakıyor. */
 function sinirliSure<T>(is: Promise<T>, ms: number): Promise<T | null> {
@@ -116,9 +126,15 @@ export default function MobileAIPage() {
        * yüzden besleme SÜRE SINIRLI — yetişmezse cevap beslemesiz üretiliyor.
        */
       setAsama('veri');
-      const sayfa = await sinirliSure(sayfaBul(soru, tumOgeler), SAYFA_BULMA_MS);
-      const oge = sayfa ? tumOgeler.find((o) => o.any === sayfa.yol) : undefined;
-      const veri = oge ? await sinirliSure(sayfaVerisi(oge), VERI_CEKME_MS) : null;
+      const sayfalar = await sinirliSure(
+        sayfalarBul(soru, tumOgeler, EN_FAZLA_SAYFA), SAYFA_BULMA_MS,
+      ) ?? [];
+      const ogeler = sayfalar
+        .map((s) => tumOgeler.find((o) => o.any === s.yol))
+        .filter((o): o is typeof tumOgeler[number] => Boolean(o));
+      const veri = ogeler.length
+        ? await sinirliSure(sayfalarVerisi(ogeler), VERI_CEKME_MS)
+        : null;
 
       setAsama('cevap');
       const cevap = await askAI(soru, veri);
@@ -127,7 +143,7 @@ export default function MobileAIPage() {
         role: 'assistant',
         content: cevap,
         timestamp: new Date(),
-        ilgili: sayfa,
+        ilgili: sayfalar,
         beslendi: Boolean(veri),
       }]);
     } catch (e) {
@@ -202,27 +218,35 @@ export default function MobileAIPage() {
                 * ayrı bir mesaj değil. Model rakamı ezberinden söylüyor;
                 * doğrulanmış hâli burada.
                 */}
-              {msg.role === 'assistant' && msg.ilgili && (
+              {msg.role === 'assistant' && msg.ilgili?.map((sayfa, i) => (
                 <button
+                  key={sayfa.yol}
                   type="button"
                   className="ios-kaynak"
-                  onClick={() => navigate(msg.ilgili!.yol)}
+                  onClick={() => navigate(sayfa.yol)}
                 >
                   {/*
-                    * Metin, cevabın nasıl üretildiğini söylüyor. "Kaynak"
-                    * ile "ilgili sayfa" aynı şey değil: besleme yapıldıysa
-                    * rakamlar gerçekten o sayfadan geliyor, yapılmadıysa
-                    * sayfa yalnızca konuyla ilgili.
+                    * Üst yazı YALNIZCA ilk kartta. Her kartta tekrarlamak
+                    * "Rakamların kaynağı"nı üç kez yazmak demekti; başlık
+                    * kartların tamamı için geçerli.
+                    *
+                    * Metin cevabın nasıl üretildiğini söylüyor: besleme
+                    * yapıldıysa rakamlar gerçekten bu sayfalardan geliyor,
+                    * yapılmadıysa sayfa yalnızca konuyla ilgili.
                     */}
-                  <span className="ios-kaynak-ust">
-                    {msg.beslendi ? 'Rakamların kaynağı' : 'İlgili sayfa'}
-                  </span>
+                  {i === 0 && (
+                    <span className="ios-kaynak-ust">
+                      {msg.beslendi
+                        ? (msg.ilgili!.length > 1 ? 'Rakamların kaynakları' : 'Rakamların kaynağı')
+                        : 'İlgili sayfa'}
+                    </span>
+                  )}
                   <span className="ios-kaynak-ad">
-                    {msg.ilgili.ad}
+                    {sayfa.ad}
                     <ChevronRight size={15} aria-hidden="true" />
                   </span>
                 </button>
-              )}
+              ))}
               <span className="ios-bubble-time">{saat(msg.timestamp)}</span>
             </div>
           ))

@@ -40,33 +40,36 @@ const BEKLEME_MS = 700;
 
 export type ModelSonucu = { yol: string; ad: string };
 
-const onbellek = new Map<string, ModelSonucu | null>();
+const onbellek = new Map<string, ModelSonucu[]>();
 
-const anahtar = (soru: string) => soru.trim().toLocaleLowerCase('tr');
+/* Önbellek anahtarına ADET de giriyor: aynı soru 1 ve 3 sayfa için farklı. */
+const anahtar = (soru: string, adet: number) => `${adet}|${soru.trim().toLocaleLowerCase('tr')}`;
 
-function oturumdanOku(k: string): ModelSonucu | null | undefined {
+function oturumdanOku(k: string): ModelSonucu[] | undefined {
   try {
     const ham = sessionStorage.getItem(`tarpo.sayfabul.${k}`);
     if (ham === null) return undefined;
-    return ham === '' ? null : (JSON.parse(ham) as ModelSonucu);
+    return JSON.parse(ham) as ModelSonucu[];
   } catch { return undefined; }
 }
 
-function oturumaYaz(k: string, v: ModelSonucu | null) {
-  try { sessionStorage.setItem(`tarpo.sayfabul.${k}`, v ? JSON.stringify(v) : ''); } catch { /* özel mod */ }
+function oturumaYaz(k: string, v: ModelSonucu[]) {
+  try { sessionStorage.setItem(`tarpo.sayfabul.${k}`, JSON.stringify(v)); } catch { /* özel mod */ }
 }
 
 /**
  * Sorguyu sunucuya sorar. Bulunamazsa (ya da bir şey ters giderse) null.
  * Hata fırlatmıyor: arama kutusu, modele ulaşılamadı diye kırmızı yanmamalı.
  */
-export async function sayfaBul(
+export async function sayfalarBul(
   soru: string,
   ogeler: MenuItem[],
+  adet = 1,
   signal?: AbortSignal,
-): Promise<ModelSonucu | null> {
-  const k = anahtar(soru);
-  if (onbellek.has(k)) return onbellek.get(k) ?? null;
+): Promise<ModelSonucu[]> {
+  const k = anahtar(soru, adet);
+  const bellek = onbellek.get(k);
+  if (bellek) return bellek;
   const oturum = oturumdanOku(k);
   if (oturum !== undefined) { onbellek.set(k, oturum); return oturum; }
 
@@ -79,30 +82,49 @@ export async function sayfaBul(
       signal,
       body: JSON.stringify({
         soru,
+        adet,
         sayfalar: ogeler
           .filter((o) => o.any)
           .map((o) => ({ yol: o.any, ad: o.label, bolum: o.bolum ?? '' })),
       }),
     });
-    if (!yanit.ok) return null;
-    const veri = await yanit.json() as { yol?: string | null; ad?: string | null };
+    if (!yanit.ok) return [];
+    const veri = await yanit.json() as {
+      yol?: string | null; ad?: string | null;
+      sayfalar?: { yol?: string; ad?: string }[];
+    };
 
     /*
      * Sunucu numarayı zaten doğruluyor; burada bir kez daha yola bakılıyor.
      * Sunucu bir gün değişirse ya da araya bir şey girerse, kullanıcı olmayan
      * bir sayfaya gönderilmesin.
+     *
+     * `sayfalar` yoksa tek sonuçlu eski biçime düşülüyor.
      */
-    const sonuc: ModelSonucu | null = veri.yol && gecerliYollar.has(veri.yol)
-      ? { yol: veri.yol, ad: veri.ad ?? '' }
-      : null;
+    const ham = veri.sayfalar?.length
+      ? veri.sayfalar
+      : (veri.yol ? [{ yol: veri.yol, ad: veri.ad ?? '' }] : []);
+
+    const sonuc: ModelSonucu[] = ham
+      .filter((x): x is { yol: string; ad?: string } => Boolean(x.yol) && gecerliYollar.has(x.yol!))
+      .map((x) => ({ yol: x.yol, ad: x.ad ?? '' }));
 
     onbellek.set(k, sonuc);
     oturumaYaz(k, sonuc);
     return sonuc;
   } catch {
     /* İptal ya da ağ hatası — sessizce yerel sonuçlara bırak. */
-    return null;
+    return [];
   }
+}
+
+/** Tek sayfa isteyen çağıranlar için (arama kutusu). */
+export async function sayfaBul(
+  soru: string,
+  ogeler: MenuItem[],
+  signal?: AbortSignal,
+): Promise<ModelSonucu | null> {
+  return (await sayfalarBul(soru, ogeler, 1, signal))[0] ?? null;
 }
 
 /**
@@ -127,9 +149,9 @@ export function useModelArama(ogeler: MenuItem[], metin: string, etkin: boolean)
     }
 
     /* Önbellekte varsa beklemeye ve "aranıyor" göstermeye gerek yok. */
-    const hazir = onbellek.get(anahtar(soru));
-    if (hazir !== undefined) {
-      setSonuc(hazir);
+    const hazir = onbellek.get(anahtar(soru, 1));
+    if (hazir) {
+      setSonuc(hazir[0] ?? null);
       setAraniyor(false);
       return;
     }
