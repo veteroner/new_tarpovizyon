@@ -1,11 +1,8 @@
 # Dependencies
 node_modules/
-netlify-dashboard/node_modules/
 
 # Build outputs
 dist/
-netlify-dashboard/dist/
-netlify-dashboard/build/
 
 # Environment variables
 .env

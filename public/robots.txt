@@ -1,28 +1,16 @@
 # TarpoVizyon — arama motoru yönergeleri
 #
-# ─── BU DOSYA YAYINA ÇIKAN TEK KOPYA ─────────────────────────────────────────
-# `netlify.toml` içindeki `base = "netlify-dashboard"` satırına ALDANMAYIN:
-# Netlify'ın kendi derleme ayarı base'i boş (kök) tutuyor ve o kazanıyor.
-# Canlıda ölçüldü — kök `public/`'te bulunan ama netlify-dashboard/public'te
-# bulunmayan /manifest.webmanifest ve /turkey_districts.json 200 dönüyor.
-# Yani derleme KÖK uygulamadan çıkıyor; netlify-dashboard yalnızca duruyor.
-#
-# ─── NEDEN PRO KAPALI ────────────────────────────────────────────────────────
-# Pro sürüm yayınlanmadı; ayrı bir güncelleme olarak, lisansla gelecek.
-# Sayfaları çalışmaya devam ediyor ve adresi bilen (biz) giriyor, ama arama
+# Pro sürüm henüz yayınlanmadı; ayrı bir güncelleme olarak, lisansla gelecek.
+# Sayfaları çalışmaya devam ediyor ve adresi bilen giriyor, ama arama
 # sonuçlarında görünmemeli: ürün henüz lisanslanmadı ve içeriğin bir kısmı
 # bayat.
 #
-# ─── NEDEN İKİ SATIR, NEDEN DÜZ `/tarpovizyon` DEĞİL ─────────────────────────
-# `Disallow: /tarpovizyon` yazsaydık önek eşleşmesi yüzünden `/tarpovizyon-
-# basic/...` sayfaları da kapanırdı — yani asıl yayınladığımız ürün aramaya
-# kapanırdı. Bu yüzden alt yollar eğik çizgiyle, Pro giriş sayfası `$` ile
-# ayrı ayrı yazıldı. (`$` sonek eşleşmesini Google ve Bing destekliyor;
-# desteklemeyen tarayıcı satırı hiç eşleştiremez, yani en kötü ihtimalle
-# etkisiz kalır — yanlış sayfayı kapatmaz.)
-#
-# Yönetim ekranı `/tarpovizyon/veri-yukle` de bu kapsamda; ayrıca yazmaya
-# gerek yok.
+# Neden iki satır, neden düz `/tarpovizyon` değil: `Disallow: /tarpovizyon`
+# yazsaydık önek eşleşmesi yüzünden `/tarpovizyon-basic/...` sayfaları da
+# kapanırdı — yani asıl yayınladığımız ürün aramaya kapanırdı. Bu yüzden alt
+# yollar eğik çizgiyle, Pro giriş sayfası `$` ile ayrı ayrı yazıldı. (`$` sonek
+# eşleşmesini Google ve Bing destekliyor; desteklemeyen tarayıcı satırı hiç
+# eşleştiremez, yani en kötü ihtimalle etkisiz kalır — yanlış sayfayı kapatmaz.)
 
 User-agent: *
 Disallow: /tarpovizyon/
