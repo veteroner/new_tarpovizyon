@@ -1,7 +1,8 @@
 name: GitHub Pages Preview
 
 # Preview-only deploy for reviewing branch work — separate from the Netlify
-# deployment (which builds from netlify-dashboard/ and is untouched by this).
+# deployment (which builds the root app per netlify.toml and is untouched by
+# this).
 on:
   push:
     branches:
