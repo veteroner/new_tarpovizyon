@@ -485,6 +485,10 @@ const CORS_HEADERS = {
  * çalıştığı adresler kabul ediliyor.
  */
 const YAZMA_ORIGIN = new Set([
+  // Uygulamanın yayın adresi. `pro.` de listede kalıyor: Pro sayfalarına
+  // oradan giriliyor ve iki adres AYNI Netlify sitesini, yani aynı yapıyı
+  // sunuyor — birini düşürmek yönetim ekranını diğerinde de bozardı.
+  'https://panel.tarpovizyon.com',
   'https://pro.tarpovizyon.com',
   'https://tarpovizyon.com',
   'http://localhost:5177',

@@ -1,0 +1,22 @@
+# TarpoVizyon — arama motoru yönergeleri
+#
+# ─── NEDEN PRO KAPALI ────────────────────────────────────────────────────────
+# Pro sürüm yayınlanmadı; ayrı bir güncelleme olarak, lisansla gelecek.
+# Sayfaları çalışmaya devam ediyor ve adresi bilen (biz) giriyor, ama arama
+# sonuçlarında görünmemeli: ürün henüz lisanslanmadı ve içeriğin bir kısmı
+# bayat.
+#
+# ─── NEDEN İKİ SATIR, NEDEN DÜZ `/tarpovizyon` DEĞİL ─────────────────────────
+# `Disallow: /tarpovizyon` yazsaydık önek eşleşmesi yüzünden `/tarpovizyon-
+# basic/...` sayfaları da kapanırdı — yani asıl yayınladığımız ürün aramaya
+# kapanırdı. Bu yüzden alt yollar eğik çizgiyle, Pro giriş sayfası `$` ile
+# ayrı ayrı yazıldı. (`$` sonek eşleşmesini Google ve Bing destekliyor;
+# desteklemeyen tarayıcı satırı hiç eşleştiremez, yani en kötü ihtimalle
+# etkisiz kalır — yanlış sayfayı kapatmaz.)
+#
+# Yönetim ekranı `/tarpovizyon/veri-yukle` de bu kapsamda; ayrıca yazmaya
+# gerek yok.
+
+User-agent: *
+Disallow: /tarpovizyon/
+Disallow: /tarpovizyon$
