@@ -1,5 +1,12 @@
 # TarpoVizyon — arama motoru yönergeleri
 #
+# ─── BU DOSYA YAYINA ÇIKAN TEK KOPYA ─────────────────────────────────────────
+# `netlify.toml` içindeki `base = "netlify-dashboard"` satırına ALDANMAYIN:
+# Netlify'ın kendi derleme ayarı base'i boş (kök) tutuyor ve o kazanıyor.
+# Canlıda ölçüldü — kök `public/`'te bulunan ama netlify-dashboard/public'te
+# bulunmayan /manifest.webmanifest ve /turkey_districts.json 200 dönüyor.
+# Yani derleme KÖK uygulamadan çıkıyor; netlify-dashboard yalnızca duruyor.
+#
 # ─── NEDEN PRO KAPALI ────────────────────────────────────────────────────────
 # Pro sürüm yayınlanmadı; ayrı bir güncelleme olarak, lisansla gelecek.
 # Sayfaları çalışmaya devam ediyor ve adresi bilen (biz) giriyor, ama arama
