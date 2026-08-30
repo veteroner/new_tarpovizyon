@@ -21,6 +21,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir, s, n } from './d1.mjs';
+import { damgaSql } from '../lib/damga.mjs';
 
 export const YEDEK_DIZIN = new URL('./yedek/', import.meta.url).pathname;
 
@@ -101,6 +102,13 @@ export async function ikiziYaz(ad, yil, ay, satirlar = null) {
       .join(',\n');
     parca.push(`INSERT INTO ${ik.tablo} (${ik.sutunlar.join(',')}) VALUES\n${obek};`);
   }
+  /*
+   * Yığının SONUNA önbellek damgası. İkizi tazeleyip damgayı atlamak, tam da
+   * bu dosyanın başında anlatılan hatayı geri getirirdi: veri D1'de doğru, ama
+   * kullanıcı sayfada eskisini görüyor — bu kez sebep yanlış tablo değil,
+   * Worker'ın kenar önbelleği olurdu.
+   */
+  parca.push(damgaSql([ik.tablo]));
   await dosyaCalistir(parca.join('\n'));
   const sonra = await say();
   console.log(`   ✓ ${ik.tablo} ${yil}-${String(ay).padStart(2, '0')}: ${varOlan} → ${sonra} satır`);

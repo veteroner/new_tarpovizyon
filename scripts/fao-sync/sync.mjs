@@ -16,6 +16,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BULK_KOK, TANIMLAR } from './tanimlar.mjs';
 import { csvSatirlari } from './csv.mjs';
+import { damgaSql } from '../lib/damga.mjs';
 
 const calistir = promisify(execFile);
 const KOK = new URL('../../workers/tarpovizyon-api/', import.meta.url).pathname;
@@ -308,6 +309,19 @@ async function setIsle(ad, t) {
     process.stdout.write(`\r   yazılıyor… ${Math.min((i + 40) * 200, degerler.length).toLocaleString('tr-TR')}/${degerler.length.toLocaleString('tr-TR')}`);
   }
   process.stdout.write('\n');
+
+  /*
+   * Önbellek damgası — yazma bittikten SONRA. Bu adım olmadan veri D1'e girer
+   * ama site bir saate kadar eski hâlini göstermeye devam eder: Worker'ın okuma
+   * yanıtları kenar önbelleğinde duruyor ve anahtarları bu damgayı taşıyor.
+   * Damga `tarpovizyon-dunya` üzerine yazılıyor (bu scriptin sürücüsü oraya
+   * bakıyor); Worker iki veritabanının damgalarını birleştirerek okuyor.
+   */
+  try {
+    await dosyaCalistir(damgaSql([t.tablo]));
+  } catch (e) {
+    console.error(`   ⚠ damga yazılamadı (veri yazıldı, önbellek 1 saat bayat kalabilir): ${e.message}`);
+  }
 
   const [sonra] = await sorgu(`SELECT MAX(${yilSutun}) son, COUNT(*) n FROM ${t.tablo}`);
   console.log(`   ✓ D1: son yıl ${sonra.son}, ${Number(sonra.n).toLocaleString('tr-TR')} satır`);

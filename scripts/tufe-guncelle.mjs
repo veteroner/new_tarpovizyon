@@ -28,6 +28,7 @@
  */
 
 import * as XLSX from 'xlsx';
+import { damgaSql } from './lib/damga.mjs';
 
 const arg = (ad) => {
   const i = process.argv.indexOf(`--${ad}`);
@@ -181,6 +182,14 @@ sqlParcalari.push(
   'INSERT INTO tufe_aylik_snapshot (harcama_grubu, aylik_degisim) VALUES\n'
     + gruplar.filter((g) => !g.genel).map((g) => `(${tirnak(g.d1)}, ${g.aylik})`).join(',\n') + ';',
 );
+
+/*
+ * Önbellek damgası — aynı yığının SONUNDA, yazmalardan sonra. Bu satırlar
+ * olmadan TÜFE D1'de güncellenir ama sayfa bir saate kadar eski değeri
+ * göstermeye devam eder: Worker'ın okuma yanıtları kenar önbelleğinde duruyor
+ * ve anahtarları tablonun damgasını taşıyor.
+ */
+sqlParcalari.push(damgaSql(['tufe_aylik', 'tufe_yillik_snapshot', 'tufe_aylik_snapshot']));
 
 const sql = sqlParcalari.join('\n');
 

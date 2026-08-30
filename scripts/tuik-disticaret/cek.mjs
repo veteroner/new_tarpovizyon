@@ -52,6 +52,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir, s, n } from './d1.mjs';
 import { ikiziYaz, YEDEK_DIZIN } from './ikizler.mjs';
 import { satiriNormalleştir } from './birimler.mjs';
+import { damgaSql } from '../lib/damga.mjs';
 
 const TABLOLAR = { hayvansal: 'tuik_ticaret_hayvansal', bitkisel: 'tuik_ticaret_bitkisel' };
 
@@ -292,6 +293,12 @@ function insertSql(tablo, satirlar) {
       .map((r) => `(${SUTUN.map((c) => (SAYI.has(c) ? n(r[c]) : s(r[c]))).join(',')})`).join(',\n');
     p.push(`INSERT INTO ${tablo} (${SUTUN.join(',')}) VALUES\n${obek};`);
   }
+  /*
+   * Yığının SONUNA önbellek damgası. Damgasız yazma, Worker'ın kenar
+   * önbelleğindeki eski yanıtları yerinde bırakır: veri D1'e girer ama ticaret
+   * sayfaları bir saate kadar önceki dönemi göstermeye devam eder.
+   */
+  p.push(damgaSql([tablo]));
   return p.join('\n');
 }
 
