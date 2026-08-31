@@ -1,5 +1,5 @@
 -- TÜİK Veri Portalı → bitkisel_tr_uretim_detay, 2025
--- üretim: 2026-08-31T18:30:25.589Z  |  kaynak: https://veriportali.tuik.gov.tr tema 13.78.282
+-- üretim: 2026-08-31T18:33:36.657Z  |  kaynak: https://veriportali.tuik.gov.tr tema 13.78.282
 -- 59 Üretim + 46 Verim satırı.
 -- Her satırın konumu 2024/2023 değerleri D1 ile birebir tutularak doğrulandı.
 
