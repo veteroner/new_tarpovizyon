@@ -118,7 +118,21 @@ export function TradeTrendSection({ title, urunler, modul = 'hayvansal' }: { tit
         </>
       )}
 
-      {!loadingProducts && products && products.length > 0 && (
+      {/*
+        * Kırılım tablosu YALNIZCA iki ve daha fazla ürün varken gösteriliyor.
+        *
+        * Tek satırlı bir kırılım, toplamın kendisinden başka bir şey söylemiyor:
+        * Buğday sayfasında "1 · Buğday · 123.185.933 $" satırı, hemen üstündeki
+        * yıl tablosunun 2026 ihracatını kelimesi kelimesine tekrar ediyordu.
+        * Okuyucuya yeni bilgi vermeyen ama tablo gibi duran bir blok, sayfanın
+        * sonunda cevapsız bir soru bırakıyor ("bunu neden ayrı gösterdiler?").
+        *
+        * 45 bitkisel ürün sayfasının hepsi ve hayvansaldan Piliç Eti tek ürünlü;
+        * onlarda blok tamamen kalkıyor. Çok ürünlü gruplarda —"Türkiye Toplam
+        * Bitkisel Üretim" (buğday/arpa/mısır/çeltik) ve iki hayvansal grup—
+        * kırılım gerçekten ayrıştırıcı bilgi taşıdığı için duruyor.
+        */}
+      {!loadingProducts && products && products.length > 1 && (
         <div style={{ marginTop: 16 }}>
           <RankedTable
             items={products.map((p) => ({
