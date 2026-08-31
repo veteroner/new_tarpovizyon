@@ -53,3 +53,6 @@ teknova rasyon mobil/
 # Düzenleyici/refactor artıkları
 *.bak
 *.backup
+
+# TÜİK bitkisel yükleyicinin indirdiği ham .xls önbelleği
+.tuik-bitkisel-onbellek/
