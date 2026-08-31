@@ -30,13 +30,26 @@ export function tamYillar(veri: YilDeger[]): YilDeger[] {
   return veri.filter((d) => (Number(d.urun_sayisi) || 0) >= enCok);
 }
 
-export async function uretimYillik(urunler: string[], unsur: string): Promise<YilDeger[]> {
+/**
+ * `birim` yalnızca Verim'de dolu geliyor: ağaç meyvelerinde Kg/Ağaç, tarla ve
+ * bağ/bahçe ürünlerinde Kg/Dekar. Grup iki birimi birden içeriyorsa (meyveler
+ * kartı: 19 ağaç + 5 alan ürünü) uç birim null ve BOŞ seri döndürüyor —
+ * ağaç başına verimle dekar başına verim ortalanamaz, blok hiç çizilmiyor.
+ */
+export async function uretimYillikBirimli(
+  urunler: string[], unsur: string,
+): Promise<{ veri: YilDeger[]; birim: string | null }> {
   const url = new URL(`${API_BASE}/api/bitkisel/uretim-detay-yillik`);
   url.searchParams.set('urunler', urunler.join('|'));
   url.searchParams.set('unsur', unsur);
   const r = await fetch(url.toString());
   if (!r.ok) throw new Error(`bitkisel üretim ucu hata: ${r.status}`);
-  return tamYillar((await r.json()).data ?? []);
+  const gelen = await r.json();
+  return { veri: tamYillar(gelen.data ?? []), birim: gelen.birim ?? null };
+}
+
+export async function uretimYillik(urunler: string[], unsur: string): Promise<YilDeger[]> {
+  return (await uretimYillikBirimli(urunler, unsur)).veri;
 }
 
 /** Altı kartın grup toplamı — iniş sayfası için. */
@@ -79,9 +92,9 @@ export function useAlanVerim(kart: BitkiselKart | undefined) {
   const verim = useQuery({
     enabled: !!kart,
     queryKey: ['tvb-bitkisel-verim', kart?.id],
-    queryFn: () => uretimYillik(kart!.urunler, 'Verim'),
+    queryFn: () => uretimYillikBirimli(kart!.urunler, 'Verim'),
   });
-  return { alan: alan.data ?? [], verim: verim.data ?? [] };
+  return { alan: alan.data ?? [], verim: verim.data?.veri ?? [], verimBirim: verim.data?.birim ?? null };
 }
 
 /** Bülten grup serisi: gerçekleşme + tahmin (ayrı işaretli). */

@@ -19,8 +19,10 @@ export type CropSectorPageConfig = {
 const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
 
 type YearRow = { yil: number; deger: number };
+/** `birim` yalnızca Verim'de dolu: ağaç meyvelerinde Kg/Ağaç, tarlada Kg/Dekar. */
+type DetaySonuc = { rows: YearRow[]; birim: string | null };
 
-async function fetchDetayYillik(urunler: string[], unsur: string): Promise<YearRow[]> {
+async function fetchDetayYillik(urunler: string[], unsur: string): Promise<DetaySonuc> {
   const url = new URL(`${API_BASE}/api/bitkisel/uretim-detay-yillik`);
   // '|' delimiter, not ',' — several variety names contain commas
   // (e.g. "Buğday, Durum Buğdayı Hariç"); a comma-joined list would be
@@ -29,7 +31,7 @@ async function fetchDetayYillik(urunler: string[], unsur: string): Promise<YearR
   url.searchParams.set('unsur', unsur);
   const res = await fetch(url.toString());
   const json = await res.json();
-  return json.data ?? [];
+  return { rows: json.data ?? [], birim: json.birim ?? null };
 }
 
 function latestNonZero(rows: YearRow[]): { value: number | null; pct: number | null } {
@@ -61,9 +63,14 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
   });
 
   const isLoading = l1 || l2 || l3;
-  const uretimRows = uretim ?? [];
-  const alanByYear = new Map((alan ?? []).map((r) => [r.yil, r.deger]));
-  const verimByYear = new Map((verim ?? []).map((r) => [r.yil, r.deger]));
+  const uretimRows = uretim?.rows ?? [];
+  const alanRows = alan?.rows ?? [];
+  const verimRows = verim?.rows ?? [];
+  // Ağaç meyvelerinde verim ağaç başına ölçülüyor; birim sabit yazılırsa
+  // (eskiden "Kg/Dekar") elma 71 Kg/Ağaç yerine 71 Kg/Dekar diye okunuyordu.
+  const verimBirim = verim?.birim ?? 'Kg/Dekar';
+  const alanByYear = new Map(alanRows.map((r) => [r.yil, r.deger]));
+  const verimByYear = new Map(verimRows.map((r) => [r.yil, r.deger]));
   const merged = uretimRows.map((r) => ({
     yil: r.yil,
     uretim_ton: r.deger,
@@ -72,10 +79,12 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
   }));
 
   const kpi1 = latestNonZero(uretimRows);
-  const kpi2 = latestNonZero(alan ?? []);
-  const kpi3 = latestNonZero(verim ?? []);
-  const hasAlan = (alan ?? []).length > 0;
-  const hasVerim = (verim ?? []).length > 0;
+  const kpi2 = latestNonZero(alanRows);
+  const kpi3 = latestNonZero(verimRows);
+  const hasAlan = alanRows.length > 0;
+  // Karışık birimli gruplarda uç boş seri döndürüyor (ağaç başına verimle
+  // dekar başına verim ortalanamaz), o yüzden kart da grafik serisi de düşüyor.
+  const hasVerim = verimRows.length > 0;
 
   return (
     <div className="tvb-page">
@@ -88,21 +97,22 @@ export function CropSectorPage({ config }: { config: CropSectorPageConfig }) {
           <div className="tvb-page__controls">
             <KpiCard label={`${productionLabel} Miktarı`} value={formatNumber(kpi1.value)} suffix="Ton" changePct={kpi1.pct} />
             {hasAlan && <KpiCard label="Ekilen Alan" value={formatNumber(kpi2.value)} suffix="Dekar" changePct={kpi2.pct} />}
-            {hasVerim && <KpiCard label="Verim" value={formatNumber(kpi3.value)} suffix="Kg/Dekar" changePct={kpi3.pct} />}
+            {hasVerim && <KpiCard label="Verim" value={formatNumber(kpi3.value)} suffix={verimBirim} changePct={kpi3.pct} />}
           </div>
 
           {merged.length > 0 && (
             <div className="tvb-section">
               {/* Üretim + ekilen alan share the left axis (both large quantities,
-                  zero-based bars); verim (kg/dekar, ~hundreds) rides the right
-                  axis so it isn't flattened against the millions on the left. */}
+                  zero-based bars); verim (kg/dekar veya kg/ağaç, ~onlar-yüzler)
+                  rides the right axis so it isn't flattened against the
+                  millions on the left. */}
               <YearlyChart
                 data={merged as unknown as Record<string, number | string>[]}
                 xKey="yil"
                 series={[
                   { key: 'uretim_ton', label: `${productionLabel} (Ton)`, type: 'bar' },
                   ...(hasAlan ? [{ key: 'ekilen_alan_da', label: 'Ekilen Alan (Dekar)', type: 'bar' as const }] : []),
-                  ...(hasVerim ? [{ key: 'verim_kg_da', label: 'Verim (Kg/Dekar)', type: 'line' as const, axis: 'right' as const }] : []),
+                  ...(hasVerim ? [{ key: 'verim_kg_da', label: `Verim (${verimBirim})`, type: 'line' as const, axis: 'right' as const }] : []),
                 ]}
               />
             </div>

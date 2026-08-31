@@ -460,13 +460,88 @@ async function gfeLatestSnapshot(env) {
   return { yil, ay, data: results };
 }
 
+/*
+ * VERİM TOPLANAMAZ — bir orandır, ürün başına ayrı bir paydası vardır.
+ *
+ * Buğday sayfası iki çeşidi topluyor ("Buğday, Durum Buğdayı Hariç" + "Durum
+ * Buğdayı") ve Verim'i de SUM ile toplayınca 2024'te 629 Kg/Dekar çıkıyordu;
+ * gerçek buğday verimi ~300. Doğrusu TABANA GÖRE AĞIRLIKLI ORTALAMA:
+ * SUM(taban × verim) / SUM(taban).
+ *
+ * Taban ürüne göre değişiyor ve tabloda `birim` sütunu YOK — ama unsur
+ * satırlarının kendisinden türetilebiliyor. Sıra önemli, tek sorguda:
+ *   1. Hasat Edilen Alan              → tarla bitkileri,  Kg/Dekar
+ *   2. Meyve Veren Yaşta Ağaç Sayısı  → ağaç meyveleri,   Kg/Ağaç
+ *   3. Toplu Meyveliklerin Alanı      → üzüm/çilek/muz…,  Kg/Dekar
+ * Tablonun tamamında doğrulandı (Üretim×1000 ÷ taban ≈ Verim, %2 tolerans):
+ * 1444/1451, 805/894 ve — ilk iki tabanı olmayan ürünlerde — 357/357. Hiçbir
+ * ürünün iki tabanı yok, hiçbir Verim satırı tabansız yıl bırakmıyor.
+ */
+const VERIM_TABANLARI = [
+  { unsur: 'Hasat Edilen Alan', birim: 'Kg/Dekar' },
+  { unsur: 'Meyve Veren Yaşta Ağaç Sayısı', birim: 'Kg/Ağaç' },
+  { unsur: 'Toplu Meyveliklerin Alanı', birim: 'Kg/Dekar' },
+];
+
+/*
+ * Grubun Verim birimi — tek birim yoksa null.
+ *
+ * "Meyveler" kartı 19 ağaç ürünü (Kg/Ağaç) ile 5 alan ürününü (Kg/Dekar) aynı
+ * listede topluyor; bunların ortalaması ağırlıklı da olsa anlamsız. Dış ticaret
+ * tarafındaki `tradeUnit` ile aynı kural: karışık birimde miktarı hiç verme.
+ */
+async function verimBirimi(env, urunler) {
+  const placeholders = urunler.map(() => '?').join(',');
+  const sql = `SELECT urun, unsur FROM bitkisel_tr_uretim_detay
+               WHERE urun IN (${placeholders})
+                 AND unsur IN ('Hasat Edilen Alan','Meyve Veren Yaşta Ağaç Sayısı','Toplu Meyveliklerin Alanı')
+               GROUP BY urun, unsur`;
+  const { results } = await env.DB.prepare(sql).bind(...urunler).all();
+  const unsurlar = new Map();
+  for (const r of results) {
+    if (!unsurlar.has(r.urun)) unsurlar.set(r.urun, new Set());
+    unsurlar.get(r.urun).add(r.unsur);
+  }
+  const birimler = new Set();
+  for (const set of unsurlar.values()) {
+    const taban = VERIM_TABANLARI.find((t) => set.has(t.unsur));
+    if (taban) birimler.add(taban.birim);
+  }
+  return birimler.size === 1 ? [...birimler][0] : null;
+}
+
 async function uretimDetayYillik(env, urunler, unsur) {
   const placeholders = urunler.map(() => '?').join(',');
+
+  if (unsur === 'Verim') {
+    // Karışık tabanlı grupta seri yok: sayfa Verim kartını ve grafik serisini
+    // hiç göstermesin diye boş dizi + birim: null dönüyor.
+    const birim = await verimBirimi(env, urunler);
+    if (!birim) return { data: [], birim: null };
+    const sql = `WITH taban AS (
+                   SELECT urun, CASE
+                     WHEN MAX(unsur = 'Hasat Edilen Alan') THEN 'Hasat Edilen Alan'
+                     WHEN MAX(unsur = 'Meyve Veren Yaşta Ağaç Sayısı') THEN 'Meyve Veren Yaşta Ağaç Sayısı'
+                     ELSE 'Toplu Meyveliklerin Alanı' END t
+                     FROM bitkisel_tr_uretim_detay WHERE urun IN (${placeholders}) GROUP BY urun)
+                 SELECT v.yil, SUM(v.deger * b.deger) / SUM(b.deger) deger,
+                        COUNT(DISTINCT v.urun) urun_sayisi
+                   FROM bitkisel_tr_uretim_detay v
+                   JOIN taban tb ON tb.urun = v.urun
+                   JOIN bitkisel_tr_uretim_detay b
+                     ON b.urun = v.urun AND b.yil = v.yil AND b.unsur = tb.t AND b.deger > 0
+                  WHERE v.unsur = 'Verim' AND v.urun IN (${placeholders})
+                  GROUP BY v.yil ORDER BY v.yil ASC`;
+    const { results } = await env.DB.prepare(sql).bind(...urunler, ...urunler).all();
+    return { data: results, birim };
+  }
+
+  // Üretim ve alan/ağaç sayısı miktardır; toplanır.
   const sql = `SELECT yil, SUM(deger) deger, COUNT(DISTINCT urun) urun_sayisi
                  FROM bitkisel_tr_uretim_detay
                WHERE unsur = ? AND urun IN (${placeholders}) GROUP BY yil ORDER BY yil ASC`;
   const { results } = await env.DB.prepare(sql).bind(unsur, ...urunler).all();
-  return results;
+  return { data: results, birim: null };
 }
 
 const CORS_HEADERS = {
@@ -734,8 +809,8 @@ async function okumaCevabi(request, env, url, slug) {
       const unsur = url.searchParams.get('unsur') || '';
       if (urunler.length === 0 || !unsur) return json({ error: 'urunler ve unsur parametreleri zorunlu' }, 400);
       try {
-        const data = await uretimDetayYillik(env, urunler, unsur);
-        return json({ data, count: data.length });
+        const { data, birim } = await uretimDetayYillik(env, urunler, unsur);
+        return json({ data, count: data.length, birim });
       } catch (err) {
         return json({ error: String(err) }, 500);
       }

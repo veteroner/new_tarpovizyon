@@ -28,7 +28,7 @@ export function BitkiselDetayPage() {
   const kart = bitkiselKartBul(String(kartId));
   const { yukleniyor, seriler } = useBitkiselKartlar();
   const { parcalar } = useGrupParcalari(kart);
-  const { alan, verim } = useAlanVerim(kart);
+  const { alan, verim, verimBirim } = useAlanVerim(kart);
   const bulten = useBultenSerisi(kart?.bulten);
 
   if (!kart) {
@@ -152,11 +152,13 @@ export function BitkiselDetayPage() {
 
       {verim.filter((d) => d.deger > 0).length > 0 && (
         <div className="tvb-section">
-          <h3>Verim</h3>
+          {/* Birim uçtan geliyor: tarlada kg/dekar, ağaç meyvelerinde kg/ağaç.
+              Rakam eskiden etiketsizdi ve ikisi aynı görünüyordu. */}
+          <h3>Verim{verimBirim ? ` (${verimBirim})` : ''}</h3>
           <YearlyChart
             data={seriGrafik(verim, 'Verim')}
             xKey="yil"
-            series={[{ key: 'Verim', label: 'Verim', type: 'line' }]}
+            series={[{ key: 'Verim', label: verimBirim ? `Verim (${verimBirim})` : 'Verim', type: 'line' }]}
             yDomain="auto"
           />
           <p className="tvb-status">
