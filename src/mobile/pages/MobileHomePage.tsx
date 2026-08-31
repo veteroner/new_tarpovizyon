@@ -23,8 +23,8 @@ import {
  *   BUGÜN     — en taze üç sayı, doğrudan burada. Ana sayfa artık menü değil,
  *               pano: uygulamayı açan kişi önce "ne oldu"yu görüyor.
  *   BÖLÜMLER  — Basic'in dört ana grubu. Tek dokunuşla içeriğe giriyor.
- *   ARAÇLAR   — hesaplayıcılar. Rasyon EKLENDİ; menüde vardı ama ana sayfada
- *               yoktu, en çok kullanılan araç olmasına rağmen.
+ *   ARAÇLAR   — hesaplayıcılar. BU SÜRÜMDE GİZLİ, bir sonraki mağaza
+ *               güncellemesine bırakıldı; `ARACLAR_ACIK` bayrağına bak.
  */
 
 /*
@@ -36,6 +36,27 @@ import {
  */
 /* Sıra BASIC_MENU ile aynı: Makro, Hayvancılık, Bitkisel, İl Düzeyinde. */
 const BOLUM_IKON = [TrendingUp, Beef, Sprout, MapPinned];
+
+/*
+ * ─── ARAÇLAR BU SÜRÜMDE GİZLİ ───────────────────────────────────────────────
+ *
+ * Araçlar bir sonraki mağaza güncellemesine bırakıldı. Tek yapılacak:
+ * bu bayrağı `true` yapmak — dizi ve çizim kodu olduğu gibi duruyor,
+ * silinmedi ki geri açmak tek satırlık iş olsun.
+ *
+ * KAPSAM: yalnızca bu ana sayfa listesi. Bilerek DOKUNULMADI:
+ *   • Rotalar (`/rasyon`, `/hasat-tahmini` …) açık; adresi bilen açabiliyor.
+ *     Pro sayfalarında uygulanan yöntemin aynısı.
+ *   • Ayarlar'daki "Gizlilik politikası" ve "Kullanım şartları" bağlantıları
+ *     `/rasyon/privacy` ve `/rasyon/terms` üzerinden gidiyor. Bunlar mağaza
+ *     zorunluluğu; rota kapatılsaydı kırılırlardı.
+ *   • Web ana sayfası (ProgramSelectionPage) araçları göstermeye devam ediyor;
+ *     web sürümü mağaza takviminden bağımsız ilerliyor.
+ *
+ * Keşfet ve asistan zaten etkilenmiyor: onlar BASIC_MENU okuyor, o da yalnızca
+ * veri sayfalarından üretiliyor — araçlar hiç girmiyordu.
+ */
+const ARACLAR_ACIK = false;
 
 const ARACLAR = [
   { baslik: 'Rasyon', alt: 'Yem karması hesapla', icon: Calculator, renk: 'var(--ios-tint-deep)', yol: '/rasyon' },
@@ -116,18 +137,20 @@ export default function MobileHomePage() {
           ))}
         </ListGroup>
 
-        <ListGroup header="Araçlar">
-          {ARACLAR.map((k) => (
-            <ListRow
-              key={k.yol}
-              icon={<k.icon size={16} strokeWidth={2.2} />}
-              iconColor={k.renk}
-              title={k.baslik}
-              subtitle={k.alt}
-              onClick={() => navigate(k.yol)}
-            />
-          ))}
-        </ListGroup>
+        {ARACLAR_ACIK && (
+          <ListGroup header="Araçlar">
+            {ARACLAR.map((k) => (
+              <ListRow
+                key={k.yol}
+                icon={<k.icon size={16} strokeWidth={2.2} />}
+                iconColor={k.renk}
+                title={k.baslik}
+                subtitle={k.alt}
+                onClick={() => navigate(k.yol)}
+              />
+            ))}
+          </ListGroup>
+        )}
       </div>
     </>
   );
