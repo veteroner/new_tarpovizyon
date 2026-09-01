@@ -6,6 +6,7 @@ import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { GirisEkrani } from './components/GirisEkrani';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
 import PiyasaPage from './pages/PiyasaPage';
+import PiyasaDetayPage from './pages/PiyasaDetayPage';
 import AsistanPage from './pages/AsistanPage';
 // Mobile imports
 import { isPlatform } from './mobile/utils/platform';
@@ -120,7 +121,7 @@ function AppContent() {
    * Piyasa ve Asistan KENDİ başlıklarını (VitrinHeader) çiziyor; global
    * Header burada da çizilirse iki başlık üst üste biner.
    */
-  const isVitrinAraciPage = location.pathname === '/piyasa' || location.pathname === '/asistan';
+  const isVitrinAraciPage = location.pathname.startsWith('/piyasa') || location.pathname === '/asistan';
   // TarpoShell handles its own layout for all /tarpovizyon/* data pages
   const isTarpoShellRoute =
     location.pathname.startsWith('/tarpovizyon/') &&
@@ -182,6 +183,7 @@ function AppContent() {
             * yönleniyorlar ki iki ayrı arayüz çakışmasın.
             */}
           <Route path="/piyasa" element={<GirisEkrani masaustu={<PiyasaPage />} mobilYol="/m/market" />} />
+          <Route path="/piyasa/:sembol" element={<PiyasaDetayPage />} />
           <Route path="/asistan" element={<GirisEkrani masaustu={<AsistanPage />} mobilYol="/m/ai" />} />
           
           {/*

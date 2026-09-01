@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, AlertCircle, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowUp, ArrowDown, Minus, ChevronRight } from 'lucide-react';
 
 import { fetchCommodities, type CommodityQuote } from '../mobile/services/commodities';
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
@@ -38,15 +39,25 @@ const KATEGORI_ADI = {
 const sayi = (n: number) =>
   new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
+/*
+ * Satır artık bir DÜĞME: tıklayınca /piyasa/:sembol açılıyor ve mobildeki
+ * gibi tarih serisi grafiği geliyor. Önce salt okunur bir listeydi — mobilde
+ * karta dokununca açılan grafik webde hiç yoktu.
+ */
 function Satir({ q }: { q: CommodityQuote }) {
+  const navigate = useNavigate();
   const yon = q.changePercent > 0 ? 'arti' : q.changePercent < 0 ? 'eksi' : 'sabit';
   const renk =
     yon === 'arti' ? '#15803d' : yon === 'eksi' ? '#b91c1c' : 'var(--tv-ikincil)';
   const Ikon = yon === 'arti' ? ArrowUp : yon === 'eksi' ? ArrowDown : Minus;
 
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-[var(--tv-cizgi-ince)] py-3 last:border-b-0">
-      <div className="min-w-0">
+    <button
+      type="button"
+      onClick={() => navigate(`/piyasa/${encodeURIComponent(q.symbol)}`)}
+      className="group flex w-full items-center justify-between gap-3 border-b border-[var(--tv-cizgi-ince)] py-3 text-left last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-vurgu)]"
+    >
+      <div className="min-w-0 flex-1">
         <div className="truncate text-[15px] font-medium text-[var(--tv-murekkep)]">{q.name}</div>
         <div className="text-[12px] text-[var(--tv-ikincil)]">{q.unit}</div>
       </div>
@@ -61,7 +72,12 @@ function Satir({ q }: { q: CommodityQuote }) {
           {sayi(Math.abs(q.changePercent))}%
         </div>
       </div>
-    </div>
+      <ChevronRight
+        size={16}
+        className="shrink-0 text-[var(--tv-ikincil)] opacity-40 transition-opacity group-hover:opacity-100"
+        aria-hidden="true"
+      />
+    </button>
   );
 }
 

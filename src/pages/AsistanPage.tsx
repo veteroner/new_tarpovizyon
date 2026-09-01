@@ -1,16 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { Send, Sparkles, AlertCircle, User } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Send, Sparkles, AlertCircle, User, Volume2, Square, ChevronRight, Database } from 'lucide-react';
 
-import { askAI } from '../mobile/services/ai';
+import { asistanaSor } from '../mobile/services/asistan';
+import { BASIC_MENU } from '../components/nav/menu';
+import { konus, durdur, sesDestekleniyorMu } from '../components/ses/konusma';
+import type { ModelSonucu } from '../components/nav/modelArama';
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
 import { VitrinFooter } from '../components/vitrin/VitrinFooter';
 
 /**
  * Yapay zekâ asistanı — web.
  *
- * Mobil uygulamada vardı, webde yoktu. Aynı `askAI` servisini kullanıyor;
- * istek Netlify Function üzerinden gidiyor (anahtarlar sunucuda, istemcide
- * hiçbir anahtar yok).
+ * Mobil uygulamada vardı, webde yoktu.
+ *
+ * ─── İLK SÜRÜM KOLAYA KAÇMIŞTI ──────────────────────────────────────────────
+ * Ham `askAI` çağrılıyordu: model yalnız kendi bilgisinden cevap veriyor,
+ * uygulamanın verisine hiç bakmıyordu. Mobil ise `asistanaSor` kullanıyor —
+ * önce soruyla ilgili SAYFALARI buluyor, o sayfaların VERİSİNİ çekiyor,
+ * cevabı ondan sonra ürettiriyor ve altına ilgili sayfa bağlantılarını
+ * koyuyor. Web artık aynısını yapıyor; iki platform aynı davranıyor.
+ *
+ * İstek Netlify Function üzerinden gidiyor (anahtarlar sunucuda).
  *
  * ─── ERİŞİLEBİLİRLİK ────────────────────────────────────────────────────────
  * Yanıt alanı `aria-live="polite"`: ekran okuyucu yeni cevabı odağı çalmadan
@@ -22,7 +33,14 @@ import { VitrinFooter } from '../components/vitrin/VitrinFooter';
  * uygulamanın kullanım şartlarında da aynı uyarı var; ikisi tutarlı.
  */
 
-type Mesaj = { rol: 'kullanici' | 'asistan'; metin: string };
+type Mesaj = {
+  rol: 'kullanici' | 'asistan';
+  metin: string;
+  /** Cevabın dayandığı uygulama sayfaları. */
+  ilgili?: ModelSonucu[];
+  /** Cevap uygulamanın kendi verisiyle mi üretildi? */
+  beslendi?: boolean;
+};
 
 const ORNEKLER = [
   'Türkiye’de buğday üretimi son 10 yılda nasıl değişti?',
@@ -32,11 +50,15 @@ const ORNEKLER = [
 ];
 
 export default function AsistanPage() {
+  const navigate = useNavigate();
   const [mesajlar, setMesajlar] = useState<Mesaj[]>([]);
   const [giris, setGiris] = useState('');
   const [bekliyor, setBekliyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
+  const [okunan, setOkunan] = useState<number | null>(null);
   const altRef = useRef<HTMLDivElement | null>(null);
+  const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
+  const seslivar = sesDestekleniyorMu();
 
   useEffect(() => {
     altRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -50,8 +72,8 @@ export default function AsistanPage() {
     setMesajlar((m) => [...m, { rol: 'kullanici', metin: s }]);
     setBekliyor(true);
     try {
-      const cevap = await askAI(s);
-      setMesajlar((m) => [...m, { rol: 'asistan', metin: cevap }]);
+      const { cevap, sayfalar, beslendi } = await asistanaSor(s, tumOgeler);
+      setMesajlar((m) => [...m, { rol: 'asistan', metin: cevap, ilgili: sayfalar, beslendi }]);
     } catch (e) {
       setHata(e instanceof Error ? e.message : 'Yanıt alınamadı.');
     } finally {
@@ -98,10 +120,63 @@ export default function AsistanPage() {
                 className={
                   m.rol === 'kullanici'
                     ? 'max-w-[80%] rounded-[16px] bg-[var(--tv-vurgu)] px-4 py-3 text-[15px] leading-relaxed text-[var(--tv-vurgu-ust)]'
-                    : 'max-w-[85%] whitespace-pre-wrap rounded-[16px] border border-[var(--tv-cizgi-ince)] bg-[var(--tv-kart)] px-4 py-3 text-[15px] leading-relaxed shadow-[var(--tv-golge)]'
+                    : 'max-w-[85%] rounded-[16px] border border-[var(--tv-cizgi-ince)] bg-[var(--tv-kart)] px-4 py-3 shadow-[var(--tv-golge)]'
                 }
               >
-                {m.metin}
+                <div className={m.rol === 'asistan' ? 'whitespace-pre-wrap text-[15px] leading-relaxed' : undefined}>
+                  {m.metin}
+                </div>
+
+                {m.rol === 'asistan' && (
+                  <>
+                    {/*
+                      * "Uygulama verisiyle" rozeti yalnız besleme GERÇEKTEN
+                      * yapıldıysa çıkıyor. Her cevaba koymak, modelin kendi
+                      * bilgisinden uydurduğu rakamları da onaylanmış gibi
+                      * gösterirdi.
+                      */}
+                    {m.beslendi && (
+                      <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--tv-vurgu-sis)] px-2.5 py-1 text-[11.5px] font-medium text-[var(--tv-vurgu)]">
+                        <Database size={12} /> Uygulama verisiyle
+                      </div>
+                    )}
+
+                    {seslivar && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (okunan === i) { durdur(); setOkunan(null); return; }
+                          durdur();
+                          konus(m.metin);
+                          setOkunan(i);
+                        }}
+                        className="ml-2 mt-3 inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-[var(--tv-cizgi)] px-3 text-[12.5px] font-medium hover:bg-[var(--tv-vurgu-sis)]"
+                      >
+                        {okunan === i ? <Square size={12} /> : <Volume2 size={13} />}
+                        {okunan === i ? 'Durdur' : 'Dinle'}
+                      </button>
+                    )}
+
+                    {m.ilgili && m.ilgili.length > 0 && (
+                      <div className="mt-4 border-t border-[var(--tv-cizgi-ince)] pt-3">
+                        <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-ikincil)]">
+                          İlgili sayfalar
+                        </div>
+                        {m.ilgili.map((s2) => (
+                          <button
+                            key={s2.yol}
+                            type="button"
+                            onClick={() => navigate(s2.yol)}
+                            className="flex min-h-[44px] w-full items-center justify-between gap-3 text-left text-[14px] font-medium text-[var(--tv-vurgu)] hover:underline"
+                          >
+                            {s2.ad}
+                            <ChevronRight size={15} className="shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
               {m.rol === 'kullanici' && (
                 <span className="ml-3 mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--tv-zemin-2)] text-[var(--tv-ikincil)]">
@@ -116,7 +191,7 @@ export default function AsistanPage() {
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--tv-vurgu-sis)] text-[var(--tv-vurgu)]">
                 <Sparkles size={16} className="animate-pulse" />
               </span>
-              Yanıt hazırlanıyor…
+              İlgili veriler alınıyor…
             </div>
           )}
 
