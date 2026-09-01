@@ -54,6 +54,73 @@
   status = 200
   force = true
 
+# ══════════════════════════════════════════════════════════════════════════
+# ESKİ WIX ADRESLERİ → YENİ SAYFALAR
+#
+# tarpovizyon.com şu an Wix'te ve şu sayfaları yayınlıyor. Alan adı buraya
+# taşınınca hepsi 404 olurdu; üstelik /tarpovizyon adresi tarpol.org.tr'nin
+# ÜST MENÜSÜNDEN bağlı (ölçüldü) — kırılırsa vakıf sitesinden gelen ziyaretçi
+# boşluğa düşer.
+#
+# `from` MUTLAK ADRES: kural yalnızca tarpovizyon.com ve www için geçerli.
+# pro.tarpovizyon.com'a DOKUNMUYOR — Pro sürümü orada kullanılmaya devam
+# edecek ve /tarpovizyon yolu orada çalışır kalmalı.
+# ══════════════════════════════════════════════════════════════════════════
+
+# /tarpovizyon → ana sayfa. (Bizim uygulamada /tarpovizyon YAYINLANMAMIŞ Pro
+# seçim ekranı; yönlendirilmezse vakıf menüsü ziyaretçiyi doğrudan oraya
+# sokar.)
+[[redirects]]
+  from = "https://tarpovizyon.com/tarpovizyon"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.tarpovizyon.com/tarpovizyon"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://tarpovizyon.com/tarpovizyon/*"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.tarpovizyon.com/tarpovizyon/*"
+  to = "/"
+  status = 301
+  force = true
+
+# Wix'teki dört veri sayfası → karşılıkları
+[[redirects]]
+  from = "/tarımsal-makro-veriler"
+  to = "/tarpovizyon-basic/makro/genel"
+  status = 301
+
+[[redirects]]
+  from = "/bikisel-üretim"
+  to = "/tarpovizyon-basic/bitkisel-genel/uretim-ozeti"
+  status = 301
+
+[[redirects]]
+  from = "/hayvansal-üretim"
+  to = "/tarpovizyon-basic/genel/hayvansal-uretim"
+  status = 301
+
+[[redirects]]
+  from = "/il-düzeyinde-sektörel-veriler"
+  to = "/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim"
+  status = 301
+
+# Wix'teki AI sayfası → yeni asistan
+[[redirects]]
+  from = "/tarpovizyon-ai"
+  to = "/asistan"
+  status = 301
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
