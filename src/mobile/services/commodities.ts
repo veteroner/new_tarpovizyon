@@ -94,9 +94,18 @@ export const COMMODITY_META: Record<string, {
   'LB=F': { name: 'Tomruk',          category: 'orman',       unit: '$/1000 bf' },
 };
 
-// Backend PHP proxy URL — çalışır hem web hem Capacitor native'de
-const BACKEND_COMMODITY_URL =
-  'https://dersbende.com/api.php?action=commodity_prices&api_key=dashboard_secret_key_2024';
+/*
+ * ─── ARTIK WORKER ÜZERİNDEN ─────────────────────────────────────────────────
+ * Önce doğrudan `dersbende.com/api.php` çağrılıyordu. Ölçüldü: üretimde
+ * piyasa sayfası ~10 sn iskelet ekranda kalıyordu, çünkü o kaynak yavaş ve
+ * HER ZİYARETÇİ için baştan çalışıyordu. Worker yanıtı Cloudflare kenarında
+ * saklıyor (fiyat 10 dk, geçmiş 30 dk) — ilk ziyaretçi bekliyor, sonrakiler
+ * anında alıyor. Kaynak anahtarı da istemci paketinden çıkmış oldu.
+ */
+const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API
+  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+
+const BACKEND_COMMODITY_URL = `${API_BASE}/api/piyasa`;
 
 function mapBackendCategory(cat: string): CommodityQuote['category'] {
   if (cat === 'Hayvancılık') return 'hayvancilik';
@@ -233,9 +242,8 @@ export async function fetchCommodityHistory(
    */
   sentKaynak = false,
 ): Promise<FiyatNoktasi[]> {
-  const url = 'https://dersbende.com/api.php?action=commodity_chart'
-    + '&api_key=dashboard_secret_key_2024'
-    + `&symbol=${encodeURIComponent(symbol)}&range=${range}`;
+  const url = `${API_BASE}/api/piyasa/gecmis`
+    + `?sembol=${encodeURIComponent(symbol)}&aralik=${range}`;
 
   const res = await fetch(url, { headers: { Accept: 'application/json' } });
   if (!res.ok) throw new Error(`Grafik verisi alınamadı (${res.status})`);

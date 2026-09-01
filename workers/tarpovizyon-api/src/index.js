@@ -645,6 +645,7 @@ import { handleCatalog, handleSchema, handleRows } from './upload.js';
 import { TABLO_SAYFALARI } from './tabloSayfalari.js';
 import { handleAi } from './ai.js';
 import { handleSayfaBul } from './sayfaBul.js';
+import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -661,6 +662,19 @@ export default {
     if (slug === 'ai') return handleAi(request, env);
     // Arama kutusu ve AI cevabı için sayfa bulucu — aynı CORS gerekçesi.
     if (slug === 'sayfa-bul') return handleSayfaBul(request, env);
+
+    /*
+     * ── Piyasa ────────────────────────────────────────────────────────────
+     * Genel okuma önbelleğinden ÖNCE ve AYRI: oradaki TTL 1 saat, fiyat için
+     * fazla uzun (kaynak zaten 15 dk gecikmeli; bir saat saklamak 75 dakika
+     * bayat fiyat demek). Piyasa kendi kısa TTL'ini taşıyor.
+     *
+     * Bu uçlar D1'e dokunmuyor, dış kaynağa gidiyor; genel okuma hız sınırı
+     * da bu yüzden uygulanmıyor — kenar önbelleği zaten kaynağa giden
+     * istekleri tek bir isteğe indiriyor.
+     */
+    if (slug === 'piyasa') return handlePiyasa(request, env, ctx);
+    if (slug === 'piyasa/gecmis') return handlePiyasaGecmis(request, env, ctx);
 
     // ── Yönetim uçları ──────────────────────────────────────────────────
     // Yazma ucu dar CORS ile korunuyor; okuma/şema uçları katalog bilgisi
