@@ -15,6 +15,15 @@ import MobileMarketPage from './mobile/pages/MobileMarketPage';
 import MobileCommodityPage from './mobile/pages/MobileCommodityPage';
 import MobileAIPage from './mobile/pages/MobileAIPage';
 import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
+/*
+ * TarpoVizyon'un KENDİ hukuki sayfaları. Bu iki bileşen depoda vardı ama
+ * hiçbir rotaya bağlı değildi; Ayarlar'daki bağlantılar `/rasyon/privacy` ve
+ * `/rasyon/terms`'e gidiyordu — yani TarpoRasyon'un politikasını açıyordu.
+ * Mağazaya TarpoVizyon'un yasal sayfası olarak başka bir ürünün metni
+ * gidiyordu.
+ */
+import MobilePrivacyPolicyPage from './mobile/pages/MobilePrivacyPolicyPage';
+import MobileTermsPage from './mobile/pages/MobileTermsPage';
 const SelectionPage = lazy(() => import('./pages/SelectionPage').then(m => ({ default: m.SelectionPage })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const TradePage = lazy(() => import('./pages/TradePage').then(m => ({ default: m.TradePage })));
@@ -151,6 +160,8 @@ function AppContent() {
             <Route path="market/:sembol" element={<MobileCommodityPage />} />
             <Route path="ai" element={<MobileAIPage />} />
             <Route path="settings" element={<MobileSettingsPage />} />
+            <Route path="gizlilik" element={<MobilePrivacyPolicyPage />} />
+            <Route path="sartlar" element={<MobileTermsPage />} />
           </Route>
 
           {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}

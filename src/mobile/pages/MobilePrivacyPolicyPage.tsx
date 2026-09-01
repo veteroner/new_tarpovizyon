@@ -2,7 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, ChevronLeft } from 'lucide-react';
 
 /**
- * Gizlilik Politikası Sayfası — TarpoRasyon
+ * Gizlilik Politikası — TarpoVizyon.
+ *
+ * Metin UYDURULMADI: uygulamanın gerçekte ne gönderdiği ölçülerek yazıldı.
+ * OneSignal aktif (abonelik kimliği + jeton), AI sorusu Worker üzerinden
+ * sağlayıcıya gidiyor, hava durumu SEÇİLEN İLİN sabit koordinatını yolluyor
+ * (konum izni yok), ses tanıma cihazın OS servisini kullanıyor. Analitik ve
+ * çökme raporlama pakette YOK — GA anahtarı tanımsız, Sentry tree-shake
+ * edilmiş; ikisi de derlenen pakette doğrulandı.
  */
 export default function MobilePrivacyPolicyPage() {
   const navigate = useNavigate();
@@ -28,11 +35,11 @@ export default function MobilePrivacyPolicyPage() {
       <div className="px-5 py-6 space-y-6">
         {/* Intro */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200">
-          <p className="text-xs text-slate-500 mb-1">Son güncelleme: Mart 2026</p>
+          <p className="text-xs text-slate-500 mb-1">Son güncelleme: Eylül 2026</p>
           <p className="text-sm text-slate-700 leading-relaxed">
-            TarpoRasyon uygulaması, TARPOL tarafından geliştirilmiş ve
-            kullanıcı gizliliğine saygı göstermeyi taahhüt eden bir tarımsal
-            karar destek sistemidir.
+            TarpoVizyon, TARPOL tarafından geliştirilen bir tarımsal veri ve
+            istatistik uygulamasıdır. Uygulamayı kullanmak için hesap açmanız
+            gerekmez; kimliğinizi belirleyen bir bilgi istenmez.
           </p>
         </div>
 
@@ -45,10 +52,9 @@ export default function MobilePrivacyPolicyPage() {
             </p>
             <ul className="space-y-1.5 mt-2">
               {[
-                'Oluşturduğunuz rasyon formülleri ve hesaplamaları',
-                'Yem kütüphanesi tercihleri ve fiyat girişleri',
-                'Uygulama ayarları ve bildirim tercihleri',
-                'Seçilen hayvan türü ve hedef değerleri',
+                'Uygulama tercihleri (tema, dil, asistan sesi seçimi)',
+                'Görüntülenen verilerin geçici önbelleği',
+                'Son bakılan sayfa ve arama geçmişi (yalnızca cihazda)',
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
@@ -64,10 +70,15 @@ export default function MobilePrivacyPolicyPage() {
           <h2 className="text-sm font-bold text-slate-800 mb-2">2. Veri Paylaşımı</h2>
           <div className="p-4 rounded-2xl bg-white border border-slate-200">
             <p className="text-sm text-slate-700 leading-relaxed">
-              Kişisel verileriniz üçüncü taraflarla <span className="font-semibold text-emerald-700">paylaşılmaz</span>,
-              satılmaz veya kiralanmaz. Uygulama içindeki yapay zeka
-              özelliği, yalnızca girdiğiniz metin sorgusunu işler; hayvan
-              ve rasyon verilerinizi sunucuya göndermez.
+              Verileriniz <span className="font-semibold text-emerald-700">satılmaz veya kiralanmaz</span>.
+              Uygulamada reklam, kullanım analitiği (Google Analytics vb.) ve
+              çökme raporlama bulunmaz.
+            </p>
+            <p className="text-sm text-slate-700 leading-relaxed mt-2">
+              Yapay zekâ asistanına sorduğunuz soru metni, yanıtın
+              üretilebilmesi için TARPOL sunucusuna ve oradan bir yapay zekâ
+              sağlayıcısına iletilir. Asistana kişisel veya gizli bilgi
+              yazmamanızı öneririz.
             </p>
           </div>
         </section>
@@ -78,16 +89,30 @@ export default function MobilePrivacyPolicyPage() {
           <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-3">
             {[
               {
-                name: 'OpenWeatherMap',
-                desc: 'Hava durumu verisi için konum bilgisi (şehir adı) iletilir. IP tabanlı konum kullanılabilir.',
+                name: 'TARPOL Veri Servisi',
+                desc: 'Tarımsal istatistikler ve yapay zekâ asistanı için sorgular gönderilir. '
+                  + 'Asistana yazdığınız soru metni buraya iletilir; kimlik bilgisi eklenmez.',
               },
               {
-                name: 'Yahoo Finance',
-                desc: 'Emtia piyasa fiyatları için anonim olarak sorgulanır. Kişisel veri iletilmez.',
+                name: 'OneSignal (bildirimler)',
+                desc: 'Bildirim izni verirseniz cihazınıza ait bir abonelik kimliği ve bildirim '
+                  + 'jetonu oluşturulur; bunlar bildirim gönderebilmek için kullanılır. '
+                  + 'İzni cihaz ayarlarından istediğiniz zaman geri alabilirsiniz.',
               },
               {
-                name: 'TARPOL API',
-                desc: 'Tarımsal istatistik verileri için anonim sorgular gönderilir.',
+                name: 'OpenWeather (hava durumu)',
+                desc: 'Yalnızca listeden seçilen ilin sabit koordinatı gönderilir. '
+                  + 'Uygulama cihazınızın konumuna erişmez, konum izni istemez.',
+              },
+              {
+                name: 'Yahoo Finance (piyasa)',
+                desc: 'Emtia fiyatları anonim olarak sorgulanır; kişisel veri iletilmez.',
+              },
+              {
+                name: 'Cihazın ses tanıma servisi',
+                desc: 'Sesli soru sorduğunuzda ses, cihazın işletim sistemine ait tanıma '
+                  + 'servisiyle (Apple veya Google) metne çevrilir ve bu işlem sırasında '
+                  + 'ilgili sağlayıcıya iletilebilir. Ses kaydı uygulama tarafından saklanmaz.',
               },
             ].map((s) => (
               <div key={s.name}>
@@ -103,10 +128,11 @@ export default function MobilePrivacyPolicyPage() {
           <h2 className="text-sm font-bold text-slate-800 mb-2">4. Veri Güvenliği</h2>
           <div className="p-4 rounded-2xl bg-white border border-slate-200">
             <p className="text-sm text-slate-700 leading-relaxed">
-              Tüm veriler cihazınızın yerel depolama alanında (localStorage /
-              SQLite) şifrelenmeden saklanır. Uygulamayı sildiğinizde tüm
-              yerel veriler de silinir. Yedekleme sorumluluğu kullanıcıya
-              aittir.
+              Uygulamanın cihazda sakladığı tercihler ve önbellek şifrelenmez; bunlar
+              kimlik belirleyici veri içermez. Sunucuya giden tüm istekler HTTPS ile
+              şifrelenir. Uygulamayı sildiğinizde cihazdaki tüm yerel veriler de
+              silinir; Ayarlar → Önbelleği temizle ile dilediğiniz zaman kendiniz de
+              silebilirsiniz.
             </p>
           </div>
         </section>
@@ -138,7 +164,7 @@ export default function MobilePrivacyPolicyPage() {
         {/* Footer */}
         <div className="text-center pb-6">
           <p className="text-[10px] text-slate-400">
-            © 2024–2026 TARPOL · TarpoRasyon v2.0
+            © 2024–2026 TARPOL · TarpoVizyon
           </p>
         </div>
       </div>

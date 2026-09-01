@@ -76,10 +76,17 @@ export default function MobileSettingsPage() {
         </ListGroup>
 
         <ListGroup header="Hakkında">
+          {/*
+            * TarpoVizyon'un KENDİ sayfaları. Önce `/rasyon/privacy` ve
+            * `/rasyon/terms`'e gidiyordu — o adresler TarpoRasyon'un politikasını
+            * açıyor ve sayfa "TarpoRasyon | Karar Destek Sistemi" diye
+            * imzalanıyordu. Mağaza incelemesinde "yanlış uygulamanın gizlilik
+            * politikası" olarak işaretlenebilirdi.
+            */}
           <ListRow icon={<Shield size={16} strokeWidth={2.2} />} iconColor="var(--ios-tint)"
-            title="Gizlilik politikası" onClick={() => navigate('/rasyon/privacy')} />
+            title="Gizlilik politikası" onClick={() => navigate('/m/gizlilik')} />
           <ListRow icon={<FileText size={16} strokeWidth={2.2} />} iconColor="var(--ios-blue)"
-            title="Kullanım şartları" onClick={() => navigate('/rasyon/terms')} />
+            title="Kullanım şartları" onClick={() => navigate('/m/sartlar')} />
           <ListRow icon={<Smartphone size={16} strokeWidth={2.2} />} iconColor="var(--ios-label-3)"
             title="Sürüm" value={`${surum} (${yapi})`} showChevron={false} />
         </ListGroup>

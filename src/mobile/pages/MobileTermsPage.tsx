@@ -2,7 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, ChevronLeft } from 'lucide-react';
 
 /**
- * Kullanım Şartları Sayfası — TarpoRasyon
+ * Kullanım Şartları — TarpoVizyon.
+ *
+ * Sorumluluk reddi uygulamanın GERÇEK içeriğine göre yazıldı: rasyon
+ * hesabı değil, TÜİK/FAO istatistikleri + gecikmeli piyasa fiyatları +
+ * yapay zekâ asistanı. Üçü de ayrı ayrı uyarı gerektiriyor.
  */
 export default function MobileTermsPage() {
   const navigate = useNavigate();
@@ -28,9 +32,9 @@ export default function MobileTermsPage() {
       <div className="px-5 py-6 space-y-6">
         {/* Intro */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200">
-          <p className="text-xs text-slate-500 mb-1">Son güncelleme: Mart 2026</p>
+          <p className="text-xs text-slate-500 mb-1">Son güncelleme: Eylül 2026</p>
           <p className="text-sm text-slate-700 leading-relaxed">
-            TarpoRasyon uygulamasını kullanarak aşağıdaki kullanım şartlarını
+            TarpoVizyon uygulamasını kullanarak aşağıdaki kullanım şartlarını
             kabul etmiş sayılırsınız. Lütfen dikkatli okuyunuz.
           </p>
         </div>
@@ -40,10 +44,11 @@ export default function MobileTermsPage() {
           <h2 className="text-sm font-bold text-slate-800 mb-2">1. Uygulamanın Amacı</h2>
           <div className="p-4 rounded-2xl bg-white border border-slate-200">
             <p className="text-sm text-slate-700 leading-relaxed">
-              TarpoRasyon, çiftçi ve ziraat uzmanlarına yönelik bir
-              <span className="font-semibold"> karar destek</span> aracıdır.
-              Uygulama; NRC 2021 standartlarına dayalı rasyon hesaplamaları,
-              yem kütüphanesi yönetimi ve tarımsal veri analitiği sunar.
+              TarpoVizyon, çiftçi, ziraat uzmanı ve sektör paydaşlarına yönelik
+              bir <span className="font-semibold">tarımsal veri ve istatistik</span> uygulamasıdır.
+              Uygulama; TÜİK ve FAO kaynaklı üretim, fiyat, dış ticaret ve il
+              bazında istatistikleri, güncel emtia piyasa fiyatlarını ve bir
+              yapay zekâ asistanını sunar.
             </p>
           </div>
         </section>
@@ -56,10 +61,17 @@ export default function MobileTermsPage() {
               Önemli Uyarı
             </p>
             <p className="text-sm text-amber-700 leading-relaxed">
-              Uygulama sonuçları <span className="font-bold">tahmindir</span>; kesin
-              veteriner veya ziraat mühendisi tavsiyesinin yerini tutmaz.
-              Gerçek hayvan performansı; genetik yapı, çevre koşulları ve
-              yönetim uygulamalarına göre farklılık gösterebilir.
+              Uygulamadaki istatistikler TÜİK ve FAO gibi kaynaklardan derlenir;
+              kaynak kurum verisini sonradan revize edebilir. Bazı göstergeler
+              hesaplanmış ya da tahmini değerlerdir ve kartlarındaki açıklamada
+              bu belirtilir. Veriler <span className="font-bold">bilgilendirme
+              amaçlıdır</span>; resmî kaynağın yerini tutmaz.
+            </p>
+            <p className="text-sm text-amber-700 leading-relaxed mt-2">
+              Piyasa fiyatları üçüncü taraf sağlayıcıdan gelir, gecikmeli olabilir
+              ve <span className="font-bold">yatırım tavsiyesi değildir</span>.
+              Yapay zekâ asistanının ürettiği yanıtlar hatalı olabilir; önemli
+              kararlarda kaynak veriyi doğrulayınız.
             </p>
             <p className="text-sm text-amber-700 leading-relaxed mt-2">
               TARPOL, uygulamanın kullanımından doğan doğrudan veya dolaylı
@@ -93,10 +105,15 @@ export default function MobileTermsPage() {
           <h2 className="text-sm font-bold text-slate-800 mb-2">4. Fikri Mülkiyet</h2>
           <div className="p-4 rounded-2xl bg-white border border-slate-200">
             <p className="text-sm text-slate-700 leading-relaxed">
-              Uygulama içindeki tüm içerik, tasarım, algoritmalar ve
-              veritabanları TARPOL'ün mülkiyetindedir ve telif hukuku
-              kapsamında korunmaktadır. NRC 2021 standartları National
-              Academies of Sciences lisansı altındadır.
+              Uygulamanın tasarımı, yazılımı ve türetilmiş göstergeleri
+              TARPOL'ün mülkiyetindedir ve telif hukuku kapsamında korunur.
+            </p>
+            <p className="text-sm text-slate-700 leading-relaxed mt-2">
+              Uygulamada sunulan istatistikler kamuya açık kaynaklardan
+              derlenmiştir ve ilgili kurumlara aittir: Türkiye İstatistik
+              Kurumu (TÜİK), Birleşmiş Milletler Gıda ve Tarım Örgütü (FAO)
+              ve Ulusal Süt Konseyi (USK). Piyasa fiyatları Yahoo Finance
+              üzerinden sağlanmaktadır.
             </p>
           </div>
         </section>
@@ -127,7 +144,7 @@ export default function MobileTermsPage() {
         {/* Footer */}
         <div className="text-center pb-6">
           <p className="text-[10px] text-slate-400">
-            © 2024–2026 TARPOL · TarpoRasyon v2.0
+            © 2024–2026 TARPOL · TarpoVizyon
           </p>
         </div>
       </div>
