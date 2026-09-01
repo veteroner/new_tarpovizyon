@@ -95,9 +95,30 @@
   force = true
 
 # Wix'teki dört veri sayfası → karşılıkları
+#
+# ─── YOLLAR YÜZDE-KODLU YAZILDI ─────────────────────────────────────────────
+# İlk hâlde çözülmüş biçim ("/tarımsal-makro-veriler") yazılmıştı ve CANLIDA
+# ÇALIŞMADI: üçü de 301 yerine 200 döndü, yani SPA yakalama kuralına düştüler.
+# Netlify eşleştirmeyi yolun HAM (kodlanmış) hâliyle yapıyor. Ölçülüp
+# düzeltildi; her iki biçim de yazılı ki tarayıcı hangisini gönderirse
+# göndersin yakalansın.
+#
+# "il" sayfasındaki i harfi Wix'te BİRLEŞTİRİCİ NOKTAYLA yazılmış
+# (i + U+0307 → %69%CC%87), düz "i" değil. İkisi de kapsandı.
+
+[[redirects]]
+  from = "/tar%C4%B1msal-makro-veriler"
+  to = "/tarpovizyon-basic/makro/genel"
+  status = 301
+
 [[redirects]]
   from = "/tarımsal-makro-veriler"
   to = "/tarpovizyon-basic/makro/genel"
+  status = 301
+
+[[redirects]]
+  from = "/bikisel-%C3%BCretim"
+  to = "/tarpovizyon-basic/bitkisel-genel/uretim-ozeti"
   status = 301
 
 [[redirects]]
@@ -106,8 +127,23 @@
   status = 301
 
 [[redirects]]
+  from = "/hayvansal-%C3%BCretim"
+  to = "/tarpovizyon-basic/genel/hayvansal-uretim"
+  status = 301
+
+[[redirects]]
   from = "/hayvansal-üretim"
   to = "/tarpovizyon-basic/genel/hayvansal-uretim"
+  status = 301
+
+[[redirects]]
+  from = "/i%CC%87l-d%C3%BCzeyinde-sekt%C3%B6rel-veriler"
+  to = "/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim"
+  status = 301
+
+[[redirects]]
+  from = "/il-d%C3%BCzeyinde-sekt%C3%B6rel-veriler"
+  to = "/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim"
   status = 301
 
 [[redirects]]
