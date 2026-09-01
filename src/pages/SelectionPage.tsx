@@ -81,7 +81,7 @@ export function SelectionPage() {
 
         {/* Footer */}
         <div className="selection-footer">
-          <p>© 2025 TARPOL - Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
+          <p>© 2024–2026 TARPOL - Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
         </div>
       </div>
     </div>

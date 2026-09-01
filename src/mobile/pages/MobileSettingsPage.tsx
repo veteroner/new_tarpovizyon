@@ -95,7 +95,7 @@ export default function MobileSettingsPage() {
         </ListGroup>
 
         <p className="ios-footnote ios-footnote-center">
-          TarpoVizyon © 2025 TARPOL<br />Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi
+          TarpoVizyon © 2024–2026 TARPOL<br />Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi
         </p>
       </div>
     </>

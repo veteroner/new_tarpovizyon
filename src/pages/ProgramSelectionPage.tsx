@@ -124,7 +124,7 @@ export function ProgramSelectionPage() {
         </div>
 
         <footer className="tarpol-giris__dip">
-          <p>© 2026 TARPOL · Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
+          <p>© 2024–2026 TARPOL · Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
         </footer>
       </div>
     </div>

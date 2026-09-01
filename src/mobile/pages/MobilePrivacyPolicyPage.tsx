@@ -138,7 +138,7 @@ export default function MobilePrivacyPolicyPage() {
         {/* Footer */}
         <div className="text-center pb-6">
           <p className="text-[10px] text-slate-400">
-            © 2026 TARPOL · TarpoRasyon v2.0
+            © 2024–2026 TARPOL · TarpoRasyon v2.0
           </p>
         </div>
       </div>
