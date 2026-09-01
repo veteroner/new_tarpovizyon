@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { NAV_GROUPS } from './pages';
 import { BasicArama } from './BasicArama';
+import { VitrinHeader } from '../components/vitrin/VitrinHeader';
+import { VitrinFooter } from '../components/vitrin/VitrinFooter';
 import type { Section } from './types';
 import './tarpovizyon-basic.css';
 
@@ -42,7 +44,6 @@ function SectionColumn({ section }: { section: Section }) {
 }
 
 export function BasicShell() {
-  const navigate = useNavigate();
   const location = useLocation();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -88,23 +89,36 @@ export function BasicShell() {
 
   return (
     <div className="tvb-shell">
-      <header className="tvb-header">
-        <button className="tvb-back" onClick={() => navigate('/')}>← TARPOL</button>
-        <h1>TarpoVizyon</h1>
-        <BasicArama />
-        <button
-          className="tvb-menu-toggle"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label="Menü"
-          aria-expanded={mobileOpen}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-      </header>
+      {/*
+        * Başlık artık ana sayfayla AYNI bileşen. Önce kendi koyu yeşil
+        * (#16a34a) çubuğu vardı: ziyaretçi vitrinden içeri girince bambaşka
+        * bir siteye geçmiş gibi oluyordu. Logo da yoktu.
+        *
+        * Grup sekmeleri burada KAPALI — hemen altındaki mega menü zaten aynı
+        * dört grubu ve tüm alt sayfaları açıyor, iki kez listelemek gürültü.
+        * "Veriye gir" düğmesi de kapalı: zaten verinin içindeyiz.
+        */}
+      <VitrinHeader
+        gruplariGoster={false}
+        ctaGoster={false}
+        arama={
+          <>
+            <BasicArama />
+            <button
+              className="tvb-menu-toggle"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Menü"
+              aria-expanded={mobileOpen}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+          </>
+        }
+      />
 
       {/* Desktop mega nav */}
       <nav className="tvb-nav" ref={navRef}>
@@ -183,6 +197,10 @@ export function BasicShell() {
       <main className="tvb-content">
         <Outlet />
       </main>
+
+      {/* Ana sayfayla aynı footer — veri sayfalarının altında da logo,
+          bağlantılar, adres ve sorumluluk satırı var. Önce hiç yoktu. */}
+      <VitrinFooter />
     </div>
   );
 }

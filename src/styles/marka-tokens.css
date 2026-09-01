@@ -12,20 +12,33 @@
  * bunlara bağlanıyor. Eklenen isimlerin hiçbiri mevcut bir değişkenle
  * çakışmıyor — dosya tamamen toplayıcı (additive).
  *
+ * ─── NEDEN KOYU TEMA YOK ────────────────────────────────────────────────────
+ * İlk sürümde `prefers-color-scheme: dark` bloğu vardı. ÖLÇÜLDÜ VE KALDIRILDI:
+ * uygulamanın geri kalanının koyu teması yok. `globals.css` içinde
+ * `--bg-primary: #f8fafc` tek bir açık değer ve koyu karşılığı hiç
+ * tanımlanmamış. Sonuç, koyu tema açık bir tarayıcıda şuydu:
+ *
+ *     kabuk (.tvb-shell)  rgb(16,16,18)   → koyu
+ *     grafik kartları      #ffffff         → beyaz
+ *
+ * yani siyah bir çerçevenin içinde bembeyaz grafik panelleri. 84 veri
+ * sayfasının hepsi açık tema; yalnızca vitrini koyuya almak uyum değil,
+ * uyumsuzluk üretiyordu. Tüm uygulamaya koyu tema eklemek ayrı ve büyük bir
+ * iş — o yapılana kadar vitrin de tek tema.
+ *
  * ─── RENKLER NEREDEN GELDİ ──────────────────────────────────────────────────
  * Zemin/mürekkep/ikincil değerler Apple'ın kendi ölçeğinden (#fbfbfd, #f5f5f7,
- * #1d1d1f, #6e6e73, #d2d2d7) — istenen "Apple tarzı" bu nötr ailesi.
- * Vurgu ise Apple'ın mavisi yerine TARPOL yeşili.
+ * #1d1d1f, #6e6e73, #d2d2d7). Vurgu ise Apple'ın mavisi yerine TARPOL yeşili.
  *
  * ─── ÖLÇÜLDÜ ────────────────────────────────────────────────────────────────
  * Kontrast oranları hesaplandı, göz kararı seçilmedi:
  *   #17693A / açık zemin = 6,52   ✓
  *   #6E6E73 / açık zemin = 4,91   ✓
- *   #4CAF6A / siyah      = 7,65   ✓
+ *   #1D1D1F / açık zemin = 16,28  ✓
  *
- * DİKKAT — vakfın limon rengi (#9CC212) açık zeminde 2,00 veriyor, yani
- * METİN OLARAK KULLANILAMAZ. Yalnızca grafik vurgu (nokta, çubuk, ayraç)
- * olarak kullanılıyor; koyu zeminde ise açık tonu metin için güvenli.
+ * DİKKAT — vakfın limon rengi (#9CC212) açık zeminde yalnızca 2,00 veriyor,
+ * yani METİN OLARAK KULLANILAMAZ. Tek kullanıldığı yer footer'daki ayraç
+ * noktası ve o da `aria-hidden`: bilgi taşımıyor, süs.
  */
 
 :root {
@@ -45,96 +58,17 @@
   /* yalnızca grafik vurgu — metin değil */
   --tv-limon: #9cc212;
 
-  --tv-ust-cam: rgba(251, 251, 253, 0.72);
-  --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
-  --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.05), 0 14px 40px rgba(0, 0, 0, 0.07);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --tv-zemin: #000000;
-    --tv-zemin-2: #101012;
-    --tv-kart: #1d1d1f;
-    --tv-murekkep: #f5f5f7;
-    --tv-ikincil: #a1a1a6;
-    --tv-cizgi: #38383d;
-    --tv-cizgi-ince: rgba(255, 255, 255, 0.1);
-
-    --tv-vurgu: #4caf6a;
-    --tv-vurgu-koyu: #6bc085;
-    --tv-vurgu-ust: #06210f;
-    --tv-vurgu-sis: rgba(76, 175, 106, 0.12);
-
-    --tv-limon: #b9dc3c;
-
-    --tv-ust-cam: rgba(0, 0, 0, 0.72);
-    --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.5);
-    --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.55);
-  }
-}
-
-:root[data-theme='dark'] {
-  --tv-zemin: #000000;
-  --tv-zemin-2: #101012;
-  --tv-kart: #1d1d1f;
-  --tv-murekkep: #f5f5f7;
-  --tv-ikincil: #a1a1a6;
-  --tv-cizgi: #38383d;
-  --tv-cizgi-ince: rgba(255, 255, 255, 0.1);
-
-  --tv-vurgu: #4caf6a;
-  --tv-vurgu-koyu: #6bc085;
-  --tv-vurgu-ust: #06210f;
-  --tv-vurgu-sis: rgba(76, 175, 106, 0.12);
-
-  --tv-limon: #b9dc3c;
-
-  --tv-ust-cam: rgba(0, 0, 0, 0.72);
-  --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.5);
-  --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.55);
-}
-
-/**
- * TARPOL logosu koyu temada.
- *
- * Logo PNG'si koyu yeşil harfler + gri alt yazıdan oluşuyor; siyah zeminde
- * ikisi de okunmuyor. Ayrı bir beyaz logo dosyası yok, o yüzden renk
- * çevriliyor: `invert(1)` görüntüyü açık hâle getiriyor ama yeşili moraya
- * döndürüyor, `hue-rotate(180deg)` de tonu yeşile geri taşıyor. Sonuç, koyu
- * zeminde okunur açık yeşil bir logo.
- *
- * Vakıftan beyaz/SVG sürüm gelirse bu filtre silinip dosya değiştirilmeli —
- * filtre bir çözüm değil, elde beyaz varyant olmadığı için köprü.
- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .tv-logo {
-    filter: invert(1) hue-rotate(180deg) brightness(1.12);
-  }
-}
-
-:root[data-theme='dark'] .tv-logo {
-  filter: invert(1) hue-rotate(180deg) brightness(1.12);
-}
-
-:root[data-theme='light'] .tv-logo {
-  filter: none;
-}
-
-:root[data-theme='light'] {
-  --tv-zemin: #fbfbfd;
-  --tv-zemin-2: #f5f5f7;
-  --tv-kart: #ffffff;
-  --tv-murekkep: #1d1d1f;
-  --tv-ikincil: #6e6e73;
-  --tv-cizgi: #d2d2d7;
-  --tv-cizgi-ince: rgba(0, 0, 0, 0.07);
-
-  --tv-vurgu: #17693a;
-  --tv-vurgu-koyu: #12522d;
-  --tv-vurgu-ust: #ffffff;
-  --tv-vurgu-sis: rgba(23, 105, 58, 0.08);
-
-  --tv-limon: #9cc212;
+  /*
+   * Bölüm renkleri. Renk BÖLÜM KİMLİĞİNİ taşıyor (Makro/Hayvancılık/
+   * Bitkisel/İl), seri sırasını değil — bir bölümün üç kartı aynı rengi
+   * paylaşıyor. OKLab ΔE + renk körlüğü simülasyonuyla doğrulandı; komşu
+   * çiftlerin hepsi protan/döter/tritan altında ayrışıyor ve dördü de beyaz
+   * zeminde 3,7 üzeri kontrast veriyor.
+   */
+  --tv-d1: #2e7d32;
+  --tv-d2: #15557a;
+  --tv-d3: #b87611;
+  --tv-d4: #9b3d51;
 
   --tv-ust-cam: rgba(251, 251, 253, 0.72);
   --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);

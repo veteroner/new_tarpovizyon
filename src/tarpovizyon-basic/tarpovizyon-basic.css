@@ -1169,3 +1169,93 @@
   .tvb-header h1 { flex: 1 1 auto; }
   .tvb-arama { order: 3; width: 100%; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VİTRİN DİLİNE UYUM
+
+   Veri sayfaları kendi dünyasında duruyordu: koyu yeşil (#16a34a) başlık,
+   logosuz, footer'sız. Ziyaretçi ana sayfadan içeri girince başka bir siteye
+   geçmiş gibi oluyordu.
+
+   Başlık ve footer artık ana sayfayla AYNI bileşen (VitrinHeader /
+   VitrinFooter). Geriye kalan kabuk kuralları burada marka belirteçlerine
+   bağlanıyor. Kurallar dosyanın SONUNDA: aynı özgüllükte sonuncu kazanır,
+   böylece yukarıdaki 1100 satıra dokunmaya gerek kalmıyor.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.tvb-shell {
+  background: var(--tv-zemin-2);
+  color: var(--tv-murekkep);
+}
+
+/* Menü düğmesi yeşil zemine göre beyazdı; açık başlıkta görünmez olurdu. */
+.tvb-menu-toggle {
+  background: transparent;
+  color: var(--tv-murekkep);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+.tvb-menu-toggle:hover { background: var(--tv-vurgu-sis); }
+.tvb-menu-toggle:active { background: var(--tv-vurgu-sis); }
+
+/* Mega menü çubuğu: başlığın hemen altına yapışıyor (başlık 56px). */
+.tvb-nav {
+  background: var(--tv-kart);
+  border-bottom: 1px solid var(--tv-cizgi-ince);
+  justify-content: center;
+}
+.tvb-nav__section-btn {
+  color: var(--tv-murekkep);
+  font-size: 13px;
+}
+.tvb-nav__section-btn--active {
+  color: var(--tv-vurgu);
+}
+.tvb-nav__dropdown {
+  background: var(--tv-kart);
+  border: 1px solid var(--tv-cizgi-ince);
+  border-radius: 14px;
+  box-shadow: var(--tv-golge-kart);
+}
+.tvb-nav__link { color: var(--tv-murekkep); }
+.tvb-nav__link:hover { background: var(--tv-vurgu-sis); }
+.tvb-nav__link--active { background: var(--tv-vurgu-sis); color: var(--tv-vurgu); }
+.tvb-nav__mega-heading { color: var(--tv-ikincil); }
+
+/* Mobil çekmece de aynı yüzeyi kullanıyor. */
+.tvb-drawer { background: var(--tv-kart); }
+.tvb-drawer__head { background: var(--tv-kart); border-bottom: 1px solid var(--tv-cizgi-ince); }
+.tvb-drawer__title { color: var(--tv-murekkep); }
+.tvb-drawer__close { color: var(--tv-murekkep); }
+.tvb-drawer__group-btn { color: var(--tv-murekkep); }
+.tvb-drawer__group-btn.is-active { color: var(--tv-vurgu); }
+.tvb-drawer__link { color: var(--tv-murekkep); }
+.tvb-drawer__link--active { background: var(--tv-vurgu-sis); color: var(--tv-vurgu); }
+.tvb-drawer__subheading { color: var(--tv-ikincil); }
+
+/* Arama kutusu artık açık başlığın üstünde; kenarlık belirteçten. */
+.tvb-arama__giris {
+  background: var(--tv-zemin-2);
+  border: 1px solid var(--tv-cizgi-ince);
+  color: var(--tv-murekkep);
+  border-radius: 999px;
+  padding: 7px 12px 7px 32px;
+}
+.tvb-arama__giris::placeholder { color: var(--tv-ikincil); }
+.tvb-arama__giris:focus {
+  outline: 2px solid var(--tv-vurgu);
+  outline-offset: 1px;
+}
+.tvb-arama__ikon { color: var(--tv-ikincil); }
+.tvb-arama__liste {
+  background: var(--tv-kart);
+  border: 1px solid var(--tv-cizgi-ince);
+  border-radius: 14px;
+  box-shadow: var(--tv-golge-kart);
+}
+.tvb-arama__satir--secili { background: var(--tv-vurgu-sis); }
+.tvb-arama__ad { color: var(--tv-murekkep); }
+.tvb-arama__bolum, .tvb-arama__bos, .tvb-arama__baslik, .tvb-arama__dipnot {
+  color: var(--tv-ikincil);
+}
