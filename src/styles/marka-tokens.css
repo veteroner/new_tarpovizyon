@@ -74,3 +74,50 @@
   --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
   --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.05), 0 14px 40px rgba(0, 0, 0, 0.07);
 }
+
+/**
+ * Asistan cevabındaki markdown.
+ *
+ * Model markdown döndürüyor; düz metin basılınca başlıklar "### 1. Üretim
+ * Miktarı", kalınlar "**Dekara Verim:**" diye HAM görünüyordu. Tailwind'in
+ * preflight'ı ayrıca ul/ol'un madde işaretini ve girintisini sıfırlıyor —
+ * maddeler işaretsiz ve hizasız kalıyordu. İkisi de burada düzeltiliyor.
+ * (Mobil tarafın `.ios-md` kuralının web karşılığı.)
+ */
+.tv-md :is(h1, h2, h3, h4) {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 14px 0 6px;
+  letter-spacing: -0.01em;
+}
+.tv-md :is(h1, h2, h3, h4):first-child { margin-top: 0; }
+.tv-md p { margin: 0 0 10px; }
+.tv-md p:last-child { margin-bottom: 0; }
+.tv-md ul { list-style: disc; margin: 0 0 10px; padding-left: 22px; }
+.tv-md ol { list-style: decimal; margin: 0 0 10px; padding-left: 24px; }
+.tv-md li { margin: 0 0 5px; }
+/* Gevşek listede her madde bir <p> sarmalıyor; kendi alt boşluğunu ekleyip
+   maddeler arasını iki katına çıkarıyordu. */
+.tv-md li > p { margin: 0; }
+.tv-md strong { font-weight: 600; }
+.tv-md a { color: var(--tv-vurgu); text-decoration: underline; }
+.tv-md code {
+  font-size: 13.5px;
+  background: var(--tv-zemin-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+/* Kod ve tablo balonu yatay taşırmasın — sayfa yana kaymamalı. */
+.tv-md :is(pre, table) { overflow-x: auto; display: block; max-width: 100%; }
+.tv-md table { border-collapse: collapse; font-size: 13.5px; }
+.tv-md :is(th, td) {
+  border: 1px solid var(--tv-cizgi-ince);
+  padding: 6px 10px;
+  text-align: left;
+}
+.tv-md blockquote {
+  border-left: 3px solid var(--tv-cizgi);
+  margin: 0 0 10px;
+  padding-left: 12px;
+  color: var(--tv-ikincil);
+}

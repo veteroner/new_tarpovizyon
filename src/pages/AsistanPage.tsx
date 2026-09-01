@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, Sparkles, AlertCircle, User, Volume2, Square, ChevronRight, Database } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+import DynamicChart from '../components/DynamicChart';
+import type { ChartConfig } from '../components/DynamicChart';
 
 import { asistanaSor } from '../mobile/services/asistan';
 import { BASIC_MENU } from '../components/nav/menu';
@@ -27,6 +32,15 @@ import { VitrinFooter } from '../components/vitrin/VitrinFooter';
  * Yanıt alanı `aria-live="polite"`: ekran okuyucu yeni cevabı odağı çalmadan
  * duyuruyor. Gönder düğmesi istek sürerken devre dışı ve durumu yazıyla da
  * bildiriyor — yalnız dönen bir çark yeterli değil.
+ *
+ * ─── MARKDOWN ───────────────────────────────────────────────────────────────
+ * Model MARKDOWN döndürüyor. İlk sürüm cevabı `whitespace-pre-wrap` ile düz
+ * metin basıyordu; başlıklar ekranda ham hâlde "### 1. Üretim Miktarı" diye,
+ * kalınlar "**Dekara Verim:**" diye görünüyordu. Mobil taraf zaten
+ * ReactMarkdown + remark-gfm kullanıyor; web de aynısına geçti.
+ *
+ * `chart-json` kod bloğu da mobildeki gibi grafiğe çevriliyor — model
+ * istediğinde cevabın içine grafik koyabiliyor.
  *
  * ─── SORUMLULUK ─────────────────────────────────────────────────────────────
  * Yanıtların hatalı olabileceği ekranın altında sabit duruyor. Mobil
@@ -123,9 +137,31 @@ export default function AsistanPage() {
                     : 'max-w-[85%] rounded-[16px] border border-[var(--tv-cizgi-ince)] bg-[var(--tv-kart)] px-4 py-3 shadow-[var(--tv-golge)]'
                 }
               >
-                <div className={m.rol === 'asistan' ? 'whitespace-pre-wrap text-[15px] leading-relaxed' : undefined}>
-                  {m.metin}
-                </div>
+                {m.rol === 'asistan' ? (
+                  <div className="tv-md text-[15px] leading-relaxed">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code({ className, children, ...rest }) {
+                          const eslesme = /language-(\w+)/.exec(className || '');
+                          if (eslesme?.[1] === 'chart-json') {
+                            try {
+                              const config: ChartConfig = JSON.parse(String(children));
+                              return <DynamicChart config={config} />;
+                            } catch {
+                              return <pre><code className={className} {...rest}>{children}</code></pre>;
+                            }
+                          }
+                          return <code className={className} {...rest}>{children}</code>;
+                        },
+                      }}
+                    >
+                      {m.metin}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div>{m.metin}</div>
+                )}
 
                 {m.rol === 'asistan' && (
                   <>
