@@ -12,10 +12,11 @@
     "preview": "vite preview --port 5000",
     "api": "node server.js",
     "start": "node server.js",
-    "cap:sync": "find dist ios android -name '._*' -delete 2>/dev/null; LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync",
+    "dotclean": "dot_clean -m dist ios android 2>/dev/null; find dist ios android -name '._*' -delete 2>/dev/null; true",
+    "cap:sync": "npm run dotclean; LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync; npm run dotclean",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",
-    "cap:build": "npm run build && npx cap sync",
+    "cap:build": "npm run build && npm run cap:sync",
     "test": "vitest run",
     "test:watch": "vitest"
   },

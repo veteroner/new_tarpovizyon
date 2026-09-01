@@ -23,7 +23,36 @@ oluyor ve kopyalama düşüyor:
 [error] ENOENT: chmod '.../public/rasyon/assets/._index-*.css'
 ```
 
-`cap:sync` betiği kopyalamadan önce bunları siliyor.
+`cap:sync` betiği kopyalamadan önce bunları siliyor — **ama tek başına yetmiyordu.**
+
+### Temizlik SONRADAN da gerekiyor
+
+`cap sync`'in kendisi kopyalarken yenilerini üretiyor. 2026-08-31'de ölçüldü:
+sync bittiğinde **1726** gölge dosya kalmıştı (ios 1473 · android 253). İçlerinde
+`ios/App/Pods/._Pods.xcodeproj` vardı — CocoaPods'un "iki `.xcodeproj`" görmesinin
+sebebi bu. Gradle tarafında ise `android/app/src/main/._AndroidManifest.xml` her
+derlemede çoğalıp `._drawable` gibi girdiler üretiyor ve derleme şu hatayla düşüyor:
+
+```
+'.../packaged_res/debug/packageDebugResources/._drawable' is not a directory
+```
+
+Bu yüzden `cap:sync` artık temizliği **hem önce hem sonra** yapıyor ve iş
+`dotclean` betiğine ayrıldı:
+
+```
+npm run dotclean     # dot_clean -m + kalanları find ile sil
+```
+
+`dot_clean` macOS'un yerleşik aracı; gölge dosyayı asıl dosyayla birleştirip
+siliyor. Ardından `find` ile eşleşmeyen kalıntılar temizleniyor.
+
+Sync sonrası doğrulama — üçü aynı özeti vermeli:
+
+```
+for p in dist ios/App/App/public android/app/src/main/assets/public; do
+  shasum "$p/index.html"; done
+```
 
 ## 2. CocoaPods yerel ayar hatası
 
