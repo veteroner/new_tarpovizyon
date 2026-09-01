@@ -12,7 +12,7 @@
     "preview": "vite preview --port 5000",
     "api": "node server.js",
     "start": "node server.js",
-    "dotclean": "dot_clean -m dist ios android 2>/dev/null; find dist ios android -name '._*' -delete 2>/dev/null; true",
+    "dotclean": "find dist ios android node_modules/@capacitor node_modules/@capacitor-community node_modules/onesignal-cordova-plugin -name '._*' -delete 2>/dev/null; true",
     "cap:sync": "npm run dotclean; LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync; npm run dotclean",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",

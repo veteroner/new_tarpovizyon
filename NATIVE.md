@@ -41,11 +41,32 @@ Bu yüzden `cap:sync` artık temizliği **hem önce hem sonra** yapıyor ve iş
 `dotclean` betiğine ayrıldı:
 
 ```
-npm run dotclean     # dot_clean -m + kalanları find ile sil
+npm run dotclean
 ```
 
-`dot_clean` macOS'un yerleşik aracı; gölge dosyayı asıl dosyayla birleştirip
-siliyor. Ardından `find` ile eşleşmeyen kalıntılar temizleniyor.
+### Kapsam neden `node_modules`'ı da içeriyor
+
+Gradle, Capacitor eklentilerini `node_modules` içindeki kendi `android/`
+projelerinden derliyor. Oradaki gölge dosyalar şu hatayı veriyordu:
+
+```
+'.../node_modules/@capacitor/splash-screen/android/build/intermediates/
+ packaged_res/debug/packageDebugResources/._values' is not a directory
+```
+
+Bu yüzden temizlik altı yolu kapsıyor: `dist`, `ios`, `android` ve
+`node_modules` altındaki `@capacitor`, `@capacitor-community`,
+`onesignal-cordova-plugin`.
+
+### `dot_clean` neden kullanılmıyor
+
+Denendi: `dot_clean -m` gölgeyi asıl dosyayla birleştiriyor ama **sahibi olmayan
+yetim sidecar'ları bırakıyor** (138 dosya kaldı) ve 114 sn sürüyor. Düz
+`find -delete` aynı işi **1 sn**'de ve eksiksiz yapıyor. Ölçüldü, o seçildi.
+
+Tüm `node_modules` taranmıyor: orada 43.518 gölge dosya var ve taraması 69 sn
+sürüyor. Yalnızca native eklenti kökleri taranıyor — Gradle ve CocoaPods
+zaten sadece onları derliyor.
 
 Sync sonrası doğrulama — üçü aynı özeti vermeli:
 
