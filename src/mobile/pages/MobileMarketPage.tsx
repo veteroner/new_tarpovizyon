@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, AlertCircle, TrendingUp, ShoppingCart, Package } from 'lucide-react';
+// ShoppingCart / Package, RAPORLAR boşaltılınca kullanımsız kaldı; Pro yayına
+// alınıp dizi geri doldurulduğunda tekrar eklenecek.
+import { RefreshCw, AlertCircle, TrendingUp } from 'lucide-react';
 
 import { fetchCommodities, type CommodityQuote } from '../services/commodities';
 import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
@@ -31,29 +33,27 @@ const KATEGORI_ADI = {
   doviz: 'Döviz',
 } as const;
 
-const RAPORLAR = [
-  {
-    baslik: 'Fiyat endeksleri',
-    alt: 'ÜFE, TÜFE, tarım fiyatları',
-    icon: TrendingUp,
-    renk: 'var(--ios-orange)',
-    yol: '/tarpovizyon/turkey/price-index',
-  },
-  {
-    baslik: 'Ürün dengesi',
-    alt: 'Üretim–tüketim analizi',
-    icon: ShoppingCart,
-    renk: 'var(--ios-blue)',
-    yol: '/tarpovizyon/turkey/product-balance',
-  },
-  {
-    baslik: 'Dış ticaret analizi',
-    alt: 'İthalat, ihracat, ürün radarı',
-    icon: Package,
-    renk: 'var(--ios-tint)',
-    yol: '/tarpovizyon/turkey/trade',
-  },
-];
+/*
+ * ─── RAPORLAR BU SÜRÜMDE GİZLİ ──────────────────────────────────────────────
+ *
+ * Üç rapor da `/tarpovizyon/turkey/*` adreslerine gidiyordu — yani YAYINLANMAMIŞ
+ * Pro alanına. Araçları gizlerken (bkz. MobileHomePage `ARACLAR_ACIK`) burası
+ * gözden kaçmıştı: mobil uygulama Pro'ya açık bir kapı bırakıyordu.
+ *
+ * Verileri de geride: `tuik_urundenge` son sütunu 2023/24, FAO balans 2023 —
+ * Basic tarafı 2025-2026'da. Kullanıcı "raporlar neden bayat veri barındırıyor"
+ * diye sorduğunda sebep buydu; sayfalar bayat değil, Pro'nun kendisi bayat.
+ *
+ * Pro yayına alındığında bu diziyi geri doldurmak yeterli — ikonlar ve alt
+ * metinler korunsun diye tanım silinmedi, boşaltıldı.
+ */
+const RAPORLAR: {
+  baslik: string;
+  alt: string;
+  icon: typeof TrendingUp;
+  renk: string;
+  yol: string;
+}[] = [];
 
 /** Fiyat + değişim, sağa yaslı iki satır. */
 function Fiyat({ quote }: { quote: CommodityQuote }) {
@@ -152,18 +152,20 @@ export default function MobileMarketPage() {
           </ListGroup>
         ))}
 
-        <ListGroup header="Raporlar">
-          {RAPORLAR.map((r) => (
-            <ListRow
-              key={r.yol}
-              icon={<r.icon size={16} strokeWidth={2.2} />}
-              iconColor={r.renk}
-              title={r.baslik}
-              subtitle={r.alt}
-              onClick={() => navigate(r.yol)}
-            />
-          ))}
-        </ListGroup>
+        {RAPORLAR.length > 0 && (
+          <ListGroup header="Raporlar">
+            {RAPORLAR.map((r) => (
+              <ListRow
+                key={r.yol}
+                icon={<r.icon size={16} strokeWidth={2.2} />}
+                iconColor={r.renk}
+                title={r.baslik}
+                subtitle={r.alt}
+                onClick={() => navigate(r.yol)}
+              />
+            ))}
+          </ListGroup>
+        )}
       </div>
     </>
   );

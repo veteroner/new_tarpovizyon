@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine, LabelList } from 'recharts';
 import {
   Wheat, TrendingUp, AlertTriangle, ShieldCheck, ShieldAlert,
-  Scale, Package, Users, BarChart3, Activity, Search, ArrowRightLeft,
+  Scale, Package, Users, BarChart3, Activity, Search, ArrowRightLeft, Info,
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
@@ -20,21 +21,53 @@ const CYAN = '#06b6d4';
 const PURPLE = '#8b5cf6';
 
 /* ─── Local KPI Card ─── */
-function KPI({ icon: Icon, title, value, sub, color, alert }: {
-  icon: typeof Wheat; title: string; value: string; sub?: string; color: string; alert?: boolean;
+/*
+ * Kartlardaki sayılar kendi başlarına ne olduklarını söylemiyordu: "Yeterlilik
+ * %118,4" bir kullanıcı için ne demek, nereden geliyor? Her kart artık isteğe
+ * bağlı bir açıklama taşıyor — ⓘ düğmesiyle açılıyor, varsayılan kapalı, yani
+ * bilen kullanıcıyı yormuyor ama bilmeyene cevabı yerinde veriyor.
+ */
+function AciklamaDugmesi({ metin, renk }: { metin: string; renk: string }) {
+  const [acik, setAcik] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setAcik((v) => !v)}
+        aria-expanded={acik}
+        aria-label={acik ? 'Açıklamayı gizle' : 'Bu değer nasıl hesaplanıyor?'}
+        className="p-1 -m-1 rounded-full flex-shrink-0 transition-opacity"
+        style={{ color: renk, opacity: acik ? 1 : 0.55, cursor: 'pointer' }}
+      >
+        <Info size={15} />
+      </button>
+      {acik && (
+        <p className="text-[11px] leading-relaxed mt-2 basis-full"
+           style={{ color: 'var(--text-secondary)' }}>
+          {metin}
+        </p>
+      )}
+    </>
+  );
+}
+
+function KPI({ icon: Icon, title, value, sub, color, alert, aciklama }: {
+  icon: typeof Wheat; title: string; value: string; sub?: string; color: string;
+  alert?: boolean; aciklama?: string;
 }) {
   return (
     <div className={`rounded-xl shadow-md p-5 border-l-4 min-h-[140px] flex flex-col ${alert ? 'animate-pulse' : ''}`}
          style={{ background: 'var(--bg-card)', borderLeftColor: color }}>
-      <div className="flex justify-between items-start mb-auto">
+      <div className="flex justify-between items-start mb-auto gap-2">
         <div className="flex-1">
           <p className="text-xs uppercase tracking-wide font-semibold" style={{ color: 'var(--text-secondary)' }}>{title}</p>
         </div>
         <Icon size={24} style={{ color }} className="opacity-70 flex-shrink-0" />
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-wrap items-start gap-x-2">
         <p className="text-2xl font-bold mb-1" style={{ color }}>{value}</p>
-        {sub && <p className="text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>{sub}</p>}
+        {aciklama && <AciklamaDugmesi metin={aciklama} renk={color} />}
+        {sub && <p className="text-xs basis-full" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>{sub}</p>}
       </div>
     </div>
   );
@@ -159,24 +192,54 @@ export default function ProductBalancePage() {
               <p className="text-4xl font-black mt-2" style={{ color: foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED }}>
                 {foodSecurityScore}
               </p>
-              <p className="text-xs uppercase mt-1" style={{ color: 'var(--text-secondary)' }}>Gıda Güvenlik Skoru</p>
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap justify-center">
+                <p className="text-xs uppercase" style={{ color: 'var(--text-secondary)' }}>Gıda Güvenlik Skoru</p>
+                {/*
+                  * Bu skor RESMÎ BİR ENDEKS DEĞİL — bu uygulamanın kendi bileşik
+                  * göstergesi. Açıklama şart: 100 üzerinden bir sayı görüp
+                  * Global Food Security Index sanmak çok kolay.
+                  */}
+                <AciklamaDugmesi
+                  renk={foodSecurityScore >= 70 ? GREEN : foodSecurityScore >= 40 ? ORANGE : RED}
+                  metin={
+                    'TarpoVizyon’un kendi bileşik göstergesi — resmî bir endeks değildir. '
+                    + '100 puan dört parçadan oluşur: kendine yeterlilik (40 puan, %150 ve üstü tam puan), '
+                    + 'ithalat bağımlılığı (30 puan, bağımlılık arttıkça düşer), '
+                    + 'stok değişimi (15 puan, stok artıyorsa tam) ve '
+                    + 'üretim trendi (15 puan, bir önceki yıla göre artış varsa tam). '
+                    + '70 üstü yeşil, 40–70 turuncu, altı kırmızı.'
+                  }
+                />
+              </div>
             </div>
             <KPI icon={Wheat} title="Üretim" value={fmt(production) + ' ' + getUnit('Üretim')}
-                 sub={`Yıllık: ${prodYoY >= 0 ? '+' : ''}${prodYoY.toFixed(1)}%`} color={GREEN} />
+                 sub={`Yıllık: ${prodYoY >= 0 ? '+' : ''}${prodYoY.toFixed(1)}%`} color={GREEN}
+                 aciklama={'Seçili ürünün Türkiye’deki yıllık üretim miktarı (TÜİK ürün denge tabloları). '
+                   + 'Alttaki yüzde, bir önceki yıla göre değişimi gösterir.'} />
             <KPI icon={selfSufficiency >= 100 ? ShieldCheck : ShieldAlert}
                  title="Yeterlilik" value={pct(selfSufficiency)}
                  sub={`Δ ${ssYoY >= 0 ? '+' : ''}${ssYoY.toFixed(1)} puan`}
                  color={selfSufficiency >= 100 ? GREEN : selfSufficiency >= 70 ? ORANGE : RED}
-                 alert={selfSufficiency < 70} />
+                 alert={selfSufficiency < 70}
+                 aciklama={'Kendine yeterlilik oranı: üretimin yurt içi kullanıma bölümü. '
+                   + '%100’ün üstü, ülkenin kendi tüketimini karşılayıp fazla verdiği anlamına gelir; '
+                   + 'altı, açığın ithalatla veya stoktan kapatıldığını gösterir.'} />
             <KPI icon={Users} title="Kişi Başı" value={perCapita.toFixed(1) + ' ' + getUnit('Kişi başına tüketim')}
-                 sub="Yıllık tüketim" color={BLUE} />
+                 sub="Yıllık tüketim" color={BLUE}
+                 aciklama={'Bir kişinin yıl boyunca tükettiği ortalama miktar — yurt içi tüketimin nüfusa bölümü. '
+                   + 'Fiili tüketimi değil, arz üzerinden hesaplanan ortalamayı gösterir.'} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <KPI icon={ArrowRightLeft} title="İthalat Bağımlılığı" value={pct(importDep)}
                  sub={fmt(imports) + ' Ton ithalat'} color={importDep > 30 ? RED : importDep > 15 ? ORANGE : GREEN}
-                 alert={importDep > 50} />
+                 alert={importDep > 50}
+                 aciklama={'Yurt içi kullanımın ne kadarının ithalatla karşılandığı. '
+                   + 'Yükseldikçe dış kaynağa bağımlılık artar: %15 altı yeşil, %15–30 turuncu, üstü kırmızı; '
+                   + '%50’yi aşınca kart uyarı verir.'} />
             <KPI icon={TrendingUp} title="İhracat/Üretim" value={pct(exportRatio)}
-                 sub={fmt(exports) + ' Ton ihracat'} color={exportRatio > 20 ? GREEN_LIGHT : BLUE} />
+                 sub={fmt(exports) + ' Ton ihracat'} color={exportRatio > 20 ? GREEN_LIGHT : BLUE}
+                 aciklama={'Üretimin yüzde kaçının ihraç edildiği. Yüksek oran, ürünün iç pazardan çok '
+                   + 'dış pazara yöneldiğini gösterir.'} />
             <KPI icon={Package} title="Stok Değişimi" value={fmt(stockChange) + ' Ton'}
                  sub={stockChange > 0 ? 'Stok artışı ↑' : 'Stok erimesi ↓'}
                  color={stockChange > 0 ? GREEN : RED} />

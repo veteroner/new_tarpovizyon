@@ -62,11 +62,18 @@ export default function MobileCommodityPage() {
   });
   const quote = quotes?.find((q) => q.symbol === sembol);
 
+  /*
+   * `sentKaynak` queryKey'DE olmalı: quote listesi gelmeden grafik sorgusu
+   * çalışırsa bayrak false olur ve sent değerler ham kaydedilir; quote sonradan
+   * gelince anahtar değişmediği için önbellekteki 100 kat büyük seri kullanılmaya
+   * devam ederdi. Ayrıca quote gelene kadar sorgu bekletiliyor.
+   */
+  const sentKaynak = quote?.sentKaynak ?? false;
   const { data: gecmis, isLoading, isError, refetch } = useQuery({
-    queryKey: ['commodity-history', sembol, aralik],
-    queryFn: () => fetchCommodityHistory(sembol, aralik),
+    queryKey: ['commodity-history', sembol, aralik, sentKaynak],
+    queryFn: () => fetchCommodityHistory(sembol, aralik, sentKaynak),
     staleTime: 5 * 60 * 1000,
-    enabled: Boolean(sembol),
+    enabled: Boolean(sembol) && Boolean(quote),
     retry: 1,
   });
 

@@ -24,6 +24,13 @@ export interface CommodityQuote {
   currency: string;
   unit: string;          // 'USc/bu', 'USD/cwt' etc.
   marketState: string;
+  /**
+   * Kaynak veri sent (USX) cinsindeyse true; fiyat 100'e bölünerek dolara
+   * çevrildi demektir. Geçmiş verisi AYRI bir uçtan ham geliyor ve orada
+   * para birimi bilgisi yok — grafiğin KPI ile aynı ölçekte olması için
+   * bu bayrak `fetchCommodityHistory`'ye taşınıyor.
+   */
+  sentKaynak?: boolean;
 }
 
 export const COMMODITY_META: Record<string, {
@@ -132,18 +139,48 @@ export async function fetchCommodities(): Promise<CommodityQuote[]> {
   return (json.commodities as BackendCommodity[])
     .filter((c) => COMMODITY_META[c.symbol])
     .map((c) => {
-      const previousClose = Math.round((c.price - c.change) * 100) / 100;
+      /*
+       * ─── USX SENTTİR, DOLAR DEĞİL ───────────────────────────────────────
+       *
+       * Yahoo, CBOT tahıl/yumuşak emtia vadelileri için `currency: "USX"`
+       * dönüyor. USX = ABD senti (1/100 $). Buğday 780,50 USX aslında
+       * 7,81 $/bushel demek.
+       *
+       * Ekranda ham hâliyle "780,50 USX" yazıyordu: hem tanınmayan bir kod
+       * hem de dolar sanılırsa 100 kat yanlış. Listede bazı satırlar USD
+       * (pirinç, kakao, soya küspesi) bazıları USX olduğu için karşılaştırma
+       * da imkânsızdı.
+       *
+       * Çeviri BURADA, veri girişinde yapılıyor — liste, detay sayfası ve
+       * grafikler aynı kaynaktan beslendiği için hepsi tutarlı oluyor.
+       * `change` ve `previousClose` da bölünmeli, yoksa değişim tutarı fiyatla
+       * aynı ölçekte olmaz. `changePercent` oransal olduğu için dokunulmuyor.
+       *
+       * Birim etiketi de sadeleşiyor: `USc/bu` → `$/bu`, `USc/lb` → `$/lb`.
+       */
+      const sent = (c.currency || '').toUpperCase() === 'USX';
+      const bol = sent ? 100 : 1;
+      const yuvarla = (v: number) => Math.round(v * 10000) / 10000;
+
+      const fiyat = yuvarla(c.price / bol);
+      const degisim = yuvarla(c.change / bol);
+      const previousClose = yuvarla(fiyat - degisim);
+
+      const hamBirim = COMMODITY_META[c.symbol]?.unit ?? c.unit;
+      const birim = sent ? hamBirim.replace(/^USc\/|^¢\//, '$/') : hamBirim;
+
       return {
         symbol: c.symbol,
         name: c.name,
         category: mapBackendCategory(c.category),
-        price: c.price,
+        price: fiyat,
         previousClose,
-        change: c.change,
+        change: degisim,
         changePercent: c.changePct,
-        currency: c.currency || 'USD',
-        unit: COMMODITY_META[c.symbol]?.unit ?? c.unit,
+        currency: sent ? 'USD' : (c.currency || 'USD'),
+        unit: birim,
         marketState: 'CLOSED',
+        sentKaynak: sent,
       };
     })
     .sort((a, b) => {
@@ -189,6 +226,12 @@ export type FiyatNoktasi = {
 export async function fetchCommodityHistory(
   symbol: string,
   range: Aralik,
+  /*
+   * Kaynak sent (USX) cinsindeyse true. Bu uç ham fiyat döndürüyor ve para
+   * birimi bilgisi taşımıyor; çağıran taraf quote'taki `sentKaynak`'ı geçmezse
+   * grafik 780 gösterirken KPI 7,81 gösterir — aynı ekranda 100 kat fark.
+   */
+  sentKaynak = false,
 ): Promise<FiyatNoktasi[]> {
   const url = 'https://dersbende.com/api.php?action=commodity_chart'
     + '&api_key=dashboard_secret_key_2024'
@@ -202,7 +245,9 @@ export async function fetchCommodityHistory(
     throw new Error(json.error ?? 'Grafik verisi alınamadı');
   }
   // Sunucu sıralı gönderiyor ama garanti değil; grafik x ekseni artan olmalı.
+  const bol = sentKaynak ? 100 : 1;
   return json.data
     .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.c))
+    .map((p) => (bol === 1 ? p : { ...p, c: Math.round((p.c / bol) * 10000) / 10000 }))
     .sort((a, b) => a.t - b.t);
 }
