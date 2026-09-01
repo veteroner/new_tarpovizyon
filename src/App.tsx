@@ -94,6 +94,9 @@ import './styles/dataviz-tokens.css';
 import './styles/responsive.css';
 // responsive.css'ten SONRA: ölçülmüş kontrast düzeltmeleri (tüm uygulama).
 import './styles/contrast-fixes.css';
+// Web vitrininin marka değişkenleri (--tv-*). Yalnızca yeni isimler ekler,
+// mevcut hiçbir kuralı ezmez; bu yüzden en sonda durması sorun değil.
+import './styles/marka-tokens.css';
 
 const queryClient = new QueryClient();
 

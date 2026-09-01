@@ -1,0 +1,142 @@
+/**
+ * TarpoVizyon marka belirteçleri — web vitrini.
+ *
+ * ─── NEDEN AYRI DOSYA ───────────────────────────────────────────────────────
+ * Tailwind yapılandırması (tailwind.rasyon.config.js) Rasyon uygulamasıyla
+ * PAYLAŞILIYOR ve orada `primary` bir renk SKALASI (`primary-600` gibi).
+ * shadcn'in beklediği `bg-primary` tek rengi ise skalayla çakışıyor: temayı
+ * shadcn'e uydurmak `primary-600` kullanan her Rasyon ekranını bozardı.
+ *
+ * Bu yüzden tema dosyasına DOKUNULMADI. Marka renkleri burada CSS değişkeni
+ * olarak duruyor, bileşenler `bg-[var(--tv-vurgu)]` gibi keyfi değerlerle
+ * bunlara bağlanıyor. Eklenen isimlerin hiçbiri mevcut bir değişkenle
+ * çakışmıyor — dosya tamamen toplayıcı (additive).
+ *
+ * ─── RENKLER NEREDEN GELDİ ──────────────────────────────────────────────────
+ * Zemin/mürekkep/ikincil değerler Apple'ın kendi ölçeğinden (#fbfbfd, #f5f5f7,
+ * #1d1d1f, #6e6e73, #d2d2d7) — istenen "Apple tarzı" bu nötr ailesi.
+ * Vurgu ise Apple'ın mavisi yerine TARPOL yeşili.
+ *
+ * ─── ÖLÇÜLDÜ ────────────────────────────────────────────────────────────────
+ * Kontrast oranları hesaplandı, göz kararı seçilmedi:
+ *   #17693A / açık zemin = 6,52   ✓
+ *   #6E6E73 / açık zemin = 4,91   ✓
+ *   #4CAF6A / siyah      = 7,65   ✓
+ *
+ * DİKKAT — vakfın limon rengi (#9CC212) açık zeminde 2,00 veriyor, yani
+ * METİN OLARAK KULLANILAMAZ. Yalnızca grafik vurgu (nokta, çubuk, ayraç)
+ * olarak kullanılıyor; koyu zeminde ise açık tonu metin için güvenli.
+ */
+
+:root {
+  --tv-zemin: #fbfbfd;
+  --tv-zemin-2: #f5f5f7;
+  --tv-kart: #ffffff;
+  --tv-murekkep: #1d1d1f;
+  --tv-ikincil: #6e6e73;
+  --tv-cizgi: #d2d2d7;
+  --tv-cizgi-ince: rgba(0, 0, 0, 0.07);
+
+  --tv-vurgu: #17693a;
+  --tv-vurgu-koyu: #12522d;
+  --tv-vurgu-ust: #ffffff;
+  --tv-vurgu-sis: rgba(23, 105, 58, 0.08);
+
+  /* yalnızca grafik vurgu — metin değil */
+  --tv-limon: #9cc212;
+
+  --tv-ust-cam: rgba(251, 251, 253, 0.72);
+  --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
+  --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.05), 0 14px 40px rgba(0, 0, 0, 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tv-zemin: #000000;
+    --tv-zemin-2: #101012;
+    --tv-kart: #1d1d1f;
+    --tv-murekkep: #f5f5f7;
+    --tv-ikincil: #a1a1a6;
+    --tv-cizgi: #38383d;
+    --tv-cizgi-ince: rgba(255, 255, 255, 0.1);
+
+    --tv-vurgu: #4caf6a;
+    --tv-vurgu-koyu: #6bc085;
+    --tv-vurgu-ust: #06210f;
+    --tv-vurgu-sis: rgba(76, 175, 106, 0.12);
+
+    --tv-limon: #b9dc3c;
+
+    --tv-ust-cam: rgba(0, 0, 0, 0.72);
+    --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.5);
+    --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.55);
+  }
+}
+
+:root[data-theme='dark'] {
+  --tv-zemin: #000000;
+  --tv-zemin-2: #101012;
+  --tv-kart: #1d1d1f;
+  --tv-murekkep: #f5f5f7;
+  --tv-ikincil: #a1a1a6;
+  --tv-cizgi: #38383d;
+  --tv-cizgi-ince: rgba(255, 255, 255, 0.1);
+
+  --tv-vurgu: #4caf6a;
+  --tv-vurgu-koyu: #6bc085;
+  --tv-vurgu-ust: #06210f;
+  --tv-vurgu-sis: rgba(76, 175, 106, 0.12);
+
+  --tv-limon: #b9dc3c;
+
+  --tv-ust-cam: rgba(0, 0, 0, 0.72);
+  --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px rgba(0, 0, 0, 0.5);
+  --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+/**
+ * TARPOL logosu koyu temada.
+ *
+ * Logo PNG'si koyu yeşil harfler + gri alt yazıdan oluşuyor; siyah zeminde
+ * ikisi de okunmuyor. Ayrı bir beyaz logo dosyası yok, o yüzden renk
+ * çevriliyor: `invert(1)` görüntüyü açık hâle getiriyor ama yeşili moraya
+ * döndürüyor, `hue-rotate(180deg)` de tonu yeşile geri taşıyor. Sonuç, koyu
+ * zeminde okunur açık yeşil bir logo.
+ *
+ * Vakıftan beyaz/SVG sürüm gelirse bu filtre silinip dosya değiştirilmeli —
+ * filtre bir çözüm değil, elde beyaz varyant olmadığı için köprü.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .tv-logo {
+    filter: invert(1) hue-rotate(180deg) brightness(1.12);
+  }
+}
+
+:root[data-theme='dark'] .tv-logo {
+  filter: invert(1) hue-rotate(180deg) brightness(1.12);
+}
+
+:root[data-theme='light'] .tv-logo {
+  filter: none;
+}
+
+:root[data-theme='light'] {
+  --tv-zemin: #fbfbfd;
+  --tv-zemin-2: #f5f5f7;
+  --tv-kart: #ffffff;
+  --tv-murekkep: #1d1d1f;
+  --tv-ikincil: #6e6e73;
+  --tv-cizgi: #d2d2d7;
+  --tv-cizgi-ince: rgba(0, 0, 0, 0.07);
+
+  --tv-vurgu: #17693a;
+  --tv-vurgu-koyu: #12522d;
+  --tv-vurgu-ust: #ffffff;
+  --tv-vurgu-sis: rgba(23, 105, 58, 0.08);
+
+  --tv-limon: #9cc212;
+
+  --tv-ust-cam: rgba(251, 251, 253, 0.72);
+  --tv-golge: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
+  --tv-golge-kart: 0 1px 3px rgba(0, 0, 0, 0.05), 0 14px 40px rgba(0, 0, 0, 0.07);
+}

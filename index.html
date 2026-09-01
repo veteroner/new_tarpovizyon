@@ -1,5 +1,15 @@
 <!doctype html>
-<html lang="en">
+<!--
+  lang="en" idi. Uygulama tamamen Türkçe ve bu yanlış bildirim GÖRÜNÜR bir
+  hataya yol açıyordu: `text-transform: uppercase` yerel kurallara göre
+  çalışır, İngilizce'de "i" → "I" olur. "İnek sütü üretimi" ekranda
+  "İNEK SÜTÜ ÜRETIMI" diye çıkıyordu — doğrusu "ÜRETİMİ". Uygulamada 73 yerde
+  uppercase kullanılıyor, hepsi etkileniyordu.
+
+  Ayrıca ekran okuyucular metni İngilizce sesle okuyor ve tireleme yanlış
+  yapılıyordu.
+-->
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
