@@ -338,7 +338,7 @@ export const NAV_GROUPS: NavGroup[] = [
   { label: 'Makro Veriler', sections: MAKRO_SECTIONS },
   { label: 'Hayvancılık', sections: HAYVANSAL_SECTIONS },
   { label: 'Bitkisel Üretim', sections: BITKISEL_SECTIONS },
-  { label: 'İl Düzeyinde Tarımsal Veriler', sections: IL_DUZEYINDE_SECTIONS },
+  { label: 'Bölgesel Veriler', sections: IL_DUZEYINDE_SECTIONS },
 ];
 
 export const SECTIONS: Section[] = NAV_GROUPS.flatMap((g) => g.sections);

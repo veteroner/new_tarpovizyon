@@ -26,7 +26,7 @@ export function VitrinFooter() {
 
   return (
     <footer className="border-t border-[var(--tv-cizgi-ince)] bg-[var(--tv-zemin)] pt-14">
-      <div className="mx-auto max-w-[1100px] px-5 sm:px-6">
+      <div className="mx-auto max-w-[1280px] px-5 sm:px-6">
         <div className="grid gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <img
@@ -36,7 +36,7 @@ export function VitrinFooter() {
               height={86}
               className="tv-logo mb-4 h-7 w-auto"
             />
-            <p className="text-[12.5px] leading-relaxed text-[var(--tv-ikincil)]">
+            <p className="text-[15px] leading-relaxed text-[var(--tv-ikincil)]">
               Tarım ve gıda sektöründe üreticiler, sivil toplum kuruluşları,
               üniversiteler, kamu ve özel sektör kurumlarının katılımını sağlayan
               sektörel hizmet platformunun veri kanadı.
@@ -44,10 +44,10 @@ export function VitrinFooter() {
           </div>
 
           <div>
-            <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
+            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
               Platform
             </h3>
-            <ul className="space-y-0.5 text-[12.5px] text-[var(--tv-ikincil)]">
+            <ul className="space-y-0.5 text-[15px] text-[var(--tv-ikincil)]">
               {GRUPLAR.map((g) => (
                 <li key={g.ad}>
                   <button
@@ -59,23 +59,24 @@ export function VitrinFooter() {
                   </button>
                 </li>
               ))}
+              {/* `/m` DEĞİL: o adres telefon biçimli uygulama kabuğu ve
+                  masaüstünde açılması anlamsız. Mağaza bölümüne gidiyor. */}
               <li>
-                <button
-                  type="button"
-                  onClick={() => navigate('/m')}
+                <a
+                  href="/#mobil"
                   className="inline-flex min-h-[36px] items-center transition-colors hover:text-[var(--tv-vurgu)]"
                 >
                   Mobil uygulama
-                </button>
+                </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
+            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
               Kurumsal
             </h3>
-            <ul className="space-y-0.5 text-[12.5px] text-[var(--tv-ikincil)]">
+            <ul className="space-y-0.5 text-[15px] text-[var(--tv-ikincil)]">
               {KURUMSAL.map(([ad, url]) => (
                 <li key={ad}>
                   <a
@@ -90,10 +91,10 @@ export function VitrinFooter() {
           </div>
 
           <div>
-            <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
+            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--tv-murekkep)]">
               Adres
             </h3>
-            <p className="text-[12.5px] leading-relaxed text-[var(--tv-ikincil)]">
+            <p className="text-[15px] leading-relaxed text-[var(--tv-ikincil)]">
               Hacettepe Mahallesi
               <br />
               Cingöz Sokak No:10
@@ -102,7 +103,7 @@ export function VitrinFooter() {
             </p>
             <a
               href="mailto:iletisim@tarpol.org.tr"
-              className="mt-2 inline-flex min-h-[36px] items-center text-[12.5px] text-[var(--tv-vurgu)] hover:underline"
+              className="mt-2 inline-flex min-h-[36px] items-center text-[15px] text-[var(--tv-vurgu)] hover:underline"
             >
               iletisim@tarpol.org.tr
             </a>
@@ -110,11 +111,11 @@ export function VitrinFooter() {
         </div>
 
         <div className="border-t border-[var(--tv-cizgi-ince)] py-6">
-          <p className="mb-3 text-[11.5px] leading-relaxed text-[var(--tv-ikincil)]">
+          <p className="mb-3 text-[13px] leading-relaxed text-[var(--tv-ikincil)]">
             İstatistikler kamuya açık kaynaklardan derlenir ve sonradan revize
             edilebilir; bilgilendirme amaçlıdır, resmî kaynağın yerini tutmaz.
           </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-[var(--tv-ikincil)]">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-[var(--tv-ikincil)]">
             <span>© 2024–2026 TARPOL</span>
             <span aria-hidden="true" className="text-[var(--tv-limon)]">
               •

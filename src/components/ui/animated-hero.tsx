@@ -42,18 +42,18 @@ function Hero() {
 
   return (
     <div className="w-full">
-      <div className="mx-auto max-w-[980px] px-6">
+      <div className="mx-auto max-w-[1280px] px-6">
         <div className="flex flex-col items-center justify-center gap-8 py-20 lg:py-28">
           <h1 className="flex flex-col text-center font-semibold tracking-[-0.03em] text-[var(--tv-murekkep)]">
             <span className="sr-only">Tarım verisi artık tek ekranda.</span>
 
-            <span aria-hidden="true" className="text-[clamp(2.4rem,6.4vw,4.2rem)] leading-[1.05]">
+            <span aria-hidden="true" className="text-[clamp(2.2rem,5.6vw,3.6rem)] leading-[1.05]">
               Tarım verisi artık
             </span>
 
             <span
               aria-hidden="true"
-              className="relative flex w-full justify-center overflow-hidden text-[clamp(2.4rem,6.4vw,4.2rem)] leading-[1.05] md:pb-3 md:pt-1"
+              className="relative flex w-full justify-center overflow-hidden text-[clamp(2.2rem,5.6vw,3.6rem)] leading-[1.05] md:pb-3 md:pt-1"
             >
               &nbsp;
               {kelimeler.map((kelime, i) => (
@@ -76,7 +76,7 @@ function Hero() {
             </span>
           </h1>
 
-          <p className="max-w-[42ch] text-center text-[clamp(1.05rem,2vw,1.3rem)] leading-relaxed text-[var(--tv-ikincil)]">
+          <p className="max-w-[42ch] text-center text-[clamp(1.15rem,2.2vw,1.625rem)] leading-relaxed text-[var(--tv-ikincil)]">
             Türkiye ve dünya tarımının üretim, fiyat, dış ticaret ve il bazındaki
             istatistikleri; yapay zekâ asistanıyla birlikte.
           </p>
@@ -85,8 +85,18 @@ function Hero() {
             <Button size="lg" className="gap-2" onClick={() => navigate('/tarpovizyon-basic')}>
               Veri platformuna gir <MoveRight className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2" onClick={() => navigate('/m')}>
-              <Smartphone className="h-4 w-4" /> Mobil uygulama
+            {/*
+              * ÖNCE `/m`'ye GİDİYORDU. Masaüstü tarayıcıda "Mobil uygulama"ya
+              * basınca kullanıcı telefon biçimli uygulama kabuğuna düşüyordu —
+              * web'de anlamsız. Artık aşağıdaki mağaza bölümüne kaydırıyor.
+              */}
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2"
+              onClick={() => document.getElementById('mobil')?.scrollIntoView({ behavior: azaltilmisHareket ? 'auto' : 'smooth' })}
+            >
+              <Smartphone className="h-4 w-4" /> Mobil uygulamayı indir
             </Button>
           </div>
         </div>

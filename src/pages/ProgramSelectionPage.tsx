@@ -62,14 +62,14 @@ export function ProgramSelectionPage() {
           onViewportEnter={bolum.id === 'il' ? ilBolumunuYukle : undefined}
           viewport={{ once: true, margin: '80px' }}
         >
-          <div className="mx-auto max-w-[1100px] px-5 sm:px-6">
+          <div className="mx-auto max-w-[1280px] px-5 sm:px-6">
             <motion.div
               {...belir(0)}
               className="mb-8 flex flex-wrap items-end justify-between gap-4"
             >
               <div>
                 <span
-                  className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
+                  className="mb-2 flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-[0.14em]"
                   style={{ color: bolum.renk }}
                 >
                   <span
@@ -79,10 +79,10 @@ export function ProgramSelectionPage() {
                   />
                   Bölüm {bi + 1}
                 </span>
-                <h2 className="text-[clamp(1.6rem,3.4vw,2.2rem)] font-semibold tracking-[-0.02em]">
+                <h2 className="text-[clamp(1.75rem,3.6vw,2.5rem)] font-semibold tracking-[-0.02em]">
                   {bolum.ad}
                 </h2>
-                <p className="mt-1.5 max-w-[52ch] text-[14.5px] leading-relaxed text-[var(--tv-ikincil)]">
+                <p className="mt-2 max-w-[56ch] text-[19px] leading-relaxed text-[var(--tv-ikincil)]">
                   {bolum.ac}
                 </p>
               </div>
@@ -90,7 +90,7 @@ export function ProgramSelectionPage() {
               <button
                 type="button"
                 onClick={() => navigate(bolum.yol)}
-                className="inline-flex min-h-[44px] items-center gap-1.5 text-[13.5px] font-medium text-[var(--tv-vurgu)] hover:underline"
+                className="inline-flex min-h-[44px] items-center gap-1.5 text-[16px] font-medium text-[var(--tv-vurgu)] hover:underline"
               >
                 Tümünü gör
                 <MoveRight size={15} />
@@ -109,13 +109,13 @@ export function ProgramSelectionPage() {
       ))}
 
       {/* ───────── MOBİL ───────── */}
-      <section className="bg-[var(--tv-zemin-2)] py-20">
-        <div className="mx-auto max-w-[1100px] px-5 sm:px-6">
+      <section id="mobil" className="scroll-mt-16 bg-[var(--tv-zemin-2)] py-20">
+        <div className="mx-auto max-w-[1280px] px-5 sm:px-6">
           <motion.div {...belir(0)} className="text-center">
-            <h2 className="text-[clamp(1.7rem,3.6vw,2.4rem)] font-semibold tracking-[-0.02em]">
+            <h2 className="text-[clamp(1.75rem,3.6vw,2.5rem)] font-semibold tracking-[-0.02em]">
               Aynı veri, cebinizde
             </h2>
-            <p className="mx-auto mt-3 max-w-[46ch] text-[16px] leading-relaxed text-[var(--tv-ikincil)]">
+            <p className="mx-auto mt-3 max-w-[48ch] text-[19px] leading-relaxed text-[var(--tv-ikincil)]">
               TarpoVizyon mobil uygulaması aynı istatistikleri, piyasa fiyatlarını ve
               yapay zekâ asistanını sunar. Ücretsiz, hesap açmadan.
             </p>

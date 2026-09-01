@@ -96,11 +96,9 @@ export function BasicShell() {
         *
         * Grup sekmeleri burada KAPALI — hemen altındaki mega menü zaten aynı
         * dört grubu ve tüm alt sayfaları açıyor, iki kez listelemek gürültü.
-        * "Veriye gir" düğmesi de kapalı: zaten verinin içindeyiz.
         */}
       <VitrinHeader
         gruplariGoster={false}
-        ctaGoster={false}
         arama={
           <>
             <BasicArama />

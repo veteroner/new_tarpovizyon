@@ -123,7 +123,7 @@ const BASLANGIC: Bolum[] = [
   },
   {
     id: 'il',
-    ad: 'İl Düzeyinde',
+    ad: 'Bölgesel Veriler',
     ac: '81 ilde üretim, havza ürün deseni ve coğrafi işaretli ürünler.',
     yol: '/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim',
     renk: 'var(--tv-d4)',
