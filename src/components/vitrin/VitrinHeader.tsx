@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, TrendingUp, Sparkles } from 'lucide-react';
 
 /**
  * Vitrin başlığı — hem ana sayfada hem veri sayfalarının içinde.
@@ -31,10 +31,18 @@ export const GRUPLAR = [
 
 export function VitrinHeader({
   arama,
+  merkez,
   gruplariGoster = true,
 }: {
   /** Arama kutusu (veri sayfalarının içinde geçiliyor). */
   arama?: React.ReactNode;
+  /**
+   * Başlığın ORTASINA konacak özel gezinme. Veri sayfaları kendi mega
+   * menüsünü buraya geçiriyor; önce menü başlığın ALTINDA ayrı bir satırdaydı
+   * ve logo / sekmeler / arama üç ayrı hizada duruyordu — başlık dağınık
+   * görünüyordu. Artık üçü de tek satırda.
+   */
+  merkez?: React.ReactNode;
   /**
    * Grup sekmeleri gösterilsin mi? Veri sayfalarının İÇİNDE kapalı: orada
    * zaten alt satırda tüm sayfaları açan mega menü var, dört grubu iki kez
@@ -63,6 +71,8 @@ export function VitrinHeader({
           />
         </button>
 
+        {merkez}
+
         {gruplariGoster && (
         <nav className="hidden items-center gap-5 lg:flex">
           {GRUPLAR.map((g) => (
@@ -83,8 +93,39 @@ export function VitrinHeader({
         </nav>
         )}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1">
           {arama}
+
+          {/*
+            * Piyasa ve Asistan mobil uygulamada vardı, webde hiç yoktu.
+            * Sekme listesine değil sağ tarafa konuldu: bunlar veri BÖLÜMÜ
+            * değil, ayrı araçlar — dört veri grubuyla aynı hizaya koymak
+            * gezinme hiyerarşisini bulandırırdı.
+            */}
+          <NavLink
+            to="/piyasa"
+            className={({ isActive }) =>
+              `hidden min-h-[44px] items-center gap-1.5 rounded-full px-3 text-[13.5px] font-medium transition-colors sm:inline-flex ${
+                isActive
+                  ? 'bg-[var(--tv-vurgu-sis)] text-[var(--tv-vurgu)]'
+                  : 'text-[var(--tv-murekkep)] hover:bg-[var(--tv-vurgu-sis)]'
+              }`
+            }
+          >
+            <TrendingUp size={16} /> Piyasa
+          </NavLink>
+          <NavLink
+            to="/asistan"
+            className={({ isActive }) =>
+              `hidden min-h-[44px] items-center gap-1.5 rounded-full px-3 text-[13.5px] font-medium transition-colors sm:inline-flex ${
+                isActive
+                  ? 'bg-[var(--tv-vurgu-sis)] text-[var(--tv-vurgu)]'
+                  : 'text-[var(--tv-murekkep)] hover:bg-[var(--tv-vurgu-sis)]'
+              }`
+            }
+          >
+            <Sparkles size={16} /> Asistan
+          </NavLink>
           <button
             type="button"
             onClick={() => setAcik((v) => !v)}

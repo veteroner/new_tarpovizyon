@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { normalizeTurkish } from '../../pages/basin/basinUtils';
 import { pathFor, shouldExcludeDistrict, type DistrictFeature } from './districtGeo';
+import { HaritaBalonu, siraVePayHesapla, type BalonBilgisi } from './HaritaBalonu';
 
 type GeoFeatureCollection = { type: 'FeatureCollection'; features: DistrictFeature[] };
 
@@ -27,9 +28,9 @@ function colorFor(value: number, breaks: number[]) {
  *  province polygon file exists) — every district within a province is painted
  *  the same color, which reads visually as a province map since adjacent
  *  same-province districts share borders. */
-export function TurkeyProvinceMap({ values }: { values: Record<string, number> }) {
+export function TurkeyProvinceMap({ values, birim }: { values: Record<string, number>; birim?: string }) {
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
-  const [hover, setHover] = useState<{ name: string; value: number; x: number; y: number } | null>(null);
+  const [hover, setHover] = useState<BalonBilgisi | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -53,6 +54,8 @@ export function TurkeyProvinceMap({ values }: { values: Record<string, number> }
   );
   const max = sortedValues.length > 0 ? sortedValues[sortedValues.length - 1] : 0;
   const breaks = useMemo(() => quantileBreaks(sortedValues), [sortedValues]);
+  // Sıra ve pay bir kez hesaplanıyor; her hover'da 81 ili yeniden sıralamak gereksiz.
+  const { toplam, sira, toplamOge } = useMemo(() => siraVePayHesapla(values), [values]);
 
   const features = geoData?.features ?? [];
   const withPaths = useMemo(
@@ -92,17 +95,21 @@ export function TurkeyProvinceMap({ values }: { values: Record<string, number> }
               onMouseEnter={(e) => {
                 if (value === undefined) return;
                 const rect = containerRef.current?.getBoundingClientRect();
-                setHover({ name: provinceName, value, x: e.clientX - (rect?.left ?? 0), y: e.clientY - (rect?.top ?? 0) });
+                setHover({
+                  ad: provinceName,
+                  deger: value,
+                  sira: sira.get(provinceName) ?? 0,
+                  toplamOge,
+                  pay: toplam > 0 ? (value / toplam) * 100 : 0,
+                  x: e.clientX - (rect?.left ?? 0),
+                  y: e.clientY - (rect?.top ?? 0),
+                });
               }}
             />
           );
         })}
       </svg>
-      {hover && (
-        <div className="tvb-map__tooltip" style={{ left: hover.x + 12, top: hover.y + 12 }}>
-          <strong>{hover.name}</strong>: {new Intl.NumberFormat('tr-TR').format(hover.value)}
-        </div>
-      )}
+      {hover && <HaritaBalonu bilgi={hover} birim={birim} />}
       <div className="tvb-map__legend">
         <span>0</span>
         <div className="tvb-map__legend-bar">

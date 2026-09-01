@@ -87,7 +87,7 @@ export function IlBitkiselUretimPage({ config }: { config: IlBitkiselUretimPageC
         <>
           <div className="tvb-section">
             <h3>{activeUrun} — İllere Göre Üretim (Ton)</h3>
-            <TurkeyProvinceMap values={mapValues} />
+            <TurkeyProvinceMap values={mapValues} birim="Ton" />
           </div>
           <div className="tvb-section">
             <RankingBlock items={items} />

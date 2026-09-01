@@ -73,7 +73,7 @@ export function IlCografiIsaretPage({ config }: { config: IlCografiIsaretPageCon
         <>
           <div className="tvb-section">
             <h3>İllere Göre Coğrafi İşaretli Ürün Sayısı</h3>
-            <TurkeyProvinceMap values={mapValues} />
+            <TurkeyProvinceMap values={mapValues} birim="ürün" />
           </div>
           <div className="tvb-section">
             <RankingBlock items={items} />
@@ -91,7 +91,7 @@ export function IlCografiIsaretPage({ config }: { config: IlCografiIsaretPageCon
 
         <input
           type="search"
-          className="tvb-arama"
+          className="tvb-metin-arama"
           value={ara}
           onChange={(e) => { setAra(e.target.value); setLimit(SAYFA); }}
           placeholder="Ürün, il veya ürün grubu ara"

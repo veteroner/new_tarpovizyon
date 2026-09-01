@@ -5,6 +5,8 @@ import { Header } from './components/Header';
 import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { GirisEkrani } from './components/GirisEkrani';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
+import PiyasaPage from './pages/PiyasaPage';
+import AsistanPage from './pages/AsistanPage';
 // Mobile imports
 import { isPlatform } from './mobile/utils/platform';
 import MobileLayout from './mobile/components/MobileLayout';
@@ -114,11 +116,16 @@ function AppContent() {
   const isTakvimPage = location.pathname === '/tarim-takvim';
   const isMobilePage = location.pathname.startsWith('/m');
   const isTarpovizyonBasicPage = location.pathname.startsWith('/tarpovizyon-basic');
+  /*
+   * Piyasa ve Asistan KENDİ başlıklarını (VitrinHeader) çiziyor; global
+   * Header burada da çizilirse iki başlık üst üste biner.
+   */
+  const isVitrinAraciPage = location.pathname === '/piyasa' || location.pathname === '/asistan';
   // TarpoShell handles its own layout for all /tarpovizyon/* data pages
   const isTarpoShellRoute =
     location.pathname.startsWith('/tarpovizyon/') &&
     !isTarpovizyonHome;
-  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute || isTarpovizyonBasicPage;
+  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute || isTarpovizyonBasicPage || isVitrinAraciPage;
 
   /*
    * Capacitor'daki kalıcı geri+ana sayfa çubuğu.
@@ -169,6 +176,13 @@ function AppContent() {
 
           {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}
           <Route path="/" element={<GirisEkrani masaustu={<ProgramSelectionPage />} mobilYol="/m" />} />
+          {/*
+            * Piyasa ve Asistan MOBİLDE VARDI, WEBDE YOKTU. İkisi de mobil
+            * servis katmanını aynen kullanıyor; dar ekranda mobil eşdeğerine
+            * yönleniyorlar ki iki ayrı arayüz çakışmasın.
+            */}
+          <Route path="/piyasa" element={<GirisEkrani masaustu={<PiyasaPage />} mobilYol="/m/market" />} />
+          <Route path="/asistan" element={<GirisEkrani masaustu={<AsistanPage />} mobilYol="/m/ai" />} />
           
           {/*
             * Çiftçi araçları.

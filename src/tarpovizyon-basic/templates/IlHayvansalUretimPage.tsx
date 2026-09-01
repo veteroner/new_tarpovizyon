@@ -53,7 +53,7 @@ export function IlHayvansalUretimPage({ config }: { config: IlHayvansalUretimPag
           </div>
           <div className="tvb-section">
             <h3>İllere Göre Toplam Hayvan Varlığı</h3>
-            <TurkeyProvinceMap values={mapValues} />
+            <TurkeyProvinceMap values={mapValues} birim="Baş" />
           </div>
           <div className="tvb-section">
             <RankingBlock items={items} />

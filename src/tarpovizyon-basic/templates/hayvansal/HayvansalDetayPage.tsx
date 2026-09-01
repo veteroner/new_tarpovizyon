@@ -242,7 +242,7 @@ export function HayvansalDetayPage() {
       {Object.keys(haritaDegerleri).length > 0 && (
         <div className="tvb-section">
           <h3>İllere Göre Dağılım (baş)</h3>
-          <TurkeyProvinceMap values={haritaDegerleri} />
+          <TurkeyProvinceMap values={haritaDegerleri} birim="Baş" />
         </div>
       )}
 

@@ -123,7 +123,7 @@ export function RankingPage({ config }: { config: RankingPageConfig }) {
           {showMap && (
             <div className="tvb-section">
               <h3>Ülkelerin Dağılımı</h3>
-              <WorldChoroplethMap values={mapValues} />
+              <WorldChoroplethMap values={mapValues} birim={kpiUnit} />
             </div>
           )}
           <div className="tvb-section">

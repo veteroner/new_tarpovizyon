@@ -23,14 +23,21 @@ export function RankingBlock({ items, topN = 10 }: { items: RankingItem[]; topN?
   })();
 
   return (
+    /*
+     * ─── SIRA: ORAN ÖNCE, İLK 10 SONRA ────────────────────────────────────
+     * İkisi yan yanaydı (1.4fr / 1fr). Oran çubuğu tek satırlık bir ÖZET,
+     * "İlk 10" ise onun DETAYI — özet detaydan önce gelmeli. Yan yana
+     * dizilimde oran çubuğu dar kalıyor, ince dilimler okunmuyordu.
+     * Artık alt alta: oran üstte tam genişlikte, ilk 10 altında.
+     */
     <div className="tvb-ranking">
-      <div className="tvb-ranking__chart">
-        <h3>İlk {top.length}</h3>
-        <HorizontalRankBar items={top} />
-      </div>
       <div className="tvb-ranking__chart">
         <h3>Oran (%)</h3>
         <ProportionBar items={proportionData} />
+      </div>
+      <div className="tvb-ranking__chart">
+        <h3>İlk {top.length}</h3>
+        <HorizontalRankBar items={top} />
       </div>
     </div>
   );

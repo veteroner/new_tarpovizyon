@@ -99,6 +99,29 @@ export function BasicShell() {
         */}
       <VitrinHeader
         gruplariGoster={false}
+        merkez={
+          /* Mega menü artık başlığın ALTINDA değil, İÇİNDE — logo, sekmeler
+             ve arama tek hizada. */
+          <nav className="tvb-nav" ref={navRef}>
+            {NAV_GROUPS.map((group) => (
+              <div key={group.label} className={`tvb-nav__section${group.sections.length > 1 ? ' tvb-nav__section--wide' : ''}`}>
+                <button
+                  className={`tvb-nav__section-btn${activeGroup?.label === group.label ? ' tvb-nav__section-btn--active' : ''}`}
+                  onClick={() => setOpenGroup((prev) => (prev === group.label ? null : group.label))}
+                >
+                  {group.label} <span className="tvb-nav__caret">▾</span>
+                </button>
+                {openGroup === group.label && (
+                  <div className={`tvb-nav__dropdown${group.sections.length > 1 ? ' tvb-nav__dropdown--mega' : ''}`}>
+                    {group.sections.map((section) => (
+                      <SectionColumn key={section.path} section={section} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        }
         arama={
           <>
             <BasicArama />
@@ -117,27 +140,6 @@ export function BasicShell() {
           </>
         }
       />
-
-      {/* Desktop mega nav */}
-      <nav className="tvb-nav" ref={navRef}>
-        {NAV_GROUPS.map((group) => (
-          <div key={group.label} className={`tvb-nav__section${group.sections.length > 1 ? ' tvb-nav__section--wide' : ''}`}>
-            <button
-              className={`tvb-nav__section-btn${activeGroup?.label === group.label ? ' tvb-nav__section-btn--active' : ''}`}
-              onClick={() => setOpenGroup((prev) => (prev === group.label ? null : group.label))}
-            >
-              {group.label} <span className="tvb-nav__caret">▾</span>
-            </button>
-            {openGroup === group.label && (
-              <div className={`tvb-nav__dropdown${group.sections.length > 1 ? ' tvb-nav__dropdown--mega' : ''}`}>
-                {group.sections.map((section) => (
-                  <SectionColumn key={section.path} section={section} />
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
 
       {/* Mobile slide-in drawer */}
       <div

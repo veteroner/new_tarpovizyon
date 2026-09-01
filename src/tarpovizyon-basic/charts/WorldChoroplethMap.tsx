@@ -3,6 +3,7 @@ import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 import { normalizeCountryKey, toWorldGeoCountryKey, translateCountry } from '../../utils/countryTranslations';
 import { resolveFaoCountryKey } from './faoCountryOverrides';
+import { HaritaBalonu, siraVePayHesapla, type BalonBilgisi } from './HaritaBalonu';
 
 type GeoFeature = { type: 'Feature'; properties?: { name?: string }; geometry: unknown };
 type GeoFeatureCollection = { type: 'FeatureCollection'; features: GeoFeature[] };
@@ -32,9 +33,9 @@ function colorFor(value: number, breaks: number[]) {
   return COLOR_STEPS[Math.min(idx, COLOR_STEPS.length - 1)];
 }
 
-export function WorldChoroplethMap({ values, height = 360 }: { values: Record<string, number>; height?: number }) {
+export function WorldChoroplethMap({ values, height = 360, birim }: { values: Record<string, number>; height?: number; birim?: string }) {
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
-  const [hover, setHover] = useState<{ name: string; value: number; x: number; y: number } | null>(null);
+  const [hover, setHover] = useState<BalonBilgisi | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -68,6 +69,17 @@ export function WorldChoroplethMap({ values, height = 360 }: { values: Record<st
   );
   const max = sortedValues.length > 0 ? sortedValues[sortedValues.length - 1] : 0;
   const breaks = useMemo(() => quantileBreaks(sortedValues), [sortedValues]);
+  const { toplam, sira, toplamOge } = useMemo(() => siraVePayHesapla(values), [values]);
+  // Sıra anahtarı ham ülke adına göre tutuluyor; balonda çevrilmiş ad yazıyor.
+  const siraGeoKey = useMemo(() => {
+    const m = new Map<string, number>();
+    sira.forEach((s, ad) => {
+      const o = resolveFaoCountryKey(ad);
+      const f = toWorldGeoCountryKey(ad);
+      m.set(geoKeySet.has(o) ? o : geoKeySet.has(f) ? f : o, s);
+    });
+    return m;
+  }, [sira, geoKeySet]);
 
   const projection = useMemo(() => {
     const proj = geoNaturalEarth1();
@@ -99,23 +111,33 @@ export function WorldChoroplethMap({ values, height = 360 }: { values: Record<st
             <path
               key={idx}
               d={d}
-              fill={value !== undefined ? colorFor(value, breaks) : '#eef0f2'}
+              /*
+               * Veri OLMAYAN ülkeler önce '#eef0f2' dolgu + BEYAZ kenarlıktı.
+               * Beyaz zeminde kenarlık kayboluyordu; kıtalar tek parça açık
+               * gri leke gibi görünüyor, hangi ülkenin nerede olduğu
+               * seçilmiyordu. Dolgu koyulaştırıldı ki beyaz sınırlar okunsun.
+               */
+              fill={value !== undefined ? colorFor(value, breaks) : '#dee2e6'}
               stroke="#fff"
-              strokeWidth={0.4}
+              strokeWidth={0.5}
               onMouseEnter={(e) => {
                 if (value === undefined) return;
                 const rect = containerRef.current?.getBoundingClientRect();
-                setHover({ name: translateCountry(geoName), value, x: e.clientX - (rect?.left ?? 0), y: e.clientY - (rect?.top ?? 0) });
+                setHover({
+                  ad: translateCountry(geoName),
+                  deger: value,
+                  sira: siraGeoKey.get(key) ?? 0,
+                  toplamOge,
+                  pay: toplam > 0 ? (value / toplam) * 100 : 0,
+                  x: e.clientX - (rect?.left ?? 0),
+                  y: e.clientY - (rect?.top ?? 0),
+                });
               }}
             />
           );
         })}
       </svg>
-      {hover && (
-        <div className="tvb-map__tooltip" style={{ left: hover.x + 12, top: hover.y + 12 }}>
-          <strong>{hover.name}</strong>: {new Intl.NumberFormat('tr-TR').format(hover.value)}
-        </div>
-      )}
+      {hover && <HaritaBalonu bilgi={hover} birim={birim} />}
       <div className="tvb-map__legend">
         <span>0</span>
         <div className="tvb-map__legend-bar">

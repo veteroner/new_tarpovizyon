@@ -938,7 +938,14 @@
 }
 
 /* ─── Arama ve kademeli liste ────────────────────────────────────────────── */
-.tvb-arama {
+/*
+ * SINIF ADI ÇAKIŞMASI ÇÖZÜLDÜ: bu kural bir <input>'a aitti ama aynı ad
+ * (`tvb-arama`) BasicArama'nın sarmalayıcı <div>'inde de kullanılıyordu.
+ * Buradaki padding/margin/border oraya sızıyor, başlıktaki arama kutusunu
+ * 58px yapıp logo ve sekmelerle hizasını bozuyordu (ölçüldü: merkez 22 vs 28).
+ * Input tarafı `tvb-metin-arama` oldu; `tvb-arama` artık yalnız sarmalayıcı.
+ */
+.tvb-metin-arama {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -953,8 +960,8 @@
   color: #111827;
   outline: none;
 }
-.tvb-arama:focus { border-color: #1d4ed8; }
-.tvb-arama::placeholder { color: #5b6472; }
+.tvb-metin-arama:focus { border-color: #1d4ed8; }
+.tvb-metin-arama::placeholder { color: #5b6472; }
 
 .tvb-daha {
   display: block;
@@ -1258,4 +1265,124 @@
 .tvb-arama__ad { color: var(--tv-murekkep); }
 .tvb-arama__bolum, .tvb-arama__bos, .tvb-arama__baslik, .tvb-arama__dipnot {
   color: var(--tv-ikincil);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HARİTA BİLGİ BALONU — genişletildi
+
+   Önce tek satırdı: "Konya: 23". Birim, sıra ve pay yoktu; 23'ün ne olduğu
+   ve iyi mi kötü mü olduğu okunmuyordu. Balon artık üç katmanlı:
+   ad → değer+birim → sıra ve toplam içindeki pay.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.tvb-map__tooltip {
+  padding: 9px 12px;
+  border-radius: 10px;
+  line-height: 1.35;
+  white-space: nowrap;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+  z-index: 5;
+}
+.tvb-map__tooltip-ad {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.tvb-map__tooltip-deger {
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.tvb-map__tooltip-birim {
+  font-size: 11.5px;
+  font-weight: 400;
+  opacity: 0.72;
+  margin-left: 4px;
+}
+.tvb-map__tooltip-alt {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 11.5px;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tvb-map__tooltip-alt strong { font-weight: 600; }
+.tvb-map__tooltip-soluk { opacity: 0.6; }
+.tvb-map__tooltip-ayrac { opacity: 0.45; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIRALAMA BLOĞU — alt alta
+
+   "İlk 10" ve "Oran (%)" yan yanaydı (1.4fr / 1fr). Oran çubuğu bir ÖZET,
+   ilk 10 ise DETAY; özet önce gelmeli. Ayrıca dar sütunda oran çubuğunun
+   ince dilimleri okunmuyordu. Artık tek sütun, oran üstte tam genişlikte.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.tvb-ranking {
+  grid-template-columns: 1fr;
+  gap: 26px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MEGA MENÜ — artık başlığın İÇİNDE
+
+   Önce başlığın altında ayrı, tam genişlikte, ortalanmış bir çubuktu:
+   satır 1 logo + arama, satır 2 sekmeler. Üç öğe üç ayrı hizadaydı ve
+   başlık dağınık görünüyordu. Menü başlık satırına alındı; buradaki
+   kurallar onu "kendi çubuğu" olmaktan çıkarıp satır içi hâle getiriyor.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.tvb-nav {
+  position: relative;   /* açılır menünün konum atası — sticky değil artık */
+  top: auto;
+  z-index: auto;
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
+  gap: 2px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  min-width: 0;
+}
+.tvb-nav__section-btn {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--tv-murekkep);
+  border-bottom: none;
+  border-radius: 999px;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.tvb-nav__section-btn:hover { background: var(--tv-vurgu-sis); color: var(--tv-vurgu); }
+.tvb-nav__section-btn--active {
+  color: var(--tv-vurgu);
+  border-bottom: none;
+  background: var(--tv-vurgu-sis);
+}
+.tvb-nav__dropdown {
+  top: calc(100% + 6px);
+  border-radius: 14px;
+}
+/* Mega menü artık başlık satırına göre konumlanıyor; sağa taşmasın diye
+   sola sabitlenip genişliği başlık genişliğiyle sınırlandırıldı. */
+.tvb-nav__dropdown--mega {
+  left: 0;
+  right: auto;
+  width: min(920px, calc(100vw - 48px));
+}
+
+/* Arama kutusu tek satırda sekmelerle yan yana; daha dar. */
+.tvb-arama { width: min(230px, 24vw); }
+
+/* Dar ekranda sekmeler gizli, çekmece düğmesi görünür (mevcut davranış). */
+@media (max-width: 1100px) {
+  .tvb-nav { display: none; }
+  .tvb-menu-toggle { display: flex; align-items: center; justify-content: center; }
+  .tvb-arama { width: min(200px, 40vw); }
 }

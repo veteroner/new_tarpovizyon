@@ -46,7 +46,7 @@ export function IlAricilikPage({ config }: { config: IlAricilikPageConfig }) {
         <>
           <div className="tvb-section">
             <h3>İllere Göre Bal Üretimi (Ton)</h3>
-            <TurkeyProvinceMap values={mapValues} />
+            <TurkeyProvinceMap values={mapValues} birim="Ton" />
           </div>
           <div className="tvb-section">
             <RankingBlock items={items} />

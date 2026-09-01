@@ -62,6 +62,24 @@ export function VitrinFooter() {
               {/* `/m` DEĞİL: o adres telefon biçimli uygulama kabuğu ve
                   masaüstünde açılması anlamsız. Mağaza bölümüne gidiyor. */}
               <li>
+                <button
+                  type="button"
+                  onClick={() => navigate('/piyasa')}
+                  className="inline-flex min-h-[36px] items-center transition-colors hover:text-[var(--tv-vurgu)]"
+                >
+                  Piyasa
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => navigate('/asistan')}
+                  className="inline-flex min-h-[36px] items-center transition-colors hover:text-[var(--tv-vurgu)]"
+                >
+                  Yapay Zekâ Asistanı
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#mobil"
                   className="inline-flex min-h-[36px] items-center transition-colors hover:text-[var(--tv-vurgu)]"

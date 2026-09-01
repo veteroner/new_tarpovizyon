@@ -94,7 +94,7 @@ export function TradePage({ title, endpoint, modul = 'hayvansal' }: { title: str
               {showQuantity && exportQty > 0 && <KpiCard label="Birim Fiyat" value={numberFmt.format(exportTotal / exportQty)} suffix={`$/${unit || 'birim'}`} />}
               <KpiCard label="Ülke Sayısı" value={String(exportItems.length)} />
             </div>
-            {exportItems.length > 0 && <WorldChoroplethMap values={Object.fromEntries(exportItems.map((i) => [i.name, i.value]))} height={300} />}
+            {exportItems.length > 0 && <WorldChoroplethMap values={Object.fromEntries(exportItems.map((i) => [i.name, i.value]))} height={300} birim="$" />}
             <RankedTable items={exportItems} valueLabel="İhracat ($)" secondaryLabel={showQuantity ? `Miktar${unit ? ` (${unit})` : ''}` : undefined} />
           </div>
 
@@ -106,7 +106,7 @@ export function TradePage({ title, endpoint, modul = 'hayvansal' }: { title: str
               {showQuantity && importQty > 0 && <KpiCard label="Birim Fiyat" value={numberFmt.format(importTotal / importQty)} suffix={`$/${unit || 'birim'}`} />}
               <KpiCard label="Ülke Sayısı" value={String(importItems.length)} />
             </div>
-            {importItems.length > 0 && <WorldChoroplethMap values={Object.fromEntries(importItems.map((i) => [i.name, i.value]))} height={300} />}
+            {importItems.length > 0 && <WorldChoroplethMap values={Object.fromEntries(importItems.map((i) => [i.name, i.value]))} height={300} birim="$" />}
             <RankedTable items={importItems} valueLabel="İthalat ($)" secondaryLabel={showQuantity ? `Miktar${unit ? ` (${unit})` : ''}` : undefined} />
           </div>
         </>
