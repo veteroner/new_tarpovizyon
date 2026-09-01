@@ -12,7 +12,7 @@ export function SelectionPage() {
         <div className="selection-header">
           <h1 className="selection-title">TARPOL TarpoVizyon</h1>
           <p className="selection-subtitle">
-            Tarımsal Strateji ve Politika Geliştirme Merkezi
+            Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi
           </p>
         </div>
 
@@ -81,7 +81,7 @@ export function SelectionPage() {
 
         {/* Footer */}
         <div className="selection-footer">
-          <p>© 2025 TARPOL - Tarımsal Veri Analiz Platformu</p>
+          <p>© 2025 TARPOL - Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
         </div>
       </div>
     </div>

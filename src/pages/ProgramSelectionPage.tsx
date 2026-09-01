@@ -76,7 +76,7 @@ export function ProgramSelectionPage() {
       <div className="tarpol-giris__kap">
         <header className="tarpol-giris__ust">
           <h1 className="tarpol-giris__ad">TARPOL</h1>
-          <p className="tarpol-giris__alt">Tarım Politika ve Yönetim Araçları</p>
+          <p className="tarpol-giris__alt">Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
         </header>
 
         {/*
@@ -124,7 +124,7 @@ export function ProgramSelectionPage() {
         </div>
 
         <footer className="tarpol-giris__dip">
-          <p>© 2026 TARPOL · Tarım Politika ve Yönetim Araçları</p>
+          <p>© 2026 TARPOL · Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
         </footer>
       </div>
     </div>
