@@ -220,8 +220,6 @@ function AppContent() {
           
           {/* TARPOVIZYON - Giriş ve Ana Sayfalar (TarpoShell dışında) */}
           <Route path="/tarpovizyon" element={<GirisEkrani masaustu={<SelectionPage />} mobilYol="/m" />} />
-          <Route path="/tarpovizyon/world" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="world" />} />
-          <Route path="/tarpovizyon/turkey" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="turkey" />} />
           <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
           <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
 
@@ -229,6 +227,20 @@ function AppContent() {
               Kabuk cihaza göre seçiliyor: geniş ekranda pano (TarpoShell),
               dar ekranda ve Capacitor'da iOS kabuğu. Rotalar tek yerde. */}
           <Route element={<DataShell />}>
+            {/*
+              * Kırılımın 0. basamağı — kapsam giriş sayfası.
+              *
+              * DataShell İÇİNDE: eskiden kabuğun dışındaydı, yani giriş
+              * sayfasında kapsam anahtarı, komut paleti ve hızlı erişim
+              * şeridi yoktu. Kullanıcı kırılımın en üstünde en az araca
+              * sahipti.
+              *
+              * `GirisEkrani` sarmalayıcı KALIYOR: mobil yönlendirmesi
+              * (/m/explore + kapsam ipucu) onun içinde. Dar ekranda
+              * MobileDataShell çizilip hemen yönlendirme yapılıyor.
+              */}
+            <Route path="/tarpovizyon/turkey" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="turkey" />} />
+            <Route path="/tarpovizyon/world" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="world" />} />
             {/* Kırılımın 1. basamağı: bölümün bu kapsamdaki konuları.
                 Kapsam başına ayrı statik rota — `:kapsam` parametreli tek
                 rota mevcut /tarpovizyon/turkey/... yollarını gölgeleyebilirdi. */}

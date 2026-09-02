@@ -1,175 +1,119 @@
+import { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { TrendingUp, Wheat, Beef, MapPinned, Home, Scale, Package, DollarSign, UtensilsCrossed } from 'lucide-react';
-import type { ReactElement } from 'react';
+import { ChevronRight } from 'lucide-react';
+import {
+  visibleMenu, BASIC_MENU, KAPSAM_ADI, type Kapsam, type MenuCategory,
+} from '../components/nav/menu';
 import '../styles/HomePage.css';
 
-type CategoryCard = {
-  id: string;
-  title: string;
-  icon: ReactElement;
-  path: string;
-  description: string;
-  gradient: string;
+/**
+ * Kapsam giriş sayfası — kırılımın 0. basamağı.
+ *
+ * ─── NEDEN YENİDEN YAZILDI ──────────────────────────────────────────────────
+ * Eskiden kapsam başına ELLE YAZILMIŞ 5 kart vardı ve üç sorunu vardı:
+ *
+ *   1. Menüden kopuktu. Menüye eklenen bölüm burada görünmüyordu; listeler
+ *      zamanla birbirinden ayrıldı.
+ *   2. Kart doğrudan bir SAYFAYA gidiyordu ("Bitkisel Üretim" → world/production),
+ *      yani bölüm basamağı atlanıyor ve kullanıcı bölümün içinde başka ne
+ *      olduğunu hiç görmüyordu.
+ *   3. Basic'ten gelen 84 pano buradan HİÇ görünmüyordu — uygulamanın en
+ *      büyük sayfa kümesi giriş ekranında yoktu.
+ *
+ * Artık kartlar `visibleMenu(kapsam)` ve `BASIC_MENU`'den türüyor, bölüm
+ * sayfasına gidiyor ve sayfa sayısını gösteriyor. Menüye eklenen her bölüm
+ * burada kendiliğinden beliriyor.
+ */
+
+/** Kategori kimliğinden şerit rengine — BolumPage ile aynı eşleme. */
+const RENK: Record<string, string> = {
+  hayvansal: 'var(--tv-d1)',
+  bitkisel: 'var(--tv-d3)',
+  'fiyat-ekonomi': 'var(--tv-d2)',
+  'dis-ticaret': 'var(--tv-d2)',
+  'il-bazinda': 'var(--tv-d4)',
+  'kaynak-cevre': 'var(--tv-d4)',
+  'genel-bakis': 'var(--tv-vurgu)',
+  araclar: 'var(--tv-vurgu)',
+  'basic-0': 'var(--tv-d2)',
+  'basic-1': 'var(--tv-d1)',
+  'basic-2': 'var(--tv-d3)',
+  'basic-3': 'var(--tv-d4)',
 };
-
-// Dünya (FAO) kategorileri
-const worldCategories: CategoryCard[] = [
-  {
-    id: 'macro',
-    title: 'MAKRO VERİLER',
-    icon: <TrendingUp size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/world/macro-economic',
-    description: 'Dünya GSYH, ekonomik göstergeler',
-    gradient: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)',
-  },
-  {
-    id: 'plant',
-    title: 'BİTKİSEL ÜRETİM',
-    icon: <Wheat size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/world/production',
-    description: 'Dünya tahıl, sebze ve meyve üretimi',
-    gradient: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-  },
-  {
-    id: 'animal',
-    title: 'HAYVANSAL ÜRETİM',
-    icon: <Beef size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/world/livestock',
-    description: 'Dünya hayvancılık ve hayvansal ürünler',
-    gradient: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
-  },
-  {
-    id: 'resources',
-    title: 'KAYNAK VE ÇEVRE',
-    icon: <MapPinned size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/world/resources',
-    description: 'Arazi kullanımı, gübre, istihdam',
-    gradient: 'linear-gradient(135deg, #16a34a 0%, #14b8a6 100%)',
-  },
-  {
-    id: 'food-balance',
-    title: 'GIDA DENGESİ',
-    icon: <UtensilsCrossed size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/world/food-balance',
-    description: 'Arz-talep dengesi, gıda güvenliği, kalori analizi',
-    gradient: 'linear-gradient(135deg, #0d9488 0%, #065f46 100%)',
-  },
-];
-
-// Türkiye (TÜİK) kategorileri
-const turkeyCategories: CategoryCard[] = [
-  {
-    id: 'macro',
-    title: 'MAKRO VERİLER',
-    icon: <TrendingUp size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/macro',
-    description: 'Türkiye GSYH, tarım ekonomisi göstergeleri',
-    gradient: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)',
-  },
-  {
-    id: 'plant',
-    title: 'BİTKİSEL ÜRETİM',
-    icon: <Wheat size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/plant-production',
-    description: 'TÜİK tahıl, sebze, meyve üretim verileri',
-    gradient: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-  },
-  {
-    id: 'animal',
-    title: 'HAYVANSAL ÜRETİM',
-    icon: <Beef size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/animal-production',
-    description: 'Türkiye et, süt, yumurta üretimi',
-    gradient: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
-  },
-  {
-    id: 'trade',
-    title: 'DIŞ TİCARET',
-    icon: <Package size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/trade',
-    description: 'İhracat, ithalat, ticaret dengesi ve istihbarat',
-    gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-  },
-  {
-    id: 'price',
-    title: 'FİYAT ENDEKSLERİ',
-    icon: <DollarSign size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/price-index',
-    description: 'TÜFE, Tarım-ÜFE, GFE, FAO fiyat endeksleri',
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-  },
-  {
-    id: 'provincial',
-    title: 'İL BAZINDA VERİLER',
-    icon: <MapPinned size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/provincial',
-    description: 'İl bazında hayvancılık, bitkisel, havza, coğrafi işaret',
-    gradient: 'linear-gradient(135deg, #16a34a 0%, #14b8a6 100%)',
-  },
-  {
-    id: 'product-balance',
-    title: 'ARZ-TALEP DENGESİ',
-    icon: <Scale size={56} strokeWidth={1.8} />,
-    path: '/tarpovizyon/turkey/product-balance',
-    description: 'Gıda güvenliği, yeterlilik, ithalat bağımlılığı',
-    gradient: 'linear-gradient(135deg, #0d9488 0%, #065f46 100%)',
-  },
-];
 
 export function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // URL'den bölge tipini belirle
-  const isWorld = location.pathname.startsWith('/tarpovizyon/world');
-  
-  const categories = isWorld ? worldCategories : turkeyCategories;
-  const regionTitle = isWorld ? 'DÜNYA VERİLERİ' : 'TÜRKİYE VERİLERİ';
-  const regionSubtitle = isWorld 
-    ? 'FAO Dünya Tarım Verileri' 
-    : 'TÜİK Türkiye Tarım Verileri';
+
+  const kapsam: Kapsam =
+    location.pathname.startsWith('/tarpovizyon/world') ? 'world' : 'turkey';
+
+  const bolumler = useMemo(() => visibleMenu(kapsam), [kapsam]);
+  const basicToplam = useMemo(
+    () => BASIC_MENU.reduce((a, k) => a + k.items.length, 0), [],
+  );
+
+  const kart = (k: MenuCategory, sayi: number) => {
+    const Icon = k.icon;
+    const renk = RENK[k.id] ?? 'var(--tv-vurgu)';
+    return (
+      <button
+        key={k.id}
+        type="button"
+        className="ap-kart"
+        style={{ ['--kimlik' as string]: renk }}
+        onClick={() => navigate(`/tarpovizyon/${kapsam}/bolum/${k.id}`)}
+      >
+        <span className="ap-ikon" style={{ color: renk }} aria-hidden="true">
+          <Icon size={20} strokeWidth={1.9} />
+        </span>
+        <span className="ap-sayac">{sayi} sayfa</span>
+        <h2>{k.title}</h2>
+        {/* Bölümün içinde ne olduğunu kart üzerinden göster: kullanıcı
+            girmeden önce doğru yeri seçebilsin. */}
+        <p className="ap-ornek">
+          {k.items.slice(0, 3).map((i) => i.label).join(' · ')}
+          {k.items.length > 3 ? ' …' : ''}
+        </p>
+        <ChevronRight size={17} className="ap-ok" aria-hidden="true" />
+      </button>
+    );
+  };
 
   return (
-    <div className="home-container">
-      {/* Back to Selection Button */}
-      <button 
-        className="back-to-selection"
-        onClick={() => navigate('/tarpovizyon')}
-        aria-label="Ana seçim sayfasına dön"
-      >
-        <Home size={20} />
-        <span>Ana Sayfa</span>
-      </button>
+    <div className="ap">
+      <header className="ap-bas">
+        <p className="ap-ustyazi">{KAPSAM_ADI[kapsam]}</p>
+        <h1>{kapsam === 'world' ? 'Dünya Verileri' : 'Türkiye Verileri'}</h1>
+        <p className="ap-kaynak">
+          {kapsam === 'world'
+            ? 'FAO — 205 ülke, üretim, kaynak ve gıda dengesi'
+            : 'TÜİK — üretim, fiyat, dış ticaret ve il bazında veriler'}
+        </p>
+      </header>
 
-      {/* Header Section */}
-      <div className="home-header">
-        <h1 className="home-region-title">{regionTitle}</h1>
-        <p className="home-region-subtitle">{regionSubtitle}</p>
-      </div>
+      <section>
+        <h2 className="ap-grup">Bölümler</h2>
+        <div className="ap-izgara">
+          {bolumler.map((k) => kart(k, k.items.length))}
+        </div>
+      </section>
 
-      {/* Category Cards Grid */}
-      <div className="categories-grid">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            className="category-card"
-            onClick={() => navigate(category.path)}
-            aria-label={`${category.title} bölümüne git`}
-          >
-            <div className="card-icon-wrapper" style={{ background: category.gradient }}>
-              <div className="card-icon">{category.icon}</div>
-            </div>
-            <h3 className="card-title">{category.title}</h3>
-            <p className="card-description">{category.description}</p>
-            <div className="card-arrow">→</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="home-footer">
-        <p>© 2024–2026 TARPOL - Yapay Zekâ • Veri • Bilim • İnovasyon Merkezi</p>
-      </div>
+      {/*
+        * Basic'ten gelen panolar. Ayrı grup, çünkü ayrı bir korpus: kapsamsız
+        * (hem Türkiye hem Dünya sayfaları içeriyorlar) ve şablonları farklı.
+        * Aynı ızgaraya karıştırmak "Bitkisel Üretim" adlı iki kartı yan yana
+        * getirirdi — biri menüden biri Basic'ten.
+        */}
+      <section className="ap-basic">
+        <h2 className="ap-grup">
+          Sektör Panoları
+          <span className="ap-grup-sayi">{basicToplam} pano · 4 kategori</span>
+        </h2>
+        <div className="ap-izgara">
+          {BASIC_MENU.map((k) => kart(k, k.items.length))}
+        </div>
+      </section>
     </div>
   );
 }
