@@ -149,9 +149,15 @@ function parseCsv(text) {
 
 const matchesFilter = (row, filter) => Object.entries(filter).every(([k, v]) => row[k] === v);
 
-function toNumber(raw, decimals) {
+/**
+ * @param bolen Kaynak birimi hedef birime çevirir. TÜİK bazı serileri farklı
+ *   ölçekte veriyor: GSYH `TUSD` (bin dolar) geliyor ama tablo milyar dolar
+ *   tutuyor, yani 1e6'ya bölünmeli. Verilmezse 1 — mevcut veri setleri
+ *   etkilenmiyor.
+ */
+function toNumber(raw, decimals, bolen = 1) {
   if (raw === undefined || raw === '') return null;
-  const n = Number(raw);
+  const n = Number(raw) / (bolen || 1);
   if (!Number.isFinite(n)) return null;
   const f = 10 ** decimals;
   return Math.round(n * f) / f;
@@ -165,9 +171,30 @@ function same(a, b) {
 }
 
 const isMonth = (p) => /^\d{4}-\d{2}$/.test(p);
+const isYear = (p) => /^\d{4}$/.test(p);
+
+/*
+ * ─── AYLIK / YILLIK ─────────────────────────────────────────────────────────
+ * Senkron başlangıçta yalnız aylık veri setleri için yazılmıştı ve üç yerde
+ * aylık biçim varsayılıyordu: dönem deseni, SQL'deki `substr(...,1,7)` ve
+ * INSERT'e yazılan `YYYY-MM-01 00:00:00`. GSYH gibi YILLIK setlerde dönem
+ * "2024" geliyor; desen tutmadığı için tüm satırlar SESSİZCE eleniyordu —
+ * hata da vermiyor, sadece "değişiklik yok" diyordu.
+ *
+ * `donem: 'yillik'` diyen veri setleri için üçü birden değişiyor.
+ */
+const yillikMi = (ds) => ds.donem === 'yillik';
 
 /** Dönem, veri setinin kapsamı içinde mi? */
-const inRange = (ds, p) => isMonth(p) && (!ds.minPeriod || p >= ds.minPeriod);
+const inRange = (ds, p) =>
+  (yillikMi(ds) ? isYear(p) : isMonth(p)) && (!ds.minPeriod || p >= ds.minPeriod);
+
+/** Dönem sütununun SQL'de karşılaştırılabilir hâli. */
+const donemIfade = (ds) =>
+  yillikMi(ds) ? ds.periodColumn : `substr(${ds.periodColumn},1,7)`;
+
+/** INSERT'e yazılacak dönem değeri. */
+const donemDegeri = (ds, p) => (yillikMi(ds) ? Number(p) : `${p}-01 00:00:00`);
 
 /** Yazma işlemlerini sırayla uygular (günlük fark tipik olarak birkaç satır). */
 async function applyWrites(writes) {
@@ -193,7 +220,7 @@ async function syncWide(ds) {
     const col = codeToCol.get(r[ds.productDim]);
     if (!col || !inRange(ds, r.TIME_PERIOD)) continue;
     if (!byPeriod.has(r.TIME_PERIOD)) byPeriod.set(r.TIME_PERIOD, {});
-    byPeriod.get(r.TIME_PERIOD)[col] = toNumber(r.OBS_VALUE, ds.decimals);
+    byPeriod.get(r.TIME_PERIOD)[col] = toNumber(r.OBS_VALUE, ds.decimals, ds.bolen);
   }
 
   /*
@@ -208,7 +235,7 @@ async function syncWide(ds) {
   }
 
   const existing = new Map();
-  for (const r of await d1(`SELECT substr(${ds.periodColumn},1,7) AS p, ${cols.join(',')} FROM ${ds.table}`)) {
+  for (const r of await d1(`SELECT ${donemIfade(ds)} AS p, ${cols.join(',')} FROM ${ds.table}`)) {
     existing.set(String(r.p), r);
   }
 
@@ -225,14 +252,14 @@ async function syncWide(ds) {
     if (prev) {
       updated++;
       writes.push({
-        sql: `UPDATE ${ds.table} SET ${cols.map((c) => `${c}=?`).join(',')} WHERE substr(${ds.periodColumn},1,7)=?`,
-        params: [...next, period],
+        sql: `UPDATE ${ds.table} SET ${cols.map((c) => `${c}=?`).join(',')} WHERE ${donemIfade(ds)}=?`,
+        params: [...next, donemDegeri(ds, period)],
       });
     } else {
       inserted++;
       writes.push({
         sql: `INSERT INTO ${ds.table} (${ds.periodColumn},${cols.join(',')}) VALUES (${Array(cols.length + 1).fill('?').join(',')})`,
-        params: [`${period}-01 00:00:00`, ...next],
+        params: [donemDegeri(ds, period), ...next],
       });
     }
   }

@@ -11,6 +11,48 @@
  */
 
 export const DATASETS = [
+  /*
+   * ─── TARIMIN GSYH'DEKİ PAYI ───────────────────────────────────────────────
+   * Ana sayfadaki "Tarımın GSYH'deki payı" kartını besleyen tablo ÖKSÜZDÜ:
+   * hiçbir iş yazmıyordu ve 2024'te donmuştu. Üstelik değerler eski bir
+   * revizyon sürümündendi — ölçüldü (2 Eylül 2026):
+   *
+   *     yıl    D1 tarım   SDMX tarım   D1 pay   SDMX pay
+   *     2023   68,5       73,7         %6,06    %6,39
+   *     2024   74         79,1         %5,60    %5,82
+   *
+   * TÜİK GSYH'yi yukarı revize etmiş; ekranda görünen pay bu yüzden düşüktü.
+   *
+   * ─── NEDEN BÖLGESEL BİR AKIŞ ──────────────────────────────────────────────
+   * SDMX'te "tarım GSYH" diye ayrı bir akış yok. `UH_BH_GSYH_CARI` bölgesel
+   * GSYH veriyor ama `REF_AREA=TR` satırı ülke toplamı ve `FAALIYET_KOD`
+   * boyutunda tarım ayrı bir kod. Kodlar DSD'den doğrulandı:
+   *     A     = Tarım, ormancılık ve balıkçılık
+   *     B1GQ  = Gayrisafi yurt içi hasıla (toplam)
+   *
+   * KIRILIM_SEVIYE=A10 seçildi: A3 ve A10 aynı tarım değerini veriyor
+   * (ölçüldü), A10 daha ayrıntılı olduğu için ileride başka bileşen
+   * gerekirse aynı çekimden karşılanabilir.
+   *
+   * Birim TUSD = BİN dolar; tablo MİLYAR dolar tutuyor, `bolen: 1e6`.
+   */
+  {
+    kind: 'wide',
+    donem: 'yillik',
+    name: 'Tarımın GSYH içindeki payı (yıllık)',
+    flow: 'UH_BH_GSYH_CARI',
+    version: '1.0',
+    productDim: 'FAALIYET_KOD',
+    filter: { REF_AREA: 'TR', UNIT_MEASURE: 'TUSD', KIRILIM_SEVIYE: 'A10' },
+    table: 'makro_tarim_gsyh',
+    periodColumn: 'yil',
+    decimals: 2,
+    bolen: 1e6,
+    columns: {
+      tarim_gsyh_milyar_usd: 'A',
+      toplam_gsyh_milyar_usd: 'B1GQ',
+    },
+  },
   {
     kind: 'wide',
     name: 'Süt ve süt ürünleri (aylık)',
