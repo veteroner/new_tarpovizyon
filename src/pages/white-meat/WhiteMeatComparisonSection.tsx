@@ -23,8 +23,6 @@ type Props = {
 };
 
 export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, quailMeatData, tradeData }: Props) {
-  if ((!tuikData || tuikData.length === 0) && (!turkeyMeatData || turkeyMeatData.length === 0) && (!quailMeatData || quailMeatData.length === 0)) return null;
-
   // Ticaret intelligence hesaplamaları
   const tradeIntelligence = useMemo(() => {
     if (!tradeData || tradeData.length === 0) return null;
@@ -46,6 +44,9 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
     return { latest, prev, totalIhracat, totalIthalat, exportCAGR, yoyExport, kismiYil,
       ilkYil: kaynak[0].yil, netBalance: latest.ihracat_musd - latest.ithalat_musd };
   }, [tradeData]);
+
+  // Erken çıkış hook'lardan SONRA: koşul değiştiğinde hook sırası sabit kalmalı.
+  if ((!tuikData || tuikData.length === 0) && (!turkeyMeatData || turkeyMeatData.length === 0) && (!quailMeatData || quailMeatData.length === 0)) return null;
 
   return (
     <>

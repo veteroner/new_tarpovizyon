@@ -40,7 +40,10 @@ const TOOLTIP_STYLE = {
   },
 };
 
-function useActiveSeries(data: Record<string, any>[], xKey: string, series?: SeriesConfig[]): SeriesConfig[] {
+// Hook değil, saf bir yardımcı: içinde hiçbir React hook'u çağrılmıyor.
+// `use` önekiyle adlandırıldığı sürece rules-of-hooks onu hook sanıp erken
+// return'den sonraki çağrıyı hata olarak işaretliyordu.
+function resolveActiveSeries(data: Record<string, any>[], xKey: string, series?: SeriesConfig[]): SeriesConfig[] {
   if (series && series.length) return series;
   return Object.keys(data[0] ?? {})
     .filter(k => k !== xKey && k !== 'color' && typeof data[0][k] === 'number')
@@ -68,7 +71,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
     );
   }
 
-  const activeSeries = useActiveSeries(data, xKey, series);
+  const activeSeries = resolveActiveSeries(data, xKey, series);
   const fmt = (v: any) => [
     typeof v === 'number' ? v.toLocaleString('tr-TR') + (unit ? ' ' + unit : '') : String(v),
   ];

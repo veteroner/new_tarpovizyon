@@ -25,8 +25,6 @@ export default function MilkTuikSection({
   tuikSelectedData, tuikLatestYear, tuikYoyChange,
   tuikAllProductsLatest, tuikSeasonality, tuikSeasonHeatmap, tuikGrowthRates
 }: Props) {
-  if (!tuikSutData || tuikSutData.length === 0) return null;
-
   const fiveYearChange = useMemo(() => {
     if (tuikSelectedData.length < 5 || !tuikLatestYear) return null;
     const fiveAgo = tuikSelectedData[tuikSelectedData.length - 5];
@@ -40,11 +38,14 @@ export default function MilkTuikSection({
   }, [tuikSeasonality]);
 
   const tuikRangeLabel = useMemo(() => {
-    if (!tuikSutData.length) return '';
+    if (!tuikSutData?.length) return '';
     const years = tuikSutData.filter(d => d.toplam > 0).map(d => d.yil);
     if (!years.length) return '';
     return `${Math.min(...years)}–${Math.max(...years)}`;
   }, [tuikSutData]);
+
+  // Erken çıkış hook'lardan SONRA: koşul değiştiğinde hook sırası sabit kalmalı.
+  if (!tuikSutData || tuikSutData.length === 0) return null;
 
   return (
     <>
