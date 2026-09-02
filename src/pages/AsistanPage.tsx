@@ -143,7 +143,9 @@ export default function AsistanPage() {
                       remarkPlugins={[remarkGfm]}
                       components={{
                         code({ className, children, ...rest }) {
-                          const eslesme = /language-(\w+)/.exec(className || '');
+                          // Tire dahil: `\w` tireyi kapsamadığı için `chart-json`
+                          // dili "chart" olarak yakalanıyor ve grafik hiç çizilmiyordu.
+                          const eslesme = /language-([\w-]+)/.exec(className || '');
                           if (eslesme?.[1] === 'chart-json') {
                             try {
                               const config: ChartConfig = JSON.parse(String(children));
