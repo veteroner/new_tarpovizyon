@@ -128,7 +128,16 @@ export default function TurkeyRedMeatProductionPage() {
       // 3. Ekonomik Göstergeler
       // DATE_FORMAT(tarih,'%Y-%m') karşılığı: tarih 'YYYY-MM-DD HH:MM:SS'
       // biçiminde; ilk 7 karakter alınıyor. LIMIT 60 en yeni 60 kayıt.
-      const economicRows = (await fetchRows('oner/kirmizi-et-ekonomik-gostergeler'))
+      /*
+       * ─── DONMUŞ İKİZDEN ÇIKILDI ─────────────────────────────────────────
+       * `oner/kirmizi-et-ekonomik-gostergeler` hiçbir senkron işinin
+       * YAZMADIĞI kopyaydı, 2026-02'de donmuştu. Günlük iş
+       * `kirmizi_et_ekonomik_gostergeler`'i besliyor; orası 2026-08'de.
+       *
+       * Yalnız üç sütun adı farklı (`_fiyatlari_` → `_fiyati_`); çıktı şekli
+       * AYNI bırakıldı ki grafikler değişmesin.
+       */
+      const economicRows = (await fetchRows('kirmizi-et/ekonomik-gostergeler'))
         .slice(-60)
         .reverse()
         .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
@@ -136,14 +145,14 @@ export default function TurkeyRedMeatProductionPage() {
         setEconomicData(economicRows.map((item: Record<string, string | number>) => ({
           tarih: String(item['tarih'] || ''),
           karkas_paritesi: Number(item['karkas_paritesi']) || 0,
-          besi_yemi_fiyatlari_tl_kg: Number(item['besi_yemi_fiyatlari_tl_kg']) || 0,
+          besi_yemi_fiyatlari_tl_kg: Number(item['besi_yemi_fiyati_tl_kg']) || 0,
           dolar_kuru_tl: Number(item['dolar_kuru_tl']) || 0,
-          besilik_dana_fiyatlari_tl_kg: Number(item['besilik_dana_fiyatlari_tl_kg']) || 0,
+          besilik_dana_fiyatlari_tl_kg: Number(item['besilik_dana_fiyati_tl_kg']) || 0,
           dana_karkas_maliyet_tl_kg: Number(item['dana_karkas_maliyet_tl_kg']) || 0,
           dana_karkas_fiyati_tl_kg: Number(item['dana_karkas_fiyati_tl_kg']) || 0,
           karlilik: Number(item['karlilik']) || 0,
           kuzu_karkas_fiyati_tl_kg: Number(item['kuzu_karkas_fiyati_tl_kg']) || 0,
-          besilik_kucukbas_fiyatlari_tl_kg: Number(item['besilik_kucukbas_fiyatlari_tl_kg']) || 0,
+          besilik_kucukbas_fiyatlari_tl_kg: Number(item['besilik_kucukbas_fiyati_tl_kg']) || 0,
           dana_karkas_fiyat_maliyet_farki_tl_kg: Number(item['dana_karkas_fiyat_maliyet_farki_tl_kg']) || 0,
         })));
       }

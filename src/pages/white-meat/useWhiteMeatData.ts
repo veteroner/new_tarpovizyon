@@ -81,19 +81,27 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // Ekonomik göstergeleri yükle
       try {
-        const economicRes = { data: (await fetchRows('oner/kanatli-eti-maliyeti-fiyati'))
+        /*
+         * ─── DONMUŞ İKİZDEN ÇIKILDI ───────────────────────────────────────
+         * `oner/kanatli-eti-maliyeti-fiyati` hiçbir senkron işinin YAZMADIĞI
+         * kopyaydı, 2026-02'de donmuştu. Günlük iş `kanatli_eti_maliyet_fiyat`
+         * tablosunu besliyor; orası 2026-08'de. Altı ay fark.
+         *
+         * Sütun adları farklı; çıktı şekli AYNI bırakıldı.
+         */
+        const economicRes = { data: (await fetchRows('kanatli/maliyet-fiyat'))
           .slice(-60).reverse()
           .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
         if (economicRes.data && economicRes.data.length > 0) {
           const mapped = economicRes.data.map((item) => ({
             tarih: String(item['tarih'] || ''),
-            etlik_pilic_maliyet_tl_kg: Number(item['etlik_pilic_maliyet_tl_kg']) || 0,
+            etlik_pilic_maliyet_tl_kg: Number(item['maliyet_tl_kg']) || 0,
             uretici_fiyati_tl_kg: Number(item['uretici_fiyati_tl_kg']) || 0,
-            etlik_pilic_yemi_tl_kg: Number(item['etlik_pilic_yemi_tl_kg']) || 0,
+            etlik_pilic_yemi_tl_kg: Number(item['yem_fiyati_tl_kg']) || 0,
             tuketici_fiyati_tl_kg: Number(item['tuketici_fiyati_tl_kg']) || 0,
             karlilik: Number(item['karlilik']) || 0,
-            uretici_fiyati_maliyet_farki_tl_kg: Number(item['uretici_fiyati_maliyet_farki_tl_kg']) || 0,
-            parite_etlik_pilic_yem_paritesi: Number(item['parite_etlik_pilic_yem_paritesi']) || 0,
+            uretici_fiyati_maliyet_farki_tl_kg: Number(item['fiyat_maliyet_farki_tl_kg']) || 0,
+            parite_etlik_pilic_yem_paritesi: Number(item['yem_paritesi']) || 0,
           }));
           setEconomicData(mapped);
           if (mapped.length > 0) {

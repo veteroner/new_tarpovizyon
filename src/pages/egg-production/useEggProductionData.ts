@@ -81,19 +81,30 @@ export function useEggProductionData() {
 
       // Ekonomik göstergeleri yükle
       try {
-        const economicRes = { data: (await fetchRows('oner/yumurta-maliyeti-fiyati'))
+        /*
+         * ─── DONMUŞ İKİZDEN ÇIKILDI ───────────────────────────────────────
+         * Önce `oner/yumurta-maliyeti-fiyati` okunuyordu: MySQL'den bir kez
+         * alınmış, hiçbir senkron işinin YAZMADIĞI donmuş kopya. Son verisi
+         * 2026-02'de kalmıştı; günlük iş `yumurta_maliyet_fiyat` tablosunu
+         * besliyor ve orası 2026-08'de. Yani ekran ALTI AY geride çalışıyordu.
+         *
+         * Sütun adları iki tabloda farklı; aşağıdaki eşleme onları çeviriyor.
+         * Çıktı şekli AYNI bırakıldı — grafikler ve alt bileşenler
+         * değişmeden çalışmaya devam ediyor.
+         */
+        const economicRes = { data: (await fetchRows('yumurta/maliyet-fiyat'))
           .slice(-60).reverse()
           .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
         if (economicRes.data && economicRes.data.length > 0) {
           const mapped = economicRes.data.map((item: Record<string, string | number>) => ({
             tarih: String(item['tarih'] || ''),
-            yumurta_maliyet_tl_kg: Number(item['yumurta_maliyet_tl_kg']) || 0,
-            yumurta_uretici_fiyati_tl_kg: Number(item['yumurta_uretici_fiyati_tl_kg']) || 0,
-            yumurtaci_tavuk_yemi_tl_kg: Number(item['yumurtaci_tavuk_yemi_tl_kg']) || 0,
+            yumurta_maliyet_tl_kg: Number(item['maliyet_tl_kg']) || 0,
+            yumurta_uretici_fiyati_tl_kg: Number(item['uretici_fiyati_tl_kg']) || 0,
+            yumurtaci_tavuk_yemi_tl_kg: Number(item['yem_fiyati_tl_kg']) || 0,
             tuketici_fiyati_tl: Number(item['tuketici_fiyati_tl']) || 0,
             karlilik: Number(item['karlilik']) || 0,
             uretici_fiyati_maliyet_farki_tl_kg: Number(item['uretici_fiyati_maliyet_farki_tl_kg']) || 0,
-            parite_yumurta_yem_paritesi: Number(item['parite_yumurta_yem_paritesi']) || 0,
+            parite_yumurta_yem_paritesi: Number(item['yem_paritesi']) || 0,
           }));
           setEconomicData(mapped);
           if (mapped.length > 0) {

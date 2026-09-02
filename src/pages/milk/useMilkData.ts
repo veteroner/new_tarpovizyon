@@ -53,7 +53,17 @@ export function useMilkData() {
       try {
         // DATE_FORMAT(tarih,'%Y-%m') karşılığı: 'YYYY-MM-DD ...' dizisinin ilk
         // 7 karakteri. Eski sorgu en yeni 60 kaydı azalan sırada veriyordu.
-        const economicRows = (await fetchRows('oner/cig-sut-ekonomik-gostergeler'))
+        /*
+         * ─── DONMUŞ İKİZDEN ÇIKILDI ───────────────────────────────────────
+         * `oner/cig-sut-ekonomik-gostergeler` MySQL'den bir kez alınmış ve
+         * hiçbir senkron işinin YAZMADIĞI kopya; 2026-02'de donmuştu. Günlük
+         * iş `cig_sut_ekonomik_gostergeler`'i besliyor, orası 2026-08'de.
+         * Ekran altı ay geride çalışıyordu.
+         *
+         * Sütun adları farklı; eşleme aşağıda. Çıktı şekli AYNI bırakıldı,
+         * grafikler değişmedi.
+         */
+        const economicRows = (await fetchRows('cig-sut/ekonomik-gostergeler'))
           .slice(-60).reverse()
           .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) }));
         if (economicRows.length > 0) {
@@ -62,14 +72,14 @@ export function useMilkData() {
             misir_silaji: Number(item['misir_silaji']) || 0,
             yonca: Number(item['yonca']) || 0,
             saman: Number(item['saman']) || 0,
-            sut_yemi_19_hp: Number(item['sut_yemi_19_hp']) || 0,
-            cig_sut_uretim_maliyeti_tl_lt: Number(item['cig_sut_uretim_maliyeti_tl_lt']) || 0,
-            usk_cig_sut_tavsiye_fiyati_tl_lt: Number(item['usk_cig_sut_tavsiye_fiyati_tl_lt']) || 0,
+            sut_yemi_19_hp: Number(item['sut_yemi_19hp']) || 0,
+            cig_sut_uretim_maliyeti_tl_lt: Number(item['uretim_maliyeti_tl_lt']) || 0,
+            usk_cig_sut_tavsiye_fiyati_tl_lt: Number(item['usk_tavsiye_fiyat_tl_lt']) || 0,
             sut_yem_paritesi: Number(item['sut_yem_paritesi']) || 0,
-            litre_basina_cig_sut_destegi_tl: Number(item['litre_basina_cig_sut_destegi_tl']) || 0,
+            litre_basina_cig_sut_destegi_tl: Number(item['litre_basina_destek_tl']) || 0,
             sut_yem_paritesi_destek_dahil: Number(item['sut_yem_paritesi_destek_dahil']) || 0,
             fiyat_maliyet_farki_tl_lt: Number(item['fiyat_maliyet_farki_tl_lt']) || 0,
-            fiyat_maliyet_farki_tl_lt_destek_dahil: Number(item['fiyat_maliyet_farki_tl_lt_destek_dahil']) || 0,
+            fiyat_maliyet_farki_tl_lt_destek_dahil: Number(item['fiyat_maliyet_farki_destek_dahil_tl_lt']) || 0,
             karlilik: Number(item['karlilik']) || 0,
           }));
           setEconomicData(mapped);
