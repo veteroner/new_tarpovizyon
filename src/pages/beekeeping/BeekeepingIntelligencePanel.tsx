@@ -3,7 +3,7 @@ import { type TuikKovanKpi } from './beekeepingTypes';
 export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: TuikKovanKpi }) {
   return (
     <div style={{ 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
       borderRadius: '12px',
       padding: '20px',
       marginTop: '48px',

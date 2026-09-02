@@ -96,13 +96,19 @@
 [style*="color: rgb(251, 191, 36)"] { color: #92400e !important; } /* kehribar-400*/
 
 /*
- * Bölüm sekmeleri. Seçili olan `.section-tab.is-active`, zemini #3b82f6 ve
- * yazısı beyaz: 3.68:1. Sekme etiketleri 13–15 px, sınır 4.5:1.
+ * Bölüm sekmeleri. Seçili sekmenin zemini eskiden #3b82f6'ydı ve beyaz yazıyla
+ * 3,68:1 veriyordu; sekme etiketleri 13–15 px olduğu için sınır 4,5:1. O gün
+ * çözüm koyu maviye (#1d4ed8) çekmekti.
+ *
+ * Marka rengi yeşile döndükten sonra bu kural HEM BAYAT HEM YANLIŞ oldu:
+ * `!important` ile mavi zemini geri getiriyor, sayfanın kalanı yeşilken tek
+ * mavi öğe olarak kalıyordu. Marka koyusuna çekildi — beyaz yazıyla 9,53:1,
+ * eski çözümden de yüksek.
  */
 .section-tab.is-active,
 .section-tab.active {
-  background: #1d4ed8 !important;
-  border-color: #1d4ed8 !important;
+  background: var(--tv-vurgu-koyu, #12522d) !important;
+  border-color: var(--tv-vurgu-koyu, #12522d) !important;
 }
 
 /* Yeşil-600 (#16a34a) metin olarak 3.2–3.3:1; koyu adıma çekiliyor. */

@@ -10,7 +10,7 @@ const kpiConfig = [
     key: 'total' as const,
     label: 'Toplam Ürün',
     sub: 'Tescilli + Başvuru',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    gradient: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)'
   },
   {
     key: 'registered' as const,

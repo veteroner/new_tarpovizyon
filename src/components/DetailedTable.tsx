@@ -147,7 +147,7 @@ export function DetailedTable<T extends object>({
                 left: '14px', 
                 top: '50%', 
                 transform: 'translateY(-50%)',
-                color: '#667eea',
+                color: 'var(--tv-vurgu, #17693a)',
                 opacity: 0.6
               }} 
             />
@@ -172,7 +172,7 @@ export function DetailedTable<T extends object>({
                 outline: 'none'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
+                e.target.style.borderColor = 'var(--tv-vurgu, #17693a)';
                 e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
               }}
               onBlur={(e) => {
@@ -191,7 +191,7 @@ export function DetailedTable<T extends object>({
               alignItems: 'center',
               gap: '8px',
               padding: '12px 20px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '10px',
@@ -228,7 +228,7 @@ export function DetailedTable<T extends object>({
       }}>
         <span style={{ 
           background: 'rgba(102, 126, 234, 0.1)',
-          color: '#667eea',
+          color: 'var(--tv-vurgu, #17693a)',
           padding: '4px 10px',
           borderRadius: '6px',
           fontWeight: 700,
@@ -288,7 +288,7 @@ export function DetailedTable<T extends object>({
               onClick={() => col.sortable !== false && handleSort(col.key)}
               onMouseEnter={(e) => {
                 if (col.sortable !== false) {
-                  e.currentTarget.style.color = '#667eea';
+                  e.currentTarget.style.color = 'var(--tv-vurgu, #17693a)';
                 }
               }}
               onMouseLeave={(e) => {
@@ -297,7 +297,7 @@ export function DetailedTable<T extends object>({
             >
               {col.label}
               {col.sortable !== false && sortKey === col.key && (
-                <span style={{ color: '#667eea', display: 'flex', alignItems: 'center' }}>
+                <span style={{ color: 'var(--tv-vurgu, #17693a)', display: 'flex', alignItems: 'center' }}>
                   {sortOrder === 'asc' ? <ChevronUp size={15} strokeWidth={2.5} /> : <ChevronDown size={15} strokeWidth={2.5} />}
                 </span>
               )}
@@ -389,7 +389,7 @@ export function DetailedTable<T extends object>({
               border: currentPage === 1 ? '2px solid var(--border)' : '2px solid rgba(102, 126, 234, 0.3)',
               borderRadius: '8px',
               background: currentPage === 1 ? 'var(--bg-primary)' : 'var(--bg-card)',
-              color: currentPage === 1 ? 'var(--text-muted)' : '#667eea',
+              color: currentPage === 1 ? 'var(--text-muted)' : 'var(--tv-vurgu, #17693a)',
               cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
               fontSize: '13px',
               fontWeight: 700,
@@ -399,7 +399,7 @@ export function DetailedTable<T extends object>({
             onMouseEnter={(e) => {
               if (currentPage > 1) {
                 e.currentTarget.style.background = 'rgba(102, 126, 234, 0.08)';
-                e.currentTarget.style.borderColor = '#667eea';
+                e.currentTarget.style.borderColor = 'var(--tv-vurgu, #17693a)';
               }
             }}
             onMouseLeave={(e) => {
@@ -429,7 +429,7 @@ export function DetailedTable<T extends object>({
             <span style={{
               fontSize: '14px',
               fontWeight: 800,
-              color: '#667eea'
+              color: 'var(--tv-vurgu, #17693a)'
             }}>
               {currentPage}
             </span>
@@ -457,7 +457,7 @@ export function DetailedTable<T extends object>({
               border: currentPage === totalPages ? '2px solid var(--border)' : '2px solid rgba(102, 126, 234, 0.3)',
               borderRadius: '8px',
               background: currentPage === totalPages ? 'var(--bg-primary)' : 'var(--bg-card)',
-              color: currentPage === totalPages ? 'var(--text-muted)' : '#667eea',
+              color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--tv-vurgu, #17693a)',
               cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
               fontSize: '13px',
               fontWeight: 700,
@@ -467,7 +467,7 @@ export function DetailedTable<T extends object>({
             onMouseEnter={(e) => {
               if (currentPage < totalPages) {
                 e.currentTarget.style.background = 'rgba(102, 126, 234, 0.08)';
-                e.currentTarget.style.borderColor = '#667eea';
+                e.currentTarget.style.borderColor = 'var(--tv-vurgu, #17693a)';
               }
             }}
             onMouseLeave={(e) => {

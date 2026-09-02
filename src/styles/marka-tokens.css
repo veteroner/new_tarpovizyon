@@ -121,3 +121,62 @@
   padding-left: 12px;
   color: var(--tv-ikincil);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ESKİ BELİRTEÇLERİ MARKA ÖLÇEĞİNE BAĞLA
+   ══════════════════════════════════════════════════════════════════════════
+
+   ─── SORUN ────────────────────────────────────────────────────────────────
+   Kabuk marka yeşiline geçtikten sonra ortaya iki dilli bir arayüz çıktı:
+   üst çubuk, kırıntı ve kartlar yeşil-Apple, veri sayfalarının İÇİ ise hâlâ
+   mavi-slate (`--primary: #3b82f6`, `--bg-primary: #f8fafc`). Aynı ekranda
+   iki marka rengi görünüyordu.
+
+   ─── NEDEN BURADA, SAYFALARDA DEĞİL ───────────────────────────────────────
+   84+ sayfa bu değişkenleri kullanıyor. Hepsini tek tek düzenlemek hem
+   günler sürerdi hem de bir sonraki sayfa eski değeri yazınca ayrışma
+   yeniden başlardı. Bu dosya `App.tsx`'te EN SON import ediliyor, yani
+   buradaki `:root` aynı özgüllükte kazanıyor.
+
+   ─── NEYE DOKUNULMADI ─────────────────────────────────────────────────────
+   1. GRAFİK SERİLERİ. `dataviz-tokens.css` kendi `--series-1..8` ölçeğini
+      taşıyor ve ölçüldü: `--primary` hiçbir yerde stroke/fill olarak
+      kullanılmıyor. Seri renklerine dokunmak çok serili grafikleri
+      okunamaz hâle getirirdi.
+   2. ANLAMSAL RENKLER (`--success`, `--warning`, `--error`) ve DÜZ RENK
+      ADLARI (`--blue`, `--green`, `--red`, `--orange`, `--purple`, `--teal`).
+      "blue" adlı değişkeni yeşile bağlamak saçma olurdu; anlamsal renkler
+      de marka renginden AYRI kalmalı, yoksa "başarılı" ile "marka" aynı
+      şeye benziyor.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Zeminler */
+  --bg-primary: var(--tv-zemin);
+  --bg: var(--tv-zemin);
+  --bg-secondary: var(--tv-kart);
+  --bg-card: var(--tv-kart);
+  --card-bg: var(--tv-kart);
+
+  /* Metin — Apple ölçeği: #1d1d1f / #6e6e73 */
+  --text-primary: var(--tv-murekkep);
+  --text-secondary: var(--tv-ikincil);
+  --text-muted: var(--tv-ikincil);
+
+  /* Marka: mavi ailesi → TARPOL yeşili */
+  --primary: var(--tv-vurgu);
+  --accent: var(--tv-vurgu);
+  --primary-dark: var(--tv-vurgu-koyu);
+  --accent-deep: var(--tv-vurgu-koyu);
+  --primary-light: #2b8a52;
+
+  /* Çizgiler */
+  --border: var(--tv-cizgi);
+  --border-light: var(--tv-cizgi-ince);
+
+  /* Gölgeler: Apple'ın yumuşak-geniş yaklaşımı, sert kısa gölge yerine */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: var(--tv-golge);
+  --shadow-lg: var(--tv-golge-kart);
+  --shadow-xl: 0 1px 3px rgba(0, 0, 0, 0.05), 0 22px 60px rgba(0, 0, 0, 0.09);
+}

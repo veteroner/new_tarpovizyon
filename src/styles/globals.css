@@ -353,7 +353,7 @@ body {
 
 /* Intelligence Table Enhancement */
 .intelligence-table .table-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%);
   border: none;
   border-radius: 12px;
   padding: 10px 14px;
@@ -410,14 +410,14 @@ body {
 
 .intelligence-table input[type="text"]:focus {
   outline: none;
-  border-color: #667eea !important;
+  border-color: var(--tv-vurgu, #17693a) !important;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .intelligence-table button {
   padding: 8px 14px !important;
   font-size: 12px !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%) !important;
   color: white !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25) !important;
@@ -1033,7 +1033,7 @@ body {
 
 /* ===== GRADIENT BACKGROUNDS ===== */
 .gradient-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%);
   color: white;
 }
 

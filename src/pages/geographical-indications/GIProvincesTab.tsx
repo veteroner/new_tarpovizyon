@@ -50,7 +50,7 @@ export function GIProvincesTab({ provinceData, allProducts, selectedProvince, on
       {/* Province Detail Card */}
       {selectedProvince !== 'Tümü' && selectedData && (
         <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
           borderRadius: '12px',
           padding: '24px',
           marginBottom: '24px',

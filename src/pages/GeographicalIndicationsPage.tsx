@@ -73,7 +73,7 @@ export default function GeographicalIndicationsPage() {
       {/* Header */}
       <div style={{
         marginBottom: '32px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
         borderRadius: '16px',
         padding: '32px',
         color: 'white'
@@ -115,7 +115,7 @@ export default function GeographicalIndicationsPage() {
               fontWeight: 600,
               cursor: 'pointer',
               borderRadius: '8px 8px 0 0',
-              borderBottom: activeTab === tab.id ? '3px solid #667eea' : '3px solid transparent',
+              borderBottom: activeTab === tab.id ? '3px solid var(--tv-vurgu, #17693a)' : '3px solid transparent',
               transition: 'all 0.2s'
             }}
           >
