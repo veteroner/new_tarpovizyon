@@ -271,3 +271,74 @@ grep -rl "services/api'" src/pages/ | wc -l   # eski api.php
 # oner_ tablosuna yazan senkron var mı (olmamalı)
 grep -rn "oner_" scripts/
 ```
+
+---
+
+## 8. Aşama 3 keşfi — TÜİK SDMX'te ne var, ne yok
+
+2 Eylül 2026'da TÜİK SDMX kataloğu (421 dataflow) tarandı. Sonuç, Aşama 3'ün
+kapsamını **daraltıyor**.
+
+### SDMX'te OLMAYAN (öksüz tabloların çoğu buradan beslenemez)
+
+| Aranan | Sonuç |
+|---|---|
+| Hayvan varlığı (`tr_hayvan_varliklari`) | ✗ hiç akış yok |
+| Kırmızı et üretimi | ✗ yok |
+| Bitkisel üretim | ✗ yok |
+| Arıcılık / bal | ✗ yok |
+| İl bazında tarım | ✗ yok |
+
+Bunlar TÜİK'in **bülten API'sinden** ya da **Veri Portalı Excel**'inden
+gelmek zorunda; SDMX yolu kapalı.
+
+### SDMX'te OLAN ve henüz kullanılmayan
+
+- `UH_BH_GSYH_CARI` — bölgesel GSYH, `FAALIYET_KOD` boyutunda
+  **`A` = Tarım, ormancılık ve balıkçılık** ve **`B1GQ` = GSYH (toplam)**
+  kodları var. 2000–2024, `UNIT_MEASURE=TUSD` (bin dolar), `KIRILIM_SEVIYE=A10`.
+- `DF_SUT_URUNLERI_YILLIK_V2` — süt ürünleri yıllık detay (aylık sürümü zaten
+  senkronda).
+
+### `makro_tarim_gsyh` ne kadar geride — ölçüldü
+
+| Yıl | D1 tarım | SDMX tarım | D1 pay | SDMX pay |
+|---|---|---|---|---|
+| 2021 | 44,71 | **47,2** | %5,53 | **%5,70** |
+| 2022 | 58,67 | **61,9** | %6,48 | **%6,69** |
+| 2023 | 68,5 | **73,7** | %6,06 | **%6,39** |
+| 2024 | 74 | **79,1** | %5,60 | **%5,82** |
+
+D1 sistematik olarak düşük: TÜİK GSYH'yi yukarı revize etmiş, D1 eski sürümü
+tutuyor. Ana sayfadaki "Tarımın GSYH'deki payı" kartı bu yüzden hem yanlış
+hem de 2025'i hiç görmeyecek.
+
+### Bunu senkrona bağlamak için çerçevede iki eksik var
+
+`datasets.mjs`'e bildirimsel kayıt eklemek YETMİYOR:
+
+1. **Yıllık dönem desteği yok.** `sync.mjs` içindeki `isMonth()`
+   `^\d{4}-\d{2}$` istiyor; GSYH dönemi `2024` biçiminde ve tüm satırlar
+   sessizce eleniyor.
+2. **Ölçek çarpanı yok.** SDMX bin dolar (`TUSD`) veriyor, tablo milyar dolar
+   tutuyor. `toNumber` yalnız ondalık yuvarlıyor.
+
+İkisi de küçük ve kapsamlı: `inRange`'e yıllık desen, `ds`'ye `bolen` alanı.
+
+### Doğrulanmış eşleme (uygulanmaya hazır)
+
+```
+flow:        UH_BH_GSYH_CARI, version 1.0
+filter:      REF_AREA=TR, UNIT_MEASURE=TUSD, KIRILIM_SEVIYE=A10
+productDim:  FAALIYET_KOD
+columns:     tarim_gsyh_milyar_usd  ← A
+             toplam_gsyh_milyar_usd ← B1GQ
+table:       makro_tarim_gsyh
+periodColumn: yil        (YILLIK — çerçeve desteği gerekiyor)
+bolen:       1e6         (bin $ → milyar $; çerçeve desteği gerekiyor)
+```
+
+### Erişim tuzağı (tekrar yaşandı)
+
+`Accept-Language` başlığı olmadan veri ucu **HTTP 500** ve gövdede
+`languageTag1` dönüyor. Hata mesajı sebebi hiç söylemiyor; başlık şart.
