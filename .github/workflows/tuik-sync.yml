@@ -45,6 +45,19 @@ jobs:
       # Dosya adı her ay değişiyor (ffpi-data-YYYY-MM.xlsx), bağlantı FAO'nun
       # endeks sayfasından keşfediliyor. TÜİK senkronu başarısız olsa bile bu
       # çalışsın diye ayrı adım; `if: always()` ile bağımsız.
+      # ─── xlsx BURADA KURULUYOR ────────────────────────────────────────
+      # Bu iş akışı hiç `npm install` çalıştırmıyordu: `sync.mjs` dış paket
+      # kullanmadığı için sorun çıkmıyordu, ama `fao-fpi-sync.mjs` `xlsx`
+      # import ediyor ve adım ERR_MODULE_NOT_FOUND ile patlıyordu. TÜİK adımı
+      # geçtiği için hata sessiz kaldı — iş akışı kırmızıydı ama TÜİK verisi
+      # güncelleniyordu, kimse bakmadı.
+      #
+      # Tüm ağacı kurmuyoruz: `npm ci` hem yavaş hem de depodaki eslint peer
+      # çakışması yüzünden `--legacy-peer-deps` istiyor. Tek paket yeterli.
+      - name: FAO adımının bağımlılığı
+        if: always() && !inputs.dry_run
+        run: npm install xlsx --no-save --no-audit --no-fund
+
       - name: FAO gıda fiyat endeksini senkronla
         if: always() && !inputs.dry_run
         env:
