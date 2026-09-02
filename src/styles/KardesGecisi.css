@@ -1,0 +1,59 @@
+/*
+ * Kardeş geçişi — içerik alanının en üstünde, sayfayla birlikte kayan şerit.
+ * Renkler `marka-tokens.css`'teki `--tv-*` ölçeğinden.
+ */
+
+.kg {
+  display: flex;
+  gap: 7px;
+  padding: 14px 22px 4px;
+  overflow-x: auto;
+  /* Kaydırma çubuğu şeridi yükseltiyordu; gizli ama kaydırma çalışıyor. */
+  scrollbar-width: none;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Segoe UI', Roboto, sans-serif;
+}
+.kg::-webkit-scrollbar { display: none; }
+
+.kg-oge {
+  flex: none;
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-kart, #fff);
+  color: var(--tv-ikincil, #6e6e73);
+  border-radius: 980px;
+  padding: 6px 15px;
+  font: inherit;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, color 160ms ease-out,
+    border-color 160ms ease-out;
+}
+.kg-oge:hover:not(:disabled) {
+  background: var(--tv-zemin-2, #f5f5f7);
+  color: var(--tv-murekkep, #1d1d1f);
+  border-color: var(--tv-cizgi, #d2d2d7);
+}
+
+/*
+ * Bulunduğun sayfa `disabled`: tıklanınca aynı yere gitmek boş bir gezinme
+ * kaydı üretiyor ve hızlı erişim şeridini kirletiyordu. Görsel olarak da
+ * soluk DEĞİL — burada disabled "yapamazsın" değil "zaten buradasın".
+ */
+.kg-oge.aktif {
+  background: var(--tv-vurgu-sis, rgba(23, 105, 58, 0.08));
+  border-color: var(--tv-vurgu, #17693a);
+  color: var(--tv-vurgu-koyu, #12522d);
+  font-weight: 600;
+  cursor: default;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kg-oge { transition: none; }
+}
+
+@media (max-width: 560px) {
+  .kg { padding: 12px 14px 4px; }
+}

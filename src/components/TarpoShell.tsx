@@ -10,6 +10,7 @@ import {
 import { KomutPaleti } from './nav/KomutPaleti';
 import { paletiAc } from './nav/paletOlay';
 import { HizliErisim } from './nav/HizliErisim';
+import { KardesGecisi } from './nav/KardesGecisi';
 import '../styles/TarpoShell.css';
 import './TarpoShell.breadcrumb.css';
 
@@ -252,6 +253,13 @@ export default function TarpoShell() {
         </nav>
 
         <main className="tarpo-content">
+          {/*
+            * Kardeş geçişi: aynı bölümün diğer konuları. Kabukta DEĞİL,
+            * içerikte — üst çubuk + kırıntı + hızlı erişim zaten üç şerit;
+            * dördüncü YAPIŞKAN şerit ekranın dörtte birini gezinmeye
+            * verirdi. Burada sayfayla birlikte kayıyor.
+            */}
+          <KardesGecisi />
           {/*
             * `key` yola bağlı: rota değişince sayfa YENİDEN KURULUYOR.
             *
