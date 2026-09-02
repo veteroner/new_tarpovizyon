@@ -1,85 +1,87 @@
 /**
- * Konum izi (breadcrumb) ve kapsam anahtarı işareti.
+ * Konum izi (breadcrumb).
  *
- * 61 sayfalık, üç seviyeli hiyerarşide hiç konum göstergesi yoktu; kullanıcı
- * nerede olduğunu ancak kenar menüsüne bakarak anlıyordu. Menü mobilde kapalı
- * olduğu için orada hiç anlaşılmıyordu.
+ * ─── ARTIK GEZİNMENİN KENDİSİ ───────────────────────────────────────────────
+ * Kenar menüsü kaldırıldıktan sonra kırıntı yalnızca "neredesin" göstergesi
+ * değil, yukarı çıkmanın da tek yolu. Bu yüzden üst çubuğun ALTINA yapışıyor:
+ * static bırakıldığında kaydırınca kayboluyordu ve kullanıcı kırılımın
+ * ortasında yönsüz kalıyordu.
+ *
+ * Renkler `marka-tokens.css`'teki `--tv-*` ölçeğinden; eski `--text-secondary`
+ * / `--bg-card` değişkenleri koyu chrome içindi.
  */
+
 .tarpo-breadcrumb {
+  position: sticky;
+  /* Üst çubuk 56px; dar ekranda sarıp büyüyor, o yüzden değişkenden. */
+  top: var(--tarpo-ust-h, 56px);
+  z-index: 40;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
+  gap: 5px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 10px 22px;
+  font-size: 14px;
+  color: var(--tv-ikincil, #6e6e73);
+  background: var(--tv-ust-cam, rgba(251, 251, 253, 0.72));
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
   overflow-x: auto;
   scrollbar-width: none;
   white-space: nowrap;
 }
-
-.tarpo-breadcrumb::-webkit-scrollbar {
-  display: none;
-}
+.tarpo-breadcrumb::-webkit-scrollbar { display: none; }
 
 .tarpo-breadcrumb button {
   border: none;
   background: none;
-  padding: 4px 2px;
-  color: var(--text-secondary);
   font: inherit;
+  color: var(--tv-ikincil, #6e6e73);
+  padding: 4px 9px;
+  border-radius: 7px;
   cursor: pointer;
-  border-radius: 4px;
+  transition: background-color 160ms ease-out, color 160ms ease-out;
 }
-
 .tarpo-breadcrumb button:hover {
-  color: var(--text-primary);
-  text-decoration: underline;
-}
-
-.tarpo-breadcrumb button:focus-visible {
-  outline: 2px solid var(--accent, #16a34a);
-  outline-offset: 2px;
+  background: var(--tv-zemin-2, #f5f5f7);
+  color: var(--tv-murekkep, #1d1d1f);
 }
 
 .tarpo-breadcrumb strong {
-  color: var(--text-primary);
+  color: var(--tv-murekkep, #1d1d1f);
   font-weight: 600;
+  padding: 4px 9px;
 }
 
 .tarpo-breadcrumb svg {
-  flex: 0 0 auto;
-  opacity: 0.5;
+  flex: none;
+  color: var(--tv-cizgi, #d2d2d7);
 }
 
 /*
- * Kapsam düğmesindeki nokta: bu konunun o kapsamda karşılığı YOK demek.
- * Tıklarsa genel bakışa düşecek; sessizce olmasındansa önceden görsün.
+ * Yapışkan çubuk kırıntının kendi genişliğiyle ortalanınca kenarlarda zemin
+ * boşluğu kalıyor. Tam genişlik çizgi için sarmalayıcı yerine kenarlık
+ * gölgesi: düzeni bozmadan çizgi ekranın iki ucuna uzuyor.
  */
-.tarpo-mode-warn {
-  margin-left: 4px;
-  opacity: 0.55;
-  font-size: 1.1em;
-  line-height: 0;
+.tarpo-breadcrumb::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  right: 0;
+  bottom: -1px;
+  width: 100vw;
+  transform: translateX(-50%);
+  border-bottom: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  pointer-events: none;
 }
 
-/* Mobil sayfada kategori başlığı — "Tümü" görünümünde grupları ayırıyor. */
-.tarpo-sheet-group-title {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 12px 16px 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
+@media (prefers-reduced-motion: reduce) {
+  .tarpo-breadcrumb button { transition: none; }
 }
 
-@media (max-width: 767px) {
-  .tarpo-breadcrumb {
-    padding: 7px 12px;
-    font-size: 0.78rem;
-  }
+@media (max-width: 720px) {
+  .tarpo-breadcrumb { padding: 8px 14px; }
 }
