@@ -56,7 +56,11 @@ jobs:
       # çakışması yüzünden `--legacy-peer-deps` istiyor. Tek paket yeterli.
       - name: FAO adımının bağımlılığı
         if: always() && !inputs.dry_run
-        run: npm install xlsx --no-save --no-audit --no-fund
+        # `--legacy-peer-deps` ŞART: tek paket istense bile npm tüm ağacı
+        # çözüyor ve depodaki eslint 10 ↔ eslint-plugin-react-hooks 7
+        # çakışmasına takılıp ERESOLVE ile duruyor. Bayraksız ilk denemem
+        # tam da bu yüzden başarısız oldu (çalıştırma 33617166721).
+        run: npm install xlsx --no-save --no-audit --no-fund --legacy-peer-deps
 
       - name: FAO gıda fiyat endeksini senkronla
         if: always() && !inputs.dry_run
