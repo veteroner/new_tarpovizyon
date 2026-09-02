@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MENU, BASIC_MENU, KAPSAM_ADI, type Kapsam, type MenuItem } from './menu';
 import { ara, type AranabilirOge } from './arama';
 import { useModelArama } from './modelArama';
+import { PALET_OLAY } from './paletOlay';
 import '../../styles/KomutPaleti.css';
 
 /**
@@ -141,7 +142,11 @@ export function KomutPaleti() {
       }
     }
     window.addEventListener('keydown', tus);
-    return () => window.removeEventListener('keydown', tus);
+    window.addEventListener(PALET_OLAY, ac);
+    return () => {
+      window.removeEventListener('keydown', tus);
+      window.removeEventListener(PALET_OLAY, ac);
+    };
   }, [acik, ac, kapat]);
 
   /* Açılınca odak kutuya. */

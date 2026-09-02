@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  ChevronLeft, ChevronRight, ChevronDown, Home, Globe, MapPin, MoreHorizontal, X,
+  ChevronLeft, ChevronRight, ChevronDown, Home, Globe, MapPin, MoreHorizontal, X, Search,
 } from 'lucide-react';
 import {
   MENU, visibleMenu, locate, scopeSwitchTarget, itemPath, hasScope,
   KAPSAM_ADI, type Kapsam, type MenuItem,
 } from './nav/menu';
 import { KomutPaleti } from './nav/KomutPaleti';
+import { paletiAc } from './nav/paletOlay';
+import { HizliErisim } from './nav/HizliErisim';
 import '../styles/TarpoShell.css';
 import './TarpoShell.breadcrumb.css';
 
@@ -30,6 +32,11 @@ import './TarpoShell.breadcrumb.css';
 export default function TarpoShell() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  /* Kısayol rozeti platforma göre: Mac'te ⌘K, diğerlerinde Ctrl+K.
+     Yanlış tuşu göstermek kısayolu hiç göstermemekten kötü. */
+  const macMi = typeof navigator !== 'undefined'
+    && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
   const kapsamFromPath: Kapsam =
     location.pathname.startsWith('/tarpovizyon/world') ? 'world' : 'turkey';
@@ -124,7 +131,18 @@ export default function TarpoShell() {
           })}
         </div>
 
-        <div className="tarpo-topbar-right" />
+        {/*
+          * Paletin GÖRÜNÜR izi. Yalnızca ⌘K ile açılabilseydi klavye
+          * kısayolunu bilmeyen kullanıcı için hiç var olmayacaktı;
+          * bu alan da zaten boş duruyordu.
+          */}
+        <div className="tarpo-topbar-right">
+          <button className="tarpo-ara-btn" onClick={paletiAc} title="Sayfa ara (⌘K / Ctrl+K)">
+            <Search size={14} />
+            <span>Ara</span>
+            <kbd>{macMi ? '⌘K' : 'Ctrl K'}</kbd>
+          </button>
+        </div>
       </header>
 
       {/*
@@ -143,6 +161,13 @@ export default function TarpoShell() {
           <strong aria-current="page">{konum.item.label}</strong>
         </nav>
       )}
+
+      {/*
+        * Hızlı erişim: kullanıcının sabitledikleri + son bakılanlar.
+        * Kenar çubuğunun ikinci kopyası DEĞİL — orada tüm menü var, burada
+        * yalnızca kişinin kendi 8-10 sayfası. Boşken hiç render edilmiyor.
+        */}
+      <HizliErisim />
 
       <div className="tarpo-body">
         <nav className={`tarpo-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>

@@ -1,0 +1,166 @@
+/*
+ * Hızlı erişim şeridi — kırıntının hemen altı.
+ *
+ * Renkler `marka-tokens.css`'teki `--tv-*` ölçeğinden; komut paletiyle aynı
+ * dil. Kabuğun eski belirteçleri için yedek değerler yazılı, çünkü bu şerit
+ * paletin aksine sayfanın İÇİNDE duruyor ve etrafıyla uyumlu olmalı.
+ */
+
+.tarpo-hizli {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-zemin, #fbfbfd);
+  /* Kaydırma çubuğu şeridi 8px uzatıyordu; gizli ama kaydırma çalışıyor. */
+  scrollbar-width: none;
+}
+.tarpo-hizli::-webkit-scrollbar { display: none; }
+
+.he-etiket {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--tv-ikincil, #6e6e73);
+  margin-right: 2px;
+}
+
+.he-bosluk {
+  flex: none;
+  width: 1px;
+  height: 15px;
+  background: var(--tv-cizgi, #d2d2d7);
+  margin: 0 5px;
+}
+
+/* Çip = iki düğmeli bir kap. İç içe <button> geçersiz olurdu; gitme ve
+   sabitleme ayrı düğmeler, kap onları tek görsel birim gibi gösteriyor. */
+.he-cip {
+  flex: none;
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-kart, #fff);
+  border-radius: 980px;
+  overflow: hidden;
+  transition: border-color 160ms ease-out;
+}
+.he-cip:hover { border-color: var(--tv-cizgi, #d2d2d7); }
+.he-cip.aktif { border-color: var(--tv-vurgu, #17693a); }
+
+.he-git {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--tv-murekkep, #1d1d1f);
+  padding: 4px 4px 4px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 160ms ease-out;
+}
+.he-git:hover { background: var(--tv-zemin-2, #f5f5f7); }
+.he-cip.aktif .he-git { color: var(--tv-vurgu-koyu, #12522d); font-weight: 600; }
+
+.he-igne-isaret { color: var(--tv-vurgu, #17693a); flex: none; }
+
+.he-ad {
+  /* Uzun pano adları şeridi ele geçirmesin. */
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.he-kapsam {
+  font-size: 10.5px;
+  color: var(--tv-ikincil, #6e6e73);
+  border-left: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  padding-left: 6px;
+}
+
+/*
+ * İğne düğmesi normalde saklı; hover/odakta beliriyor. Sürekli görünse
+ * altı çipte altı ikon olur ve asıl bilgi (sayfa adı) kaybolurdu.
+ * `:focus-within` şart: klavye kullanıcısı düğmeye sekmeyle geldiğinde
+ * görünmeyen bir düğmeye odaklanmış olurdu.
+ */
+.he-igne {
+  display: flex;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: var(--tv-ikincil, #6e6e73);
+  padding: 0 8px 0 4px;
+  cursor: pointer;
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: opacity 160ms ease-out, width 160ms ease-out;
+}
+.he-cip:hover .he-igne,
+.he-cip:focus-within .he-igne { width: 26px; opacity: 1; }
+.he-igne:hover { color: var(--tv-vurgu, #17693a); }
+
+@media (prefers-reduced-motion: reduce) {
+  .he-cip, .he-git, .he-igne { transition: none; }
+}
+
+/* Dokunmatikte hover yok: iğne hep görünsün, yoksa sabitleme yapılamaz. */
+@media (hover: none) {
+  .he-igne { width: 26px; opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .tarpo-hizli { padding: 6px 12px; }
+  .he-ad { max-width: 130px; }
+  .he-kapsam { display: none; }
+}
+
+/*
+ * Üst çubuktaki arama düğmesi — paletin görünür izi.
+ * `tarpo-topbar-right` bugüne kadar boştu; palet yalnızca ⌘K ile
+ * açılabildiği sürece kısayolu bilmeyen için hiç yoktu.
+ */
+.tarpo-ara-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--tv-cizgi, #d2d2d7);
+  background: var(--tv-kart, #fff);
+  color: var(--tv-ikincil, #6e6e73);
+  border-radius: 980px;
+  padding: 5px 11px;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 160ms ease-out, border-color 160ms ease-out;
+}
+.tarpo-ara-btn:hover {
+  color: var(--tv-murekkep, #1d1d1f);
+  border-color: var(--tv-vurgu, #17693a);
+}
+.tarpo-ara-btn kbd {
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 15px;
+  padding: 0 5px;
+  border: 1px solid var(--tv-cizgi, #d2d2d7);
+  border-radius: 5px;
+  background: var(--tv-zemin-2, #f5f5f7);
+}
+
+/* Dar ekranda kısayol rozeti yok: dokunmatikte klavye kısayolu anlamsız. */
+@media (max-width: 900px) {
+  .tarpo-ara-btn kbd { display: none; }
+}
+@media (max-width: 560px) {
+  .tarpo-ara-btn span { display: none; }
+  .tarpo-ara-btn { padding: 5px 9px; }
+}
