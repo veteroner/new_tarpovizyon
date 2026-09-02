@@ -90,8 +90,8 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
       setLoading(true);
       const [histRows, worldRows, redMeatRows, poultryRows, cityRaw, kovanRaw] = await Promise.all([
         fetchRows('oner/hayvansal-urun-uretimi', { limit: 200 }),
-        fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 }),
-        fetchRows('oner/kirmizi-et-uretimi', { limit: 200 }),
+        fetchRows('global/uretim', { limit: 5000 }),
+        fetchRows('kirmizi-et/hayvan-sayilari-yillik', { limit: 200 }),
         /*
          * DİKKAT — 'oner/kanatli-uretimleri' DEĞİL.
          *

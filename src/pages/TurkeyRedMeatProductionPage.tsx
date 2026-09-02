@@ -62,11 +62,11 @@ export default function TurkeyRedMeatProductionPage() {
       // 2a. Türlere Göre Kırılım - Tarihsel (1986-2009): büyükbaş+koyun+keçi
       // MySQL'deki YEAR(yil) karşılığı: yil '1986-01-01 00:00:00' biçiminde
       // saklanıyor, yıl istemcide ayrıştırılıyor.
-      const histSpeciesData = (await fetchRows('oner/kirmizi-et-uretim-miktari'))
+      const histSpeciesData = (await fetchRows('kirmizi-et/uretim-miktari'))
         .map((r): Row => ({ ...r, yil: extractYear(r.yil) })) as Record<string, string | number>[];
 
       // 2b. Türlere Göre Kırılım - Güncel (2010-2024): sığır/manda/koyun/keçi ayrı
-      const detailData = await fetchRows('oner/kirmizi-et-uretimi') as Record<string, string | number>[];
+      const detailData = await fetchRows('kirmizi-et/hayvan-sayilari-yillik') as Record<string, string | number>[];
 
       const allPoints = histData.map(row => ({
         year: extractYear(row['yillar']),
@@ -190,7 +190,7 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 6. Karkas Ağırlığı Verileri (193 ülke)
-      const carcassRows = await fetchRows('oner/dunya-karkas-agirligi');
+      const carcassRows = await fetchRows('global/karkas-agirligi');
       {
         setCarcassWeightData(carcassRows
           .map((r) => ({

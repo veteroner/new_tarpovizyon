@@ -135,7 +135,7 @@ export function useMilkData() {
 
       // Verimlilik verileri
       try {
-        const prodRows = (await fetchRows('oner/verimlilikler'))
+        const prodRows = (await fetchRows('tr/verimlilikler'))
           .map((r): Row => ({ ...r, yil: String(r.yil ?? '').slice(0, 4) }));
         if (prodRows.length > 0) {
           const mapped = prodRows.map((item) => ({
@@ -182,7 +182,7 @@ export function useMilkData() {
 
         // Eskiden her ürün için iç içe COUNT(*)+1 alt sorgularıyla sıralama
         // hesaplanıyordu. Tablo küçük: tek seferde çekilip sıra istemcide.
-        const dunyaUretim = await fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 });
+        const dunyaUretim = await fetchRows('global/uretim', { limit: 5000 });
         const siraHesapla = (urun: string) => {
           const satirlar = dunyaUretim.filter((r) => String(r.urun ?? '') === urun);
           const turkiye = satirlar.find((r) => String(r.ulke ?? '') === 'Türkiye');

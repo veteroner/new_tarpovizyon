@@ -119,7 +119,7 @@ export function useWhiteMeatData(): WhiteMeatData {
         const euCountries = ['Almanya', 'Fransa', 'İtalya', 'İspanya', 'Hollanda', 'Belçika', 'Polonya', 'Romanya', 'Avusturya', 'Bulgaristan', 'Hırvatistan', 'Çekya', 'Danimarka', 'Estonya', 'Finlandiya', 'Yunanistan', 'Macaristan', 'İrlanda', 'Letonya', 'Litvanya', 'Portekiz', 'Slovakya', 'Slovenya', 'İsveç'];
 
         // Eskiden iç içe COUNT(*)+1 alt sorgularıyla; tablo küçük, sıra istemcide.
-        const dunyaUretim = await fetchRows('oner/dunya-hayvansal-uretim', { limit: 5000 });
+        const dunyaUretim = await fetchRows('global/uretim', { limit: 5000 });
         const tavuk = dunyaUretim.filter((r) => String(r.urun ?? '') === 'Tavuk eti');
         const trDeger = num(tavuk.find((r) => String(r.ulke ?? '') === 'Türkiye')?.uretim_miktari_ton);
         const ustunde = (liste: typeof tavuk) =>
