@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import {
   visibleMenu, BASIC_MENU, KAPSAM_ADI, type Kapsam, type MenuCategory,
 } from '../components/nav/menu';
+import { PiyasaSeridi } from '../components/PiyasaSeridi';
 import '../styles/HomePage.css';
 
 /**
@@ -91,6 +92,13 @@ export function HomePage() {
             : 'TÜİK — üretim, fiyat, dış ticaret ve il bazında veriler'}
         </p>
       </header>
+
+      {/*
+        * Piyasa: sayfadaki tek GÜN İÇİNDE değişen veri. Bölüm kartlarının
+        * üstünde, çünkü "bugün ne oldu" sorusu "nereye gideyim"den önce
+        * geliyor. Hata veya boş yanıtta kendini hiç çizmiyor.
+        */}
+      <PiyasaSeridi />
 
       <section>
         <h2 className="ap-grup">Bölümler</h2>

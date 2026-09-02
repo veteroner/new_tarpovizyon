@@ -1,0 +1,148 @@
+/*
+ * Piyasa şeridi — kapsam giriş sayfasının üstünde.
+ *
+ * Bölüm kartlarıyla kasıtlı olarak FARKLI biçim: onlar yıllık veri, bu gün
+ * içinde değişiyor. Aynı kart biçimi "bu da yılda bir güncelleniyor"
+ * izlenimi verirdi.
+ */
+
+.ps-kap {
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-kart, #fff);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
+  margin-bottom: 26px;
+  overflow: hidden;
+}
+
+.ps-bas {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  padding: 15px 20px 0;
+}
+.ps-bas h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ps-canli {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--tv-vurgu, #17693a);
+}
+.ps-nokta {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ps-nabiz 2.4s ease-in-out infinite;
+}
+@keyframes ps-nabiz { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) {
+  .ps-nokta { animation: none; }
+}
+
+.ps-tumu {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--tv-ikincil, #6e6e73);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 7px;
+  transition: color 160ms ease-out, background-color 160ms ease-out;
+}
+.ps-tumu:hover {
+  color: var(--tv-murekkep, #1d1d1f);
+  background: var(--tv-zemin-2, #f5f5f7);
+}
+
+.ps {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: none;
+}
+.ps::-webkit-scrollbar { display: none; }
+
+.ps-oge {
+  flex: 1 0 auto;
+  min-width: 138px;
+  display: block;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  padding: 11px 16px 13px;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background-color 160ms ease-out;
+}
+.ps-oge:hover { background: var(--tv-zemin-2, #f5f5f7); }
+/* İnce ayraç: kutu kenarlığı yerine iç gölge — çipler arası boşluk bozulmasın. */
+.ps-oge + .ps-oge { box-shadow: inset 1px 0 0 var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07)); }
+
+.ps-ad {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tv-ikincil, #6e6e73);
+  white-space: nowrap;
+}
+.ps-fiyat {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums;
+}
+.ps-birim {
+  font-size: 11.5px;
+  color: var(--tv-ikincil, #6e6e73);
+  margin-left: 5px;
+}
+.ps-delta {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ps-delta.artis { color: var(--tv-vurgu, #17693a); }
+.ps-delta.azalis { color: var(--tv-d4, #9b3d51); }
+
+/*
+ * Yükleme iskeleti — şerit sonradan belirip altındaki ızgarayı aşağı
+ * itmesin. Yükseklik dolu hâliyle aynı.
+ */
+.ps-iskelet {
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-kart, #fff);
+  border-radius: 18px;
+  margin-bottom: 26px;
+  padding: 46px 4px 4px;
+}
+.ps-bos {
+  height: 62px;
+  border-radius: 13px;
+  background: var(--tv-zemin-2, #f5f5f7);
+  animation: ps-parla 1.6s ease-in-out infinite;
+}
+@keyframes ps-parla { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) {
+  .ps-bos { animation: none; }
+}
+
+@media (max-width: 560px) {
+  .ps-oge { min-width: 124px; padding: 10px 13px 12px; }
+}
