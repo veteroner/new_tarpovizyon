@@ -1,0 +1,242 @@
+/*
+ * Asistan panosu — sağdan açılan pano ve onu açan yüzen düğme.
+ * Renkler `marka-tokens.css`'teki `--tv-*` ölçeğinden.
+ */
+
+.asp-dugme {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 980px;
+  padding: 12px 20px;
+  background: var(--tv-vurgu, #17693a);
+  color: #fff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(23, 105, 58, 0.28);
+  transition: background-color 180ms ease-out, transform 180ms ease-out;
+}
+.asp-dugme:hover {
+  background: var(--tv-vurgu-koyu, #12522d);
+  transform: translateY(-1px);
+}
+
+.asp-fon {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(0, 0, 0, 0.28);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: asp-belir 180ms ease-out both;
+}
+@keyframes asp-belir { from { opacity: 0; } to { opacity: 1; } }
+
+.asp {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 960;
+  width: min(430px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--tv-kart, #fff);
+  border-left: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  box-shadow: -18px 0 60px rgba(0, 0, 0, 0.14);
+  animation: asp-kay 240ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Segoe UI', Roboto, sans-serif;
+  color: var(--tv-murekkep, #1d1d1f);
+  letter-spacing: -0.01em;
+}
+@keyframes asp-kay { from { transform: translateX(100%); } to { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .asp, .asp-fon { animation: none; }
+  .asp-dugme { transition: none; }
+  .asp-dugme:hover { transform: none; }
+}
+
+.asp-bas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 17px 19px;
+  border-bottom: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  color: var(--tv-vurgu, #17693a);
+}
+.asp-bas h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--tv-murekkep, #1d1d1f);
+}
+.asp-kapat {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--tv-ikincil, #6e6e73);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+}
+.asp-kapat:hover {
+  background: var(--tv-zemin-2, #f5f5f7);
+  color: var(--tv-murekkep, #1d1d1f);
+}
+
+.asp-ic { flex: 1; overflow-y: auto; padding: 17px 19px; }
+
+.asp-baglam {
+  margin: 0 0 16px;
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: var(--tv-zemin-2, #f5f5f7);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--tv-ikincil, #6e6e73);
+}
+.asp-baglam b { color: var(--tv-murekkep, #1d1d1f); font-weight: 600; }
+
+.asp-oneri {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+  background: var(--tv-kart, #fff);
+  border-radius: 13px;
+  padding: 11px 14px;
+  margin-bottom: 9px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, border-color 160ms ease-out;
+}
+.asp-oneri:hover {
+  background: var(--tv-zemin-2, #f5f5f7);
+  border-color: var(--tv-cizgi, #d2d2d7);
+}
+
+.asp-durum, .asp-hata {
+  margin: 0;
+  padding: 14px 0;
+  font-size: 14px;
+  color: var(--tv-ikincil, #6e6e73);
+}
+.asp-hata { color: var(--tv-d4, #9b3d51); }
+
+.asp-cevap { font-size: 14.5px; line-height: 1.55; }
+
+/*
+ * Beslenme rozeti: cevabın gerçek veriyle mi yoksa genel bilgiyle mi
+ * üretildiğini SÖYLÜYOR. Model rakam uydurabildiği için bu ayrım
+ * kullanıcının görmesi gereken bir şey, gizlenecek bir ayrıntı değil.
+ */
+.asp-besleme {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0 0;
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.asp-besleme.var {
+  background: var(--tv-vurgu-sis, rgba(23, 105, 58, 0.08));
+  color: var(--tv-vurgu-koyu, #12522d);
+}
+.asp-besleme.yok {
+  background: var(--tv-zemin-2, #f5f5f7);
+  color: var(--tv-ikincil, #6e6e73);
+}
+.asp-besleme svg { flex: none; }
+
+.asp-kaynaklar { margin-top: 12px; display: flex; flex-direction: column; gap: 2px; }
+.asp-kaynak {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--tv-vurgu, #17693a);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 160ms ease-out;
+}
+.asp-kaynak span { flex: 1; }
+.asp-kaynak:hover { background: var(--tv-zemin-2, #f5f5f7); }
+
+.asp-yeni {
+  margin-top: 16px;
+  border: 1px solid var(--tv-cizgi, #d2d2d7);
+  background: var(--tv-kart, #fff);
+  border-radius: 980px;
+  padding: 6px 15px;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--tv-ikincil, #6e6e73);
+  cursor: pointer;
+}
+.asp-yeni:hover { color: var(--tv-murekkep, #1d1d1f); }
+
+.asp-alt {
+  display: flex;
+  gap: 9px;
+  padding: 13px 19px;
+  border-top: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, 0.07));
+}
+.asp-alt input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--tv-cizgi, #d2d2d7);
+  background: var(--tv-kart, #fff);
+  border-radius: 980px;
+  padding: 8px 15px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--tv-murekkep, #1d1d1f);
+  outline: none;
+  transition: border-color 160ms ease-out;
+}
+.asp-alt input:focus { border-color: var(--tv-vurgu, #17693a); }
+.asp-alt button {
+  flex: none;
+  border: 0;
+  background: var(--tv-vurgu, #17693a);
+  color: #fff;
+  border-radius: 980px;
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.asp-alt button:disabled {
+  background: var(--tv-cizgi, #d2d2d7);
+  color: var(--tv-ikincil, #6e6e73);
+  cursor: default;
+}
+
+/* Mobil kabuğun sekme çubuğunun altında kalmasın. */
+@media (max-width: 768px) {
+  .asp-dugme { bottom: 78px; right: 16px; }
+}

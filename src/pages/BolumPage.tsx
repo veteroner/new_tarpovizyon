@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import {
   MENU, BASIC_MENU, itemPath, hasScope, KAPSAM_ADI, type Kapsam, type MenuCategory,
 } from '../components/nav/menu';
+import { katla } from '../components/nav/arama';
 import '../styles/BolumPage.css';
 
 /**
@@ -39,10 +40,20 @@ const RENK: Record<string, string> = {
   araclar: 'var(--tv-vurgu)',
 };
 
+/**
+ * Bu sayıyı geçince süzme kutusu çıkıyor.
+ *
+ * Ölçülmüş vaka: Basic'in "Bitkisel Üretim" bölümünde 49, "Hayvancılık"ta 22
+ * sayfa var. 49 kartı ekrana dökünce kullanıcı aradığı ürünü gözle tarıyor.
+ * 12'nin altında kutu göstermek ise boşuna: liste zaten tek bakışta okunuyor.
+ */
+const SUZGEC_ESIGI = 12;
+
 export default function BolumPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { bolumId } = useParams<{ bolumId: string }>();
+  const [sorgu, setSorgu] = useState('');
 
   const kapsam: Kapsam =
     location.pathname.startsWith('/tarpovizyon/world') ? 'world' : 'turkey';
@@ -67,10 +78,26 @@ export default function BolumPage() {
   const renk = RENK[kategori.id] ?? 'var(--tv-vurgu)';
 
   /* Bu kapsamda açılabilenler ve açılamayanlar ayrı ayrı. */
-  const burada = kategori.items.filter((it) => hasScope(it, kapsam));
+  const tumBurada = kategori.items.filter((it) => hasScope(it, kapsam));
   const digerde = kategori.items.filter(
     (it) => !hasScope(it, kapsam) && hasScope(it, digerKapsam),
   );
+
+  /*
+   * Süzme, komut paletiyle aynı Türkçe katlamayı kullanıyor: "uzum" yazan
+   * kullanıcı "Üzüm"ü bulmalı. Düz `toLowerCase()` Türkçe'de İ→i̇ üretiyor
+   * ve "İZMİR" ile "izmir" eşleşmiyor.
+   *
+   * Alt bölüm adı da aranıyor: Basic'te sayfa adı "Ekonomik Göstergeler ve
+   * Maliyet Unsurları", bölüm adı "Kırmızı Et Sektörü" — kullanıcı "kırmızı
+   * et" yazdığında o sayfayı bulabilmeli.
+   */
+  const suzgecVar = tumBurada.length > SUZGEC_ESIGI;
+  const kq = katla(sorgu.trim());
+  const burada = kq
+    ? tumBurada.filter((it) =>
+      katla(it.label).includes(kq) || katla(it.bolum ?? '').includes(kq))
+    : tumBurada;
 
   return (
     <div className="bp">
@@ -81,10 +108,33 @@ export default function BolumPage() {
         </div>
         <h1>{kategori.title}</h1>
         <p className="bp-sayi">
-          {burada.length} konu
-          {digerde.length > 0 && ` · ${digerde.length} tanesi yalnızca ${KAPSAM_ADI[digerKapsam]} kapsamında`}
+          {kq ? `${burada.length} / ${tumBurada.length} konu` : `${tumBurada.length} konu`}
+          {!kq && digerde.length > 0
+            && ` · ${digerde.length} tanesi yalnızca ${KAPSAM_ADI[digerKapsam]} kapsamında`}
         </p>
       </header>
+
+      {suzgecVar && (
+        <div className="bp-suzgec">
+          <Search size={15} aria-hidden="true" />
+          <input
+            type="search"
+            value={sorgu}
+            onChange={(e) => setSorgu(e.target.value)}
+            placeholder={`${kategori.title} içinde ara…`}
+            aria-label={`${kategori.title} içinde ara`}
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </div>
+      )}
+
+      {kq && !burada.length && (
+        <p className="bp-bos-sonuc">
+          “{sorgu}” için sonuç yok.{' '}
+          <button type="button" onClick={() => setSorgu('')}>Süzgeci temizle</button>
+        </p>
+      )}
 
       <div className="bp-izgara">
         {burada.map((it) => {
@@ -112,7 +162,9 @@ export default function BolumPage() {
         })}
       </div>
 
-      {digerde.length > 0 && (
+      {/* Süzgeç açıkken gizli: bu liste süzülmüyor, süzülmüş kartların
+          altında süzülmemişleri göstermek yanıltıcı olurdu. */}
+      {!kq && digerde.length > 0 && (
         <section className="bp-diger">
           <h2 className="bp-diger-bas">
             Yalnızca {KAPSAM_ADI[digerKapsam]} kapsamında

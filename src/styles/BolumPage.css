@@ -160,3 +160,49 @@
   .bp { padding: 20px 14px 48px; }
   .bp-izgara { grid-template-columns: 1fr; }
 }
+
+/* ─── Süzme kutusu ──────────────────────────────────────────────────────────
+   12 konudan fazla bölümlerde çıkıyor (Basic Bitkisel 49, Hayvancılık 22).
+   Daha azında liste zaten tek bakışta okunuyor; kutu boşuna yer kaplardı. */
+.bp-suzgec {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 16px;
+  padding: 8px 15px;
+  max-width: 380px;
+  border: 1px solid var(--tv-cizgi, #d2d2d7);
+  background: var(--tv-kart, #fff);
+  border-radius: 980px;
+  color: var(--tv-ikincil, #6e6e73);
+  transition: border-color 160ms ease-out;
+}
+.bp-suzgec:focus-within { border-color: var(--tv-vurgu, #17693a); }
+.bp-suzgec input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--tv-murekkep, #1d1d1f);
+  outline: none;
+}
+.bp-suzgec input::placeholder { color: var(--tv-ikincil, #6e6e73); }
+
+.bp-bos-sonuc {
+  margin: 0 0 18px;
+  color: var(--tv-ikincil, #6e6e73);
+  font-size: 15px;
+}
+.bp-bos-sonuc button {
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--tv-vurgu, #17693a);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) { .bp-suzgec { transition: none; } }

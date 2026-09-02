@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MENU, BASIC_MENU, KAPSAM_ADI, type Kapsam, type MenuItem } from './menu';
 import { ara, type AranabilirOge } from './arama';
 import { useModelArama } from './modelArama';
-import { PALET_OLAY } from './paletOlay';
+import { PALET_OLAY } from './kabukOlaylari';
 import '../../styles/KomutPaleti.css';
 
 /**

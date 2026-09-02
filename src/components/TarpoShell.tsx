@@ -8,9 +8,10 @@ import {
   KAPSAM_ADI, type Kapsam, type MenuItem,
 } from './nav/menu';
 import { KomutPaleti } from './nav/KomutPaleti';
-import { paletiAc } from './nav/paletOlay';
+import { paletiAc } from './nav/kabukOlaylari';
 import { HizliErisim } from './nav/HizliErisim';
 import { KardesGecisi } from './nav/KardesGecisi';
+import { AsistanPanosu } from './nav/AsistanPanosu';
 import '../styles/TarpoShell.css';
 import './TarpoShell.breadcrumb.css';
 
@@ -348,6 +349,14 @@ export default function TarpoShell() {
         * Dünya'ya geçiyor.
         */}
       <KomutPaleti />
+
+      {/*
+        * Asistan panosu. `/tarpovizyon/ai-assistant` sayfası duruyor ama
+        * oraya gitmek bulunduğun sayfadan ÇIKMAK demek: grafiğe bakarken
+        * aklına gelen soruyu sormak için veriyi terk ediyorsun. Pano üstte
+        * açılıyor, sayfa arkada kalıyor ve pano nerede olduğunu biliyor.
+        */}
+      <AsistanPanosu />
     </div>
   );
 }
