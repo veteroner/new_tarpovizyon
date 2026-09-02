@@ -56,3 +56,5 @@ teknova rasyon mobil/
 
 # TÜİK bitkisel yükleyicinin indirdiği ham .xls önbelleği
 .tuik-bitkisel-onbellek/
+# TÜİK Veri Portalı indirmeleri (XLS + üretilen SQL) — türetilebilir, depoda durmamalı
+.tuik-indirme/
