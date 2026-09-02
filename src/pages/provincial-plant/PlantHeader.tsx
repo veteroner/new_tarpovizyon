@@ -63,7 +63,7 @@ export function PlantHeader({
       }}>
         {/* KPI 1: Toplam Üretim */}
         <div style={{
-          background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+          background: 'linear-gradient(135deg, #17693a 0%, #12522d 100%)',
           borderRadius: '16px',
           padding: '24px',
           color: 'white',
@@ -101,11 +101,12 @@ export function PlantHeader({
 
         {/* KPI 3: En Hızlı Büyüyen */}
         <div style={{
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))',
           borderRadius: '16px',
           padding: '24px',
-          color: 'white',
-          boxShadow: '0 8px 16px rgba(59, 130, 246, 0.2)'
+          color: 'var(--tv-murekkep, #1d1d1f)',
+          boxShadow: 'var(--tv-golge)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
             En Hızlı Büyüyen
@@ -120,11 +121,12 @@ export function PlantHeader({
 
         {/* KPI 4: Aktif İl Sayısı */}
         <div style={{
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))',
           borderRadius: '16px',
           padding: '24px',
-          color: 'white',
-          boxShadow: '0 8px 16px rgba(139, 92, 246, 0.2)'
+          color: 'var(--tv-murekkep, #1d1d1f)',
+          boxShadow: 'var(--tv-golge)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
             Aktif İl Sayısı

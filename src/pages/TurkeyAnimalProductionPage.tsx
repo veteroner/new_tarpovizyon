@@ -57,10 +57,11 @@ const TurkeyAnimalProductionPage: React.FC = () => {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
             padding: '12px 24px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            color: 'white', border: 'none', borderRadius: '10px',
+            /* Eylem düğmesi: KPI kartı değil, marka renginde kalmalı. */
+            background: 'var(--tv-vurgu, #17693a)',
+            color: '#fff', border: 'none', borderRadius: '10px',
             cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+            boxShadow: 'var(--tv-golge)',
             transition: 'all 0.2s'
           }}
         >

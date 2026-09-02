@@ -20,29 +20,30 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
         marginBottom: '32px' 
       }}>
         <div style={{ 
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
           padding: '28px', 
           borderRadius: '16px', 
-          boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
+          boxShadow: 'var(--tv-golge)',
           position: 'relative',
           overflow: 'hidden'
         }}>
           <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🥛</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               TOPLAM ÜRETİM {latest?.year}
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
               {formatTon(latest?.totalTon ?? 0)}
             </div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
               Yıllık süt üretimi
             </div>
           </div>
         </div>
 
         <div style={{ 
-          background: yoy >= 0 ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+          background: yoy >= 0 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
           padding: '28px', 
           borderRadius: '16px', 
           boxShadow: `0 4px 16px ${yoy >= 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
@@ -64,44 +65,46 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
         </div>
 
         <div style={{ 
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
           padding: '28px', 
           borderRadius: '16px', 
-          boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
+          boxShadow: 'var(--tv-golge)',
           position: 'relative',
           overflow: 'hidden'
         }}>
           <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐄</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               BÜYÜKBAŞ PAYI
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
               %{cattleShare.toFixed(1)}
             </div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
               Toplam üretimde
             </div>
           </div>
         </div>
 
         <div style={{ 
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', 
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
           padding: '28px', 
           borderRadius: '16px', 
-          boxShadow: '0 4px 16px rgba(139, 92, 246, 0.2)',
+          boxShadow: 'var(--tv-golge)',
           position: 'relative',
           overflow: 'hidden'
         }}>
           <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>📊</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               10 YILLIK CAGR
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
               %{cagr.toFixed(1)}
             </div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
               Bileşik büyüme
             </div>
           </div>
@@ -109,7 +112,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
 
         {sufficiency && (
           <div style={{
-            background: Number(sufficiency.sut_ton) >= 1 ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            background: Number(sufficiency.sut_ton) >= 1 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
             padding: '28px',
             borderRadius: '16px',
             boxShadow: Number(sufficiency.sut_ton) >= 1 ? '0 4px 16px rgba(34, 197, 94, 0.2)' : '0 4px 16px rgba(239, 68, 68, 0.2)',
@@ -134,66 +137,69 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
         {worldRankings && (
           <>
             <div style={{ 
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '28px', 
               borderRadius: '16px',
-              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.2)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative',
               overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐄</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   İNEK SÜT ÜRETİMİ
                 </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1, marginBottom: '8px' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
                   Dünya #{worldRankings.cattle.world}
                 </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
                   AB #{worldRankings.cattle.eu}
                 </div>
               </div>
             </div>
 
             <div style={{ 
-              background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '28px', 
               borderRadius: '16px',
-              boxShadow: '0 4px 16px rgba(6, 182, 212, 0.2)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative',
               overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐑</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   KOYUN SÜT ÜRETİMİ
                 </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1, marginBottom: '8px' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
                   Dünya #{worldRankings.sheep.world}
                 </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
                   AB #{worldRankings.sheep.eu}
                 </div>
               </div>
             </div>
 
             <div style={{ 
-              background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '28px', 
               borderRadius: '16px',
-              boxShadow: '0 4px 16px rgba(168, 85, 247, 0.2)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative',
               overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐐</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   KEÇİ SÜT ÜRETİMİ
                 </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1, marginBottom: '8px' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
                   Dünya #{worldRankings.goat.world}
                 </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
                   AB #{worldRankings.goat.eu}
                 </div>
               </div>

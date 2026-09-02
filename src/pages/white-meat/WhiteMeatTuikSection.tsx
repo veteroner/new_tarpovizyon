@@ -293,7 +293,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div style={{ fontSize: '3rem', color: '#22c55e', marginBottom: '8px' }}>↓</div>
-                    <div style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '20px', color: 'white', fontWeight: '700', fontSize: '0.9rem' }}>
+                    <div style={{ padding: '8px 16px', background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', borderRadius: '20px', color: 'var(--tv-murekkep, #1d1d1f)', fontWeight: '700', fontSize: '0.9rem' }}>
                       %{tuikData[0]?.hatchRate.toFixed(1)} Başarı
                     </div>
                   </div>
@@ -314,7 +315,8 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div style={{ fontSize: '3rem', color: '#3b82f6', marginBottom: '8px' }}>↓</div>
-                    <div style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', borderRadius: '20px', color: 'white', fontWeight: '700', fontSize: '0.9rem' }}>
+                    <div style={{ padding: '8px 16px', background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', borderRadius: '20px', color: 'var(--tv-murekkep, #1d1d1f)', fontWeight: '700', fontSize: '0.9rem' }}>
                       {tuikData[0]?.yieldPerBird.toFixed(2)} kg/baş
                     </div>
                   </div>

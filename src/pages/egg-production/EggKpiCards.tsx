@@ -43,25 +43,26 @@ export function EggKpiCards({ latest, yoy, peak, eggPrices, eggPriceDate, eggPri
         <div className="kpi-subtitle">milyon adet ({peak?.year ?? '-'})</div>
       </div>
 
-      <div className="kpi-card" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
+      <div className="kpi-card" style={{ background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))' }}>
         <div className="kpi-header">
-          <span className="kpi-title" style={{ color: 'white' }}>GÜNCEL YUMURTA FİYATLARI </span>
+          <span className="kpi-title" style={{ color: 'var(--tv-murekkep, #1d1d1f)' }}>GÜNCEL YUMURTA FİYATLARI </span>
           <div className="kpi-icon orange"><Wallet size={18} aria-hidden="true" /></div>
         </div>
         {eggPriceError ? (
-          <div style={{ fontSize: '0.9rem', color: 'white', padding: '10px 0' }}>{eggPriceError}</div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--tv-murekkep, #1d1d1f)', padding: '10px 0' }}>{eggPriceError}</div>
         ) : Object.keys(eggPrices).length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', padding: '10px 0' }}>
             {eggPrices.double && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '2px' }}>Double</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'white' }}>{formatTL(eggPrices.double)} TL</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '2px' }}>Double</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--tv-murekkep, #1d1d1f)' }}>{formatTL(eggPrices.double)} TL</div>
               </div>
             )}
             {eggPrices.eski_ana && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '2px' }}>Eski Ana</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'white' }}>{formatTL(eggPrices.eski_ana)} TL</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '2px' }}>Eski Ana</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--tv-murekkep, #1d1d1f)' }}>{formatTL(eggPrices.eski_ana)} TL</div>
               </div>
             )}
             {eggPrices.yeni_ana && (

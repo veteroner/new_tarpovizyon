@@ -171,20 +171,21 @@ export default function MilkEconomicsSection({
             marginBottom: '32px' 
           }}>
             <div style={{ 
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '24px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.25)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>💰</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
                   ÜSK TAVSİYE FİYATI
                 </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
                   {latest?.usk_cig_sut_tavsiye_fiyati_tl_lt.toFixed(2)} ₺/lt
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
                   {latest?.tarih}
                 </div>
               </div>
@@ -212,8 +213,8 @@ export default function MilkEconomicsSection({
 
             <div style={{ 
               background: (latest?.karlilik ?? 0) >= 0 
-                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' 
-                : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' 
+                : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
               padding: '24px', borderRadius: '14px',
               boxShadow: (latest?.karlilik ?? 0) >= 0 
                 ? '0 4px 16px rgba(34, 197, 94, 0.25)'
@@ -235,20 +236,21 @@ export default function MilkEconomicsSection({
             </div>
 
             <div style={{ 
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '24px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🌾</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
                   SÜT YEM PARİTESİ
                 </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
                   {latest?.sut_yem_paritesi.toFixed(2)}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
                   {latest?.tarih}
                 </div>
               </div>
@@ -313,30 +315,32 @@ export default function MilkEconomicsSection({
             </div>
 
             <div style={{ 
-              background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '20px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(6, 182, 212, 0.25)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🌽</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>MISIR SİLAJI</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{latest?.misir_silaji.toFixed(2)} ₺/kg</div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>MISIR SİLAJI</div>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.misir_silaji.toFixed(2)} ₺/kg</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
               </div>
             </div>
 
             <div style={{ 
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
               padding: '20px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.25)',
+              boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🍀</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>YONCA</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{latest?.yonca.toFixed(2)} ₺/kg</div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>YONCA</div>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.yonca.toFixed(2)} ₺/kg</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
               </div>
             </div>
           </div>

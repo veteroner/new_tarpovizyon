@@ -76,8 +76,9 @@ export default function TuikLivestockPage() {
             disabled={loading}
             style={{
               padding: '8px 16px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: 'white',
+              /* Eylem düğmesi: KPI kartı değil, marka renginde kalmalı. */
+              background: 'var(--tv-vurgu, #17693a)',
+              color: '#fff',
               border: 'none',
               borderRadius: '8px',
               cursor: loading ? 'not-allowed' : 'pointer',

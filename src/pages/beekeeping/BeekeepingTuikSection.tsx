@@ -102,22 +102,23 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
         </div>
 
         <div style={{ 
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 
+          background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
           padding: '24px', 
           borderRadius: '14px',
-          boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)',
+          boxShadow: 'var(--tv-golge)',
           position: 'relative',
           overflow: 'hidden'
         }}>
           <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🕯️</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>
               BALMUMU ÜRETİMİ ({tuikKovanKpi.latest.year})
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+            <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
               {tuikKovanKpi.latest.balmumu.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ton
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '8px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px' }}>
               Yıllık: {tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{tuikKovanKpi.balmumuYoy.toFixed(1)}%
             </div>
           </div>

@@ -107,7 +107,7 @@ export default function MilkTuikSection({
           </div>
 
           <div style={{
-            background: tuikYoyChange >= 0 ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            background: tuikYoyChange >= 0 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
             padding: '24px', borderRadius: '14px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
           }}>
@@ -124,16 +124,17 @@ export default function MilkTuikSection({
 
           {fiveYearChange !== null && (
             <div style={{
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))',
               padding: '24px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
+              boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>📊</div>
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>
                   5 YILLIK DEĞİŞİM
                 </div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
                   {fiveYearChange >= 0 ? '+' : ''}{fiveYearChange.toFixed(1)}%
                 </div>
               </div>

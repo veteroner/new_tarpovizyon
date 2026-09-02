@@ -284,7 +284,7 @@ export default function ProvincialLivestockHeader({
                 style={{
                   width: '100%',
                   padding: '10px 16px',
-                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  background: 'linear-gradient(135deg, #17693a 0%, #12522d 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',

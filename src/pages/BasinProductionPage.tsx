@@ -306,7 +306,7 @@ export default function BasinProductionPage() {
     }}>
       {/* Header */}
       <div style={{ 
-        background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+        background: 'linear-gradient(135deg, #17693a 0%, #12522d 100%)',
         borderRadius: '16px',
         padding: '32px',
         marginBottom: '24px',

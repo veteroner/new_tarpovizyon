@@ -21,7 +21,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       {/* Hero KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '48px' }}>
         {/* Red Meat */}
-        <div style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(239, 68, 68, 0.25)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ background: 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(239, 68, 68, 0.25)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥩</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM KIRMIZI ET</div>
@@ -34,12 +34,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Milk */}
-        <div style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--tv-kart, #fff)',
+          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥛</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM SÜT ÜRETİMİ</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.milk.value)} ton</div>
-            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM SÜT ÜRETİMİ</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{formatValue(kpiData.milk.value)} ton</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.milk.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
               {kpiData.milk.change >= 0 ? '+' : ''}{kpiData.milk.change.toFixed(1)}% Yıllık Değişim
             </div>
@@ -47,12 +48,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Egg */}
-        <div style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(251, 191, 36, 0.25)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥚</div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM YUMURTA</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{(kpiData.egg.value / 1000).toFixed(2)} Milyar adet</div>
-            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM YUMURTA</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{(kpiData.egg.value / 1000).toFixed(2)} Milyar adet</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.egg.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
               {kpiData.egg.change >= 0 ? '+' : ''}{kpiData.egg.change.toFixed(1)}% Yıllık Değişim
             </div>
