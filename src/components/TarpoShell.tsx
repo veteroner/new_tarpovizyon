@@ -7,6 +7,7 @@ import {
   MENU, visibleMenu, locate, scopeSwitchTarget, itemPath, hasScope,
   KAPSAM_ADI, type Kapsam, type MenuItem,
 } from './nav/menu';
+import { KomutPaleti } from './nav/KomutPaleti';
 import '../styles/TarpoShell.css';
 import './TarpoShell.breadcrumb.css';
 
@@ -279,6 +280,17 @@ export default function TarpoShell() {
       {sheet !== null && (
         <div className="tarpo-sheet-overlay" onClick={() => setSheet(null)} />
       )}
+
+      {/*
+        * Komut paleti (⌘K). Kabuğun EN SONUNDA duruyor ki her Pro sayfasında
+        * açılabilsin; kendi görünürlüğünü kendi yönetiyor, kapalıyken hiçbir
+        * şey render etmiyor.
+        *
+        * Kapsamı ayarlamıyor: kapsam yoldan türetiliyor (`kapsamFromPath`),
+        * yani palet `/tarpovizyon/world/...` adresine gidince kabuk zaten
+        * Dünya'ya geçiyor.
+        */}
+      <KomutPaleti />
     </div>
   );
 }
