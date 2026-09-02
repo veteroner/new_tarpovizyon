@@ -342,3 +342,59 @@ bolen:       1e6         (bin $ → milyar $; çerçeve desteği gerekiyor)
 
 `Accept-Language` başlığı olmadan veri ucu **HTTP 500** ve gövdede
 `languageTag1` dönüyor. Hata mesajı sebebi hiç söylemiyor; başlık şart.
+
+---
+
+## 9. Hayvancılık — ölçüm önceki varsayımı çürüttü
+
+**2026-09-02.** Bu bölümdeki dört tablo için "öksüz tablo = bayat veri"
+varsayımım yanlış çıktı. Ölçüm:
+
+| Tablo | D1'de son yıl | TÜİK'in yayındaki değeriyle |
+|---|---|---|
+| `tr_hayvan_varliklari` | 2025 | ✓ birebir (2023/24/25) |
+| `cig_sut_uretim_miktari` | 2025 | ✓ 2024–25, ✗ 2020–23 (manda eksik) |
+| `kirmizi_et_uretim_miktari` | 2025 | ✓ birebir (2023/24/25) |
+| `il_hayvan_sayilari` | 2025, 81 il | ✓ Σsığır ulusal tabloyla aynı |
+
+Dördü de güncel — çünkü elle yüklenmişler. Gerçek boşluk **bayatlık değil,
+otomasyon**: TÜİK 2026'yı yayımladığında hiçbir iş bu tablolara yazmayacaktı.
+
+### Ne yapıldı
+
+`scripts/tuik-hayvancilik-yukle.mjs` — bitkisel yükleyicisiyle aynı desen,
+`tuik-sync.yml`'ın günlük işine bağlı. Kaynak: Veri Portalı tema **13.79**.
+
+| XLS | Ne veriyor |
+|---|---|
+| `46_t1` | büyükbaş sayıları (sığır 3 ırk + manda) |
+| `46_t2` | küçükbaş sayıları (koyun 2 + keçi 2) |
+| `46_t5` | kesilen hayvan sayısı + et üretimi |
+| `46_t13` | çiğ süt, 2020+ |
+
+Türetilmiş sütunların formülleri D1'in 2025 satırıyla doğrulandı:
+kasaplık güç oranı = kesilen ÷ varlık × 100, karkas verimi = ton × 1000 ÷ kesilen.
+
+### İlk çalıştırmanın bulduğu hatalar (uygulandı)
+
+- **Çiğ süt 2020–2023**: büyükbaş yalnızca ineği sayıyordu; manda dışarıda
+  kalmıştı. Fark her yıl tam olarak manda sütunu kadar (2020: 63.766 t →
+  2023: 43.025 t). 2024–25 zaten doğruydu.
+- **2001 ve 2014**: TÜİK'in kendi revizyonları (2001 sığır 10.761.000 →
+  10.548.000; 2014 büyükbaş toplamı 288 baş).
+
+### Kasıtlı olarak yapılmayan
+
+**`il_hayvan_sayilari` bu kaynakta yok** — 13.79'daki 16 tablonun hepsi
+yalnızca Türkiye toplamı. İl kırılımı portalın dinamik "Veritabanları"
+bölümünde ve indirilebilir XLS değil; ayrı bir iş. Tablo şu an güncel
+(2025, 81 il) ama otomatik tazelenmiyor.
+
+### Tuzaklar
+
+- **DELETE+INSERT kullanma.** `cig_sut_uretim_miktari`'nin sağılan hayvan
+  sütunları bu kaynakta yok ama D1'de dolu (2020–2023). Satırı silip yeniden
+  kurmak onları yok eder. Betik yalnızca değişen sütunlara UPDATE atıyor.
+- **`xlsx` bağımlılığı.** İş akışındaki kurulum adımından *sonra* gelmeli.
+- **Hız sınırı.** İndirmeler arası ≥6,5 sn; takılınca portal XLS değil HTML
+  döndürüyor, OLE2 imza kontrolü bunu yakalıyor.
