@@ -4,7 +4,7 @@ import {
   ChevronLeft, ChevronRight, ChevronDown, Home, Globe, MapPin, MoreHorizontal, X, Search,
 } from 'lucide-react';
 import {
-  MENU, visibleMenu, locate, scopeSwitchTarget, itemPath, hasScope,
+  MENU, BASIC_MENU, visibleMenu, locate, scopeSwitchTarget, itemPath, hasScope,
   KAPSAM_ADI, type Kapsam, type MenuItem,
 } from './nav/menu';
 import { KomutPaleti } from './nav/KomutPaleti';
@@ -48,6 +48,16 @@ export default function TarpoShell() {
     () => locate(location.pathname, location.search),
     [location.pathname, location.search],
   );
+
+  /*
+   * Bölüm sayfasındaysak hangi kategori? `locate()` bunu bulamaz — bölüm
+   * sayfaları menü ÖĞESİ değil, kategorinin kendisi. Kırıntı bu sayfada da
+   * görünmeli, yoksa kullanıcı kırılımın ortasında konumsuz kalıyor.
+   */
+  const bolumKategori = useMemo(() => {
+    const m = location.pathname.match(/^\/tarpovizyon\/(?:turkey|world)\/bolum\/([^/]+)$/);
+    return m ? [...MENU, ...BASIC_MENU].find((k) => k.id === m[1]) : undefined;
+  }, [location.pathname]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => localStorage.getItem('tarpo-sidebar-collapsed') === 'true');
@@ -149,16 +159,30 @@ export default function TarpoShell() {
         * Konum izi. 61 sayfalık, 3 seviyeli bir hiyerarşide hiç yoktu;
         * kullanıcı nerede olduğunu yalnızca menüye bakarak anlıyordu.
         */}
-      {konum && (
+      {(konum || bolumKategori) && (
         <nav className="tarpo-breadcrumb" aria-label="Konum">
           <button onClick={() => navigate(
             kapsam === 'world' ? '/tarpovizyon/world' : '/tarpovizyon/turkey')}>
             {KAPSAM_ADI[kapsam]}
           </button>
           <ChevronRight size={13} aria-hidden="true" />
-          <span>{konum.kategori.title}</span>
-          <ChevronRight size={13} aria-hidden="true" />
-          <strong aria-current="page">{konum.item.label}</strong>
+          {/*
+            * Kategori segmenti artık DÜZ METİN DEĞİL. Bölüm sayfası (kırılımın
+            * 1. basamağı) yapılana kadar gidecek bir yeri yoktu; şimdi var.
+            */}
+          {konum ? (
+            <>
+              <button onClick={() => navigate(
+                `/tarpovizyon/${kapsam}/bolum/${konum.kategori.id}`)}>
+                {konum.kategori.title}
+              </button>
+              <ChevronRight size={13} aria-hidden="true" />
+              <strong aria-current="page">{konum.item.label}</strong>
+            </>
+          ) : (
+            /* Bölüm sayfasındayız: kategori son segment. */
+            <strong aria-current="page">{bolumKategori!.title}</strong>
+          )}
         </nav>
       )}
 

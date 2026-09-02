@@ -12,7 +12,7 @@ import '../../styles/KomutPaleti.css';
  * ─── NEDEN ──────────────────────────────────────────────────────────────────
  * Pro'nun masaüstü başlığında arama HİÇ yoktu. Basic'in kendi kutusu var
  * (`BasicArama`), mobilde Keşfet sekmesi var, ama Pro kabuğunda 50 menü
- * öğesine + Basic'ten gelen 96 panoya tek yol mega menüyü açıp doğru bölümü
+ * öğesine + Basic'ten gelen 84 panoya tek yol mega menüyü açıp doğru bölümü
  * tahmin etmekti. Sayfanın adını bilen kullanıcı bile onu tıklaya tıklaya
  * arıyordu.
  *
@@ -107,7 +107,7 @@ export function KomutPaleti() {
   const dizin = useMemo(() => dizinKur(mobil), [mobil]);
   const cikti = useMemo(() => ara(dizin, metin), [dizin, metin]);
 
-  /* Boş sorguda liste açılmıyor: 146 sayfayı kutuya dökmenin anlamı yok.
+  /* Boş sorguda liste açılmıyor: 134 öğeyi kutuya dökmenin anlamı yok.
      `BasicArama` da aynı davranışta. */
   const sonuclar = cikti.bos ? [] : cikti.sonuclar.slice(0, EN_FAZLA);
   const oneriler = cikti.bos ? [] : cikti.oneriler;

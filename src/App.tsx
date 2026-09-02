@@ -29,6 +29,7 @@ import MobilePrivacyPolicyPage from './mobile/pages/MobilePrivacyPolicyPage';
 import MobileTermsPage from './mobile/pages/MobileTermsPage';
 const SelectionPage = lazy(() => import('./pages/SelectionPage').then(m => ({ default: m.SelectionPage })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const BolumPage = lazy(() => import('./pages/BolumPage'));
 const TradePage = lazy(() => import('./pages/TradePage').then(m => ({ default: m.TradePage })));
 const ProductionPage = lazy(() => import('./pages/ProductionPage').then(m => ({ default: m.ProductionPage })));
 const TurkeyAnimalProductionPage = lazy(() => import('./pages/TurkeyAnimalProductionPage'));
@@ -228,6 +229,11 @@ function AppContent() {
               Kabuk cihaza göre seçiliyor: geniş ekranda pano (TarpoShell),
               dar ekranda ve Capacitor'da iOS kabuğu. Rotalar tek yerde. */}
           <Route element={<DataShell />}>
+            {/* Kırılımın 1. basamağı: bölümün bu kapsamdaki konuları.
+                Kapsam başına ayrı statik rota — `:kapsam` parametreli tek
+                rota mevcut /tarpovizyon/turkey/... yollarını gölgeleyebilirdi. */}
+            <Route path="/tarpovizyon/turkey/bolum/:bolumId" element={<ErrorBoundary><BolumPage /></ErrorBoundary>} />
+            <Route path="/tarpovizyon/world/bolum/:bolumId" element={<ErrorBoundary><BolumPage /></ErrorBoundary>} />
             <Route path="/tarpovizyon/turkey/overview" element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
             <Route path="/tarpovizyon/commodity-prices" element={<ErrorBoundary><CommodityPricesPage /></ErrorBoundary>} />
             <Route path="/tarpovizyon/ai-assistant" element={<ErrorBoundary><AIAssistantPage /></ErrorBoundary>} />

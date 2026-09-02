@@ -8,7 +8,7 @@ import '../../styles/HizliErisim.css';
  * Hızlı erişim şeridi — sabitlenenler + son bakılanlar.
  *
  * ─── NEDEN ──────────────────────────────────────────────────────────────────
- * Komut paleti (⌘K) 146 sayfaya erişimi çözdü ama her seferinde YAZMAK
+ * Komut paleti (⌘K) 134 sayfaya erişimi çözdü ama her seferinde YAZMAK
  * gerekiyor. Kullanıcının gerçekte döndüğü sayfa sayısı 8-10; onlar için
  * yazmak da tıklamak kadar yorucu.
  *

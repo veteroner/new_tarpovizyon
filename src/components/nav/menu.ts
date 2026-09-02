@@ -62,6 +62,16 @@ export type MenuItem = {
 };
 
 export type MenuCategory = {
+  /**
+   * Kararlı kimlik — bölüm sayfasının adresinde geçiyor
+   * (`/tarpovizyon/:kapsam/bolum/:id`).
+   *
+   * Başlıktan slug TÜRETİLMİYOR: "Bitkisel Üretim" hem MENU'de hem
+   * BASIC_MENU'de var, ikisi ayrı kategori. Türetilen slug çakışır ve
+   * kullanıcı yanlış bölüme düşerdi. Ayrıca başlık değişince yer imleri
+   * kırılırdı; kimlik başlıktan bağımsız.
+   */
+  id: string;
   title: string;
   icon: LucideIcon;
   /** Kategori yalnızca bu kapsamda görünür; boşsa her ikisinde. */
@@ -79,7 +89,7 @@ export const hasScope = (item: MenuItem, kapsam: Kapsam): boolean =>
 
 export const MENU: MenuCategory[] = [
   {
-    title: 'Genel Bakış', icon: Globe2, items: [
+    id: 'genel-bakis', title: 'Genel Bakış', icon: Globe2, items: [
       // Tek genel bakış sayfası var; /tarpovizyon/overview buraya YÖNLENDİRİYOR,
       // ayrı bir dünya sayfası değil. Kapsamsız.
       { label: 'Panoya Genel Bakış', any: '/tarpovizyon/turkey/overview' },
@@ -92,7 +102,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Fiyat ve Ekonomi', icon: DollarSign, items: [
+    id: 'fiyat-ekonomi', title: 'Fiyat ve Ekonomi', icon: DollarSign, items: [
       // Makro her iki kapsamda da var — eskiden Dünya'da "Makroekonomik",
       // Türkiye'de "Fiyat ve Ekonomi" altındaydı; aynı konu iki ayrı yerde.
       { label: 'Makroekonomik', world: '/tarpovizyon/world/macro-economic', turkey: '/tarpovizyon/turkey/macro' },
@@ -103,7 +113,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Bitkisel Üretim', icon: Sprout, items: [
+    id: 'bitkisel', title: 'Bitkisel Üretim', icon: Sprout, items: [
       { label: 'Genel Üretim', world: '/tarpovizyon/world/production', turkey: '/tarpovizyon/turkey/plant-production' },
       { label: 'Tahıllar', world: '/tarpovizyon/world/cereals', turkey: '/tarpovizyon/turkey/cereals' },
       { label: 'Sebzeler', world: '/tarpovizyon/world/vegetables', turkey: '/tarpovizyon/turkey/vegetables' },
@@ -117,7 +127,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Hayvansal Üretim', icon: Beef, items: [
+    id: 'hayvansal', title: 'Hayvansal Üretim', icon: Beef, items: [
       { label: 'Genel Üretim', turkey: '/tarpovizyon/turkey/animal-production' },
       { label: 'Kırmızı Et', world: '/tarpovizyon/world/red-meat', turkey: '/tarpovizyon/turkey/red-meat' },
       { label: 'Beyaz Et', world: '/tarpovizyon/world/white-meat', turkey: '/tarpovizyon/turkey/white-meat' },
@@ -132,7 +142,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Dış Ticaret', icon: Package, onlyIn: 'turkey', items: [
+    id: 'dis-ticaret', title: 'Dış Ticaret', icon: Package, onlyIn: 'turkey', items: [
       { label: 'Genel Bakış', turkey: '/tarpovizyon/turkey/trade?tab=overview' },
       { label: 'Bitkisel Ticaret', turkey: '/tarpovizyon/turkey/trade?tab=plant' },
       { label: 'Hayvansal Ticaret', turkey: '/tarpovizyon/turkey/trade?tab=animal' },
@@ -142,7 +152,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'İl Bazında', icon: MapPinned, onlyIn: 'turkey', items: [
+    id: 'il-bazinda', title: 'İl Bazında', icon: MapPinned, onlyIn: 'turkey', items: [
       { label: 'Hayvancılık', turkey: '/tarpovizyon/turkey/provincial' },
       { label: 'Bitkisel Üretim', turkey: '/tarpovizyon/turkey/plant-provincial' },
       { label: 'Coğrafi İşaretli', turkey: '/tarpovizyon/turkey/geographical-indication' },
@@ -150,7 +160,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Kaynak ve Çevre', icon: BarChart3, onlyIn: 'world', items: [
+    id: 'kaynak-cevre', title: 'Kaynak ve Çevre', icon: BarChart3, onlyIn: 'world', items: [
       { label: 'Genel Kaynaklar', world: '/tarpovizyon/world/resources' },
       { label: 'Arazi Örtüsü', world: '/tarpovizyon/world/land-cover' },
       { label: 'Gübre', world: '/tarpovizyon/world/fertilizer' },
@@ -160,7 +170,7 @@ export const MENU: MenuCategory[] = [
     ],
   },
   {
-    title: 'Araçlar', icon: Wrench, items: [
+    id: 'araclar', title: 'Araçlar', icon: Wrench, items: [
       { label: 'Rasyon', any: '/rasyon' },
       { label: 'Hasat Tahmini', any: '/hasat-tahmini' },
       { label: 'Sulama Planı', any: '/sulama-plan' },
@@ -240,7 +250,12 @@ function anaUc(config: unknown): string | undefined {
   return typeof uc === 'string' && uc ? uc : undefined;
 }
 
-export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup) => ({
+export const BASIC_MENU: MenuCategory[] = BASIC_GRUPLARI.map((grup, i) => ({
+  /*
+   * `basic-` öneki ŞART: "Bitkisel Üretim" hem MENU'de hem burada var.
+   * Öneksiz kimlik ikisini aynı adrese düşürürdü.
+   */
+  id: `basic-${i}`,
   /*
    * Kategori adı SADE. Önce "Basic · Hayvancılık" yazıyordu; kullanıcı
    * uygulamanın "Basic sürüm" olduğunu bilmiyor ve bilmesine de gerek yok —
