@@ -25,6 +25,8 @@ export type EconomicData = {
 };
 
 export type WorldCarcassPrices = {
+  /* Taze karşılığı YOK — tek seferlik anlık görüntü; tarihi ekranda yazıyor. */
+  anlikGoruntuTarihi?: string;
   ingiltere: number;
   abd: number;
   ab_27: number;

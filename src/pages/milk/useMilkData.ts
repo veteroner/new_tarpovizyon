@@ -9,8 +9,6 @@ import {
   type ProductivityComparison,
   type TuikSutUrunData,
   type WorldRankings,
-  parseTrNumber,
-  extractYear,
   AY_ADLARI,
   AY_TAM,
 } from './milkUtils';
@@ -33,15 +31,27 @@ export function useMilkData() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchRows('oner/sut-uretimi-veri') as Record<string, unknown>[];
+      /*
+       * ─── DONMUŞ İKİZDEN ÇIKILDI ─────────────────────────────────────────
+       * `oner/sut-uretimi-veri` (o_sur_uretimi_veri) MySQL göçünden kalma
+       * kopyaydı: 2024'te duruyordu ve sayıları NOKTALI METİN olarak
+       * tutuyordu ("21.098.564"). `cig-sut/uretim-miktari` hem 2025'e kadar
+       * dolu hem de sütunları gerçekten sayısal — `parseTrNumber` ile metin
+       * ayrıştırmaya artık gerek yok.
+       *
+       * Toplam sütun yok; büyükbaş + küçükbaş toplanıyor (küçükbaş zaten
+       * koyun+keçi toplamı olarak geliyor).
+       */
+      const data = await fetchRows('cig-sut/uretim-miktari') as Record<string, unknown>[];
 
       const points = data
         .map((row) => {
-          const year = extractYear(row['Yıl']);
-          const cattleTon = parseTrNumber(row['Büyükbaş Süt Üretimi (Ton)']);
-          const sheepTon = parseTrNumber(row['Koyun Sütü Üretimi (Ton)']);
-          const goatTon = parseTrNumber(row['Keçi Sütü Üretimi (Ton)']);
-          const totalTon = parseTrNumber(row['Toplam Süt Üretimi (Ton)']);
+          const year = Number(row['yil']) || 0;
+          const cattleTon = Number(row['buyukbas_sut_uretimi_ton']) || 0;
+          const sheepTon = Number(row['koyun_sutu_uretimi_ton']) || 0;
+          const goatTon = Number(row['keci_sutu_uretimi_ton']) || 0;
+          const smallTon = Number(row['kucukbas_sutu_uretimi_ton']) || (sheepTon + goatTon);
+          const totalTon = cattleTon + smallTon;
           return { year, totalTon, cattleTon, sheepTon, goatTon };
         })
         .filter((p) => p.year > 0)
@@ -95,19 +105,25 @@ export function useMilkData() {
 
       // Sanayiye Giden Süt
       try {
-        const industryRows = (await fetchRows('oner/sanayiye-giden-sut'))
+        /*
+         * Donmuş ikizden çıkıldı. İki fark: dönem sütunu `yil` değil `tarih`,
+         * ve uzun sütun adları kısaltılmış
+         * (`icme_sutu_pastorize_uht_vb_ton` → `icme_sutu_ton` gibi).
+         * Çıktı şekli aynı bırakıldı.
+         */
+        const industryRows = (await fetchRows('cig-sut/urun-uretimi'))
           .slice(-24).reverse()
-          .map((r): Row => ({ ...r, yil: String(r.yil ?? '').slice(0, 7) }));
+          .map((r): Row => ({ ...r, yil: String(r.tarih ?? r.yil ?? '').slice(0, 7) }));
         if (industryRows.length > 0) {
           const mapped = industryRows.map((item) => ({
             yil: String(item['yil'] || ''),
             inek_sutu_ton: Number(item['inek_sutu_ton']) || 0,
             yagsiz_sut_tozu_ton: Number(item['yagsiz_sut_tozu_ton']) || 0,
-            tereyag_ton: Number(item['tereyag_ton']) || 0,
+            tereyag_ton: Number(item['tereyagi_ton']) || 0,
             inek_peyniri_ton: Number(item['inek_peyniri_ton']) || 0,
             yogurt_ton: Number(item['yogurt_ton']) || 0,
             ayran_ton: Number(item['ayran_ton']) || 0,
-            icme_sutu_pastorize_uht_vb_ton: Number(item['icme_sutu_pastorize_uht_vb_ton']) || 0,
+            icme_sutu_pastorize_uht_vb_ton: Number(item['icme_sutu_ton']) || 0,
           }));
           setIndustrySutData(mapped);
         }
@@ -117,10 +133,21 @@ export function useMilkData() {
 
       // Dünya Süt Fiyatları
       try {
+        /*
+         * ─── BU TABLONUN TAZE KARŞILIĞI YOK ─────────────────────────────
+         * Tek satırlık, ülke bazında dünya süt fiyatı anlık görüntüsü.
+         * Hiçbir senkron işi beslemiyor ve D1'de eşdeğeri bulunmuyor.
+         *
+         * SİLMEDİM: içerik gerçek ve başka yerde yok. Ama güncel sanılmaması
+         * için anlık görüntünün TARİHİ de okunup ekrana taşınıyor
+         * (`created_at`). Kalıcı çözüm: kaynak bulunup senkrona bağlanması
+         * — bkz. docs/PRO-DURUM.md §7.
+         */
         const worldRows = await fetchRows('oner/dunya-sut-fiyatlari', { limit: 1 });
         if (worldRows.length > 0) {
           const item = worldRows[0];
           setWorldMilkPrices({
+            anlikGoruntuTarihi: String(item['created_at'] ?? '').slice(0, 10),
             abd_class_3: Number(item['abd_class_3']) || 0,
             ab_27: Number(item['ab_27']) || 0,
             yeni_zelanda: Number(item['yeni_zelanda']) || 0,
@@ -150,13 +177,17 @@ export function useMilkData() {
 
       // Verimlilik Karşılaştırması
       try {
-        // Değerler '99,5' gibi virgüllü metin; REPLACE(...)*1 karşılığı istemcide.
-        const compRows = await fetchRows('oner/dunya-karkas-veri');
+        /*
+         * Donmuş ikizden çıkıldı. `o_dunya_kaarkas_veri` değerleri VİRGÜLLÜ
+         * METİN tutuyordu ('100,5') ve istemcide ayrıştırılıyordu;
+         * `global/karkas-agirligi` aynı 193 ülkeyi sayısal sütunla veriyor.
+         */
+        const compRows = await fetchRows('global/karkas-agirligi');
         if (compRows.length > 0) {
           const mapped = compRows
             .map((item) => ({
-              ulke: String(item['Ülke'] ?? ''),
-              karkas_verimi: Number(String(item['Karkas Verimi (Kg)'] ?? '').replace(',', '.')) || 0,
+              ulke: String(item['ulke'] ?? ''),
+              karkas_verimi: Number(item['karkas_verimi_kg']) || 0,
             }))
             .filter(d => d.ulke && d.ulke.trim().length > 0)
             .sort((a, b) => b.karkas_verimi - a.karkas_verimi);
@@ -168,7 +199,9 @@ export function useMilkData() {
 
       // Yeterlilikler
       try {
-        const suffRows = await fetchRows('oner/yeterlilikler', { limit: 1 });
+        /* Donmuş ikizden çıkıldı. Tek fark: etiket sütunu `1_sutun` yerine
+           `sira` (ve boş); kullanılan alanlar aynı adta. */
+        const suffRows = await fetchRows('tr/yeterlilikler', { limit: 1 });
         if (suffRows.length > 0) {
           setSufficiency(suffRows[0] as Record<string, string | number>);
         }

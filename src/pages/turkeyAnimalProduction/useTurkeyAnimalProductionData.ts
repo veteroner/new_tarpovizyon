@@ -89,7 +89,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
     try {
       setLoading(true);
       const [histRows, worldRows, redMeatRows, poultryRows, cityRaw, kovanRaw] = await Promise.all([
-        fetchRows('oner/hayvansal-urun-uretimi', { limit: 200 }),
+        fetchRows('tr/hayvansal-urun-uretimi', { limit: 200 }),
         fetchRows('global/uretim', { limit: 5000 }),
         fetchRows('kirmizi-et/hayvan-sayilari-yillik', { limit: 200 }),
         /*
@@ -119,7 +119,8 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
           where: { duzeykod: 3 }, whereIn: { urun: ['Kovan', 'Balmumu'] } }),
       ]);
 
-      const histRes = { data: [...histRows].sort((a, b) => String(a.yillar).localeCompare(String(b.yillar))) };
+      /* Taze tabloda yıl sütunu `yil` (ikizde `yillar` idi). */
+      const histRes = { data: [...histRows].sort((a, b) => String(a.yil).localeCompare(String(b.yil))) };
       const worldRes = { data: worldRows };
       const redMeatRes = { data: [...redMeatRows].sort((a, b) => Number(a.yil) - Number(b.yil)) };
       // DATE_SUB(NOW(), INTERVAL 24 MONTH) karşılığı.
@@ -162,7 +163,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
 
       if ((histRes.data?.length ?? 0) > 0) {
         setHistoricalData((histRes.data as Record<string, string | number>[]).map(row => ({
-          yillar: String(row['yillar'] || row['Yıllar'] || ''),
+          yillar: String(row['yil'] || row['yillar'] || row['Yıllar'] || ''),
           bal_uretimi: parseFloat(String(row['bal_uretimi'] || row['Bal Üretimi'] || '0')) || 0,
           cig_sut_uretimi: parseFloat(String(row['cig_sut_uretimi'] || row['Çiğ Süt Üretimi'] || '0')) || 0,
           kirmizi_et_uretimi: parseFloat(String(row['kirmizi_et_uretimi'] || row['Kırmızı Et Üretimi'] || '0')) || 0,

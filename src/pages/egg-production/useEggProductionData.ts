@@ -17,8 +17,6 @@ import {
   type MonthlyEggData,
   type EggEconomicData,
   type EggTradeData,
-  parseTrNumber,
-  extractYear,
 } from './eggProductionTypes';
 
 export function useEggProductionData() {
@@ -42,14 +40,20 @@ export function useEggProductionData() {
     setLoading(true);
     try {
       const [data, kumesTum] = await Promise.all([
-        fetchRows('oner/toplam-uretim-veri'),
+        /*
+         * Donmuş ikizden çıkıldı. `o_toplam_uretim_veri`'nin son satırı
+         * BOZUKTU (aşağıdaki yoruma bakınız: 2025 yumurta 14,6 Mr, gerçeği
+         * 19,9 Mr; bal ve süt sütunları da 0/boş). `tr_hayvansal_urun_uretimi`
+         * aynı 65 yılı doğru değerlerle ve sayısal sütunlarla veriyor.
+         */
+        fetchRows('tr/hayvansal-urun-uretimi'),
         fetchRows(R_KUMES, { limit: 2000 }),
       ]);
 
       const points = data
         .map((row) => {
-          const year = extractYear(row['Yıllar']);
-          const eggsMillion = parseTrNumber(row['Yumurta (Milyon Adet)']);
+          const year = Number(row['yil']) || 0;
+          const eggsMillion = Number(row['yumurta_milyon_adet']) || 0;
           return { year, eggsMillion };
         })
         .filter((p) => p.year > 0 && p.eggsMillion > 0)

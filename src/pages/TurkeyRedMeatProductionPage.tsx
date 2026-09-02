@@ -57,7 +57,8 @@ export default function TurkeyRedMeatProductionPage() {
     setLoading(true);
     try {
       // 1. Ana Üretim Verisi (1961-2024)
-      const histData = await fetchRows('oner/hayvansal-urun-uretimi') as Record<string, string | number>[];
+      /* Donmuş ikiz; tazesinde yıl sütunu `yillar` değil `yil`. */
+      const histData = await fetchRows('tr/hayvansal-urun-uretimi') as Record<string, string | number>[];
 
       // 2a. Türlere Göre Kırılım - Tarihsel (1986-2009): büyükbaş+koyun+keçi
       // MySQL'deki YEAR(yil) karşılığı: yil '1986-01-01 00:00:00' biçiminde
@@ -69,7 +70,7 @@ export default function TurkeyRedMeatProductionPage() {
       const detailData = await fetchRows('kirmizi-et/hayvan-sayilari-yillik') as Record<string, string | number>[];
 
       const allPoints = histData.map(row => ({
-        year: extractYear(row['yillar']),
+        year: extractYear(row['yil']),
         totalTon: Number(row['kirmizi_et_uretimi']) || 0,
         cattleTon: 0,
         sheepTon: 0,
@@ -158,10 +159,18 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 4. Dünya Karkas Fiyatları
+      /*
+       * ─── BU TABLONUN TAZE KARŞILIĞI YOK ───────────────────────────────
+       * Tek satırlık, ülke bazında dünya karkas fiyatı anlık görüntüsü.
+       * Hiçbir senkron işi beslemiyor ve D1'de eşdeğeri bulunmuyor.
+       * SİLMEDİM (içerik gerçek ve başka yerde yok) ama güncel sanılmaması
+       * için anlık görüntü tarihi ekrana taşınıyor.
+       */
       const pricesRows = await fetchRows('oner/dunya-karkas-fiyatlari', { limit: 1 });
       if (pricesRows.length > 0) {
         const row = pricesRows[0];
         setWorldCarcassPrices({
+          anlikGoruntuTarihi: String(row['created_at'] ?? '').slice(0, 10),
           ingiltere: Number(row['ingiltere']) || 0,
           abd: Number(row['abd']) || 0,
           ab_27: Number(row['ab_27']) || 0,
@@ -176,12 +185,16 @@ export default function TurkeyRedMeatProductionPage() {
 
       // 5. Verimlilik Karşılaştırma
       try {
-        // Değerler '99,5' gibi virgüllü metin; REPLACE(...)*1 karşılığı istemcide.
-        const prodRows = await fetchRows('oner/dunya-karkas-veri');
+        /*
+         * Donmuş ikizden çıkıldı. `o_dunya_kaarkas_veri` değerleri VİRGÜLLÜ
+         * METİN tutuyordu ('100,5') ve istemcide ayrıştırılıyordu;
+         * `global/karkas-agirligi` aynı 193 ülkeyi sayısal sütunla veriyor.
+         */
+        const prodRows = await fetchRows('global/karkas-agirligi');
         setProductivityComparison(prodRows
           .map((r) => ({
-            ulke: String(r['Ülke'] ?? ''),
-            karkas_verimi: Number(String(r['Karkas Verimi (Kg)'] ?? '').replace(',', '.')) || 0,
+            ulke: String(r['ulke'] ?? ''),
+            karkas_verimi: Number(r['karkas_verimi_kg']) || 0,
           }))
           .filter(d => d.ulke && d.ulke.trim().length > 0)
           .sort((a, b) => b.karkas_verimi - a.karkas_verimi));
@@ -201,19 +214,21 @@ export default function TurkeyRedMeatProductionPage() {
       }
 
       // 7. Türkiye Tüketim Verileri
-      const consRows = await fetchRows('oner/kisi-basina-tuketimler', { limit: 1 });
+      /* Donmuş ikizden çıkıldı; alan adlarındaki `_tuketimi_` kalktı. */
+      const consRows = await fetchRows('tr/kisi-basina-guncel-tuketim', { limit: 1 });
       if (consRows.length > 0) {
         const row = consRows[0];
         setConsumptionData({
-          kirmizi_et_tuketimi_kg: Number(row['kirmizi_et_tuketimi_kg']) || 0,
-          yumurta_tuketimi_adet: Number(row['yumurta_tuketimi_adet']) || 0,
+          kirmizi_et_tuketimi_kg: Number(row['kirmizi_et_kg']) || 0,
+          yumurta_tuketimi_adet: Number(row['yumurta_adet']) || 0,
           pilic_eti_kg: Number(row['pilic_eti_kg']) || 0,
-          bal_tuketimi_kg: Number(row['bal_tuketimi_kg']) || 0,
+          bal_tuketimi_kg: Number(row['bal_kg']) || 0,
         });
       }
 
       // 8. Dünya Et Tüketimi Karşılaştırma
-      const compRows = await fetchRows('oner/karsilastirma-et-tuketimi');
+      /* Donmuş ikizden çıkıldı; `balik_ve_deniz_urunleri` → `balik_deniz_urunleri`. */
+      const compRows = await fetchRows('global/et-tuketimi-karsilastirma');
       {
         setConsumptionComparison(compRows
           .map((r) => ({
@@ -222,7 +237,7 @@ export default function TurkeyRedMeatProductionPage() {
             sigir_eti: Number(r['sigir_eti']) || 0,
             koyun_keci_eti: Number(r['koyun_keci_eti']) || 0,
             domuz_eti: Number(r['domuz_eti']) || 0,
-            balik_ve_deniz_urunleri: Number(r['balik_ve_deniz_urunleri']) || 0,
+            balik_ve_deniz_urunleri: Number(r['balik_deniz_urunleri']) || 0,
             diger_etler: Number(r['diger_etler']) || 0,
           }))
           .filter(d => d.ulke && d.ulke.trim().length > 0));
@@ -231,19 +246,78 @@ export default function TurkeyRedMeatProductionPage() {
       // 9. İthalat Verileri
       // Tabloda ilk satır başlık metni (ithalat = null); eski SQL bunu
       // "WHERE ithalat >= 2010" ile eliyordu. Sütun toplamı da istemcide.
-      const importRows = (await fetchRows('oner/canli-hayvan-et-ithalati'))
-        .filter((r) => Number(r.ithalat) >= 2010)
-        .sort((a, b) => Number(a.ithalat) - Number(b.ithalat));
-      if (importRows.length > 0) {
-        setImportData(importRows.map((r) => ({
+      /*
+       * ─── İKİ TABLO BİRLEŞTİRİLİYOR — DÜZ GEÇİŞ VERİ KAYBEDERDİ ─────────
+       * Burada diğerlerinden farklı bir durum var ve ölçülerek çıkarıldı:
+       *
+       *   dis-ticaret/kirmizi-et-hayvan-ithalati : 2002–2024, REVİZE
+       *       değerler, isimli ve sayısal sütunlar
+       *   oner/canli-hayvan-et-ithalati          : 2010–2025, ham değerler,
+       *       İSİMSİZ metin sütunlar (column_1 … column_12)
+       *
+       * Ortak 15 yılın 4'ünde değerler birebir, 11'inde yeni tablo revize
+       * (örn. 2012 besilik sığır 177.392 → 228.421). Farkların hiçbiri
+       * sıfır/eksik değil, yani yeni tablo daha doğru.
+       *
+       * AMA yeni tablo 2024'te bitiyor, eskide 2025 satırı var ve DOLU.
+       * Düz geçiş o yılı silerdi. Bu yüzden taban yeni tablo, eski tablodan
+       * yalnızca yeni tabloda OLMAYAN yıllar ekleniyor.
+       *
+       * İsimsiz sütunların karşılığı tahminle değil, 15 yıllık değer
+       * karşılaştırmasıyla doğrulandı (column_5 → besilik_sigir_bas gibi).
+       *
+       * DİKKAT — İKİSİ DE ÖKSÜZ: hiçbir senkron işi bu tabloları yazmıyor,
+       * ikisi de tek seferlik anlık görüntü. Kaynağa bağlanması Aşama 3'te
+       * (bkz. docs/PRO-DURUM.md §5).
+       */
+      const [taze, ikiz] = await Promise.all([
+        fetchRows('dis-ticaret/kirmizi-et-hayvan-ithalati', { limit: 200 }),
+        fetchRows('oner/canli-hayvan-et-ithalati', { limit: 200 }),
+      ]);
+
+      type Ithalat = {
+        yil: string;
+        karkas_et_ithalati_ton: number;
+        besilik_sigir_bas: number;
+        besilik_kesimlik_kucukbas_sayisi_bas: number;
+        toplam_ithalata_odenen_dolar: number;
+      };
+
+      const tazeYillar = new Set(taze.map((r) => Number(r.yil)));
+
+      const tazeKayitlar: Ithalat[] = taze
+        .filter((r) => Number(r.yil) >= 2010)
+        .map((r) => ({
+          yil: String(r.yil ?? ''),
+          karkas_et_ithalati_ton: num(r.karkas_et_ithalati_ton),
+          besilik_sigir_bas: num(r.besilik_sigir_bas),
+          besilik_kesimlik_kucukbas_sayisi_bas: num(r.kasaplik_kucukbas_bas),
+          /*
+           * Hazır `toplam_odenen_dolar` sütunu var AMA NULL — 2010-2024'ün
+           * tamamında boş (ölçüldü). Onu kullansaydım grafik 15 yıl sıfır
+           * gösterip yalnız 2025'te zıplardı. Parçalardan toplanıyor; parça
+           * sütunları dolu ve toplamları tutarlı (2024: 710.288.600 $).
+           */
+          toplam_ithalata_odenen_dolar:
+            num(r.kasaplik_kucukbas_deger) + num(r.damizlik_kucukbas_deger)
+            + num(r.besilik_sigir_deger) + num(r.kasaplik_sigir_deger)
+            + num(r.damizlik_sigir_deger),
+        }));
+
+      const eksikYillar: Ithalat[] = ikiz
+        .filter((r) => Number(r.ithalat) >= 2010 && !tazeYillar.has(Number(r.ithalat)))
+        .map((r) => ({
           yil: String(r.ithalat ?? ''),
           karkas_et_ithalati_ton: num(r.column_11),
           besilik_sigir_bas: num(r.column_5),
           besilik_kesimlik_kucukbas_sayisi_bas: num(r.column_1),
           toplam_ithalata_odenen_dolar:
             num(r.column_2) + num(r.column_4) + num(r.column_6) + num(r.column_8) + num(r.column_10),
-        })));
-      }
+        }));
+
+      const importRows = [...tazeKayitlar, ...eksikYillar]
+        .sort((a, b) => Number(a.yil) - Number(b.yil));
+      if (importRows.length > 0) setImportData(importRows);
 
       // 10. Dünya Sıralamaları (FAO)
       try {

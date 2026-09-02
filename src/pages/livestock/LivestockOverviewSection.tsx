@@ -78,7 +78,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
     (async () => {
       try {
         // WHERE tarih = (SELECT MAX(tarih) …) karşılığı istemcide.
-        const ilHayvan = await fetchRows('oner/illerin-hayvan-sayisi', { limit: 2000 });
+        const ilHayvan = await fetchRows('il/hayvan-sayilari', { limit: 2000 });
         const sonTarih = ilHayvan.reduce((en, r) => {
           const t = String(r.tarih ?? '');
           return t > en ? t : en;

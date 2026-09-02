@@ -36,6 +36,11 @@ export type IndustrySutData = {
 };
 
 export type WorldMilkPrices = {
+  /*
+   * Bu tablonun taze karşılığı YOK — tek seferlik anlık görüntü. Tarih
+   * ekranda gösteriliyor ki güncel sanılmasın (bkz. useMilkData).
+   */
+  anlikGoruntuTarihi?: string;
   abd_class_3: number;
   ab_27: number;
   yeni_zelanda: number;

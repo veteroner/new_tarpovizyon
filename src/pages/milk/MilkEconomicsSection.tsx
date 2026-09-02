@@ -63,6 +63,16 @@ export default function MilkEconomicsSection({
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
               Türkiye ve dünya ülkeleri çiğ süt fiyatları karşılaştırması (USD/kg)
             </p>
+            {/*
+              * Bu tabloyu hiçbir senkron işi beslemiyor: tek seferlik bir
+              * anlık görüntü. Tarihi burada AÇIKÇA yazılıyor — tarihsiz
+              * bırakmak okuyucuya güncel fiyat gösteriyormuş izlenimi verirdi.
+              */}
+            {worldMilkPrices.anlikGoruntuTarihi && (
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '6px', opacity: 0.85 }}>
+                {worldMilkPrices.anlikGoruntuTarihi} tarihli anlık görüntü — düzenli güncellenmiyor
+              </p>
+            )}
           </div>
 
           <div style={{ 

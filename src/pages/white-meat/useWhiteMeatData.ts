@@ -49,12 +49,13 @@ export function useWhiteMeatData(): WhiteMeatData {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchRows('oner/hayvansal-urun-uretimi');
+      /* Donmuş ikiz; tazesinde yıl sütunu `yillar` değil `yil`. */
+      const data = await fetchRows('tr/hayvansal-urun-uretimi');
       const kumesTum = await fetchRows(R_KUMES, { limit: 2000 });
 
       const points: YearPoint[] = data
         .map((row) => ({
-          year: Number(String(row.yillar ?? '').slice(0, 4)) || 0,
+          year: Number(String(row.yil ?? '').slice(0, 4)) || 0,
           poultryTon: num(row.kanatli_eti_ton),
         }))
         .filter((p) => p.year > 0)
@@ -144,7 +145,7 @@ export function useWhiteMeatData(): WhiteMeatData {
       // İl bazlı kanatlı hayvan varlığı
       try {
         // WHERE tarih = (SELECT MAX(tarih) …) karşılığı: en yeni tarih istemcide.
-        const ilHayvan = await fetchRows('oner/illerin-hayvan-sayisi', { limit: 2000 });
+        const ilHayvan = await fetchRows('il/hayvan-sayilari', { limit: 2000 });
         const sonTarih = ilHayvan.reduce((en, r) => {
           const t = String(r.tarih ?? '');
           return t > en ? t : en;

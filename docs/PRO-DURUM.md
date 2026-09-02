@@ -1,6 +1,6 @@
 # TarpoVizyon Pro — Durum Tespiti ve Yol Haritası
 
-**Tarih:** 2 Eylül 2026
+**Tarih:** 2 Eylül 2026 · **Aşama 1 TAMAMLANDI** (aşağıda "Aşama 1 sonucu")
 **Kapsam:** `/tarpovizyon/*` altındaki 61 rota (yayınlanmamış Pro sürümü)
 **Yöntem:** Bu belgedeki her sayı ölçülmüştür — kod tarandı, canlı API çağrıldı,
 D1'de `MAX(dönem)` doğrudan hesaplandı. Tahmin yok.
@@ -159,12 +159,41 @@ tablolar da güncellenmiyor.
 
 ## 5. Yapılacaklar
 
-### Aşama 1 — İkizlerden çık (en yüksek getiri, en düşük risk)
+### Aşama 1 — İkizlerden çık ✅ TAMAMLANDI
 
-7 dosyada 21 rota çağrısını taze karşılığına çevir. Kod değişikliği küçük;
-asıl iş **şema doğrulaması** (§6).
+**24 `oner/` çağrısından 21'i taşındı. Kalan 3'ü bilerek duruyor.**
 
-Beklenen kazanç: Pro'nun hayvancılık tarafı 6 ay–1 yıl ileri gider.
+Kazanç:
+
+| Gösterge | Önce | Sonra |
+|---|---|---|
+| Yumurta / çiğ süt / kanatlı / kırmızı et ekonomik göstergeleri | 2026-02 | **2026-08** |
+| Kırmızı et üretim miktarı | 2024 | **2025** |
+| İl hayvan varlığı | 2024-01 | **2025-01** |
+| Hayvansal ürün üretimi (Basic dahil) | dönemsiz/bozuk | **2025** |
+
+Yol boyunca çıkan ve düzeltilen üç sessiz hata:
+
+1. **`o_toplam_uretim_veri`'nin son satırı bozuktu** — 2025 yumurta 14,6 Mr
+   (gerçeği 19,9 Mr), bal ve süt sütunları 0/boş. Yumurta sayfası bu yüzden
+   uydurma bir "%-24,9 düşüş" gösteriyordu.
+2. **`toplam_odenen_dolar` sütunu NULL** — taze ithalat tablosunda 2010-2024'ün
+   tamamında boş. Hazır sütunu kullansaydım grafik 15 yıl sıfır gösterip
+   yalnız 2025'te zıplardı. Parçalardan toplanıyor.
+3. **`oner/hayvansal-urun-uretimi` BASIC tarafında da kullanılıyordu** —
+   Pro taranırken çıktı. O da taşındı.
+
+Bilerek bırakılan 3 çağrı:
+
+| Rota | Neden |
+|---|---|
+| `oner/canli-hayvan-et-ithalati` | Taze tablo 2024'te bitiyor, bunda 2025 var. İkisi birleştiriliyor: taban taze (revize değerler, 2002'ye kadar), eksik yıllar bundan. **İkisi de öksüz.** |
+| `oner/dunya-sut-fiyatlari` | Taze karşılığı yok. Silinmedi; ekranda **anlık görüntü tarihi** yazıyor. |
+| `oner/dunya-karkas-fiyatlari` | Aynı gerekçe, aynı çözüm. |
+
+Doğrulama: arıcılık geniş→uzun pivotu eski tabloyla **891/891 birebir**
+tuttu; 16 eşlenen ekonomik alan 2026-08'de sıfır değil; kırmızı et sayfasının
+üç sekmesi de dolu (Ekonomi 2026-08, İthalat 2025, Dünya 2024).
 
 ### Aşama 2 — Eski `api.php` katmanından çık
 

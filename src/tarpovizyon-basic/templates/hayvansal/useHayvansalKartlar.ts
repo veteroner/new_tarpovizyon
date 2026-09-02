@@ -32,13 +32,19 @@ export function useHayvansalKartlar() {
 
   const uretim = useQuery({
     queryKey: ['tvb-hayvansal-uretim'],
-    queryFn: () => fetchRows('oner/hayvansal-urun-uretimi', { limit: '200' }),
+    /*
+     * Donmuş ikizden çıkıldı. Bu satır BASIC tarafındaydı — Pro taranırken
+     * çıktı: `oner_hayvansal_urun_uretimi` hiçbir senkron işinin yazmadığı
+     * kopya ve dönem sütunu bile yok. `tr_hayvansal_urun_uretimi` günlük
+     * beslenen tablo ve 2025'te; yıl sütunu `yillar` değil `yil`.
+     */
+    queryFn: () => fetchRows('tr/hayvansal-urun-uretimi', { limit: '200' }),
   });
 
   return {
     yukleniyor: varlik.isLoading || uretim.isLoading,
     varlik: varlik.data ? seriyeCevir(varlik.data, 'tarih') : [],
-    uretim: uretim.data ? seriyeCevir(uretim.data, 'yillar') : [],
+    uretim: uretim.data ? seriyeCevir(uretim.data, 'yil') : [],
   };
 }
 

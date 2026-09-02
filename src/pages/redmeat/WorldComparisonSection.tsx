@@ -118,7 +118,15 @@ export default function WorldComparisonSection({
       {/* Section 4: Dünya Karkas Fiyatları */}
       {worldCarcassPriceTreemap.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
-          <ChartCard title="💰 Dünya Karkas Et Fiyatları (USD/kg)" span={2} action={<ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />}>
+          {/*
+            * Bu tabloyu hiçbir senkron işi beslemiyor — tek seferlik anlık
+            * görüntü. Tarihi başlığa yazılıyor ki güncel fiyat sanılmasın.
+            */}
+          <ChartCard
+            title={`💰 Dünya Karkas Et Fiyatları (USD/kg)${worldCarcassPrices?.anlikGoruntuTarihi ? ` — ${worldCarcassPrices.anlikGoruntuTarihi} anlık görüntüsü` : ''}`}
+            span={2}
+            action={<ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />}
+          >
             <ResponsiveContainer width="100%" height={400}>
               <Treemap
                 data={worldCarcassPriceTreemap}

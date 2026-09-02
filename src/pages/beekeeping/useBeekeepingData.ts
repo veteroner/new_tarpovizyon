@@ -23,35 +23,51 @@ export function useBeekeepingData() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Load beekeeper trend data (2013-2023)
-      const yearData = await fetchRows('oner/illere-gore-arici-sayisi', { limit: 200 }) as Record<string, unknown>[];
-      
-      const parsedYearData = yearData.map(row => ({
-        il: String(row['il'] || ''),
-        '2013': parseNumber(row['2013_01_01_00_00_00']),
-        '2014': parseNumber(row['2014_01_01_00_00_00']),
-        '2015': parseNumber(row['2015_01_01_00_00_00']),
-        '2016': parseNumber(row['2016_01_01_00_00_00']),
-        '2017': parseNumber(row['2017_01_01_00_00_00']),
-        '2018': parseNumber(row['2018_01_01_00_00_00']),
-        '2019': parseNumber(row['2019_01_01_00_00_00']),
-        '2020': parseNumber(row['2020_01_01_00_00_00']),
-        '2021': parseNumber(row['2021_01_01_00_00_00']),
-        '2022': parseNumber(row['2022_01_01_00_00_00']),
-        '2023': parseNumber(row['2023_01_01_00_00_00']),
-      }));
+      /*
+       * ─── DONMUŞ İKİZDEN ÇIKILDI (GENİŞ → UZUN) ─────────────────────────
+       * `oner/illere-gore-arici-sayisi` MySQL göçünden kalma kopyaydı ve
+       * GENİŞ biçimdeydi: her yıl ayrı bir sütun (`2013_01_01_00_00_00` …).
+       * Yeni yıl eklendiğinde tabloya SÜTUN eklemek gerekiyordu, bu yüzden
+       * de hiç eklenmedi — 2023'te dondu.
+       *
+       * `il/arici-sayisi-yillik` UZUN biçimde: her satır bir il-yıl çifti
+       * (`il`, `yil`, `arici_sayisi`). Yeni yıl yalnızca yeni SATIR demek.
+       * Aşağıdaki pivot uzun biçimi bileşenin beklediği geniş şekle
+       * çeviriyor — böylece grafik ve tablolar değişmeden çalışıyor ve
+       * yıl listesi artık veriden geliyor, kodda sabit değil.
+       */
+      const uzunSatirlar = await fetchRows('il/arici-sayisi-yillik', { limit: 5000 }) as Record<string, unknown>[];
+
+      const ileGore = new Map<string, Record<string, number | string>>();
+      const gorulenYillar = new Set<string>();
+      uzunSatirlar.forEach((r) => {
+        const il = String(r['il'] ?? '');
+        const yil = String(r['yil'] ?? '');
+        if (!il || !yil) return;
+        gorulenYillar.add(yil);
+        if (!ileGore.has(il)) ileGore.set(il, { il });
+        ileGore.get(il)![yil] = parseNumber(r['arici_sayisi']);
+      });
+
+      // Bir ilde eksik yıl varsa 0 ile doldur — grafikte delik kalmasın.
+      const yillar = [...gorulenYillar].sort();
+      const parsedYearData = [...ileGore.values()].map((satir) => {
+        yillar.forEach((y) => { if (satir[y] === undefined) satir[y] = 0; });
+        return satir;
+      }) as Parameters<typeof setBeekeeperYearData>[0];
       setBeekeeperYearData(parsedYearData);
 
       // Load province detailed data
-      const provData = await fetchRows('oner/illerin-bal-cesitleri', { limit: 2000 }) as Record<string, unknown>[];
-      
+      /* Donmuş ikizden çıkıldı; yeni tabloda `_adet` sonekleri yok. */
+      const provData = await fetchRows('il/bal-cesitleri', { limit: 2000 }) as Record<string, unknown>[];
+
       const parsedProvData = provData.map(row => ({
         il: String(row['il'] || ''),
         balin_cesiti: String(row['balin_cesiti'] || ''),
-        aricilik_yapan_isletme_sayisi_adet: parseNumber(row['aricilik_yapan_isletme_sayisi_adet']),
-        yeni_kovan_sayisi_adet: parseNumber(row['yeni_kovan_sayisi_adet']),
-        eski_kovan_sayisi_adet: parseNumber(row['eski_kovan_sayisi_adet']),
-        toplam_kovan_adet: parseNumber(row['toplam_kovan_adet']),
+        aricilik_yapan_isletme_sayisi_adet: parseNumber(row['aricilik_yapan_isletme_sayisi']),
+        yeni_kovan_sayisi_adet: parseNumber(row['yeni_kovan_sayisi']),
+        eski_kovan_sayisi_adet: parseNumber(row['eski_kovan_sayisi']),
+        toplam_kovan_adet: parseNumber(row['toplam_kovan']),
         bal_uretimi_ton: parseNumber(row['bal_uretimi_ton']),
         balmumu_uretimi_ton: parseNumber(row['balmumu_uretimi_ton']),
         bal_verimi_kg: parseNumber(row['bal_verimi_kg']),
