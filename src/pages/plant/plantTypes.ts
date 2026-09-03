@@ -31,35 +31,29 @@ export const TURKEY_REGIONS: Record<string, string[]> = {
  * ÇEKEMİYORDU, çünkü sorgu `SUM(y2004)…SUM(y2024)` diye YEARS'tan üretiliyor.
  * Yani tek bir sabit, on bir bitkisel sayfayı birden eskitiyordu.
  *
- * ─── 2025 NEDEN AYRI İŞARETLİ ──────────────────────────────────────────────
- * `tuik_bitkisel_uretim`'de y2025 YALNIZCA Türkiye satırlarında (duzeykod=1)
- * dolu: TÜİK'in indirilebilir tablolarında il bazlı 2025 bitkisel üretim YOK
- * (13.78.282 temasındaki 30 tablonun hiçbiri il×üretim değil; il kırılımı
- * dinamik veritabanında). Bu yüzden 2025 seçilebilir ama etiketi kapsamını
- * söylüyor ve VARSAYILAN olmuyor — varsayılan 2025 olsaydı "Lider İl" kartı
- * ve il grafikleri açılışta boş gelirdi.
+ * ─── 2025 İL ÜRETİMİ ARTIK VAR ─────────────────────────────────────────────
+ * Bir süre y2025 yalnızca Türkiye satırlarında (duzeykod=1) doluydu: TÜİK'in
+ * indirilebilir tablolarında il×üretim yok, il kırılımı MEDAS'ın dinamik
+ * veritabanında. O kırılım pivot dışa aktarımından yüklendi — 7.683 il satırı,
+ * bkz. scripts/medas-pivot-il-yukle.mjs. Artık 2025 hem ülke hem il düzeyinde
+ * tam ve varsayılan olabiliyor.
  */
 export const ILK_YIL = 2004;
 
 export const SON_YIL = 2025;
 
 /*
- * ─── 2025'TE HANGİ GÖSTERGE VAR ────────────────────────────────────────────
- * TÜİK bitkisel veriyi iki aşamada yayımlıyor: EKİM ALANI ilkbaharda,
- * ÜRETİM hasat sonrası. 2025 için il ve ilçe düzeyinde ekilen alan, hasat
- * edilen alan, verim ve ağaç sayıları var; ÜRETİM HENÜZ YOK — ölçüldü,
- * `Üretim` unsurunun 76.674 satırının tamamı sıfır (her düzeyde).
+ * ─── O YIL YAYIMLANMAMIŞ GÖSTERGELER ───────────────────────────────────────
+ * ŞU AN BOŞ — ama mekanizma duruyor.
  *
- * Ülke toplamı olarak 2025 üretimi Veri Portalı Excel'inde var ve D1'de
- * duzeykod=1 satırlarında duruyor; ama bu sayfalar Türkiye'yi İLLERİ
- * TOPLAYARAK buluyor (`where: { duzeykod: 3 }`), yani oraya ulaşmıyor.
- *
- * Bu liste olmadan kullanıcı 2025 + Üretim seçtiğinde "0 ton, %-100"
- * görüyordu — yanlış rakam, veri yokluğundan ayırt edilemiyor.
+ * 2025 üretimi il düzeyinde MEDAS pivot dışa aktarımından yüklendi
+ * (scripts/medas-pivot-il-yukle.mjs), yani artık kapatılacak bir gösterge-yıl
+ * çifti yok. Liste silinmedi çünkü durum her yıl tekrarlıyor: TÜİK ekim
+ * alanını ilkbaharda, ÜRETİMİ hasat sonrası yayımlıyor. 2026 ilkbaharında
+ * y2026 ekilen alanla dolunca üretim yine aylarca boş kalacak; o zaman buraya
+ * `2026: ['Üretim']` yazmak yeterli.
  */
-export const YIL_DISI_UNSURLAR: Record<number, string[]> = {
-  2025: ['Üretim'],
-};
+export const YIL_DISI_UNSURLAR: Record<number, string[]> = {};
 
 /**
  * Kısıt GÖSTERGEDE değil YILDA.
