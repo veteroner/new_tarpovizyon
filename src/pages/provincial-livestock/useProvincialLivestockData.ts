@@ -1,3 +1,4 @@
+import { HAYVAN_IL_YIL, yilSutunu } from '../../utils/hayvanYili';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchAgg, num } from '../../services/d1';
 
@@ -55,7 +56,8 @@ export function useProvincialLivestockData(): ProvincialLivestockData {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('overview');
 
-  const [selectedYear, setSelectedYear] = useState<string>('y2024');
+  /* İl/ilçe seviyesi; orada 2025 dolu (bkz. utils/hayvanYili.ts). */
+  const [selectedYear, setSelectedYear] = useState<string>(yilSutunu(HAYVAN_IL_YIL));
   const [selectedAnimals, setSelectedAnimals] = useState<string[]>(['Sığır']);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string>('Tümü');

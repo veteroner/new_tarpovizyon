@@ -39,6 +39,10 @@ export function ComparativeSection({ data }: Props) {
     ? (((Number(eggLast[eggLast.length - 1]?.egg) || 0) - (Number(eggLast[eggLast.length - 2]?.egg) || 0)) /
       (Number(eggLast[eggLast.length - 2]?.egg) || 1) * 100).toFixed(1) + '%'
     : 'N/A';
+  /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
+     yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
+  const yil = data.years.livestock ?? '';
+
 
   return (
     <>
@@ -70,7 +74,7 @@ export function ComparativeSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title="🥧 Toplam Hayvansal Üretim Dağılımı (2023)" action={<ChartInsightButton title="Toplam Hayvansal Üretim Dağılımı (2023)" description="Süt ve et üretiminin toplam içindeki payı" data={[{name:'Süt',value:data.milkProduction.total},{name:'Et',value:data.meatProduction.total}]} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
+        <ChartCard title={`🥧 Toplam Hayvansal Üretim Dağılımı (${yil})`} action={<ChartInsightButton title={`Toplam Hayvansal Üretim Dağılımı (${yil})`} description="Süt ve et üretiminin toplam içindeki payı" data={[{name:'Süt',value:data.milkProduction.total},{name:'Et',value:data.meatProduction.total}]} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -117,7 +121,7 @@ export function ComparativeSection({ data }: Props) {
       </div>
 
       <div className="data-table" style={{ marginTop: '2rem' }}>
-        <h3 className="data-table-title">Kategori Özet Karşılaştırması (2023)</h3>
+        <h3 className="data-table-title">Kategori Özet Karşılaştırması ({yil})</h3>
         <div className="table-row" style={{ background: 'var(--bg-card)', fontWeight: '600', borderBottom: '2px solid var(--border)' }}>
           <div className="table-rank" style={{ width: '200px' }}>Kategori</div>
           <div className="table-info" style={{ flex: 1 }}>Toplam Üretim</div>

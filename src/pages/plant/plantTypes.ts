@@ -61,6 +61,29 @@ export const YIL_DISI_UNSURLAR: Record<number, string[]> = {
   2025: ['Üretim'],
 };
 
+/**
+ * Kısıt GÖSTERGEDE değil YILDA.
+ *
+ * İlk denemede yayımlanmamış göstergeyi listeden düşürmüştüm; o zaman 2025'te
+ * "Üretim" seçeneği tamamen kayboluyordu ve sayfanın asıl ölçütü yokmuş gibi
+ * duruyordu. Doğrusu tersi: gösterge listesi TAM kalıyor, yayımlanmamış YIL
+ * o gösterge için kapatılıyor. Eksik olan yıl, gösterge değil.
+ */
+export const yayimlandiMi = (unsur: string, yil: number): boolean =>
+  !(YIL_DISI_UNSURLAR[yil] ?? []).includes(unsur);
+
+/** O gösterge için veri bulunan en son yıl. */
+export function sonYayimYili(unsur: string): number {
+  let y = SON_YIL;
+  while (y > ILK_YIL && !yayimlandiMi(unsur, y)) y -= 1;
+  return y;
+}
+
+/** Açılışta seçilecek gösterge: EN TAZE yılda yayımlanmış ilk seçenek. */
+export function acilisGostergesi(secenekler: { id: string }[], yil: number): string {
+  return (secenekler.find((o) => yayimlandiMi(o.id, yil)) ?? secenekler[0])?.id;
+}
+
 /** Açılışta seçili yıl. */
 export const VARSAYILAN_YIL = SON_YIL;
 

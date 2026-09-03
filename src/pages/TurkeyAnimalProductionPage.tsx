@@ -19,6 +19,15 @@ const TurkeyAnimalProductionPage: React.FC = () => {
     cagr5Year, forecastRedMeat, milkProductivityTrend, growthStrategy,
   } = useTurkeyAnimalProductionData();
 
+  /*
+   * Dönem etiketi VERİDEN türüyor. "1961-2024" düz yazılıydı; tablo 2025'e
+   * kadar dolu ve sayfa zaten son satırı okuyor, yani KPI'lar güncelken
+   * etiket bir yıl geriyi gösteriyordu.
+   */
+  const donem = historicalData.length
+    ? `${String(historicalData[0]?.yillar).slice(0, 4)}-${String(historicalData[historicalData.length - 1]?.yillar).slice(0, 4)}`
+    : '';
+
   const exportCSV = () => {
     const headers = ['Yıl', 'Kırmızı Et (ton)', 'Süt (ton)', 'Yumurta (M adet)', 'Kanatlı (ton)', 'Bal (ton)'];
     const rows = historicalData.map(d => [
@@ -49,7 +58,7 @@ const TurkeyAnimalProductionPage: React.FC = () => {
             Hayvansal Üretim Dashboard
           </h1>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-            Türkiye hayvansal ürün üretim verileri • 1961-2024 tarihsel analiz
+            Türkiye hayvansal ürün üretim verileri • {donem} tarihsel analiz
           </p>
         </div>
         <button

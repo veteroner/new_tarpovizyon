@@ -1,5 +1,5 @@
 import ProductSelector from '../../components/ProductSelector';
-import { TURKEY_REGIONS, YEARS, UNSUR_OPTIONS } from './plantTypes';
+import { TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, yayimlandiMi } from './plantTypes';
 
 interface PlantFiltersProps {
   productList: { id: string; name: string; nameTR: string }[];
@@ -54,7 +54,18 @@ export default function PlantFilters({
         <label className="filter-label">Yıl</label>
         <select className="filter-select" value={selectedYear}
           onChange={e => setSelectedYear(Number(e.target.value))}>
-          {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          {/* Yayımlanmamış yıl kapalı ve SEBEBİ yazıyor. Eskiden bunun yerine
+              göstergenin kendisi listeden düşüyordu; o zaman 2025'te "Üretim"
+              diye bir seçenek hiç görünmüyor, eksik olanın yalnızca 2025
+              üretimi olduğu anlaşılmıyordu. */}
+          {YEARS.map(y => {
+            const varMi = yayimlandiMi(selectedUnsur, y);
+            return (
+              <option key={y} value={y} disabled={!varMi}>
+                {y}{varMi ? '' : ' — henüz yayımlanmadı'}
+              </option>
+            );
+          })}
         </select>
       </div>
 

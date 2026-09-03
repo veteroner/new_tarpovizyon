@@ -16,6 +16,10 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
 }) => {
   if (historicalChartData.length === 0) return null;
 
+  /* Etiket ÇİZİLEN aralıktan: sabit "1961-2024" hem eskiydi hem de kullanıcı
+     "Son 5 Yıl"a bastığında yine tüm dönemi iddia ediyordu. */
+  const donem = `${historicalChartData[0]?.yil}-${historicalChartData[historicalChartData.length - 1]?.yil}`;
+
   return (
     <>
       <div style={{ marginTop: '48px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -24,7 +28,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
             Tarihsel Üretim Trendleri
           </h2>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-            1961-2024 dönemi hayvansal ürün üretim trendleri
+            {donem} dönemi hayvansal ürün üretim trendleri
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>

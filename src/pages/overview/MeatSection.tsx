@@ -13,6 +13,10 @@ interface Props {
 }
 
 export function MeatSection({ data }: Props) {
+  /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
+     yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
+  const yil = data.years.livestock ?? '';
+
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
@@ -23,7 +27,7 @@ export function MeatSection({ data }: Props) {
         <div className="kpi-card large" style={{ borderLeft: '4px solid #ef4444' }}>
           <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{ background: '#fee2e2', color: '#ef4444' }}><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#ef4444' }}>{formatNumber(data.meatProduction.total)} ton</div>
-          <div className="kpi-subtitle">2023 Yılı Toplam</div>
+          <div className="kpi-subtitle">{yil} Yılı Toplam</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
@@ -92,7 +96,7 @@ export function MeatSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title="🥩 Et Türleri Dağılımı (2023)" action={<ChartInsightButton title="Et Türleri Dağılımı (2023)" description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />}>
+        <ChartCard title={`🥩 Et Türleri Dağılımı (${yil})`} action={<ChartInsightButton title={`Et Türleri Dağılımı (${yil})`} description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.meatProduction.breakdown} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

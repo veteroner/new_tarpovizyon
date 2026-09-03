@@ -14,6 +14,16 @@ const R_ME = 'fao/me-indicator';
 const R_LAND = 'fao/land-use';
 const R_NUFUS = 'fao/nufus';
 const R_ISTIHDAM = 'fao/nufus-istihdam-tarim';
+import { HAYVAN_TOPLU_YIL, yilSutunu } from '../../utils/hayvanYili';
+
+/*
+ * Bu sayfa ülke KPI'larını ve BÖLGE grafiklerini yan yana çiziyor. Bölge
+ * satırlarında 2025 hiç yok (ölçüldü), bu yüzden sayfa bütün olarak toplu
+ * seviyenin son tam yılında. Yalnızca KPI'ları ilerletmek, yanındaki grafikle
+ * çelişen bir sayfa üretirdi.
+ */
+const TOPLU_SUTUN = yilSutunu(HAYVAN_TOPLU_YIL);
+
 const R_CANLI = 'tuik/hayvancilik-canlihayvan';
 const TR = 'Türkiye';
 const KIRMIZI_ET = [
@@ -79,11 +89,11 @@ export function useOverviewData(): UseOverviewDataReturn {
         fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Value Added (Agriculture, Forestry and Fishing)', elementcode: EC_PAY_GSYH, unit: '%' } }),
         fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Employment in agriculture by age, total (15+)' } }),
         fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Share of employment in agriculture in total employment' } }),
-        fetchAgg(R_CANLI, { groupBy: ['grup'], sum: ['y2024'], where: { duzey: 'ülke', yer: 'TÜRKİYE' }, whereIn: { grup: ['Sığır', 'Koyun', 'Keçi', 'Tavuk', 'Hindi'] } }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Sığır' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], where: { grup: 'Keçi' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: ['y2024'], whereIn: { duzey: ['bölge', 'bolge'], grup: ['Tavuk', 'Hindi'] }, orderBy: 'sum_y2024', dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['grup'], sum: [TOPLU_SUTUN], where: { duzey: 'ülke', yer: 'TÜRKİYE' }, whereIn: { grup: ['Sığır', 'Koyun', 'Keçi', 'Tavuk', 'Hindi'] } }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [TOPLU_SUTUN], where: { grup: 'Sığır' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${TOPLU_SUTUN}`, dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [TOPLU_SUTUN], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${TOPLU_SUTUN}`, dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [TOPLU_SUTUN], where: { grup: 'Keçi' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${TOPLU_SUTUN}`, dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [TOPLU_SUTUN], whereIn: { duzey: ['bölge', 'bolge'], grup: ['Tavuk', 'Hindi'] }, orderBy: `sum_${TOPLU_SUTUN}`, dir: 'desc', limit: 12 }),
       ]);
 
       // Nüfus
@@ -181,7 +191,7 @@ export function useOverviewData(): UseOverviewDataReturn {
       // Hayvan varlığı
       const livestockStocksBreakdown: DataItem[] = livestockStocksRes.map((row, idx) => ({
         name: String(row.grup ?? ''),
-        value: num(row.sum_y2024),
+        value: num(row[`sum_${TOPLU_SUTUN}`]),
         fill: COLORS.general[idx % COLORS.general.length],
         unit: 'baş',
       }));
@@ -194,7 +204,7 @@ export function useOverviewData(): UseOverviewDataReturn {
       const mapRegional = (rows: Row[], palette: string[]): DataItem[] =>
         rows.map((row, idx) => ({
           name: String(row.yer || ''),
-          value: num(row.sum_y2024),
+          value: num(row[`sum_${TOPLU_SUTUN}`]),
           fill: palette[idx % palette.length],
           unit: 'baş',
         }));

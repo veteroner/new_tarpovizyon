@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchRows, fetchAgg, num } from '../../services/d1';
 
+import { HAYVAN_IL_YIL, yilSutunu } from '../../utils/hayvanYili';
+
+/* Bu sayfanın tüm sorguları duzeykod=3 (il); orada 2025 dolu. */
+const YIL_SUTUNU = yilSutunu(HAYVAN_IL_YIL);
+
 const R_CANLI = 'tuik/hayvancilik-canlihayvan';
 const R_URETIM = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
@@ -111,11 +116,11 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
            * tersi. 'il' ile gruplayınca tek bir boş anahtar dönüyor ve harita
            * sessizce boş kalıyordu.
            */
-          fetchAgg(R_CANLI, { groupBy: ['yer', 'grup', 'kategori'], sum: ['y2024'], where: { duzeykod: 3 } }),
+          fetchAgg(R_CANLI, { groupBy: ['yer', 'grup', 'kategori'], sum: [YIL_SUTUNU], where: { duzeykod: 3 } }),
         // NOT: MySQL'de Kovan sayıları '487.085' gibi METİNDİ ve sorgu
         // REPLACE(…,'.','') uyguluyordu. D1'de sayısal — nokta silmek ondalıklı
         // Balmumu değerini bozardı, doğrudan toplanıyor.
-        fetchAgg(R_URETIM, { groupBy: ['yer', 'urun'], sum: ['2024'],
+        fetchAgg(R_URETIM, { groupBy: ['yer', 'urun'], sum: [String(HAYVAN_IL_YIL)],
           where: { duzeykod: 3 }, whereIn: { urun: ['Kovan', 'Balmumu'] } }),
       ]);
 
@@ -139,7 +144,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
         const kayit = ilHaritasi.get(il) ?? { il, sigir: 0, manda: 0, koyun: 0, keci: 0, etTavugu: 0, yumurtaTavugu: 0 };
         const grup = String(r.grup ?? '');
         const kategori = String(r.kategori ?? '');
-        const v = num(r.sum_y2024);
+        const v = num(r[`sum_${YIL_SUTUNU}`]);
         if (grup === 'Sığır') kayit.sigir = (kayit.sigir as number) + v;
         else if (grup === 'Manda') kayit.manda = (kayit.manda as number) + v;
         else if (grup === 'Koyun') kayit.koyun = (kayit.koyun as number) + v;
@@ -154,7 +159,7 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
       for (const r of kovanRaw) {
         const yer = String(r.yer ?? '');
         const kayit = kovanHaritasi.get(yer) ?? { yer, kovan: 0, balmumu: 0 };
-        const v = num(r['sum_2024']);
+        const v = num(r[`sum_${HAYVAN_IL_YIL}`]);
         if (String(r.urun ?? '') === 'Kovan') kayit.kovan = (kayit.kovan as number) + v;
         else kayit.balmumu = (kayit.balmumu as number) + v;
         kovanHaritasi.set(yer, kayit);

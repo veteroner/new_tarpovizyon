@@ -13,6 +13,10 @@ interface Props {
 }
 
 export function MilkSection({ data }: Props) {
+  /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
+     yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
+  const yil = data.years.livestock ?? '';
+
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
@@ -23,7 +27,7 @@ export function MilkSection({ data }: Props) {
         <div className="kpi-card large" style={{ borderLeft: '4px solid #3b82f6' }}>
           <div className="kpi-header"><span className="kpi-title">TOPLAM SÜT</span><div className="kpi-icon" style={{ background: '#dbeafe', color: '#3b82f6' }}><Milk size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#3b82f6' }}>{formatNumber(data.milkProduction.total)} ton</div>
-          <div className="kpi-subtitle">2023 Yılı Toplam</div>
+          <div className="kpi-subtitle">{yil} Yılı Toplam</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
@@ -48,7 +52,7 @@ export function MilkSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title="🥧 Süt Türlerine Göre Dağılım (2023)" action={<ChartInsightButton title="Süt Türlerine Göre Dağılım (2023)" description="İnek, koyun ve keçi sütü dağılımı" data={data.milkProduction.breakdown} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', inekSütü: formatNumber(data.milkProduction.cattle)+' ton', koyunSütü: formatNumber(data.milkProduction.sheep)+' ton' }} />}>
+        <ChartCard title={`🥧 Süt Türlerine Göre Dağılım (${yil})`} action={<ChartInsightButton title={`Süt Türlerine Göre Dağılım (${yil})`} description="İnek, koyun ve keçi sütü dağılımı" data={data.milkProduction.breakdown} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', inekSütü: formatNumber(data.milkProduction.cattle)+' ton', koyunSütü: formatNumber(data.milkProduction.sheep)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie

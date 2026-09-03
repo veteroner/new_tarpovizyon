@@ -3,7 +3,8 @@ import { fetchAgg, num, type Row } from '../../services/d1';
 
 const R = 'tuik/bitkisel-uretim';
 import {
-  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct, VARSAYILAN_YIL, YIL_DISI_UNSURLAR,
+  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct, VARSAYILAN_YIL,
+  yayimlandiMi, sonYayimYili,
 } from './plantTypes';
 import type {
   CityRow, YearRow, RegionRow, ProductRow, ScatterRow, DistrictRow, YieldTrendRow,
@@ -53,7 +54,22 @@ export function usePlantData({
 }: Pick<TuikPlantCategoryPageProps, 'urunGrup' | 'urunFilter' | 'defaultProducts' | 'showTreeMetrics'>): UsePlantDataResult {
 
   const [selectedYear, setSelectedYear] = useState(VARSAYILAN_YIL);
-  const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
+  /*
+   * Açılış göstergesi sabit 'Üretim' değil.
+   *
+   * İki sebep: (a) en taze yılda (2025) üretim henüz yayımlanmıyor, sayfa
+   * sıfırlarla açılıyordu; (b) meyve/kuruyemiş/içecek sayfalarında "Ekilen
+   * Alan" hiç dolu değil — ağaç ürünlerinde ekim alanı tutulmuyor (ölçüldü,
+   * 2024'te de 0). Bu yüzden sayfa türüne göre tercih sırası var.
+   */
+  const [selectedUnsur, setSelectedUnsur] = useState(() => {
+    const tercih = showTreeMetrics
+      ? ['Üretim', 'Toplu Meyveliklerin Alanı', 'Meyve Veren Yaşta Ağaç Sayısı']
+      : ['Üretim', 'Ekilen Alan', 'Hasat Edilen Alan'];
+    return tercih.find((id) => yayimlandiMi(id, VARSAYILAN_YIL))
+      ?? tercih.find((id) => UNSUR_OPTIONS.some((o) => o.id === id))
+      ?? UNSUR_OPTIONS[0].id;
+  });
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>(defaultProducts || []);
@@ -73,44 +89,28 @@ export function usePlantData({
     const agacsiz = showTreeMetrics ? UNSUR_OPTIONS : UNSUR_OPTIONS.filter(o =>
       !['Meyve Veren Yaşta Ağaç Sayısı', 'Meyve Vermeyen Yaşta Ağaç Sayısı', 'Toplu Meyveliklerin Alanı'].includes(o.id)
     );
-    /* O yıl yayımlanmamış gösterge listeden düşüyor: seçilebilir bırakmak
-       "0 ton" gösterip veri yokluğunu gerçek düşüş gibi sunuyordu. */
-    const disi = YIL_DISI_UNSURLAR[selectedYear] ?? [];
-    return disi.length ? agacsiz.filter(o => !disi.includes(o.id)) : agacsiz;
-  }, [showTreeMetrics, selectedYear]);
+    /*
+     * Yıl süzmesi BURADAN KALKTI. Yayımlanmamış göstergeyi listeden düşürmek
+     * 2025'te "Üretim" seçeneğini tamamen yok ediyordu — sayfanın asıl ölçütü
+     * yokmuş gibi görünüyordu. Kısıt yıla taşındı: gösterge listesi tam,
+     * o gösterge için yayımlanmamış YIL kapalı (bkz. PlantFilters).
+     */
+    return agacsiz;
+  }, [showTreeMetrics]);
 
   /*
-   * Seçili gösterge listede yoksa ilkine kaydır — render sırasında, efektte
-   * değil (efektte setState art arda render tetikliyor).
+   * Gösterge değişince yıl uyum sağlıyor — tersi değil.
    *
-   * KOŞUL YIL DEĞİŞİMİNE BAĞLANMAMALI: ilk denememde "yıl değiştiyse" diye
-   * yazmıştım ve AÇILIŞTA hiç çalışmadı, çünkü varsayılan yıl 2025 ve
-   * karşılaştırılan iki değer de 2025'ti. Sonuç: `selectedUnsur` 'Üretim'de
-   * kalıyor, <select> ise listede olmayan değeri gösteremediği için ilk
-   * seçeneği ("Ekilen Alan") çiziyordu — ekranda gösterge doğru görünüyor,
-   * sorgu yanlış unsurla gidiyor, sayfa "0 ton" diyordu. Birim alanının
-   * "dekar" yerine "ton" kalması da bunun izidir.
-   *
-   * Geçerlilik doğrudan sorgulanıyor; geçersizken bir kez düzeltiyor, sonraki
-   * render'da koşul sağlanmadığı için döngü olmuyor.
+   * Eskiden burada render sırasında göstergeyi kaydıran bir guard vardı;
+   * yayımlanmamış gösterge listeden düştüğü için gerekiyordu. Artık liste tam,
+   * onun yerine yayımlanmamış bir gösterge seçilirse YIL o göstergenin son
+   * yayımlandığı yıla iniyor. Kullanıcının istediği ölçüt korunuyor, sayfa da
+   * sıfır göstermiyor.
    */
-  if (filteredUnsurOptions.length && !filteredUnsurOptions.some(o => o.id === selectedUnsur)) {
-    /*
-     * Listenin İLKİNE düşmek yetmiyor. Meyve/kuruyemiş/içecek sayfalarında
-     * "Ekilen Alan" hiç dolu değil (ağaç ürünlerinde ekim alanı tutulmuyor;
-     * ölçüldü — bu sayfalar 2024'te de 0 veriyor). İlk seçenek "Ekilen Alan"
-     * olduğu için otomatik kaydırma onları boş bir göstergeye düşürüyordu.
-     *
-     * Sayfa ağaç metriği gösteriyorsa meyvelik alanı, değilse ekilen alan
-     * tercih ediliyor; ikisi de yoksa listenin ilki.
-     */
-    const tercih = showTreeMetrics
-      ? ['Toplu Meyveliklerin Alanı', 'Meyve Veren Yaşta Ağaç Sayısı', 'Ekilen Alan']
-      : ['Ekilen Alan', 'Hasat Edilen Alan', 'Verim'];
-    const secilecek = tercih.find(id => filteredUnsurOptions.some(o => o.id === id))
-      ?? filteredUnsurOptions[0].id;
-    setSelectedUnsur(secilecek);
-  }
+  const gostergeSec = (id: string) => {
+    setSelectedUnsur(id);
+    if (!yayimlandiMi(id, selectedYear)) setSelectedYear(sonYayimYili(id));
+  };
 
   const currentBirim = filteredUnsurOptions.find(o => o.id === selectedUnsur)?.birim || 'ton';
 
@@ -405,7 +405,7 @@ export function usePlantData({
 
   return {
     selectedYear, setSelectedYear,
-    selectedUnsur, setSelectedUnsur,
+    selectedUnsur, setSelectedUnsur: gostergeSec,
     selectedRegion, setSelectedRegion,
     selectedProvince, setSelectedProvince,
     selectedProducts, setSelectedProducts,

@@ -13,6 +13,10 @@ interface Props {
 }
 
 export function EggSection({ data }: Props) {
+  /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
+     yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
+  const yil = data.years.livestock ?? '';
+
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
@@ -23,7 +27,7 @@ export function EggSection({ data }: Props) {
         <div className="kpi-card large" style={{ borderLeft: '4px solid #f59e0b' }}>
           <div className="kpi-header"><span className="kpi-title">TOPLAM YUMURTA</span><div className="kpi-icon" style={{ background: '#fef3c7', color: '#f59e0b' }}><Egg size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: '#f59e0b' }}>{formatNumber(data.eggProduction.total)} adet</div>
-          <div className="kpi-subtitle">2023 Yılı Toplam</div>
+          <div className="kpi-subtitle">{yil} Yılı Toplam</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TAVUK YUMURTASI</span></div>
@@ -43,7 +47,7 @@ export function EggSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title="🥧 Yumurta Türleri (2023)" action={<ChartInsightButton title="Yumurta Türleri (2023)" description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />}>
+        <ChartCard title={`🥧 Yumurta Türleri (${yil})`} action={<ChartInsightButton title={`Yumurta Türleri (${yil})`} description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie

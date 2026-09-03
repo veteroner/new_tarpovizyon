@@ -1,4 +1,6 @@
-import { SON_YIL, ILK_YIL, YIL_DISI_UNSURLAR } from './plant/plantTypes';
+import {
+  SON_YIL, ILK_YIL, yayimlandiMi, sonYayimYili, acilisGostergesi,
+} from './plant/plantTypes';
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -66,23 +68,28 @@ function formatShort(value: number): string {
 
 export default function TuikPlantProductionPage() {
   const [selectedYear, setSelectedYear] = useState(`y${SON_YIL}`);
-  const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
+  /* Açılışta en taze yıl kazanıyor: 2025'te yayımlanmış ilk gösterge seçilir
+     (üretim hasat sonrası geldiği için "Ekilen Alan"). Sabit 'Üretim' yazmak
+     sayfayı sıfırlarla açıyordu. */
+  const [selectedUnsur, setSelectedUnsur] = useState(
+    () => acilisGostergesi(UNSUR_OPTIONS, SON_YIL),
+  );
+
+  const yilSayi = Number(selectedYear.replace('y', ''));
 
   /*
-   * O yıl yayımlanmamış gösterge listeden düşüyor. TÜİK bitkiselde ekim
-   * alanını ilkbaharda, ÜRETİMİ hasat sonrası yayımlıyor; 2025'te üretim
-   * satırlarının tamamı sıfır. Seçilebilir bırakmak "0 ton, %-100"
-   * gösterip veri yokluğunu gerçek düşüş gibi sunuyordu.
+   * Gösterge listesi TAM — hiçbir seçenek gizlenmiyor. Kısıt yıla taşındı:
+   * o gösterge için yayımlanmamış yıl <option> olarak kapalı ve sebebi
+   * yazıyor. Göstergeyi listeden düşürmek "üretim diye bir şey yok" gibi
+   * okunuyordu; oysa eksik olan yalnızca 2025 üretimi.
    */
-  const yilSayi = Number(selectedYear.replace('y', ''));
-  const gostergeler = (YIL_DISI_UNSURLAR[yilSayi] ?? []).length
-    ? UNSUR_OPTIONS.filter((o) => !YIL_DISI_UNSURLAR[yilSayi].includes(o.id))
-    : UNSUR_OPTIONS;
-  /* Geçerlilik doğrudan sorgulanıyor: "yıl değiştiyse" koşulu açılışta
-     çalışmıyor, çünkü varsayılan yıl zaten 2025. */
-  if (gostergeler.length && !gostergeler.some((o) => o.id === selectedUnsur)) {
-    setSelectedUnsur(gostergeler[0].id);
-  }
+  const gostergeDegisti = (id: string) => {
+    setSelectedUnsur(id);
+    /* Yayımlanmamış yıldayken o göstergeye geçilirse yıl geri alınıyor;
+       aksi hâlde sayfa sıfır gösterip veri yokluğunu düşüş gibi sunuyor. */
+    if (!yayimlandiMi(id, yilSayi)) setSelectedYear(`y${sonYayimYili(id)}`);
+  };
+
   /*
    * Başlangıçta seçim YOK; doğru varsayılan ürün listesi geldikten sonra
    * seçiliyor (aşağıya bakınız).
@@ -231,8 +238,8 @@ export default function TuikPlantProductionPage() {
         </div>
         <div className="filter-group">
           <label className="filter-label">Gösterge</label>
-          <select className="filter-select" value={selectedUnsur} onChange={(e) => setSelectedUnsur(e.target.value)}>
-            {gostergeler.map(opt => (
+          <select className="filter-select" value={selectedUnsur} onChange={(e) => gostergeDegisti(e.target.value)}>
+            {UNSUR_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.name}</option>
             ))}
           </select>
@@ -240,9 +247,14 @@ export default function TuikPlantProductionPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {YILLAR.map(year => (
-              <option key={year} value={`y${year}`}>{year}</option>
-            ))}
+            {YILLAR.map(year => {
+              const varMi = yayimlandiMi(selectedUnsur, year);
+              return (
+                <option key={year} value={`y${year}`} disabled={!varMi}>
+                  {year}{varMi ? '' : ' — henüz yayımlanmadı'}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>
