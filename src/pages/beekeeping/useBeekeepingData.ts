@@ -170,12 +170,42 @@ export function useBeekeepingData() {
     });
   }, [beekeeperYearData]);
 
+  /*
+   * ─── YILLAR VERİDEN TÜRETİLİYOR ─────────────────────────────────────────
+   * Burada `row['2023']` ve `row['2022']` SABİT YAZILIYDI. Veri borusu
+   * dinamikti (`gorulenYillar`), ama KPI hesabı 2023'e çivilenmişti: uca
+   * 2024 ve 2025 eklendiğinde sayfa yine 2023 toplamını gösteriyordu.
+   * Etiketler de ("Aktif Kovan (2023)", "Arıcılık Gelişimi (2013-2023)")
+   * aynı sabitleri taşıyordu, yani sayı eskiyince yazı da yalan söylüyordu.
+   *
+   * Artık mevcut yıl anahtarlarından en büyüğü ve bir öncekisi alınıyor;
+   * yeni yıl geldiğinde hem hesap hem etiket kendiliğinden ilerliyor.
+   */
+  const { sonYil, oncekiYil, ilkYil } = useMemo(() => {
+    const yillar = new Set<string>();
+    beekeeperYearData.forEach((row) => {
+      Object.keys(row).forEach((k) => { if (/^\d{4}$/.test(k)) yillar.add(k); });
+    });
+    const sirali = [...yillar].sort();
+    return {
+      ilkYil: sirali[0] ?? '',
+      sonYil: sirali[sirali.length - 1] ?? '',
+      oncekiYil: sirali[sirali.length - 2] ?? '',
+    };
+  }, [beekeeperYearData]);
+
   // Calculate KPI metrics
   const kpiMetrics = useMemo<KpiMetrics>(() => {
-    const totalBeekeepers2023 = beekeeperYearData.reduce((sum, row) => sum + (row['2023'] || 0), 0);
-    const totalBeekeepers2022 = beekeeperYearData.reduce((sum, row) => sum + (row['2022'] || 0), 0);
-    const beekeeperGrowth = totalBeekeepers2022 > 0 
-      ? ((totalBeekeepers2023 - totalBeekeepers2022) / totalBeekeepers2022 * 100) 
+    /* Dizin imzası `number | string` veriyor (`il` alanı yüzünden); yıl
+       anahtarları her zaman sayı, okurken daraltılıyor. */
+    const yilDegeri = (row: BeekeeperYearData, y: string) =>
+      (typeof row[y] === 'number' ? row[y] : 0);
+    const toplaYil = (y: string) =>
+      y ? beekeeperYearData.reduce((sum, row) => sum + yilDegeri(row, y), 0) : 0;
+    const totalBeekeepersSon = toplaYil(sonYil);
+    const totalBeekeepersOnceki = toplaYil(oncekiYil);
+    const beekeeperGrowth = totalBeekeepersOnceki > 0
+      ? ((totalBeekeepersSon - totalBeekeepersOnceki) / totalBeekeepersOnceki * 100)
       : 0;
 
     const totalHives = provinceData.reduce((sum, row) => sum + row.toplam_kovan_adet, 0);
@@ -186,22 +216,22 @@ export function useBeekeepingData() {
       : 0;
 
     return {
-      totalBeekeepers: totalBeekeepers2023,
+      totalBeekeepers: totalBeekeepersSon,
       beekeeperGrowth,
       totalHives,
       totalHoneyProduction,
       totalBeeswaxProduction,
       avgYield,
     };
-  }, [beekeeperYearData, provinceData]);
+  }, [beekeeperYearData, provinceData, sonYil, oncekiYil]);
 
   // Top provinces by beekeepers
   const topBeekeepers = useMemo(() => {
     return beekeeperYearData
-      .map(row => ({ il: row.il, count: row['2023'] }))
+      .map(row => ({ il: row.il, count: typeof row[sonYil] === 'number' ? row[sonYil] : 0 }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
-  }, [beekeeperYearData]);
+  }, [beekeeperYearData, sonYil]);
 
   // Top provinces by honey production
   const topProducers = useMemo(() => {
@@ -285,6 +315,11 @@ export function useBeekeepingData() {
 
   return {
     loading,
+    /* Etiketler bu üçünü kullanıyor; sabit yıl yazmak yerine veriden gelen
+       değer gösteriliyor. */
+    ilkYil,
+    sonYil,
+    oncekiYil,
     yearTrendData,
     kpiMetrics,
     topBeekeepers,

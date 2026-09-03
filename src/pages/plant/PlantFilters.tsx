@@ -1,5 +1,5 @@
 import ProductSelector from '../../components/ProductSelector';
-import { TURKEY_REGIONS, YEARS, UNSUR_OPTIONS } from './plantTypes';
+import { TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, SADECE_TURKIYE_YILI } from './plantTypes';
 
 interface PlantFiltersProps {
   productList: { id: string; name: string; nameTR: string }[];
@@ -54,7 +54,13 @@ export default function PlantFilters({
         <label className="filter-label">Yıl</label>
         <select className="filter-select" value={selectedYear}
           onChange={e => setSelectedYear(Number(e.target.value))}>
-          {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          {/* İl kırılımı olmayan yıl kapsamını söylüyor: kullanıcı seçmeden
+              önce ne alacağını bilsin, boş il grafiğiyle karşılaşmasın. */}
+          {YEARS.map(y => (
+            <option key={y} value={y}>
+              {y >= SADECE_TURKIYE_YILI ? `${y} — yalnızca Türkiye` : y}
+            </option>
+          ))}
         </select>
       </div>
 

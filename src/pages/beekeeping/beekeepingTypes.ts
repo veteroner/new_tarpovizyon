@@ -1,16 +1,15 @@
+/**
+ * İl × yıl arıcı sayısı.
+ *
+ * Yıllar 2013…2023 diye TEK TEK YAZILIYDI. Uca 2024 ve 2025 eklendiğinde
+ * tip onları tanımıyordu; `row[sonYil]` derlenmiyor, kod da mecburen
+ * `row['2023']` gibi sabitlere düşüyordu. Dizin imzasıyla yeni yıl
+ * kendiliğinden geçerli oluyor — tipin her yıl elle güncellenmesi gerekmiyor.
+ */
 export type BeekeeperYearData = {
   il: string;
-  '2013': number;
-  '2014': number;
-  '2015': number;
-  '2016': number;
-  '2017': number;
-  '2018': number;
-  '2019': number;
-  '2020': number;
-  '2021': number;
-  '2022': number;
-  '2023': number;
+  /** 'YYYY' → o yılın arıcı sayısı. */
+  [yil: string]: number | string;
 };
 
 export type ProvinceData = {

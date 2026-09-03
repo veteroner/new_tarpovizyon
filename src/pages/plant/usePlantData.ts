@@ -3,7 +3,7 @@ import { fetchAgg, num, type Row } from '../../services/d1';
 
 const R = 'tuik/bitkisel-uretim';
 import {
-  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct,
+  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct, VARSAYILAN_YIL,
 } from './plantTypes';
 import type {
   CityRow, YearRow, RegionRow, ProductRow, ScatterRow, DistrictRow, YieldTrendRow,
@@ -52,7 +52,7 @@ export function usePlantData({
   urunGrup, urunFilter, defaultProducts, showTreeMetrics = false
 }: Pick<TuikPlantCategoryPageProps, 'urunGrup' | 'urunFilter' | 'defaultProducts' | 'showTreeMetrics'>): UsePlantDataResult {
 
-  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedYear, setSelectedYear] = useState(VARSAYILAN_YIL);
   const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('');

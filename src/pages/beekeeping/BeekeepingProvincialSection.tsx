@@ -22,13 +22,15 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
 type Props = {
+  /** Başlıktaki yıl veriden geliyor, sabit değil. */
+  sonYil: string;
   topBeekeepers: { il: string; count: number }[];
   topProducers: { il: string; production: number }[];
   topYield: { il: string; yield: number }[];
   honeyTypesData: { name: string; count: number }[];
 };
 
-export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYield, honeyTypesData }: Props) {
+export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducers, topYield, honeyTypesData }: Props) {
   return (
     <>
       <div style={{ marginTop: '40px', marginBottom: '24px' }}>
@@ -56,7 +58,7 @@ export function BeekeepingProvincialSection({ topBeekeepers, topProducers, topYi
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              En Çok Arıcı Olan İller (2023)
+              En Çok Arıcı Olan İller ({sonYil})
             </h3>
             <ChartInsightButton title="🐝 En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
           </div>

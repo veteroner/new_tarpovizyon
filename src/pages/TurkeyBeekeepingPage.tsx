@@ -23,6 +23,9 @@ export default function TurkeyBeekeepingPage() {
   const {
     loading,
     yearTrendData,
+    ilkYil,
+    sonYil,
+    oncekiYil,
     kpiMetrics,
     topBeekeepers,
     topProducers,
@@ -51,16 +54,17 @@ export default function TurkeyBeekeepingPage() {
 
       {kpiMetrics && (
         <>
-          <BeekeepingKpiCards kpiMetrics={kpiMetrics} />
+          <BeekeepingKpiCards kpiMetrics={kpiMetrics} sonYil={sonYil} oncekiYil={oncekiYil} />
 
           {tuikKovanKpi && <BeekeepingIntelligencePanel tuikKovanKpi={tuikKovanKpi} />}
 
           <SectionTabs tabs={BOLUMLER} />
 
-          {active === 'gelisim' && <BeekeepingDevelopmentSection yearTrendData={yearTrendData} />}
+          {active === 'gelisim' && <BeekeepingDevelopmentSection yearTrendData={yearTrendData} ilkYil={ilkYil} sonYil={sonYil} />}
 
           {active === 'iller' && (
           <BeekeepingProvincialSection
+            sonYil={sonYil}
             topBeekeepers={topBeekeepers}
             topProducers={topProducers}
             topYield={topYield}

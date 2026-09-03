@@ -10,12 +10,16 @@ import {
 import { type YearTrendData, COLORS, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 
-export function BeekeepingDevelopmentSection({ yearTrendData }: { yearTrendData: YearTrendData[] }) {
+export function BeekeepingDevelopmentSection({ yearTrendData, ilkYil, sonYil }: {
+  yearTrendData: YearTrendData[];
+  ilkYil: string;
+  sonYil: string;
+}) {
   return (
     <>
       <div style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          Arıcılık Gelişimi (2013-2023)
+          Arıcılık Gelişimi ({ilkYil}-{sonYil})
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
           Türkiye geneli arıcı sayısı ve kovan gelişimi tarihsel trend analizi

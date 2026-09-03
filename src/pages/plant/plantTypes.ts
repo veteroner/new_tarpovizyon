@@ -22,7 +22,54 @@ export const TURKEY_REGIONS: Record<string, string[]> = {
   'Ortadoğu Anadolu': ['BİNGÖL', 'BİTLİS', 'ELAZIĞ', 'HAKKARİ', 'MALATYA', 'MUŞ', 'TUNCELİ', 'VAN'],
 };
 
-export const YEARS = Array.from({ length: 21 }, (_, i) => 2024 - i);
+/**
+ * Yıl listesi.
+ *
+ * ─── ELLE YAZILI SON YIL SORUNU ────────────────────────────────────────────
+ * Burada `2024 - i` yazıyordu ve uzunluk 21'e sabitti. TÜİK 2025'i yayımlayıp
+ * veri D1'e girdiğinde bile filtre 2024'te kalıyordu — sayfa taze veriyi
+ * ÇEKEMİYORDU, çünkü sorgu `SUM(y2004)…SUM(y2024)` diye YEARS'tan üretiliyor.
+ * Yani tek bir sabit, on bir bitkisel sayfayı birden eskitiyordu.
+ *
+ * ─── 2025 NEDEN AYRI İŞARETLİ ──────────────────────────────────────────────
+ * `tuik_bitkisel_uretim`'de y2025 YALNIZCA Türkiye satırlarında (duzeykod=1)
+ * dolu: TÜİK'in indirilebilir tablolarında il bazlı 2025 bitkisel üretim YOK
+ * (13.78.282 temasındaki 30 tablonun hiçbiri il×üretim değil; il kırılımı
+ * dinamik veritabanında). Bu yüzden 2025 seçilebilir ama etiketi kapsamını
+ * söylüyor ve VARSAYILAN olmuyor — varsayılan 2025 olsaydı "Lider İl" kartı
+ * ve il grafikleri açılışta boş gelirdi.
+ */
+export const ILK_YIL = 2004;
+
+/*
+ * ─── 2025 NEDEN HENÜZ AÇIK DEĞİL ───────────────────────────────────────────
+ * Bu sayfa Türkiye toplamını İL SATIRLARINI TOPLAYARAK buluyor
+ * (`where: { duzeykod: 3 }`, bkz. usePlantData). Yani ülke düzeyinde
+ * (duzeykod=1) veri olması yetmiyor; il kırılımı gerekiyor.
+ *
+ * D1'de y2025 şu an YALNIZCA duzeykod=1 satırlarında dolu (Veri Portalı
+ * Excel'inden). İl satırları boş, çünkü TÜİK il bazlı 2025 bitkisel üretimi
+ * indirilebilir tablo olarak yayımlamıyor — veri MySQL'de (`ist` şeması,
+ * elle girilmiş) ve D1'e göç sırasında y2025 sütunu henüz yoktu.
+ *
+ * SON_YIL 2025 yapıldığında sayfa "0 ton, %-100" gösteriyor: illerin
+ * toplamı sıfır. Bu, yılı hiç göstermemekten kötü — yanlış rakam.
+ *
+ * AÇMAK İÇİN: `scripts/bitkisel-y2025-yukle.mjs` ile MySQL'den dışa
+ * aktarılan y2025 D1'e yazıldıktan sonra buradaki 2024 → 2025 yapılır.
+ * Başka değişiklik gerekmiyor; Worker beyaz listesinde y2025 zaten var.
+ */
+export const SON_YIL = 2024;
+
+/** Yalnızca Türkiye toplamı olarak var olan yıl; il kırılımı gelince kalkar. */
+export const SADECE_TURKIYE_YILI = 2025;
+/** Açılışta seçili yıl. */
+export const VARSAYILAN_YIL = SON_YIL;
+
+export const YEARS = Array.from(
+  { length: SON_YIL - ILK_YIL + 1 },
+  (_, i) => SON_YIL - i,
+);
 
 export const UNSUR_OPTIONS = [
   { id: 'Üretim', label: 'Üretim (Ton)', birim: 'ton' },

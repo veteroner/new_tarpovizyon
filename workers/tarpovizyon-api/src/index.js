@@ -186,10 +186,20 @@ const AGG = {
     dims: ['ulkekod', 'ulkead', 'urunkod', 'urunad', 'year',
       'miktar_birim', 'uretim_birim', 'verim_birim'],
     nums: ['miktar_deger', 'uretim_deger', 'verim_deger', 'uretim2_deger', 'verim2_deger'] },
-  // Geniş format: yıllar y2004…y2024 sütunlarında.
+  /*
+   * Geniş format: yıllar y2004…y2025 sütunlarında.
+   *
+   * `nums` bir BEYAZ LİSTE — istemcinin isteyebileceği sütunlar. D1'e y2025
+   * eklendiğinde burası güncellenmezse uç `izin verilmeyen sütun: y2025`
+   * diye 400 dönüyor ve sayfa hiç veri alamıyor. Yani yeni yıl İKİ yerde
+   * açılmalı: tabloda ve burada.
+   *
+   * y2025 yalnızca duzeykod=1 (Türkiye) satırlarında dolu; TÜİK'in
+   * indirilebilir tablolarında il bazlı 2025 bitkisel üretim yok.
+   */
   'tuik/bitkisel-uretim': { table: 'tuik_bitkisel_uretim',
     dims: ['duzeykod', 'duzey', 'yerkod', 'yer', 'ili', 'ugkod', 'urun_grup', 'urunkod', 'urun', 'unsur', 'birim'],
-    nums: ['y2004', 'y2005', 'y2006', 'y2007', 'y2008', 'y2009', 'y2010', 'y2011', 'y2012', 'y2013', 'y2014', 'y2015', 'y2016', 'y2017', 'y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024'] },
+    nums: ['y2004', 'y2005', 'y2006', 'y2007', 'y2008', 'y2009', 'y2010', 'y2011', 'y2012', 'y2013', 'y2014', 'y2015', 'y2016', 'y2017', 'y2018', 'y2019', 'y2020', 'y2021', 'y2022', 'y2023', 'y2024', 'y2025'] },
   'tuik/ticaret-bitkisel': { table: 'tuik_ticaret_bitkisel',
     dims: ['yil', 'ay', 'ana_urun', 'alt_urun', 'ulke', 'ulkekod', 'duzey_1', 'duzey_2', 'duzey_3', 'miktar_birim'],
     nums: ['ihracat_mik', 'ithalat_mik', 'ihracat_deger', 'ithalat_deger'] },

@@ -1,6 +1,12 @@
 import { type KpiMetrics, COLORS, formatNumber, formatTon } from './beekeepingTypes';
 
-export function BeekeepingKpiCards({ kpiMetrics }: { kpiMetrics: KpiMetrics }) {
+export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
+  kpiMetrics: KpiMetrics;
+  /* Yıllar veriden geliyor; etiketlere sabit yıl yazmak, uca yeni yıl
+     eklendiğinde sayının değişip yazının kalmasına yol açıyordu. */
+  sonYil: string;
+  oncekiYil: string;
+}) {
   return (
     <div style={{ 
       display: 'grid', 
@@ -26,7 +32,7 @@ export function BeekeepingKpiCards({ kpiMetrics }: { kpiMetrics: KpiMetrics }) {
             {formatNumber(kpiMetrics.totalBeekeepers)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            {kpiMetrics.beekeeperGrowth >= 0 ? '+' : ''}{kpiMetrics.beekeeperGrowth.toFixed(1)}% (2023 vs 2022)
+            {kpiMetrics.beekeeperGrowth >= 0 ? '+' : ''}{kpiMetrics.beekeeperGrowth.toFixed(1)}% ({sonYil} vs {oncekiYil})
           </div>
         </div>
       </div>
@@ -49,7 +55,7 @@ export function BeekeepingKpiCards({ kpiMetrics }: { kpiMetrics: KpiMetrics }) {
             {formatNumber(kpiMetrics.totalHives)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Aktif Kovan (2023)
+            Aktif Kovan ({sonYil})
           </div>
         </div>
       </div>
@@ -72,7 +78,7 @@ export function BeekeepingKpiCards({ kpiMetrics }: { kpiMetrics: KpiMetrics }) {
             {formatTon(kpiMetrics.totalHoneyProduction)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Yıllık Toplam (2023)
+            Yıllık Toplam ({sonYil})
           </div>
         </div>
       </div>
@@ -95,7 +101,7 @@ export function BeekeepingKpiCards({ kpiMetrics }: { kpiMetrics: KpiMetrics }) {
             {formatTon(kpiMetrics.totalBeeswaxProduction)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Yıllık Toplam (2023)
+            Yıllık Toplam ({sonYil})
           </div>
         </div>
       </div>
