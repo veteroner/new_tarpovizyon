@@ -3,7 +3,7 @@ import { fetchAgg, num, type Row } from '../../services/d1';
 
 const R = 'tuik/bitkisel-uretim';
 import {
-  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct, VARSAYILAN_YIL,
+  COLORS, TURKEY_REGIONS, YEARS, UNSUR_OPTIONS, pct, VARSAYILAN_YIL, YIL_DISI_UNSURLAR,
 } from './plantTypes';
 import type {
   CityRow, YearRow, RegionRow, ProductRow, ScatterRow, DistrictRow, YieldTrendRow,
@@ -69,10 +69,48 @@ export function usePlantData({
   const [yieldTrendData, setYieldTrendData] = useState<YieldTrendRow[]>([]);
   const [radarData, setRadarData] = useState<{ il: string; [key: string]: string | number }[]>([]);
 
-  const filteredUnsurOptions = useMemo(() =>
-    showTreeMetrics ? UNSUR_OPTIONS : UNSUR_OPTIONS.filter(o =>
+  const filteredUnsurOptions = useMemo(() => {
+    const agacsiz = showTreeMetrics ? UNSUR_OPTIONS : UNSUR_OPTIONS.filter(o =>
       !['Meyve Veren Yaşta Ağaç Sayısı', 'Meyve Vermeyen Yaşta Ağaç Sayısı', 'Toplu Meyveliklerin Alanı'].includes(o.id)
-    ), [showTreeMetrics]);
+    );
+    /* O yıl yayımlanmamış gösterge listeden düşüyor: seçilebilir bırakmak
+       "0 ton" gösterip veri yokluğunu gerçek düşüş gibi sunuyordu. */
+    const disi = YIL_DISI_UNSURLAR[selectedYear] ?? [];
+    return disi.length ? agacsiz.filter(o => !disi.includes(o.id)) : agacsiz;
+  }, [showTreeMetrics, selectedYear]);
+
+  /*
+   * Seçili gösterge listede yoksa ilkine kaydır — render sırasında, efektte
+   * değil (efektte setState art arda render tetikliyor).
+   *
+   * KOŞUL YIL DEĞİŞİMİNE BAĞLANMAMALI: ilk denememde "yıl değiştiyse" diye
+   * yazmıştım ve AÇILIŞTA hiç çalışmadı, çünkü varsayılan yıl 2025 ve
+   * karşılaştırılan iki değer de 2025'ti. Sonuç: `selectedUnsur` 'Üretim'de
+   * kalıyor, <select> ise listede olmayan değeri gösteremediği için ilk
+   * seçeneği ("Ekilen Alan") çiziyordu — ekranda gösterge doğru görünüyor,
+   * sorgu yanlış unsurla gidiyor, sayfa "0 ton" diyordu. Birim alanının
+   * "dekar" yerine "ton" kalması da bunun izidir.
+   *
+   * Geçerlilik doğrudan sorgulanıyor; geçersizken bir kez düzeltiyor, sonraki
+   * render'da koşul sağlanmadığı için döngü olmuyor.
+   */
+  if (filteredUnsurOptions.length && !filteredUnsurOptions.some(o => o.id === selectedUnsur)) {
+    /*
+     * Listenin İLKİNE düşmek yetmiyor. Meyve/kuruyemiş/içecek sayfalarında
+     * "Ekilen Alan" hiç dolu değil (ağaç ürünlerinde ekim alanı tutulmuyor;
+     * ölçüldü — bu sayfalar 2024'te de 0 veriyor). İlk seçenek "Ekilen Alan"
+     * olduğu için otomatik kaydırma onları boş bir göstergeye düşürüyordu.
+     *
+     * Sayfa ağaç metriği gösteriyorsa meyvelik alanı, değilse ekilen alan
+     * tercih ediliyor; ikisi de yoksa listenin ilki.
+     */
+    const tercih = showTreeMetrics
+      ? ['Toplu Meyveliklerin Alanı', 'Meyve Veren Yaşta Ağaç Sayısı', 'Ekilen Alan']
+      : ['Ekilen Alan', 'Hasat Edilen Alan', 'Verim'];
+    const secilecek = tercih.find(id => filteredUnsurOptions.some(o => o.id === id))
+      ?? filteredUnsurOptions[0].id;
+    setSelectedUnsur(secilecek);
+  }
 
   const currentBirim = filteredUnsurOptions.find(o => o.id === selectedUnsur)?.birim || 'ton';
 

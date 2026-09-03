@@ -41,28 +41,26 @@ export const TURKEY_REGIONS: Record<string, string[]> = {
  */
 export const ILK_YIL = 2004;
 
-/*
- * ─── 2025 NEDEN HENÜZ AÇIK DEĞİL ───────────────────────────────────────────
- * Bu sayfa Türkiye toplamını İL SATIRLARINI TOPLAYARAK buluyor
- * (`where: { duzeykod: 3 }`, bkz. usePlantData). Yani ülke düzeyinde
- * (duzeykod=1) veri olması yetmiyor; il kırılımı gerekiyor.
- *
- * D1'de y2025 şu an YALNIZCA duzeykod=1 satırlarında dolu (Veri Portalı
- * Excel'inden). İl satırları boş, çünkü TÜİK il bazlı 2025 bitkisel üretimi
- * indirilebilir tablo olarak yayımlamıyor — veri MySQL'de (`ist` şeması,
- * elle girilmiş) ve D1'e göç sırasında y2025 sütunu henüz yoktu.
- *
- * SON_YIL 2025 yapıldığında sayfa "0 ton, %-100" gösteriyor: illerin
- * toplamı sıfır. Bu, yılı hiç göstermemekten kötü — yanlış rakam.
- *
- * AÇMAK İÇİN: `scripts/bitkisel-y2025-yukle.mjs` ile MySQL'den dışa
- * aktarılan y2025 D1'e yazıldıktan sonra buradaki 2024 → 2025 yapılır.
- * Başka değişiklik gerekmiyor; Worker beyaz listesinde y2025 zaten var.
- */
-export const SON_YIL = 2024;
+export const SON_YIL = 2025;
 
-/** Yalnızca Türkiye toplamı olarak var olan yıl; il kırılımı gelince kalkar. */
-export const SADECE_TURKIYE_YILI = 2025;
+/*
+ * ─── 2025'TE HANGİ GÖSTERGE VAR ────────────────────────────────────────────
+ * TÜİK bitkisel veriyi iki aşamada yayımlıyor: EKİM ALANI ilkbaharda,
+ * ÜRETİM hasat sonrası. 2025 için il ve ilçe düzeyinde ekilen alan, hasat
+ * edilen alan, verim ve ağaç sayıları var; ÜRETİM HENÜZ YOK — ölçüldü,
+ * `Üretim` unsurunun 76.674 satırının tamamı sıfır (her düzeyde).
+ *
+ * Ülke toplamı olarak 2025 üretimi Veri Portalı Excel'inde var ve D1'de
+ * duzeykod=1 satırlarında duruyor; ama bu sayfalar Türkiye'yi İLLERİ
+ * TOPLAYARAK buluyor (`where: { duzeykod: 3 }`), yani oraya ulaşmıyor.
+ *
+ * Bu liste olmadan kullanıcı 2025 + Üretim seçtiğinde "0 ton, %-100"
+ * görüyordu — yanlış rakam, veri yokluğundan ayırt edilemiyor.
+ */
+export const YIL_DISI_UNSURLAR: Record<number, string[]> = {
+  2025: ['Üretim'],
+};
+
 /** Açılışta seçili yıl. */
 export const VARSAYILAN_YIL = SON_YIL;
 

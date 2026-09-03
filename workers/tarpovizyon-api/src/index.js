@@ -722,7 +722,27 @@ export default {
      */
     if (request.method === 'GET') {
       const onbellek = caches.default;
-      const hazir = await onbellek.match(request);
+      /*
+       * ─── ÖNBELLEK ANAHTARINA VERİ SÜRÜMÜ ────────────────────────────────
+       * Önbellek yalnızca URL'ye göre anahtarlanıyordu ve TTL 1 saatti. D1'e
+       * yeni yıl yazıldığında sayfa bir saat boyunca ESKİ yanıtı alıyordu —
+       * ölçülmüş vaka: bitkisel y2025 il verisi yüklendikten sonra 22
+       * sütunlu sorgu 2025'i sıfır döndürmeye devam etti, aynı URL önbellek
+       * kırıcıyla çağrılınca doğru değer geldi.
+       *
+       * Sürüm anahtarın parçası: VERI_SURUM artırılıp Worker dağıtılınca
+       * bütün önbellek bir anda geçersiz oluyor. Veri yüklemesinden sonra
+       * beklemek yerine tek satır değiştirilip dağıtılıyor.
+       *
+       * (Tam otomatik çözüm `veri_damga` tablosunu her istekte okumak olurdu
+       * ama bu, önbelleğin kurtardığı D1 okumasını geri getirir.)
+       */
+      const anahtar = new Request(
+        new URL(request.url).toString()
+          + (request.url.includes('?') ? '&' : '?') + `_v=${VERI_SURUM}`,
+        request,
+      );
+      const hazir = await onbellek.match(anahtar);
       if (hazir) return hazir;
 
       if (await okumaSiniriAsildi(request, env)) {
@@ -737,7 +757,7 @@ export default {
       if (yanit.ok) {
         const saklanacak = new Response(yanit.clone().body, yanit);
         saklanacak.headers.set('Cache-Control', `public, max-age=${ONBELLEK_SN}`);
-        ctx?.waitUntil?.(onbellek.put(request, saklanacak.clone()));
+        ctx?.waitUntil?.(onbellek.put(anahtar, saklanacak.clone()));
         return saklanacak;
       }
       return yanit;
@@ -755,6 +775,17 @@ export default {
  * tekrarını D1'e hiç indirmiyor.
  */
 const ONBELLEK_SN = 3600;
+
+/**
+ * Veri sürümü — önbellek anahtarının parçası.
+ *
+ * D1'e toplu veri yazdıktan sonra BURAYI ARTIR ve Worker'ı dağıt; eski
+ * yanıtlar anında geçersiz olur. Artırılmazsa yeni veri en geç bir saat
+ * (ONBELLEK_SN) sonra görünür.
+ *
+ * 2 → bitkisel y2025 il/ilçe verisi (130.543 satır) yüklendi.
+ */
+const VERI_SURUM = 2;
 
 /**
  * Okuma uçları için hız sınırı — AI'dan AYRI ve daha yüksek eşikli.

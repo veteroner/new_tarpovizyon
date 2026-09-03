@@ -15,12 +15,34 @@ export type Row = Record<string, string | number | null>;
 
 type ParamValue = string | number | undefined | null;
 
+/**
+ * Veri sürümü — her isteğe `_v` olarak ekleniyor.
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * Worker yanıtları `Cache-Control: max-age=3600` ile dönüyor. D1'e yeni veri
+ * yazıldığında TARAYICI aynı URL için eski gövdeyi bir saat daha sunuyor.
+ * Ölçülmüş vaka: bitkisel y2025 il verisi yüklendikten sonra aynı URL
+ * varsayılan `fetch` ile 2025'i SIFIR, `cache: 'reload'` ile 97.656.036
+ * döndürdü. Worker'ın kendi önbelleğini sürümlemek yetmiyor, çünkü istemci
+ * URL'si değişmiyor.
+ *
+ * Sürüm URL'nin parçası olunca yeni değer yeni bir kaynak sayılıyor ve hem
+ * tarayıcı hem ara önbellekler baştan çekiyor.
+ *
+ * TOPLU VERİ YÜKLEMESİNDEN SONRA BURAYI ARTIR; Worker'daki `VERI_SURUM` ile
+ * aynı tutulması gerekmiyor ama karışmasın diye aynı numara kullanılıyor.
+ *
+ * 2 → bitkisel y2025 il/ilçe verisi (130.543 satır).
+ */
+export const VERI_SURUM = 2;
+
 function buildUrl(path: string, params: Record<string, ParamValue> = {}): string {
   const url = new URL(`${API_BASE}/api/${path}`);
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined || v === null || v === '') continue;
     url.searchParams.set(k, String(v));
   }
+  url.searchParams.set('_v', String(VERI_SURUM));
   return url.toString();
 }
 
