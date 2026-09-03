@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -37,17 +38,17 @@ export function MilkSection({ data }: Props) {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">İNEK SÜTÜ</span></div>
           <div className="kpi-value">{formatNumber(data.milkProduction.cattle)} ton</div>
-          <div className="kpi-subtitle">Toplam süt üretiminin %{((data.milkProduction.cattle) / (data.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam süt üretiminin {yuzde(((data.milkProduction.cattle) / (data.milkProduction.total || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KOYUN SÜTÜ</span></div>
           <div className="kpi-value">{formatNumber(data.milkProduction.sheep)} ton</div>
-          <div className="kpi-subtitle">Toplam süt üretiminin %{((data.milkProduction.sheep) / (data.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam süt üretiminin {yuzde(((data.milkProduction.sheep) / (data.milkProduction.total || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KEÇİ SÜTÜ</span></div>
           <div className="kpi-value">{formatNumber(data.milkProduction.goat)} ton</div>
-          <div className="kpi-subtitle">Toplam süt üretiminin %{((data.milkProduction.goat) / (data.milkProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam süt üretiminin {yuzde(((data.milkProduction.goat) / (data.milkProduction.total || 1) * 100), 0)}'i</div>
         </div>
       </div>
 
@@ -61,7 +62,7 @@ export function MilkSection({ data }: Props) {
                 cy="50%"
                 outerRadius={100}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={false}
               >
                 {data.milkProduction.breakdown.map((entry, index) => (

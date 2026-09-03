@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, latestYear, num } from '../../services/d1';
@@ -66,19 +67,13 @@ export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef444
 
 // ---------- HELPERS ----------
 export function formatTon(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ton';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ton';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ton';
-  return value.toFixed(1) + ' ton';
+  return kisa(value, { birim: 'ton' });
 }
 export function formatKgHa(value: number): string {
   return value.toFixed(2) + ' kg/ha';
 }
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(1);
+  return eksen(value);
 }
 
 // ---------- HOOK ----------

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { PoultryEconomicData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
@@ -141,7 +142,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                formatter={(value: number) => [`${value.toFixed(2)}%`]}
+                formatter={(value: number) => [`${yuzde(value, 2)}`]}
               />
               <Area type="monotone" dataKey="karlilik" name="Karlılık (%)" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} strokeWidth={2} />
             </AreaChart>

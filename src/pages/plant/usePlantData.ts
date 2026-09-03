@@ -1,3 +1,4 @@
+import { sayi } from '../../utils/sayi';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAgg, num, type Row } from '../../services/d1';
 
@@ -251,7 +252,7 @@ export function usePlantData({
         const total = r1.data.reduce((s, r) => s + (Number(r.toplam) || 0), 0);
         setCityData(r1.data.map((r, i) => ({
           name: String(r.yer), value: Number(r.toplam) || 0,
-          share: total > 0 ? ((Number(r.toplam) || 0) / total * 100).toFixed(1) : '0',
+          share: total > 0 ? sayi((Number(r.toplam) || 0) / total * 100, 1) : '0',
           fill: COLORS[i % COLORS.length]
         })));
       }

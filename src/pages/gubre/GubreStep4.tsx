@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -134,7 +135,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
                     <div style={{ width: 12, height: 12, borderRadius: 2, background: d.color, flexShrink: 0 }} />
                     <span style={{ fontSize: '0.9rem', color: 'var(--gh-text-primary, #111827)' }}>
                       <strong>{d.name}:</strong> {d.value.toFixed(1)} kg/da
-                      {total > 0 && <span style={{ color: '#6b7280', marginLeft: 4 }}>(%{((d.value / total) * 100).toFixed(0)})</span>}
+                      {total > 0 && <span style={{ color: '#6b7280', marginLeft: 4 }}>({yuzde(((d.value / total) * 100), 0)})</span>}
                     </span>
                   </div>
                 ))}

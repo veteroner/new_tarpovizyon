@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   LineChart, Line, BarChart, Bar, Cell,
@@ -1654,8 +1655,8 @@ export default function CommodityPricesPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1rem' }}>
                         {[
                           { label: 'Son Fiyat', val: latest ? `$${latest.price_value < 100 ? latest.price_value.toFixed(2) : Math.round(latest.price_value).toLocaleString('en-US')}` : '-', color: '#f8fafc' },
-                          { label: 'Aylık Değ.', val: momPct != null ? `${momPct >= 0 ? '+' : ''}${momPct.toFixed(1)}%` : '-', color: momPct == null ? '#94a3b8' : momPct >= 0 ? '#22c55e' : '#ef4444' },
-                          { label: 'Yıllık Değ.', val: yoyPct != null ? `${yoyPct >= 0 ? '+' : ''}${yoyPct.toFixed(1)}%` : '-', color: yoyPct == null ? '#94a3b8' : yoyPct >= 0 ? '#22c55e' : '#ef4444' },
+                          { label: 'Aylık Değ.', val: momPct != null ? `${momPct >= 0 ? '+' : ''}${yuzde(momPct, 1)}` : '-', color: momPct == null ? '#94a3b8' : momPct >= 0 ? '#22c55e' : '#ef4444' },
+                          { label: 'Yıllık Değ.', val: yoyPct != null ? `${yoyPct >= 0 ? '+' : ''}${yuzde(yoyPct, 1)}` : '-', color: yoyPct == null ? '#94a3b8' : yoyPct >= 0 ? '#22c55e' : '#ef4444' },
                           { label: '12A Ort.', val: h.length ? `$${avg12 < 100 ? avg12.toFixed(2) : Math.round(avg12).toLocaleString('en-US')}` : '-', color: '#94a3b8' },
                         ].map(stat => (
                           <div key={stat.label} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '0.75rem', padding: '0.75rem', textAlign: 'center' }}>

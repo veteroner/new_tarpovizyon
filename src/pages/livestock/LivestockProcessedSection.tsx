@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -241,14 +242,13 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           </div>
           <div className="kpi-value">{formatShort(processedKPIs.turkeyTotal)}</div>
           <div className="kpi-subtitle">
-            Pay: %{processedKPIs.totalProduction > 0
-              ? ((processedKPIs.turkeyTotal / processedKPIs.totalProduction) * 100).toFixed(2) : '0'}
+            Pay: {yuzde(processedKPIs.totalProduction > 0? ((processedKPIs.turkeyTotal / processedKPIs.totalProduction) * 100) : 0, 2)}
           </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">İŞLEME ORANI</span></div>
           <div className="kpi-value" style={{ color: processedKPIs.processingRate > 20 ? '#22c55e' : '#f59e0b' }}>
-            %{processedKPIs.processingRate.toFixed(1)}
+            {yuzde(processedKPIs.processingRate, 1)}
           </div>
           <div className="kpi-subtitle">Ham süt → İşlenmiş ürün dönüşümü</div>
         </div>
@@ -300,7 +300,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
                     }} />
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: 3 }}>
-                    %{((p.turkeyVal / p.total) * 100).toFixed(1)} pay
+                    {yuzde(((p.turkeyVal / p.total) * 100), 1)} pay
                   </div>
                 </div>
               )}
@@ -347,7 +347,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
               margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(1)}%`} />
+              <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(Number(v), 1)}`} />
               <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number) => [`%${(v as number).toFixed(2)} CAGR`, 'Büyüme']} />

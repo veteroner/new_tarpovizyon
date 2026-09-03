@@ -1,3 +1,4 @@
+import { yuzde, sayi } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -134,7 +135,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       }));
       const globalTotal = allCountries.reduce((s: number, c: {value: number}) => s + c.value, 0);
       const top20Display = allCountries.slice(0, 20).map((c: {area: string; name: string; value: number}, i: number) => ({
-        ...c, share: ((c.value / globalTotal) * 100).toFixed(1), fill: COLORS[i % COLORS.length]
+        ...c, share: sayi(((c.value / globalTotal) * 100), 1), fill: COLORS[i % COLORS.length]
       }));
       setStocksCountryData(top20Display);
 
@@ -332,23 +333,23 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: stocksKPIs.globalCAGR5 > 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>📈</div></div>
-            <div className="kpi-value" style={{color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>%{stocksKPIs.globalCAGR5.toFixed(2)}</div>
-            <div className="kpi-subtitle">10Y: %{stocksKPIs.globalCAGR10.toFixed(2)}</div>
+            <div className="kpi-value" style={{color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>{yuzde(stocksKPIs.globalCAGR5, 2)}</div>
+            <div className="kpi-subtitle">10Y: {yuzde(stocksKPIs.globalCAGR10, 2)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">TÜRKİYE</span><div className="kpi-icon purple">🇹🇷</div></div>
             <div className="kpi-value">#{stocksKPIs.turkeyRankGlobal}</div>
-            <div className="kpi-subtitle">{formatNumber(stocksKPIs.turkeyTotal)} baş · %{((stocksKPIs.turkeyTotal / stocksKPIs.totalStock) * 100).toFixed(1)} pay</div>
+            <div className="kpi-subtitle">{formatNumber(stocksKPIs.turkeyTotal)} baş · {yuzde(((stocksKPIs.turkeyTotal / stocksKPIs.totalStock) * 100), 1)} pay</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">🇹🇷 5Y CAGR</span></div>
-            <div className="kpi-value" style={{color: stocksKPIs.turkeyCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>%{stocksKPIs.turkeyCAGR5.toFixed(2)}</div>
+            <div className="kpi-value" style={{color: stocksKPIs.turkeyCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>{yuzde(stocksKPIs.turkeyCAGR5, 2)}</div>
             <div className="kpi-subtitle">{stocksKPIs.turkeyCAGR5 > stocksKPIs.globalCAGR5 ? '✅ Küresel ortalamanın üstünde' : '⚠️ Küresel ortalamanın altında'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{stocksKPIs.topGrower}</div>
-            <div className="kpi-subtitle">CAGR %{stocksKPIs.topGrowerCAGR.toFixed(1)}</div>
+            <div className="kpi-subtitle">CAGR {yuzde(stocksKPIs.topGrowerCAGR, 1)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">LİDER ÜLKE</span><div className="kpi-icon orange"><Trophy size={18} aria-hidden="true" /></div></div>
@@ -451,7 +452,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie data={stocksData.map((d, i) => ({...d, fill: COLORS[i % COLORS.length]}))} cx="50%" cy="50%" outerRadius={95} dataKey="value"
-                label={(props) => { const p = props as unknown as Record<string, unknown>; const name = String(p.name ?? ''); const pct = Number(p.percent ?? 0); return `${ANIMAL_ITEMS.find(ai => ai.name === name)?.nameTR || name} ${(pct * 100).toFixed(0)}%`; }} labelLine={false}>
+                label={(props) => { const p = props as unknown as Record<string, unknown>; const name = String(p.name ?? ''); const pct = Number(p.percent ?? 0); return `${ANIMAL_ITEMS.find(ai => ai.name === name)?.nameTR || name} ${yuzde((pct * 100), 0)}`; }} labelLine={false}>
                 {stocksData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
               </Pie>
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Baş']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
@@ -475,7 +476,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                   label={{ value: 'Toplam Stok (Baş)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)' }}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis type="number" dataKey="cagr5" name="CAGR"
-                  tickFormatter={(v: number) => `${v.toFixed(1)}%`}
+                  tickFormatter={(v: number) => `${yuzde(v, 1)}`}
                   label={{ value: '5Y CAGR (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
                 <ZAxis range={[60, 400]} />
@@ -542,7 +543,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                 <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>{ANIMAL_ITEMS.find(ai => ai.name === p.animal)?.nameTR || p.animal}</div>
                 <div style={{fontSize: '1.3rem', fontWeight: '700', color: 'var(--text-primary)', marginTop: '4px'}}>{formatNumber(p.count)}</div>
                 <div style={{display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap'}}>
-                  <span style={{fontSize: '0.75rem', background: 'rgba(59,130,246,.15)', color: '#3b82f6', padding: '2px 6px', borderRadius: '4px'}}>Pay %{p.share.toFixed(1)}</span>
+                  <span style={{fontSize: '0.75rem', background: 'rgba(59,130,246,.15)', color: '#3b82f6', padding: '2px 6px', borderRadius: '4px'}}>Pay {yuzde(p.share, 1)}</span>
                   <span style={{fontSize: '0.75rem', background: p.cagr5 >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: p.cagr5 >= 0 ? '#22c55e' : '#ef4444', padding: '2px 6px', borderRadius: '4px'}}>5Y {p.cagr5 > 0 ? '+' : ''}{p.cagr5.toFixed(1)}%</span>
                 </div>
                 <div style={{marginTop: '8px', background: 'var(--bg-primary)', borderRadius: '4px', height: '6px', overflow: 'hidden'}}>
@@ -619,7 +620,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                         {isTurkey ? '🇹🇷 ' : ''}{c.country}
                       </td>
                       <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-primary)'}}>{formatNumber(c.total)}</td>
-                      <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-secondary)'}}>%{c.share.toFixed(2)}</td>
+                      <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-secondary)'}}>{yuzde(c.share, 2)}</td>
                       <td style={{padding: '10px 16px', textAlign: 'right', fontWeight: '600', color: c.cagr5 > 1 ? '#22c55e' : c.cagr5 > -1 ? '#f59e0b' : '#ef4444'}}>
                         {c.cagr5 > 0 ? '+' : ''}{c.cagr5.toFixed(2)}%
                       </td>

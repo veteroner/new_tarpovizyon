@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -263,7 +264,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                     outerRadius={120}
                     label={(entry: unknown) => {
                       const data = entry as Record<string, string | number>;
-                      return `${data.district}: ${(data.provinceShare as number).toFixed(1)}%`;
+                      return `${data.district}: ${yuzde((data.provinceShare as number), 1)}`;
                     }}
                     labelLine={{stroke: 'var(--text-secondary)', strokeWidth: 1}}
                   >
@@ -278,7 +279,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                       borderRadius: '8px',
                       fontSize: '12px'
                     }}
-                    formatter={(value: number) => `${value.toFixed(2)}%`}
+                    formatter={(value: number) => `${yuzde(value, 2)}`}
                   />
                 </PieChart>
               </ResponsiveContainer>

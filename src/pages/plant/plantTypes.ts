@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 /* ─── renk paleti ─── */
 export const COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -98,16 +99,10 @@ export const UNSUR_OPTIONS = [
 
 /* ─── yardımcı fonksiyonlar ─── */
 export function fmt(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toLocaleString('tr-TR');
+  return kisa(value);
 }
 export function fmtShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 export function pct(a: number, b: number): number {
   return b !== 0 ? ((a - b) / b) * 100 : 0;

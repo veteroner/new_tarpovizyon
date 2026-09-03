@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, latestYear, num } from '../../services/d1';
@@ -36,19 +37,11 @@ export const TABS: { id: Tab; label: string; icon: string }[] = [
 export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
 
 export function formatPop(value: number): string {
-  const actual = value * 1000;
-  if (actual >= 1e9) return (actual / 1e9).toFixed(2) + ' Milyar';
-  if (actual >= 1e6) return (actual / 1e6).toFixed(2) + ' Milyon';
-  if (actual >= 1e3) return (actual / 1e3).toFixed(0) + ' Bin';
-  return actual.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  const actual = value * 1000;
-  if (actual >= 1e9) return (actual / 1e9).toFixed(1) + 'B';
-  if (actual >= 1e6) return (actual / 1e6).toFixed(1) + 'M';
-  if (actual >= 1e3) return (actual / 1e3).toFixed(0) + 'K';
-  return actual.toFixed(0);
+  return eksen(value);
 }
 
 export function formatPercent(v: number): string { return `%${v.toFixed(1)}`; }

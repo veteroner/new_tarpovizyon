@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, Layers, Activity, Factory, Leaf, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
 import {
@@ -34,13 +35,13 @@ export function OverviewTab({
   return (
     <div style={{ animation: 'slideInUp 0.4s ease-out' }}>
       <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <KPICard title="Dünya Toplam Üretim" value={formatValue(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.worldYoY >= 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(1)}% | ${overviewKPIs.countryCount} ülke`} icon={Globe} color="blue" large />
+        <KPICard title="Dünya Toplam Üretim" value={formatValue(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.worldYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.worldYoY, 1)} | ${overviewKPIs.countryCount} ülke`} icon={Globe} color="blue" large />
         <KPICard title="Dünya Ekim Alanı" value={formatHa(overviewKPIs.worldArea)} subtitle={`${overviewKPIs.productCount} ürün`} icon={Layers} color="green" />
         <KPICard title="Dünya Ort. Verim" value={formatYield(overviewKPIs.worldYield)} subtitle="Tüm ürünler ortalaması" icon={Activity} color="teal" />
         <KPICard title="İşlenmiş Üretim" value={formatValue(overviewKPIs.processedTotal)} subtitle={`İşleme oranı: %${overviewKPIs.processingRatio.toFixed(1)}`} icon={Factory} color="purple" />
       </div>
       <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <KPICard title="🇹🇷 Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${overviewKPIs.turkeyYoY.toFixed(1)}%`} icon={Leaf} color="green" large />
+        <KPICard title="🇹🇷 Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.turkeyYoY, 1)}`} icon={Leaf} color="green" large />
         <KPICard title="🇹🇷 Ekim Alanı" value={formatHa(overviewKPIs.turkeyArea)} subtitle={`${overviewKPIs.turkeyProductCount} ürün`} icon={MapPin} color="teal" />
         <KPICard title="🇹🇷 Ort. Verim" value={formatYield(overviewKPIs.turkeyYield)} subtitle={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? '✅ Dünya üstü' : '⚠️ Dünya altı'} icon={TrendingUp} color={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'green' : 'red'} />
         <KPICard title="🇹🇷 İşlenmiş" value={formatValue(overviewKPIs.turkeyProcessedTotal)} subtitle={`İşleme: %${overviewSupplyChain?.turkeyProcessingRatio?.toFixed(1) || '?'}`} icon={Factory} color="orange" />
@@ -60,8 +61,8 @@ export function OverviewTab({
             <div style={{ fontSize: '28px', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(168,85,247,0.1)', borderRadius: '12px', border: '2px solid #a855f7' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>İşleme</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: '#a855f7' }}>%{overviewSupplyChain.processingRatio.toFixed(1)}</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>🇹🇷 %{overviewSupplyChain.turkeyProcessingRatio.toFixed(1)}</div>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: '#a855f7' }}>{yuzde(overviewSupplyChain.processingRatio, 1)}</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>🇹🇷 {yuzde(overviewSupplyChain.turkeyProcessingRatio, 1)}</div>
             </div>
             <div style={{ fontSize: '28px', color: 'var(--text-secondary)' }}>→</div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(59,130,246,0.1)', borderRadius: '12px', border: '2px solid #3b82f6' }}>
@@ -78,7 +79,7 @@ export function OverviewTab({
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie data={overviewCategoryData} cx="50%" cy="50%" innerRadius={70} outerRadius={120} paddingAngle={2} dataKey="value"
-                label={(props: any) => { const p = props as unknown as Record<string, unknown>; return `${p.name} ${((Number(p.percent) || 0) * 100).toFixed(0)}%`; }}>
+                label={(props: any) => { const p = props as unknown as Record<string, unknown>; return `${p.name} ${yuzde(((Number(p.percent) || 0) * 100), 0)}`; }}>
                 {overviewCategoryData.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.color} />)}
               </Pie>
               <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />

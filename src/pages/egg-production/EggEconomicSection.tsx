@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { EggEconomicData } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
@@ -142,7 +143,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                formatter={(value: number) => [`${value.toFixed(2)}%`]}
+                formatter={(value: number) => [`${yuzde(value, 2)}`]}
               />
               <Area type="monotone" dataKey="karlilik" name="Karlılık (%)" stroke="#a855f7" fill="#a855f7" fillOpacity={0.4} strokeWidth={3.5} />
             </AreaChart>

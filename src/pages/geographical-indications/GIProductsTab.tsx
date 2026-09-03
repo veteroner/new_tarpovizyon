@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
@@ -105,7 +106,7 @@ export function GIProductsTab({ productGroupData }: Props) {
                   </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right' }}>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      %{((group.registered / group.count) * 100).toFixed(1)}
+                      {yuzde(((group.registered / group.count) * 100), 1)}
                     </div>
                   </td>
                 </tr>

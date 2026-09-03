@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
@@ -89,12 +90,12 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
         <div className="sp-kpi-grid">
           <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
             <div className="sp-kpi__label">Sezon Stres Oranı</div>
-            <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>%{(calc.sezonStresOrani * 100).toFixed(0)}</div>
+            <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>{yuzde((calc.sezonStresOrani * 100), 0)}</div>
             <div className="sp-kpi__unit">karşılanamayan su / toplam ihtiyaç</div>
           </div>
           <div className="sp-kpi" style={{ borderColor: '#e74c3c' }}>
             <div className="sp-kpi__label">Tahmini Verim Kaybı</div>
-            <div className="sp-kpi__value" style={{ color: '#e74c3c' }}>-%{calc.verimKaybiPct.toFixed(0)}</div>
+            <div className="sp-kpi__value" style={{ color: '#e74c3c' }}>-{yuzde(calc.verimKaybiPct, 0)}</div>
             <div className="sp-kpi__unit">su stresine bağlı (yaklaşık)</div>
           </div>
           <div className="sp-kpi">
@@ -196,7 +197,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             </div>
             <div className="sp-kpi" style={{ borderColor: '#f59e0b' }}>
               <div className="sp-kpi__label">Tahmini Verim Kaybı</div>
-              <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>-%{calc.verimKaybiPct.toFixed(0)}</div>
+              <div className="sp-kpi__value" style={{ color: '#f59e0b' }}>-{yuzde(calc.verimKaybiPct, 0)}</div>
               <div className="sp-kpi__unit">sulamasız</div>
             </div>
           </div>
@@ -302,7 +303,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                  <strong>Sezon Stres Oranı:</strong> %{(calc.sezonStresOrani * 100).toFixed(0)}
+                  <strong>Sezon Stres Oranı:</strong> {yuzde((calc.sezonStresOrani * 100), 0)}
                 </div>
                 <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
                   <strong>Su Açığı:</strong> {calc.waterDeficit.toFixed(0)} mm/sezon
@@ -453,7 +454,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <span className="sp-benefit-icon"><TrendingUp size={18} aria-hidden="true" /></span>
             <div>
               <div className="sp-benefit-title">Verim Artışı</div>
-              <div className="sp-benefit-value">+%{calc.verimArtisi.toFixed(0)}</div>
+              <div className="sp-benefit-value">+{yuzde(calc.verimArtisi, 0)}</div>
               <div className="sp-benefit-hint">Optimal sulama ile tahmini</div>
             </div>
           </div>
@@ -462,7 +463,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
               <span className="sp-benefit-icon"><Droplets size={18} aria-hidden="true" /></span>
               <div>
                 <div className="sp-benefit-title">Su Tasarrufu</div>
-                <div className="sp-benefit-value">%{calc.suTasarrufu.toFixed(0)}</div>
+                <div className="sp-benefit-value">{yuzde(calc.suTasarrufu, 0)}</div>
                 <div className="sp-benefit-hint">Damla sulama sistemine geçişle</div>
               </div>
             </div>

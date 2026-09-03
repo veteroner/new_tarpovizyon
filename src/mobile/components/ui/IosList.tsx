@@ -1,3 +1,4 @@
+import { yuzde } from '../../../utils/sayi';
 import type { ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -104,7 +105,7 @@ export function StatTile({
       {delta !== undefined && (
         <div className={`ios-tile-delta ${iyi ? 'ios-up' : 'ios-down'}`}>
           <span aria-hidden="true">{delta > 0 ? '▲' : delta < 0 ? '▼' : '—'}</span>
-          {' '}%{Math.abs(delta).toFixed(1)}
+          {' '}{yuzde(Math.abs(delta), 1)}
         </div>
       )}
       {sub && <div className="ios-tile-delta" style={{ color: 'var(--ios-label-3)', fontWeight: 400 }}>{sub}</div>}

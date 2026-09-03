@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -377,7 +378,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
               <YAxis type="number" dataKey="growth" name="Büyüme" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <ZAxis type="number" dataKey="volume" range={[30, 300]} />
               <Tooltip
-                formatter={(value: number, name: string) => [name === 'R²' ? value.toFixed(3) : `${value.toFixed(1)}%`, name]}
+                formatter={(value: number, name: string) => [name === 'R²' ? value.toFixed(3) : `${yuzde(value, 1)}`, name]}
                 labelFormatter={(_, payload) => {
                   if (payload && payload.length > 0) {
                     const d = payload[0].payload as {country: string; product: string};
@@ -503,7 +504,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                   </span>
                   <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px'}}>{risk.country}</div>
                   <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%'}}>{translateProduct(risk.product)}</div>
-                  <div style={{fontSize: '1.2rem', fontWeight: 700, color: sColor}}>%{risk.decline.toFixed(1)} CAGR</div>
+                  <div style={{fontSize: '1.2rem', fontWeight: 700, color: sColor}}>{yuzde(risk.decline, 1)} CAGR</div>
                 </div>
               );
             })}

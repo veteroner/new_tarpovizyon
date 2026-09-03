@@ -1,3 +1,4 @@
+import { sayi } from '../../utils/sayi';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAgg, num } from '../../services/d1';
 
@@ -156,7 +157,7 @@ export function useTuikLivestockData(): UseTuikLivestockDataReturn {
         setCityData(cityRes.data.map((item: Record<string, unknown>, index: number) => ({
           name: String(item['il'] || ''),
           value: Number(item['toplam']) || 0,
-          share: shareBase > 0 ? ((Number(item['toplam']) || 0) / shareBase * 100).toFixed(1) : '0.0',
+          share: shareBase > 0 ? sayi((Number(item['toplam']) || 0) / shareBase * 100, 1) : '0,0',
           fill: COLORS[index % COLORS.length]
         })));
       }

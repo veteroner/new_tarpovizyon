@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useKademeli } from '../../components/ui/useKademeli';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -213,7 +214,7 @@ export function PlantOverviewTab({
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label={({ percent }: { percent?: number }) => percent ? `${(percent * 100).toFixed(1)}%` : ''}
+                label={({ percent }: { percent?: number }) => percent ? `${yuzde((percent * 100), 1)}` : ''}
               >
                 {regionalSummary.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

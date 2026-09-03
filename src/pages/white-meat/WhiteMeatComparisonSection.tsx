@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Area,
   AreaChart,
@@ -65,10 +66,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
           {/* Ticaret KPI Kartları */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
             {[
-              { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '📤', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${tradeIntelligence.yoyExport.toFixed(1)}% YoY` },
+              { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '📤', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${yuzde(tradeIntelligence.yoyExport, 1)} YoY` },
               { label: `İTHALAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ithalat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#ef4444', icon: '📥', sub: 'Yem hammaddesi ağırlıklı' },
               { label: 'NET TİCARET DENGESİ', value: `$${tradeIntelligence.netBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: tradeIntelligence.netBalance > 0 ? '#10b981' : '#ef4444', icon: '⚖️', sub: tradeIntelligence.netBalance > 0 ? '✅ Net ihracatçı' : '❌ Net ithalatçı' },
-              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${tradeIntelligence.exportCAGR.toFixed(1)}%`, color: '#3b82f6', icon: '📈', sub: `${tradeIntelligence.ilkYil}–${tradeIntelligence.latest.yil} bileşik` },
+              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${yuzde(tradeIntelligence.exportCAGR, 1)}`, color: '#3b82f6', icon: '📈', sub: `${tradeIntelligence.ilkYil}–${tradeIntelligence.latest.yil} bileşik` },
             ].map(kpi => (
               <div key={kpi.label} className="kpi-card" style={{ borderTop: `3px solid ${kpi.color}` }}>
                 <div className="kpi-header"><span className="kpi-title" style={{ fontSize: '0.7rem' }}>{kpi.label}</span><span style={{ fontSize: '1.5rem' }}>{kpi.icon}</span></div>

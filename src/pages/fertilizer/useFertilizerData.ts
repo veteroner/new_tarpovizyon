@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -28,24 +29,15 @@ export const FERTILIZER_ITEMS = [
 ];
 
 export function formatTon(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar ton';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon ton';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin ton';
-  return value.toFixed(0) + ' ton';
+  return kisa(value, { birim: 'ton' });
 }
 
 export function formatUSD(value: number): string {
-  if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
-  if (value >= 1e6) return '$' + (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return '$' + (value / 1e3).toFixed(0) + 'K';
-  return '$' + value.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function useFertilizerData(activeTab: Tab) {

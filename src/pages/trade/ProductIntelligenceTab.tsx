@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -269,7 +270,7 @@ export default function ProductIntelligenceTab() {
 
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
             <KPICard title={`İthalat (${yearForMonthly})`} value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
             <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Partner" value={topCountry} subtitle="En büyük ihracat ülkesi" icon={Globe} color="blue" />
@@ -348,7 +349,7 @@ export default function ProductIntelligenceTab() {
                         {c.balance >= 0 ? '+' : ''}{formatMoney(c.balance)}
                       </td>
                       <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)' }}>
-                        %{totalExp > 0 ? ((c.exp / totalExp) * 100).toFixed(1) : '0'}
+                        {yuzde(totalExp > 0? ((c.exp / totalExp) * 100) : 0, 1)}
                       </td>
                     </tr>
                   ))}
@@ -384,7 +385,7 @@ export default function ProductIntelligenceTab() {
                       return (
                         <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
                           <div style={{ fontWeight: 700, marginBottom: 4 }}>{d.name}</div>
-                          <div>İhracat Payı: %{d.x.toFixed(1)}</div>
+                          <div>İhracat Payı: {yuzde(d.x, 1)}</div>
                           <div>Denge: ${d.y.toFixed(1)}M</div>
                           <div>İhracat: ${d.z.toFixed(1)}M</div>
                         </div>

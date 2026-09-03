@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, AreaChart, Area, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -37,12 +38,12 @@ export function MeatSection({ data }: Props) {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KIRMIZI ET</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.redMeat)} ton</div>
-          <div className="kpi-subtitle">Toplam etin %{((data.meatProduction.redMeat) / (data.meatProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam etin {yuzde(((data.meatProduction.redMeat) / (data.meatProduction.total || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">BEYAZ ET</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.whiteMeat)} ton</div>
-          <div className="kpi-subtitle">Toplam etin %{((data.meatProduction.whiteMeat) / (data.meatProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam etin {yuzde(((data.meatProduction.whiteMeat) / (data.meatProduction.total || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">BEYAZ/KIRMIZI</span></div>
@@ -59,22 +60,22 @@ export function MeatSection({ data }: Props) {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">SIĞIR ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.cattle)} ton</div>
-          <div className="kpi-subtitle">Kırmızı etin %{((data.meatProduction.cattle) / (data.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Kırmızı etin {yuzde(((data.meatProduction.cattle) / (data.meatProduction.redMeat || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KOYUN ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.sheep)} ton</div>
-          <div className="kpi-subtitle">Kırmızı etin %{((data.meatProduction.sheep) / (data.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Kırmızı etin {yuzde(((data.meatProduction.sheep) / (data.meatProduction.redMeat || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KEÇİ ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.goat)} ton</div>
-          <div className="kpi-subtitle">Kırmızı etin %{((data.meatProduction.goat) / (data.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Kırmızı etin {yuzde(((data.meatProduction.goat) / (data.meatProduction.redMeat || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">MANDA ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.buffalo)} ton</div>
-          <div className="kpi-subtitle">Kırmızı etin %{((data.meatProduction.buffalo) / (data.meatProduction.redMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Kırmızı etin {yuzde(((data.meatProduction.buffalo) / (data.meatProduction.redMeat || 1) * 100), 0)}'i</div>
         </div>
       </div>
 
@@ -86,12 +87,12 @@ export function MeatSection({ data }: Props) {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">PİLİÇ ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.chicken)} ton</div>
-          <div className="kpi-subtitle">Beyaz etin %{((data.meatProduction.chicken) / (data.meatProduction.whiteMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Beyaz etin {yuzde(((data.meatProduction.chicken) / (data.meatProduction.whiteMeat || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">HİNDİ ETİ</span></div>
           <div className="kpi-value">{formatNumber(data.meatProduction.turkey)} ton</div>
-          <div className="kpi-subtitle">Beyaz etin %{((data.meatProduction.turkey) / (data.meatProduction.whiteMeat || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Beyaz etin {yuzde(((data.meatProduction.turkey) / (data.meatProduction.whiteMeat || 1) * 100), 0)}'i</div>
         </div>
       </div>
 

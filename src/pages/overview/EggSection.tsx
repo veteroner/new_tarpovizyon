@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -32,7 +33,7 @@ export function EggSection({ data }: Props) {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TAVUK YUMURTASI</span></div>
           <div className="kpi-value">{formatNumber(data.eggProduction.chicken)} adet</div>
-          <div className="kpi-subtitle">Toplam üretimin %{((data.eggProduction.chicken) / (data.eggProduction.total || 1) * 100).toFixed(0)}'i</div>
+          <div className="kpi-subtitle">Toplam üretimin {yuzde(((data.eggProduction.chicken) / (data.eggProduction.total || 1) * 100), 0)}'i</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">KİŞİ BAŞI</span></div>
@@ -56,7 +57,7 @@ export function EggSection({ data }: Props) {
                 cy="50%"
                 outerRadius={100}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
               >
                 {data.eggProduction.breakdown.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />

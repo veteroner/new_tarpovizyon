@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useMemo } from 'react';
 import {
   Area,
@@ -154,7 +155,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
           <div className="kpi-subtitle">
             {importAnalytics.yoy && (
               <span style={{ color: importAnalytics.yoy.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
-                {importAnalytics.yoy.carcass >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.carcass).toFixed(1)} Yıllık Değişim
+                {importAnalytics.yoy.carcass >= 0 ? '↑' : '↓'} {yuzde(Math.abs(importAnalytics.yoy.carcass), 1)} Yıllık Değişim
               </span>
             )}
           </div>
@@ -166,10 +167,10 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               <span className="kpi-title">YETERLİLİK (PROXY)</span>
               <div className="kpi-icon green"><Home size={18} aria-hidden="true" /></div>
             </div>
-            <div className="kpi-value">%{ssrProxyLatest.ssr.toFixed(1)}</div>
+            <div className="kpi-value">{yuzde(ssrProxyLatest.ssr, 1)}</div>
             <div className="kpi-subtitle">
               {ssrProxyLatest.year !== ssrProxyLatest.importYear ? `${ssrProxyLatest.year} üretimi` : `${ssrProxyLatest.year}`}{' '}—
-              %{ssrProxyLatest.importShare.toFixed(1)} ithalat payı (karkas: %{ssrProxyLatest.carcassShare.toFixed(1)}, canlı CWE: %{ssrProxyLatest.liveShare.toFixed(1)})
+              {yuzde(ssrProxyLatest.importShare, 1)} ithalat payı (karkas: {yuzde(ssrProxyLatest.carcassShare, 1)}, canlı CWE: {yuzde(ssrProxyLatest.liveShare, 1)})
             </div>
           </div>
         )}
@@ -183,7 +184,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
           <div className="kpi-subtitle">
             {importAnalytics.yoy && (
               <span style={{ color: importAnalytics.yoy.cattle >= 0 ? '#22c55e' : '#ef4444' }}>
-                {importAnalytics.yoy.cattle >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.cattle).toFixed(1)} Yıllık Değişim
+                {importAnalytics.yoy.cattle >= 0 ? '↑' : '↓'} {yuzde(Math.abs(importAnalytics.yoy.cattle), 1)} Yıllık Değişim
               </span>
             )}
           </div>
@@ -198,7 +199,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
           <div className="kpi-subtitle">
             {importAnalytics.yoy && (
               <span style={{ color: importAnalytics.yoy.smallRuminant >= 0 ? '#22c55e' : '#ef4444' }}>
-                {importAnalytics.yoy.smallRuminant >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.smallRuminant).toFixed(1)} Yıllık Değişim
+                {importAnalytics.yoy.smallRuminant >= 0 ? '↑' : '↓'} {yuzde(Math.abs(importAnalytics.yoy.smallRuminant), 1)} Yıllık Değişim
               </span>
             )}
           </div>
@@ -215,7 +216,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               <div className="kpi-subtitle">
                 {importAnalytics.yoy && (
                   <span style={{ color: importAnalytics.yoy.spending >= 0 ? '#ef4444' : '#22c55e' }}>
-                    {importAnalytics.yoy.spending >= 0 ? '↑' : '↓'} %{Math.abs(importAnalytics.yoy.spending).toFixed(1)} Yıllık Değişim
+                    {importAnalytics.yoy.spending >= 0 ? '↑' : '↓'} {yuzde(Math.abs(importAnalytics.yoy.spending), 1)} Yıllık Değişim
                   </span>
                 )}
               </div>
@@ -238,7 +239,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <div className="kpi-icon purple"><TrendingUp size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value" style={{ color: importAnalytics.cagr.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
-            %{importAnalytics.cagr.carcass.toFixed(1)}
+            {yuzde(importAnalytics.cagr.carcass, 1)}
           </div>
           <div className="kpi-subtitle">{importRangeLabel} bileşik</div>
         </div>
@@ -255,7 +256,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
                 <YAxis
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                   domain={LINE_Y_DOMAIN}
-                  tickFormatter={(v) => `${Number(v).toFixed(0)}%`} width={46} />
+                  tickFormatter={(v) => `${yuzde(Number(v), 0)}`} width={46} />
                 <Tooltip
                   formatter={(value: number) => [`%${Number(value).toFixed(1)}`, 'Yeterlilik (Proxy)']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -375,7 +376,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
                 cx="50%"
                 cy="50%"
                 outerRadius={110}
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
                 labelLine={true}
               >
                 {importComposition.map((entry, index) => (
@@ -453,7 +454,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               Karkas Et CAGR ({importRangeLabel})
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: importAnalytics.cagr.carcass >= 0 ? '#22c55e' : '#ef4444' }}>
-              %{importAnalytics.cagr.carcass.toFixed(2)}
+              {yuzde(importAnalytics.cagr.carcass, 2)}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
               {importAnalytics.cagr.carcass >= 0 ? 'Artan trend' : 'Azalan trend'}
@@ -465,7 +466,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               Besilik Sığır CAGR
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: importAnalytics.cagr.cattle >= 0 ? '#22c55e' : '#ef4444' }}>
-              %{importAnalytics.cagr.cattle.toFixed(2)}
+              {yuzde(importAnalytics.cagr.cattle, 2)}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
               Yıllık ortalama değişim
@@ -477,7 +478,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               Küçükbaş CAGR
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: importAnalytics.cagr.smallRuminant >= 0 ? '#22c55e' : '#ef4444' }}>
-              %{importAnalytics.cagr.smallRuminant.toFixed(2)}
+              {yuzde(importAnalytics.cagr.smallRuminant, 2)}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
               Bileşik büyüme oranı
@@ -489,7 +490,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               Harcama CAGR
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>
-              %{importAnalytics.cagr.spending.toFixed(2)}
+              {yuzde(importAnalytics.cagr.spending, 2)}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
               Döviz etkisi dahil

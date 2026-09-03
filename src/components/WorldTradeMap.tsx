@@ -1,3 +1,4 @@
+import { kisa } from '../utils/sayi';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
@@ -40,14 +41,7 @@ function clamp01(value: number): number {
 }
 
 function formatMoney(value: number): string {
-  const v = Number(value) || 0;
-  const abs = Math.abs(v);
-  const sign = v < 0 ? '-' : '';
-  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
-  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
-  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
-  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
-  return `${sign}$${abs.toLocaleString('tr-TR')}`;
+  return kisa(value);
 }
 
 function pickFillForValue(value: number, min: number, max: number): string {

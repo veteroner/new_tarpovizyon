@@ -1,3 +1,4 @@
+import { kisa, eksen, yuzde, sayi } from '../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -41,19 +42,11 @@ const INDICATOR_OPTIONS = [
 ];
 
 function formatValue(value: number): string {
-  if (value >= 1e12) return (value / 1e12).toFixed(2) + ' Trilyon $';
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar $';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + ' Milyon $';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin $';
-  return value.toFixed(0) + ' $';
+  return kisa(value, { para: '$' });
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e12) return (value / 1e12).toFixed(1) + 'T';
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(0) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export default function MacroEconomicPage() {
@@ -100,7 +93,7 @@ export default function MacroEconomicPage() {
         const mapped = countryRes.data.map((item, index: number) => ({
           name: translateCountry(String(item['area'] || '')),
           value: (Number(item['total']) || 0) * 1e6,
-          share: ((Number(item['total']) || 0) / total * 100).toFixed(1),
+          share: sayi(((Number(item['total']) || 0) / total * 100), 1),
           fill: COLORS[index % COLORS.length]
         }));
         setCountryData(mapped);
@@ -169,7 +162,7 @@ export default function MacroEconomicPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">YILLIK BÜYÜME</span><div className={`kpi-icon ${yearGrowth >= 0 ? 'green' : 'red'}`}>{yearGrowth >= 0 ? '📈' : '📉'}</div></div>
-              <div className="kpi-value" style={{ color: yearGrowth >= 0 ? '#22c55e' : '#ef4444' }}>%{yearGrowth.toFixed(1)}</div>
+              <div className="kpi-value" style={{ color: yearGrowth >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearGrowth, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
@@ -179,7 +172,7 @@ export default function MacroEconomicPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">TOP 5 PAYI</span><div className="kpi-icon purple"><BarChart3 size={18} aria-hidden="true" /></div></div>
-              <div className="kpi-value">%{top5Share.toFixed(1)}</div>
+              <div className="kpi-value">{yuzde(top5Share, 1)}</div>
               <div className="kpi-subtitle">Dünya toplamından</div>
             </div>
           </div>
@@ -226,7 +219,7 @@ export default function MacroEconomicPage() {
                     cy="50%" 
                     outerRadius={120} 
                     dataKey="value" 
-                    label={({ name, percent }) => `${name?.substring(0, 10)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name?.substring(0, 10)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                     labelLine={false}
                   >
                     {countryData.slice(0, 8).map((_, index) => (

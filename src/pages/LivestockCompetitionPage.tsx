@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import {
@@ -127,7 +128,7 @@ export function LivestockCompetitionPage() {
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">PAZAR PAYI</span></div>
           <div className="kpi-value" style={{ color: '#10b981' }}>
-            %{turkeyData && world.total > 0 ? ((turkeyData.total / world.total) * 100).toFixed(2) : '0'}
+            {yuzde(turkeyData && world.total > 0? ((turkeyData.total / world.total) * 100) : 0, 2)}
           </div>
           <div className="kpi-subtitle">Dünya toplam hayvansal üretim payı</div>
         </div>
@@ -142,7 +143,7 @@ export function LivestockCompetitionPage() {
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TOP 3 PAY</span></div>
-          <div className="kpi-value" style={{ color: '#8b5cf6' }}>%{hhi.top3Share.toFixed(1)}</div>
+          <div className="kpi-value" style={{ color: '#8b5cf6' }}>{yuzde(hhi.top3Share, 1)}</div>
           <div className="kpi-subtitle">En büyük 3 üreticinin payı</div>
         </div>
         <div className="kpi-card">
@@ -169,7 +170,7 @@ export function LivestockCompetitionPage() {
               }}>
                 <div style={{ fontSize: '1.5rem', marginBottom: 5 }}>{it.emoji}</div>
                 <h4 style={{ color: 'var(--text-secondary)', marginBottom: 10, fontSize: '0.85rem' }}>{it.label}</h4>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: it.color }}>%{pct.toFixed(2)}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: it.color }}>{yuzde(pct, 2)}</div>
                 <div style={{ marginTop: 10, background: 'rgba(255,255,255,.05)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${Math.min(pct * 5, 100)}%`, background: it.color, borderRadius: 8, transition: 'width .5s' }} />
                 </div>
@@ -193,7 +194,7 @@ export function LivestockCompetitionPage() {
             <AreaChart data={mktShareChart} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${v.toFixed(0)}%`} width={46} />
+              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(v, 0)}`} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`%${(v as number).toFixed(2)}`, n]} />
               <Legend />
@@ -224,7 +225,7 @@ export function LivestockCompetitionPage() {
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: 10, borderRadius: 8 }}>
                     <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{d.fullName}</div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                      Pay: %{d.share.toFixed(2)} · BBO: %{d.cagr.toFixed(1)}
+                      Pay: {yuzde(d.share, 2)} · BBO: {yuzde(d.cagr, 1)}
                     </div>
                   </div>
                 );
@@ -424,10 +425,10 @@ export function LivestockCompetitionPage() {
                   <td style={{ padding: 12, textAlign: 'right' }}>#{c.trRank}</td>
                   <td style={{ padding: 12, textAlign: 'right', color: NEG }}>{fmtVal(c.gap)}</td>
                   <td style={{ padding: 12, textAlign: 'right' }}>
-                    <span style={{ color: c.tCagr > 0 ? POS : NEG }}>%{c.tCagr.toFixed(1)}</span>
+                    <span style={{ color: c.tCagr > 0 ? POS : NEG }}>{yuzde(c.tCagr, 1)}</span>
                   </td>
                   <td style={{ padding: 12, textAlign: 'right' }}>
-                    <span style={{ color: c.lCagr > 0 ? POS : NEG }}>%{c.lCagr.toFixed(1)}</span>
+                    <span style={{ color: c.lCagr > 0 ? POS : NEG }}>{yuzde(c.lCagr, 1)}</span>
                   </td>
                   <td style={{ padding: 12, textAlign: 'center' }}>
                     {c.yrs !== null ? (
@@ -528,7 +529,7 @@ export function LivestockCompetitionPage() {
                   <div className="kpi-subtitle">ton</div>
                 </div>
                 <div className="kpi-card"><div className="kpi-title" style={{ fontSize: '0.7rem' }}>DÜNYA PAYI</div>
-                  <div className="kpi-value" style={{ fontSize: '1.3rem', color: '#8b5cf6' }}>%{sharePct.toFixed(2)}</div>
+                  <div className="kpi-value" style={{ fontSize: '1.3rem', color: '#8b5cf6' }}>{yuzde(sharePct, 2)}</div>
                   <div className="kpi-subtitle">{currentRankings.length} ülke arasında</div>
                 </div>
                 <div className="kpi-card"><div className="kpi-title" style={{ fontSize: '0.7rem' }}>SIRA</div>
@@ -556,7 +557,7 @@ export function LivestockCompetitionPage() {
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{b.name}</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtVal(b.val)}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                      %{total > 0 ? ((b.val / total) * 100).toFixed(1) : '0'} payı
+                      {yuzde(total > 0? ((b.val / total) * 100) : 0, 1)} payı
                     </div>
                   </div>
                 ))}

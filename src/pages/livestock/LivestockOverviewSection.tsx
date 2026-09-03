@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -329,7 +330,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
             <>
               <div className="kpi-card">
                 <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}>📈</div></div>
-                <div className="kpi-value" style={{color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}>%{(intelligenceMetrics.cagr5Year ?? 0).toFixed(2)}</div>
+                <div className="kpi-value" style={{color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}>{yuzde((intelligenceMetrics.cagr5Year ?? 0), 2)}</div>
                 <div className="kpi-subtitle">Yıllık bileşik büyüme</div>
               </div>
               <div className="kpi-card">
@@ -339,7 +340,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
               </div>
               <div className="kpi-card">
                 <div className="kpi-header"><span className="kpi-title">VOLATİLİTE</span></div>
-                <div className="kpi-value">%{(intelligenceMetrics.volatility ?? 0).toFixed(1)}</div>
+                <div className="kpi-value">{yuzde((intelligenceMetrics.volatility ?? 0), 1)}</div>
                 <div className="kpi-subtitle">{(intelligenceMetrics.volatility ?? 0) < 5 ? '🟢 Düşük' : (intelligenceMetrics.volatility ?? 0) < 15 ? '🟡 Orta' : '🔴 Yüksek'}</div>
               </div>
             </>
@@ -353,7 +354,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
             <div className="kpi-value" style={{fontSize: '1rem'}}>{intelligenceMetrics.topMoverCountry || '-'}</div>
-            <div className="kpi-subtitle">CAGR %{(intelligenceMetrics.topMoverGrowth ?? 0).toFixed(1)}</div>
+            <div className="kpi-subtitle">CAGR {yuzde((intelligenceMetrics.topMoverGrowth ?? 0), 1)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">ET ÜRETİMİ</span><div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div></div>
@@ -392,7 +393,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
             </div>
             <div style={{background: 'rgba(168,85,247,.08)', borderRadius: '12px', padding: '16px', textAlign: 'center'}}>
               <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>İşleme Oranı</div>
-              <div style={{fontSize: '1.5rem', fontWeight: 700, color: '#a855f7'}}>%{execSummary.supplyChainRatio.toFixed(1)}</div>
+              <div style={{fontSize: '1.5rem', fontWeight: 700, color: '#a855f7'}}>{yuzde(execSummary.supplyChainRatio, 1)}</div>
               <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>dönüşüm</div>
             </div>
             <div style={{background: 'rgba(139,92,246,.08)', borderRadius: '12px', padding: '16px', textAlign: 'center'}}>

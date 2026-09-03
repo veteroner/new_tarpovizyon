@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 // ShoppingCart / Package, RAPORLAR boşaltılınca kullanımsız kaldı; Pro yayına
@@ -64,7 +65,7 @@ function Fiyat({ quote }: { quote: CommodityQuote }) {
       <span className={artti ? 'ios-up' : 'ios-down'}>
         {/* Ok renkten bağımsız anlam taşıyor. */}
         <span aria-hidden="true">{artti ? '▲' : '▼'}</span>
-        {' '}%{Math.abs(quote.changePercent).toFixed(2)}
+        {' '}{yuzde(Math.abs(quote.changePercent), 2)}
       </span>
     </span>
   );

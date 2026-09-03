@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -59,7 +60,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM PAYI (GSYİH)</span><div className="kpi-icon blue"><Pin size={18} aria-hidden="true" /></div></div>
-          <div className="kpi-value">{data.agriculturalGDPShare ? `%${data.agriculturalGDPShare.toFixed(1)}` : '—'}</div>
+          <div className="kpi-value">{data.agriculturalGDPShare ? yuzde(data.agriculturalGDPShare, 1) : '—'}</div>
           <div className="kpi-subtitle">GSYİH içindeki pay ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
@@ -69,7 +70,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">TARIM PAYI (İSTİHDAM)</span><div className="kpi-icon pink">%</div></div>
-          <div className="kpi-value">{data.agriculturalEmploymentShare ? `%${data.agriculturalEmploymentShare.toFixed(1)}` : '—'}</div>
+          <div className="kpi-value">{data.agriculturalEmploymentShare ? yuzde(data.agriculturalEmploymentShare, 1) : '—'}</div>
           <div className="kpi-subtitle">Toplam istihdam içindeki pay ({yl(y.employment)})</div>
         </div>
       </div>

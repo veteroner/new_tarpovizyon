@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Area,
   AreaChart,
@@ -97,7 +98,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <span className="kpi-title">KULUÇKA BAŞARI ORANI</span>
                 <div className="kpi-icon green"><Egg size={18} aria-hidden="true" /></div>
               </div>
-              <div className="kpi-value" style={{ color: '#22c55e' }}>%{tuikData[0]?.hatchRate.toFixed(1)}</div>
+              <div className="kpi-value" style={{ color: '#22c55e' }}>{yuzde(tuikData[0]?.hatchRate, 1)}</div>
               <div className="kpi-subtitle">Civiv çıkma oranı</div>
             </div>
             <div className="kpi-card">
@@ -164,7 +165,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
               </div>
               <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ort. Kuluçka Başarısı</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: '700', color: '#22c55e' }}>%{(tuikData.reduce((sum, d) => sum + d.hatchRate, 0) / tuikData.length).toFixed(1)}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '700', color: '#22c55e' }}>{yuzde((tuikData.reduce((sum, d) => sum + d.hatchRate, 0) / tuikData.length), 1)}</div>
               </div>
               <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ort. Et Verimi</div>
@@ -295,7 +296,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                     <div style={{ fontSize: '3rem', color: '#22c55e', marginBottom: '8px' }}>↓</div>
                     <div style={{ padding: '8px 16px', background: 'var(--tv-kart, #fff)',
           border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', borderRadius: '20px', color: 'var(--tv-murekkep, #1d1d1f)', fontWeight: '700', fontSize: '0.9rem' }}>
-                      %{tuikData[0]?.hatchRate.toFixed(1)} Başarı
+                      {yuzde(tuikData[0]?.hatchRate, 1)} Başarı
                     </div>
                   </div>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>

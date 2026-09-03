@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -115,15 +116,11 @@ export const LAND_USE_TRANSITION_OVERRIDE_STORAGE_KEY = 'land-use-transition-mat
 
 /* ── Format helpers ────────────────────────────────────────── */
 export function formatArea(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyar ha';
-  if (value >= 1e3) return (value / 1e3).toFixed(2) + ' Milyon ha';
-  return value.toFixed(0) + ' Bin ha';
+  return kisa(value, { birim: 'ha' });
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'B';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + 'M';
-  return value.toFixed(0) + 'K';
+  return eksen(value);
 }
 
 export function formatPercent(value: number): string {

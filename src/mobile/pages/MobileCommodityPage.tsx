@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -100,7 +101,7 @@ export default function MobileCommodityPage() {
               {/* Ok, renkten bağımsız olarak yönü söylüyor (renk körlüğü). */}
               <span aria-hidden="true">{artti ? '▲' : '▼'}</span>
               {' '}
-              {Math.abs(quote.change).toFixed(2)} (%{Math.abs(quote.changePercent).toFixed(2)})
+              {Math.abs(quote.change).toFixed(2)} ({yuzde(Math.abs(quote.changePercent), 2)})
             </span>
           </div>
         )}

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Line, ComposedChart, ReferenceLine, Legend,
@@ -29,12 +30,12 @@ export default function TrendsTab({
         <div className="kpi-grid">
           <div className="kpi-card" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)', color: 'white' }}>
             <div className="kpi-header"><span className="kpi-title">CAGR (TÜM DÖNEM)</span></div>
-            <div className="kpi-value">%{cagrAnalysis.overall.toFixed(2)}</div>
+            <div className="kpi-value">{yuzde(cagrAnalysis.overall, 2)}</div>
             <div className="kpi-subtitle" style={{ color: 'rgba(255,255,255,0.8)' }}>{cagrAnalysis.startYear} - {cagrAnalysis.endYear}</div>
           </div>
           <div className="kpi-card" style={{ background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', color: 'white' }}>
             <div className="kpi-header"><span className="kpi-title">CAGR (SON 5 YIL)</span></div>
-            <div className="kpi-value">%{cagrAnalysis.last5Years.toFixed(2)}</div>
+            <div className="kpi-value">{yuzde(cagrAnalysis.last5Years, 2)}</div>
             <div className="kpi-subtitle" style={{ color: 'rgba(255,255,255,0.8)' }}>Son 5 yıllık büyüme</div>
           </div>
           <div className="kpi-card" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white' }}>

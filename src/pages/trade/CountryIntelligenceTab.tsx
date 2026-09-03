@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -430,7 +431,7 @@ export default function CountryIntelligenceTab() {
 
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
+            <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
             <KPICard title={`İthalat (${yearForMonthly})`} value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
             <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Ürün" value={topProduct} subtitle="En çok ihracat" icon={Package} color="purple" />
@@ -563,7 +564,7 @@ export default function CountryIntelligenceTab() {
                       return (
                         <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
                           <div style={{ fontWeight: 700, marginBottom: 4 }}>{d.name}</div>
-                          <div>İhracat Payı: %{d.x.toFixed(1)}</div>
+                          <div>İhracat Payı: {yuzde(d.x, 1)}</div>
                           <div>Denge: ${d.y.toFixed(1)}M</div>
                           <div>İhracat: ${d.z.toFixed(1)}M</div>
                         </div>
@@ -676,12 +677,12 @@ export default function CountryIntelligenceTab() {
                     <div style={{ padding: 14, borderRadius: 12, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.18)' }}>
                       <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>İhracat</div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: '#10b981', marginTop: 4 }}>{formatMoney(selectedProductDetail.exp)}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>%{selectedProductExportShare.toFixed(1)} ülke payı</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{yuzde(selectedProductExportShare, 1)} ülke payı</div>
                     </div>
                     <div style={{ padding: 14, borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.18)' }}>
                       <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>İthalat</div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: '#f59e0b', marginTop: 4 }}>{formatMoney(selectedProductDetail.imp)}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>%{selectedProductImportShare.toFixed(1)} ülke payı</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{yuzde(selectedProductImportShare, 1)} ülke payı</div>
                     </div>
                   </div>
 
@@ -776,7 +777,7 @@ export default function CountryIntelligenceTab() {
                           : 'Bu ürün ülke için net açık üretiyor; negatif denge dışa bağımlılık sinyali veriyor.'}
                       </div>
                       <div>
-                        İhracat payı %{selectedProductExportShare.toFixed(1)} ve toplam ülke cirosundaki ağırlığı {selectedProductTurnover > 0 ? `%${toProductShare(selectedProductTurnover, totalExp + totalImp).toFixed(1)}` : '%0.0'}.
+                        İhracat payı {yuzde(selectedProductExportShare, 1)} ve toplam ülke cirosundaki ağırlığı {selectedProductTurnover > 0 ? `%${toProductShare(selectedProductTurnover, totalExp + totalImp).toFixed(1)}` : '%0.0'}.
                       </div>
                       <div>
                         Drawer, tablo, bar chart, scatter ve treemap üzerindeki ürün seçimini tek okuma yüzeyinde birleştirir.

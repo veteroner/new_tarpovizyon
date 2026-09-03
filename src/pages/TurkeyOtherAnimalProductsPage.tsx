@@ -1,3 +1,4 @@
+import { kisa, eksen, yuzde } from '../utils/sayi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Area,
@@ -68,17 +69,11 @@ interface ProductSummary {
 }
 
 function formatNumber(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toFixed(0);
+  return kisa(value);
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export default function TurkeyOtherAnimalProductsPage() {
@@ -272,7 +267,7 @@ export default function TurkeyOtherAnimalProductsPage() {
               <div className="kpi-value" style={{ fontSize: '1rem' }}>{formatNumber(summary.value)}</div>
               <div className="kpi-subtitle">
                 {summary.birim}
-                {summary.change !== 0 && <span style={{ color: summary.change >= 0 ? '#22c55e' : '#ef4444', marginLeft: 8 }}>%{summary.change.toFixed(1)}</span>}
+                {summary.change !== 0 && <span style={{ color: summary.change >= 0 ? '#22c55e' : '#ef4444', marginLeft: 8 }}>{yuzde(summary.change, 1)}</span>}
               </div>
             </div>
           ))}
@@ -292,7 +287,7 @@ export default function TurkeyOtherAnimalProductsPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? '📈' : '📉'}</div></div>
-              <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>%{yearChange.toFixed(1)}</div>
+              <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearChange, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
@@ -375,7 +370,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                       outerRadius={140}
                       innerRadius={40}
                       dataKey="value"
-                      label={({ name, percent }) => `${name?.substring(0, 8)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name?.substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                       labelLine={false}
                     >
                       {cityData.slice(0, 10).map((_, index) => (

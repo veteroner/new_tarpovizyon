@@ -1,3 +1,4 @@
+import { eksen, yuzde, sayi } from '../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Treemap, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, LabelList } from 'recharts';
 import { fetchAgg, latestYear, num } from '../services/d1';
@@ -62,10 +63,7 @@ function makeFormatLong(unit: string) {
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 // --------------- Component ---------------
@@ -133,7 +131,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
         setCountryData(countryRes.data.map((item, index: number) => ({
           name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
-          share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
+          share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
           fill: colors[index % colors.length]
         } as CountryDataItem)));
       }
@@ -288,7 +286,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                     cy="50%"
                     outerRadius={100}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 0)}`}
                     labelLine={false}
                   >
                     {productData.map((_entry, index) => (

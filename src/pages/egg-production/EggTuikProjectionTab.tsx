@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Bar,
   CartesianGrid,
@@ -88,7 +89,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <span className="kpi-title">YILLIK BÜYÜME (CAGR)</span>
             <div className="kpi-icon blue"><TrendingUp size={18} aria-hidden="true" /></div>
           </div>
-          <div className="kpi-value">%{(eggGrowthRate * 100).toFixed(2)}</div>
+          <div className="kpi-value">{yuzde((eggGrowthRate * 100), 2)}</div>
           <div className="kpi-subtitle">16 yıllık ortalama büyüme</div>
         </div>
 
@@ -171,7 +172,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               {' | '}
               <strong>2026 Tahmin:</strong> {totalProjected2026Layer.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
               {' | '}
-              <strong>Artış:</strong> %{(layerGrowthRate * 100).toFixed(2)}
+              <strong>Artış:</strong> {yuzde((layerGrowthRate * 100), 2)}
             </div>
           </ChartCard>
         </div>
@@ -209,8 +210,8 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
           <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
             <strong>Model Performansı:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-              <div>• CAGR (Yumurta): <strong>%{(eggGrowthRate * 100).toFixed(2)}</strong></div>
-              <div>• CAGR (Tavuk): <strong>%{(layerGrowthRate * 100).toFixed(2)}</strong></div>
+              <div>• CAGR (Yumurta): <strong>{yuzde((eggGrowthRate * 100), 2)}</strong></div>
+              <div>• CAGR (Tavuk): <strong>{yuzde((layerGrowthRate * 100), 2)}</strong></div>
               <div>• Veri aralığı: <strong>2010-2025 (16 yıl)</strong></div>
               <div>• Tahmin yılı: <strong>2026</strong></div>
             </div>

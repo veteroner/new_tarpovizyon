@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -68,7 +69,7 @@ export default function ProvincialComparisonTab({
               }}
               formatter={(value: number, _name: string, props: unknown) => {
                 const payload = (props as Record<string, Record<string, number>>).payload;
-                return [formatNumber(value), `Popülasyon (${payload.marketShare.toFixed(2)}% pazar payı)`];
+                return [formatNumber(value), `Popülasyon (${yuzde(payload.marketShare, 2)} pazar payı)`];
               }}
             />
             <Bar

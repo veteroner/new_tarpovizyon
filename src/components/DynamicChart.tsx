@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area,
@@ -91,7 +92,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
               nameKey={xKey}
               cx="50%" cy="50%"
               outerRadius={height * 0.32}
-              label={(props: any) => `${props.name} ${((props.percent ?? 0) * 100).toFixed(1)}%`}
+              label={(props: any) => `${props.name} ${yuzde(((props.percent ?? 0) * 100), 1)}`}
               labelLine
             >
               {data.map((entry, i) => (

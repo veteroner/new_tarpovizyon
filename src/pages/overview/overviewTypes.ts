@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 export const COLORS = {
   milk: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
   meat: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'],
@@ -10,17 +11,11 @@ export const COLORS = {
 };
 
 export function formatNumber(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function translateMilkItem(item: string): string {

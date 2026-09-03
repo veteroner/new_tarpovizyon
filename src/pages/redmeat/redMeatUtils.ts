@@ -1,3 +1,4 @@
+import { eksen } from '../../utils/sayi';
 // Types
 export type YearPoint = {
   year: number;
@@ -134,9 +135,7 @@ export function formatTon(value: number): string {
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function formatNumber(value: number): string {

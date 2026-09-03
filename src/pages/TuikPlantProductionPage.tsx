@@ -1,3 +1,4 @@
+import { kisa, eksen, yuzde, sayi } from '../utils/sayi';
 import { SON_YIL, ILK_YIL } from './plant/plantTypes';
 import { useState, useEffect, useCallback } from 'react';
 import { 
@@ -51,17 +52,11 @@ const UNSUR_OPTIONS = [
 const YILLAR = Array.from({ length: SON_YIL - ILK_YIL + 1 }, (_, i) => SON_YIL - i);
 
 function formatTon(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toFixed(0);
+  return kisa(value);
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + ' Mly';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + ' Mln';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + ' Bin';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export default function TuikPlantProductionPage() {
@@ -185,7 +180,7 @@ export default function TuikPlantProductionPage() {
         const mapped = cityRes.data.map((item, index: number) => ({
           name: String(item['yer'] || ''),
           value: Number(item['toplam']) || 0,
-          share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
+          share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
           fill: COLORS[index % COLORS.length]
         }));
         setCityData(mapped);
@@ -282,7 +277,7 @@ export default function TuikPlantProductionPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? '📈' : '📉'}</div></div>
-              <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>%{yearChange.toFixed(1)}</div>
+              <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearChange, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
             <div className="kpi-card">
@@ -358,7 +353,7 @@ export default function TuikPlantProductionPage() {
                     cy="50%" 
                     outerRadius={130} 
                     dataKey="value" 
-                    label={({ name, percent }) => `${name?.substring(0, 8)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name?.substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                     labelLine={false}
                   >
                     {cityData.slice(0, 10).map((_, index) => (

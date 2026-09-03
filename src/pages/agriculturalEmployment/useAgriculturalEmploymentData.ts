@@ -1,3 +1,4 @@
+import { kisa, eksen, sayi } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -29,19 +30,11 @@ export const TABS: { id: Tab; label: string; icon: string }[] = [
 export const CHART_COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 export function formatPop(value: number): string {
-  const actual = value * 1000;
-  if (actual >= 1e9) return (actual / 1e9).toFixed(2) + ' Milyar';
-  if (actual >= 1e6) return (actual / 1e6).toFixed(2) + ' Milyon';
-  if (actual >= 1e3) return (actual / 1e3).toFixed(0) + ' Bin';
-  return actual.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  const actual = value * 1000;
-  if (actual >= 1e9) return (actual / 1e9).toFixed(1) + 'B';
-  if (actual >= 1e6) return (actual / 1e6).toFixed(1) + 'M';
-  if (actual >= 1e3) return (actual / 1e3).toFixed(0) + 'K';
-  return actual.toFixed(0);
+  return eksen(value);
 }
 
 export function formatPercent(v: number): string { return `%${v.toFixed(1)}`; }
@@ -181,9 +174,9 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
         const sh = items.map((i: any) => i.value / t);
         return { year, hhi: calculateHHI(sh), top5: items.sort((a: any, b: any) => b.value - a.value).slice(0, 5).reduce((s: number, i: any) => s + i.value, 0) / t * 100 };
       }).sort((a, b) => a.year.localeCompare(b.year));
-      const pieData = countries.slice(0, 8).map((c: any, i: number) => ({ ...c, share: (c.value / worldTotal * 100).toFixed(1), fill: CHART_COLORS[i % CHART_COLORS.length] }));
+      const pieData = countries.slice(0, 8).map((c: any, i: number) => ({ ...c, share: sayi((c.value / worldTotal * 100), 1), fill: CHART_COLORS[i % CHART_COLORS.length] }));
       const restShare = countries.slice(8).reduce((s: number, c: any) => s + c.value, 0);
-      if (restShare > 0) pieData.push({ name: 'Diger', value: restShare, share: (restShare / worldTotal * 100).toFixed(1), fill: '#94a3b8' });
+      if (restShare > 0) pieData.push({ name: 'Diger', value: restShare, share: sayi((restShare / worldTotal * 100), 1), fill: '#94a3b8' });
       setConcentrationData({ hhi, top5Share, top10Share, countryCount: countries.length, pieData, hhiHistory });
       const ins: Insight[] = [];
       ins.push({ id: 'cn1', type: hhi > 0.25 ? 'warning' : 'info', message: `HHI Endeksi: ${(hhi * 10000).toFixed(0)} — ${hhi > 0.25 ? 'Yuksek yogunlasma' : hhi > 0.15 ? 'Orta yogunlasma' : 'Dusuk yogunlasma'}`, severity: hhi > 0.25 ? 'high' : 'medium', category: 'Yogunlasma' });

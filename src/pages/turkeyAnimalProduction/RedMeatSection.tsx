@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
@@ -44,7 +45,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <Pie
                 data={redMeatBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
                 paddingAngle={3} dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent || 0) * 100), 1)}`}
               >
                 {redMeatBreakdown.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

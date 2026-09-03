@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { useEffect, useMemo, useState } from 'react';
 import { Area, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } from 'recharts';
 import {
@@ -496,9 +497,9 @@ export default function TurkeyMacroPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
             <p className="text-green-300 font-bold mb-1">Tarımın Konumu</p>
-            <p>Tarım GSYH payı %{agriShare.toFixed(1)} ile {
+            <p>Tarım GSYH payı {yuzde(agriShare, 1)} ile {
               [...mainSectors].sort((a, b) => b.cari - a.cari).findIndex(s => s.sektorkod === 'A') + 1
-            }. sırada. Reel büyüme %{agriGrowth.toFixed(1)}.
+            }. sırada. Reel büyüme {yuzde(agriGrowth, 1)}.
             Tarım ekonominin yaklaşık her {Math.round(100 / agriShare)} TL'sinden 1 TL'sini üretiyor.</p>
           </div>
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
@@ -506,7 +507,7 @@ export default function TurkeyMacroPage() {
             <p>{(() => {
               const fastest = growthRanking[0];
               const slowest = growthRanking[growthRanking.length - 1];
-              return `En hızlı büyüyen: ${fastest?.name} (%${fastest?.growth.toFixed(1)}). En yavaş: ${slowest?.name} (%${slowest?.growth.toFixed(1)}). Sanayi ${(sectorData.find(s => s.sektorkod === 'BCD')?.zincir_degisim ?? 0).toFixed(1)}% büyüdü.`;
+              return `En hızlı büyüyen: ${fastest?.name} (%${fastest?.growth.toFixed(1)}). En yavaş: ${slowest?.name} (%${slowest?.growth.toFixed(1)}). Sanayi ${yuzde((sectorData.find(s => s.sektorkod === 'BCD')?.zincir_degisim ?? 0), 1)} büyüdü.`;
             })()}</p>
           </div>
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>

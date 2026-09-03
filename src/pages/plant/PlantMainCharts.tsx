@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { ILK_YIL, SON_YIL } from './plantTypes';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
@@ -72,7 +73,7 @@ export default function PlantMainCharts({
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={150}
                 dataKey="value"
-                label={({ name, percent }) => `${(name || '').substring(0, 8)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${(name || '').substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={false}>
                 {cityData.slice(0, 10).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>

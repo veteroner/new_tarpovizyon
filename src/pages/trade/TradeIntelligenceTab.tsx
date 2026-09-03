@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line,
   ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, PolarGrid,
@@ -152,11 +153,11 @@ export default function TradeIntelligenceTab() {
                     }}
                   />
                 </div>
-                <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Top 3 ülke payı: %{(hhi as HHIResult).top3share.toFixed(1)}</div>
+                <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Top 3 ülke payı: {yuzde((hhi as HHIResult).top3share, 1)}</div>
                 <div className="flex flex-wrap gap-1">
                   {(hhi as HHIResult).topCountries.map(c => (
                     <span key={c.name} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                      {c.name} <strong>%{c.share.toFixed(1)}</strong>
+                      {c.name} <strong>{yuzde(c.share, 1)}</strong>
                     </span>
                   ))}
                 </div>
@@ -211,7 +212,7 @@ export default function TradeIntelligenceTab() {
                     })}
                     <td className="px-2 py-1.5 text-center">
                       <span className={`font-bold ${s.amplitude > 100 ? 'text-red-600' : s.amplitude > 50 ? 'text-amber-600' : 'text-green-600'}`}>
-                        %{s.amplitude.toFixed(0)}
+                        {yuzde(s.amplitude, 0)}
                       </span>
                     </td>
                   </tr>

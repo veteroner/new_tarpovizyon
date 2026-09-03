@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -302,7 +303,7 @@ export default function ProvincialDistrictsTab({
                     labelLine={false}
                     label={(entry: unknown) => {
                       const data = entry as Record<string, string | number>;
-                      return `${data.district} (${(data.provinceShare as number).toFixed(1)}%)`;
+                      return `${data.district} (${yuzde((data.provinceShare as number), 1)})`;
                     }}
                     outerRadius={120}
                     fill="#8884d8"

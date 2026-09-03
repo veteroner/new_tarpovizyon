@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import {
@@ -87,7 +88,7 @@ export default function LandUsePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`Yıllık: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${overviewKPIs.worldYoY.toFixed(2)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="green" large />
+                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`Yıllık: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${yuzde(overviewKPIs.worldYoY, 2)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="green" large />
                 <KPICard title="TURKIYE ARAZISI" value={formatArea(overviewKPIs.turkeyAg)} subtitle={`Dunya payi: %${overviewKPIs.turkeyShare.toFixed(2)} | Sira: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="SULAMA ORANI" value={formatPercent(overviewKPIs.irrigationRate)} subtitle={`${formatArea(overviewKPIs.turkeyIrrigation)} sulanan`} icon={Target} color="blue" />
                 <KPICard title="NADAS ORANI" value={formatPercent(overviewKPIs.fallowRate)} subtitle={`${formatArea(overviewKPIs.turkeyFallow)} nadas`} icon={AlertTriangle} color={overviewKPIs.fallowRate > 15 ? 'red' : 'green'} />
@@ -162,7 +163,7 @@ export default function LandUsePage() {
               {transformComparison.length > 0 && (
                 <div className="kpi-grid">
                   {transformComparison.slice(0, 4).map((tc: any, i: number) => (
-                    <KPICard key={tc.name} title={tc.name.substring(0, 20).toUpperCase()} value={`${tc.changePct > 0 ? '+' : ''}${tc.changePct.toFixed(1)}%`} subtitle={`${tc.startYear} -> ${tc.endYear} | CAGR: %${tc.cagr.toFixed(2)}`} icon={tc.changePct > 0 ? TrendingUp : TrendingDown} color={tc.changePct > 0 ? 'green' : 'red'} large={i === 0} />
+                    <KPICard key={tc.name} title={tc.name.substring(0, 20).toUpperCase()} value={`${tc.changePct > 0 ? '+' : ''}${yuzde(tc.changePct, 1)}`} subtitle={`${tc.startYear} -> ${tc.endYear} | CAGR: %${tc.cagr.toFixed(2)}`} icon={tc.changePct > 0 ? TrendingUp : TrendingDown} color={tc.changePct > 0 ? 'green' : 'red'} large={i === 0} />
                   ))}
                 </div>
               )}

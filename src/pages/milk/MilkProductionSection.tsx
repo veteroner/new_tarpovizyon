@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, PieChart, Pie, Cell, LineChart,
@@ -97,7 +98,7 @@ export default function MilkProductionSection({
                 cy="50%"
                 outerRadius={120}
                 innerRadius={60}
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
                 labelLine={{ stroke: 'var(--text-secondary)', strokeWidth: 1 }}
               >
                 {latestBreakdown.rows.map((_, idx) => (
@@ -130,7 +131,7 @@ export default function MilkProductionSection({
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
               <Tooltip 
-                formatter={(value: number) => [`${value.toFixed(2)}%`]}
+                formatter={(value: number) => [`${yuzde(value, 2)}`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
               <Line 

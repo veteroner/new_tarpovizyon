@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, PieChart, Pie, Cell,
@@ -54,8 +55,8 @@ export default function OverviewTab({
         <div className="intelligence-panel" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(59,130,246,0.1) 100%)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(245,158,11,0.3)' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Akıllı Analiz</h3>
           <div style={{ lineHeight: '2', fontSize: '0.9rem' }}>
-            {yearChange > 5 && <p style={{ color: '#22c55e' }}>📈 <strong>Güçlü büyüme</strong>: {selectedAnimal} sayısı geçen yıla göre %{yearChange.toFixed(1)} arttı.</p>}
-            {yearChange < -5 && <p style={{ color: '#ef4444' }}>📉 <strong>Dikkat</strong>: {selectedAnimal} sayısı geçen yıla göre %{Math.abs(yearChange).toFixed(1)} azaldı.</p>}
+            {yearChange > 5 && <p style={{ color: '#22c55e' }}>📈 <strong>Güçlü büyüme</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(yearChange, 1)} arttı.</p>}
+            {yearChange < -5 && <p style={{ color: '#ef4444' }}>📉 <strong>Dikkat</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(Math.abs(yearChange), 1)} azaldı.</p>}
             {Math.abs(yearChange) <= 5 && <p style={{ color: '#3b82f6' }}>📊 <strong>Stabil seyir</strong>: {selectedAnimal} sayısı görece istikrarlı.</p>}
             <p style={{ color: 'var(--text-secondary)' }}>En yüksek il: <strong>{topCity}</strong> — {formatNumber(topCityValue)} baş</p>
             <p style={{ color: 'var(--text-secondary)' }}>🗺️ {provinceCount} il takip ediliyor.</p>
@@ -99,7 +100,7 @@ export default function OverviewTab({
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <Tooltip formatter={(value: number) => [`${value.toFixed(1)}%`, 'Büyüme']} />
+              <Tooltip formatter={(value: number) => [`${yuzde(value, 1)}`, 'Büyüme']} />
               <Bar dataKey="growth" name="Büyüme (%)" radius={[4, 4, 0, 0]}>
                 {growthData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.growth >= 0 ? '#22c55e' : '#ef4444'} />
@@ -117,7 +118,7 @@ export default function OverviewTab({
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={120} innerRadius={50} dataKey="value"
-                  label={({ name, percent }) => `${name?.substring(0, 10)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name?.substring(0, 10)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                   labelLine={false}>
                   {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                 </Pie>
@@ -167,7 +168,7 @@ export default function OverviewTab({
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={140} innerRadius={40}
                 dataKey="value"
-                label={({ name, percent }) => `${name?.substring(0, 8)} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name?.substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={false}>
                 {cityData.slice(0, 10).map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
               </Pie>

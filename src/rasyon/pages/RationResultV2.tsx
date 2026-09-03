@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download, Share2, AlertTriangle, Sparkles, FileSpreadsheet, Lightbulb, PieChart } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -1067,7 +1068,7 @@ export default function RationResultV2() {
                         {dmSharePct != null && (
                           <>
                             {' '}
-                            (<span className="font-medium">%{dmSharePct.toFixed(0)}</span> DM payı)
+                            (<span className="font-medium">{yuzde(dmSharePct, 0)}</span> DM payı)
                           </>
                         )}
                       </p>
@@ -1172,7 +1173,7 @@ export default function RationResultV2() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="h-2 rounded-full bg-blue-500" 
-                    style={{ width: `${(enhancedCost.breakdown.laborCostTL / enhancedCost.totalDailyCostTL * 100).toFixed(0)}%` }}
+                    style={{ width: `${yuzde((enhancedCost.breakdown.laborCostTL / enhancedCost.totalDailyCostTL * 100), 0)}` }}
                   />
                 </div>
               </div>
@@ -1188,7 +1189,7 @@ export default function RationResultV2() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="h-2 rounded-full bg-yellow-500" 
-                    style={{ width: `${(enhancedCost.breakdown.energyCostTL / enhancedCost.totalDailyCostTL * 100).toFixed(0)}%` }}
+                    style={{ width: `${yuzde((enhancedCost.breakdown.energyCostTL / enhancedCost.totalDailyCostTL * 100), 0)}` }}
                   />
                 </div>
               </div>

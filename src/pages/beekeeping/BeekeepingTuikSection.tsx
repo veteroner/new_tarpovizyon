@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Area,
   AreaChart,
@@ -94,10 +95,10 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             ESKİ / YENİ TİP ORANI
           </div>
           <div style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--text-primary)', lineHeight: 1 }}>
-            %{(100 - tuikKovanKpi.eskiPay).toFixed(1)} Yeni
+            {yuzde((100 - tuikKovanKpi.eskiPay), 1)} Yeni
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-            Eski Tip: %{tuikKovanKpi.eskiPay.toFixed(1)} | CAGR: %{tuikKovanKpi.cagr.toFixed(2)}
+            Eski Tip: {yuzde(tuikKovanKpi.eskiPay, 1)} | CAGR: {yuzde(tuikKovanKpi.cagr, 2)}
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 import type { Insight } from '../../components/InsightCard';
 
 // ─── TYPES ──────────────────────────────────────────────────
@@ -50,23 +51,15 @@ export function getCropCategory(product: string): { key: string; name: string; c
 export const DEVELOPED_COUNTRIES = ['United States of America', 'Germany', 'France', 'United Kingdom', 'Japan', 'Canada', 'Italy', 'Netherlands', 'Australia', 'Spain', 'Belgium', 'Austria', 'Sweden', 'Denmark', 'Norway', 'Finland', 'Switzerland', 'Ireland', 'New Zealand', 'Israel', 'Republic of Korea', 'Czechia', 'Poland'];
 
 export function formatValue(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar Ton';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon Ton';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin Ton';
-  return value.toFixed(0) + ' Ton';
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function formatHa(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M ha';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K ha';
-  return value.toFixed(0) + ' ha';
+  return kisa(value, { birim: 'ha' });
 }
 
 export function formatYield(value: number): string {

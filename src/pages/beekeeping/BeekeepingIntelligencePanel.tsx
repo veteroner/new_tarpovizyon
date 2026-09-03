@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { type TuikKovanKpi } from './beekeepingTypes';
 
 export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: TuikKovanKpi }) {
@@ -26,7 +27,7 @@ export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: Tu
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
           <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>ESKİ TİP KOVAN PAYI</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>%{tuikKovanKpi.eskiPay.toFixed(1)}</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yuzde(tuikKovanKpi.eskiPay, 1)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Modernizasyon seviyesi</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

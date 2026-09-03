@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import {
   Line, XAxis, YAxis, CartesianGrid,
@@ -150,7 +151,7 @@ export default function ResultsView({
           <div className="hz-kpi__label">Risk Seviyesi</div>
           <div className="hz-kpi__value" style={{ color: calc.risk.color }}>{calc.risk.emoji}</div>
           <div className="hz-kpi__unit">{calc.risk.label}</div>
-          <div className="hz-kpi__range">Değişkenlik: %{(calc.cv * 100).toFixed(1)}</div>
+          <div className="hz-kpi__range">Değişkenlik: {yuzde((calc.cv * 100), 1)}</div>
         </div>
       </div>
 
@@ -178,7 +179,7 @@ export default function ResultsView({
                 <div className="hz-econ-item__label">Net {calc.netKar >= 0 ? 'Kâr' : 'Zarar'}</div>
                 <div className="hz-econ-item__value">₺{Math.abs(calc.netKar).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</div>
                 {calc.karMarji !== null && (
-                  <div className="hz-econ-item__sub">Kâr Marjı: %{calc.karMarji.toFixed(1)}</div>
+                  <div className="hz-econ-item__sub">Kâr Marjı: {yuzde(calc.karMarji, 1)}</div>
                 )}
               </div>
             )}

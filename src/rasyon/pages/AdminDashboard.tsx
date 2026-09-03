@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /**
  * Admin Dashboard
  * 
@@ -69,7 +70,7 @@ export default function AdminDashboard() {
   }
 
   const formatPercent = (value: number): string => {
-    return `${value.toFixed(1)}%`
+    return `${yuzde(value, 1)}`
   }
 
   return (

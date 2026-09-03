@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, AreaChart, Area, Cell
@@ -251,7 +252,7 @@ export default function ProvincialTrendsTab({
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => `${value.toFixed(1)}%`} width={46} />
+              tickFormatter={(value) => `${yuzde(value, 1)}`} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',
@@ -259,7 +260,7 @@ export default function ProvincialTrendsTab({
                 borderRadius: '8px',
                 fontSize: '12px'
               }}
-              formatter={(value: number) => [`${value.toFixed(2)}%`, 'Büyüme']}
+              formatter={(value: number) => [`${yuzde(value, 2)}`, 'Büyüme']}
               labelFormatter={(label) => `Yıl: ${label}`}
             />
             <Bar

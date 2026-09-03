@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, PieChart, Pie, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { TrendingUp, TrendingDown, Beef, Scale, Zap, AlertTriangle } from 'lucide-react';
@@ -211,8 +212,8 @@ export default function AnimalTradeTab() {
 
       {/* KPIs */}
       <div className="kpi-grid">
-        <KPICard title="Hayvansal İhracat" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yoyGrowth.toFixed(1)}%`} icon={TrendingUp} color="green" large />
-        <KPICard title="Hayvansal İthalat" value={formatMoney(totalImp)} subtitle={`Yıllık: ${impChange >= 0 ? '+' : ''}${impChange.toFixed(1)}%`} icon={TrendingDown} color="orange" large />
+        <KPICard title="Hayvansal İhracat" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
+        <KPICard title="Hayvansal İthalat" value={formatMoney(totalImp)} subtitle={`Yıllık: ${impChange >= 0 ? '+' : ''}${yuzde(impChange, 1)}`} icon={TrendingDown} color="orange" large />
         <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
         <KPICard title="Ürün Sayısı" value={String(productCount)} subtitle="Hayvansal ürün grubu" icon={Beef} color="red" />
         <KPICard title="Ülke Sayısı" value={String(countryCount)} subtitle="Ticaret ortağı" icon={Zap} color="blue" />
@@ -248,7 +249,7 @@ export default function AnimalTradeTab() {
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{products[0].name}</div>
             <div style={{ fontSize: 12, color: '#10b981' }}>
-              İhracat: {formatMoney(products[0].exp)} · Pay: %{totalExp > 0 ? ((products[0].exp / totalExp) * 100).toFixed(1) : '0'}
+              İhracat: {formatMoney(products[0].exp)} · Pay: {yuzde(totalExp > 0? ((products[0].exp / totalExp) * 100) : 0, 1)}
             </div>
           </div>
         )}
@@ -279,28 +280,28 @@ export default function AnimalTradeTab() {
             <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 700, marginBottom: 4 }}>CANLI — İhracat</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.liveExp)}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              Pay: %{totalExpForSplit > 0 ? ((liveProcessed.liveExp / totalExpForSplit) * 100).toFixed(1) : '0'} · {liveProcessed.liveCount} ürün
+              Pay: {yuzde(totalExpForSplit > 0? ((liveProcessed.liveExp / totalExpForSplit) * 100) : 0, 1)} · {liveProcessed.liveCount} ürün
             </div>
           </div>
           <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 14 }}>
             <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 700, marginBottom: 4 }}>CANLI — İthalat</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.liveImp)}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              Pay: %{totalImpForSplit > 0 ? ((liveProcessed.liveImp / totalImpForSplit) * 100).toFixed(1) : '0'}
+              Pay: {yuzde(totalImpForSplit > 0? ((liveProcessed.liveImp / totalImpForSplit) * 100) : 0, 1)}
             </div>
           </div>
           <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: 14 }}>
             <div style={{ fontSize: 12, color: '#10b981', fontWeight: 700, marginBottom: 4 }}>İŞLENMİŞ — İhracat</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.procExp)}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              Pay: %{totalExpForSplit > 0 ? ((liveProcessed.procExp / totalExpForSplit) * 100).toFixed(1) : '0'} · {liveProcessed.procCount} ürün
+              Pay: {yuzde(totalExpForSplit > 0? ((liveProcessed.procExp / totalExpForSplit) * 100) : 0, 1)} · {liveProcessed.procCount} ürün
             </div>
           </div>
           <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: 14 }}>
             <div style={{ fontSize: 12, color: '#10b981', fontWeight: 700, marginBottom: 4 }}>İŞLENMİŞ — İthalat</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{formatMoney(liveProcessed.procImp)}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              Pay: %{totalImpForSplit > 0 ? ((liveProcessed.procImp / totalImpForSplit) * 100).toFixed(1) : '0'}
+              Pay: {yuzde(totalImpForSplit > 0? ((liveProcessed.procImp / totalImpForSplit) * 100) : 0, 1)}
             </div>
           </div>
         </div>

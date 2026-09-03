@@ -1,3 +1,4 @@
+import { sayi } from '../utils/sayi';
 import { useOverviewData } from './overview/useOverviewData';
 import { GeneralStatsSection } from './overview/GeneralStatsSection';
 import { MilkSection } from './overview/MilkSection';
@@ -18,9 +19,10 @@ export function OverviewPage() {
     );
   }
 
-  const ruralPercent = ((data.ruralPopulation / (data.population || 1)) * 100).toFixed(1);
-  const urbanPercent = (100 - parseFloat(ruralPercent)).toFixed(1);
-  const agriLandPercent = ((data.agriculturalLand / (data.totalLand || 1)) * 100).toFixed(1);
+  const kirsalOran = (data.ruralPopulation / (data.population || 1)) * 100;
+  const ruralPercent = sayi(kirsalOran, 1);
+  const urbanPercent = sayi(100 - kirsalOran, 1);
+  const agriLandPercent = sayi((data.agriculturalLand / (data.totalLand || 1)) * 100, 1);
 
   return (
     <div className="page-container">

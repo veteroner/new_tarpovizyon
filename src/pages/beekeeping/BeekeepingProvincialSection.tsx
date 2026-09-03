@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Bar,
   LabelList,
@@ -171,7 +172,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
+                label={({ name, percent }) => `${name} (${yuzde(((percent || 0) * 100), 0)})`}
                 outerRadius={120}
                 fill="#8884d8"
                 dataKey="count"

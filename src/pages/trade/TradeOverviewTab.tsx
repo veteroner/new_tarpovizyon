@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from 'recharts';
 import { useMemo, useState } from 'react';
 import { TrendingUp, TrendingDown, Scale, ArrowLeftRight, Zap, AlertTriangle } from 'lucide-react';
@@ -107,7 +108,7 @@ export default function TradeOverviewTab() {
         <KPICard
           title="Toplam İhracat"
           value={formatMoney(expTotal)}
-          subtitle={`Yıllık: ${yoyExpGrowth >= 0 ? '+' : ''}${yoyExpGrowth.toFixed(1)}%`}
+          subtitle={`Yıllık: ${yoyExpGrowth >= 0 ? '+' : ''}${yuzde(yoyExpGrowth, 1)}`}
           icon={TrendingUp}
           color="green"
           large
@@ -143,7 +144,7 @@ export default function TradeOverviewTab() {
         />
         <KPICard
           title="Yıllık Büyüme"
-          value={`${yoyExpGrowth >= 0 ? '+' : ''}${yoyExpGrowth.toFixed(1)}%`}
+          value={`${yoyExpGrowth >= 0 ? '+' : ''}${yuzde(yoyExpGrowth, 1)}`}
           subtitle="İhracat büyümesi"
           icon={Zap}
           color={yoyExpGrowth >= 0 ? 'green' : 'orange'}
@@ -199,7 +200,7 @@ export default function TradeOverviewTab() {
             <Scale size={18} color="#6366f1" />
             <span style={{ color: '#6366f1', fontWeight: 700, fontSize: 13 }}>Ülke Yoğunlaşması</span>
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>%{top5CountryShare.toFixed(1)}</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{yuzde(top5CountryShare, 1)}</div>
           <div style={{ fontSize: 13, color: '#6366f1' }}>İlk 5 ülke ihracat payı</div>
         </div>
 
@@ -415,7 +416,7 @@ export default function TradeOverviewTab() {
                       {formatMoney(p.value)}
                     </td>
                     <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)' }}>
-                      %{expTotal > 0 ? ((p.value / expTotal) * 100).toFixed(1) : '0'}
+                      {yuzde(expTotal > 0? ((p.value / expTotal) * 100) : 0, 1)}
                     </td>
                   </tr>
                 ))}
@@ -455,7 +456,7 @@ export default function TradeOverviewTab() {
                       {formatMoney(p.value)}
                     </td>
                     <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)' }}>
-                      %{impTotal > 0 ? ((p.value / impTotal) * 100).toFixed(1) : '0'}
+                      {yuzde(impTotal > 0? ((p.value / impTotal) * 100) : 0, 1)}
                     </td>
                   </tr>
                 ))}

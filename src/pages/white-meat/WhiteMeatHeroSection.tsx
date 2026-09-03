@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   Area,
   AreaChart,
@@ -39,7 +40,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
             <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? '📈' : '📉'}</div>
           </div>
           <div className="kpi-value" style={{ color: yoy >= 0 ? '#22c55e' : '#ef4444' }}>
-            %{yoy.toFixed(1)}
+            {yuzde(yoy, 1)}
           </div>
           <div className="kpi-subtitle">Önceki yıla göre</div>
         </div>

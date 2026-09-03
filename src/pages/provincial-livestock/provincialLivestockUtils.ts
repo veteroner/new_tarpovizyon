@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 import type { RegionTotal } from '../../components/TurkeyHeatMap';
 
 // Constants
@@ -95,17 +96,11 @@ export interface AggregatedMetrics {
 
 // Utility Functions
 export function formatNumber(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + ' Mly';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + ' Mln';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + ' Bin';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function calculateCAGR(startValue: number, endValue: number, years: number): number {

@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -55,7 +56,7 @@ export default function PopulationPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA NUFUSU" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: +${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.cagr.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DUNYA NUFUSU" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: +${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.cagr.toFixed(2)}`} icon={Globe} color="purple" large />
                 <KPICard title="EN KALABALIK" value={overviewKPIs.topCountry} subtitle={formatPop(overviewKPIs.topCountryValue)} icon={Award} color="blue" />
                 <KPICard title="KENTLESME" value={formatPercent(overviewKPIs.urbanRate)} subtitle="Sehirde yasayan" icon={Building2} color="teal" />
                 <KPICard title="KIRSAL" value={formatPop(overviewKPIs.worldRural)} subtitle={`Kentsel: ${formatPop(overviewKPIs.worldUrban)}`} icon={Home} color="orange" />

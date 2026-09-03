@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import './card.css';
 import type { CSSProperties, ReactNode } from 'react';
 
@@ -143,7 +144,7 @@ export function StatCard({
             <span className={`ui-delta ${iyi ? 'is-iyi' : 'is-kotu'}`}>
               {/* Ok işareti: renk tek başına anlam taşımamalı. */}
               <span aria-hidden="true">{delta > 0 ? '▲' : delta < 0 ? '▼' : '—'}</span>
-              {' '}%{Math.abs(delta).toFixed(1)}
+              {' '}{yuzde(Math.abs(delta), 1)}
             </span>
           )}
           {sub && <span className="ui-stat-sub">{sub}</span>}

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -26,18 +27,18 @@ export function ComparativeSection({ data }: Props) {
   const eggLast = data.eggProduction.yearly;
 
   const milkChange = milkLast.length >= 2
-    ? (((Number(milkLast[milkLast.length - 1]?.milk) || 0) - (Number(milkLast[milkLast.length - 2]?.milk) || 0)) /
-      (Number(milkLast[milkLast.length - 2]?.milk) || 1) * 100).toFixed(1) + '%'
+    ? yuzde(((Number(milkLast[milkLast.length - 1]?.milk) || 0) - (Number(milkLast[milkLast.length - 2]?.milk) || 0)) /
+      (Number(milkLast[milkLast.length - 2]?.milk) || 1) * 100, 1)
     : 'N/A';
 
   const meatChange = meatLast.length >= 2
-    ? (((Number(meatLast[meatLast.length - 1]?.meat) || 0) - (Number(meatLast[meatLast.length - 2]?.meat) || 0)) /
-      (Number(meatLast[meatLast.length - 2]?.meat) || 1) * 100).toFixed(1) + '%'
+    ? yuzde(((Number(meatLast[meatLast.length - 1]?.meat) || 0) - (Number(meatLast[meatLast.length - 2]?.meat) || 0)) /
+      (Number(meatLast[meatLast.length - 2]?.meat) || 1) * 100, 1)
     : 'N/A';
 
   const eggChange = eggLast.length >= 2
-    ? (((Number(eggLast[eggLast.length - 1]?.egg) || 0) - (Number(eggLast[eggLast.length - 2]?.egg) || 0)) /
-      (Number(eggLast[eggLast.length - 2]?.egg) || 1) * 100).toFixed(1) + '%'
+    ? yuzde(((Number(eggLast[eggLast.length - 1]?.egg) || 0) - (Number(eggLast[eggLast.length - 2]?.egg) || 0)) /
+      (Number(eggLast[eggLast.length - 2]?.egg) || 1) * 100, 1)
     : 'N/A';
   /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
      yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
@@ -87,7 +88,7 @@ export function ComparativeSection({ data }: Props) {
                 cy="50%"
                 outerRadius={100}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
               />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
             </PieChart>

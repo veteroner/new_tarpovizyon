@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { formatTon, type WorldRankings } from './milkUtils';
 
 type Props = {
@@ -79,7 +80,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               BÜYÜKBAŞ PAYI
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-              %{cattleShare.toFixed(1)}
+              {yuzde(cattleShare, 1)}
             </div>
             <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
               Toplam üretimde
@@ -102,7 +103,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               10 YILLIK CAGR
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-              %{cagr.toFixed(1)}
+              {yuzde(cagr, 1)}
             </div>
             <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
               Bileşik büyüme
@@ -125,7 +126,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
                 YETERLİLİK
               </div>
               <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
-                %{(Number(sufficiency.sut_ton) * 100).toFixed(0)}
+                {yuzde((Number(sufficiency.sut_ton) * 100), 0)}
               </div>
               <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
                 {Number(sufficiency.sut_ton) >= 1 ? '✓ Yeterli' : '✗ Yetersiz'}
@@ -232,7 +233,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BÜYÜKBAŞ PAYI</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>%{cattleShare.toFixed(1)}</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yuzde(cattleShare, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Toplam üretimde</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

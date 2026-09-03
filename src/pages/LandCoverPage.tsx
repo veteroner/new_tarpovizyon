@@ -1,3 +1,4 @@
+import { kisa, eksen, yuzde, sayi } from '../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList } from 'recharts';
 import { fetchAgg, latestYear, num } from '../services/d1';
@@ -44,16 +45,11 @@ const LAND_COVER_ITEMS = [
 ];
 
 function formatArea(value: number): string {
-  // value is in 1000 ha
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyar ha';
-  if (value >= 1e3) return (value / 1e3).toFixed(2) + ' Milyon ha';
-  return value.toFixed(0) + ' Bin ha';
+  return kisa(value, { birim: 'ha' });
 }
 
 function formatShort(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'B';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + 'M';
-  return value.toFixed(0) + 'K';
+  return eksen(value);
 }
 
 export default function LandCoverPage() {
@@ -118,7 +114,7 @@ export default function LandCoverPage() {
         const mapped = countryRes.data.map((item, index: number) => ({
           name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
-          share: ((Number(item['toplam']) || 0) / total * 100).toFixed(1),
+          share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
           fill: COLORS[index % COLORS.length]
         } as CountryDataItem));
         setCountryData(mapped);
@@ -232,7 +228,7 @@ export default function LandCoverPage() {
             <ChartCard title="🥧 Örtü Payı Dağılımı" action={<ChartInsightButton title="Örtü Payı Dağılımı" description="Arazi örtüsü pay dağılımı" data={coverData} context={{ section: 'Arazi Örtüsü' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  <Pie data={coverData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name?.substring(0,10)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+                  <Pie data={coverData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name?.substring(0,10)} ${yuzde(((percent ?? 0) * 100), 0)}`} labelLine={false}>
                     {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                   </Pie>
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />

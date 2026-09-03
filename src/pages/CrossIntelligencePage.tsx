@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import {
   Bar, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceLine,
   ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, PolarGrid,
@@ -96,7 +97,7 @@ export default function CrossIntelligencePage() {
           <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
             <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-secondary)' }}>Yeterlilik</p>
             <p className={`text-2xl font-bold ${latestRow.sufficiency >= 100 ? 'text-green-600' : latestRow.sufficiency >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-              %{latestRow.sufficiency.toFixed(0)}
+              {yuzde(latestRow.sufficiency, 0)}
             </p>
           </div>
           <div className="rounded-xl border p-5 shadow-sm min-h-[120px] flex flex-col justify-between" style={{ background: 'var(--bg-card)' }}>
@@ -187,7 +188,7 @@ export default function CrossIntelligencePage() {
                 <div className="border rounded-lg shadow-lg p-3 text-xs" style={{ background: 'var(--bg-card)' }}>
                   <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{d.name}</p>
                   <p>Üretim: {d.x > 1e6 ? `${(d.x / 1e6).toFixed(1)}M ton` : `${(d.x / 1e3).toFixed(0)}K ton`}</p>
-                  <p className={d.y >= 100 ? 'text-green-600' : 'text-red-600'}>Yeterlilik: %{d.y.toFixed(0)}</p>
+                  <p className={d.y >= 100 ? 'text-green-600' : 'text-red-600'}>Yeterlilik: {yuzde(d.y, 0)}</p>
                 </div>
               );
             }} />
@@ -241,7 +242,7 @@ export default function CrossIntelligencePage() {
                   <td className="px-3 py-2 font-medium">{r.product}</td>
                   <td className="px-3 py-2 text-center">
                     <span className={`font-bold ${r.sufficiency >= 100 ? 'text-green-600' : r.sufficiency >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-                      %{r.sufficiency.toFixed(0)}
+                      {yuzde(r.sufficiency, 0)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-center">
@@ -255,7 +256,7 @@ export default function CrossIntelligencePage() {
                           }}
                         />
                       </div>
-                      <span className="text-xs w-10 text-right" style={{ color: 'var(--text-primary)' }}>%{r.importDep.toFixed(0)}</span>
+                      <span className="text-xs w-10 text-right" style={{ color: 'var(--text-primary)' }}>{yuzde(r.importDep, 0)}</span>
                     </div>
                   </td>
                   <td className="px-3 py-2 text-center" style={{ color: 'var(--text-primary)' }}>{r.consumption > 0 ? `${r.consumption.toFixed(1)} kg` : '-'}</td>
@@ -397,7 +398,7 @@ export default function CrossIntelligencePage() {
             <ChartInsightButton title={`Arz Dağılımı — ${product.label}`} description="Arz segmentlerine göre dağılım" data={decomp} context={{ section: 'Çapraz Zeka' }} compact />
             </div>
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-              Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>%{avgImportDep.toFixed(1)}</strong> · Ortalama ihracat oranı: <strong>%{avgExportRatio.toFixed(1)}</strong>
+              Yerli üretim + ithalat = toplam arz · İhracat negatif olarak gösterilir · Ortalama ithalat bağımlılığı: <strong>{yuzde(avgImportDep, 1)}</strong> · Ortalama ihracat oranı: <strong>{yuzde(avgExportRatio, 1)}</strong>
             </p>
             {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
               hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride

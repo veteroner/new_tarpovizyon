@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import {
@@ -64,7 +65,7 @@ export function PredictionsTab({
       {predKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title="🇹🇷 Mevcut" value={formatValue(predKPIs.currentProduction)} subtitle="2023 üretim" icon={Leaf} color="blue" large />
-          <KPICard title="Tahmin 2028" value={formatValue(predKPIs.forecastProduction)} subtitle={`${predKPIs.prodChange >= 0 ? '+' : ''}${predKPIs.prodChange.toFixed(1)}%`} icon={predKPIs.prodChange >= 0 ? TrendingUp : TrendingDown} color={predKPIs.prodChange >= 0 ? 'green' : 'red'} />
+          <KPICard title="Tahmin 2028" value={formatValue(predKPIs.forecastProduction)} subtitle={`${predKPIs.prodChange >= 0 ? '+' : ''}${yuzde(predKPIs.prodChange, 1)}`} icon={predKPIs.prodChange >= 0 ? TrendingUp : TrendingDown} color={predKPIs.prodChange >= 0 ? 'green' : 'red'} />
           <KPICard title="Model R²" value={predKPIs.r2Production.toFixed(3)} subtitle={predKPIs.r2Production > 0.9 ? '✅ Güçlü' : predKPIs.r2Production > 0.7 ? '🟡 Orta' : '⚠️ Zayıf'} icon={Activity} color={predKPIs.r2Production > 0.9 ? 'green' : predKPIs.r2Production > 0.7 ? 'orange' : 'red'} />
           <KPICard title="Verim Tahmin" value={formatYield(predKPIs.forecastYield)} subtitle={predKPIs.forecastYield > predKPIs.currentYield ? '📈 Artış bekleniyor' : '📉 Düşüş bekleniyor'} icon={Target} color={predKPIs.forecastYield > predKPIs.currentYield ? 'green' : 'red'} />
         </div>

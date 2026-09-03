@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -435,7 +436,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                   }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 2, color: 'var(--text-secondary)' }}>
-                  <span>Lidere fark: %{g.gapToLeader.toFixed(0)}</span>
+                  <span>Lidere fark: {yuzde(g.gapToLeader, 0)}</span>
                   <span style={{ color: '#f59e0b' }}>▎Dünya Ort.</span>
                   <span style={{ color: g.gapToAvg >= 0 ? '#22c55e' : '#ef4444' }}>
                     Ort.{g.gapToAvg >= 0 ? '+' : ''}{g.gapToAvg.toFixed(0)}%

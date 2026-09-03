@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, BarChart2 } from 'lucide-react';
 import {
@@ -164,7 +165,7 @@ export function CompetitionTab({
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.rank}</td>
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatMetric(c.production)}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right' }}>%{c.share.toFixed(1)}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right' }}>{yuzde(c.share, 1)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatHa(c.area)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatYield(c.yieldVal)}</td>
                 </tr>
@@ -178,7 +179,7 @@ export function CompetitionTab({
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="x" name="Büyüme %" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${v.toFixed(0)}%`} />
+                <XAxis dataKey="x" name="Büyüme %" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${yuzde(v, 0)}`} />
                 <YAxis dataKey="y" name="Üretim" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
                 <Tooltip content={({ active, payload }: any) => {
                   if (active && payload?.[0]) { const d = payload[0].payload; return (

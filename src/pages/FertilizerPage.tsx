@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -66,7 +67,7 @@ export default function FertilizerPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DÜNYA GÜBRE İTHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DÜNYA GÜBRE İTHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
                 <KPICard title="TÜRKİYE İTHALATI" value={formatTon(overviewKPIs.turkeyImport)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="EN BÜYÜK İTHALATÇI" value={overviewKPIs.topImporter} subtitle="2023" icon={Award} color="blue" />
                 <KPICard title="EN BÜYÜK İHRACATÇI" value={overviewKPIs.topExporter} subtitle="2023" icon={TrendingUp} color="green" />

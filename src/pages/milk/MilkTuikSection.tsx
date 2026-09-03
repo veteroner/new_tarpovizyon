@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useMemo } from 'react';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
@@ -261,7 +262,7 @@ export default function MilkTuikSection({
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip 
-                  formatter={(value: number) => [`${value.toFixed(1)}%`]}
+                  formatter={(value: number) => [`${yuzde(value, 1)}`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 />
                 <Bar dataKey="rate" name="Büyüme %" radius={[6, 6, 0, 0]}>
@@ -400,7 +401,7 @@ export default function MilkTuikSection({
                         </td>
                       ))}
                       <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600', color: change === null ? 'var(--text-secondary)' : change >= 0 ? '#22c55e' : '#ef4444' }}>
-                        {change !== null ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : '-'}
+                        {change !== null ? `${change >= 0 ? '+' : ''}${yuzde(change, 1)}` : '-'}
                       </td>
                     </tr>
                   );

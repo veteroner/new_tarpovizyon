@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -55,7 +56,7 @@ export default function PesticidePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`${overviewKPIs.yil} | Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${overviewKPIs.yoy.toFixed(1)}% | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`${overviewKPIs.yil} | Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
                 <KPICard title="TÜRKİYE KULLANIMI" value={formatTon(overviewKPIs.turkeyUsage)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="EN BÜYÜK KULLANICI" value={overviewKPIs.topUser} subtitle={String(overviewKPIs.yil ?? '')} icon={Award} color="blue" />
                 <KPICard title="PESTİSİT TÜRÜ" value={String(overviewKPIs.typeCount)} subtitle="Aktif tür" icon={Bug} color="red" />
@@ -64,7 +65,7 @@ export default function PesticidePage() {
                 <ChartCard title="Pestisit Tür Dağılımı" action={<ChartInsightButton title="Pestisit Tür Dağılımı" description="Pestisit tür dağılımı" data={overviewByType} context={{ section: 'Pestisit Genel' }} compact />}>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                      <Pie data={overviewByType} cx="50%" cy="50%" outerRadius={100} innerRadius={40} dataKey="value" label={({ name, percent }) => `${(name || '').substring(0, 12)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+                      <Pie data={overviewByType} cx="50%" cy="50%" outerRadius={100} innerRadius={40} dataKey="value" label={({ name, percent }) => `${(name || '').substring(0, 12)} ${yuzde(((percent ?? 0) * 100), 0)}`} labelLine={false}>
                         {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Pie>
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />

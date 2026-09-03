@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, Cell
@@ -220,7 +221,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => `${value.toFixed(0)}%`} width={46} />
+              tickFormatter={(value) => `${yuzde(value, 0)}`} width={46} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',
@@ -228,7 +229,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
                 borderRadius: '8px',
                 fontSize: '12px'
               }}
-              formatter={(value: number) => `${value.toFixed(2)}%`}
+              formatter={(value: number) => `${yuzde(value, 2)}`}
             />
             <Bar
               dataKey="growth"

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, Leaf, TrendingUp, Activity, Wheat, AlertTriangle } from 'lucide-react';
 import {
@@ -50,8 +51,8 @@ export function PrimaryTab({
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title={`Dünya ${translateProduct(primaryProduct).substring(0, 20)}`} value={formatValue(primaryKPIs.worldTotal)} subtitle={`${primaryKPIs.producerCount} ülke`} icon={Globe} color="blue" large />
           <KPICard title="🇹🇷 Türkiye" value={formatValue(primaryKPIs.turkeyProduction)} subtitle={`${primaryKPIs.turkeyRank}. | %${primaryKPIs.turkeyShare.toFixed(1)}`} icon={Leaf} color="green" />
-          <KPICard title="Dünya CAGR" value={`${primaryKPIs.worldCAGR >= 0 ? '+' : ''}${primaryKPIs.worldCAGR.toFixed(2)}%`} subtitle="2000-2023" icon={TrendingUp} color={primaryKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
-          <KPICard title="🇹🇷 CAGR" value={`${primaryKPIs.turkeyCAGR >= 0 ? '+' : ''}${primaryKPIs.turkeyCAGR.toFixed(2)}%`} subtitle={`Vol: %${primaryKPIs.turkeyVolatility.toFixed(1)}`} icon={Activity} color={primaryKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
+          <KPICard title="Dünya CAGR" value={`${primaryKPIs.worldCAGR >= 0 ? '+' : ''}${yuzde(primaryKPIs.worldCAGR, 2)}`} subtitle="2000-2023" icon={TrendingUp} color={primaryKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
+          <KPICard title="🇹🇷 CAGR" value={`${primaryKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(primaryKPIs.turkeyCAGR, 2)}`} subtitle={`Vol: %${primaryKPIs.turkeyVolatility.toFixed(1)}`} icon={Activity} color={primaryKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
         </div>
 
         {primaryAnomalies.length > 0 && (
@@ -77,7 +78,7 @@ export function PrimaryTab({
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.rank}</td>
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatMetric(c.production)}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right' }}>%{c.share.toFixed(1)}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right' }}>{yuzde(c.share, 1)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatHa(c.area)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatYield(c.yieldVal)}</td>
                 </tr>
@@ -97,12 +98,12 @@ export function PrimaryTab({
               </div>
               <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Top 1</div>
-                <div style={{ fontSize: '24px', fontWeight: 700 }}>%{primaryHHI.top1Share.toFixed(1)}</div>
+                <div style={{ fontSize: '24px', fontWeight: 700 }}>{yuzde(primaryHHI.top1Share, 1)}</div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{primaryKPIs.leader}</div>
               </div>
               <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Top 3</div>
-                <div style={{ fontSize: '24px', fontWeight: 700 }}>%{primaryHHI.top3Share.toFixed(1)}</div>
+                <div style={{ fontSize: '24px', fontWeight: 700 }}>{yuzde(primaryHHI.top3Share, 1)}</div>
               </div>
               <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Etkin Üretici</div>
@@ -131,7 +132,7 @@ export function PrimaryTab({
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={primaryTopCountries.slice(0, 10)} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="production" nameKey="country"
-                  label={(props: any) => { const p = props as unknown as Record<string, unknown>; return `${String(p.country).substring(0, 10)} ${((Number(p.percent) || 0) * 100).toFixed(0)}%`; }}>
+                  label={(props: any) => { const p = props as unknown as Record<string, unknown>; return `${String(p.country).substring(0, 10)} ${yuzde(((Number(p.percent) || 0) * 100), 0)}`; }}>
                   {primaryTopCountries.slice(0, 10).map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />

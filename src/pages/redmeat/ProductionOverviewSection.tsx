@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useMemo } from 'react';
 import {
   Area,
@@ -90,7 +91,7 @@ export default function ProductionOverviewSection({
             <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? '📈' : '📉'}</div>
           </div>
           <div className="kpi-value" style={{ color: yoy >= 0 ? '#22c55e' : '#ef4444' }}>
-            %{yoy.toFixed(1)}
+            {yuzde(yoy, 1)}
           </div>
           <div className="kpi-subtitle">Önceki yıla göre</div>
         </div>
@@ -244,7 +245,7 @@ export default function ProductionOverviewSection({
                 cx="50%"
                 cy="50%"
                 outerRadius={120}
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
+                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
                 labelLine={true}
               >
                 {buyukbasKucukbasBreakdown.map((entry, index) => (

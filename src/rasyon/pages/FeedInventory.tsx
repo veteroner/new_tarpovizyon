@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /**
  * Feed Inventory Page
  * 
@@ -831,8 +832,8 @@ function LotManagementModal({
                       <div className="font-medium">{lot.lotNumber}</div>
                       <div className="text-sm text-gray-600">
                         {lot.analysisSource === 'lab' ? 'Laboratuvar' : 'NIR'} Analiz
-                        {typeof lot.cpPercent === 'number' && ` • HP: ${lot.cpPercent.toFixed(1)}%`}
-                        {typeof lot.ndfPercent === 'number' && ` • NDF: ${lot.ndfPercent.toFixed(1)}%`}
+                        {typeof lot.cpPercent === 'number' && ` • HP: ${yuzde(lot.cpPercent, 1)}`}
+                        {typeof lot.ndfPercent === 'number' && ` • NDF: ${yuzde(lot.ndfPercent, 1)}`}
                         {typeof lot.remainingQuantityKg === 'number' && ` • Kalan: ${lot.remainingQuantityKg.toFixed(0)} kg`}
                       </div>
                       {lot.expirationDate && (

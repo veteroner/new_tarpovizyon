@@ -1,3 +1,4 @@
+import { kisa } from './sayi';
 /**
  * Livestock Intelligence Calculations
  * Advanced analytics for FAO livestock data
@@ -378,9 +379,6 @@ export function calculatePercentile(value: number, allValues: number[]): number 
 /**
  * Format large numbers with K/M/B suffixes
  */
-export function formatMetric(value: number, decimals: number = 1): string {
-  if (value >= 1e9) return `${(value / 1e9).toFixed(decimals)}B`;
-  if (value >= 1e6) return `${(value / 1e6).toFixed(decimals)}M`;
-  if (value >= 1e3) return `${(value / 1e3).toFixed(decimals)}K`;
-  return value.toFixed(decimals);
+export function formatMetric(value: number): string {
+  return kisa(value);
 }

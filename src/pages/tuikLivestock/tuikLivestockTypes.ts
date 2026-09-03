@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 import { getRegionByProvince } from '../../utils/productionCategories';
 
 export const COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#0ea5e9', '#d946ef', '#a3e635'];
@@ -69,17 +70,11 @@ export const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-202
 export const YEAR_COLUMNS = YEARS.map(y => `y${y}`);
 
 export function formatNumber(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toFixed(0);
+  return kisa(value);
 }
 
 export function formatShort(value: number): string {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
+  return eksen(value);
 }
 
 export function calculateCAGR(startValue: number, endValue: number, years: number): number {
