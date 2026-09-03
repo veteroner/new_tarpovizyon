@@ -112,7 +112,7 @@ export function MeatSection({ data }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📈 Et Üretim Trendi (2010-2023)" action={<ChartInsightButton title="Et Üretim Trendi (2010-2023)" description="Yıllık et üretimi değişimi" data={data.meatProduction.yearly} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
+        <ChartCard title={`📈 Et Üretim Trendi (2010-${yil})`} action={<ChartInsightButton title={`Et Üretim Trendi (2010-${yil})`} description="Yıllık et üretimi değişimi" data={data.meatProduction.yearly} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.meatProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

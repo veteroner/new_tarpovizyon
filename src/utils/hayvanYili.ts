@@ -6,13 +6,17 @@
  * DEĞİL, ve bunu bilmeden yılı ilerletmek sessizce sıfır gösteriyor.
  *
  * ─── ÖLÇÜM (tuik_hayvancilik_canlihayvan, 2026-09-03) ───────────────────────
- * Ülke satırı (duzey='ülke', yer='TÜRKİYE'), 2024 → 2025:
- *   Sığır   16.824.208 → 17.544.200      Koyun  44.080.584 → 46.688.813
- *   Keçi    10.822.084 → 11.185.505      Manda     162.051 →     164.785
- *   Tavuk  379.626.813 →           0     Hindi   2.826.858 →           0
- *   Kaz      1.303.026 →           0     Ördek     389.957 →           0
+ * Ülke satırı (duzey='ülke', yer='TÜRKİYE'), 2024 → 2025 — kanatlı satırları
+ * doldurulduktan SONRAKİ hâl:
+ *   Tavuk  379.626.813 → 389.186.697     Koyun  44.080.584 → 46.688.813
+ *   Sığır   16.824.208 →  17.544.200     Keçi   10.822.084 → 11.185.505
+ *   Hindi    2.826.858 →   3.192.168     Kaz     1.303.026 →  1.263.907
+ *   Ördek      389.957 →     389.086     Manda     162.051 →    164.785
+ * (Kanatlının dördü ölçüm anında 0'dı; 46_t8'den yazıldı.)
  *
  * Bölge satırları (duzey='bölge'), 2025: BEŞ GRUBUN DA TOPLAMI 0.
+ *   Üstelik bölge 2024'ü de bozuk: Et Tavuğu ile Yumurta Tavuğu birebir aynı
+ *   sayıyı taşıyor (76.118.438 = 76.118.438) ve toplamları ülkenin %40'ı.
  * İl/ilçe satırları (duzeykod=3/4), 2025: DOLU — kanatlı dahil
  *   (Tavuk il toplamı 2025'te 387.164.365).
  *
@@ -26,15 +30,27 @@
 export const HAYVAN_IL_YIL = 2025;
 
 /**
- * duzey='bölge' ve 'ülke' satırları.
+ * duzey='ülke' satırı — ARTIK 2025.
  *
- * Ülke satırında geviş getirenlerin 2025'i var ama bölgenin hiç yok. Genel
- * Bakış sayfası ikisini YAN YANA çiziyor (ülke KPI'ları + bölge grafikleri);
- * yalnızca KPI'ları 2025'e almak, hemen yanında 2024 bölge toplamı duran
- * içsel olarak tutarsız bir sayfa üretirdi. Bu yüzden toplu seviyeler
- * bütün olarak 2024'te.
+ * Kanatlının 2025'i başta boştu; TÜİK'in "Türlerine Göre Kümes Hayvan
+ * Sayıları" tablosundan (46_t8) dolduruldu — bkz. scripts/tuik-kumes-ulke-yukle.mjs.
+ * Kaynağın 2024 değerleri D1'deki satırlarla birebir tuttuğu doğrulandıktan
+ * sonra yazıldı. Sekiz grubun da 2025'i dolu.
  */
-export const HAYVAN_TOPLU_YIL = 2024;
+export const HAYVAN_ULKE_YIL = 2025;
+
+/**
+ * duzey='bölge' satırları — 2024'te KALIYOR.
+ *
+ * Bölgede 2025 hiç yok ve türetilecek güvenilir kaynak da yok: il satırları
+ * 81 değil 80 il içeriyor ve 2024'te kategori ayrımı bozulmuş. Uydurulmuş bir
+ * bölge dağılımı yazmaktansa grafiğin kendi yılını söylemesi doğru.
+ *
+ * Bu yüzden Genel Bakış'ta ülke KPI'ları 2025, bölge grafikleri 2024 — ve
+ * HER İKİSİ de kendi yılını başlığında yazıyor. Karışıklık, tarihi gizlemekten
+ * değil, iki farklı yılı tek etiket altında toplamaktan doğar.
+ */
+export const HAYVAN_BOLGE_YIL = 2024;
 
 /** `y2025` gibi sütun adı üretir. */
 export const yilSutunu = (yil: number) => `y${yil}`;

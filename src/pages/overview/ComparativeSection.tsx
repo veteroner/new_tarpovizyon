@@ -51,7 +51,7 @@ export function ComparativeSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title="📈 Hayvansal Üretim Kategorileri Karşılaştırması (2010-2023)" span={2} action={<ChartInsightButton title="Hayvansal Üretim Kategorileri Karşılaştırması (2010-2023)" description="Süt, et ve yumurta üretiminin karşılaştırmalı trendi" data={combinedData} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange }} />}>
+        <ChartCard title={`📈 Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} span={2} action={<ChartInsightButton title={`Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} description="Süt, et ve yumurta üretiminin karşılaştırmalı trendi" data={combinedData} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={combinedData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

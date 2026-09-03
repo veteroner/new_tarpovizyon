@@ -1,6 +1,4 @@
-import {
-  SON_YIL, ILK_YIL, yayimlandiMi, sonYayimYili, acilisGostergesi,
-} from './plant/plantTypes';
+import { SON_YIL, ILK_YIL } from './plant/plantTypes';
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -68,27 +66,19 @@ function formatShort(value: number): string {
 
 export default function TuikPlantProductionPage() {
   const [selectedYear, setSelectedYear] = useState(`y${SON_YIL}`);
-  /* Açılışta en taze yıl kazanıyor: 2025'te yayımlanmış ilk gösterge seçilir
-     (üretim hasat sonrası geldiği için "Ekilen Alan"). Sabit 'Üretim' yazmak
-     sayfayı sıfırlarla açıyordu. */
-  const [selectedUnsur, setSelectedUnsur] = useState(
-    () => acilisGostergesi(UNSUR_OPTIONS, SON_YIL),
-  );
-
-  const yilSayi = Number(selectedYear.replace('y', ''));
+  /* Sayfanın asıl ölçütü üretim; ülke satırında 2025 dolu olduğu için
+     açılışta artık ona düşmeye gerek yok. */
+  const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
 
   /*
-   * Gösterge listesi TAM — hiçbir seçenek gizlenmiyor. Kısıt yıla taşındı:
-   * o gösterge için yayımlanmamış yıl <option> olarak kapalı ve sebebi
-   * yazıyor. Göstergeyi listeden düşürmek "üretim diye bir şey yok" gibi
-   * okunuyordu; oysa eksik olan yalnızca 2025 üretimi.
+   * Gösterge ve yıl listelerinin İKİSİ DE tam; hiçbir seçenek kapalı değil.
+   *
+   * Bir ara 2025'te "Üretim"i kapatmıştım — çünkü sayfa Türkiye'yi illeri
+   * toplayarak buluyordu ve il kırılımında 2025 üretimi yok. Asıl sorun
+   * oymuş: Türkiye rakamı artık ülke satırından (duzeykod=1) okunuyor ve
+   * orada 2025 her gösterge için dolu. Kapatılacak bir şey kalmadı; eksik
+   * olan yalnızca İL DAĞILIMI, onu da sayfa aşağıda yazıyla söylüyor.
    */
-  const gostergeDegisti = (id: string) => {
-    setSelectedUnsur(id);
-    /* Yayımlanmamış yıldayken o göstergeye geçilirse yıl geri alınıyor;
-       aksi hâlde sayfa sıfır gösterip veri yokluğunu düşüş gibi sunuyor. */
-    if (!yayimlandiMi(id, yilSayi)) setSelectedYear(`y${sonYayimYili(id)}`);
-  };
 
   /*
    * Başlangıçta seçim YOK; doğru varsayılan ürün listesi geldikten sonra
@@ -156,25 +146,42 @@ export default function TuikPlantProductionPage() {
     setLoading(true);
     try {
       const yearCol = selectedYear;
-      const ORTAK = { where: { unsur: selectedUnsur, duzeykod: 3 }, whereIn: { urun: selectedProducts } };
+      /*
+       * İKİ AYRI SEVİYE.
+       *
+       * Türkiye toplamı ve trend TÜRKİYE SATIRINDAN (duzeykod=1) okunuyor;
+       * daha önce iller toplanıyordu. Ölçüldü: 2024'te iki yol birebir aynı
+       * sonucu veriyor (+0.00%), ama 2025 ÜRETİMİ yalnızca Türkiye satırında
+       * var — TÜİK il kırılımını hasat sonrası yayımlıyor. İlleri toplayan
+       * sayfa bu yüzden 2025'te "0 ton" görüyordu; doldurulacak bir veri
+       * yoktu, yanlış seviyeye bakılıyordu.
+       *
+       * İl grafikleri elbette il satırlarından (duzeykod=3) geliyor ve o
+       * kırılım 2025 üretiminde boş — sayfa bunu gizlemek yerine söylüyor.
+       */
+      const URUN = { where: { unsur: selectedUnsur }, whereIn: { urun: selectedProducts } };
+      const ORTAK = { ...URUN, where: { unsur: selectedUnsur, duzeykod: 3 } };
+      const TR = { ...URUN, where: { unsur: selectedUnsur, duzeykod: 1 } };
       /* Trend sorgusunun sütunları da sabitten. Elle "21" yazılıydı: yıl
          eklenince trend son yılı 0 okuyor, KPI da bunu %-100'lük gerçek bir
          çöküş gibi gösteriyordu. */
       const YIL_SUTUNLARI = YILLAR.map((y) => `y${y}`);
 
-      const [cityRes, yearlyRes] = await Promise.all([
+      const [cityRes, yearlyRes, trRes] = await Promise.all([
         fetchAgg(R, { groupBy: ['yer'], sum: [yearCol], ...ORTAK,
           orderBy: `sum_${yearCol}`, dir: 'desc', limit: 20 })
           .then((rows) => ({ data: rows.map((r) => ({ yer: r.yer, toplam: num(r[`sum_${yearCol}`]) })) })),
         // Eskiden 21 ayrı SUM(yNNNN) sütunuydu.
-        fetchAgg(R, { sum: YIL_SUTUNLARI, ...ORTAK })
+        fetchAgg(R, { sum: YIL_SUTUNLARI, ...TR })
           .then((rows) => ({ data: [Object.fromEntries(YIL_SUTUNLARI.map((yc) =>
             [`v${yc.slice(1)}`, num(rows[0]?.[`sum_${yc}`])]))] })),
+        fetchAgg(R, { sum: [yearCol], ...TR }).then((rows) => num(rows[0]?.[`sum_${yearCol}`])),
       ]);
+
+      setTotalValue(trRes);
 
       if (cityRes.data) {
         const total = cityRes.data.reduce((sum: number, item) => sum + (Number(item['toplam']) || 0), 0);
-        setTotalValue(total);
         const mapped = cityRes.data.map((item, index: number) => ({
           name: String(item['yer'] || ''),
           value: Number(item['toplam']) || 0,
@@ -210,7 +217,16 @@ export default function TuikPlantProductionPage() {
   const unit = selectedUnsur === 'Üretim' ? 'ton' : 'dekar';
   const topCity = cityData[0]?.name || '-';
   const topCityValue = cityData[0]?.value || 0;
-  const avgValue = cityData.length > 0 ? totalValue / cityData.length : 0;
+  /* İl ortalaması İL verisinden — ülke toplamını il sayısına bölmek, il
+     kırılımı boşken (2025 üretimi) anlamsız bir sayı üretirdi. */
+  const ilToplam = cityData.reduce((t, c) => t + c.value, 0);
+  const avgValue = cityData.length > 0 ? ilToplam / cityData.length : 0;
+  /*
+   * SATIR SAYISINA DEĞİL DEĞERE bakılıyor. İl sorgusu 2025 üretiminde de
+   * satır döndürüyor — yalnızca hepsi sıfır. `length > 0` demek "Lider il:
+   * Şırnak, 0 ton" gibi rastgele bir il göstermek demekti.
+   */
+  const ilKirilimiVar = cityData.some((c) => c.value > 0);
 
   // Yıllık değişim
   const currentYearIdx = yearlyData.findIndex(y => y.year === yearLabel);
@@ -238,7 +254,7 @@ export default function TuikPlantProductionPage() {
         </div>
         <div className="filter-group">
           <label className="filter-label">Gösterge</label>
-          <select className="filter-select" value={selectedUnsur} onChange={(e) => gostergeDegisti(e.target.value)}>
+          <select className="filter-select" value={selectedUnsur} onChange={(e) => setSelectedUnsur(e.target.value)}>
             {UNSUR_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.name}</option>
             ))}
@@ -247,14 +263,9 @@ export default function TuikPlantProductionPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {YILLAR.map(year => {
-              const varMi = yayimlandiMi(selectedUnsur, year);
-              return (
-                <option key={year} value={`y${year}`} disabled={!varMi}>
-                  {year}{varMi ? '' : ' — henüz yayımlanmadı'}
-                </option>
-              );
-            })}
+            {YILLAR.map(year => (
+              <option key={year} value={`y${year}`}>{year}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -276,15 +287,33 @@ export default function TuikPlantProductionPage() {
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">LİDER İL</span><div className="kpi-icon green"><Trophy size={18} aria-hidden="true" /></div></div>
-              <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{topCity}</div>
-              <div className="kpi-subtitle">{formatTon(topCityValue)} {unit}</div>
+              <div className="kpi-value" style={{ fontSize: '1.1rem' }}>{ilKirilimiVar ? topCity : '—'}</div>
+              <div className="kpi-subtitle">
+                {ilKirilimiVar ? `${formatTon(topCityValue)} ${unit}` : 'İl kırılımı yayımlanmadı'}
+              </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">İL ORTALAMASI</span><div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div></div>
-              <div className="kpi-value">{formatTon(avgValue)}</div>
-              <div className="kpi-subtitle">{unit}/il</div>
+              <div className="kpi-value">{ilKirilimiVar ? formatTon(avgValue) : '—'}</div>
+              <div className="kpi-subtitle">
+                {ilKirilimiVar ? `${unit}/il` : 'İl kırılımı yayımlanmadı'}
+              </div>
             </div>
           </div>
+
+          {/*
+            * İl kırılımı yokken BOŞ GRAFİK çizmek yerine sebebi yazılıyor.
+            * Boş eksenler "veri bozuk" gibi okunuyor; oysa Türkiye rakamı
+            * yukarıda duruyor, eksik olan yalnızca il dağılımı.
+            */}
+          {!loading && !ilKirilimiVar && (
+            <p className="tv-uyari-satir">
+              <b>{yearLabel} {selectedUnsur.toLocaleLowerCase('tr')}</b> için il kırılımı
+              henüz yayımlanmadı — TÜİK il rakamlarını hasat sonrası açıklıyor.
+              Yukarıdaki Türkiye toplamı güncel; il grafikleri için daha eski
+              bir yıl seçebilirsiniz.
+            </p>
+          )}
 
           <div className="chart-grid">
             <ChartCard title={`📅 Yıllık Üretim Trendi (${ILK_YIL}-${SON_YIL})`} span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description={`Yıllık üretim trendi (${ILK_YIL}-${SON_YIL})`} data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
@@ -300,6 +329,7 @@ export default function TuikPlantProductionPage() {
             </ChartCard>
           </div>
 
+          {ilKirilimiVar && (
           <div className="chart-grid">
             <ChartCard title={<>İl Bazında {selectedUnsur} ({yearLabel})</>} action={<ChartInsightButton title={`İl Bazında ${selectedUnsur}`} description="İl bazında üretim" data={cityData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
@@ -341,6 +371,9 @@ export default function TuikPlantProductionPage() {
             </ChartCard>
           </div>
 
+          )}
+
+          {ilKirilimiVar && (
           <div className="data-table">
             <h3 className="data-table-title">İl Sıralaması - {selectedUnsur}</h3>
             {cityData.map((city, index) => (
@@ -354,6 +387,7 @@ export default function TuikPlantProductionPage() {
               </div>
             ))}
           </div>
+          )}
         </>
       )}
     </div>

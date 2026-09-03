@@ -1,4 +1,4 @@
-import { HAYVAN_TOPLU_YIL } from '../../utils/hayvanYili';
+import { HAYVAN_ULKE_YIL, HAYVAN_BOLGE_YIL } from '../../utils/hayvanYili';
 import { useState } from 'react';
 import {
   BarChart, Bar, Cell,
@@ -24,7 +24,7 @@ export function LivestockSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#6b7280' }}>Hayvan Varlığı ({HAYVAN_TOPLU_YIL})</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#6b7280' }}>Hayvan Varlığı ({HAYVAN_ULKE_YIL})</h2>
       </div>
 
       <div className="kpi-grid">
@@ -51,7 +51,7 @@ export function LivestockSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`📊 Hayvan Varlığı Dağılımı (${HAYVAN_TOPLU_YIL})`} span={2} action={<ChartInsightButton title={`Hayvan Varlığı Dağılımı (${HAYVAN_TOPLU_YIL})`} description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />}>
+        <ChartCard title={`📊 Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} span={2} action={<ChartInsightButton title={`Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data.livestockStocks.breakdown} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -71,7 +71,14 @@ export function LivestockSection({ data }: Props) {
 
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
-            <h3 className="chart-title" style={{ marginBottom: 0 }}>Bölgesel Dağılım (Top 12)</h3>
+            {/*
+              * Yıl BAŞLIKTA, çünkü bu grafik yukarıdaki ülke rakamlarından
+              * BİR YIL GERİDE: bölge satırlarında 2025 yok. Ortak bir başlık
+              * altında toplasaydık iki farklı yıl tek yılmış gibi okunurdu.
+              */}
+            <h3 className="chart-title" style={{ marginBottom: 0 }}>
+              Bölgesel Dağılım (Top 12) · {HAYVAN_BOLGE_YIL}
+            </h3>
             <ChartInsightButton title="Bölgesel Hayvan Varlığı Dağılımı" description="İl bazlı hayvan varlığı dağılımı" data={data.livestockStocks.regional[regionalGroup] ?? []} context={{ seçiliTür: regionalGroup }} compact />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div
