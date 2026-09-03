@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -85,7 +86,7 @@ export default function CerealProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Tahıl Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı tahıl üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı tahıl üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🌾"
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={TAHIL_URUNLER}

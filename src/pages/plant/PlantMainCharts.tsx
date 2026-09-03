@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plantTypes';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
@@ -25,7 +26,7 @@ export default function PlantMainCharts({
     <>
       {/* ─── Grafik 1: Yıllık Trend (ComposedChart) ─── */}
       <div className="chart-grid">
-        <ChartCard title="📅 Yıllık Trend (2004–2024)" span={2} action={<ChartInsightButton title="📅 Yıllık Trend" description="Bitkisel üretim yıllık trendi" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+        <ChartCard title={`📅 Yıllık Trend (${ILK_YIL}–${SON_YIL})`} span={2} action={<ChartInsightButton title="📅 Yıllık Trend" description="Bitkisel üretim yıllık trendi" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
           {/*
             * "Yıllık değişim %" üretim serisinden TÜRETİLMİŞ. Eskiden ikinci
             * bir y ekseninde çiziliyordu; iki ölçeğin hizası keyfi olduğu için

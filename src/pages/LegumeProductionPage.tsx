@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -55,7 +56,7 @@ export default function LegumeProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Baklagil Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı baklagil üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı baklagil üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🫘"
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={BAKLAGIL_URUNLER}

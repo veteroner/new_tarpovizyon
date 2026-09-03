@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -47,7 +48,7 @@ export default function NutProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Sert Kabuklu Meyve Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı sert kabuklu meyve üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı sert kabuklu meyve üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🥜"
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={SERT_KABUKLU_URUNLER}

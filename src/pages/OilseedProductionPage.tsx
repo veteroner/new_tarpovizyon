@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -52,7 +53,7 @@ export default function OilseedProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Yağlı Tohum Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı yağlı tohum üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı yağlı tohum üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🌻"
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={YAGLI_TOHUM_URUNLER}

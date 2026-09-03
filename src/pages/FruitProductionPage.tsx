@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -60,7 +61,7 @@ export default function FruitProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Meyve Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı meyve üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı meyve üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🍎"
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={MEYVE_URUNLER}

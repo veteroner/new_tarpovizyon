@@ -1,3 +1,4 @@
+import { SON_YIL, ILK_YIL, YIL_DISI_UNSURLAR } from './plant/plantTypes';
 import { useState, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -42,6 +43,13 @@ const UNSUR_OPTIONS = [
   { id: 'Hasat Edilen Alan', name: 'Hasat Edilen Alan (Dekar)' },
 ];
 
+/*
+ * Yıllar `plantTypes`'tan geliyor. Burada 2024 DÖRT YERE elle yazılmıştı
+ * (başlangıç durumu, yıl döngüsü, seçenek listesi, grafik başlığı) — biri
+ * güncellenip öbürü unutulduğunda sayfa sessizce tutarsız oluyordu.
+ */
+const YILLAR = Array.from({ length: SON_YIL - ILK_YIL + 1 }, (_, i) => SON_YIL - i);
+
 function formatTon(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
   if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
@@ -57,8 +65,24 @@ function formatShort(value: number): string {
 }
 
 export default function TuikPlantProductionPage() {
-  const [selectedYear, setSelectedYear] = useState('y2024');
+  const [selectedYear, setSelectedYear] = useState(`y${SON_YIL}`);
   const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
+
+  /*
+   * O yıl yayımlanmamış gösterge listeden düşüyor. TÜİK bitkiselde ekim
+   * alanını ilkbaharda, ÜRETİMİ hasat sonrası yayımlıyor; 2025'te üretim
+   * satırlarının tamamı sıfır. Seçilebilir bırakmak "0 ton, %-100"
+   * gösterip veri yokluğunu gerçek düşüş gibi sunuyordu.
+   */
+  const yilSayi = Number(selectedYear.replace('y', ''));
+  const gostergeler = (YIL_DISI_UNSURLAR[yilSayi] ?? []).length
+    ? UNSUR_OPTIONS.filter((o) => !YIL_DISI_UNSURLAR[yilSayi].includes(o.id))
+    : UNSUR_OPTIONS;
+  /* Geçerlilik doğrudan sorgulanıyor: "yıl değiştiyse" koşulu açılışta
+     çalışmıyor, çünkü varsayılan yıl zaten 2025. */
+  if (gostergeler.length && !gostergeler.some((o) => o.id === selectedUnsur)) {
+    setSelectedUnsur(gostergeler[0].id);
+  }
   /*
    * Başlangıçta seçim YOK; doğru varsayılan ürün listesi geldikten sonra
    * seçiliyor (aşağıya bakınız).
@@ -113,7 +137,6 @@ export default function TuikPlantProductionPage() {
       }
     };
     loadProducts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = useCallback(async () => {
@@ -127,7 +150,10 @@ export default function TuikPlantProductionPage() {
     try {
       const yearCol = selectedYear;
       const ORTAK = { where: { unsur: selectedUnsur, duzeykod: 3 }, whereIn: { urun: selectedProducts } };
-      const YIL_SUTUNLARI = Array.from({ length: 21 }, (_, i) => `y${2004 + i}`);
+      /* Trend sorgusunun sütunları da sabitten. Elle "21" yazılıydı: yıl
+         eklenince trend son yılı 0 okuyor, KPI da bunu %-100'lük gerçek bir
+         çöküş gibi gösteriyordu. */
+      const YIL_SUTUNLARI = YILLAR.map((y) => `y${y}`);
 
       const [cityRes, yearlyRes] = await Promise.all([
         fetchAgg(R, { groupBy: ['yer'], sum: [yearCol], ...ORTAK,
@@ -154,7 +180,7 @@ export default function TuikPlantProductionPage() {
       if (yearlyRes.data && yearlyRes.data[0]) {
         const row = yearlyRes.data[0];
         const mapped = [];
-        for (let y = 2004; y <= 2024; y++) {
+        for (let y = ILK_YIL; y <= SON_YIL; y++) {
           mapped.push({
             year: String(y),
             value: Number(row[`v${y}`]) || 0
@@ -206,7 +232,7 @@ export default function TuikPlantProductionPage() {
         <div className="filter-group">
           <label className="filter-label">Gösterge</label>
           <select className="filter-select" value={selectedUnsur} onChange={(e) => setSelectedUnsur(e.target.value)}>
-            {UNSUR_OPTIONS.map(opt => (
+            {gostergeler.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.name}</option>
             ))}
           </select>
@@ -214,7 +240,7 @@ export default function TuikPlantProductionPage() {
         <div className="filter-group">
           <label className="filter-label">Yıl</label>
           <select className="filter-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-            {Array.from({ length: 21 }, (_, i) => 2024 - i).map(year => (
+            {YILLAR.map(year => (
               <option key={year} value={`y${year}`}>{year}</option>
             ))}
           </select>
@@ -249,7 +275,7 @@ export default function TuikPlantProductionPage() {
           </div>
 
           <div className="chart-grid">
-            <ChartCard title="📅 Yıllık Üretim Trendi (2004-2024)" span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description="Yıllık üretim trendi (2004-2024)" data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+            <ChartCard title={`📅 Yıllık Üretim Trendi (${ILK_YIL}-${SON_YIL})`} span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description={`Yıllık üretim trendi (${ILK_YIL}-${SON_YIL})`} data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

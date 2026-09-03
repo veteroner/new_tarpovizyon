@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -47,7 +48,7 @@ export default function FiberCropPage() {
   return (
     <TuikPlantCategoryPage
       title="Lif Bitkileri Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı lif bitkileri üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı lif bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🧵"
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={LIF_URUNLER}

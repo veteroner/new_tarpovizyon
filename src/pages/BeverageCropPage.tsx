@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartInsightButton } from '../components/ChartInsightButton';
@@ -61,7 +62,7 @@ export default function BeverageCropPage() {
   return (
     <TuikPlantCategoryPage
       title="İçecek & Baharat Bitkileri"
-      subtitle="Türkiye il/ilçe/bölge bazlı içecek ve baharat bitkileri üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı içecek ve baharat bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🍵"
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={ICECEK_URUNLER}

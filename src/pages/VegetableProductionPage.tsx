@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 
 interface SebzeRow { ad: string; ekim: number[]; hasat: number[] }
@@ -71,7 +72,7 @@ export default function VegetableProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Sebze Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı sebze üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı sebze üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🥬"
       urunGrup="Sebzeler"
       defaultProducts={['Domates (Sofralık)', 'Biber (Sivri)', 'Hıyar (Sofralık)']}

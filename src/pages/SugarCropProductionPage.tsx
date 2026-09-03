@@ -1,3 +1,4 @@
+import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 
 const SEKER_URUNLER = [
@@ -61,7 +62,7 @@ export default function SugarCropProductionPage() {
   return (
     <TuikPlantCategoryPage
       title="Şeker Bitkileri Üretimi"
-      subtitle="Türkiye il/ilçe/bölge bazlı şeker bitkileri üretim analizi — TÜİK 2004–2024"
+      subtitle={`Türkiye il/ilçe/bölge bazlı şeker bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
       icon="🍬"
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={SEKER_URUNLER}
