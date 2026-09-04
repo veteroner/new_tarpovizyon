@@ -32,7 +32,17 @@ export const CROP_CATEGORIES: Record<string, { name: string; color: string; keyw
   FRUITS: { name: 'Meyveler', color: '#ef4444', keywords: ['Apple', 'Grape', 'Orange', 'Banana', 'Watermelon', 'Tangerine', 'Lemon', 'Fig', 'Apricot', 'Cherry', 'Peach', 'Pear', 'Plum', 'Strawberr', 'Blueberr', 'Cranberr', 'Raspberry', 'Kiwi', 'Mango', 'Pineapple', 'Avocado', 'Papaya', 'Date', 'Cantaloupe', 'Pomelo', 'Grapefruit', 'Persimmon', 'Quince'] },
   VEGETABLES: { name: 'Sebzeler', color: '#10b981', keywords: ['Tomato', 'Potato', 'Onion', 'Cucumber', 'Cabbage', 'Eggplant', 'Chilli', 'Pepper', 'Lettuce', 'Spinach', 'Carrot', 'Turnip', 'Cauliflower', 'Broccoli', 'Artichoke', 'Asparagus', 'Bean', 'Pea', 'Garlic', 'Leek', 'Mushroom', 'Pumpkin', 'Squash', 'Okra', 'Green corn'] },
   OILSEEDS: { name: 'Yağlı Tohumlar', color: '#8b5cf6', keywords: ['Sunflower', 'Soybean', 'Rapeseed', 'Groundnut', 'Sesame', 'Linseed', 'Castor', 'Safflower', 'Mustard', 'Poppy', 'Hempseed', 'Karite', 'Tung'] },
-  INDUSTRIAL: { name: 'Endüstriyel', color: '#06b6d4', keywords: ['Sugar beet', 'Sugar cane', 'Cotton', 'Tea', 'Tobacco', 'Coffee', 'Cocoa', 'Rubber', 'Jute', 'Flax', 'Hemp', 'Sisal', 'Agave', 'Abaca', 'Coir', 'Chicory'] },
+  /*
+   * ─── "ENDÜSTRİYEL" ÜÇE BÖLÜNDÜ ────────────────────────────────────────────
+   * Üç ayrı menü satırı — Şeker Bitkileri, İçecek Bitkileri, Lif Bitkileri —
+   * hepsi `categoryFilter="INDUSTRIAL"` ile aynı bileşene gidiyordu. Yani üç
+   * farklı sayfa AYNI VERİYİ farklı başlıkla gösteriyordu; kullanıcı üç kez
+   * tıklayıp aynı grafiği görüyordu.
+   */
+  SUGAR: { name: 'Şeker Bitkileri', color: '#06b6d4', keywords: ['Sugar beet', 'Sugar cane', 'Sugar crops'] },
+  BEVERAGE: { name: 'İçecek Bitkileri', color: '#06b6d4', keywords: ['Tea', 'Coffee', 'Cocoa', 'Maté', 'Chicory'] },
+  FIBER: { name: 'Lif Bitkileri', color: '#06b6d4', keywords: ['Cotton', 'Jute', 'Flax', 'Hemp', 'Sisal', 'Agave', 'Abaca', 'Coir', 'Ramie', 'Kapok'] },
+  INDUSTRIAL: { name: 'Diğer Endüstriyel', color: '#06b6d4', keywords: ['Tobacco', 'Rubber'] },
   PULSES: { name: 'Baklagiller', color: '#f97316', keywords: ['Chick pea', 'Lentil', 'Beans, dry', 'Broad bean', 'Cow pea', 'Pigeon pea', 'Bambara', 'Lupins', 'Vetches'] },
   NUTS: { name: 'Sert Kabuklular', color: '#92400e', keywords: ['Hazelnut', 'Almond', 'Walnut', 'Pistachio', 'Chestnut', 'Cashew', 'Brazil nut', 'Areca', 'Kola'] },
   TUBERS: { name: 'Yumrular', color: '#84cc16', keywords: ['Cassava', 'Yam', 'Taro', 'Sweet potato', 'Edible roots'] },

@@ -38,7 +38,7 @@ export function ProductionPage({ categoryFilter, categoryTitle, categoryIcon }: 
 
       <div className="page-header" style={{ marginBottom: '24px' }}>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {categoryIcon || '🌾'} {categoryTitle || 'Bitkisel Üretim İçgörüleri'}
+          {categoryIcon}{categoryTitle || 'Bitkisel Üretim İçgörüleri'}
         </h1>
         <p className="page-subtitle" style={{ opacity: 0.8 }}>
           {categoryFilter

@@ -256,15 +256,15 @@ function AppContent() {
 
             {/* Dünya Bitkisel Üretim */}
             <Route path="/tarpovizyon/world/production" element={<ProductionPage />} />
-            <Route path="/tarpovizyon/world/cereals" element={<ProductionPage categoryFilter="CEREALS" categoryTitle="Tahıl Üretimi — Dünya" categoryIcon="🌾" />} />
-            <Route path="/tarpovizyon/world/vegetables" element={<ProductionPage categoryFilter="VEGETABLES" categoryTitle="Sebze Üretimi — Dünya" categoryIcon="🥬" />} />
-            <Route path="/tarpovizyon/world/fruits" element={<ProductionPage categoryFilter="FRUITS" categoryTitle="Meyve Üretimi — Dünya" categoryIcon="🍎" />} />
-            <Route path="/tarpovizyon/world/legumes" element={<ProductionPage categoryFilter="PULSES" categoryTitle="Bakliyat Üretimi — Dünya" categoryIcon="🫘" />} />
-            <Route path="/tarpovizyon/world/oilseeds" element={<ProductionPage categoryFilter="OILSEEDS" categoryTitle="Yağlı Tohum Üretimi — Dünya" categoryIcon="🌻" />} />
-            <Route path="/tarpovizyon/world/sugar-crops" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="Endüstriyel Bitkiler — Dünya" categoryIcon="🏭" />} />
-            <Route path="/tarpovizyon/world/nuts" element={<ProductionPage categoryFilter="NUTS" categoryTitle="Sert Kabuklu Üretimi — Dünya" categoryIcon="🥜" />} />
-            <Route path="/tarpovizyon/world/beverages" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="İçecek & Endüstriyel — Dünya" categoryIcon="☕" />} />
-            <Route path="/tarpovizyon/world/fiber-crops" element={<ProductionPage categoryFilter="INDUSTRIAL" categoryTitle="Lif Bitkileri — Dünya" categoryIcon="🧵" />} />
+            <Route path="/tarpovizyon/world/cereals" element={<ProductionPage categoryFilter="CEREALS" categoryTitle="Tahıl Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/vegetables" element={<ProductionPage categoryFilter="VEGETABLES" categoryTitle="Sebze Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/fruits" element={<ProductionPage categoryFilter="FRUITS" categoryTitle="Meyve Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/legumes" element={<ProductionPage categoryFilter="PULSES" categoryTitle="Bakliyat Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/oilseeds" element={<ProductionPage categoryFilter="OILSEEDS" categoryTitle="Yağlı Tohum Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/sugar-crops" element={<ProductionPage categoryFilter="SUGAR" categoryTitle="Şeker Bitkileri — Dünya" />} />
+            <Route path="/tarpovizyon/world/nuts" element={<ProductionPage categoryFilter="NUTS" categoryTitle="Sert Kabuklu Üretimi — Dünya" />} />
+            <Route path="/tarpovizyon/world/beverages" element={<ProductionPage categoryFilter="BEVERAGE" categoryTitle="İçecek Bitkileri — Dünya" />} />
+            <Route path="/tarpovizyon/world/fiber-crops" element={<ProductionPage categoryFilter="FIBER" categoryTitle="Lif Bitkileri — Dünya" />} />
 
             {/* Dünya Hayvansal Üretim */}
             <Route path="/tarpovizyon/world/livestock" element={<LivestockStocksPage />} />
