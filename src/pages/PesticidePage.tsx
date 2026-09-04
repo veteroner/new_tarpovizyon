@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import {
@@ -9,7 +10,7 @@ import { Globe, TrendingUp, TrendingDown, MapPin, Award, AlertTriangle, Layers, 
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
-import { usePesticideData, TABS, CHART_COLORS, formatTon, formatKgHa, formatShort } from './pesticide/usePesticideData';
+import { usePesticideData, TABS, formatTon, formatKgHa, formatShort } from './pesticide/usePesticideData';
 import type { Tab } from './pesticide/usePesticideData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
@@ -66,7 +67,7 @@ export default function PesticidePage() {
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={overviewByType} cx="50%" cy="50%" outerRadius={100} innerRadius={40} dataKey="value" label={({ name, percent }) => `${(name || '').substring(0, 12)} ${yuzde(((percent ?? 0) * 100), 0)}`} labelLine={false}>
-                        {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={seriesColor(i)} />)}
                       </Pie>
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                     </PieChart>
@@ -80,7 +81,7 @@ export default function PesticidePage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {overviewTopCountries.slice(0, 15).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewTopCountries.slice(0, 15).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -159,7 +160,7 @@ export default function PesticidePage() {
                       <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       
                 <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
@@ -189,7 +190,7 @@ export default function PesticidePage() {
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Kullanım']} />
                       <Bar dataKey="tonaj" radius={[0, 4, 4, 0]}>
-                        {turkeyProfile.composition.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {turkeyProfile.composition.map((_: unknown, i: number) => <Cell key={i} fill={seriesColor(i)} />)}
                       
                 <LabelList dataKey="tonaj" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>

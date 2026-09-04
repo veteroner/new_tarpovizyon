@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import {
@@ -9,9 +10,7 @@ import { Globe, TrendingUp, TrendingDown, MapPin, Target, Award, AlertTriangle, 
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
-import {
-  useFertilizerData, formatTon, formatUSD, formatShort, CHART_COLORS,
-} from './fertilizer/useFertilizerData';
+import { useFertilizerData, formatTon, formatUSD, formatShort } from './fertilizer/useFertilizerData';
 import type { Tab } from './fertilizer/useFertilizerData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
@@ -81,7 +80,7 @@ export default function FertilizerPage() {
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'İthalat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewByType.map((_: unknown, i: number) => <Cell key={i} fill={seriesColor(i)} />)}
                       
                 <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
@@ -96,7 +95,7 @@ export default function FertilizerPage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'İthalat']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {overviewTopCountries.slice(0, 15).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewTopCountries.slice(0, 15).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -187,7 +186,7 @@ export default function FertilizerPage() {
                       <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'İhracat']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {concData.slice(0, 25).map((c: { isTurkey: boolean }, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       
                 <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>

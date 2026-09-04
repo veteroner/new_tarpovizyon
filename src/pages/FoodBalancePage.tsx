@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
@@ -11,10 +12,7 @@ import { FlowSankeyCard } from '../components/FlowSankeyCard';
 import { KPICard } from '../components/KPICard';
 import { InsightCard } from '../components/InsightCard';
 import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
-import {
-  useFoodBalanceData, CHART_COLORS,
-  formatTon, formatShort, formatPercent
-} from './foodBalance/useFoodBalanceData';
+import { useFoodBalanceData, formatTon, formatShort, formatPercent } from './foodBalance/useFoodBalanceData';
 import type { Tab } from './foodBalance/useFoodBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
@@ -84,7 +82,7 @@ export default function FoodBalancePage() {
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Uretim']} />
                       <Bar dataKey="production" radius={[0, 4, 4, 0]}>
-                        {overviewByProduct.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewByProduct.map((_: any, i: number) => <Cell key={i} fill={seriesColor(i)} />)}
                       
                 <LabelList dataKey="production" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
@@ -99,7 +97,7 @@ export default function FoodBalancePage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Uretim']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>

@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, Layers, Activity, Factory, Leaf, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
@@ -10,10 +11,7 @@ import {
 import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import {
-  formatValue, formatShort, formatHa, formatYield,
-  TABS, TURKEY_COLOR, CHART_COLORS
-} from './productionTypes';
+import { formatValue, formatShort, formatHa, formatYield, TABS, TURKEY_COLOR } from './productionTypes';
 import type { Insight, OverviewKPIs, SupplyChainData, OverviewTrendPoint, Tab } from './productionTypes';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
@@ -94,7 +92,7 @@ export function OverviewTab({
               <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={110} interval={0} />
               <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                {overviewTopCountries.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                {overviewTopCountries.map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : seriesColor(i)} />)}
               
                 <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>

@@ -19,6 +19,27 @@ Bu raporda o yanlış bulgu yok. Ama not düşüyorum, çünkü aynı tuzağa bi
 düşmeyeyim: DOM'dan sayı çıkarırken sayılan şeyin ne olduğunu doğrulamadan
 sonuç yazmak, denetimin kendisini çöpe atar.
 
+### İkinci hatam — ve bu birinciden daha ağır
+
+Grafik sayarken **yalnızca açılıştaki sekmeyi** saydım. Sayfaların çoğu içerik
+sekmelerine bölünmüş (`SectionTabs`, sekme çubukları); ben her birinin
+görünen dilimini "sayfanın tamamı" sandım. Sekme sekme ölçünce:
+
+| sayfa | raporda yazan | gerçek |
+|---|---|---|
+| `world/cereals` | 2 | **19** (6 sekme) |
+| `world/livestock` | 1 | **14** (6 sekme) |
+| `turkey/red-meat` | 3 | **14** (5 bölüm, ikisi ölçülemedi) |
+| `turkey/beekeeping` | 1 | **13** (5 bölüm) |
+| `geographical-indication` | 2 | **4** (5 sekme, metin 1.334 değil 14.100) |
+
+Üçüncü bir ölçüm hatası daha: sayacım **yalnızca recharts** çiziyor.
+`BeekeepingHoneyTypesSection` gibi HTML çubuklarla çizen bölümler "0 grafik"
+görünüyordu — boş değillerdi.
+
+Sonuç: **aşağıdaki iki tablonun `G` sütunu ve ona dayanan "en zayıf sayfalar"
+maddesi geçersiz.** Metin uzunluğu sütunu da öyle — o da tek sekmenin metni.
+
 ---
 
 ## En ağır altı kusur
@@ -146,16 +167,35 @@ Rakam satan bir üründe en ucuz ve en ağır hata.
 ### 6. Dokuz bitkisel sayfa birbirinin kopyası
 
 `cereals`, `vegetables`, `fruits`, `legumes`, `oilseeds`, `sugar-crops`,
-`nuts`, `beverages`, `fiber-crops` — hepsi aynı bileşen, 9–12 grafik,
-3.200±60 karakter. Aralarındaki tek fark ürün filtresi.
+`nuts`, `beverages`, `fiber-crops` — hepsi aynı bileşen, aralarındaki tek fark
+ürün filtresi.
 
 Bu, dokuz sayfa değil bir sayfa ve bir açılır liste. Menüde dokuz satır yer
-kaplıyor, kırılımda dokuz kart, palette dokuz sonuç — ama kullanıcı için
-dokuz farklı yer yok. Buna karşılık ürün grubuna **özgü** hiçbir şey yok:
-tahılda rekolte/stok yok, meyvede don riski yok, lif bitkisinde tekstil
-talebi yok.
+kaplıyor, kırılımda dokuz kart, palette dokuz sonuç — ama kullanıcı için dokuz
+farklı yer yok. Buna karşılık ürün grubuna **özgü** hiçbir şey yok: tahılda
+rekolte/stok yok, meyvede don riski yok, lif bitkisinde tekstil talebi yok,
+fındıkta ihracat yok, yağlı tohumda ithalat bağımlılığı yok.
 
----
+Bu madde ölçüm hatasından etkilenmiyor: dokuz sayfa aynı bileşeni çağırıyor,
+bu kaynaktan doğrulandı.
+
+### 7. ~~En zayıf altı sayfa~~ — BU DA YANLIŞTI
+
+Raporun ilk hâlinde `red-meat`, `beekeeping`, `other-animal-products`,
+`geographical-indication`, `world/livestock` ve `commodity-prices` "Pro
+menüsünde yer kaplıyor ama içeriği yok" diye işaretlenmişti. Sekmeler sayılınca
+altısından dördü düştü (yukarıdaki tabloya bakınız).
+
+Ayakta kalan iki gerçek bulgu:
+
+- **`other-animal-products`** — 2 grafik, 1.077 karakter, sekmesi YOK. Bal,
+  yumurta, deri, yün, ipek hepsi tek sayfada ve yalnızca merinos yapağısı
+  çiziliyor. Bu sayfa gerçekten zayıf.
+- **`commodity-prices`** — 0 grafik ölçümü yerel önizlemeye özgü: sayfa
+  `/api.php?action=commodity_prices&api_key=…` çağırıyor ve o uç önizleme
+  sunucusunda yok (500). Ama iki gerçek sorun var: (a) emtia fiyatı zaman
+  serisidir, sayfa tablo gösteriyor; (b) **API anahtarı URL sorgu dizesinde**
+  gidiyor — istemci kodunda, herkese açık depoda.
 
 ## Sayfa sayfa — Türkiye (28 sayfa)
 

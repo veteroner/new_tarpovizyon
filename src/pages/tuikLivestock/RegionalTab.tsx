@@ -5,11 +5,11 @@ import {
   LabelList,
 } from 'recharts';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
-import { COLORS, REGION_COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
+import { REGION_COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
-import { BAR_COLOR } from '../../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { ChartCard } from '../../components/ui/Card';
 
 type Props = Pick<UseTuikLivestockDataReturn,
@@ -77,7 +77,7 @@ export default function RegionalTab({
                     labelLine={true}
                   >
                     {regionalAnalysis.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={REGION_COLORS[entry.region] || COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={REGION_COLORS[entry.region] || seriesColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
@@ -142,7 +142,7 @@ export default function RegionalTab({
                   labelLine={true}
                 >
                   {cityDataForSelectedRegion.slice(0, 10).map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />

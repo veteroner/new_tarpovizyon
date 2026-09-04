@@ -1,10 +1,11 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, PieChart, Pie, Cell, LineChart,
   BarChart, Bar
 } from 'recharts';
-import { COLORS, formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
+import { formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
@@ -102,7 +103,7 @@ export default function MilkProductionSection({
                 labelLine={{ stroke: 'var(--text-secondary)', strokeWidth: 1 }}
               >
                 {latestBreakdown.rows.map((_, idx) => (
-                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                  <Cell key={`cell-${idx}`} fill={seriesColor(idx)} />
                 ))}
               </Pie>
               <Tooltip formatter={(value: number) => [formatTon(value), ''] } />

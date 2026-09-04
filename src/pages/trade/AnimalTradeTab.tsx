@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, PieChart, Pie, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -24,7 +25,6 @@ const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
   '7': 'Tem', '8': 'Ağu', '9': 'Eyl', '10': 'Eki', '11': 'Kas', '12': 'Ara',
 };
-const PIE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#6366f1', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#84cc16', '#06b6d4'];
 
 function calcHHI(values: number[]): number {
   const total = values.reduce((a, b) => a + b, 0);
@@ -351,7 +351,7 @@ export default function AnimalTradeTab() {
                 label={({ name, percent }) => `${name?.substring(0, 12)} %${((percent ?? 0) * 100).toFixed(0)}`}
                 labelLine={{ strokeWidth: 1 }}
               >
-                {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                {pieData.map((_, i) => <Cell key={i} fill={seriesColor(i)} />)}
               </Pie>
               <Tooltip formatter={(v: number) => [formatMoney(v), 'İhracat']} />
             </PieChart>

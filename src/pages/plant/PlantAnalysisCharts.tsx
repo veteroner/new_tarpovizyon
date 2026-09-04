@@ -85,7 +85,7 @@ export default function PlantAnalysisCharts({
                   }}
                 />
                 <Scatter data={scatterData} fill="#8b5cf6">
-                  {scatterData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {scatterData.map((_, i) => <Cell key={i} fill={seriesColor(i)} />)}
                 </Scatter>
               </ScatterChart>
             </ResponsiveContainer>
@@ -130,7 +130,7 @@ export default function PlantAnalysisCharts({
                   return (
                     <g>
                       <rect x={x} y={y} width={width} height={height}
-                        style={{ fill: COLORS[idx % COLORS.length], stroke: 'var(--bg-card)', strokeWidth: 2 }} />
+                        style={{ fill: seriesColor(idx), stroke: 'var(--bg-card)', strokeWidth: 2 }} />
                       {width > 50 && height > 25 && (
                         <text x={x + width / 2} y={y + height / 2} textAnchor="middle"
                           fill="#fff" fontSize={11} fontWeight="bold">

@@ -1,4 +1,4 @@
-import { HONEY_COLORS } from './beekeepingTypes';
+import { seriesColor } from '../../utils/chartColors';
 
 export function BeekeepingHoneyTypesSection({ honeyTypesData }: { honeyTypesData: { name: string; count: number }[] }) {
   return (
@@ -34,12 +34,12 @@ export function BeekeepingHoneyTypesSection({ honeyTypesData }: { honeyTypesData
               left: 0, 
               width: '100%', 
               height: '4px', 
-              background: HONEY_COLORS[i % HONEY_COLORS.length] 
+              background: seriesColor(i) 
             }}></div>
             <div style={{ 
               fontSize: '1.5rem', 
               fontWeight: '900', 
-              color: HONEY_COLORS[i % HONEY_COLORS.length],
+              color: seriesColor(i),
               marginBottom: '6px'
             }}>
               {ht.count}

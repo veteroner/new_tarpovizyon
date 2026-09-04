@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 import { useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine, LabelList } from 'recharts';
@@ -8,12 +9,7 @@ import {
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
-import {
-  useProductBalanceData,
-  YEAR_LABELS, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor,
-  fmt, pct,
-  GREEN, GREEN_LIGHT, BLUE, RED, ORANGE, AREA_COLORS,
-} from './productBalance/useProductBalanceData';
+import { useProductBalanceData, YEAR_LABELS, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { compactValue } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
@@ -462,8 +458,8 @@ export default function ProductBalancePage() {
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 {perCapitaProducts.map((p, i) => (
                   <Area key={p} type="monotone" dataKey={p}
-                        stroke={AREA_COLORS[i % AREA_COLORS.length]}
-                        fill={AREA_COLORS[i % AREA_COLORS.length]}
+                        stroke={seriesColor(i)}
+                        fill={seriesColor(i)}
                         fillOpacity={0.1} strokeWidth={2} dot={{ r: 2 }} />
                 ))}
               </AreaChart>

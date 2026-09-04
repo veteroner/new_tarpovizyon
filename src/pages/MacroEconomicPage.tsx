@@ -15,13 +15,12 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import { translateCountry } from '../utils/countryTranslations';
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { SERIES } from '../utils/chartColors';
+import { seriesColor } from '../utils/chartColors';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
-const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 interface YearlyDataItem {
   year: string;
@@ -94,7 +93,7 @@ export default function MacroEconomicPage() {
           name: translateCountry(String(item['area'] || '')),
           value: (Number(item['total']) || 0) * 1e6,
           share: sayi(((Number(item['total']) || 0) / total * 100), 1),
-          fill: COLORS[index % COLORS.length]
+          fill: seriesColor(index)
         }));
         setCountryData(mapped);
       }
@@ -223,7 +222,7 @@ export default function MacroEconomicPage() {
                     labelLine={false}
                   >
                     {countryData.slice(0, 8).map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => [formatValue(value), indicatorName]} />

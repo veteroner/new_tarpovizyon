@@ -12,9 +12,9 @@ import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
-import { COLORS, ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
+import { ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
-import { BAR_COLOR } from '../../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { Rocket, Trophy } from 'lucide-react';
 
 const R = 'fao/uretim-hayvansal-canlihayvan';
@@ -125,7 +125,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
 
       if (animalRes.data) {
         setStocksData(animalRes.data.map((item: Record<string, string | number>, index: number) => ({
-          name: String(item.urunad || ''), value: Number(item.toplam) || 0, fill: COLORS[index % COLORS.length]
+          name: String(item.urunad || ''), value: Number(item.toplam) || 0, fill: seriesColor(index)
         })));
       }
 
@@ -135,7 +135,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       }));
       const globalTotal = allCountries.reduce((s: number, c: {value: number}) => s + c.value, 0);
       const top20Display = allCountries.slice(0, 20).map((c: {area: string; name: string; value: number}, i: number) => ({
-        ...c, share: sayi(((c.value / globalTotal) * 100), 1), fill: COLORS[i % COLORS.length]
+        ...c, share: sayi(((c.value / globalTotal) * 100), 1), fill: seriesColor(i)
       }));
       setStocksCountryData(top20Display);
 
@@ -414,7 +414,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
               {selectedItems.map((id, idx) => {
                 const animal = ANIMAL_ITEMS.find(a => a.id === id);
                 if (!animal) return null;
-                return <Area key={animal.name} type="monotone" dataKey={animal.name} stackId="1" stroke={COLORS[idx % COLORS.length]} fill={COLORS[idx % COLORS.length]} fillOpacity={0.6} />;
+                return <Area key={animal.name} type="monotone" dataKey={animal.name} stackId="1" stroke={seriesColor(idx)} fill={seriesColor(idx)} fillOpacity={0.6} />;
               })}
             </AreaChart>
           </ResponsiveContainer>
@@ -451,9 +451,9 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
-              <Pie data={stocksData.map((d, i) => ({...d, fill: COLORS[i % COLORS.length]}))} cx="50%" cy="50%" outerRadius={95} dataKey="value"
+              <Pie data={stocksData.map((d, i) => ({...d, fill: seriesColor(i)}))} cx="50%" cy="50%" outerRadius={95} dataKey="value"
                 label={(props) => { const p = props as unknown as Record<string, unknown>; const name = String(p.name ?? ''); const pct = Number(p.percent ?? 0); return `${ANIMAL_ITEMS.find(ai => ai.name === name)?.nameTR || name} ${yuzde((pct * 100), 0)}`; }} labelLine={false}>
-                {stocksData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                {stocksData.map((_, index) => (<Cell key={`cell-${index}`} fill={seriesColor(index)} />))}
               </Pie>
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Baş']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
             </PieChart>

@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde, sayi } from '../../utils/sayi';
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -11,7 +12,7 @@ import { InsightCard, type Insight } from '../../components/InsightCard';
 import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
+import { type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Sprout, TriangleAlert, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
@@ -98,7 +99,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       // Products
       const primaryData = productRes.data ? productRes.data.map((item: Record<string, string | number>, index: number) => ({
-        name: String(item.urunad || ''), value: Number(item.toplam) || 0, fill: COLORS[index % COLORS.length]
+        name: String(item.urunad || ''), value: Number(item.toplam) || 0, fill: seriesColor(index)
       })) : [];
 
       // Countries
@@ -107,7 +108,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       }));
       const globalTotal = allCountries.reduce((s: number, c: {value: number}) => s + c.value, 0);
       const top20 = allCountries.slice(0, 20).map((c: {area: string; name: string; value: number}, i: number) => ({
-        ...c, share: sayi(((c.value / globalTotal) * 100), 1), fill: COLORS[i % COLORS.length]
+        ...c, share: sayi(((c.value / globalTotal) * 100), 1), fill: seriesColor(i)
       }));
       setPrimaryCountryData(top20);
 
@@ -360,7 +361,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
               />
               <Scatter name="Ülkeler" data={primaryCountryCAGR.slice(0, 25)} fill="#3b82f6">
                 {primaryCountryCAGR.slice(0, 25).map((c, idx) => (
-                  <Cell key={`psc-${idx}`} fill={c.country.includes('Türkiye') || c.country.includes('Turkey') ? '#ef4444' : COLORS[idx % COLORS.length]} />
+                  <Cell key={`psc-${idx}`} fill={c.country.includes('Türkiye') || c.country.includes('Turkey') ? '#ef4444' : seriesColor(idx)} />
                 ))}
               </Scatter>
             </ScatterChart>

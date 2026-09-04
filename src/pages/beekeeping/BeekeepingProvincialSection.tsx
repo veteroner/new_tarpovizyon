@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import {
   Bar,
@@ -18,7 +19,7 @@ import {
   YAxis,
   Legend,
 } from 'recharts';
-import { COLORS, HONEY_COLORS, formatNumber } from './beekeepingTypes';
+import { COLORS, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
 
@@ -178,7 +179,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
                 dataKey="count"
               >
                 {honeyTypesData.slice(0, 8).map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={HONEY_COLORS[index % HONEY_COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                 ))}
               </Pie>
               <Tooltip 

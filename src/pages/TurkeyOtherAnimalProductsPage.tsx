@@ -20,13 +20,12 @@ import { fetchAgg, num } from '../services/d1';
 const R = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { BAR_COLOR, SERIES } from '../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { CalendarDays, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
-const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
 interface ProductOption {
   id: string;
@@ -196,7 +195,7 @@ export default function TurkeyOtherAnimalProductsPage() {
         const sorted = cities.sort((a, b) => b.value - a.value).slice(0, 20);
         sorted.forEach((city, i) => {
           city.share = total > 0 ? ((city.value / total) * 100).toFixed(1) : '0';
-          city.fill = COLORS[i % COLORS.length];
+          city.fill = seriesColor(i);
         });
         setCityData(sorted);
       }
@@ -306,7 +305,7 @@ export default function TurkeyOtherAnimalProductsPage() {
           <div className="chart-grid">
             <div className="chart-card" style={{ gridColumn: growthData.length > 0 ? 'span 1' : 'span 2' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <h3 className="chart-title" style={{ marginBottom: 0 }}>📈 {currentProduct.label} Üretim Trendi</h3>
+              <h3 className="chart-title" style={{ marginBottom: 0 }}>{currentProduct.label} Üretim Trendi</h3>
               <ChartInsightButton title={`${currentProduct.label} Üretim Trendi`} description="Üretim trendi" data={trendData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={300}>
@@ -374,7 +373,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                       labelLine={false}
                     >
                       {cityData.slice(0, 10).map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => [`${formatNumber(value)} ${currentProduct.birim}`, currentProduct.label]} />

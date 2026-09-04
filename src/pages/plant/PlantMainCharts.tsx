@@ -1,12 +1,12 @@
 import { yuzde } from '../../utils/sayi';
 import { ILK_YIL, SON_YIL } from './plantTypes';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
-import { COLORS, fmt, fmtShort } from './plantTypes';
+import { fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 import type { CityRow, YearRow, RegionRow, ProductRow } from './plantTypes';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
-import { BAR_COLOR } from '../../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { ChartCard } from '../../components/ui/Card';
 
 interface PlantMainChartsProps {
@@ -75,7 +75,7 @@ export default function PlantMainCharts({
                 dataKey="value"
                 label={({ name, percent }) => `${(name || '').substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={false}>
-                {cityData.slice(0, 10).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                {cityData.slice(0, 10).map((_, i) => <Cell key={i} fill={seriesColor(i)} />)}
               </Pie>
               <Tooltip formatter={(v: number) => [`${fmt(v)} ${currentBirim}`, selectedUnsur]} />
             </PieChart>

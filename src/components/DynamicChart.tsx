@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
@@ -8,10 +9,6 @@ import {
 } from 'recharts';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
-const DEFAULT_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1',
-];
 
 interface SeriesConfig {
   dataKey: string;
@@ -48,7 +45,7 @@ function resolveActiveSeries(data: Record<string, any>[], xKey: string, series?:
   if (series && series.length) return series;
   return Object.keys(data[0] ?? {})
     .filter(k => k !== xKey && k !== 'color' && typeof data[0][k] === 'number')
-    .map((k, i) => ({ dataKey: k, name: k, color: DEFAULT_COLORS[i % DEFAULT_COLORS.length] }));
+    .map((k, i) => ({ dataKey: k, name: k, color: seriesColor(i) }));
 }
 
 export default function DynamicChart({ config }: { config: ChartConfig }) {
@@ -96,7 +93,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
               labelLine
             >
               {data.map((entry, i) => (
-                <Cell key={i} fill={(entry.color as string) ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]} />
+                <Cell key={i} fill={(entry.color as string) ?? seriesColor(i)} />
               ))}
             </Pie>
             <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
@@ -121,7 +118,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
             <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
             <Legend />
             {activeSeries.map((s, i) => {
-              const color = s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+              const color = s.color ?? seriesColor(i);
               if (s.type === 'bar')
                 return <Bar key={s.dataKey} dataKey={s.dataKey} name={s.name ?? s.dataKey} fill={color} radius={[3, 3, 0, 0]} stackId={stacked ? 'stack' : undefined} />;
               if (s.type === 'area')
@@ -150,7 +147,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
             {activeSeries.length > 1 && <Legend />}
             {activeSeries.map((s, i) => (
               <Bar key={s.dataKey} dataKey={s.dataKey} name={s.name ?? s.dataKey}
-                fill={s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]}
+                fill={s.color ?? seriesColor(i)}
                 radius={[4, 4, 0, 0]}
                 stackId={stacked ? 'stack' : undefined}
               />
@@ -177,7 +174,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
             {activeSeries.length > 1 && <Legend />}
             {activeSeries.map((s, i) => (
               <Line key={s.dataKey} type="monotone" dataKey={s.dataKey} name={s.name ?? s.dataKey}
-                stroke={s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]}
+                stroke={s.color ?? seriesColor(i)}
                 strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
             ))}
           </LineChart>
@@ -195,7 +192,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
         <AreaChart data={data} margin={{ top: 5, right: 8, left: 4, bottom: 5 }}>
           <defs>
             {activeSeries.map((s, i) => {
-              const color = s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+              const color = s.color ?? seriesColor(i);
               return (
                 <linearGradient key={s.dataKey} id={`dynGrad_${s.dataKey}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={color} stopOpacity={0.4} />
@@ -211,7 +208,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
           <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
           {activeSeries.length > 1 && <Legend />}
           {activeSeries.map((s, i) => {
-            const color = s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+            const color = s.color ?? seriesColor(i);
             return (
               <Area key={s.dataKey} type="monotone" dataKey={s.dataKey} name={s.name ?? s.dataKey}
                 stroke={color} strokeWidth={2.5}

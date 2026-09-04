@@ -1,4 +1,4 @@
-import { AXIS } from '../../utils/chartColors';
+import { AXIS, seriesColor } from '../../utils/chartColors';
 import { endeksle } from '../../utils/endeks';
 import { yuzde, sayi } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -12,7 +12,7 @@ import { InsightCard } from '../../components/InsightCard';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
-import { formatValue, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
+import { formatValue, TURKEY_COLOR } from './productionTypes';
 import type { Insight, ProcessedKPIs } from './productionTypes';
 import { ChartCard } from '../../components/ui/Card';
 
@@ -98,7 +98,7 @@ export function ProcessedTab({
               <PieChart>
                 <Pie data={processedTopCountries.slice(0, 10)} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="production" nameKey="country"
                   label={(props: any) => { const p = props as unknown as Record<string, unknown>; return `${String(p.country).substring(0, 10)} ${yuzde(((Number(p.percent) || 0) * 100), 0)}`; }}>
-                  {processedTopCountries.slice(0, 10).map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  {processedTopCountries.slice(0, 10).map((e: any, i: number) => <Cell key={`c-${i}`} fill={e.isTurkey ? TURKEY_COLOR : seriesColor(i)} />)}
                 </Pie>
                 <Tooltip formatter={(v: unknown) => formatValue(Number(v))} />
               </PieChart>

@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from 'recharts';
@@ -25,7 +26,6 @@ const MONTHS_TR: Record<string, string> = {
   '1': 'Oca', '2': 'Şub', '3': 'Mar', '4': 'Nis', '5': 'May', '6': 'Haz',
   '7': 'Tem', '8': 'Ağu', '9': 'Eyl', '10': 'Eki', '11': 'Kas', '12': 'Ara',
 };
-const COLORS = ['#10b981', '#059669', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b', '#22c55e', '#16a34a', '#4ade80', '#86efac', '#bbf7d0'];
 
 interface ProductRow { name: string; exp: number; imp: number; balance: number; expQty: number; impQty: number; unit: string }
 interface CountryRow { name: string; exp: number; imp: number }
@@ -151,7 +151,7 @@ export default function PlantTradeTab() {
 
   const treemapData = useMemo(() =>
     products.filter(p => p.exp > 0).slice(0, 15).map((p, i) => ({
-      name: p.name, size: p.exp, value: p.exp, fill: COLORS[i % COLORS.length],
+      name: p.name, size: p.exp, value: p.exp, fill: seriesColor(i),
     })), [products]);
   const plantContext = { group: 'Bitkisel ticaret', year: selectedYear, product: selectedProduct || 'Tüm ürünler', totalExp, totalImp, balance, productCount, countryCount, yoyGrowth: Number(yoyGrowth.toFixed(2)), impChange: Number(impChange.toFixed(2)) };
   const countryChartData = countries.map(c => ({

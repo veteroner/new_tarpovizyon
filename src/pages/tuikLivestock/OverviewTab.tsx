@@ -4,11 +4,11 @@ import {
   AreaChart, Area, PieChart, Pie, Cell,
   LabelList,
 } from 'recharts';
-import { COLORS, formatNumber, formatShort } from './tuikLivestockTypes';
+import { formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
-import { BAR_COLOR } from '../../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Beef, TrendingUp, Trophy } from 'lucide-react';
 
@@ -120,7 +120,7 @@ export default function OverviewTab({
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={120} innerRadius={50} dataKey="value"
                   label={({ name, percent }) => `${name?.substring(0, 10)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                   labelLine={false}>
-                  {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                  {categoryData.map((_, index) => (<Cell key={`cell-${index}`} fill={seriesColor(index)} />))}
                 </Pie>
                 <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, '']} />
               </PieChart>
@@ -170,7 +170,7 @@ export default function OverviewTab({
                 dataKey="value"
                 label={({ name, percent }) => `${name?.substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={false}>
-                {cityData.slice(0, 10).map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                {cityData.slice(0, 10).map((_, index) => (<Cell key={`cell-${index}`} fill={seriesColor(index)} />))}
               </Pie>
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
             </PieChart>

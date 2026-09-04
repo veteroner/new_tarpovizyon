@@ -1,9 +1,10 @@
+import { seriesColor } from '../../utils/chartColors';
 import {
   PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { TurkeyHeatMap } from '../../components/TurkeyHeatMap';
 import type { ProvinceData, GIMetrics } from './giTypes';
-import { COLORS, formatNumber } from './giTypes';
+import { formatNumber } from './giTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 
 interface Props {
@@ -126,7 +127,7 @@ export function GIOverviewTab({
                 labelLine={true}
               >
                 {typeData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                 ))}
               </Pie>
               <Tooltip

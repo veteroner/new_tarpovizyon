@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
@@ -102,7 +103,7 @@ export default function LandUsePage() {
                       <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Alan']} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {overviewLandTypes.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewLandTypes.map((_: any, i: number) => <Cell key={i} fill={seriesColor(i)} />)}
                       
                 <LabelList dataKey="value" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
@@ -117,7 +118,7 @@ export default function LandUsePage() {
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {overviewTopCountries.slice(0, 15).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -187,7 +188,7 @@ export default function LandUsePage() {
                       <Tooltip formatter={(v: number) => [formatArea(v), '']} />
                       <Legend />
                       {Object.keys(transformData[0] || {}).filter(k => k !== 'year').map((key, i) => (
-                        <Line key={key} type="monotone" dataKey={key} name={key} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />
+                        <Line key={key} type="monotone" dataKey={key} name={key} stroke={seriesColor(i)} strokeWidth={2} dot={false} />
                       ))}
                     </LineChart>
                   </ResponsiveContainer>
@@ -234,7 +235,7 @@ export default function LandUsePage() {
                       <YAxis type="category" dataKey="country" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Bar dataKey="agLand" radius={[0, 4, 4, 0]}>
-                        {benchmarkData.slice(0, 30).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        {benchmarkData.slice(0, 30).map((c: any, i: number) => <Cell key={i} fill={c.isTurkey ? '#ff6b35' : seriesColor(i)} />)}
                       
                 <LabelList dataKey="agLand" position="right" formatter={compactValue} style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
               </Bar>
@@ -278,7 +279,7 @@ export default function LandUsePage() {
                       <Tooltip formatter={(v: number) => [v ? formatArea(v) : 'N/A', '']} />
                       <Legend />
                       {Object.keys(turkeyTrends[0] || {}).filter(k => k !== 'year').map((key, i) => (
-                        <Line key={key} type="monotone" dataKey={key} name={key} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} connectNulls />
+                        <Line key={key} type="monotone" dataKey={key} name={key} stroke={seriesColor(i)} strokeWidth={2} dot={false} connectNulls />
                       ))}
                     </LineChart>
                   </ResponsiveContainer>
