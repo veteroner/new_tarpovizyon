@@ -82,7 +82,7 @@ export default function SulamaPlanPage() {
       <div className="sp-topbar">
         <button className="sp-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="sp-topbar__title">
-          <span>💧</span>
+          <span></span>
           <span>Sulama Planlayıcı</span>
         </div>
         {state.step > 1 && (

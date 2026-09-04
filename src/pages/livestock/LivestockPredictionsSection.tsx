@@ -273,17 +273,17 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       if (turkeyForecasts.length > 0) {
         const trGrowing = turkeyForecasts.filter(t => t.changePercent > 0);
         ins.push({ id: `pr${iid++}`, type: trGrowing.length > turkeyForecasts.length / 2 ? 'growth' : 'warning',
-          message: `Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${translateProduct(trGrowing[0].product)} (+%${trGrowing[0].changePercent.toFixed(1)})` : ''}`,
+          message: `Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${translateProduct(trGrowing[0].product)} (+${yuzde(trGrowing[0].changePercent, 1)})` : ''}`,
           severity: 'medium', category: 'TÜRKİYE' });
       }
       if (risks.length > 0) {
         ins.push({ id: `pr${iid++}`, type: 'warning',
-          message: `⚠️ ${risks.length} ülke-ürün kombinasyonunda kritik düşüş (CAGR<-5%). En şiddetli: ${risks[0].country} - ${translateProduct(risks[0].product)} (%${risks[0].decline.toFixed(1)})`,
+          message: `⚠️ ${risks.length} ülke-ürün kombinasyonunda kritik düşüş (CAGR<-5%). En şiddetli: ${risks[0].country} - ${translateProduct(risks[0].product)} (${yuzde(risks[0].decline, 1)})`,
           severity: 'high', category: 'RİSK' });
       }
       if (anomalies.length > 0) {
         ins.push({ id: `pr${iid}`, type: 'info',
-          message: `🔍 ${anomalies.length} anomali tespit edildi (Z>2.5). ${anomalies.filter(a => a.type === 'SPIKE').length} ani artış, ${anomalies.filter(a => a.type === 'DROP').length} ani düşüş.`,
+          message: `${anomalies.length} anomali tespit edildi (Z>2.5). ${anomalies.filter(a => a.type === 'SPIKE').length} ani artış, ${anomalies.filter(a => a.type === 'DROP').length} ani düşüş.`,
           severity: 'medium', category: 'ANOMALİ' });
       }
       setPredInsights(ins);
@@ -309,7 +309,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <div className="kpi-subtitle">Prophet / 3Y projeksiyon ({parseInt(selectedYear) + 1}-{parseInt(selectedYear) + 3})</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">MEDYAN R²</span><div className="kpi-icon" style={{background: predKPIs.avgR2 > 0.7 ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)', color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}>📐</div></div>
+            <div className="kpi-header"><span className="kpi-title">MEDYAN R²</span><div className="kpi-icon" style={{background: predKPIs.avgR2 > 0.7 ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)', color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}></div></div>
             <div className="kpi-value" style={{color: predKPIs.avgR2 > 0.7 ? '#22c55e' : '#f59e0b'}}>{predKPIs.avgR2.toFixed(3)}</div>
             <div className="kpi-subtitle">{predKPIs.highConfidence} yüksek güvenilir (R²&gt;0.8)</div>
           </div>
@@ -551,8 +551,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       {/* Methodology */}
       <div style={{marginTop: '20px', padding: '15px', background: 'rgba(59,130,246,.08)', borderRadius: '12px', border: '1px solid rgba(59,130,246,.2)'}}>
-        <div style={{fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6}}>
-          💡 <strong>Tahmin Metodolojisi:</strong> Lineer regresyon modeli 15 yıllık tarihçe üzerinden çalışır. R² değeri modelin açıklayıcılığını ölçer (0-1). <br/>
+        <div style={{fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6}}><strong>Tahmin Metodolojisi:</strong> Lineer regresyon modeli 15 yıllık tarihçe üzerinden çalışır. R² değeri modelin açıklayıcılığını ölçer (0-1). <br/>
           <span style={{color: '#22c55e'}}>■</span> R²&gt;0.8 = Mükemmel &nbsp; <span style={{color: '#f59e0b'}}>■</span> 0.6-0.8 = İyi &nbsp; <span style={{color: '#94a3b8'}}>■</span> &lt;0.6 = Düşük güven. Anomali: Z-score&gt;2.5 olan olağandışı değişimler.
         </div>
       </div>

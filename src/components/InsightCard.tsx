@@ -29,13 +29,12 @@ const INSIGHT_COLORS = {
   info: { bg: 'rgba(59, 130, 246, 0.1)', border: '#3b82f6', icon: '#3b82f6' }
 };
 
-const INSIGHT_EMOJIS = {
-  growth: '🚀',
-  decline: '📉',
-  warning: '⚠️',
-  achievement: '🏆',
-  info: '💡'
-};
+/*
+ * EMOJİ KATMANI KALDIRILDI. Bu kartta zaten yukarıda lucide `INSIGHT_ICONS`
+ * vardı; emoji onların YANINDA ikinci bir ikon katmanı olarak duruyordu —
+ * aynı bilgi iki kez, biri platforma göre değişen glifle ve ekran okuyucuda
+ * adıyla okunarak ("roket Büyüme").
+ */
 
 export function InsightCard({ insights, maxDisplay = 10 }: InsightCardProps) {
   const displayInsights = insights.slice(0, maxDisplay);
@@ -69,7 +68,6 @@ export function InsightCard({ insights, maxDisplay = 10 }: InsightCardProps) {
         {displayInsights.map((insight, index) => {
           const Icon = INSIGHT_ICONS[insight.type];
           const colors = INSIGHT_COLORS[insight.type];
-          const emoji = INSIGHT_EMOJIS[insight.type];
 
           return (
             <div
@@ -99,8 +97,7 @@ export function InsightCard({ insights, maxDisplay = 10 }: InsightCardProps) {
                 lineHeight: 1,
                 flexShrink: 0
               }}>
-                {emoji}
-              </div>
+                </div>
               <div style={{ flex: 1 }}>
                 <div style={{
                   display: 'flex',

@@ -1,4 +1,4 @@
-import { kisa, eksen } from '../../utils/sayi';
+import { kisa, eksen, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -364,13 +364,13 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
 
       const insights: Insight[] = [];
       insights.push({ id: 'ov1', type: 'info', message: `Dunya toplam tarim arazisi ${formatArea(worldAg)} - ${topCountries.length} buyuk uretici ulke`, severity: 'low', category: 'Kapsam' });
-      if (worldYoY < -0.5) insights.push({ id: 'ov2', type: 'decline', message: `Dunya tarim arazisi onceki yila gore %${Math.abs(worldYoY).toFixed(2)} azaldi`, severity: 'high', category: 'Trend' });
-      else if (worldYoY > 0.5) insights.push({ id: 'ov2', type: 'growth', message: `Dunya tarim arazisi onceki yila gore %${worldYoY.toFixed(2)} artti`, severity: 'medium', category: 'Trend' });
-      if (turkeyRank > 0 && turkeyRank <= 15) insights.push({ id: 'ov3', type: 'achievement', message: `Turkiye tarim arazisinde dunya ${turkeyRank}. sirada - toplam ${formatArea(turkeyAg)} (dunya payi %${turkeyShare.toFixed(2)})`, severity: 'high', category: 'Turkiye' });
-      if (irrigationRate < 30) insights.push({ id: 'ov4', type: 'warning', message: `Turkiye sulama orani sadece %${irrigationRate.toFixed(1)} - sulama altyapisi yatirim potansiyeli yuksek`, severity: 'high', category: 'Sulama' });
-      else insights.push({ id: 'ov4', type: 'achievement', message: `Turkiye sulama orani %${irrigationRate.toFixed(1)} - guclu altyapi`, severity: 'medium', category: 'Sulama' });
-      if (fallowRate > 15) insights.push({ id: 'ov5', type: 'warning', message: `Nadas orani %${fallowRate.toFixed(1)} - islenebilir arazinin onemli kismi atil durumda`, severity: 'medium', category: 'Verimlilik' });
-      if (worldCAGR && worldCAGR.cagr < 0) insights.push({ id: 'ov6', type: 'decline', message: `Dunya tarim arazisi uzun vadede yillik %${Math.abs(worldCAGR.cagr).toFixed(2)} CAGR ile azaliyor`, severity: 'high', category: 'Uzun Vade' });
+      if (worldYoY < -0.5) insights.push({ id: 'ov2', type: 'decline', message: `Dunya tarim arazisi onceki yila gore ${yuzde(Math.abs(worldYoY), 2)} azaldi`, severity: 'high', category: 'Trend' });
+      else if (worldYoY > 0.5) insights.push({ id: 'ov2', type: 'growth', message: `Dunya tarim arazisi onceki yila gore ${yuzde(worldYoY, 2)} artti`, severity: 'medium', category: 'Trend' });
+      if (turkeyRank > 0 && turkeyRank <= 15) insights.push({ id: 'ov3', type: 'achievement', message: `Turkiye tarim arazisinde dunya ${turkeyRank}. sirada - toplam ${formatArea(turkeyAg)} (dunya payi ${yuzde(turkeyShare, 2)})`, severity: 'high', category: 'Turkiye' });
+      if (irrigationRate < 30) insights.push({ id: 'ov4', type: 'warning', message: `Turkiye sulama orani sadece ${yuzde(irrigationRate, 1)} - sulama altyapisi yatirim potansiyeli yuksek`, severity: 'high', category: 'Sulama' });
+      else insights.push({ id: 'ov4', type: 'achievement', message: `Turkiye sulama orani ${yuzde(irrigationRate, 1)} - guclu altyapi`, severity: 'medium', category: 'Sulama' });
+      if (fallowRate > 15) insights.push({ id: 'ov5', type: 'warning', message: `Nadas orani ${yuzde(fallowRate, 1)} - islenebilir arazinin onemli kismi atil durumda`, severity: 'medium', category: 'Verimlilik' });
+      if (worldCAGR && worldCAGR.cagr < 0) insights.push({ id: 'ov6', type: 'decline', message: `Dunya tarim arazisi uzun vadede yillik ${yuzde(Math.abs(worldCAGR.cagr), 2)} CAGR ile azaliyor`, severity: 'high', category: 'Uzun Vade' });
       setOverviewInsights(insights);
     } catch (error) { console.error('Overview veri hatasi:', error); }
     finally { setLoading(false); }
@@ -512,13 +512,13 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
 
       const ins: Insight[] = [];
       const agChange = transformComp.find(t => t.name === 'Tarım arazisi');
-      if (agChange && agChange.change < 0) ins.push({ id: 'tr1', type: 'decline', message: `Turkiye tarim arazisi ${agChange.startYear}-${agChange.endYear} doneminde ${formatArea(Math.abs(agChange.change))} azaldi (%${Math.abs(agChange.changePct).toFixed(1)} kayip)`, severity: 'high', category: 'Arazi Kaybi' });
+      if (agChange && agChange.change < 0) ins.push({ id: 'tr1', type: 'decline', message: `Turkiye tarim arazisi ${agChange.startYear}-${agChange.endYear} doneminde ${formatArea(Math.abs(agChange.change))} azaldi (${yuzde(Math.abs(agChange.changePct), 1)} kayip)`, severity: 'high', category: 'Arazi Kaybi' });
       const forestChange = transformComp.find(t => t.name === 'Orman alanı');
       if (forestChange && forestChange.change > 0) ins.push({ id: 'tr2', type: 'growth', message: `Ormanlik alan ${forestChange.startYear}-${forestChange.endYear} doneminde ${formatArea(forestChange.change)} artti - agaclandirma basarisi`, severity: 'medium', category: 'Orman' });
       const irrigChange = transformComp.find(t => t.name.includes('Sulama'));
-      if (irrigChange && irrigChange.change > 0) ins.push({ id: 'tr3', type: 'growth', message: `Sulama altyapisi %${irrigChange.changePct.toFixed(1)} buyudu - yillik CAGR %${irrigChange.cagr.toFixed(2)}`, severity: 'medium', category: 'Sulama' });
+      if (irrigChange && irrigChange.change > 0) ins.push({ id: 'tr3', type: 'growth', message: `Sulama altyapisi ${yuzde(irrigChange.changePct, 1)} buyudu - yillik CAGR ${yuzde(irrigChange.cagr, 2)}`, severity: 'medium', category: 'Sulama' });
       const pastureChange = transformComp.find(t => t.name === 'Sürekli çayırlar ve meralar');
-      if (pastureChange && pastureChange.change < 0) ins.push({ id: 'tr4', type: 'warning', message: `Cayir-mera alani %${Math.abs(pastureChange.changePct).toFixed(1)} azaldi - hayvancilik kapasite riski`, severity: 'medium', category: 'Mera' });
+      if (pastureChange && pastureChange.change < 0) ins.push({ id: 'tr4', type: 'warning', message: `Cayir-mera alani ${yuzde(Math.abs(pastureChange.changePct), 1)} azaldi - hayvancilik kapasite riski`, severity: 'medium', category: 'Mera' });
       setTransformInsights(ins);
     } catch (error) { console.error('Transform veri hatasi:', error); }
     finally { setLoading(false); }
@@ -548,7 +548,7 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
       if (turkeyInBench) ins.push({ id: 'bm1', type: turkeyInBench.rank <= 15 ? 'achievement' : 'info', message: `Turkiye tarim arazisi buyuklugunde dunya ${turkeyInBench.rank}. - ${formatArea(turkeyInBench.agLand)}`, severity: turkeyInBench.rank <= 10 ? 'high' : 'medium', category: 'Siralama' });
       if (hhi) {
         const concLabel = hhi.concentration === 'LOW' ? 'dusuk konsantrasyon' : hhi.concentration === 'MODERATE' ? 'orta konsantrasyon' : 'yuksek konsantrasyon';
-        ins.push({ id: 'bm2', type: hhi.concentration === 'LOW' ? 'info' : 'warning', message: `Tarim arazisi dagilimi: HHI ${hhi.hhi.toFixed(0)} (${concLabel}) - Top 3 ulke payi %${hhi.top3Share.toFixed(1)}`, severity: 'medium', category: 'Konsantrasyon' });
+        ins.push({ id: 'bm2', type: hhi.concentration === 'LOW' ? 'info' : 'warning', message: `Tarim arazisi dagilimi: HHI ${hhi.hhi.toFixed(0)} (${concLabel}) - Top 3 ulke payi ${yuzde(hhi.top3Share, 1)}`, severity: 'medium', category: 'Konsantrasyon' });
       }
       setBenchmarkInsights(ins);
     } catch (error) { console.error('Benchmark veri hatasi:', error); }
@@ -617,9 +617,9 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
 
       const ins: Insight[] = [];
       const agCagr = calculateCAGR(turkeyByType['Tarım arazisi'] || []);
-      if (agCagr) ins.push({ id: 'tp1', type: agCagr.cagr > 0 ? 'growth' : 'decline', message: `Turkiye tarim arazisi 2000den bu yana yillik %${Math.abs(agCagr.cagr).toFixed(2)} CAGR ile ${agCagr.cagr > 0 ? 'buyudu' : 'kuculdu'}`, severity: 'high', category: 'Trend' });
+      if (agCagr) ins.push({ id: 'tp1', type: agCagr.cagr > 0 ? 'growth' : 'decline', message: `Turkiye tarim arazisi 2000den bu yana yillik ${yuzde(Math.abs(agCagr.cagr), 2)} CAGR ile ${agCagr.cagr > 0 ? 'buyudu' : 'kuculdu'}`, severity: 'high', category: 'Trend' });
       const irrigCagr = calculateCAGR(turkeyByType['Sulama altyapısı bulunan arazi'] || []);
-      if (irrigCagr && irrigCagr.cagr > 0) ins.push({ id: 'tp2', type: 'growth', message: `Sulama altyapisi yillik %${irrigCagr.cagr.toFixed(2)} CAGR ile buyuyor${irrigRank > 0 ? ' - dunya ' + irrigRank + '. sirada' : ''}`, severity: 'medium', category: 'Sulama' });
+      if (irrigCagr && irrigCagr.cagr > 0) ins.push({ id: 'tp2', type: 'growth', message: `Sulama altyapisi yillik ${yuzde(irrigCagr.cagr, 2)} CAGR ile buyuyor${irrigRank > 0 ? ' - dunya ' + irrigRank + '. sirada' : ''}`, severity: 'medium', category: 'Sulama' });
       if (turkeyData['Tarım arazisi'] && worldAvgs['Tarım arazisi']) {
         const ratio = turkeyData['Tarım arazisi'] / worldAvgs['Tarım arazisi'];
         ins.push({ id: 'tp3', type: ratio > 1 ? 'achievement' : 'info', message: `Turkiye tarim arazisi dunya ulke ortalamasinin ${ratio.toFixed(1)}x ${ratio > 1 ? 'uzerinde' : 'altinda'} (${formatArea(turkeyData['Tarım arazisi'])} vs ${formatArea(worldAvgs['Tarım arazisi'])})`, severity: 'medium', category: 'Benchmark' });
@@ -666,10 +666,10 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
 
       const ins: Insight[] = [];
       if (turkeyTrend) {
-        ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye tarim arazisi trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, R2 ${turkeyForecast.r2.toFixed(3)}, ${turkeyTrend.acceleration > 0 ? 'hizlaniyor' : 'yavasliyor'}`, severity: 'high', category: 'Tahmin' });
+        ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye tarim arazisi trendi: CAGR ${yuzde(turkeyTrend.cagr, 2)}, R2 ${turkeyForecast.r2.toFixed(3)}, ${turkeyTrend.acceleration > 0 ? 'hizlaniyor' : 'yavasliyor'}`, severity: 'high', category: 'Tahmin' });
         if (turkeyTrend.forecast3y > 0) ins.push({ id: 'fc2', type: 'info', message: `3 yillik projeksiyon: ${formatArea(turkeyTrend.forecast3y)} (lineer model)`, severity: 'medium', category: 'Projeksiyon' });
       }
-      if (worldTrend) ins.push({ id: 'fc3', type: worldTrend.direction === 'down' ? 'warning' : 'info', message: `Dunya tarim arazisi trendi: CAGR %${worldTrend.cagr.toFixed(2)}, volatilite %${worldTrend.volatility.toFixed(1)}`, severity: 'medium', category: 'Dunya' });
+      if (worldTrend) ins.push({ id: 'fc3', type: worldTrend.direction === 'down' ? 'warning' : 'info', message: `Dunya tarim arazisi trendi: CAGR ${yuzde(worldTrend.cagr, 2)}, volatilite ${yuzde(worldTrend.volatility, 1)}`, severity: 'medium', category: 'Dunya' });
       setForecastInsights(ins);
     } catch (error) { console.error('Forecast veri hatasi:', error); }
     finally { setLoading(false); }
@@ -700,32 +700,32 @@ export function useLandUseData(activeTab: Tab, transitionOverrideVersion = 0) {
       if (agBefore > 0 && agNow < agBefore) {
         const loss = agBefore - agNow;
         const lossPct = (loss / agBefore) * 100;
-        alerts.push({ id: 'int-ag-loss', severity: lossPct > 5 ? 'critical' : 'warning', title: 'Tarim Arazisi Kaybi', message: `2010-2022 doneminde ${formatArea(loss)} tarim arazisi kaybedildi (%${lossPct.toFixed(1)})`, metric: 'Arazi kaybi', value: loss });
+        alerts.push({ id: 'int-ag-loss', severity: lossPct > 5 ? 'critical' : 'warning', title: 'Tarim Arazisi Kaybi', message: `2010-2022 doneminde ${formatArea(loss)} tarim arazisi kaybedildi (${yuzde(lossPct, 1)})`, metric: 'Arazi kaybi', value: loss });
       }
       const irrigNow = turkeyNow['Sulama altyapısı bulunan arazi'] || 0;
       const irrigBefore = turkeyBefore['Sulama altyapısı bulunan arazi'] || 0;
       if (irrigBefore > 0 && irrigNow > irrigBefore) {
         const growth = irrigNow - irrigBefore;
         const growthPct = (growth / irrigBefore) * 100;
-        alerts.push({ id: 'int-irrig-growth', severity: 'positive', title: 'Sulama Altyapisi Buyumesi', message: `2010-2022 doneminde ${formatArea(growth)} yeni sulama alani (%${growthPct.toFixed(1)} artis)`, metric: 'Sulama artisi', value: growth });
+        alerts.push({ id: 'int-irrig-growth', severity: 'positive', title: 'Sulama Altyapisi Buyumesi', message: `2010-2022 doneminde ${formatArea(growth)} yeni sulama alani (${yuzde(growthPct, 1)} artis)`, metric: 'Sulama artisi', value: growth });
       }
       const fallowNow = turkeyNow['Geçici nadas alanı'] || 0;
       const arableNow = turkeyNow['İşlenebilir arazi'] || 0;
       if (arableNow > 0) {
         const fallowRate = (fallowNow / arableNow) * 100;
-        if (fallowRate > 15) alerts.push({ id: 'int-fallow-high', severity: 'warning', title: 'Yuksek Nadas Orani', message: `Islenebilir arazinin %${fallowRate.toFixed(1)} nadas - modern tarim yontemleriyle azaltilabilir`, metric: 'Nadas orani', value: fallowRate });
+        if (fallowRate > 15) alerts.push({ id: 'int-fallow-high', severity: 'warning', title: 'Yuksek Nadas Orani', message: `Islenebilir arazinin ${yuzde(fallowRate, 1)} nadas - modern tarim yontemleriyle azaltilabilir`, metric: 'Nadas orani', value: fallowRate });
       }
       const forestNow = turkeyNow['Orman alanı'] || 0;
       const forestBefore = turkeyBefore['Orman alanı'] || 0;
       if (forestBefore > 0) {
         const forestChange = forestNow - forestBefore;
         const forestPct = (forestChange / forestBefore) * 100;
-        alerts.push({ id: 'int-forest', severity: forestChange > 0 ? 'positive' : 'critical', title: forestChange > 0 ? 'Ormanlik Alan Artisi' : 'Ormansizlasma', message: `2010-2022: ${forestChange > 0 ? '+' : ''}${formatArea(forestChange)} (${forestPct > 0 ? '+' : ''}%${forestPct.toFixed(1)})`, metric: 'Orman degisimi', value: forestChange });
+        alerts.push({ id: 'int-forest', severity: forestChange > 0 ? 'positive' : 'critical', title: forestChange > 0 ? 'Ormanlik Alan Artisi' : 'Ormansizlasma', message: `2010-2022: ${forestChange > 0 ? '+' : ''}${formatArea(forestChange)} (${forestPct > 0 ? '+' : ''}${yuzde(forestPct, 1)})`, metric: 'Orman degisimi', value: forestChange });
       }
       if (agNow > 0 && worldAvg['Tarım arazisi'] > 0 && worldAvg['Sulama altyapısı bulunan arazi'] > 0) {
         const trIrrigRate = irrigNow / agNow * 100;
         const worldIrrigRate = worldAvg['Sulama altyapısı bulunan arazi'] / worldAvg['Tarım arazisi'] * 100;
-        alerts.push({ id: 'int-irrig-bench', severity: trIrrigRate > worldIrrigRate ? 'positive' : 'info', title: 'Sulama Orani Karsilastirma', message: `Turkiye: %${trIrrigRate.toFixed(1)} vs Dunya ort.: %${worldIrrigRate.toFixed(1)}`, metric: 'Sulama orani', value: trIrrigRate });
+        alerts.push({ id: 'int-irrig-bench', severity: trIrrigRate > worldIrrigRate ? 'positive' : 'info', title: 'Sulama Orani Karsilastirma', message: `Turkiye: ${yuzde(trIrrigRate, 1)} vs Dunya ort.: ${yuzde(worldIrrigRate, 1)}`, metric: 'Sulama orani', value: trIrrigRate });
       }
       setIntelligenceAlerts(alerts);
 

@@ -1,3 +1,4 @@
+import { kisa, eksen } from '../../utils/sayi';
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface HistoricalData {
@@ -64,12 +65,7 @@ export type MapFilterKey = 'toplam' | 'sigir' | 'manda' | 'koyun' | 'keci' | 'ko
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
-export const formatValue = (v: number): string =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} Milyon` :
-  v >= 1_000 ? `${(v / 1_000).toFixed(0)} Bin` :
-  v.toFixed(0);
+/* Merkezî biçimlendirici: yerel kopya nokta ondalık üretiyordu. */
+export const formatValue = (v: number): string => kisa(v);
 
-export const formatShort = (v: number): string =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)} Mln` :
-  v >= 1_000 ? `${(v / 1_000).toFixed(0)} Bin` :
-  v.toString();
+export const formatShort = (v: number): string => eksen(v);

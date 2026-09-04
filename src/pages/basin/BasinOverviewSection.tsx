@@ -258,8 +258,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
             </BarChart>
           </ResponsiveContainer>
         )}
-        <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-          💡 2024 yılı ilçe bazlı bitkisel üretim verileri (TUIK)
+        <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)' }}>2024 yılı ilçe bazlı bitkisel üretim verileri (TUIK)
         </div>
       </div>
 
@@ -450,8 +449,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
               fontWeight: 600,
               width: '100%'
             }}
-          >
-            📊 {selectedProductsForTrend.length > 0 ? `${selectedProductsForTrend.length} Ürün için Trend Göster` : 'Ürün Seçin'}
+          >{selectedProductsForTrend.length > 0 ? `${selectedProductsForTrend.length} Ürün için Trend Göster` : 'Ürün Seçin'}
           </button>
           {selectedProductsForTrend.length > 0 && (
             <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>

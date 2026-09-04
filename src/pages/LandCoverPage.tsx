@@ -259,7 +259,7 @@ export default function LandCoverPage() {
             height={270}
             stripKey="share"
             stripLabel="Pay"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Bar dataKey="value" name="Alan" fill="#22c55e" radius={[4, 4, 0, 0]} />

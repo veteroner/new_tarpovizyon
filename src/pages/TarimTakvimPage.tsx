@@ -66,7 +66,7 @@ export default function TarimTakvimPage() {
       <div className="tt-topbar">
         <button className="tt-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="tt-topbar__title">
-          <span>📅</span>
+          <span></span>
           <span>Tarımsal Takvim</span>
         </div>
         <div style={{ width: '100px' }} />

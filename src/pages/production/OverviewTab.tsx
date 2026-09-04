@@ -36,10 +36,10 @@ export function OverviewTab({
         <KPICard title="Dünya Toplam Üretim" value={formatValue(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.worldYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.worldYoY, 1)} | ${overviewKPIs.countryCount} ülke`} icon={Globe} color="blue" large />
         <KPICard title="Dünya Ekim Alanı" value={formatHa(overviewKPIs.worldArea)} subtitle={`${overviewKPIs.productCount} ürün`} icon={Layers} color="green" />
         <KPICard title="Dünya Ort. Verim" value={formatYield(overviewKPIs.worldYield)} subtitle="Tüm ürünler ortalaması" icon={Activity} color="teal" />
-        <KPICard title="İşlenmiş Üretim" value={formatValue(overviewKPIs.processedTotal)} subtitle={`İşleme oranı: %${overviewKPIs.processingRatio.toFixed(1)}`} icon={Factory} color="purple" />
+        <KPICard title="İşlenmiş Üretim" value={formatValue(overviewKPIs.processedTotal)} subtitle={`İşleme oranı: ${yuzde(overviewKPIs.processingRatio, 1)}`} icon={Factory} color="purple" />
       </div>
       <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <KPICard title="Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.turkeyYoY, 1)}`} icon={Leaf} color="green" large />
+        <KPICard title="Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: ${yuzde(overviewKPIs.turkeyShare, 1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.turkeyYoY, 1)}`} icon={Leaf} color="green" large />
         <KPICard title="Ekim Alanı" value={formatHa(overviewKPIs.turkeyArea)} subtitle={`${overviewKPIs.turkeyProductCount} ürün`} icon={MapPin} color="teal" />
         <KPICard title="Ort. Verim" value={formatYield(overviewKPIs.turkeyYield)} subtitle={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'Dünya üstü' : 'Dünya altı'} icon={TrendingUp} color={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'green' : 'red'} />
         <KPICard title="İşlenmiş" value={formatValue(overviewKPIs.turkeyProcessedTotal)} subtitle={`İşleme: %${overviewSupplyChain?.turkeyProcessingRatio?.toFixed(1) || '?'}`} icon={Factory} color="orange" />

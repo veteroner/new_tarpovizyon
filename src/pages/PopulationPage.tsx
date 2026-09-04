@@ -56,7 +56,7 @@ export default function PopulationPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA NUFUSU" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: +${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.cagr.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DUNYA NUFUSU" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: +${yuzde(overviewKPIs.yoy, 1)} | BBO: ${yuzde(overviewKPIs.cagr, 2)}`} icon={Globe} color="purple" large />
                 <KPICard title="EN KALABALIK" value={overviewKPIs.topCountry} subtitle={formatPop(overviewKPIs.topCountryValue)} icon={Award} color="blue" />
                 <KPICard title="KENTLESME" value={formatPercent(overviewKPIs.urbanRate)} subtitle="Sehirde yasayan" icon={Building2} color="teal" />
                 <KPICard title="KIRSAL" value={formatPop(overviewKPIs.worldRural)} subtitle={`Kentsel: ${formatPop(overviewKPIs.worldUrban)}`} icon={Home} color="orange" />
@@ -132,7 +132,7 @@ export default function PopulationPage() {
                     yFormat={formatShort}
                     stripKey="urbanRate"
                     stripLabel="Kentleşme Oranı"
-                    stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
+                    stripFormat={(v: number) => `${yuzde(Number(v), 0)}`}
                   >
                     <Legend />
                     <Area type="monotone" dataKey="urban" name="Kentsel"
@@ -196,7 +196,7 @@ export default function PopulationPage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TURKIYE NUFUSU" value={formatPop(turkeyProfile.totalNow)} subtitle={`Dunya #${turkeyProfile.rank} | CAGR: %${turkeyProfile.cagr.toFixed(2)}`} icon={MapPin} color="orange" large />
+                <KPICard title="TURKIYE NUFUSU" value={formatPop(turkeyProfile.totalNow)} subtitle={`Dunya #${turkeyProfile.rank} | CAGR: ${yuzde(turkeyProfile.cagr, 2)}`} icon={MapPin} color="orange" large />
                 <KPICard title="KENTSEL" value={formatPop(turkeyProfile.urbanNow)} subtitle={formatPercent(turkeyProfile.urbanRate)} icon={Building2} color="purple" />
                 <KPICard title="KIRSAL" value={formatPop(turkeyProfile.ruralNow)} subtitle={formatPercent(100 - turkeyProfile.urbanRate)} icon={Home} color="green" />
                 <KPICard title="DUNYA SIRASI" value={`#${turkeyProfile.rank}`} subtitle="Nufus" icon={Award} color="blue" />
@@ -213,7 +213,7 @@ export default function PopulationPage() {
             yFormat={formatShort}
             stripKey="urbanRate"
             stripLabel="Kentleşme Oranı"
-            stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 0)}`}
           >
             <Legend />
             <Area type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />

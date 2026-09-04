@@ -1,4 +1,4 @@
-import { kisa, eksen } from '../../utils/sayi';
+import { kisa, eksen, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, latestYear, num } from '../../services/d1';
@@ -44,7 +44,7 @@ export function formatShort(value: number): string {
   return eksen(value);
 }
 
-export function formatPercent(v: number): string { return `%${v.toFixed(1)}`; }
+export function formatPercent(v: number): string { return `${yuzde(v, 1)}`; }
 
 export function usePopulationData(activeTab: Tab) {
   const [loading, setLoading] = useState(true);
@@ -106,8 +106,8 @@ export function usePopulationData(activeTab: Tab) {
       setOverviewKPIs({ worldTotal, worldUrban, worldRural, urbanRate, yoy, cagr: cagr?.cagr || 0, topCountry: countries[0]?.name || '-', topCountryValue: countries[0]?.total || 0 });
       const ins: Insight[] = [];
       ins.push({ id: 'ov1', type: 'info', message: `Dunya nufusu: ${formatPop(worldTotal)} (${yil})`, severity: 'low', category: 'Genel' });
-      ins.push({ id: 'ov2', type: urbanRate > 55 ? 'achievement' : 'info', message: `Kentlesme orani: %${urbanRate.toFixed(1)} — ${urbanRate > 55 ? 'Dunya cogunlugu sehirlerde' : 'Kirsal agirlikli'}`, severity: 'medium', category: 'Kentlesme' });
-      if (cagr) ins.push({ id: 'ov3', type: 'growth', message: `Nufus artis CAGR: %${cagr.cagr.toFixed(2)}`, severity: 'medium', category: 'Buyume' });
+      ins.push({ id: 'ov2', type: urbanRate > 55 ? 'achievement' : 'info', message: `Kentlesme orani: ${yuzde(urbanRate, 1)} — ${urbanRate > 55 ? 'Dunya cogunlugu sehirlerde' : 'Kirsal agirlikli'}`, severity: 'medium', category: 'Kentlesme' });
+      if (cagr) ins.push({ id: 'ov3', type: 'growth', message: `Nufus artis CAGR: ${yuzde(cagr.cagr, 2)}`, severity: 'medium', category: 'Buyume' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
     finally { setLoading(false); }
@@ -142,8 +142,8 @@ export function usePopulationData(activeTab: Tab) {
       const urbanShift = trendStart && trendEnd ? trendEnd.urbanRate - trendStart.urbanRate : 0;
       setUrbanKPIs({ avgUrban, mostUrban: mostUrban?.name || '-', mostUrbanRate: mostUrban?.urbanRate || 0, leastUrban: leastUrban?.name || '-', leastUrbanRate: leastUrban?.urbanRate || 0, urbanShift });
       const ins: Insight[] = [];
-      ins.push({ id: 'ur1', type: 'info', message: `Ortalama kentlesme orani: %${avgUrban.toFixed(1)}`, severity: 'medium', category: 'Kentlesme' });
-      if (mostUrban) ins.push({ id: 'ur2', type: 'achievement', message: `En kentsel: ${mostUrban.name} %${mostUrban.urbanRate.toFixed(1)}`, severity: 'low', category: 'Kentsel' });
+      ins.push({ id: 'ur1', type: 'info', message: `Ortalama kentlesme orani: ${yuzde(avgUrban, 1)}`, severity: 'medium', category: 'Kentlesme' });
+      if (mostUrban) ins.push({ id: 'ur2', type: 'achievement', message: `En kentsel: ${mostUrban.name} ${yuzde(mostUrban.urbanRate, 1)}`, severity: 'low', category: 'Kentsel' });
       if (urbanShift > 10) ins.push({ id: 'ur3', type: 'growth', message: `Kentlesme ${urbanShift.toFixed(1)} puan artti — hizli kentes donusumu`, severity: 'high', category: 'Trend' });
       setUrbanInsights(ins);
     } catch (e) { console.error('Urbanization hatasi:', e); }
@@ -215,8 +215,8 @@ export function usePopulationData(activeTab: Tab) {
       setTurkeyProfile({ totalNow, ruralNow, urbanNow, maleNow, femaleNow, urbanRate, rank: turkeyIdx >= 0 ? turkeyIdx + 1 : 'N/A', cagr: cagr?.cagr || 0 });
       const ins: Insight[] = [];
       ins.push({ id: 'tk1', type: 'info', message: `Turkiye nufusu: ${formatPop(totalNow)} (Dunya #${turkeyIdx >= 0 ? turkeyIdx + 1 : '?'})`, severity: 'medium', category: 'Konum' });
-      ins.push({ id: 'tk2', type: urbanRate > 75 ? 'achievement' : 'info', message: `Kentlesme orani: %${urbanRate.toFixed(1)} ${urbanRate > 75 ? '— yuksek kentsel toplum' : ''}`, severity: 'medium', category: 'Kentlesme' });
-      if (cagr) ins.push({ id: 'tk3', type: 'growth', message: `Nufus CAGR: %${cagr.cagr.toFixed(2)}`, severity: 'medium', category: 'Buyume' });
+      ins.push({ id: 'tk2', type: urbanRate > 75 ? 'achievement' : 'info', message: `Kentlesme orani: ${yuzde(urbanRate, 1)} ${urbanRate > 75 ? '— yuksek kentsel toplum' : ''}`, severity: 'medium', category: 'Kentlesme' });
+      if (cagr) ins.push({ id: 'tk3', type: 'growth', message: `Nufus CAGR: ${yuzde(cagr.cagr, 2)}`, severity: 'medium', category: 'Buyume' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
     finally { setLoading(false); }
@@ -246,8 +246,8 @@ export function usePopulationData(activeTab: Tab) {
       });
       setForecastData({ chartData, worldTrend, turkeyTrend, turkeyR2: turkeyForecast.r2, worldR2: worldForecast.r2, anomalyCount: anomalies.filter(a => a.isAnomaly).length });
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : 'decline', message: `Turkiye nufus trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, volatilite %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: 'growth', message: `Dunya nufus trendi: CAGR %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dunya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : 'decline', message: `Turkiye nufus trendi: CAGR ${yuzde(turkeyTrend.cagr, 2)}, volatilite ${yuzde(turkeyTrend.volatility, 1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: 'growth', message: `Dunya nufus trendi: CAGR ${yuzde(worldTrend.cagr, 2)}`, severity: 'medium', category: 'Dunya' });
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
@@ -273,13 +273,13 @@ export function usePopulationData(activeTab: Tab) {
       const urbanRate = totalNow > 0 ? (urbanNow / totalNow * 100) : 0;
       if (totalBefore > 0) {
         const growth = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'pop-growth', severity: growth > 30 ? 'warning' : 'info', title: 'Turkiye Nufus Artisi', message: `2000-${yil} doneminde %${growth.toFixed(1)} artis (${formatPop(totalNow)})`, metric: 'Nufus Buyumesi', value: growth });
+        alerts.push({ id: 'pop-growth', severity: growth > 30 ? 'warning' : 'info', title: 'Turkiye Nufus Artisi', message: `2000-${yil} doneminde ${yuzde(growth, 1)} artis (${formatPop(totalNow)})`, metric: 'Nufus Buyumesi', value: growth });
       }
-      alerts.push({ id: 'urban-rate', severity: urbanRate > 80 ? 'warning' : 'positive', title: 'Kentlesme Seviyesi', message: `Turkiye kentlesme: %${urbanRate.toFixed(1)} — ${urbanRate > 80 ? 'asiri kentsel yogunluk riski' : 'dengeli'}`, metric: 'Kentlesme', value: urbanRate });
+      alerts.push({ id: 'urban-rate', severity: urbanRate > 80 ? 'warning' : 'positive', title: 'Kentlesme Seviyesi', message: `Turkiye kentlesme: ${yuzde(urbanRate, 1)} — ${urbanRate > 80 ? 'asiri kentsel yogunluk riski' : 'dengeli'}`, metric: 'Kentlesme', value: urbanRate });
       if (ruralBefore > 0) {
         const ruralChange = ((ruralNow - ruralBefore) / ruralBefore) * 100;
         if (ruralChange < -20) {
-          alerts.push({ id: 'rural-decline', severity: 'critical', title: 'Kirsal Nufus Erimesi', message: `Kirsal nufus 2000'den bu yana %${Math.abs(ruralChange).toFixed(0)} azaldi — tarim iscisi kriteri`, metric: 'Kirsal Goc', value: ruralChange });
+          alerts.push({ id: 'rural-decline', severity: 'critical', title: 'Kirsal Nufus Erimesi', message: `Kirsal nufus 2000'den bu yana ${yuzde(Math.abs(ruralChange), 0)} azaldi — tarim iscisi kriteri`, metric: 'Kirsal Goc', value: ruralChange });
         }
       }
       const urbanHistory = urbanTrendRes.map((r) => ({ year: String(r.year), rate: num(r.sum_TOPLAM) > 0 ? (num(r.sum_sehir) / num(r.sum_TOPLAM) * 100) : 0 }));
@@ -287,7 +287,7 @@ export function usePopulationData(activeTab: Tab) {
         const first = urbanHistory[0];
         const last = urbanHistory[urbanHistory.length - 1];
         const shift = last.rate - first.rate;
-        alerts.push({ id: 'urban-shift', severity: shift > 40 ? 'warning' : 'info', title: 'Tarihsel Kentlesme Donusumu', message: `${first.year}-${last.year} arasi kentlesme %${first.rate.toFixed(0)} → %${last.rate.toFixed(0)} (+${shift.toFixed(0)} puan)`, metric: 'Kentsel Donusum', value: shift });
+        alerts.push({ id: 'urban-shift', severity: shift > 40 ? 'warning' : 'info', title: 'Tarihsel Kentlesme Donusumu', message: `${first.year}-${last.year} arasi kentlesme ${yuzde(first.rate, 0)} → ${yuzde(last.rate, 0)} (+${shift.toFixed(0)} puan)`, metric: 'Kentsel Donusum', value: shift });
       }
       setIntelligenceAlerts(alerts);
       setAllInsights(alerts.map(a => ({

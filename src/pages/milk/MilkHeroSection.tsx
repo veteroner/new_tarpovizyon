@@ -30,7 +30,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
           position: 'relative',
           overflow: 'hidden'
         }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🥛</div>
+          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               TOPLAM ÜRETİM {latest?.year}
@@ -75,7 +75,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
           position: 'relative',
           overflow: 'hidden'
         }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐄</div>
+          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               BÜYÜKBAŞ PAYI
@@ -98,7 +98,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
           position: 'relative',
           overflow: 'hidden'
         }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>📊</div>
+          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
               10 YILLIK CAGR
@@ -121,7 +121,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
             position: 'relative',
             overflow: 'hidden'
           }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🥛</div>
+            <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
                 YETERLİLİK
@@ -147,7 +147,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               position: 'relative',
               overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐄</div>
+              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   İNEK SÜT ÜRETİMİ
@@ -170,7 +170,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               position: 'relative',
               overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐑</div>
+              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   KOYUN SÜT ÜRETİMİ
@@ -193,7 +193,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               position: 'relative',
               overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>🐐</div>
+              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
                   KEÇİ SÜT ÜRETİMİ
@@ -239,7 +239,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>YETERLİLİK</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sufficiency ? `%${(Number(sufficiency.sut_ton) * 100).toFixed(0)}` : '-'}</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sufficiency ? `${yuzde((Number(sufficiency.sut_ton) * 100), 0)}` : '-'}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>{sufficiency && Number(sufficiency.sut_ton) >= 1 ? 'Yeterli' : 'Yetersiz'}</div>
           </div>
         </div>

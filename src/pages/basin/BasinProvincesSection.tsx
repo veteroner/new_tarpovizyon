@@ -247,8 +247,7 @@ export default function BasinProvincesSection({ provinceBasinData, provinceDiver
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-              💡 2024 yılı {selectedProductForMap} üretiminin il bazlı dağılımı
+            <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>2024 yılı {selectedProductForMap} üretiminin il bazlı dağılımı
             </div>
           </>
         ) : null}

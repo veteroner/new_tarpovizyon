@@ -348,7 +348,7 @@ export default function AnimalTradeTab() {
                 cy="50%"
                 outerRadius={110}
                 innerRadius={50}
-                label={({ name, percent }) => `${name?.substring(0, 12)} %${((percent ?? 0) * 100).toFixed(0)}`}
+                label={({ name, percent }) => `${name?.substring(0, 12)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                 labelLine={{ strokeWidth: 1 }}
               >
                 {pieData.map((_, i) => <Cell key={i} fill={seriesColor(i)} />)}

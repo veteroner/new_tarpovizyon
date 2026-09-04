@@ -132,7 +132,7 @@ export default function MilkTuikSection({
               padding: '24px', borderRadius: '14px',
               boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>📊</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>
                   5 YILLIK DEĞİŞİM
@@ -150,7 +150,7 @@ export default function MilkTuikSection({
               padding: '24px', borderRadius: '14px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>📅</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
                   EN YOĞUN AY
@@ -180,8 +180,7 @@ export default function MilkTuikSection({
           border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-              📈 {selectedTuikSutUrun} — Yıllık Üretim Trendi (Ton)
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>{selectedTuikSutUrun} — Yıllık Üretim Trendi (Ton)
             </h3>
             <ChartInsightButton title="Yıllık Üretim Trendi" description="Seçili süt ürünü yıllık üretim trendi" data={tuikSelectedData} context={{ urun: selectedTuikSutUrun }} />
           </div>
@@ -371,8 +370,7 @@ export default function MilkTuikSection({
           background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', 
           border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
-          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📋 {selectedTuikSutUrun} — Yıllık Detay Tablosu
+          <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>{selectedTuikSutUrun} — Yıllık Detay Tablosu
           </h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>

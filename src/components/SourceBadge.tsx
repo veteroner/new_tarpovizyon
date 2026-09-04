@@ -19,8 +19,7 @@ export function SourceBadge({ source, revision, size = 'md' }: SourceBadgeProps)
       background: 'rgba(59,130,246,0.1)', border: '1px solid #3b82f6',
       color: '#1d4ed8', fontSize: fsize, fontWeight: 600,
       whiteSpace: 'nowrap',
-    }}>
-      📚 {source}{revision ? ` · ${revision}` : ''}
+    }}>{source}{revision ? ` · ${revision}` : ''}
     </span>
   );
 }

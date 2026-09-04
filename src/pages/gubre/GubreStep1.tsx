@@ -110,7 +110,7 @@ export function GubreStep1({ state, setState, onNext }: Props) {
           <p><strong>Kaynak:</strong> {cropData.kaynak}</p>
           <p><strong>Varsayım:</strong> {cropData.varsayim}</p>
           <p><strong>Revizyon:</strong> {cropData.revizyonTarihi}</p>
-          <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>💡 {cropData.notes}</p>
+          <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>{cropData.notes}</p>
         </div>
       )}
 

@@ -111,7 +111,7 @@ export default function ProvincialTrendsTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>🎯</div>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Güncel ({yearRange[1]})
           </div>
@@ -149,7 +149,7 @@ export default function ProvincialTrendsTab({
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>💹</div>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}></div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>
             Toplam Değişim
           </div>
@@ -175,8 +175,7 @@ export default function ProvincialTrendsTab({
         border: '1px solid var(--border)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📊 {yearRange[0]}-{yearRange[1]} Yılları Arası Hayvan Popülasyon Trendi
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>{yearRange[0]}-{yearRange[1]} Yılları Arası Hayvan Popülasyon Trendi
           </h3>
           <ChartInsightButton title="Popülasyon Trendi" description="Yıllar arası trend analizi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>

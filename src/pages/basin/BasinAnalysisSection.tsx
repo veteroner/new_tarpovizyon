@@ -397,9 +397,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '20px'
-                  }}>
-                    🌊
-                  </div>
+                  }}></div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
                       {basin.basinName}
@@ -540,8 +538,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
               </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                💡 {selectedBasinForAnalysis} havzasındaki tüm ilçelerin 2024 yılı bitkisel üretim toplamları
+              <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>{selectedBasinForAnalysis} havzasındaki tüm ilçelerin 2024 yılı bitkisel üretim toplamları
               </div>
             </div>
           )}

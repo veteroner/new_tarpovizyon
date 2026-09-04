@@ -66,7 +66,7 @@ export default function FertilizerPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DÜNYA GÜBRE İTHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DÜNYA GÜBRE İTHALATI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: ${yuzde(overviewKPIs.worldCAGR, 2)}`} icon={Globe} color="purple" large />
                 <KPICard title="TÜRKİYE İTHALATI" value={formatTon(overviewKPIs.turkeyImport)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="EN BÜYÜK İTHALATÇI" value={overviewKPIs.topImporter} subtitle="2023" icon={Award} color="blue" />
                 <KPICard title="EN BÜYÜK İHRACATÇI" value={overviewKPIs.topExporter} subtitle="2023" icon={TrendingUp} color="green" />
@@ -172,8 +172,8 @@ export default function FertilizerPage() {
               {concHHI && (
                 <div className="kpi-grid">
                   <KPICard title="HHI ENDEKSİ" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration === 'HIGH' ? 'Yüksek' : concHHI.concentration === 'MODERATE' ? 'Orta' : 'Düşük'}`} icon={BarChart2} color="purple" large />
-                  <KPICard title="İLK 1 PAYI" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle="En büyük ihracatçı" icon={Award} color="orange" />
-                  <KPICard title="İLK 3 PAYI" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
+                  <KPICard title="İLK 1 PAYI" value={`${yuzde(concHHI.top1Share, 1)}`} subtitle="En büyük ihracatçı" icon={Award} color="orange" />
+                  <KPICard title="İLK 3 PAYI" value={`${yuzde(concHHI.top3Share, 1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
                   <KPICard title="ETKİN RAKİP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayı" icon={Activity} color="green" />
                 </div>
               )}
@@ -202,7 +202,7 @@ export default function FertilizerPage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM İTHALAT" value={formatTon(turkeyProfile.totalImp)} subtitle={`BBO: %${turkeyProfile.impCAGR.toFixed(2)}`} icon={TrendingDown} color="red" large />
+                <KPICard title="TOPLAM İTHALAT" value={formatTon(turkeyProfile.totalImp)} subtitle={`BBO: ${yuzde(turkeyProfile.impCAGR, 2)}`} icon={TrendingDown} color="red" large />
                 <KPICard title="TOPLAM İHRACAT" value={formatTon(turkeyProfile.totalExp)} subtitle="2023" icon={TrendingUp} color="green" />
                 <KPICard title="İTHALAT DEĞERİ" value={formatUSD(turkeyProfile.totalImpVal * 1000)} subtitle="2023 USD" icon={Target} color="blue" />
                 <KPICard title="TİCARET ORANI" value={`${turkeyProfile.tradeRatio.toFixed(1)}x`} subtitle="İthalat / İhracat" icon={Scale} color={turkeyProfile.tradeRatio > 3 ? 'red' : 'orange'} />

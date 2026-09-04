@@ -129,8 +129,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
       {monthlyTurkeyMeat.length > 0 && (
         <>
           <div style={{ marginTop: '40px', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
-              📅 2025 Aylık Hindi Eti Üretimi
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>2025 Aylık Hindi Eti Üretimi
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
               * Bazı aylar TÜİK tarafından gizli tutulmuştur. Eksik aylar, mevcut ayların ortalaması ile tahmin edilmiştir.

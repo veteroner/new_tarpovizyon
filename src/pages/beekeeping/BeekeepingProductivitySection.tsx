@@ -102,8 +102,7 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
                             textAnchor="middle"
                             fill="rgba(255,255,255,0.9)"
                             fontSize={fontSize - 3}
-                          >
-                            🐝 {formatNumber(beekeepersNumber)} | {yieldNumber.toFixed(1)} kg/kovan
+                          >{formatNumber(beekeepersNumber)} | {yieldNumber.toFixed(1)} kg/kovan
                           </text>
                         </>
                       )}
@@ -127,14 +126,13 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
                     padding: '12px 16px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}>
-                    <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>
-                      📍 {data.name}
+                    <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>{data.name}
                     </div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div>🍯 <strong>Bal Üretimi:</strong> {formatNumber(data.size)} ton</div>
-                      <div>📊 <strong>Verim:</strong> {(data.yield || 0).toFixed(1)} kg/kovan</div>
-                      <div>🪔 <strong>Kovan:</strong> {formatNumber(data.hives)}</div>
-                      <div>🐝 <strong>Arıcı:</strong> {formatNumber(data.beekeepers)}</div>
+                      <div><strong>Bal Üretimi:</strong> {formatNumber(data.size)} ton</div>
+                      <div><strong>Verim:</strong> {(data.yield || 0).toFixed(1)} kg/kovan</div>
+                      <div><strong>Kovan:</strong> {formatNumber(data.hives)}</div>
+                      <div><strong>Arıcı:</strong> {formatNumber(data.beekeepers)}</div>
                     </div>
                   </div>
                 );

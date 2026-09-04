@@ -178,7 +178,7 @@ export default function MilkEconomicsSection({
               boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>💰</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
                   ÜSK TAVSİYE FİYATI
@@ -198,7 +198,7 @@ export default function MilkEconomicsSection({
               boxShadow: '0 4px 16px rgba(249, 115, 22, 0.25)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>📊</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
                   ÜRETİM MALİYETİ
@@ -222,7 +222,7 @@ export default function MilkEconomicsSection({
                 : '0 4px 16px rgba(239, 68, 68, 0.25)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>📈</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
                   KARLILIK ORANI
@@ -243,7 +243,7 @@ export default function MilkEconomicsSection({
               boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🌾</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
                   SÜT YEM PARİTESİ
@@ -307,7 +307,7 @@ export default function MilkEconomicsSection({
               boxShadow: '0 4px 16px rgba(245, 158, 11, 0.25)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🌾</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>SÜT YEMİ (19% HP)</div>
                 <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{latest?.sut_yemi_19_hp.toFixed(2)} ₺/kg</div>
@@ -322,7 +322,7 @@ export default function MilkEconomicsSection({
               boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🌽</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>MISIR SİLAJI</div>
                 <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.misir_silaji.toFixed(2)} ₺/kg</div>
@@ -337,7 +337,7 @@ export default function MilkEconomicsSection({
               boxShadow: 'var(--tv-golge)',
               position: 'relative', overflow: 'hidden'
             }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}>🍀</div>
+              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>YONCA</div>
                 <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.yonca.toFixed(2)} ₺/kg</div>

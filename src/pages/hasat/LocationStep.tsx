@@ -25,7 +25,7 @@ export default function LocationStep({
       <p className="hz-card__desc">Arazi konumunuzu girin veya GPS ile otomatik tespit edin.</p>
 
       <button className={`hz-gps-btn ${gpsLoad ? 'hz-gps-btn--loading' : ''}`} onClick={handleGPS} disabled={gpsLoad}>
-        <span role="img" aria-label="gps">📡</span>
+        <span role="img" aria-label="gps"></span>
         {gpsLoad ? ' Konum alınıyor…' : ' GPS ile Konumu Tespit Et'}
       </button>
 
@@ -62,7 +62,7 @@ export default function LocationStep({
 
       {state.il && state.ilce && (
         <div className="hz-location-badge">
-          <span role="img" aria-label="pin">📍</span>
+          <span role="img" aria-label="pin"></span>
           <span>{state.ilce}, {state.il}</span>
           {state.locationMethod === 'gps' && <span className="hz-gps-tag">GPS</span>}
         </div>

@@ -55,11 +55,11 @@ export default function OverviewTab({
         <div className="intelligence-panel" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(59,130,246,0.1) 100%)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(245,158,11,0.3)' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Akıllı Analiz</h3>
           <div style={{ lineHeight: '2', fontSize: '0.9rem' }}>
-            {yearChange > 5 && <p style={{ color: '#22c55e' }}>📈 <strong>Güçlü büyüme</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(yearChange, 1)} arttı.</p>}
-            {yearChange < -5 && <p style={{ color: '#ef4444' }}>📉 <strong>Dikkat</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(Math.abs(yearChange), 1)} azaldı.</p>}
-            {Math.abs(yearChange) <= 5 && <p style={{ color: '#3b82f6' }}>📊 <strong>Stabil seyir</strong>: {selectedAnimal} sayısı görece istikrarlı.</p>}
+            {yearChange > 5 && <p style={{ color: '#22c55e' }}><strong>Güçlü büyüme</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(yearChange, 1)} arttı.</p>}
+            {yearChange < -5 && <p style={{ color: '#ef4444' }}><strong>Dikkat</strong>: {selectedAnimal} sayısı geçen yıla göre {yuzde(Math.abs(yearChange), 1)} azaldı.</p>}
+            {Math.abs(yearChange) <= 5 && <p style={{ color: '#3b82f6' }}><strong>Stabil seyir</strong>: {selectedAnimal} sayısı görece istikrarlı.</p>}
             <p style={{ color: 'var(--text-secondary)' }}>En yüksek il: <strong>{topCity}</strong> — {formatNumber(topCityValue)} baş</p>
-            <p style={{ color: 'var(--text-secondary)' }}>🗺️ {provinceCount} il takip ediliyor.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>{provinceCount} il takip ediliyor.</p>
           </div>
         </div>
 

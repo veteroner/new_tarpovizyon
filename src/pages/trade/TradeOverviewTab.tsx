@@ -137,8 +137,8 @@ export default function TradeOverviewTab() {
         />
         <KPICard
           title="Bitkisel Pay"
-          value={`%${plantShare.toFixed(1)}`}
-          subtitle={`Hayvansal: %${(100 - plantShare).toFixed(1)}`}
+          value={`${yuzde(plantShare, 1)}`}
+          subtitle={`Hayvansal: ${yuzde((100 - plantShare), 1)}`}
           icon={TrendingUp}
           color="purple"
         />

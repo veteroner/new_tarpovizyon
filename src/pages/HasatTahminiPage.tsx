@@ -279,7 +279,7 @@ export function HasatTahminiPage(): React.ReactElement {
       <div className="hz-topbar">
         <button className="hz-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
         <div className="hz-topbar__title">
-          <span role="img" aria-label="hasat">🌾</span>
+          <span role="img" aria-label="hasat"></span>
           <span>Hasat Tahmincisi</span>
         </div>
         {state.step > 1 && (

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, AlertTriangle } from 'lucide-react';
 import {
@@ -53,7 +54,7 @@ export function YieldTab({
           <KPICard title="Verim" value={formatYield(yieldKPIs.turkeyYield)} subtitle={`${yieldKPIs.turkeyRank}./${yieldKPIs.totalRanked}`} icon={Target} color={yieldKPIs.turkeyYield > yieldKPIs.worldAvgYield ? 'green' : 'red'} large />
           <KPICard title="Dünya Ort." value={formatYield(yieldKPIs.worldAvgYield)} subtitle="Tüm üreticiler" icon={Globe} color="blue" />
           <KPICard title="Lider" value={formatYield(yieldKPIs.leaderYield)} subtitle={yieldKPIs.leader} icon={Award} color="purple" />
-          <KPICard title="Gap" value={`%${yieldKPIs.gapToLeader.toFixed(0)}`} subtitle={yieldKPIs.catchUpYears ? `~${yieldKPIs.catchUpYears}y` : 'N/A'} icon={AlertTriangle} color={yieldKPIs.gapToLeader > 50 ? 'red' : 'orange'} />
+          <KPICard title="Gap" value={`${yuzde(yieldKPIs.gapToLeader, 0)}`} subtitle={yieldKPIs.catchUpYears ? `~${yieldKPIs.catchUpYears}y` : 'N/A'} icon={AlertTriangle} color={yieldKPIs.gapToLeader > 50 ? 'red' : 'orange'} />
         </div>
 
         <div style={{ marginBottom: '24px' }}><InsightCard insights={yieldInsights} maxDisplay={6} /></div>

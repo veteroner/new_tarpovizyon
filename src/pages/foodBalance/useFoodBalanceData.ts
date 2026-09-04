@@ -1,4 +1,4 @@
-import { kisa, eksen } from '../../utils/sayi';
+import { kisa, eksen, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -52,7 +52,7 @@ export function formatShort(value: number): string {
 }
 
 export function formatPercent(value: number): string {
-  return `%${value.toFixed(1)}`;
+  return `${yuzde(value, 1)}`;
 }
 
 export function getSufficiencyColor(ratio: number): string {
@@ -139,7 +139,7 @@ export function useFoodBalanceData(activeTab: Tab) {
 
       const ins: Insight[] = [];
       ins.push({ id: 'ov1', type: 'info', message: `Dunya gida uretimi ${formatTon(worldProd)} (${byProduct.length} temel urun)`, severity: 'low', category: 'Genel' });
-      if (yoy > 3) ins.push({ id: 'ov2', type: 'growth', message: `Gida uretimi %${yoy.toFixed(1)} artti`, severity: 'medium', category: 'Trend' });
+      if (yoy > 3) ins.push({ id: 'ov2', type: 'growth', message: `Gida uretimi ${yuzde(yoy, 1)} artti`, severity: 'medium', category: 'Trend' });
       ins.push({ id: 'ov3', type: 'info', message: `Ortalama kalori: ${avgCal.toFixed(0)} kcal/kisi/gun`, severity: 'low', category: 'Beslenme' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
@@ -177,12 +177,12 @@ export function useFoodBalanceData(activeTab: Tab) {
       setSecurityKPIs({ avgSufficiency, selfSufficient, dependent, productCount: products.length, worldAvgCal });
 
       const ins: Insight[] = [];
-      ins.push({ id: 'sc1', type: avgSufficiency >= 80 ? 'achievement' : 'warning', message: `Turkiye ortalama gida kendine yeterliligi: %${avgSufficiency.toFixed(1)} (${selfSufficient}/${products.length} urunde fazla)`, severity: avgSufficiency < 80 ? 'high' : 'medium', category: 'Yeterlilik' });
+      ins.push({ id: 'sc1', type: avgSufficiency >= 80 ? 'achievement' : 'warning', message: `Turkiye ortalama gida kendine yeterliligi: ${yuzde(avgSufficiency, 1)} (${selfSufficient}/${products.length} urunde fazla)`, severity: avgSufficiency < 80 ? 'high' : 'medium', category: 'Yeterlilik' });
       if (dependent > 0) ins.push({ id: 'sc2', type: 'warning', message: `${dependent} urunde yuksek dis bagimlilik (%80 altinda)`, severity: 'high', category: 'Bagimlilik' });
       const mostDependent = products.filter((p: any) => p.sufficiency < 80).sort((a: any, b: any) => a.sufficiency - b.sufficiency)[0];
-      if (mostDependent) ins.push({ id: 'sc3', type: 'decline', message: `En bagimli urun: ${mostDependent.name} (%${mostDependent.sufficiency.toFixed(1)} yeterlilik)`, severity: 'high', category: 'Risk' });
+      if (mostDependent) ins.push({ id: 'sc3', type: 'decline', message: `En bagimli urun: ${mostDependent.name} (${yuzde(mostDependent.sufficiency, 1)} yeterlilik)`, severity: 'high', category: 'Risk' });
       const bestProduct = products[0];
-      if (bestProduct && bestProduct.sufficiency > 100) ins.push({ id: 'sc4', type: 'achievement', message: `${bestProduct.name} urunde %${(bestProduct.sufficiency - 100).toFixed(0)} uretim fazlasi - ihracat potansiyeli`, severity: 'low', category: 'Firsat' });
+      if (bestProduct && bestProduct.sufficiency > 100) ins.push({ id: 'sc4', type: 'achievement', message: `${bestProduct.name} urunde ${yuzde((bestProduct.sufficiency - 100), 0)} uretim fazlasi - ihracat potansiyeli`, severity: 'low', category: 'Firsat' });
       setSecurityInsights(ins);
     } catch (e) { console.error('Security hatasi:', e); }
     finally { setLoading(false); }
@@ -265,7 +265,7 @@ export function useFoodBalanceData(activeTab: Tab) {
       const ins: Insight[] = [];
       ins.push({ id: 'tp1', type: 'info', message: `Turkiye toplam gida uretimi: ${formatTon(totalProd)} (Dunya ${turkeyIdx >= 0 ? turkeyIdx + 1 : '?'}.)`, severity: 'medium', category: 'Uretim' });
       ins.push({ id: 'tp2', type: totalImp > totalExp * 1.5 ? 'warning' : 'achievement', message: `Ticaret dengesi: Ithalat ${formatTon(totalImp)} / Ihracat ${formatTon(totalExp)}`, severity: totalImp > totalExp * 2 ? 'high' : 'medium', category: 'Ticaret' });
-      if (prodCAGR) ins.push({ id: 'tp3', type: prodCAGR.cagr > 0 ? 'growth' : 'decline', message: `Uretim CAGR: %${prodCAGR.cagr.toFixed(2)} (${prodCAGR.cagr > 0 ? 'buyume' : 'daralma'})`, severity: 'medium', category: 'Trend' });
+      if (prodCAGR) ins.push({ id: 'tp3', type: prodCAGR.cagr > 0 ? 'growth' : 'decline', message: `Uretim CAGR: ${yuzde(prodCAGR.cagr, 2)} (${prodCAGR.cagr > 0 ? 'buyume' : 'daralma'})`, severity: 'medium', category: 'Trend' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
     finally { setLoading(false); }
@@ -304,8 +304,8 @@ export function useFoodBalanceData(activeTab: Tab) {
       });
 
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye gida uretim trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, volatilite %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: 'info', message: `Dunya gida uretim trendi: CAGR %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dunya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye gida uretim trendi: CAGR ${yuzde(turkeyTrend.cagr, 2)}, volatilite ${yuzde(turkeyTrend.volatility, 1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: 'info', message: `Dunya gida uretim trendi: CAGR ${yuzde(worldTrend.cagr, 2)}`, severity: 'medium', category: 'Dunya' });
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
@@ -337,9 +337,9 @@ export function useFoodBalanceData(activeTab: Tab) {
         const sufficiency = domestic > 0 ? (data.prod / domestic * 100) : 0;
         const name = getProductName(id);
         if (sufficiency < 50) {
-          alerts.push({ id: `sec-${id}`, severity: 'critical', title: `${name} Gida Guvenligi Riski`, message: `Kendine yeterlilik %${sufficiency.toFixed(0)} - yuksek dis bagimlilik`, metric: 'Yeterlilik', value: sufficiency });
+          alerts.push({ id: `sec-${id}`, severity: 'critical', title: `${name} Gida Guvenligi Riski`, message: `Kendine yeterlilik ${yuzde(sufficiency, 0)} - yuksek dis bagimlilik`, metric: 'Yeterlilik', value: sufficiency });
         } else if (sufficiency < 80) {
-          alerts.push({ id: `sec-${id}`, severity: 'warning', title: `${name} Bagimlilik`, message: `Kendine yeterlilik %${sufficiency.toFixed(0)}`, metric: 'Yeterlilik', value: sufficiency });
+          alerts.push({ id: `sec-${id}`, severity: 'warning', title: `${name} Bagimlilik`, message: `Kendine yeterlilik ${yuzde(sufficiency, 0)}`, metric: 'Yeterlilik', value: sufficiency });
         }
       });
 
@@ -349,7 +349,7 @@ export function useFoodBalanceData(activeTab: Tab) {
           const change = ((n.prod - b.prod) / b.prod) * 100;
           const name = getProductName(id);
           if (Math.abs(change) > 20) {
-            alerts.push({ id: `prod-${id}`, severity: change > 20 ? 'positive' : 'warning', title: `${name} Uretim ${change > 0 ? 'Artisi' : 'Dususu'}`, message: `2015-2022 doneminde %${change.toFixed(1)} degisim`, metric: 'Uretim', value: change });
+            alerts.push({ id: `prod-${id}`, severity: change > 20 ? 'positive' : 'warning', title: `${name} Uretim ${change > 0 ? 'Artisi' : 'Dususu'}`, message: `2015-2022 doneminde ${yuzde(change, 1)} degisim`, metric: 'Uretim', value: change });
           }
         }
       });

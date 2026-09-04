@@ -68,7 +68,7 @@ export default function FoodBalancePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA GIDA URETIMI" value={formatTon(overviewKPIs.worldProd)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DUNYA GIDA URETIMI" value={formatTon(overviewKPIs.worldProd)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: ${yuzde(overviewKPIs.worldCAGR, 2)}`} icon={Globe} color="purple" large />
                 <KPICard title="EN BUYUK URETICI" value={overviewKPIs.topProducer} subtitle="2022" icon={Award} color="blue" />
                 <KPICard title="ORT KALORI" value={`${overviewKPIs.avgCal.toFixed(0)} kcal`} subtitle="kisi/gun" icon={Heart} color="orange" />
                 <KPICard title="IZLENEN URUN" value={String(overviewKPIs.productCount)} subtitle="Temel gida" icon={Wheat} color="green" />
@@ -137,7 +137,7 @@ export default function FoodBalancePage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis type="number" domain={[0, 'dataMax']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                         <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
-                        <Tooltip formatter={(v: number) => [`%${Number(v).toFixed(1)}`, 'Yeterlilik']} />
+                        <Tooltip formatter={(v: number) => [`${yuzde(Number(v), 1)}`, 'Yeterlilik']} />
                         <Bar dataKey="sufficiency" radius={[0, 4, 4, 0]}>
                           {securityData.map((d: any, i: number) => <Cell key={i} fill={d.sufficiencyColor} />)}
                         
@@ -256,7 +256,7 @@ export default function FoodBalancePage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TURKIYE URETIMI" value={formatTon(turkeyProfile.totalProd)} subtitle={`CAGR: %${turkeyProfile.cagr.toFixed(2)} | Dunya #${turkeyProfile.worldRank}`} icon={MapPin} color="orange" large />
+                <KPICard title="TURKIYE URETIMI" value={formatTon(turkeyProfile.totalProd)} subtitle={`CAGR: ${yuzde(turkeyProfile.cagr, 2)} | Dunya #${turkeyProfile.worldRank}`} icon={MapPin} color="orange" large />
                 <KPICard title="ITHALAT" value={formatTon(turkeyProfile.totalImp)} subtitle="2022" icon={TrendingDown} color="red" />
                 <KPICard title="IHRACAT" value={formatTon(turkeyProfile.totalExp)} subtitle="2022" icon={TrendingUp} color="green" />
                 <KPICard title="ORT KALORI" value={`${turkeyProfile.avgCal.toFixed(0)} kcal`} subtitle="kisi/gun" icon={Heart} color="purple" />

@@ -1,4 +1,4 @@
-import { kisa, eksen } from '../../utils/sayi';
+import { kisa, eksen, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, latestYear, num } from '../../services/d1';
@@ -155,12 +155,12 @@ export function usePesticideData(activeTab: Tab) {
 
       const ins: Insight[] = [];
       ins.push({ id: 'ov1', type: 'info', message: `Dünya toplam pestisit kullanımı ${formatTon(worldTotal)} (${byType.length} tür)`, severity: 'low', category: 'Genel' });
-      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Pestisit kullanımı önceki yıla göre %${yoy.toFixed(1)} arttı — risk artışı`, severity: 'high', category: 'Trend' });
-      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Pestisit kullanımı %${Math.abs(yoy).toFixed(1)} azaldı`, severity: 'medium', category: 'Trend' });
+      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Pestisit kullanımı önceki yıla göre ${yuzde(yoy, 1)} arttı — risk artışı`, severity: 'high', category: 'Trend' });
+      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Pestisit kullanımı ${yuzde(Math.abs(yoy), 1)} azaldı`, severity: 'medium', category: 'Trend' });
       if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'warning' : 'info', message: `Türkiye pestisit kullanımında dünya ${turkeyRank}. — ${formatTon(turkeyData.value)}${turkeyRank <= 10 ? ' (yüksek kullanım riski)' : ''}`, severity: turkeyRank <= 10 ? 'high' : 'medium', category: 'Türkiye' });
       const herbicide = byType.find((b: any) => b.name.includes('Herbisit'));
       const total = byType.reduce((s: number, b: any) => s + b.value, 0);
-      if (herbicide && total > 0) ins.push({ id: 'ov4', type: 'info', message: `Herbisitler toplam pestisitin %${(herbicide.value / total * 100).toFixed(1)}'ini oluşturuyor`, severity: 'low', category: 'Kompozisyon' });
+      if (herbicide && total > 0) ins.push({ id: 'ov4', type: 'info', message: `Herbisitler toplam pestisitin ${yuzde((herbicide.value / total * 100), 1)}'ini oluşturuyor`, severity: 'low', category: 'Kompozisyon' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Genel Bakış hatası:', e); }
     finally { setLoading(false); }
@@ -239,11 +239,11 @@ export function usePesticideData(activeTab: Tab) {
       const ins: Insight[] = [];
       if (hhi) {
         const label = hhi.concentration === 'LOW' ? 'düşük' : hhi.concentration === 'MODERATE' ? 'orta' : 'yüksek';
-        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Pestisit kullanım konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — Top 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
+        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Pestisit kullanım konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — Top 3 pay ${yuzde(hhi.top3Share, 1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
       }
       if (data.length >= 2) {
         const top1Share = (data[0].value / shares.reduce((s: number, v: number) => s + v, 0)) * 100;
-        ins.push({ id: 'cn2', type: top1Share > 30 ? 'warning' : 'info', message: `${data[0].country} tek başına dünya kullanımının %${top1Share.toFixed(1)}'ini oluşturuyor`, severity: top1Share > 30 ? 'high' : 'medium', category: 'Hakimiyet' });
+        ins.push({ id: 'cn2', type: top1Share > 30 ? 'warning' : 'info', message: `${data[0].country} tek başına dünya kullanımının ${yuzde(top1Share, 1)}'ini oluşturuyor`, severity: top1Share > 30 ? 'high' : 'medium', category: 'Hakimiyet' });
       }
       setConcInsights(ins);
     } catch (e) { console.error('Pazar Yoğunluğu hatası:', e); }
@@ -297,9 +297,9 @@ export function usePesticideData(activeTab: Tab) {
       if (kgHa > 3) ins.push({ id: 'tp2', type: 'warning', message: `Pestisit yoğunluğu ${formatKgHa(kgHa)} — AB ortalamasının üzerinde olabilir`, severity: 'high', category: 'Yoğunluk' });
       if (composition.length > 0) {
         const dominant = composition[0];
-        ins.push({ id: 'tp3', type: 'info', message: `En çok kullanılan: ${dominant.name} (%${dominant.share.toFixed(1)} pay, ${formatTon(dominant.tonaj)})`, severity: 'low', category: 'Kompozisyon' });
+        ins.push({ id: 'tp3', type: 'info', message: `En çok kullanılan: ${dominant.name} (${yuzde(dominant.share, 1)} pay, ${formatTon(dominant.tonaj)})`, severity: 'low', category: 'Kompozisyon' });
       }
-      if (trendAnalysis) ins.push({ id: 'tp4', type: trendAnalysis.direction === 'up' ? 'growth' : 'decline', message: `Türkiye pestisit trendi: BBO %${trendAnalysis.cagr.toFixed(2)} (${trendAnalysis.direction === 'up' ? 'artıyor' : 'azalıyor'})`, severity: 'medium', category: 'Trend' });
+      if (trendAnalysis) ins.push({ id: 'tp4', type: trendAnalysis.direction === 'up' ? 'growth' : 'decline', message: `Türkiye pestisit trendi: BBO ${yuzde(trendAnalysis.cagr, 2)} (${trendAnalysis.direction === 'up' ? 'artıyor' : 'azalıyor'})`, severity: 'medium', category: 'Trend' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Türkiye Profili hatası:', e); }
     finally { setLoading(false); }
@@ -339,8 +339,8 @@ export function usePesticideData(activeTab: Tab) {
       });
 
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye pestisit trendi: BBO %${turkeyTrend.cagr.toFixed(2)}, oynaklık %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya pestisit trendi: BBO %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dünya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye pestisit trendi: BBO ${yuzde(turkeyTrend.cagr, 2)}, oynaklık ${yuzde(turkeyTrend.volatility, 1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya pestisit trendi: BBO ${yuzde(worldTrend.cagr, 2)}`, severity: 'medium', category: 'Dünya' });
       if (turkeyTrend && worldTrend && turkeyTrend.cagr > worldTrend.cagr * 1.5) ins.push({ id: 'fc3', type: 'warning', message: `Türkiye pestisit artış hızı dünya ortalamasının ${(turkeyTrend.cagr / (worldTrend.cagr || 1)).toFixed(1)}x katı`, severity: 'high', category: 'Uyarı' });
       setForecastInsights(ins);
     } catch (e) { console.error('Trend & Tahmin hatası:', e); }
@@ -371,7 +371,7 @@ export function usePesticideData(activeTab: Tab) {
       const totalBefore = before['Pestisitler (toplam)'] || 0;
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: `Pestisit Kullanım Değişimi (2015-${yil})`, message: `Toplam pestisit kullanımı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanım trendi', value: change });
+        alerts.push({ id: 'int-pest-change', severity: change > 30 ? 'critical' : change > 10 ? 'warning' : change > 0 ? 'info' : 'positive', title: `Pestisit Kullanım Değişimi (2015-${yil})`, message: `Toplam pestisit kullanımı ${yuzde(change, 1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(totalBefore)} -> ${formatTon(totalNow)})`, metric: 'Kullanım trendi', value: change });
       }
       if (worldAvg > 0 && totalNow > 0) {
         const vsAvg = totalNow / worldAvg;
@@ -385,7 +385,7 @@ export function usePesticideData(activeTab: Tab) {
         if (b > 0) {
           const ch = ((n - b) / b) * 100;
           if (Math.abs(ch) > 20) {
-            alerts.push({ id: `int-${type}`, severity: ch > 30 ? 'warning' : ch < -20 ? 'positive' : 'info', title: `${type} Degisimi`, message: `${type}: %${ch.toFixed(1)} ${ch > 0 ? 'artis' : 'azalis'} (2015-${yil})`, metric: type, value: ch });
+            alerts.push({ id: `int-${type}`, severity: ch > 30 ? 'warning' : ch < -20 ? 'positive' : 'info', title: `${type} Degisimi`, message: `${type}: ${yuzde(ch, 1)} ${ch > 0 ? 'artis' : 'azalis'} (2015-${yil})`, metric: type, value: ch });
           }
         }
       });

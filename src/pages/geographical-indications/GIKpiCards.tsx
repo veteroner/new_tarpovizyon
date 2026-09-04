@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import type { GIMetrics } from './giTypes';
 import { formatNumber } from './giTypes';
 
@@ -15,7 +16,7 @@ const kpiConfig = [
   {
     key: 'registered' as const,
     label: 'Tescilli',
-    sub: (m: GIMetrics) => `%${((m.registered / m.total) * 100).toFixed(1)} Tescil Oranı`,
+    sub: (m: GIMetrics) => `${yuzde(((m.registered / m.total) * 100), 1)} Tescil Oranı`,
     gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
   },
   {

@@ -1,3 +1,4 @@
+import { sayi } from '../../utils/sayi';
 import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
@@ -23,7 +24,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '48px' }}>
         {/* Red Meat */}
         <div style={{ background: 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(239, 68, 68, 0.25)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥩</div>
+          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM KIRMIZI ET</div>
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.redMeat.value)} ton</div>
@@ -37,7 +38,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Milk */}
         <div style={{ background: 'var(--tv-kart, #fff)',
           border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥛</div>
+          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM SÜT ÜRETİMİ</div>
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{formatValue(kpiData.milk.value)} ton</div>
@@ -50,10 +51,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Egg */}
         <div style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🥚</div>
+          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM YUMURTA</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{(kpiData.egg.value / 1000).toFixed(2)} Milyar adet</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{sayi(kpiData.egg.value / 1000, 2)} Milyar adet</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.egg.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
               {kpiData.egg.change >= 0 ? '+' : ''}{yuzde(kpiData.egg.change, 1)} Yıllık Değişim
@@ -63,7 +64,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Honey */}
         <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(245, 158, 11, 0.25)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🍯</div>
+          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM BAL ÜRETİMİ</div>
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.honey.value)} ton</div>

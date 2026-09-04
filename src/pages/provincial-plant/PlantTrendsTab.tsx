@@ -145,8 +145,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
         border: '1px solid var(--border)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
-            📈 22 Yıllık Trend (2004-2025)
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>22 Yıllık Trend (2004-2025)
           </h3>
           <ChartInsightButton title="22 Yıllık Trend" description="Uzun dönem bitkisel üretim trendi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>

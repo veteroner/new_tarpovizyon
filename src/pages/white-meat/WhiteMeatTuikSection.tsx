@@ -260,7 +260,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[60, 100]} width={46} />
-                  <Tooltip formatter={(value: number) => [`%${value.toFixed(2)}`, 'Başarı Oranı']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                  <Tooltip formatter={(value: number) => [`${yuzde(value, 2)}`, 'Başarı Oranı']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Line type="monotone" dataKey="hatchRate" name="Kuluçka Başarı Oranı (%)" stroke="#22c55e" strokeWidth={3} dot={{ fill: '#22c55e', r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -301,7 +301,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                     </div>
                   </div>
                   <div style={{ textAlign: 'center', flex: '1', minWidth: '200px' }}>
-                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}>🐣</div>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}></div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: '#22c55e' }}>{(tuikData[0]?.producedChicks || 0).toLocaleString('tr-TR')}</div>
                     <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '10px', fontWeight: '600' }}>Üretilen Civiv</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px' }}>(bin adet)</div>

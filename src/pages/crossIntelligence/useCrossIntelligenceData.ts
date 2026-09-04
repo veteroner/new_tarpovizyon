@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchRows, num, type Row } from '../../services/d1';
@@ -123,29 +124,29 @@ export function useCrossIntelligenceData() {
       if (latest && prev) {
         const prodChange = prev.production > 0 ? ((latest.production - prev.production) / prev.production) * 100 : 0;
         if (prodChange < -10) {
-          msgs.push({ type: 'danger', text: `${p.label} üretimi %${Math.abs(prodChange).toFixed(1)} düştü → İthalat baskısı artabilir` });
+          msgs.push({ type: 'danger', text: `${p.label} üretimi ${yuzde(Math.abs(prodChange), 1)} düştü → İthalat baskısı artabilir` });
         } else if (prodChange > 15) {
-          msgs.push({ type: 'success', text: `${p.label} üretimi %${prodChange.toFixed(1)} arttı → İhracat potansiyeli yükseliyor` });
+          msgs.push({ type: 'success', text: `${p.label} üretimi ${yuzde(prodChange, 1)} arttı → İhracat potansiyeli yükseliyor` });
         }
 
         const impDep = latest.imports > 0 && (latest.production + latest.imports) > 0
           ? (latest.imports / (latest.production + latest.imports)) * 100 : 0;
         if (impDep > 30) {
-          msgs.push({ type: 'warning', text: `İthalat bağımlılığı %${impDep.toFixed(1)} → Kritik eşik (%30) aşıldı! Dış fiyat şoklarına açık` });
+          msgs.push({ type: 'warning', text: `İthalat bağımlılığı ${yuzde(impDep, 1)} → Kritik eşik (%30) aşıldı! Dış fiyat şoklarına açık` });
         }
 
         if (latest.sufficiency > 0 && latest.sufficiency < 80) {
-          msgs.push({ type: 'danger', text: `Yeterlilik derecesi %${latest.sufficiency.toFixed(0)} → Gıda güvenliği riski! Üretim artışı veya ithalat çeşitlendirmesi gerekli` });
+          msgs.push({ type: 'danger', text: `Yeterlilik derecesi ${yuzde(latest.sufficiency, 0)} → Gıda güvenliği riski! Üretim artışı veya ithalat çeşitlendirmesi gerekli` });
         } else if (latest.sufficiency > 120) {
-          msgs.push({ type: 'success', text: `Yeterlilik derecesi %${latest.sufficiency.toFixed(0)} → Fazla üretim, ihracat ile değerlendirme fırsatı` });
+          msgs.push({ type: 'success', text: `Yeterlilik derecesi ${yuzde(latest.sufficiency, 0)} → Fazla üretim, ihracat ile değerlendirme fırsatı` });
         }
 
         const prodDelta = prodChange;
         const priceDelta = prev.priceIndex > 0 ? ((latest.priceIndex - prev.priceIndex) / prev.priceIndex) * 100 : 0;
         if (prodDelta < -5 && priceDelta > 10) {
-          msgs.push({ type: 'warning', text: `Üretim ↓%${Math.abs(prodDelta).toFixed(0)} iken fiyat ↑%${priceDelta.toFixed(0)} → Arz daralması fiyatı yukarı itiyor` });
+          msgs.push({ type: 'warning', text: `Üretim ↓${yuzde(Math.abs(prodDelta), 0)} iken fiyat ↑${yuzde(priceDelta, 0)} → Arz daralması fiyatı yukarı itiyor` });
         } else if (prodDelta > 10 && priceDelta < -5) {
-          msgs.push({ type: 'info', text: `Üretim ↑%${prodDelta.toFixed(0)} iken fiyat ↓%${Math.abs(priceDelta).toFixed(0)} → Arz bolluğu fiyatı baskılıyor` });
+          msgs.push({ type: 'info', text: `Üretim ↑${yuzde(prodDelta, 0)} iken fiyat ↓${yuzde(Math.abs(priceDelta), 0)} → Arz bolluğu fiyatı baskılıyor` });
         }
 
         if (latest.imports > latest.exports * 5 && latest.imports > 1e4) {

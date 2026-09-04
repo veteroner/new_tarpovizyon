@@ -61,7 +61,7 @@ export default function GubreHesapPage() {
       {/* Topbar */}
       <div className="gh-topbar">
         <button className="gh-topbar__back" onClick={() => navigate('/')}>← Ana Sayfa</button>
-        <div className="gh-topbar__title"><span>🧪</span><span>Gübre Hesaplayıcı</span></div>
+        <div className="gh-topbar__title"><span></span><span>Gübre Hesaplayıcı</span></div>
         {step > 1 && <button className="gh-topbar__reset" onClick={handleReset}>Yeniden Başlat</button>}
         {step === 1 && <div style={{ width: '140px' }} />}
       </div>

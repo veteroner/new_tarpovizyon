@@ -347,7 +347,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
             height={270}
             stripKey="share"
             stripLabel="Dünya Payı"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Bar dataKey="value" name="Üretim" fill={primaryColor} radius={[4, 4, 0, 0]} />

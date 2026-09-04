@@ -1,4 +1,4 @@
-import { kisa, eksen, sayi } from '../../utils/sayi';
+import { kisa, eksen, sayi, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -37,7 +37,7 @@ export function formatShort(value: number): string {
   return eksen(value);
 }
 
-export function formatPercent(v: number): string { return `%${v.toFixed(1)}`; }
+export function formatPercent(v: number): string { return `${yuzde(v, 1)}`; }
 
 export function useAgriculturalEmploymentData(activeTab: Tab) {
   const [loading, setLoading] = useState(true);
@@ -95,8 +95,8 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       setOverviewKPIs({ worldTotal, worldMale, worldFemale, femaleShare, yoy, cagr: cagr?.cagr || 0, topCountry: countries[0]?.name || '-', topCountryValue: countries[0]?.total || 0 });
       const ins: Insight[] = [];
       ins.push({ id: 'ov1', type: 'info', message: `Dunya tarim istihdami: ${formatPop(worldTotal)} (Top 25 ulke)`, severity: 'low', category: 'Genel' });
-      ins.push({ id: 'ov2', type: femaleShare > 40 ? 'achievement' : 'warning', message: `Kadin istihdam payi: %${femaleShare.toFixed(1)}`, severity: femaleShare < 30 ? 'high' : 'medium', category: 'Cinsiyet' });
-      if (cagr) ins.push({ id: 'ov3', type: cagr.cagr > 0 ? 'growth' : 'decline', message: `Tarim istihdami CAGR: %${cagr.cagr.toFixed(2)} — ${cagr.cagr > 0 ? 'buyuyor' : 'daraliyor'}`, severity: 'high', category: 'Trend' });
+      ins.push({ id: 'ov2', type: femaleShare > 40 ? 'achievement' : 'warning', message: `Kadin istihdam payi: ${yuzde(femaleShare, 1)}`, severity: femaleShare < 30 ? 'high' : 'medium', category: 'Cinsiyet' });
+      if (cagr) ins.push({ id: 'ov3', type: cagr.cagr > 0 ? 'growth' : 'decline', message: `Tarim istihdami CAGR: ${yuzde(cagr.cagr, 2)} — ${cagr.cagr > 0 ? 'buyuyor' : 'daraliyor'}`, severity: 'high', category: 'Trend' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
     finally { setLoading(false); }
@@ -133,8 +133,8 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       const recentTrend = trend.length >= 2 ? trend[trend.length - 1].femaleRatio - (trend[trend.length - 10]?.femaleRatio || 0) : 0;
       setGenderKPIs({ totalM, totalF, avgFemaleRatio, highestFemale: highestFemale?.name || '-', lowestFemale: lowestFemale?.name || '-', recentTrend });
       const ins: Insight[] = [];
-      ins.push({ id: 'gn1', type: 'info', message: `Ortalama kadin tarim istihdam orani: %${avgFemaleRatio.toFixed(1)}`, severity: 'medium', category: 'Cinsiyet' });
-      if (highestFemale) ins.push({ id: 'gn2', type: 'achievement', message: `En yuksek kadin payi: ${highestFemale.name} (%${highestFemale.femaleRatio.toFixed(1)})`, severity: 'low', category: 'Esitlik' });
+      ins.push({ id: 'gn1', type: 'info', message: `Ortalama kadin tarim istihdam orani: ${yuzde(avgFemaleRatio, 1)}`, severity: 'medium', category: 'Cinsiyet' });
+      if (highestFemale) ins.push({ id: 'gn2', type: 'achievement', message: `En yuksek kadin payi: ${highestFemale.name} (${yuzde(highestFemale.femaleRatio, 1)})`, severity: 'low', category: 'Esitlik' });
       if (recentTrend > 0) ins.push({ id: 'gn3', type: 'growth', message: `Kadin payi son 10 yilda +${recentTrend.toFixed(1)} puan artti`, severity: 'medium', category: 'Trend' });
       else if (recentTrend < 0) ins.push({ id: 'gn3', type: 'decline', message: `Kadin payi son 10 yilda ${recentTrend.toFixed(1)} puan dustu`, severity: 'high', category: 'Trend' });
       setGenderInsights(ins);
@@ -180,7 +180,7 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       setConcentrationData({ hhi, top5Share, top10Share, countryCount: countries.length, pieData, hhiHistory });
       const ins: Insight[] = [];
       ins.push({ id: 'cn1', type: hhi > 0.25 ? 'warning' : 'info', message: `HHI Endeksi: ${(hhi * 10000).toFixed(0)} — ${hhi > 0.25 ? 'Yuksek yogunlasma' : hhi > 0.15 ? 'Orta yogunlasma' : 'Dusuk yogunlasma'}`, severity: hhi > 0.25 ? 'high' : 'medium', category: 'Yogunlasma' });
-      ins.push({ id: 'cn2', type: 'info', message: `Top 5 ulke: %${top5Share.toFixed(1)} pay | Top 10: %${top10Share.toFixed(1)}`, severity: 'medium', category: 'Dagılım' });
+      ins.push({ id: 'cn2', type: 'info', message: `Top 5 ulke: ${yuzde(top5Share, 1)} pay | Top 10: ${yuzde(top10Share, 1)}`, severity: 'medium', category: 'Dagılım' });
       setConcentrationInsights(ins);
     } catch (e) { console.error('Concentration hatasi:', e); }
     finally { setLoading(false); }
@@ -215,8 +215,8 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       setTurkeyProfile({ totalNow, maleNow, femaleNow, femaleRatio, rank: turkeyIdx >= 0 ? turkeyIdx + 1 : 'N/A', cagr: cagr?.cagr || 0 });
       const ins: Insight[] = [];
       ins.push({ id: 'tk1', type: 'info', message: `Turkiye tarim istihdami: ${formatPop(totalNow)} (Dunya #${turkeyIdx >= 0 ? turkeyIdx + 1 : '?'})`, severity: 'medium', category: 'Konum' });
-      ins.push({ id: 'tk2', type: femaleRatio > 35 ? 'achievement' : 'warning', message: `Kadin payi: %${femaleRatio.toFixed(1)} ${femaleRatio > 40 ? '(Dunya ortalamasinin ustunde)' : ''}`, severity: 'medium', category: 'Cinsiyet' });
-      if (cagr) ins.push({ id: 'tk3', type: cagr.cagr > 0 ? 'growth' : 'decline', message: `Istihdam CAGR: %${cagr.cagr.toFixed(2)}`, severity: 'high', category: 'Trend' });
+      ins.push({ id: 'tk2', type: femaleRatio > 35 ? 'achievement' : 'warning', message: `Kadin payi: ${yuzde(femaleRatio, 1)} ${femaleRatio > 40 ? '(Dunya ortalamasinin ustunde)' : ''}`, severity: 'medium', category: 'Cinsiyet' });
+      if (cagr) ins.push({ id: 'tk3', type: cagr.cagr > 0 ? 'growth' : 'decline', message: `Istihdam CAGR: ${yuzde(cagr.cagr, 2)}`, severity: 'high', category: 'Trend' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
     finally { setLoading(false); }
@@ -248,8 +248,8 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       });
       setForecastData({ chartData, worldTrend, turkeyTrend, turkeyR2: turkeyForecast.r2, worldR2: worldForecast.r2, anomalyCount: anomalies.filter(a => a.isAnomaly).length });
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye istihdam trendi: CAGR %${turkeyTrend.cagr.toFixed(2)}, volatilite %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'decline', message: `Dunya istihdam trendi: CAGR %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dunya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Turkiye istihdam trendi: CAGR ${yuzde(turkeyTrend.cagr, 2)}, volatilite ${yuzde(turkeyTrend.volatility, 1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'decline', message: `Dunya istihdam trendi: CAGR ${yuzde(worldTrend.cagr, 2)}`, severity: 'medium', category: 'Dunya' });
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
@@ -273,19 +273,19 @@ export function useAgriculturalEmploymentData(activeTab: Tab) {
       const totalBefore = num(before?.sum_total);
       if (totalBefore > 0) {
         const change = ((totalNow - totalBefore) / totalBefore) * 100;
-        alerts.push({ id: 'emp-change', severity: Math.abs(change) > 15 ? (change < 0 ? 'critical' : 'positive') : 'info', title: `Turkiye Istihdam ${change > 0 ? 'Artisi' : 'Dususu'}`, message: `2010-2022 doneminde %${change.toFixed(1)} degisim (${formatPop(totalNow)})`, metric: 'Istihdam Degisimi', value: change });
+        alerts.push({ id: 'emp-change', severity: Math.abs(change) > 15 ? (change < 0 ? 'critical' : 'positive') : 'info', title: `Turkiye Istihdam ${change > 0 ? 'Artisi' : 'Dususu'}`, message: `2010-2022 doneminde ${yuzde(change, 1)} degisim (${formatPop(totalNow)})`, metric: 'Istihdam Degisimi', value: change });
       }
       const femaleRatio = totalNow > 0 ? (femaleNow / totalNow * 100) : 0;
       const worldM = num(worldGenderRows[0]?.sum_male);
       const worldF = num(worldGenderRows[0]?.sum_female);
       const worldFemaleRatio = (worldM + worldF) > 0 ? (worldF / (worldM + worldF) * 100) : 0;
-      alerts.push({ id: 'gender-gap', severity: femaleRatio < worldFemaleRatio * 0.8 ? 'warning' : 'positive', title: 'Cinsiyet Esitligi', message: `Turkiye kadin payi: %${femaleRatio.toFixed(1)} vs Dunya: %${worldFemaleRatio.toFixed(1)}`, metric: 'Kadin Orani', value: femaleRatio });
+      alerts.push({ id: 'gender-gap', severity: femaleRatio < worldFemaleRatio * 0.8 ? 'warning' : 'positive', title: 'Cinsiyet Esitligi', message: `Turkiye kadin payi: ${yuzde(femaleRatio, 1)} vs Dunya: ${yuzde(worldFemaleRatio, 1)}`, metric: 'Kadin Orani', value: femaleRatio });
       const worldData = worldTotalRows;
       const world2022 = num(worldData.find((r: any) => String(r.yearcode) === '2022')?.sum_total);
       const world2010 = num(worldData.find((r: any) => String(r.yearcode) === '2010')?.sum_total);
       if (world2010 > 0) {
         const globalChange = ((world2022 - world2010) / world2010) * 100;
-        alerts.push({ id: 'global-emp', severity: globalChange < -5 ? 'warning' : 'info', title: 'Dunya Tarim Istihdami', message: `2010-2022 doneminde %${globalChange.toFixed(1)} degisim`, metric: 'Global Trend', value: globalChange });
+        alerts.push({ id: 'global-emp', severity: globalChange < -5 ? 'warning' : 'info', title: 'Dunya Tarim Istihdami', message: `2010-2022 doneminde ${yuzde(globalChange, 1)} degisim`, metric: 'Global Trend', value: globalChange });
       }
       if (totalBefore > 0 && totalNow < totalBefore * 0.7) {
         alerts.push({ id: 'structural', severity: 'critical', title: 'Yapisal Donusum', message: 'Turkiye tarim istihdaminda hizli cozulme — sanayilesme sinyali', metric: 'Yapisal', value: ((totalNow - totalBefore) / totalBefore) * 100 });

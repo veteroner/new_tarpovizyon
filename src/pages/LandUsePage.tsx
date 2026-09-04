@@ -89,8 +89,8 @@ export default function LandUsePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`Yıllık: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${yuzde(overviewKPIs.worldYoY, 2)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="green" large />
-                <KPICard title="TURKIYE ARAZISI" value={formatArea(overviewKPIs.turkeyAg)} subtitle={`Dunya payi: %${overviewKPIs.turkeyShare.toFixed(2)} | Sira: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
+                <KPICard title="DUNYA TARIM ARAZISI" value={formatArea(overviewKPIs.worldAg)} subtitle={`Yıllık: ${overviewKPIs.worldYoY > 0 ? '+' : ''}${yuzde(overviewKPIs.worldYoY, 2)} | BBO: ${yuzde(overviewKPIs.worldCAGR, 2)}`} icon={Globe} color="green" large />
+                <KPICard title="TURKIYE ARAZISI" value={formatArea(overviewKPIs.turkeyAg)} subtitle={`Dunya payi: ${yuzde(overviewKPIs.turkeyShare, 2)} | Sira: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="SULAMA ORANI" value={formatPercent(overviewKPIs.irrigationRate)} subtitle={`${formatArea(overviewKPIs.turkeyIrrigation)} sulanan`} icon={Target} color="blue" />
                 <KPICard title="NADAS ORANI" value={formatPercent(overviewKPIs.fallowRate)} subtitle={`${formatArea(overviewKPIs.turkeyFallow)} nadas`} icon={AlertTriangle} color={overviewKPIs.fallowRate > 15 ? 'red' : 'green'} />
               </div>
@@ -164,7 +164,7 @@ export default function LandUsePage() {
               {transformComparison.length > 0 && (
                 <div className="kpi-grid">
                   {transformComparison.slice(0, 4).map((tc: any, i: number) => (
-                    <KPICard key={tc.name} title={tc.name.substring(0, 20).toUpperCase()} value={`${tc.changePct > 0 ? '+' : ''}${yuzde(tc.changePct, 1)}`} subtitle={`${tc.startYear} -> ${tc.endYear} | CAGR: %${tc.cagr.toFixed(2)}`} icon={tc.changePct > 0 ? TrendingUp : TrendingDown} color={tc.changePct > 0 ? 'green' : 'red'} large={i === 0} />
+                    <KPICard key={tc.name} title={tc.name.substring(0, 20).toUpperCase()} value={`${tc.changePct > 0 ? '+' : ''}${yuzde(tc.changePct, 1)}`} subtitle={`${tc.startYear} -> ${tc.endYear} | CAGR: ${yuzde(tc.cagr, 2)}`} icon={tc.changePct > 0 ? TrendingUp : TrendingDown} color={tc.changePct > 0 ? 'green' : 'red'} large={i === 0} />
                   ))}
                 </div>
               )}
@@ -264,7 +264,7 @@ export default function LandUsePage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TARIM ARAZISI" value={formatArea(turkeyProfile['Tarım arazisi'] || 0)} subtitle={`Islenebilir: %${(turkeyProfile.arablePct || 0).toFixed(1)} | Mera: %${(turkeyProfile.pasturePct || 0).toFixed(1)}`} icon={Globe} color="green" large />
+                <KPICard title="TARIM ARAZISI" value={formatArea(turkeyProfile['Tarım arazisi'] || 0)} subtitle={`Islenebilir: ${yuzde((turkeyProfile.arablePct || 0), 1)} | Mera: ${yuzde((turkeyProfile.pasturePct || 0), 1)}`} icon={Globe} color="green" large />
                 <KPICard title="SULAMA ORANI" value={formatPercent(turkeyProfile.irrigationRate || 0)} subtitle={`Dunya sirasi: #${turkeyProfile.irrigationRank}`} icon={Target} color="blue" />
                 <KPICard title="NADAS ORANI" value={formatPercent(turkeyProfile.fallowRate || 0)} subtitle={`${formatArea(turkeyProfile['Geçici nadas alanı'] || 0)} nadas`} icon={AlertTriangle} color={turkeyProfile.fallowRate > 15 ? 'red' : 'green'} />
                 <KPICard title="ORMANLIK ALAN" value={formatArea(turkeyProfile['Orman alanı'] || 0)} subtitle="Agaclandirma trendi" icon={Layers} color="teal" />

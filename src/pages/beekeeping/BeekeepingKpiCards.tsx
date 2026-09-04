@@ -24,7 +24,7 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🐝</div>
+        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
             TOPLAM ARICI SAYISI
@@ -47,7 +47,7 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🪔</div>
+        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
             TOPLAM KOVAN SAYISI
@@ -70,7 +70,7 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🍯</div>
+        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
             BAL ÜRETİMİ
@@ -93,7 +93,7 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>🕯️</div>
+        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
             BALMUMU ÜRETİMİ

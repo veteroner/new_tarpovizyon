@@ -105,7 +105,7 @@ export default function AIAssistantPage() {
             padding: '2rem',
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌾🤖</div>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
                 Tarpol AI'ya Hoş Geldiniz
               </h2>
@@ -129,8 +129,7 @@ export default function AIAssistantPage() {
                     fontSize: '0.85rem', transition: 'all 0.2s',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                   }}
-                >
-                  💬 {s}
+                >{s}
                 </button>
               ))}
             </div>

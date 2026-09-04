@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { translateCountry } from '../../utils/countryTranslations';
 import { fetchAgg, num, type Row } from '../../services/d1';
@@ -163,16 +164,16 @@ export function useLivestockCompetitionData() {
     if (tr && trPast && trPast.total > 0) {
       const g = cagr5(tr.total, trPast.total);
       if (g > 3) out.push({ id: `ci${id++}`, type: 'growth', severity: 'medium',
-        message: `Türkiye toplam hayvansal üretimde %${g.toFixed(1)} BBO ile güçlü büyüyor`, category: 'BÜYÜME' });
+        message: `Türkiye toplam hayvansal üretimde ${yuzde(g, 1)} BBO ile güçlü büyüyor`, category: 'BÜYÜME' });
       else if (g < -1) out.push({ id: `ci${id++}`, type: 'decline', severity: 'medium',
-        message: `Türkiye toplam üretimde %${Math.abs(g).toFixed(1)} yıllık daralma yaşıyor`, category: 'DÜŞÜŞ' });
+        message: `Türkiye toplam üretimde ${yuzde(Math.abs(g), 1)} yıllık daralma yaşıyor`, category: 'DÜŞÜŞ' });
     }
 
     if (cur.length > 0) {
       const wt = cur.reduce((s, c) => s + c.total, 0);
       const t1 = (cur[0].total / wt) * 100;
       if (t1 > 20) out.push({ id: `ci${id++}`, type: 'warning', severity: 'medium',
-        message: `${cur[0].country} dünya hayvansal üretiminin %${t1.toFixed(1)}'ini kontrol ediyor – konsantrasyon riski`, category: 'PAZAR' });
+        message: `${cur[0].country} dünya hayvansal üretiminin ${yuzde(t1, 1)}'ini kontrol ediyor – konsantrasyon riski`, category: 'PAZAR' });
     }
 
     if (tr) {
@@ -196,7 +197,7 @@ export function useLivestockCompetitionData() {
 
     if (growths[0]?.cagr > 5)
       out.push({ id: `ci${id++}`, type: 'info', severity: 'medium',
-        message: `En hızlı büyüyen: ${growths[0].country} (%${growths[0].cagr.toFixed(1)} BBO) – yükselen pazar`, category: 'TREND' });
+        message: `En hızlı büyüyen: ${growths[0].country} (${yuzde(growths[0].cagr, 1)} BBO) – yükselen pazar`, category: 'TREND' });
 
     if (tr && cur[0] && !isTR(cur[0].country)) {
       const lp = past.find(p => p.country === cur[0].country);

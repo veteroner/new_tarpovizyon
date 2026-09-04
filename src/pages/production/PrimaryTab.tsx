@@ -43,17 +43,16 @@ export function PrimaryTab({
             {primaryProducts.map(p => <option key={p} value={p}>{translateProduct(p)}</option>)}
           </select>
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '8px 16px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px' }}>
-          📊 {primaryProducts.length} ürün mevcut
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '8px 16px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px' }}>{primaryProducts.length} ürün mevcut
         </div>
       </div>
 
       {primaryKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title={`Dünya ${translateProduct(primaryProduct).substring(0, 20)}`} value={formatValue(primaryKPIs.worldTotal)} subtitle={`${primaryKPIs.producerCount} ülke`} icon={Globe} color="blue" large />
-          <KPICard title="Türkiye" value={formatValue(primaryKPIs.turkeyProduction)} subtitle={`${primaryKPIs.turkeyRank}. | %${primaryKPIs.turkeyShare.toFixed(1)}`} icon={Leaf} color="green" />
+          <KPICard title="Türkiye" value={formatValue(primaryKPIs.turkeyProduction)} subtitle={`${primaryKPIs.turkeyRank}. | ${yuzde(primaryKPIs.turkeyShare, 1)}`} icon={Leaf} color="green" />
           <KPICard title="Dünya CAGR" value={`${primaryKPIs.worldCAGR >= 0 ? '+' : ''}${yuzde(primaryKPIs.worldCAGR, 2)}`} subtitle="2000-2023" icon={TrendingUp} color={primaryKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
-          <KPICard title="CAGR" value={`${primaryKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(primaryKPIs.turkeyCAGR, 2)}`} subtitle={`Vol: %${primaryKPIs.turkeyVolatility.toFixed(1)}`} icon={Activity} color={primaryKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
+          <KPICard title="CAGR" value={`${primaryKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(primaryKPIs.turkeyCAGR, 2)}`} subtitle={`Vol: ${yuzde(primaryKPIs.turkeyVolatility, 1)}`} icon={Activity} color={primaryKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
         </div>
 
         {primaryAnomalies.length > 0 && (

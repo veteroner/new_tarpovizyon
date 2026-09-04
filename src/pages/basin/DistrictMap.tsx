@@ -299,8 +299,8 @@ export default function DistrictMap({ basinData, basinColors, filterBasin, filte
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
           <div style={{ fontWeight: 700, marginBottom: '4px' }}>{tooltip.district}</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>📍 {tooltip.province}</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>🌊 {tooltip.basin}</div>
+          <div style={{ fontSize: '12px', opacity: 0.9 }}>{tooltip.province}</div>
+          <div style={{ fontSize: '12px', opacity: 0.9 }}>{tooltip.basin}</div>
         </div>
       )}
     </div>

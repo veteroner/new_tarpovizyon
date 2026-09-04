@@ -291,7 +291,7 @@ export default function BasinProductionPage() {
         color: 'var(--text-primary)'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌊</div>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
           <div style={{ fontSize: '18px', opacity: 0.9, color: 'var(--text-secondary)' }}>Havza Verileri Yükleniyor...</div>
         </div>
       </div>

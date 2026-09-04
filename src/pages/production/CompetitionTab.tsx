@@ -52,7 +52,7 @@ export function CompetitionTab({
       {compKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title="Sıralama" value={compKPIs.turkeyRank > 0 ? `${compKPIs.turkeyRank}.` : '-'} subtitle={`${compKPIs.totalProducers} üretici`} icon={Target} color="blue" large />
-          <KPICard title="Lider" value={compKPIs.leader.substring(0, 15)} subtitle={`%${compKPIs.leaderShare.toFixed(1)}`} icon={Award} color="orange" />
+          <KPICard title="Lider" value={compKPIs.leader.substring(0, 15)} subtitle={`${yuzde(compKPIs.leaderShare, 1)}`} icon={Award} color="orange" />
           <KPICard title="HHI" value={compKPIs.latestHHI.toFixed(0)} subtitle={compKPIs.latestHHI > 2500 ? 'Çok Yoğun' : compKPIs.latestHHI > 1500 ? 'Yoğun' : 'Rekabetçi'} icon={BarChart2} color={compKPIs.latestHHI > 2500 ? 'red' : compKPIs.latestHHI > 1500 ? 'orange' : 'green'} />
           <KPICard title="Aktif Ülke" value={compKPIs.totalProducers.toString()} subtitle="Üretim yapan" icon={Globe} color="teal" />
         </div>
@@ -131,7 +131,7 @@ export function CompetitionTab({
                 Türkiye'nin değerleri global medyana ve top 5 ortalamasına göre normalize edilir. <strong>1,0×</strong> medyan ile eşit, <strong>&gt;1</strong> avantaj.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-                {tile('Pazar Payı (RCA)', rcaShare, `TR %${tr.share.toFixed(2)} · Medyan %${medShare.toFixed(2)}`)}
+                {tile('Pazar Payı (RCA)', rcaShare, `TR ${yuzde(tr.share, 2)} · Medyan ${yuzde(medShare, 2)}`)}
                 {tile('Verim Avantajı', rcaYield, `TR ${formatYield(tr.yieldVal)} · Medyan ${formatYield(medYield)}`)}
                 {tile('Üretim Ölçeği (Alan)', rcaArea, `TR ${formatHa(tr.area)} · Medyan ${formatHa(medArea)}`)}
                 {tile('Verim vs Top 5', rcaYieldVsTop, `Top 5 ort: ${formatYield(top5avgYield)}`)}

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useCallback } from 'react';
 import type { Insight } from '../../components/InsightCard';
@@ -225,19 +226,19 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
       });
 
       const insights: Insight[] = [];
-      if (turkeyRank <= 10) insights.push({ id: 'ov1', type: 'achievement', message: `Türkiye dünya bitkisel üretiminde ${turkeyRank}. sırada — ${formatValue(turkeyTotal)} ile dünya üretiminin %${turkeyShare.toFixed(1)}'ini karşılıyor`, severity: 'high', category: 'Genel' });
-      if (worldYoY > 2) insights.push({ id: 'ov2', type: 'growth', message: `Dünya bitkisel üretimi yıllık %${worldYoY.toFixed(1)} büyüdü — ${yil} yılı rekor üretim`, severity: 'medium', category: 'Trend' });
-      else if (worldYoY < -2) insights.push({ id: 'ov2', type: 'decline', message: `Dünya bitkisel üretimi yıllık %${Math.abs(worldYoY).toFixed(1)} geriledi`, severity: 'high', category: 'Risk' });
-      if (turkeyYoY > 3) insights.push({ id: 'ov3', type: 'growth', message: `Türkiye üretimi %${turkeyYoY.toFixed(1)} arttı — dünya ortalamasının ${(turkeyYoY / Math.max(worldYoY, 0.1)).toFixed(1)}x üzerinde`, severity: 'high', category: 'Türkiye' });
-      else if (turkeyYoY < -3) insights.push({ id: 'ov3', type: 'warning', message: `Türkiye üretimi %${Math.abs(turkeyYoY).toFixed(1)} azaldı — ciddi düşüş`, severity: 'high', category: 'Risk' });
-      if (turkeyYield > worldYield) insights.push({ id: 'ov4', type: 'achievement', message: `Türkiye ortalama verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldYield)}) %${((turkeyYield / worldYield - 1) * 100).toFixed(0)} üzerinde`, severity: 'medium', category: 'Verim' });
+      if (turkeyRank <= 10) insights.push({ id: 'ov1', type: 'achievement', message: `Türkiye dünya bitkisel üretiminde ${turkeyRank}. sırada — ${formatValue(turkeyTotal)} ile dünya üretiminin ${yuzde(turkeyShare, 1)}'ini karşılıyor`, severity: 'high', category: 'Genel' });
+      if (worldYoY > 2) insights.push({ id: 'ov2', type: 'growth', message: `Dünya bitkisel üretimi yıllık ${yuzde(worldYoY, 1)} büyüdü — ${yil} yılı rekor üretim`, severity: 'medium', category: 'Trend' });
+      else if (worldYoY < -2) insights.push({ id: 'ov2', type: 'decline', message: `Dünya bitkisel üretimi yıllık ${yuzde(Math.abs(worldYoY), 1)} geriledi`, severity: 'high', category: 'Risk' });
+      if (turkeyYoY > 3) insights.push({ id: 'ov3', type: 'growth', message: `Türkiye üretimi ${yuzde(turkeyYoY, 1)} arttı — dünya ortalamasının ${(turkeyYoY / Math.max(worldYoY, 0.1)).toFixed(1)}x üzerinde`, severity: 'high', category: 'Türkiye' });
+      else if (turkeyYoY < -3) insights.push({ id: 'ov3', type: 'warning', message: `Türkiye üretimi ${yuzde(Math.abs(turkeyYoY), 1)} azaldı — ciddi düşüş`, severity: 'high', category: 'Risk' });
+      if (turkeyYield > worldYield) insights.push({ id: 'ov4', type: 'achievement', message: `Türkiye ortalama verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldYield)}) ${yuzde(((turkeyYield / worldYield - 1) * 100), 0)} üzerinde`, severity: 'medium', category: 'Verim' });
       else { const gap = ((worldYield - turkeyYield) / worldYield * 100).toFixed(0); insights.push({ id: 'ov4', type: 'warning', message: `Türkiye ortalama verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldYield)}) %${gap} altında — verim artışı potansiyeli`, severity: 'medium', category: 'Verim' }); }
       const turkeyProcRatio = turkeyTotal > 0 ? (turkeyProcessedTotal / turkeyTotal) * 100 : 0;
-      if (turkeyProcRatio < processingRatio) insights.push({ id: 'ov6', type: 'warning', message: `Türkiye işleme oranı (%${turkeyProcRatio.toFixed(1)}) dünya ortalamasının (%${processingRatio.toFixed(1)}) altında — gıda sanayii yatırım fırsatı`, severity: 'medium', category: 'İşleme' });
+      if (turkeyProcRatio < processingRatio) insights.push({ id: 'ov6', type: 'warning', message: `Türkiye işleme oranı (${yuzde(turkeyProcRatio, 1)}) dünya ortalamasının (${yuzde(processingRatio, 1)}) altında — gıda sanayii yatırım fırsatı`, severity: 'medium', category: 'İşleme' });
       if (trends.length >= 5) {
         const worldTrendData: YearValue[] = trends.map((t: any) => ({ year: t.year, value: t.worldProduction }));
         const worldCAGR = calculateCAGR(worldTrendData);
-        if (worldCAGR) insights.push({ id: 'ov7', type: worldCAGR.cagr > 0 ? 'growth' : 'decline', message: `Dünya bitkisel üretimi ${trends[0].year}-${trends[trends.length - 1].year} döneminde yıllık %${worldCAGR.cagr.toFixed(2)} CAGR ile ${worldCAGR.trend === 'GROWTH' ? 'büyüdü' : 'geriledi'}`, severity: 'medium', category: 'Uzun Vadeli' });
+        if (worldCAGR) insights.push({ id: 'ov7', type: worldCAGR.cagr > 0 ? 'growth' : 'decline', message: `Dünya bitkisel üretimi ${trends[0].year}-${trends[trends.length - 1].year} döneminde yıllık ${yuzde(worldCAGR.cagr, 2)} CAGR ile ${worldCAGR.trend === 'GROWTH' ? 'büyüdü' : 'geriledi'}`, severity: 'medium', category: 'Uzun Vadeli' });
       }
       insights.push({ id: 'ov8', type: 'info', message: `FAO veritabanında ${num(worldRow?.cd_ulkead)} ülke, ${num(worldRow?.cd_urunad)} birincil ürün takip ediliyor — Türkiye ${num(turkeyRow?.cd_urunad)} üründe üretim yapıyor`, severity: 'low', category: 'Kapsam' });
       setOverviewInsights(insights);
@@ -305,14 +306,14 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
 
       const ins: Insight[] = [];
       const productTR = translateProduct(product);
-      if (turkeyInTop && turkeyInTop.rank <= 5) ins.push({ id: 'pr1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. sırası — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: productTR });
+      if (turkeyInTop && turkeyInTop.rank <= 5) ins.push({ id: 'pr1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. sırası — ${yuzde(turkeyInTop.share, 1)} pazar payı`, severity: 'high', category: productTR });
       else if (turkeyInTop && turkeyInTop.rank <= 15) ins.push({ id: 'pr1', type: 'info', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. sırası`, severity: 'medium', category: productTR });
-      if (turkeyCAGR && turkeyCAGR.cagr > 2) ins.push({ id: 'pr2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile büyüyor`, severity: 'medium', category: 'Trend' });
-      else if (turkeyCAGR && turkeyCAGR.cagr < -1) ins.push({ id: 'pr2', type: 'decline', message: `Türkiye ${productTR} üretimi yıllık %${Math.abs(turkeyCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'high', category: 'Risk' });
-      if (hhi && hhi.concentration === 'VERY_HIGH') ins.push({ id: 'pr3', type: 'warning', message: `${productTR} pazarı çok yoğun (HHI: ${hhi.hhi.toFixed(0)}) — ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'high', category: 'Pazar' });
-      if (turkeyVol > 15) ins.push({ id: 'pr4', type: 'warning', message: `Türkiye ${productTR} üretimi yüksek volatilite gösteriyor (%${turkeyVol.toFixed(1)})`, severity: 'high', category: 'Risk' });
+      if (turkeyCAGR && turkeyCAGR.cagr > 2) ins.push({ id: 'pr2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık ${yuzde(turkeyCAGR.cagr, 1)} CAGR ile büyüyor`, severity: 'medium', category: 'Trend' });
+      else if (turkeyCAGR && turkeyCAGR.cagr < -1) ins.push({ id: 'pr2', type: 'decline', message: `Türkiye ${productTR} üretimi yıllık ${yuzde(Math.abs(turkeyCAGR.cagr), 1)} CAGR ile geriliyor`, severity: 'high', category: 'Risk' });
+      if (hhi && hhi.concentration === 'VERY_HIGH') ins.push({ id: 'pr3', type: 'warning', message: `${productTR} pazarı çok yoğun (HHI: ${hhi.hhi.toFixed(0)}) — ${topCountries[0]?.country} ${yuzde(topCountries[0]?.share, 1)} ile dominant`, severity: 'high', category: 'Pazar' });
+      if (turkeyVol > 15) ins.push({ id: 'pr4', type: 'warning', message: `Türkiye ${productTR} üretimi yüksek volatilite gösteriyor (${yuzde(turkeyVol, 1)})`, severity: 'high', category: 'Risk' });
       if (realAnomalies.length > 0) { const la = realAnomalies[realAnomalies.length - 1]; ins.push({ id: 'pr5', type: la.type === 'SPIKE' ? 'growth' : 'warning', message: `${la.year} yılında ${productTR} üretiminde ${la.type === 'SPIKE' ? 'ani artış' : 'ani düşüş'} (z-score: ${la.zScore.toFixed(1)})`, severity: 'medium', category: 'Anomali' }); }
-      if (worldCAGR && turkeyCAGR && turkeyCAGR.cagr > worldCAGR.cagr) ins.push({ id: 'pr6', type: 'growth', message: `Türkiye ${productTR} büyüme hızı (%${turkeyCAGR.cagr.toFixed(1)}) dünya ortalamasının (%${worldCAGR.cagr.toFixed(1)}) üzerinde`, severity: 'medium', category: 'Rekabet' });
+      if (worldCAGR && turkeyCAGR && turkeyCAGR.cagr > worldCAGR.cagr) ins.push({ id: 'pr6', type: 'growth', message: `Türkiye ${productTR} büyüme hızı (${yuzde(turkeyCAGR.cagr, 1)}) dünya ortalamasının (${yuzde(worldCAGR.cagr, 1)}) üzerinde`, severity: 'medium', category: 'Rekabet' });
       setPrimaryInsights(ins);
     } catch (error) { console.error('Primary veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -363,10 +364,10 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
 
       const ins: Insight[] = [];
       const productTR = translateProduct(product);
-      if (turkeyInTop && turkeyInTop.rank <= 10) ins.push({ id: 'pc1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. — %${turkeyInTop.share.toFixed(1)} pazar payı`, severity: 'high', category: 'Sıralama' });
-      if (turkeyCAGR && turkeyCAGR.cagr > 3) ins.push({ id: 'pc2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık %${turkeyCAGR.cagr.toFixed(1)} CAGR ile hızla büyüyor`, severity: 'medium', category: 'Büyüme' });
-      if (worldCAGR && worldCAGR.cagr < 0) ins.push({ id: 'pc3', type: 'decline', message: `Dünya ${productTR} üretimi yıllık %${Math.abs(worldCAGR.cagr).toFixed(1)} CAGR ile geriliyor`, severity: 'medium', category: 'Trend' });
-      if (topCountries[0]?.share > 40) ins.push({ id: 'pc4', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile baskın — tedarik riski`, severity: 'high', category: 'Konsantrasyon' });
+      if (turkeyInTop && turkeyInTop.rank <= 10) ins.push({ id: 'pc1', type: 'achievement', message: `Türkiye ${productTR} üretiminde dünya ${turkeyInTop.rank}. — ${yuzde(turkeyInTop.share, 1)} pazar payı`, severity: 'high', category: 'Sıralama' });
+      if (turkeyCAGR && turkeyCAGR.cagr > 3) ins.push({ id: 'pc2', type: 'growth', message: `Türkiye ${productTR} üretimi yıllık ${yuzde(turkeyCAGR.cagr, 1)} CAGR ile hızla büyüyor`, severity: 'medium', category: 'Büyüme' });
+      if (worldCAGR && worldCAGR.cagr < 0) ins.push({ id: 'pc3', type: 'decline', message: `Dünya ${productTR} üretimi yıllık ${yuzde(Math.abs(worldCAGR.cagr), 1)} CAGR ile geriliyor`, severity: 'medium', category: 'Trend' });
+      if (topCountries[0]?.share > 40) ins.push({ id: 'pc4', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} ${yuzde(topCountries[0]?.share, 1)} ile baskın — tedarik riski`, severity: 'high', category: 'Konsantrasyon' });
       setProcessedInsights(ins);
     } catch (error) { console.error('Processed veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -445,11 +446,11 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
 
       const yIns: Insight[] = [];
       const productTR = translateProduct(product);
-      if (turkeyYield > worldAvgYield) yIns.push({ id: 'y1', type: 'achievement', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${((turkeyYield / worldAvgYield - 1) * 100).toFixed(0)} üzerinde`, severity: 'high', category: 'Verim' });
-      else yIns.push({ id: 'y1', type: 'warning', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) %${Math.abs(gapToWorld).toFixed(0)} altında`, severity: 'high', category: 'Verim' });
-      if (gapToLeader > 50) yIns.push({ id: 'y2', type: 'warning', message: `${leader?.country} (${formatYield(leaderYield)}) lider — Türkiye'nin verim açığı %${gapToLeader.toFixed(0)}`, severity: 'high', category: 'Gap' });
-      if (catchUpYears !== null && catchUpYears < 50) yIns.push({ id: 'y3', type: 'info', message: `Mevcut CAGR (%${turkeyYieldCAGR?.cagr.toFixed(1)}) ile lidere tahmini ${catchUpYears} yılda yetişilir`, severity: 'medium', category: 'Projeksiyon' });
-      if (turkeyYieldCAGR && turkeyYieldCAGR.cagr > 2) yIns.push({ id: 'y4', type: 'growth', message: `Türkiye ${productTR} verimi yıllık %${turkeyYieldCAGR.cagr.toFixed(1)} CAGR ile artıyor`, severity: 'medium', category: 'Trend' });
+      if (turkeyYield > worldAvgYield) yIns.push({ id: 'y1', type: 'achievement', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) ${yuzde(((turkeyYield / worldAvgYield - 1) * 100), 0)} üzerinde`, severity: 'high', category: 'Verim' });
+      else yIns.push({ id: 'y1', type: 'warning', message: `Türkiye ${productTR} verimi (${formatYield(turkeyYield)}) dünya ortalamasının (${formatYield(worldAvgYield)}) ${yuzde(Math.abs(gapToWorld), 0)} altında`, severity: 'high', category: 'Verim' });
+      if (gapToLeader > 50) yIns.push({ id: 'y2', type: 'warning', message: `${leader?.country} (${formatYield(leaderYield)}) lider — Türkiye'nin verim açığı ${yuzde(gapToLeader, 0)}`, severity: 'high', category: 'Gap' });
+      if (catchUpYears !== null && catchUpYears < 50) yIns.push({ id: 'y3', type: 'info', message: `Mevcut CAGR (${yuzde(turkeyYieldCAGR?.cagr ?? 0, 1)}) ile lidere tahmini ${catchUpYears} yılda yetişilir`, severity: 'medium', category: 'Projeksiyon' });
+      if (turkeyYieldCAGR && turkeyYieldCAGR.cagr > 2) yIns.push({ id: 'y4', type: 'growth', message: `Türkiye ${productTR} verimi yıllık ${yuzde(turkeyYieldCAGR.cagr, 1)} CAGR ile artıyor`, severity: 'medium', category: 'Trend' });
       setYieldInsights(yIns);
     } catch (error) { console.error('Yield veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -537,10 +538,10 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
       const cIns: Insight[] = [];
       const productTR = translateProduct(product);
       const turkeyMover = movers.find((m: any) => m.isTurkey);
-      if (turkeyMover && turkeyMover.growth > 10) cIns.push({ id: 'c1', type: 'growth', message: `Türkiye ${productTR} üretimi son 5 yılda %${turkeyMover.growth.toFixed(1)} büyüdü`, severity: 'high', category: 'Büyüme' });
-      else if (turkeyMover && turkeyMover.growth < -10) cIns.push({ id: 'c1', type: 'decline', message: `Türkiye ${productTR} üretimi son 5 yılda %${Math.abs(turkeyMover.growth).toFixed(1)} geriledi`, severity: 'high', category: 'Gerileme' });
-      if (topGainers.length > 0 && !topGainers[0].isTurkey) cIns.push({ id: 'c2', type: 'info', message: `En hızlı büyüyen: ${topGainers[0].country} (%${topGainers[0].growth.toFixed(1)})`, severity: 'medium', category: 'Rekabet' });
-      if (topCountries[0]?.share > 30) cIns.push({ id: 'c3', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} %${topCountries[0]?.share.toFixed(1)} ile dominant`, severity: 'medium', category: 'Konsantrasyon' });
+      if (turkeyMover && turkeyMover.growth > 10) cIns.push({ id: 'c1', type: 'growth', message: `Türkiye ${productTR} üretimi son 5 yılda ${yuzde(turkeyMover.growth, 1)} büyüdü`, severity: 'high', category: 'Büyüme' });
+      else if (turkeyMover && turkeyMover.growth < -10) cIns.push({ id: 'c1', type: 'decline', message: `Türkiye ${productTR} üretimi son 5 yılda ${yuzde(Math.abs(turkeyMover.growth), 1)} geriledi`, severity: 'high', category: 'Gerileme' });
+      if (topGainers.length > 0 && !topGainers[0].isTurkey) cIns.push({ id: 'c2', type: 'info', message: `En hızlı büyüyen: ${topGainers[0].country} (${yuzde(topGainers[0].growth, 1)})`, severity: 'medium', category: 'Rekabet' });
+      if (topCountries[0]?.share > 30) cIns.push({ id: 'c3', type: 'warning', message: `${productTR} pazarında ${topCountries[0]?.country} ${yuzde(topCountries[0]?.share, 1)} ile dominant`, severity: 'medium', category: 'Konsantrasyon' });
       setCompInsights(cIns);
     } catch (error) { console.error('Competition veri yüklenirken hata:', error); }
     finally { setLoading(false); }
@@ -590,8 +591,8 @@ export function useProductionData(categoryFilter?: string): UseProductionDataRet
 
       const pIns: Insight[] = [];
       const productTR = translateProduct(product);
-      if (prodChange > 5) pIns.push({ id: 'pd1', type: 'growth', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen %${prodChange.toFixed(1)} artacak — ${formatValue(forecastProd)}`, severity: 'high', category: 'Tahmin' });
-      else if (prodChange < -5) pIns.push({ id: 'pd1', type: 'warning', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen %${Math.abs(prodChange).toFixed(1)} azalacak`, severity: 'high', category: 'Tahmin' });
+      if (prodChange > 5) pIns.push({ id: 'pd1', type: 'growth', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen ${yuzde(prodChange, 1)} artacak — ${formatValue(forecastProd)}`, severity: 'high', category: 'Tahmin' });
+      else if (prodChange < -5) pIns.push({ id: 'pd1', type: 'warning', message: `Türkiye ${productTR} üretimi 3 yıl sonra tahminen ${yuzde(Math.abs(prodChange), 1)} azalacak`, severity: 'high', category: 'Tahmin' });
       if (prodForecast.r2 > 0.8) pIns.push({ id: 'pd2', type: 'info', message: `Üretim tahmin modeli güvenilir (R²=${prodForecast.r2.toFixed(2)})`, severity: 'medium', category: 'Model' });
       else if (prodForecast.r2 < 0.4) pIns.push({ id: 'pd2', type: 'warning', message: `Üretim tahmin modeli düşük güvenilirlik (R²=${prodForecast.r2.toFixed(2)})`, severity: 'medium', category: 'Model' });
       if (forecastYieldVal > lastYield * 1.1) pIns.push({ id: 'pd3', type: 'growth', message: `Verim artışı bekleniyor: ${formatYield(lastYield)} → ${formatYield(forecastYieldVal)}`, severity: 'medium', category: 'Verim' });

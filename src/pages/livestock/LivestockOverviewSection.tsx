@@ -281,14 +281,14 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
         const trPrimaryRank = pRanks.findIndex(r => String(r.ulkead) === 'Türkiye') + 1 || 0;
 
         const xIns: Insight[] = [];
-        xIns.push({ id: 'x-1', type: 'info', message: `Tedarik Zinciri: Dünya birincil üretiminin %${ratio.toFixed(1)}'i işlenmiş ürüne dönüştürülüyor`, severity: 'medium' });
+        xIns.push({ id: 'x-1', type: 'info', message: `Tedarik Zinciri: Dünya birincil üretiminin ${yuzde(ratio, 1)}'i işlenmiş ürüne dönüştürülüyor`, severity: 'medium' });
         if (trPrimaryRank > 0 && trPrimaryRank <= 10) {
           xIns.push({ id: 'x-2', type: 'achievement', message: `Türkiye birincil hayvansal üretimde dünya ${trPrimaryRank}. sırada`, severity: 'medium' });
         } else if (trPrimaryRank > 10) {
           xIns.push({ id: 'x-2', type: 'warning', message: `Türkiye birincil hayvansal üretimde dünya ${trPrimaryRank}. sırada — ilk 10'a girme potansiyeli mevcut`, severity: 'medium' });
         }
         if (ratio < 20) {
-          xIns.push({ id: 'x-3', type: 'decline', message: `İşleme oranı düşük (%${ratio.toFixed(1)}) — katma değerli üretim potansiyeli büyük`, severity: 'high' });
+          xIns.push({ id: 'x-3', type: 'decline', message: `İşleme oranı düşük (${yuzde(ratio, 1)}) — katma değerli üretim potansiyeli büyük`, severity: 'high' });
         }
 
         setExecSummary({
@@ -329,7 +329,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
           {intelligenceMetrics && (
             <>
               <div className="kpi-card">
-                <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}>📈</div></div>
+                <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}></div></div>
                 <div className="kpi-value" style={{color: (intelligenceMetrics.cagr5Year ?? 0) >= 0 ? '#22c55e' : '#ef4444'}}>{yuzde((intelligenceMetrics.cagr5Year ?? 0), 2)}</div>
                 <div className="kpi-subtitle">Yıllık bileşik büyüme</div>
               </div>
@@ -458,7 +458,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                 <YAxis type="number" dataKey="cagr" name="CAGR" unit="%" tickFormatter={pctTick}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <ZAxis range={[40, 400]} />
-                <Tooltip formatter={(value: number, name: string) => [name === 'CAGR' ? `%${value.toFixed(2)}` : formatNumber(value), name]}
+                <Tooltip formatter={(value: number, name: string) => [name === 'CAGR' ? `${yuzde(value, 2)}` : formatNumber(value), name]}
                   labelFormatter={(_, payload) => { if (payload && payload.length > 0) { const d = payload[0].payload as {country: string}; return d.country; } return ''; }}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                 <Legend />

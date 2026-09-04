@@ -310,8 +310,8 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       // Insights
       const ins: Insight[] = [];
-      if (turkey.meatEff > avgMeat) ins.push({ id: 'eff-1', type: 'achievement', message: `Türkiye et verimi (${turkey.meatEff.toFixed(0)} kg/hayvan) dünya ortalamasının (${avgMeat.toFixed(0)}) %${((turkey.meatEff - avgMeat) / avgMeat * 100).toFixed(0)} üzerinde`, severity: 'medium' });
-      else ins.push({ id: 'eff-1', type: 'warning', message: `Türkiye et verimi (${turkey.meatEff.toFixed(0)} kg/hayvan) dünya ortalamasının (${avgMeat.toFixed(0)}) %${Math.abs((turkey.meatEff - avgMeat) / avgMeat * 100).toFixed(0)} altında`, severity: 'high' });
+      if (turkey.meatEff > avgMeat) ins.push({ id: 'eff-1', type: 'achievement', message: `Türkiye et verimi (${turkey.meatEff.toFixed(0)} kg/hayvan) dünya ortalamasının (${avgMeat.toFixed(0)}) ${yuzde(((turkey.meatEff - avgMeat) / avgMeat * 100), 0)} üzerinde`, severity: 'medium' });
+      else ins.push({ id: 'eff-1', type: 'warning', message: `Türkiye et verimi (${turkey.meatEff.toFixed(0)} kg/hayvan) dünya ortalamasının (${avgMeat.toFixed(0)}) ${yuzde(Math.abs((turkey.meatEff - avgMeat) / avgMeat * 100), 0)} altında`, severity: 'high' });
 
       if (turkey.milkEff > avgMilk) ins.push({ id: 'eff-2', type: 'achievement', message: `Türkiye süt verimi (${turkey.milkEff.toFixed(0)} kg/inek) dünya ortalamasını (${avgMilk.toFixed(0)}) geçiyor`, severity: 'medium' });
       else ins.push({ id: 'eff-2', type: 'decline', message: `Türkiye süt verimi (${turkey.milkEff.toFixed(0)} kg/inek) dünya ortalamasının (${avgMilk.toFixed(0)}) altında`, severity: 'high' });
@@ -319,8 +319,8 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
       if (turkey.eggEff > avgEgg) ins.push({ id: 'eff-3', type: 'achievement', message: `Türkiye yumurta verimi (${turkey.eggEff.toFixed(0)} adet/tavuk) dünya ortalamasının üzerinde`, severity: 'low' });
       else ins.push({ id: 'eff-3', type: 'warning', message: `Türkiye yumurta verimi (${turkey.eggEff.toFixed(0)} adet/tavuk) dünya ortalamasının (${avgEgg.toFixed(0)}) altında`, severity: 'medium' });
 
-      if (trMeatCAGR > 3) ins.push({ id: 'eff-4', type: 'growth', message: `Türkiye et verimi yıllık %${trMeatCAGR.toFixed(1)} büyüyor — hızlı iyileşme trendi`, severity: 'low' });
-      if (trMilkCAGR > 3) ins.push({ id: 'eff-5', type: 'growth', message: `Türkiye süt verimi yıllık %${trMilkCAGR.toFixed(1)} büyüyor — modern hayvancılık etkisi`, severity: 'low' });
+      if (trMeatCAGR > 3) ins.push({ id: 'eff-4', type: 'growth', message: `Türkiye et verimi yıllık ${yuzde(trMeatCAGR, 1)} büyüyor — hızlı iyileşme trendi`, severity: 'low' });
+      if (trMilkCAGR > 3) ins.push({ id: 'eff-5', type: 'growth', message: `Türkiye süt verimi yıllık ${yuzde(trMilkCAGR, 1)} büyüyor — modern hayvancılık etkisi`, severity: 'low' });
 
       gap.forEach((g, i) => {
         if (g.catchUpYears && g.catchUpYears < 15) {
@@ -422,7 +422,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
               <div style={{ marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)' }}>
                   <span>Türkiye: {g.turkeyVal.toFixed(0)} {g.unit}</span>
-                  <span>🏆 {g.leaderCountry}: {g.leaderVal.toFixed(0)} {g.unit}</span>
+                  <span>{g.leaderCountry}: {g.leaderVal.toFixed(0)} {g.unit}</span>
                 </div>
                 <div style={{ position: 'relative', height: 24, background: 'var(--bg-secondary)', borderRadius: 12, overflow: 'hidden', marginTop: 4 }}>
                   <div style={{
@@ -622,8 +622,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       {/* Methodology */}
       <div style={{ margin: '16px 0', padding: 16, background: 'rgba(59,130,246,0.05)', borderRadius: 12, border: '1px solid rgba(59,130,246,0.2)' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          💡 <strong>Verimlilik Metodolojisi:</strong> Et Verimi = Et Üretimi (ton) × 1000 / Sığır Stoku (baş). Süt Verimi = Süt Üretimi (ton) × 1000 / Sığır Stoku. Yumurta Verimi = Yumurta Üretimi (ton) × 1M / Tavuk Stoku (tahmini dönüşüm). <br/>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}><strong>Verimlilik Metodolojisi:</strong> Et Verimi = Et Üretimi (ton) × 1000 / Sığır Stoku (baş). Süt Verimi = Süt Üretimi (ton) × 1000 / Sığır Stoku. Yumurta Verimi = Yumurta Üretimi (ton) × 1M / Tavuk Stoku (tahmini dönüşüm). <br/>
           Catch-Up Calculator = CAGR bazlı logaritmik projeksiyon. Segmentasyon: G7 + OECD gelişmiş, diğerleri gelişmekte. Veriler FAO {selectedYear}.
         </div>
       </div>

@@ -263,9 +263,9 @@ export default function PriceIndexPage() {
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={[...topProducts].sort((a, b) => b.change - a.change)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `%${v.toFixed(0)}`} domain={VALUE_HEADROOM} />
+                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => `${yuzde(v, 0)}`} domain={VALUE_HEADROOM} />
                     <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
-                    <Tooltip formatter={(v: number) => [`%${Number(v).toFixed(1)}`, 'Değişim']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
+                    <Tooltip formatter={(v: number) => [`${yuzde(Number(v), 1)}`, 'Değişim']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="change" name="Değişim" radius={[0, 4, 4, 0]}>
                       {[...topProducts].sort((a, b) => b.change - a.change).map((entry, i) => (
                         <Cell key={i} fill={entry.change >= 0 ? '#ef4444' : '#22c55e'} />

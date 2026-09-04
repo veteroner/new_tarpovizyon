@@ -84,8 +84,8 @@ export default function WeatherWidget({ il, compact = false }: WeatherWidgetProp
         />
         <span className="ww__temp-sm">{weather.temp}°C</span>
         <span className="ww__sep">|</span>
-        <span className="ww__detail-sm">💧 {weather.humidity}%</span>
-        <span className="ww__detail-sm">💨 {weather.windSpeed} m/s</span>
+        <span className="ww__detail-sm">{weather.humidity}%</span>
+        <span className="ww__detail-sm">{weather.windSpeed} m/s</span>
         <button className="ww__refresh-sm" onClick={load} title="Yenile">↻</button>
       </div>
     );
@@ -101,7 +101,7 @@ export default function WeatherWidget({ il, compact = false }: WeatherWidgetProp
           alt={weather.description}
         />
         <div className="ww__headline">
-          <h3 className="ww__city">🌤️ {weather.city} — Canlı Hava</h3>
+          <h3 className="ww__city">{weather.city} — Canlı Hava</h3>
           <p className="ww__desc">{weather.description}</p>
         </div>
         <div className="ww__temp-big">{weather.temp}°<small>C</small></div>

@@ -288,7 +288,7 @@ export default function ProductBalancePage() {
             height={270}
             stripKey="Yeterlilik"
             stripLabel="Yeterlilik Derecesi"
-            stripFormat={(v: number) => `%${Number(v).toFixed(0)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 0)}`}
           >
             <Legend />
             <Bar dataKey="Üretim" fill={GREEN} opacity={0.7} radius={[3, 3, 0, 0]} />
@@ -523,8 +523,8 @@ export default function ProductBalancePage() {
               <p>{selfSufficiency >= 100
                 ? `Kendine yeterli (${yuzde(selfSufficiency, 0)}). Üretim iç talebi karşılıyor.`
                 : selfSufficiency >= 70
-                ? `Kısmen yeterli (${yuzde(selfSufficiency, 0)}). İthalata %${importDep.toFixed(0)} bağımlılık.`
-                : `Yetersiz (${yuzde(selfSufficiency, 0)}). Kritik ithalat bağımlılığı: %${importDep.toFixed(0)}.`}</p>
+                ? `Kısmen yeterli (${yuzde(selfSufficiency, 0)}). İthalata ${yuzde(importDep, 0)} bağımlılık.`
+                : `Yetersiz (${yuzde(selfSufficiency, 0)}). Kritik ithalat bağımlılığı: ${yuzde(importDep, 0)}.`}</p>
             </div>
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
               <p className="text-blue-300 font-bold mb-1">Üretim Trendi</p>

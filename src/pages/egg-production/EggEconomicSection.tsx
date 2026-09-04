@@ -83,7 +83,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>TÜKETİCİ FİYATI</span>
-            <div style={{ fontSize: '1.5rem' }}>🛒</div>
+            <div style={{ fontSize: '1.5rem' }}></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#2563eb' }}>{filteredData[0]?.tuketici_fiyati_tl.toFixed(2)} ₺/adet</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>

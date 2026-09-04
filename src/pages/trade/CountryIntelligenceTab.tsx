@@ -761,7 +761,7 @@ export default function CountryIntelligenceTab() {
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
                         <YAxis hide width={46} />
-                        <Tooltip formatter={(v: number, name: string) => [`%${v.toFixed(1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
+                        <Tooltip formatter={(v: number, name: string) => [`${yuzde(v, 1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
                         <Area type="monotone" dataKey="expShare" stroke="#6366f1" fill="url(#countryDrawerExpShare)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="impShare" stroke="#ef4444" fill="url(#countryDrawerImpShare)" strokeWidth={2} dot={false} />
                       </AreaChart>
@@ -777,7 +777,7 @@ export default function CountryIntelligenceTab() {
                           : 'Bu ürün ülke için net açık üretiyor; negatif denge dışa bağımlılık sinyali veriyor.'}
                       </div>
                       <div>
-                        İhracat payı {yuzde(selectedProductExportShare, 1)} ve toplam ülke cirosundaki ağırlığı {selectedProductTurnover > 0 ? `%${toProductShare(selectedProductTurnover, totalExp + totalImp).toFixed(1)}` : '%0.0'}.
+                        İhracat payı {yuzde(selectedProductExportShare, 1)} ve toplam ülke cirosundaki ağırlığı {selectedProductTurnover > 0 ? `${yuzde(toProductShare(selectedProductTurnover, totalExp + totalImp), 1)}` : '%0.0'}.
                       </div>
                       <div>
                         Drawer, tablo, bar chart, scatter ve treemap üzerindeki ürün seçimini tek okuma yüzeyinde birleştirir.

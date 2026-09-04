@@ -326,7 +326,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                     <YAxis tickFormatter={(v) => `%${v}`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                    <Tooltip formatter={(value: number) => [`%${value.toFixed(1)}`, 'Büyüme']} />
+                    <Tooltip formatter={(value: number) => [`${yuzde(value, 1)}`, 'Büyüme']} />
                     <Bar dataKey="growth" name="Büyüme" radius={[4, 4, 0, 0]}>
                       {growthData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.growth >= 0 ? '#22c55e' : '#ef4444'} />

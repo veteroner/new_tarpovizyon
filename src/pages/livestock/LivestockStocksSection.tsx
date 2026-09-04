@@ -270,31 +270,31 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       const insArr: Insight[] = [];
       let iid = 1;
       if (globalCAGR5 > 1) {
-        insArr.push({ id: `si${iid++}`, type: 'growth', message: `Küresel hayvan stoku 5 yılda yıllık %${globalCAGR5.toFixed(1)} büyüyor. Toplam ${formatNumber(globalTotal)} baş hayvan mevcut.`, severity: 'medium', category: 'TREND' });
+        insArr.push({ id: `si${iid++}`, type: 'growth', message: `Küresel hayvan stoku 5 yılda yıllık ${yuzde(globalCAGR5, 1)} büyüyor. Toplam ${formatNumber(globalTotal)} baş hayvan mevcut.`, severity: 'medium', category: 'TREND' });
       } else if (globalCAGR5 < -1) {
-        insArr.push({ id: `si${iid++}`, type: 'decline', message: `Küresel stok 5 yılda yıllık %${Math.abs(globalCAGR5).toFixed(1)} azalıyor! ${formatNumber(globalTotal)} baş seviyesine geriledi.`, severity: 'high', category: 'TREND' });
+        insArr.push({ id: `si${iid++}`, type: 'decline', message: `Küresel stok 5 yılda yıllık ${yuzde(Math.abs(globalCAGR5), 1)} azalıyor! ${formatNumber(globalTotal)} baş seviyesine geriledi.`, severity: 'high', category: 'TREND' });
       }
       if (trIdx >= 0) {
         insArr.push({ id: `si${iid++}`, type: turkeyCAGR5 > 0 ? 'achievement' : 'warning',
-          message: `Türkiye dünya ${trIdx + 1}. sırada (${formatNumber(trTotal)} baş, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5Y BBO: %${turkeyCAGR5.toFixed(1)}`,
+          message: `Türkiye dünya ${trIdx + 1}. sırada (${formatNumber(trTotal)} baş, pay ${yuzde(((trTotal / globalTotal) * 100), 1)}). 5Y BBO: ${yuzde(turkeyCAGR5, 1)}`,
           severity: turkeyCAGR5 < 0 ? 'high' : 'medium', category: 'TÜRKİYE' });
       }
       const topGrowAnimal = [...animalCAGRArr].sort((a, b) => b.cagr5 - a.cagr5)[0];
       if (topGrowAnimal && topGrowAnimal.cagr5 > 1) {
-        insArr.push({ id: `si${iid++}`, type: 'growth', message: `En hızlı büyüyen tür: ${topGrowAnimal.animal} (5Y BBO %${topGrowAnimal.cagr5.toFixed(1)}). Mevcut stok: ${formatNumber(topGrowAnimal.current)}`, severity: 'medium', category: 'TÜR ANALİZİ' });
+        insArr.push({ id: `si${iid++}`, type: 'growth', message: `En hızlı büyüyen tür: ${topGrowAnimal.animal} (5Y BBO ${yuzde(topGrowAnimal.cagr5, 1)}). Mevcut stok: ${formatNumber(topGrowAnimal.current)}`, severity: 'medium', category: 'TÜR ANALİZİ' });
       }
       const decAnimal = [...animalCAGRArr].sort((a, b) => a.cagr5 - b.cagr5)[0];
       if (decAnimal && decAnimal.cagr5 < -1) {
-        insArr.push({ id: `si${iid++}`, type: 'decline', message: `⚠️ ${decAnimal.animal} populasyonu eriyor! 5Y BBO %${decAnimal.cagr5.toFixed(1)}, acil dikkat gerekiyor.`, severity: 'high', category: 'RİSK' });
+        insArr.push({ id: `si${iid++}`, type: 'decline', message: `⚠️ ${decAnimal.animal} populasyonu eriyor! 5Y BBO ${yuzde(decAnimal.cagr5, 1)}, acil dikkat gerekiyor.`, severity: 'high', category: 'RİSK' });
       }
       if (hhiResult.hhi < 500) {
-        insArr.push({ id: `si${iid++}`, type: 'info', message: `Pazar çok dağınık (HHI: ${hhiResult.hhi.toFixed(0)}). İlk 3 ülke payı: %${hhiResult.top3Share.toFixed(1)}`, severity: 'low', category: 'PAZAR YAPISI' });
+        insArr.push({ id: `si${iid++}`, type: 'info', message: `Pazar çok dağınık (HHI: ${hhiResult.hhi.toFixed(0)}). İlk 3 ülke payı: ${yuzde(hhiResult.top3Share, 1)}`, severity: 'low', category: 'PAZAR YAPISI' });
       } else if (hhiResult.hhi > 1500) {
-        insArr.push({ id: `si${iid++}`, type: 'warning', message: `Yüksek konsantrasyon (HHI: ${hhiResult.hhi.toFixed(0)}). Lider ülke tek başına %${hhiResult.top1Share.toFixed(1)} paza kontrol ediyor.`, severity: 'high', category: 'PAZAR YAPISI' });
+        insArr.push({ id: `si${iid++}`, type: 'warning', message: `Yüksek konsantrasyon (HHI: ${hhiResult.hhi.toFixed(0)}). Lider ülke tek başına ${yuzde(hhiResult.top1Share, 1)} paza kontrol ediyor.`, severity: 'high', category: 'PAZAR YAPISI' });
       }
       const collapseCount = risks.filter(r => r.type === 'collapse').length;
       if (collapseCount > 0) {
-        insArr.push({ id: `si${iid}`, type: 'warning', message: `🚨 ${collapseCount} ülke-tür kombinasyonunda populasyon çöküşü tespit edildi (10 yılda >%50 düşüş).`, severity: 'high', category: 'RİSK' });
+        insArr.push({ id: `si${iid}`, type: 'warning', message: `${collapseCount} ülke-tür kombinasyonunda populasyon çöküşü tespit edildi (10 yılda >%50 düşüş).`, severity: 'high', category: 'RİSK' });
       }
       setStocksInsights(insArr);
     } catch (error) {
@@ -332,7 +332,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             <div className="kpi-subtitle">{stocksKPIs.countryCount} ülke · {stocksKPIs.speciesCount} tür</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: stocksKPIs.globalCAGR5 > 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>📈</div></div>
+            <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: stocksKPIs.globalCAGR5 > 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}></div></div>
             <div className="kpi-value" style={{color: stocksKPIs.globalCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>{yuzde(stocksKPIs.globalCAGR5, 2)}</div>
             <div className="kpi-subtitle">10Y: {yuzde(stocksKPIs.globalCAGR10, 2)}</div>
           </div>
@@ -437,7 +437,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" tickFormatter={(v: number) => `${v}%`} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={80} interval={0} />
-              <Tooltip formatter={(value: number, name: string) => [`%${value.toFixed(2)}`, name === 'cagr5' ? '5Y CAGR' : '10Y CAGR']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              <Tooltip formatter={(value: number, name: string) => [`${yuzde(value, 2)}`, name === 'cagr5' ? '5Y CAGR' : '10Y CAGR']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend formatter={(v: string) => v === 'cagr5' ? '5 Yıl CAGR' : '10 Yıl CAGR'} />
               <Bar dataKey="cagr5" fill="#3b82f6" radius={[0, 4, 4, 0]} />
               <Bar dataKey="cagr10" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
@@ -483,7 +483,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                 <Tooltip
                   cursor={{ strokeDasharray: '3 3' }}
                   formatter={(value: number, name: string) => {
-                    if (name === 'CAGR') return [`%${value.toFixed(2)}`, '5Y CAGR'];
+                    if (name === 'CAGR') return [`${yuzde(value, 2)}`, '5Y CAGR'];
                     if (name === 'Stok') return [formatNumber(value), 'Toplam Stok'];
                     return [value, name];
                   }}

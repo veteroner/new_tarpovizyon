@@ -203,8 +203,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           border: '1px solid var(--border)',
           boxShadow: 'var(--shadow-md)'
         }}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px', fontWeight: 600 }}>
-            🌾 {selectedMapDistrict.name} / {selectedMapDistrict.province} — Ürün Deseni
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px', fontWeight: 600 }}>{selectedMapDistrict.name} / {selectedMapDistrict.province} — Ürün Deseni
           </h3>
           <div style={{ marginBottom: '16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
             Havza: <span style={{ color: BASIN_COLORS[selectedMapDistrict.basin] || 'var(--text-primary)', fontWeight: 600 }}>{selectedMapDistrict.basin}</span>
@@ -240,8 +239,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
                       (e.currentTarget as HTMLDivElement).style.transform = '';
                       (e.currentTarget as HTMLDivElement).style.boxShadow = '';
                     }}
-                  >
-                    🌾 {p.urun}
+                  >{p.urun}
                   </div>
                 );
               })}
@@ -260,8 +258,7 @@ export default function BasinDistrictsSection({ allBasinData, basinSummary }: Ba
           border: '1px solid var(--border)',
           boxShadow: 'var(--shadow-md)'
         }}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px', fontWeight: 600 }}>
-            📊 {selectedMapDistrict.name} / {selectedMapDistrict.province} — Üretim Miktarı (2024)
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px', fontWeight: 600 }}>{selectedMapDistrict.name} / {selectedMapDistrict.province} — Üretim Miktarı (2024)
           </h3>
           <div style={{ marginBottom: '16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
             Kayıtlı bitkisel üretim verileri (ton)

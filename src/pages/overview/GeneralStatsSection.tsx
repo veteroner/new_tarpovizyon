@@ -64,7 +64,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
           <div className="kpi-subtitle">GSYİH içindeki pay ({yl(y.macro)})</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">TARIM İSTİHDAMI</span><div className="kpi-icon orange">👨‍🌾</div></div>
+          <div className="kpi-header"><span className="kpi-title">TARIM İSTİHDAMI</span><div className="kpi-icon orange"></div></div>
           <div className="kpi-value">{data.agriculturalEmployment ? formatNumber(data.agriculturalEmployment) : '—'}</div>
           <div className="kpi-subtitle">Kişi (15+), {yl(y.employment)}</div>
         </div>

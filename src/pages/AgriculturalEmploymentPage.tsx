@@ -57,7 +57,7 @@ export default function AgriculturalEmploymentPage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DUNYA TARIM ISTIHDAMI" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.cagr.toFixed(2)}`} icon={Users} color="purple" large />
+                <KPICard title="DUNYA TARIM ISTIHDAMI" value={formatPop(overviewKPIs.worldTotal)} subtitle={`Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: ${yuzde(overviewKPIs.cagr, 2)}`} icon={Users} color="purple" large />
                 <KPICard title="EN BUYUK" value={overviewKPIs.topCountry} subtitle={formatPop(overviewKPIs.topCountryValue)} icon={Award} color="blue" />
                 <KPICard title="KADIN PAYI" value={formatPercent(overviewKPIs.femaleShare)} subtitle="Dunya ortalama" icon={UserCheck} color="teal" />
                 <KPICard title="ERKEK" value={formatPop(overviewKPIs.worldMale)} subtitle={`Kadin: ${formatPop(overviewKPIs.worldFemale)}`} icon={BarChart2} color="orange" />
@@ -129,7 +129,7 @@ export default function AgriculturalEmploymentPage() {
             yFormat={formatShort}
             stripKey="femaleRatio"
             stripLabel="Kadın Oranı"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Area type="monotone" dataKey="male" name="Erkek" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
@@ -171,7 +171,7 @@ export default function AgriculturalEmploymentPage() {
             height={270}
             stripKey="top5"
             stripLabel="İlk 5 Ülke Payı"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Bar dataKey="hhi" name="HHI" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
@@ -186,9 +186,9 @@ export default function AgriculturalEmploymentPage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TURKIYE ISTIHDAMI" value={formatPop(turkeyProfile.totalNow)} subtitle={`Dunya #${turkeyProfile.rank} | CAGR: %${turkeyProfile.cagr.toFixed(2)}`} icon={MapPin} color="orange" large />
+                <KPICard title="TURKIYE ISTIHDAMI" value={formatPop(turkeyProfile.totalNow)} subtitle={`Dunya #${turkeyProfile.rank} | CAGR: ${yuzde(turkeyProfile.cagr, 2)}`} icon={MapPin} color="orange" large />
                 <KPICard title="ERKEK" value={formatPop(turkeyProfile.maleNow)} subtitle="2022" icon={Users} color="blue" />
-                <KPICard title="KADIN" value={formatPop(turkeyProfile.femaleNow)} subtitle={`%${turkeyProfile.femaleRatio.toFixed(1)}`} icon={UserCheck} color="teal" />
+                <KPICard title="KADIN" value={formatPop(turkeyProfile.femaleNow)} subtitle={`${yuzde(turkeyProfile.femaleRatio, 1)}`} icon={UserCheck} color="teal" />
                 <KPICard title="DUNYA SIRASI" value={`#${turkeyProfile.rank}`} subtitle="Tarim istihdami" icon={Award} color="purple" />
               </div>
               <div className="chart-grid">
@@ -206,7 +206,7 @@ export default function AgriculturalEmploymentPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <Tooltip formatter={(v: number, name: string) => [name.includes('Oran') ? `%${Number(v).toFixed(1)}` : formatPop(v), name]} />
+                      <Tooltip formatter={(v: number, name: string) => [name.includes('Oran') ? `${yuzde(Number(v), 1)}` : formatPop(v), name]} />
                       <Legend />
                       <Area type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
                       <Bar dataKey="male" name="Erkek" fill="#3b82f6" opacity={0.6} />

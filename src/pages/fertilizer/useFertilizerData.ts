@@ -1,4 +1,4 @@
-import { kisa, eksen } from '../../utils/sayi';
+import { kisa, eksen, yuzde } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAgg, num } from '../../services/d1';
@@ -109,8 +109,8 @@ export function useFertilizerData(activeTab: Tab) {
 
       const ins: Insight[] = [];
       ins.push({ id: 'ov1', type: 'info', message: `Dünya gübre ithalatı ${formatTon(worldTotal)} (${byType.length} ana gübre türü)`, severity: 'low', category: 'Kapsam' });
-      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Gübre ithalatı önceki yıla göre %${yoy.toFixed(1)} arttı — talep artışı`, severity: 'high', category: 'Trend' });
-      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Gübre ithalatı %${Math.abs(yoy).toFixed(1)} azaldı`, severity: 'high', category: 'Trend' });
+      if (yoy > 5) ins.push({ id: 'ov2', type: 'growth', message: `Gübre ithalatı önceki yıla göre ${yuzde(yoy, 1)} arttı — talep artışı`, severity: 'high', category: 'Trend' });
+      else if (yoy < -5) ins.push({ id: 'ov2', type: 'decline', message: `Gübre ithalatı ${yuzde(Math.abs(yoy), 1)} azaldı`, severity: 'high', category: 'Trend' });
       if (turkeyData) ins.push({ id: 'ov3', type: turkeyRank <= 10 ? 'achievement' : 'info', message: `Türkiye gübre ithalatında dünya ${turkeyRank}. — ${formatTon(turkeyData.value)}`, severity: 'medium', category: 'Türkiye' });
       setOverviewInsights(ins);
     } catch (e) { console.error('Overview hatasi:', e); }
@@ -181,7 +181,7 @@ export function useFertilizerData(activeTab: Tab) {
       const ins: Insight[] = [];
       if (hhi) {
         const label = hhi.concentration === 'LOW' ? 'düşük' : hhi.concentration === 'MODERATE' ? 'orta' : 'yüksek';
-        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Gübre ihracatı konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — İlk 3 pay %${hhi.top3Share.toFixed(1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
+        ins.push({ id: 'cn1', type: hhi.concentration === 'HIGH' ? 'warning' : 'info', message: `Gübre ihracatı konsantrasyonu: HHI ${hhi.hhi.toFixed(0)} (${label}) — İlk 3 pay ${yuzde(hhi.top3Share, 1)}`, severity: hhi.concentration === 'HIGH' ? 'high' : 'medium', category: 'HHI' });
       }
       const turkeyInList = data.find((c: any) => c.isTurkey);
       if (turkeyInList) ins.push({ id: 'cn2', type: 'info', message: `Türkiye gübre ihracatında dünya ${turkeyInList.rank}. (${formatTon(turkeyInList.value)})`, severity: 'medium', category: 'Sıralama' });
@@ -234,7 +234,7 @@ export function useFertilizerData(activeTab: Tab) {
       });
       const ins: Insight[] = [];
       ins.push({ id: 'tp1', type: totalImp > totalExp * 3 ? 'warning' : 'info', message: `Türkiye gübre ticareti: İthalat ${formatTon(totalImp)} — İhracat ${formatTon(totalExp)} (oran: ${(totalImp / (totalExp || 1)).toFixed(1)}x)`, severity: 'high', category: 'Denge' });
-      if (impCAGR) ins.push({ id: 'tp2', type: impCAGR.cagr > 0 ? 'growth' : 'decline', message: `Gübre ithalatı yıllık %${Math.abs(impCAGR.cagr).toFixed(2)} bileşik büyüme oranıyla ${impCAGR.cagr > 0 ? 'artıyor' : 'azalıyor'}`, severity: 'medium', category: 'Trend' });
+      if (impCAGR) ins.push({ id: 'tp2', type: impCAGR.cagr > 0 ? 'growth' : 'decline', message: `Gübre ithalatı yıllık ${yuzde(Math.abs(impCAGR.cagr), 2)} bileşik büyüme oranıyla ${impCAGR.cagr > 0 ? 'artıyor' : 'azalıyor'}`, severity: 'medium', category: 'Trend' });
       if (byProduct.length > 0) ins.push({ id: 'tp3', type: 'info', message: `En çok ithal edilen: ${byProduct[0].name} (${formatTon(byProduct[0].import)})`, severity: 'low', category: 'Ürün' });
       setTurkeyInsights(ins);
     } catch (e) { console.error('Turkey hatasi:', e); }
@@ -269,8 +269,8 @@ export function useFertilizerData(activeTab: Tab) {
         turkeySlope: turkeyForecast.slope, anomalyCount: anomalies.filter(a => a.isAnomaly).length,
       });
       const ins: Insight[] = [];
-      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye gübre ithalatı trendi: BBO %${turkeyTrend.cagr.toFixed(2)}, oynaklık %${turkeyTrend.volatility.toFixed(1)}`, severity: 'high', category: 'Tahmin' });
-      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya gübre ticareti trendi: BBO %${worldTrend.cagr.toFixed(2)}`, severity: 'medium', category: 'Dünya' });
+      if (turkeyTrend) ins.push({ id: 'fc1', type: turkeyTrend.direction === 'up' ? 'growth' : turkeyTrend.direction === 'down' ? 'decline' : 'info', message: `Türkiye gübre ithalatı trendi: BBO ${yuzde(turkeyTrend.cagr, 2)}, oynaklık ${yuzde(turkeyTrend.volatility, 1)}`, severity: 'high', category: 'Tahmin' });
+      if (worldTrend) ins.push({ id: 'fc2', type: worldTrend.direction === 'up' ? 'growth' : 'info', message: `Dünya gübre ticareti trendi: BBO ${yuzde(worldTrend.cagr, 2)}`, severity: 'medium', category: 'Dünya' });
       setForecastInsights(ins);
     } catch (e) { console.error('Forecast hatasi:', e); }
     finally { setLoading(false); }
@@ -296,13 +296,13 @@ export function useFertilizerData(activeTab: Tab) {
       const impBefore = before['İthalat Miktarı'] || 0;
       if (impBefore > 0) {
         const change = ((impNow - impBefore) / impBefore) * 100;
-        alerts.push({ id: 'int-imp-change', severity: change > 30 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'İthalat Değişimi (2015-2022)', message: `Gübre ithalatı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(impBefore)} → ${formatTon(impNow)})`, metric: 'İthalat trendi', value: change });
+        alerts.push({ id: 'int-imp-change', severity: change > 30 ? 'warning' : change > 0 ? 'info' : 'positive', title: 'İthalat Değişimi (2015-2022)', message: `Gübre ithalatı ${yuzde(change, 1)} ${change > 0 ? 'arttı' : 'azaldı'} (${formatTon(impBefore)} → ${formatTon(impNow)})`, metric: 'İthalat trendi', value: change });
       }
       const expNow = now['İhracat Miktarı'] || 0;
       const expBefore = before['İhracat Miktarı'] || 0;
       if (expBefore > 0) {
         const change = ((expNow - expBefore) / expBefore) * 100;
-        alerts.push({ id: 'int-exp-change', severity: change > 20 ? 'positive' : 'info', title: 'İhracat Performansı', message: `Gübre ihracatı %${change.toFixed(1)} ${change > 0 ? 'arttı' : 'azaldı'}`, metric: 'İhracat trendi', value: change });
+        alerts.push({ id: 'int-exp-change', severity: change > 20 ? 'positive' : 'info', title: 'İhracat Performansı', message: `Gübre ihracatı ${yuzde(change, 1)} ${change > 0 ? 'arttı' : 'azaldı'}`, metric: 'İhracat trendi', value: change });
       }
       if (impNow > 0 && expNow > 0) {
         const ratio = impNow / expNow;

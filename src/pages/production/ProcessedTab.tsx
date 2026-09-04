@@ -44,8 +44,8 @@ export function ProcessedTab({
 
       {processedKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-          <KPICard title="Dünya Toplam" value={formatValue(processedKPIs.worldTotal)} subtitle={`Lider: ${processedKPIs.leader} (%${processedKPIs.leaderShare.toFixed(1)})`} icon={Globe} color="blue" large />
-          <KPICard title="Türkiye" value={formatValue(processedKPIs.turkeyProduction)} subtitle={processedKPIs.turkeyRank > 0 ? `${processedKPIs.turkeyRank}. | %${processedKPIs.turkeyShare.toFixed(1)}` : 'Sıralama dışı'} icon={Factory} color="green" />
+          <KPICard title="Dünya Toplam" value={formatValue(processedKPIs.worldTotal)} subtitle={`Lider: ${processedKPIs.leader} (${yuzde(processedKPIs.leaderShare, 1)})`} icon={Globe} color="blue" large />
+          <KPICard title="Türkiye" value={formatValue(processedKPIs.turkeyProduction)} subtitle={processedKPIs.turkeyRank > 0 ? `${processedKPIs.turkeyRank}. | ${yuzde(processedKPIs.turkeyShare, 1)}` : 'Sıralama dışı'} icon={Factory} color="green" />
           <KPICard title="Dünya CAGR" value={`${processedKPIs.worldCAGR >= 0 ? '+' : ''}${yuzde(processedKPIs.worldCAGR, 2)}`} subtitle="Bileşik büyüme" icon={TrendingUp} color={processedKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
           <KPICard title="CAGR" value={`${processedKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(processedKPIs.turkeyCAGR, 2)}`} subtitle="Türkiye büyüme" icon={Activity} color={processedKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
         </div>

@@ -1,5 +1,5 @@
 import { seriesColor, BAR_COLOR } from '../utils/chartColors';
-import { yuzde } from '../utils/sayi';
+import { yuzde, eksen, sayi } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import {
@@ -21,11 +21,9 @@ const NEG = '#ef4444';
 const NEUT = '#f59e0b';
 
 /* ── Helpers ───────────────────────────────────────────────── */
+/* Merkezî biçimlendirici: yerel kopyası nokta ondalık üretiyordu. */
 function fmtVal(v: number): string {
-  if (v >= 1e9) return (v / 1e9).toFixed(1) + 'B';
-  if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
-  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
-  return v.toFixed(0);
+  return eksen(v);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -148,7 +146,7 @@ export function LivestockCompetitionPage() {
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">ETKİN RAKİP</span></div>
-          <div className="kpi-value" style={{ color: '#06b6d4' }}>{hhi.effectiveCompetitors.toFixed(1)}</div>
+          <div className="kpi-value" style={{ color: '#06b6d4' }}>{sayi(hhi.effectiveCompetitors, 1)}</div>
           <div className="kpi-subtitle">{currentRankings.length} ülke arasında</div>
         </div>
       </div>
@@ -158,9 +156,9 @@ export function LivestockCompetitionPage() {
         <h3 className="chart-title">Türkiye'nin Dünya Payı ({selectedYear})</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 15, padding: 15 }}>
           {([
-            { label: 'Et Üretimi', val: turkeyData?.meat || 0, w: world.meat, color: '#ef4444', emoji: '🥩' },
-            { label: 'Süt Üretimi', val: turkeyData?.milk || 0, w: world.milk, color: '#3b82f6', emoji: '🥛' },
-            { label: 'Yumurta Üretimi', val: turkeyData?.eggs || 0, w: world.eggs, color: '#f59e0b', emoji: '🥚' },
+            { label: 'Et Üretimi', val: turkeyData?.meat || 0, w: world.meat, color: '#ef4444' },
+            { label: 'Süt Üretimi', val: turkeyData?.milk || 0, w: world.milk, color: '#3b82f6' },
+            { label: 'Yumurta Üretimi', val: turkeyData?.eggs || 0, w: world.eggs, color: '#f59e0b' },
           ]).map((it, i) => {
             const pct = it.w > 0 ? (it.val / it.w) * 100 : 0;
             return (
@@ -168,7 +166,7 @@ export function LivestockCompetitionPage() {
                 background: 'rgba(255,255,255,.03)', borderRadius: 12, padding: 20, textAlign: 'center',
                 border: '1px solid var(--border)'
               }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: 5 }}>{it.emoji}</div>
+                <div style={{ fontSize: '1.5rem', marginBottom: 5 }}></div>
                 <h4 style={{ color: 'var(--text-secondary)', marginBottom: 10, fontSize: '0.85rem' }}>{it.label}</h4>
                 <div style={{ fontSize: '2rem', fontWeight: 700, color: it.color }}>{yuzde(pct, 2)}</div>
                 <div style={{ marginTop: 10, background: 'rgba(255,255,255,.05)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
@@ -196,7 +194,7 @@ export function LivestockCompetitionPage() {
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
               <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(v, 0)}`} width={46} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-                formatter={(v: number, n: string) => [`%${(v as number).toFixed(2)}`, n]} />
+                formatter={(v: number, n: string) => [`${yuzde((v as number), 2)}`, n]} />
               <Legend />
               {currentRankings.slice(0, 8).map((c, i) => (
                 <Area key={c.country} type="monotone" dataKey={c.country} stackId="1"
@@ -457,8 +455,7 @@ export function LivestockCompetitionPage() {
           marginTop: 15, padding: 15, background: 'rgba(59,130,246,.1)', borderRadius: 8,
           border: '1px solid rgba(59,130,246,.3)'
         }}>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            💡 <strong>Yakalama formülü:</strong> Türkiye BBO &gt; Lider BBO ise mevcut büyüme hızıyla liderliğe ulaşma süresi hesaplanır.
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Yakalama formülü:</strong> Türkiye BBO &gt; Lider BBO ise mevcut büyüme hızıyla liderliğe ulaşma süresi hesaplanır.
             Lider daha hızlı büyüyorsa yakalama imkansız (∞).
           </div>
         </div>
@@ -522,7 +519,7 @@ export function LivestockCompetitionPage() {
               style={{ background: 'var(--bg-card)', width: '100%', maxWidth: 720, maxHeight: '80vh', overflow: 'auto', padding: 24, borderTopLeftRadius: 16, borderTopRightRadius: 16, border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: 700 }}>
-                  {isTR(drillCountry) ? 'TR · ' : '🌍 '}{drillCountry} — Ürün Detayı ({selectedYear})
+                  {isTR(drillCountry) ? 'TR · ' : ''}{drillCountry} — Ürün Detayı ({selectedYear})
                 </h3>
                 <button onClick={() => setDrillCountry(null)}
                   style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: '0.85rem' }}>

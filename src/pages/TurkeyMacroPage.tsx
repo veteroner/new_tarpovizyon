@@ -265,7 +265,7 @@ export default function TurkeyMacroPage() {
                    outerRadius={120} innerRadius={50} paddingAngle={2}
                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                    label={((props: any) =>
-                     `${String(props.name || '')} %${((Number(props.percent) || 0) * 100).toFixed(0)}`
+                     `${String(props.name || '')} ${yuzde(((Number(props.percent) || 0) * 100), 0)}`
                    )} labelLine={{ strokeWidth: 1 }} style={{ fontSize: 10 }}>
                 {pieData.map((d, i) => (
                   <Cell key={i} fill={d.fill} />
@@ -349,7 +349,7 @@ export default function TurkeyMacroPage() {
               const last = agriShareTrend[agriShareTrend.length - 1];
               const decline = first.share - last.share;
               const volatileYears = agriShareTrend.filter(r => Math.abs(r.growth) > 5).length;
-              return `Tarımın GSYH payı ${first.yil}'de %${first.share.toFixed(1)}'den ${last.yil}'de %${last.share.toFixed(1)}'e geriledi (${decline.toFixed(1)} puan düşüş). Son 25 yılda ${volatileYears} yılda %5'ten fazla dalgalanma yaşandı — tarım, en volatil sektörlerden biri olmaya devam ediyor.`;
+              return `Tarımın GSYH payı ${first.yil}'de ${yuzde(first.share, 1)}'den ${last.yil}'de ${yuzde(last.share, 1)}'e geriledi (${decline.toFixed(1)} puan düşüş). Son 25 yılda ${volatileYears} yılda %5'ten fazla dalgalanma yaşandı — tarım, en volatil sektörlerden biri olmaya devam ediyor.`;
             })()}
           </p>
         </div>
@@ -429,7 +429,7 @@ export default function TurkeyMacroPage() {
             height={270}
             stripKey="Oran"
             stripLabel="Oran"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Area type="monotone" dataKey="En Zengin 5 İl"
@@ -514,7 +514,7 @@ export default function TurkeyMacroPage() {
             <p>{(() => {
               const fastest = growthRanking[0];
               const slowest = growthRanking[growthRanking.length - 1];
-              return `En hızlı büyüyen: ${fastest?.name} (%${fastest?.growth.toFixed(1)}). En yavaş: ${slowest?.name} (%${slowest?.growth.toFixed(1)}). Sanayi ${yuzde((sectorData.find(s => s.sektorkod === 'BCD')?.zincir_degisim ?? 0), 1)} büyüdü.`;
+              return `En hızlı büyüyen: ${fastest?.name} (${yuzde(fastest?.growth, 1)}). En yavaş: ${slowest?.name} (${yuzde(slowest?.growth, 1)}). Sanayi ${yuzde((sectorData.find(s => s.sektorkod === 'BCD')?.zincir_degisim ?? 0), 1)} büyüdü.`;
             })()}</p>
           </div>
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>

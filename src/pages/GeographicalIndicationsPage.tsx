@@ -50,7 +50,7 @@ export default function GeographicalIndicationsPage() {
         color: 'var(--text-secondary)'
       }}>
         <div>
-          <div style={{ fontSize: '48px', marginBottom: '16px', textAlign: 'center' }}>🏛️</div>
+          <div style={{ fontSize: '48px', marginBottom: '16px', textAlign: 'center' }}></div>
           <div style={{ fontSize: '18px', fontWeight: 600 }}>Coğrafi İşaretli Gıda Ürünleri Yükleniyor...</div>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function GeographicalIndicationsPage() {
         color: 'white'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-          <div style={{ fontSize: '48px' }}>🏛️</div>
+          <div style={{ fontSize: '48px' }}></div>
           <div>
             <h1 style={{ fontSize: '32px', fontWeight: 800, margin: 0 }}>
               Türkiye Coğrafi İşaretli Gıda Ürünleri

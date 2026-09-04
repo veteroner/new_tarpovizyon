@@ -205,22 +205,22 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       const ins: Insight[] = [];
       let iid = 1;
       ins.push({ id: `pi${iid++}`, type: globalCAGR5 > 0 ? 'growth' : 'decline',
-        message: `Küresel ${activePrimaryTab === 'meat' ? 'et' : activePrimaryTab === 'milk' ? 'süt' : activePrimaryTab === 'eggs' ? 'yumurta' : ''} üretimi ${globalCAGR5 > 0 ? 'büyüyor' : 'azalıyor'}: 5Y BBO %${globalCAGR5.toFixed(1)}. Toplam: ${formatNumber(globalTotal)} ton.`,
+        message: `Küresel ${activePrimaryTab === 'meat' ? 'et' : activePrimaryTab === 'milk' ? 'süt' : activePrimaryTab === 'eggs' ? 'yumurta' : ''} üretimi ${globalCAGR5 > 0 ? 'büyüyor' : 'azalıyor'}: 5Y BBO ${yuzde(globalCAGR5, 1)}. Toplam: ${formatNumber(globalTotal)} ton.`,
         severity: 'medium', category: 'TREND' });
       if (trIdx >= 0) {
         ins.push({ id: `pi${iid++}`, type: turkeyCAGR5 > globalCAGR5 ? 'achievement' : 'warning',
-          message: `Türkiye dünya #${trIdx + 1} (${formatNumber(trTotal)} ton, pay %${((trTotal / globalTotal) * 100).toFixed(1)}). 5Y BBO %${turkeyCAGR5.toFixed(1)} ${turkeyCAGR5 > globalCAGR5 ? '- küreselden hızlı!' : '- küreselden yavaş.'}`,
+          message: `Türkiye dünya #${trIdx + 1} (${formatNumber(trTotal)} ton, pay ${yuzde(((trTotal / globalTotal) * 100), 1)}). 5Y BBO ${yuzde(turkeyCAGR5, 1)} ${turkeyCAGR5 > globalCAGR5 ? '- küreselden hızlı!' : '- küreselden yavaş.'}`,
           severity: turkeyCAGR5 < 0 ? 'high' : 'medium', category: 'TÜRKİYE' });
       }
       const emerging = prodCAGRArr.filter(p => p.lifecycle === 'emerging');
       if (emerging.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'growth', message: `🌱 ${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${translateProduct(e.product)} (BBO %${e.cagr5.toFixed(1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
+        ins.push({ id: `pi${iid++}`, type: 'growth', message: `${emerging.length} yükselen ürün tespit edildi: ${emerging.slice(0, 3).map(e => `${translateProduct(e.product)} (BBO ${yuzde(e.cagr5, 1)})`).join(', ')}`, severity: 'medium', category: 'FIRSAT' });
       }
       const declining = prodCAGRArr.filter(p => p.lifecycle === 'declining');
       if (declining.length > 0) {
-        ins.push({ id: `pi${iid++}`, type: 'decline', message: `📉 ${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${translateProduct(d.product)} (BBO %${d.cagr5.toFixed(1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
+        ins.push({ id: `pi${iid++}`, type: 'decline', message: `${declining.length} üründ düşüş trendi: ${declining.slice(0, 3).map(d => `${translateProduct(d.product)} (BBO ${yuzde(d.cagr5, 1)})`).join(', ')}`, severity: 'high', category: 'RİSK' });
       }
-      ins.push({ id: `pi${iid}`, type: 'info', message: `Pazar lideri: ${allCountries[0]?.name || '-'} (%${(allCountries[0]?.value / globalTotal * 100).toFixed(1)} pay). Top 3 ülke toplam %${(allCountries.slice(0, 3).reduce((s: number, c: {value: number}) => s + c.value, 0) / globalTotal * 100).toFixed(1)} kontrol ediyor.`, severity: 'low', category: 'PAZAR' });
+      ins.push({ id: `pi${iid}`, type: 'info', message: `Pazar lideri: ${allCountries[0]?.name || '-'} (${yuzde((allCountries[0]?.value / globalTotal * 100), 1)} pay). Top 3 ülke toplam ${yuzde((allCountries.slice(0, 3).reduce((s: number, c: {value: number}) => s + c.value, 0) / globalTotal * 100), 1)} kontrol ediyor.`, severity: 'low', category: 'PAZAR' });
       setPrimaryInsights(ins);
 
     } catch (error) {
@@ -238,10 +238,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
     <>
       {/* Sub-tab buttons */}
       <div style={{ display: 'flex', gap: '10px', marginTop: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        {renderPrimaryTabButton('meat', '🥩', 'Et Ürünleri')}
-        {renderPrimaryTabButton('milk', '🥛', 'Süt Ürünleri')}
-        {renderPrimaryTabButton('eggs', '🥚', 'Yumurta')}
-        {renderPrimaryTabButton('other', '🍯', 'Diğer Ürünler')}
+        {renderPrimaryTabButton('meat', '', 'Et Ürünleri')}
+        {renderPrimaryTabButton('milk', '', 'Süt Ürünleri')}
+        {renderPrimaryTabButton('eggs', '', 'Yumurta')}
+        {renderPrimaryTabButton('other', '', 'Diğer Ürünler')}
       </div>
 
       {/* Intelligence KPIs */}
@@ -323,9 +323,9 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tickFormatter={(v: number) => `%${v.toFixed(0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} domain={VALUE_HEADROOM} />
+              <XAxis type="number" tickFormatter={(v: number) => `${yuzde(v, 0)}`} tick={{fill: 'var(--text-secondary)', fontSize: 11}} domain={VALUE_HEADROOM} />
               <YAxis type="category" dataKey="product" tick={{fill: 'var(--text-secondary)', fontSize: 9}} width={110} tickFormatter={truncTick} interval={0} />
-              <Tooltip formatter={(value: number) => [`%${value.toFixed(2)}`, '5Y CAGR']}
+              <Tooltip formatter={(value: number) => [`${yuzde(value, 2)}`, '5Y CAGR']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Bar dataKey="cagr5" radius={[0, 4, 4, 0]}>
                 {primaryProductCAGR.slice(0, 12).map((p, idx) => (

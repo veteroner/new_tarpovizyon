@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -72,7 +73,7 @@ export default function RegionalTab({
                       const payload = (props as any)?.payload as any;
                       const region = String(payload?.region ?? '').trim();
                       const share = Number(payload?.share ?? 0);
-                      return region ? `${region} %${share.toFixed(1)}` : '';
+                      return region ? `${region} ${yuzde(share, 1)}` : '';
                     }}
                     labelLine={true}
                   >
@@ -137,7 +138,7 @@ export default function RegionalTab({
                     const payload = (props as any)?.payload as any;
                     const name = String(payload?.name ?? '').trim();
                     const share = Number(payload?.share ?? 0);
-                    return name ? `${name} %${share.toFixed(1)}` : '';
+                    return name ? `${name} ${yuzde(share, 1)}` : '';
                   }}
                   labelLine={true}
                 >

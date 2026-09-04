@@ -260,7 +260,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <YAxis tickFormatter={(v: number) => `${v}`} tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
             <Tooltip
               formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]}
-              labelFormatter={(label: string) => `📅 ${label}`}
+              labelFormatter={(label: string) => `${label}`}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="etc" name="ETc (Bitki Su Tük.)" fill="#e67e22" radius={[3, 3, 0, 0]} />
@@ -346,7 +346,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
-            <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `📅 ${l}`} />
+            <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Area type="monotone" dataKey="yagis" name="Toplam Yağış" stroke="#3b82f6" fill="url(#gradYagis)" strokeWidth={2} />
             <Area type="monotone" dataKey="efektifYagis" name="Efektif Yağış" stroke="#0ea5e9" fill="url(#gradEfektif)" strokeWidth={2} />
@@ -370,7 +370,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
-            <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `📅 ${l}`} />
+            <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="etc" name="ETc (Bitki Su Tüketimi)" fill="#e67e22" radius={[3, 3, 0, 0]} />
             <Bar dataKey="brutSulama" name="Brüt Sulama" fill="#e74c3c" radius={[3, 3, 0, 0]} />
@@ -565,9 +565,9 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       <div className="sp-params-card">
         <h3>Hesaplama Parametreleri</h3>
         <div className="sp-params">
-          <span>📍 {state.il}{bolgeMeta ? ` (${bolgeMeta.emoji} ${bolgeMeta.ad})` : ''}</span>
-          <span>🌾 {state.urun}</span>
-          <span>📐 {state.alan.toLocaleString('tr-TR')} da</span>
+          <span>{state.il}{bolgeMeta ? ` (${bolgeMeta.emoji} ${bolgeMeta.ad})` : ''}</span>
+          <span>{state.urun}</span>
+          <span>{state.alan.toLocaleString('tr-TR')} da</span>
           <span>Toprak: {SOIL_TYPES[state.toprakTipi].tip}</span>
           <span>Sistem: {IRRIGATION_SYSTEMS[state.sulamaSistemi].tip}</span>
           <span>Dönem: {cropData.donem[state.gelismeDonemi]}</span>

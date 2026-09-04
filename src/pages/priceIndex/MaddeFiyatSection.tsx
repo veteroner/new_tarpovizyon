@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   ResponsiveContainer, ComposedChart, Area, Line, BarChart, Bar, Cell,
   CartesianGrid, XAxis, YAxis, Tooltip, LabelList,
@@ -20,21 +21,21 @@ function DegisimGrafigi({ veri, baslik, renk }: {
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={veri} layout="vertical" margin={{ top: 4, right: 8, left: 4, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-          <XAxis type="number" domain={VALUE_HEADROOM} tickFormatter={(v: number) => `%${Number(v).toFixed(0)}`}
+          <XAxis type="number" domain={VALUE_HEADROOM} tickFormatter={(v: number) => `${yuzde(Number(v), 0)}`}
             tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
           <YAxis type="category" dataKey="urun" width={110} interval={0} tickFormatter={truncTick}
             tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
           <Tooltip
             formatter={(v: number, _n, p) => {
               const d = p.payload as FiyatDegisim;
-              return [`%${v.toFixed(1)}  (${tl(d.oncekiFiyat)} → ${tl(d.sonFiyat)} ${d.birim})`, 'Aylık değişim'];
+              return [`${yuzde(v, 1)}  (${tl(d.oncekiFiyat)} → ${tl(d.sonFiyat)} ${d.birim})`, 'Aylık değişim'];
             }}
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
           />
           <Bar dataKey="degisim" radius={[0, 4, 4, 0]}>
             {veri.map((_, i) => <Cell key={i} fill={renk} />)}
             <LabelList dataKey="degisim" position="right"
-              formatter={(v: number) => `%${v.toFixed(1)}`}
+              formatter={(v: number) => `${yuzde(v, 1)}`}
               style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
           </Bar>
         </BarChart>

@@ -189,7 +189,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       }
       if (processingRate > 0) {
         pInsights.push({ id: `pi${iid++}`, type: processingRate > 20 ? 'achievement' : 'warning', severity: 'medium',
-          message: `Türkiye süt işleme oranı: %${processingRate.toFixed(1)} (ham süt → işlenmiş ürün dönüşümü)`, category: 'VERİMLİLİK' });
+          message: `Türkiye süt işleme oranı: ${yuzde(processingRate, 1)} (ham süt → işlenmiş ürün dönüşümü)`, category: 'VERİMLİLİK' });
       }
       const trBestProd = products
         .filter(p => p.turkeyRank > 0 && p.turkeyRank <= 10)
@@ -201,12 +201,12 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       const fastGrowing = growths.filter(g => g.cagr > 3 && g.current > 1e6);
       if (fastGrowing.length > 0) {
         pInsights.push({ id: `pi${iid++}`, type: 'growth', severity: 'medium',
-          message: `En hızlı büyüyen: ${translateProduct(fastGrowing[0].product)} (%${fastGrowing[0].cagr.toFixed(1)} CAGR)`, category: 'BÜYÜME' });
+          message: `En hızlı büyüyen: ${translateProduct(fastGrowing[0].product)} (${yuzde(fastGrowing[0].cagr, 1)} CAGR)`, category: 'BÜYÜME' });
       }
       const declining = growths.filter(g => g.cagr < -2 && g.current > 1e5);
       if (declining.length > 0) {
         pInsights.push({ id: `pi${iid}`, type: 'decline', severity: 'medium',
-          message: `Dikkat: ${translateProduct(declining[0].product)} küresel olarak daralıyor (%${Math.abs(declining[0].cagr).toFixed(1)} yıllık)`, category: 'RİSK' });
+          message: `Dikkat: ${translateProduct(declining[0].product)} küresel olarak daralıyor (${yuzde(Math.abs(declining[0].cagr), 1)} yıllık)`, category: 'RİSK' });
       }
       setProcessedInsights(pInsights);
 
@@ -350,7 +350,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(Number(v), 1)}`} />
               <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={110} tickFormatter={truncTick} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-                formatter={(v: number) => [`%${(v as number).toFixed(2)} CAGR`, 'Büyüme']} />
+                formatter={(v: number) => [`${yuzde((v as number), 2)} CAGR`, 'Büyüme']} />
               {processedGrowthData.slice(0, 15).map((g, i) => (
                 <Bar key={i} dataKey="cagr" fill={g.cagr > 5 ? '#22c55e' : g.cagr > 0 ? '#3b82f6' : g.cagr > -3 ? '#f59e0b' : '#ef4444'} />
               ))}
@@ -419,7 +419,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
                       ) : '—'}
                     </td>
                     <td style={{ padding: 12, textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {p.turkeyVal > 0 && p.total > 0 ? `%${((p.turkeyVal / p.total) * 100).toFixed(2)}` : '—'}
+                      {p.turkeyVal > 0 && p.total > 0 ? `${yuzde(((p.turkeyVal / p.total) * 100), 2)}` : '—'}
                     </td>
                     <td style={{ padding: 12, textAlign: 'center', fontSize: '0.85rem' }}>
                       {growth ? (
@@ -442,8 +442,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           marginTop: 15, padding: 15, background: 'rgba(139,92,246,.1)', borderRadius: 8,
           border: '1px solid rgba(139,92,246,.3)'
         }}>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            💡 <strong>Not:</strong> İşlenmiş ürünler peynir, tereyağı, yoğurt, süt tozu, hayvansal yağlar ve ipek gibi katma değerli ürünleri kapsar.
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Not:</strong> İşlenmiş ürünler peynir, tereyağı, yoğurt, süt tozu, hayvansal yağlar ve ipek gibi katma değerli ürünleri kapsar.
             Veri kaynağı: FAO · fao_uretim_hayvansal_islenmis ({processedProductData.length} ürün, 2000-2023)
           </div>
         </div>

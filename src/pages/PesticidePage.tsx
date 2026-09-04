@@ -57,7 +57,7 @@ export default function PesticidePage() {
           {activeTab === 'overview' && overviewKPIs && (
             <>
               <div className="kpi-grid">
-                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`${overviewKPIs.yil} | Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: %${overviewKPIs.worldCAGR.toFixed(2)}`} icon={Globe} color="purple" large />
+                <KPICard title="DÜNYA PESTİSİT KULLANIMI" value={formatTon(overviewKPIs.worldTotal)} subtitle={`${overviewKPIs.yil} | Yıllık: ${overviewKPIs.yoy > 0 ? '+' : ''}${yuzde(overviewKPIs.yoy, 1)} | BBO: ${yuzde(overviewKPIs.worldCAGR, 2)}`} icon={Globe} color="purple" large />
                 <KPICard title="TÜRKİYE KULLANIMI" value={formatTon(overviewKPIs.turkeyUsage)} subtitle={`Dünya sırası: #${overviewKPIs.turkeyRank}`} icon={MapPin} color="orange" />
                 <KPICard title="EN BÜYÜK KULLANICI" value={overviewKPIs.topUser} subtitle={String(overviewKPIs.yil ?? '')} icon={Award} color="blue" />
                 <KPICard title="PESTİSİT TÜRÜ" value={String(overviewKPIs.typeCount)} subtitle="Aktif tür" icon={Bug} color="red" />
@@ -146,8 +146,8 @@ export default function PesticidePage() {
               {concHHI && (
                 <div className="kpi-grid">
                   <KPICard title="HHI ENDEKSİ" value={concHHI.hhi.toFixed(0)} subtitle={`Konsantrasyon: ${concHHI.concentration === 'HIGH' ? 'Yüksek' : concHHI.concentration === 'MODERATE' ? 'Orta' : 'Düşük'}`} icon={BarChart2} color="purple" large />
-                  <KPICard title="İLK 1 PAYI" value={`%${concHHI.top1Share.toFixed(1)}`} subtitle={concData[0]?.country || '-'} icon={Award} color="orange" />
-                  <KPICard title="İLK 3 PAYI" value={`%${concHHI.top3Share.toFixed(1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
+                  <KPICard title="İLK 1 PAYI" value={`${yuzde(concHHI.top1Share, 1)}`} subtitle={concData[0]?.country || '-'} icon={Award} color="orange" />
+                  <KPICard title="İLK 3 PAYI" value={`${yuzde(concHHI.top3Share, 1)}`} subtitle="İlk 3 ülke" icon={Layers} color="blue" />
                   <KPICard title="ETKİN RAKİP" value={concHHI.effectiveCompetitors.toFixed(1)} subtitle="Efektif sayı" icon={Activity} color="green" />
                 </div>
               )}
@@ -176,10 +176,10 @@ export default function PesticidePage() {
           {activeTab === 'turkey' && turkeyProfile && (
             <>
               <div className="kpi-grid">
-                <KPICard title="TOPLAM PESTİSİT" value={formatTon(turkeyProfile.totalUsage)} subtitle={`BBO: %${turkeyProfile.cagr.toFixed(2)}`} icon={Bug} color="red" large />
+                <KPICard title="TOPLAM PESTİSİT" value={formatTon(turkeyProfile.totalUsage)} subtitle={`BBO: ${yuzde(turkeyProfile.cagr, 2)}`} icon={Bug} color="red" large />
                 <KPICard title="YOĞUNLUK" value={formatKgHa(turkeyProfile.kgHa)} subtitle="kg/ha" icon={Droplets} color="purple" />
                 <KPICard title="DÜNYA ORTALAMASI" value={formatTon(turkeyProfile.worldAvg)} subtitle="Ülke ort." icon={Globe} color="blue" />
-                <KPICard title="TREND YÖNÜ" value={turkeyProfile.direction === 'up' ? 'Artış' : turkeyProfile.direction === 'down' ? 'Düşüş' : 'Stabil'} subtitle={`%${Math.abs(turkeyProfile.vsWorldAvg).toFixed(0)} ${turkeyProfile.vsWorldAvg > 0 ? 'üzerinde' : 'altında'}`} icon={turkeyProfile.direction === 'up' ? TrendingUp : TrendingDown} color={turkeyProfile.direction === 'up' ? 'orange' : 'green'} />
+                <KPICard title="TREND YÖNÜ" value={turkeyProfile.direction === 'up' ? 'Artış' : turkeyProfile.direction === 'down' ? 'Düşüş' : 'Stabil'} subtitle={`${yuzde(Math.abs(turkeyProfile.vsWorldAvg), 0)} ${turkeyProfile.vsWorldAvg > 0 ? 'üzerinde' : 'altında'}`} icon={turkeyProfile.direction === 'up' ? TrendingUp : TrendingDown} color={turkeyProfile.direction === 'up' ? 'orange' : 'green'} />
               </div>
               <div className="chart-grid">
                 <ChartCard title="Türkiye Pestisit Kompozisyonu" action={<ChartInsightButton title="Türkiye Pestisit Kompozisyonu" description="Türkiye pestisit tip kompozisyonu" data={turkeyProfile.composition} context={{ section: 'Türkiye' }} compact />}>

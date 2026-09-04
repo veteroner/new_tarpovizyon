@@ -258,7 +258,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
                   domain={LINE_Y_DOMAIN}
                   tickFormatter={(v) => `${yuzde(Number(v), 0)}`} width={46} />
                 <Tooltip
-                  formatter={(value: number) => [`%${Number(value).toFixed(1)}`, 'Yeterlilik (Proxy)']}
+                  formatter={(value: number) => [`${yuzde(Number(value), 1)}`, 'Yeterlilik (Proxy)']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 />
                 <Line

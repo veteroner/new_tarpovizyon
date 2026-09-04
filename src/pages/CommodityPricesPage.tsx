@@ -1151,8 +1151,7 @@ export default function CommodityPricesPage() {
             )}
 
             {!faoLoading && !faoError && sortedCards.length === 0 && allComms.length > 0 && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', fontSize: '0.92rem' }}>
-                🔍 &ldquo;{faoSearch}&rdquo; ile eşleşen ürün bulunamadı
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', fontSize: '0.92rem' }}>&ldquo;{faoSearch}&rdquo; ile eşleşen ürün bulunamadı
               </div>
             )}
 
@@ -1278,8 +1277,7 @@ export default function CommodityPricesPage() {
                   {/* Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>
-                        🌍 {getCommodityEmoji(worldModalComm)} {translateCommodity(worldModalComm)} — Dünya Fiyatları
+                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>{getCommodityEmoji(worldModalComm)} {translateCommodity(worldModalComm)} — Dünya Fiyatları
                       </h3>
                       <p style={{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>
                         Kaynak: FAO GIEWS · USD cinsinden normalize edilmiş son aylık iç piyasa fiyatları
@@ -1493,8 +1491,7 @@ export default function CommodityPricesPage() {
             {!intlLoading && !intlError && intlSeries.length > 0 && (
               <>
                 {/* Info bar */}
-                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '0.75rem', padding: '0.6rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#0369a1' }}>
-                  🌐 <strong>FAO FPMA</strong> — Food Price Monitoring &amp; Analysis · Dünya Bankası Pink Sheet · IGC · USDA · Tümü USD bazında, aylık
+                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '0.75rem', padding: '0.6rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#0369a1' }}><strong>FAO FPMA</strong> — Food Price Monitoring &amp; Analysis · Dünya Bankası Pink Sheet · IGC · USDA · Tümü USD bazında, aylık
                 </div>
 
                 {/* KPI Cards */}

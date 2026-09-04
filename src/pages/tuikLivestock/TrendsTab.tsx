@@ -75,7 +75,7 @@ export default function TrendsTab({
           <div style={{ padding: '20px' }}>
             {anomalies.map((anomaly, idx) => (
               <div key={idx} style={{ padding: '12px', marginBottom: '8px', background: 'var(--card-bg)', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
-                <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>📍 {anomaly.year} Yılı</div>
+                <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{anomaly.year} Yılı</div>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                   Değer: {formatNumber(anomaly.value)} baş • Sapma: {anomaly.deviation.toFixed(2)} sigma
                 </div>

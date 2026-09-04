@@ -429,7 +429,7 @@ export default function CrossIntelligencePage() {
             height={270}
             stripKey="importDep"
             stripLabel="İthalat Bağımlılığı"
-            stripFormat={(v: number) => `%${Number(v).toFixed(1)}`}
+            stripFormat={(v: number) => `${yuzde(Number(v), 1)}`}
           >
             <Legend />
             <Bar dataKey="production" stackId="supply" fill="#10b981" name="Yerli Üretim" />
