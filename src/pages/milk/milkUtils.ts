@@ -1,3 +1,4 @@
+import { SERIES } from '../../utils/chartColors';
 import { eksen } from '../../utils/sayi';
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -76,7 +77,7 @@ export type WorldRankings = {
 
 /* ── Constants ────────────────────────────────────────────────────────── */
 
-export const COLORS = ['#3b82f6', '#f97316', '#a855f7', '#10b981'];
+export const COLORS = SERIES;  // merkezî palet; döngü YOK, 8'den sonra seriyi katla
 
 export const TUIK_SUT_URUNLER = [
   { id: 'İnek Sütü', label: 'İnek Sütü', emoji: '🥛', color: '#3b82f6' },

@@ -10,12 +10,11 @@ import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
-import { BAR_COLOR } from '../utils/chartColors';
+import { BAR_COLOR, seriesColor } from '../utils/chartColors';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 import { Globe, TreePine, Trophy } from 'lucide-react';
 
-const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
 
 interface DataItem {
   [key: string]: string | number;
@@ -104,7 +103,7 @@ export default function LandCoverPage() {
         const mapped = coverRes.data.map((item, index: number) => ({
           name: String(item['item_tr'] || ''),
           value: Number(item['toplam']) || 0,
-          fill: COLORS[index % COLORS.length]
+          fill: seriesColor(index)
         } as DataItem));
         setCoverData(mapped);
       }
@@ -115,7 +114,7 @@ export default function LandCoverPage() {
           name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
           share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
-          fill: COLORS[index % COLORS.length]
+          fill: seriesColor(index)
         } as CountryDataItem));
         setCountryData(mapped);
       }
@@ -229,7 +228,7 @@ export default function LandCoverPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={coverData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name?.substring(0,10)} ${yuzde(((percent ?? 0) * 100), 0)}`} labelLine={false}>
-                    {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                    {coverData.map((_, index) => (<Cell key={`cell-${index}`} fill={seriesColor(index)} />))}
                   </Pie>
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                 </PieChart>

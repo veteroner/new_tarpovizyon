@@ -12,12 +12,11 @@ import { fetchAgg, num } from '../services/d1';
 const R = 'tuik/bitkisel-uretim';
 import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { BAR_COLOR } from '../utils/chartColors';
+import { BAR_COLOR, seriesColor, topNvediger } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
-const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 interface YearlyDataItem {
   year: string;
@@ -181,7 +180,7 @@ export default function TuikPlantProductionPage() {
           name: String(item['yer'] || ''),
           value: Number(item['toplam']) || 0,
           share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
-          fill: COLORS[index % COLORS.length]
+          fill: seriesColor(index)
         }));
         setCityData(mapped);
       }
@@ -222,6 +221,14 @@ export default function TuikPlantProductionPage() {
    * Şırnak, 0 ton" gibi rastgele bir il göstermek demekti.
    */
   const ilKirilimiVar = cityData.some((c) => c.value > 0);
+
+  /*
+   * Pasta ilk 7 il + "Diğer". Eskiden 10 dilimdi: palet 8 renkli olduğu için
+   * son iki dilim nötr griye düşüyordu — ölçüldü, 10 dilimde 9 renk, 1'i gri.
+   * Dokuzuncu bir renk ÜRETMEK çözüm değil; hue ekledikçe renk körlüğünde
+   * ayrım daralıyor. Doğru cevap seriyi azaltmak.
+   */
+  const pastaVerisi = topNvediger(cityData, (c) => c.value, 7);
 
   // Yıllık değişim
   const currentYearIdx = yearlyData.findIndex(y => y.year === yearLabel);
@@ -344,11 +351,11 @@ export default function TuikPlantProductionPage() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="İl Payları Dağılımı" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />}>
+            <ChartCard title="İl Payları Dağılımı" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={pastaVerisi} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie 
-                    data={cityData.slice(0, 10)} 
+                    data={pastaVerisi} 
                     cx="50%" 
                     cy="50%" 
                     outerRadius={130} 
@@ -356,8 +363,8 @@ export default function TuikPlantProductionPage() {
                     label={({ name, percent }) => `${name?.substring(0, 8)} ${yuzde(((percent ?? 0) * 100), 0)}`}
                     labelLine={false}
                   >
-                    {cityData.slice(0, 10).map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {pastaVerisi.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => [`${formatTon(value)} ${unit}`, selectedUnsur]} />

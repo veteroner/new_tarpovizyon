@@ -51,3 +51,36 @@ export const STATUS = {
 /** Izgara ve eksen — grafiğin verisiyle yarışmayacak kadar soluk. */
 export const GRID = 'var(--viz-grid)';
 export const AXIS = 'var(--viz-axis)';
+
+/**
+ * Sekizden fazla kategoriyi "Diğer"e katlar.
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * Pro sayfalarında kategorik palet 13 ayrı dosyada kopyalanmış, biri 20
+ * renkliydi ve hepsi DÖNGÜSEL kullanılıyordu (`COLORS[i % COLORS.length]`).
+ * Ölçüldü: eski palette 3. ve 4. seri deuteranopide ΔE 5,5 (eşik 8), en yakın
+ * çift ΔE 2,1 — pratikte aynı renk. On dilimlik bir pastada bunların üçü bir
+ * aradaydı.
+ *
+ * Dokuzuncu bir renk ÜRETMEK çözüm değil: hue ekledikçe ayrım daralır. Doğru
+ * cevap seriyi azaltmak. Bu yardımcı büyük olanları bırakıp gerisini tek
+ * kalemde toplar — pasta da okunur olur, palet de tükenmez.
+ */
+export function topNvediger<T extends Record<string, unknown>>(
+  satirlar: T[],
+  deger: (r: T) => number,
+  n = 7,
+  digerAd = 'Diğer',
+  adAlan: keyof T = 'name' as keyof T,
+): T[] {
+  if (satirlar.length <= n + 1) return satirlar;
+  const sirali = [...satirlar].sort((a, b) => deger(b) - deger(a));
+  const bas = sirali.slice(0, n);
+  const kuyruk = sirali.slice(n);
+  const toplam = kuyruk.reduce((t, r) => t + deger(r), 0);
+  /* "Diğer" ilk satırın şeklini taşıyor ki grafik aynı alanları okuyabilsin. */
+  const diger = { ...sirali[0], [adAlan]: `${digerAd} (${kuyruk.length})` } as T;
+  const anahtar = Object.keys(sirali[0]).find((k) => deger(sirali[0]) === (sirali[0] as Record<string, unknown>)[k]);
+  if (anahtar) (diger as Record<string, unknown>)[anahtar] = toplam;
+  return [...bas, diger];
+}

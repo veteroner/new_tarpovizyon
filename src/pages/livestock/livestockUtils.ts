@@ -1,5 +1,6 @@
+import { SERIES } from '../../utils/chartColors';
 import { kisa, eksen } from '../../utils/sayi';
-export const COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
+export const COLORS = SERIES;  // merkezî palet; döngü YOK, 8'den sonra seriyi katla
 
 export type Tab = 'overview' | 'stocks' | 'primary' | 'processed' | 'efficiency' | 'predictions';
 export type PrimaryTab = 'meat' | 'milk' | 'eggs' | 'other';

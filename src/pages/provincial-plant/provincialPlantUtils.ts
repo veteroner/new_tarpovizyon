@@ -1,3 +1,4 @@
+import { seriesColor } from '../../utils/chartColors';
 import type { RegionTotal } from '../../components/TurkeyHeatMap';
 
 // Re-export for section files
@@ -29,10 +30,6 @@ export const REGION_COLORS: Record<string, string> = {
   'Güneydoğu Anadolu': '#14b8a6'
 };
 
-const COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
-];
 
 // ─── Types ───
 export interface ProvincialData {
@@ -108,7 +105,7 @@ export const calculateCAGR = (startValue: number, endValue: number, years: numbe
 
 export const getProductColor = (name: string): string => {
   const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return COLORS[hash % COLORS.length];
+  return seriesColor(hash);
 };
 
 export const getProductIcon = (name: string): string => {

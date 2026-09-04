@@ -1,3 +1,4 @@
+import { SERIES } from '../../utils/chartColors';
 // Types
 export interface GIProduct {
   id: string;
@@ -44,11 +45,7 @@ export interface GIMetrics {
 }
 
 // Constants
-export const COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
-  '#6366f1', '#d946ef', '#0ea5e9', '#22d3ee', '#a3e635'
-];
+export const COLORS = SERIES;  // merkezî palet; döngü YOK, 8'den sonra seriyi katla
 
 export const REGION_COLORS: Record<string, string> = {
   'Marmara': '#3b82f6',

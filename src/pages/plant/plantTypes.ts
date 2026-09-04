@@ -1,11 +1,7 @@
+import { SERIES } from '../../utils/chartColors';
 import { kisa, eksen } from '../../utils/sayi';
 /* ─── renk paleti ─── */
-export const COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
-  '#6366f1', '#d946ef', '#0ea5e9', '#22d3ee', '#a3e635',
-  '#fbbf24', '#fb923c', '#f472b6', '#818cf8', '#2dd4bf'
-];
+export const COLORS = SERIES;  // merkezî palet; döngü YOK, 8'den sonra seriyi katla
 
 /* ─── TÜİK 12 istatistiki bölge ─── */
 export const TURKEY_REGIONS: Record<string, string[]> = {

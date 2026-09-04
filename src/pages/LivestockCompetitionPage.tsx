@@ -1,3 +1,4 @@
+import { seriesColor, BAR_COLOR } from '../utils/chartColors';
 import { yuzde } from '../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
@@ -14,7 +15,6 @@ import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
 /* ── Color constants ───────────────────────────────────────── */
-const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1'];
 const TURKEY_COLOR = '#ef4444';
 const POS = '#22c55e';
 const NEG = '#ef4444';
@@ -200,8 +200,8 @@ export function LivestockCompetitionPage() {
               <Legend />
               {currentRankings.slice(0, 8).map((c, i) => (
                 <Area key={c.country} type="monotone" dataKey={c.country} stackId="1"
-                  stroke={isTR(c.country) ? TURKEY_COLOR : COLORS[i % COLORS.length]}
-                  fill={isTR(c.country) ? TURKEY_COLOR : COLORS[i % COLORS.length]}
+                  stroke={isTR(c.country) ? TURKEY_COLOR : seriesColor(i)}
+                  fill={isTR(c.country) ? TURKEY_COLOR : seriesColor(i)}
                   fillOpacity={isTR(c.country) ? 0.8 : 0.4} />
               ))}
               <Area type="monotone" dataKey="Diğer" stackId="1" stroke="#6b7280" fill="#6b7280" fillOpacity={0.2} />
@@ -334,11 +334,17 @@ export function LivestockCompetitionPage() {
         </p>
         <ResponsiveContainer width="100%" height={420}>
           <Treemap
-            data={currentRankings.slice(0, 20).map((c, i) => ({
+            data={currentRankings.slice(0, 20).map((c) => ({
               name: c.country.length > 18 ? c.country.substring(0, 18) + '…' : c.country,
               size: c.meat + c.milk + c.eggs,
               isTurkey: isTR(c.country),
-              color: isTR(c.country) ? TURKEY_COLOR : COLORS[i % COLORS.length],
+              /*
+               * Treemap'te DEĞERİ BOYUT kodluyor; renk kimlik taşımıyor.
+               * Eskiden 20 ülkeye 20 kategorik renk veriliyordu — 8'den
+               * sonrası nötre düşüyordu (ölçüldü) ve zaten hiçbir şey
+               * anlatmıyordu. Tek renk + Türkiye vurgusu: kimlik etikette.
+               */
+              color: isTR(c.country) ? TURKEY_COLOR : BAR_COLOR,
             }))}
             dataKey="size"
             aspectRatio={4 / 3}

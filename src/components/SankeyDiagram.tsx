@@ -1,3 +1,4 @@
+import { seriesColor } from '../utils/chartColors';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
@@ -20,11 +21,6 @@ interface Props {
   formatValue?: (v: number) => string;
 }
 
-const COLORS = [
-  '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6',
-  '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316',
-  '#14b8a6', '#a78bfa', '#34d399', '#fbbf24', '#60a5fa',
-];
 
 function defaultFmt(v: number): string {
   if (v >= 1e9) return (v / 1e9).toFixed(1) + 'B';
@@ -90,7 +86,7 @@ export function SankeyDiagram({ nodes, links, height = 380, formatValue }: Props
         <defs>
           {computedLinks.map((link: any, i: number) => {
             const srcIdx = typeof link.source === 'object' ? link.source._idx : link.source;
-            const nodeColor = nodes[srcIdx]?.color || COLORS[srcIdx % COLORS.length];
+            const nodeColor = nodes[srcIdx]?.color || seriesColor(srcIdx);
             return (
               <linearGradient key={i} id={`sk-g-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor={nodeColor} stopOpacity={0.65} />
@@ -113,7 +109,7 @@ export function SankeyDiagram({ nodes, links, height = 380, formatValue }: Props
 
         {/* Nodes */}
         {computedNodes.map((node: any, i: number) => {
-          const nodeColor = node.color || COLORS[i % COLORS.length];
+          const nodeColor = node.color || seriesColor(i);
           const nodeH = Math.max(1, (node.y1 ?? 0) - (node.y0 ?? 0));
           const midY = ((node.y0 ?? 0) + (node.y1 ?? 0)) / 2;
           const isLeft = ((node.x0 ?? 0) + (node.x1 ?? 0)) / 2 < width / 2;
