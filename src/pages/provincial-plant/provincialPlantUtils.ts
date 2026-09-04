@@ -1,4 +1,6 @@
-import { seriesColor } from '../../utils/chartColors';
+import { kisa, eksen } from '../../utils/sayi';
+import { ILK_YIL, SON_YIL } from '../plant/plantTypes';
+import { BAR_COLOR } from '../../utils/chartColors';
 import type { RegionTotal } from '../../components/TurkeyHeatMap';
 
 // Re-export for section files
@@ -6,7 +8,12 @@ export type { RegionTotal };
 
 // ─── Constants ───
 export const TABLE_NAME = 'tuik_bitkisel_uretim';
-export const YEARS = Array.from({ length: 21 }, (_, i) => 2004 + i); // 2004-2024
+/* Yıllar plantTypes'tan; burada 21/2004 elle yazılıydı ve sayfa 2025'i hiç
+   listelemiyordu — il bazlı 2025 üretimi D1'de olmasına rağmen. */
+export const YEARS = Array.from(
+  { length: SON_YIL - ILK_YIL + 1 },
+  (_, i) => ILK_YIL + i,
+);
 
 export const DEFAULT_PRODUCTS = [
   'Buğday, Durum Buğdayı Hariç',
@@ -84,46 +91,34 @@ export const DEFAULT_METRICS: AggregatedMetrics = {
 };
 
 // ─── Utility Functions ───
-export const formatNumber = (value: number): string => {
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + ' Milyar';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + ' Milyon';
-  if (value >= 1e3) return (value / 1e3).toFixed(1) + ' Bin';
-  return value.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
-};
+export const formatNumber = (value: number): string => kisa(value);
 
-export const formatShort = (value: number): string => {
-  if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
-  return value.toFixed(0);
-};
+export const formatShort = (value: number): string => eksen(value);
 
 export const calculateCAGR = (startValue: number, endValue: number, years: number): number => {
   if (startValue <= 0 || endValue <= 0 || years <= 0) return 0;
   return (Math.pow(endValue / startValue, 1 / years) - 1) * 100;
 };
 
-export const getProductColor = (name: string): string => {
-  const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return seriesColor(hash);
-};
+/**
+ * Ürün rozetinin rengi — TEK RENK.
+ *
+ * Eskiden ürün adının karakter toplamından bir "hash" üretilip palete
+ * bindiriliyordu. İki sorun: (a) ~50 farklı ürün 8 renkli palete sığmıyor,
+ * çarpışmalar rastgele; (b) rozet zaten ÜRÜN ADINI yazıyor, renk hiçbir şey
+ * eklemiyordu. Kimlik etikette, renk yalnızca vurgu.
+ *
+ * (Palet merkezîleştirilirken bu fonksiyon hash'i doğrudan `seriesColor`a
+ * veriyordu; hash 8'den büyük olduğu için bütün rozetler griye düşmüştü.)
+ */
+export const getProductColor = (_ad?: string): string => BAR_COLOR;
 
-export const getProductIcon = (name: string): string => {
-  const nameLower = name.toLowerCase();
-  if (nameLower.includes('buğday')) return '🌾';
-  if (nameLower.includes('arpa')) return '🌾';
-  if (nameLower.includes('mısır')) return '🌽';
-  if (nameLower.includes('çeltik')) return '🌾';
-  if (nameLower.includes('ayçiçeği')) return '🌻';
-  if (nameLower.includes('pamuk')) return '☁️';
-  if (nameLower.includes('domates')) return '🍅';
-  if (nameLower.includes('patates')) return '🥔';
-  if (nameLower.includes('soğan')) return '🧅';
-  if (nameLower.includes('pancar')) return '🥕';
-  if (nameLower.includes('elma')) return '🍎';
-  if (nameLower.includes('portakal')) return '🍊';
-  if (nameLower.includes('üzüm')) return '🍇';
-  if (nameLower.includes('meyve')) return '🍎';
-  if (nameLower.includes('sebze')) return '🥬';
-  return '🌾';
-};
+/**
+ * Ürün ikonu — ARTIK BOŞ.
+ *
+ * 200+ ürünün 190'ı `🌾` dönüyordu, yani ikon ayırt etmiyordu; üstelik emoji
+ * glifi platforma göre değişiyor ve ekran okuyucu onu adıyla okuyor
+ * ("buğday başağı Buğday"). Ürün adı zaten yanında. Çağrı yerleri bozulmasın
+ * diye fonksiyon duruyor, boş dönüyor.
+ */
+export const getProductIcon = (_ad?: string): string => '';

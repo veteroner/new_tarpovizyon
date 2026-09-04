@@ -386,8 +386,8 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                   <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px'}}>{ANIMAL_ITEMS.find(ai => ai.name === a.animal)?.nameTR || a.animal}</div>
                   <div style={{fontSize: '1.3rem', fontWeight: '700', color: 'var(--text-primary)'}}>{formatNumber(a.current)}</div>
                   <div style={{display: 'flex', gap: '12px', marginTop: '8px'}}>
-                    <span style={{fontSize: '0.8rem', color: trendColor, fontWeight: '600'}}>5Y: {a.cagr5 > 0 ? '+' : ''}{a.cagr5.toFixed(1)}%</span>
-                    <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>10Y: {a.cagr10 > 0 ? '+' : ''}{a.cagr10.toFixed(1)}%</span>
+                    <span style={{fontSize: '0.8rem', color: trendColor, fontWeight: '600'}}>5Y: {a.cagr5 > 0 ? '+' : ''}{yuzde(a.cagr5, 1)}</span>
+                    <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>10Y: {a.cagr10 > 0 ? '+' : ''}{yuzde(a.cagr10, 1)}</span>
                   </div>
                   <div style={{marginTop: '6px', fontSize: '0.7rem', fontWeight: '700', color: trendColor, background: `${trendColor}15`, display: 'inline-block', padding: '2px 8px', borderRadius: '4px'}}>{trendLabel}</div>
                 </div>
@@ -544,7 +544,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                 <div style={{fontSize: '1.3rem', fontWeight: '700', color: 'var(--text-primary)', marginTop: '4px'}}>{formatNumber(p.count)}</div>
                 <div style={{display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap'}}>
                   <span style={{fontSize: '0.75rem', background: 'rgba(59,130,246,.15)', color: '#3b82f6', padding: '2px 6px', borderRadius: '4px'}}>Pay {yuzde(p.share, 1)}</span>
-                  <span style={{fontSize: '0.75rem', background: p.cagr5 >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: p.cagr5 >= 0 ? '#22c55e' : '#ef4444', padding: '2px 6px', borderRadius: '4px'}}>5Y {p.cagr5 > 0 ? '+' : ''}{p.cagr5.toFixed(1)}%</span>
+                  <span style={{fontSize: '0.75rem', background: p.cagr5 >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: p.cagr5 >= 0 ? '#22c55e' : '#ef4444', padding: '2px 6px', borderRadius: '4px'}}>5Y {p.cagr5 > 0 ? '+' : ''}{yuzde(p.cagr5, 1)}</span>
                 </div>
                 <div style={{marginTop: '8px', background: 'var(--bg-primary)', borderRadius: '4px', height: '6px', overflow: 'hidden'}}>
                   <div style={{width: `${Math.min(p.share * 5, 100)}%`, height: '100%', background: '#3b82f6', borderRadius: '4px'}} />
@@ -584,7 +584,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                     <td style={{padding: '10px 16px', color: 'var(--text-primary)', fontWeight: '500'}}>{r.country}</td>
                     <td style={{padding: '10px 16px', color: 'var(--text-secondary)'}}>{ANIMAL_ITEMS.find(ai => ai.name === r.animal)?.nameTR || r.animal}</td>
                     <td style={{padding: '10px 16px', textAlign: 'right', fontWeight: '700', color: r.decline10 < 0 ? '#ef4444' : '#22c55e'}}>
-                      {r.decline10 > 0 ? '+' : ''}{r.decline10.toFixed(1)}%
+                      {r.decline10 > 0 ? '+' : ''}{yuzde(r.decline10, 1)}
                     </td>
                   </tr>
                 ))}
@@ -622,7 +622,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                       <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-primary)'}}>{formatNumber(c.total)}</td>
                       <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-secondary)'}}>{yuzde(c.share, 2)}</td>
                       <td style={{padding: '10px 16px', textAlign: 'right', fontWeight: '600', color: c.cagr5 > 1 ? '#22c55e' : c.cagr5 > -1 ? '#f59e0b' : '#ef4444'}}>
-                        {c.cagr5 > 0 ? '+' : ''}{c.cagr5.toFixed(2)}%
+                        {c.cagr5 > 0 ? '+' : ''}{yuzde(c.cagr5, 2)}
                       </td>
                       <td style={{padding: '10px 16px', textAlign: 'center'}}>
                         {c.cagr5 > 3 ? '🚀' : c.cagr5 > 1 ? '📈' : c.cagr5 > -1 ? '➡️' : c.cagr5 > -3 ? '📉' : '💀'}

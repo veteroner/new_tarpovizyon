@@ -150,7 +150,7 @@ export function PlantComparisonTab({ filteredProvincialData, regionalSummary }: 
                     fontWeight: 700,
                     color: region.growthRate >= 0 ? '#22c55e' : '#ef4444'
                   }}>
-                    {region.growthRate >= 0 ? '+' : ''}{region.growthRate.toFixed(1)}%
+                    {region.growthRate >= 0 ? '+' : ''}{yuzde(region.growthRate, 1)}
                   </div>
                 </div>
               </div>

@@ -172,22 +172,22 @@ export default function ProductionOverviewSection({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>ET İTHALAT CAGR</div>
-              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{importAnalytics.cagr.carcass.toFixed(1)}%</div>
+              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(importAnalytics.cagr.carcass, 1)}</div>
               <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Karkas Et Büyüme</div>
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>YILLIK DEĞİŞİM</div>
-              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yoy > 0 ? '+' : ''}{yoy.toFixed(1)}%</div>
+              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yoy > 0 ? '+' : ''}{yuzde(yoy, 1)}</div>
               <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Üretim Değişimi</div>
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>BESİLİK SIĞIR İTH. CAGR</div>
-              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{importAnalytics.cagr.cattle.toFixed(1)}%</div>
+              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(importAnalytics.cagr.cattle, 1)}</div>
               <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Büyükbaş Büyüme</div>
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>HARCAMA CAGR</div>
-              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{importAnalytics.cagr.spending.toFixed(1)}%</div>
+              <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(importAnalytics.cagr.spending, 1)}</div>
               <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>İthalat Giderleri</div>
             </div>
           </div>

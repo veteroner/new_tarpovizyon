@@ -132,7 +132,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             {' | '}
             <strong>2026 Tahmin:</strong> {totalProjected2026Egg.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
             {' | '}
-            <strong>Artış:</strong> {((totalProjected2026Egg - monthlyEgg.reduce((sum, m) => sum + m.value, 0)) / monthlyEgg.reduce((sum, m) => sum + m.value, 0) * 100).toFixed(2)}%
+            <strong>Artış:</strong> {yuzde(((totalProjected2026Egg - monthlyEgg.reduce((sum, m) => sum + m.value, 0)) / monthlyEgg.reduce((sum, m) => sum + m.value, 0) * 100), 2)}
           </div>
         </ChartCard>
       </div>

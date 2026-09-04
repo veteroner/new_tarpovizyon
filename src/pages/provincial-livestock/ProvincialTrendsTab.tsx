@@ -136,7 +136,7 @@ export default function ProvincialTrendsTab({
               <span style={{
                 color: calculateCAGR(yearlyTrendData[0].value, yearlyTrendData[yearlyTrendData.length - 1].value, yearlyTrendData.length - 1) >= 0 ? '#22c55e' : '#ef4444'
               }}>
-                {calculateCAGR(yearlyTrendData[0].value, yearlyTrendData[yearlyTrendData.length - 1].value, yearlyTrendData.length - 1).toFixed(2)}%/yıl
+                {yuzde(calculateCAGR(yearlyTrendData[0].value, yearlyTrendData[yearlyTrendData.length - 1].value, yearlyTrendData.length - 1), 2)}/yıl
               </span>
             ) : '-'}
           </div>
@@ -158,7 +158,7 @@ export default function ProvincialTrendsTab({
               <span style={{
                 color: (yearlyTrendData[yearlyTrendData.length - 1].value - yearlyTrendData[0].value) >= 0 ? '#22c55e' : '#ef4444'
               }}>
-                {((yearlyTrendData[yearlyTrendData.length - 1].value - yearlyTrendData[0].value) / yearlyTrendData[0].value * 100).toFixed(1)}%
+                {yuzde(((yearlyTrendData[yearlyTrendData.length - 1].value - yearlyTrendData[0].value) / yearlyTrendData[0].value * 100), 1)}
               </span>
             ) : '-'}
           </div>

@@ -88,7 +88,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
                   CAGR ({yearRange[0]}-{yearRange[1]})
                 </div>
                 <div style={{ fontSize: '24px', fontWeight: 700, color: cagr >= 0 ? '#22c55e' : '#ef4444' }}>
-                  {cagr >= 0 ? '+' : ''}{cagr.toFixed(2)}%
+                  {cagr >= 0 ? '+' : ''}{yuzde(cagr, 2)}
                 </div>
               </div>
               <div style={{
@@ -127,7 +127,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
                   Toplam Değişim
                 </div>
                 <div style={{ fontSize: '24px', fontWeight: 700, color: totalChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                  {totalChange >= 0 ? '+' : ''}{totalChange.toFixed(1)}%
+                  {totalChange >= 0 ? '+' : ''}{yuzde(totalChange, 1)}
                 </div>
               </div>
             </>

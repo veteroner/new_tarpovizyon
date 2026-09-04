@@ -143,7 +143,7 @@ export default function ResultsView({
         <div className="hz-kpi">
           <div className="hz-kpi__label">7 Yıl Trendi</div>
           <div className={`hz-kpi__value ${calc.trend >= 0 ? 'hz-kpi__value--green' : 'hz-kpi__value--red'}`}>
-            {calc.trend >= 0 ? '+' : ''}{calc.trend.toFixed(1)}%
+            {calc.trend >= 0 ? '+' : ''}{yuzde(calc.trend, 1)}
           </div>
           <div className="hz-kpi__unit">değişim</div>
         </div>
@@ -196,14 +196,14 @@ export default function ResultsView({
             {calc.perfVsIl !== null && (
               <div className={`hz-perf-item ${calc.perfVsIl >= 0 ? 'hz-perf-item--positive' : 'hz-perf-item--negative'}`}>
                 <span className="hz-perf-label">İl Ortalamasına Göre</span>
-                <span className="hz-perf-value">{calc.perfVsIl >= 0 ? '+' : ''}{calc.perfVsIl.toFixed(1)}%</span>
+                <span className="hz-perf-value">{calc.perfVsIl >= 0 ? '+' : ''}{yuzde(calc.perfVsIl, 1)}</span>
                 <span className="hz-perf-desc">{calc.perfVsIl >= 0 ? '↗ İl ortalamasının üzerinde' : '↘ İl ortalamasının altında'}</span>
               </div>
             )}
             {calc.perfVsTR !== null && (
               <div className={`hz-perf-item ${calc.perfVsTR >= 0 ? 'hz-perf-item--positive' : 'hz-perf-item--negative'}`}>
                 <span className="hz-perf-label">Türkiye Ortalamasına Göre</span>
-                <span className="hz-perf-value">{calc.perfVsTR >= 0 ? '+' : ''}{calc.perfVsTR.toFixed(1)}%</span>
+                <span className="hz-perf-value">{calc.perfVsTR >= 0 ? '+' : ''}{yuzde(calc.perfVsTR, 1)}</span>
                 <span className="hz-perf-desc">{calc.perfVsTR >= 0 ? '↗ Ulusal ortalamanın üzerinde' : '↘ Ulusal ortalamanın altında'}</span>
               </div>
             )}
@@ -330,7 +330,7 @@ export default function ResultsView({
                       {showRows.map((r, i) => (
                         <tr key={r.il} className={r.il === state.il ? 'hz-ranking-row--highlight' : ''}>
                           <td className="hz-ranking-rank">
-                            {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                            {i < 3 ? `${i + 1}.` : `${i + 1}`}
                           </td>
                           <td>{r.il} {r.il === state.il && '📍'}</td>
                           <td className="hz-ranking-verim">{r.verim.toFixed(0)}</td>
@@ -432,7 +432,7 @@ export default function ResultsView({
                   <td>{calc.adjVerim.toFixed(0)}</td>
                   <td>{calc.tahminiUretim.toFixed(1)}</td>
                   <td className={calc.trend >= 0 ? 'hz-trend--up' : 'hz-trend--down'}>
-                    {calc.trend >= 0 ? '+' : ''}{calc.trend.toFixed(1)}%
+                    {calc.trend >= 0 ? '+' : ''}{yuzde(calc.trend, 1)}
                   </td>
                   <td>{calc.risk.emoji}</td>
                 </tr>
@@ -442,7 +442,7 @@ export default function ResultsView({
                     <td>{cr.quick.verim.toFixed(0)}</td>
                     <td>{cr.quick.uretim.toFixed(1)}</td>
                     <td className={cr.quick.trend >= 0 ? 'hz-trend--up' : 'hz-trend--down'}>
-                      {cr.quick.trend >= 0 ? '+' : ''}{cr.quick.trend.toFixed(1)}%
+                      {cr.quick.trend >= 0 ? '+' : ''}{yuzde(cr.quick.trend, 1)}
                     </td>
                     <td>{cr.quick.risk}</td>
                   </tr>

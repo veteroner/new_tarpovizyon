@@ -65,12 +65,12 @@ export default function PlantKpiPanel({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK CAGR</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{cagr5Year.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{yuzde(cagr5Year, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>VERİMLİLİK TRENDİ</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yieldTrend >= 0 ? '+' : ''}{yieldTrend.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yieldTrend >= 0 ? '+' : ''}{yuzde(yieldTrend, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 3 yıl verim değişimi</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

@@ -428,7 +428,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
                           background: growth.cagr > 3 ? 'rgba(34,197,94,.15)' : growth.cagr > 0 ? 'rgba(59,130,246,.15)' : growth.cagr > -3 ? 'rgba(245,158,11,.15)' : 'rgba(239,68,68,.15)',
                           color: growth.cagr > 3 ? '#22c55e' : growth.cagr > 0 ? '#3b82f6' : growth.cagr > -3 ? '#f59e0b' : '#ef4444',
                         }}>
-                          {growth.lifecycle} {growth.cagr > 0 ? '+' : ''}{growth.cagr.toFixed(1)}%
+                          {growth.lifecycle} {growth.cagr > 0 ? '+' : ''}{yuzde(growth.cagr, 1)}
                         </span>
                       ) : '—'}
                     </td>

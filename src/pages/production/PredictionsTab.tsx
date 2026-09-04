@@ -145,21 +145,21 @@ export function PredictionsTab({
               <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '8px' }}>Kötümser (×0.8)</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction * 0.8)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                {((predKPIs.forecastProduction * 0.8 / predKPIs.currentProduction - 1) * 100).toFixed(1)}%
+                {yuzde(((predKPIs.forecastProduction * 0.8 / predKPIs.currentProduction - 1) * 100), 1)}
               </div>
             </div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(59,130,246,0.08)', borderRadius: '12px', border: '1px solid rgba(59,130,246,0.3)' }}>
               <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 600, marginBottom: '8px' }}>Baz Senaryo</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                {predKPIs.prodChange >= 0 ? '+' : ''}{predKPIs.prodChange.toFixed(1)}%
+                {predKPIs.prodChange >= 0 ? '+' : ''}{yuzde(predKPIs.prodChange, 1)}
               </div>
             </div>
             <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(16,185,129,0.08)', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)' }}>
               <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '8px' }}>İyimser (×1.2)</div>
               <div style={{ fontSize: '24px', fontWeight: 700 }}>{formatValue(predKPIs.forecastProduction * 1.2)}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                {((predKPIs.forecastProduction * 1.2 / predKPIs.currentProduction - 1) * 100).toFixed(1)}%
+                {yuzde(((predKPIs.forecastProduction * 1.2 / predKPIs.currentProduction - 1) * 100), 1)}
               </div>
             </div>
           </div>

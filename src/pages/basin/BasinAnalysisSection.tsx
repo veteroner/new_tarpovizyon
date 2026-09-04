@@ -324,7 +324,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
                     </div>
                   </div>
                   <div style={{ fontSize: '20px' }}>
-                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : ''}
+                    {idx < 3 ? `${idx + 1}.` : ''}
                   </div>
                 </div>
               ))}

@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { Beef, Map, TrendingUp, Trophy } from 'lucide-react';
 import {
   formatNumber,
@@ -84,7 +85,7 @@ export default function ProvincialLivestockHeader({
             background: metrics.avgGrowthRate >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
             color: metrics.avgGrowthRate >= 0 ? '#22c55e' : '#ef4444'
           }}>
-            {metrics.avgGrowthRate >= 0 ? '+' : ''}{metrics.avgGrowthRate.toFixed(1)}%
+            {metrics.avgGrowthRate >= 0 ? '+' : ''}{yuzde(metrics.avgGrowthRate, 1)}
           </div>
         </div>
 

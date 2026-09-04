@@ -170,7 +170,7 @@ export default function TradeOverviewTab() {
               <span style={{ color: '#10b981', fontWeight: 700, fontSize: 13 }}>En Hızlı Büyüyen İhracat</span>
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{fastestGrowing.name}</div>
-            <div style={{ fontSize: 13, color: '#10b981' }}>+{fastestGrowing.growth.toFixed(1)}% büyüme</div>
+            <div style={{ fontSize: 13, color: '#10b981' }}>+{yuzde(fastestGrowing.growth, 1)} büyüme</div>
           </div>
         )}
 
@@ -186,7 +186,7 @@ export default function TradeOverviewTab() {
               <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: 13 }}>En Çok Artan İthalat</span>
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{biggestImportIncrease.name}</div>
-            <div style={{ fontSize: 13, color: '#f59e0b' }}>+{biggestImportIncrease.growth.toFixed(1)}% artış</div>
+            <div style={{ fontSize: 13, color: '#f59e0b' }}>+{yuzde(biggestImportIncrease.growth, 1)} artış</div>
           </div>
         )}
 

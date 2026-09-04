@@ -97,7 +97,7 @@ export function PlantOverviewTab({
                       fontWeight: 800,
                       color: idx < 3 ? 'white' : 'var(--text-secondary)'
                     }}>
-                      {idx < 3 ? ['🥇', '🥈', '🥉'][idx] : idx + 1}
+                      {idx < 3 ? `${idx + 1}.` : idx + 1}
                     </div>
                   </td>
                   <td style={{ padding: '16px 8px' }}>
@@ -150,12 +150,12 @@ export function PlantOverviewTab({
                       color: province.growthRate >= 0 ? '#22c55e' : '#ef4444'
                     }}>
                       <span>{province.growthRate >= 0 ? '↗' : '↘'}</span>
-                      <span>{province.growthRate >= 0 ? '+' : ''}{province.growthRate.toFixed(1)}%</span>
+                      <span>{province.growthRate >= 0 ? '+' : ''}{yuzde(province.growthRate, 1)}</span>
                     </div>
                   </td>
                   <td style={{ padding: '16px 8px', textAlign: 'right' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
-                      {province.marketShare.toFixed(2)}%
+                      {yuzde(province.marketShare, 2)}
                     </div>
                     <div style={{
                       height: '6px',

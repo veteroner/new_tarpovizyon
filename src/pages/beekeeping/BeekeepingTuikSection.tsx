@@ -78,7 +78,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             YILLIK DEĞİŞİM
           </div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: tuikKovanKpi.yoy >= 0 ? '#22c55e' : '#ef4444', lineHeight: 1 }}>
-            {tuikKovanKpi.yoy >= 0 ? '+' : ''}{tuikKovanKpi.yoy.toFixed(1)}%
+            {tuikKovanKpi.yoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.yoy, 1)}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
             Toplam kovan ({tuikKovanKpi.prev?.year} → {tuikKovanKpi.latest.year})
@@ -120,7 +120,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               {tuikKovanKpi.latest.balmumu.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ton
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px' }}>
-              Yıllık: {tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{tuikKovanKpi.balmumuYoy.toFixed(1)}%
+              Yıllık: {tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.balmumuYoy, 1)}
             </div>
           </div>
         </div>

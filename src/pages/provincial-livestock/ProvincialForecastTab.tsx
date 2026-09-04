@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import {
   formatNumber,
   type ProvincialData,
@@ -96,7 +97,7 @@ export default function ProvincialForecastTab({
                         color: 'var(--text-secondary)',
                         marginTop: '2px'
                       }}>
-                        Büyüme: {province.growthRate.toFixed(1)}%/yıl
+                        Büyüme: {yuzde(province.growthRate, 1)}/yıl
                       </div>
                     </td>
                     <td style={{ padding: '16px 8px', textAlign: 'right' }}>
@@ -178,7 +179,7 @@ export default function ProvincialForecastTab({
                 color: 'var(--text-secondary)',
                 marginBottom: '16px'
               }}>
-                Yıllık büyüme: <strong>{(scenarioGrowth * 100).toFixed(1)}%</strong>
+                Yıllık büyüme: <strong>{yuzde((scenarioGrowth * 100), 1)}</strong>
               </div>
               <div style={{
                 fontSize: '24px',
@@ -201,7 +202,7 @@ export default function ProvincialForecastTab({
                 color: colors[idx],
                 textAlign: 'center'
               }}>
-                {((forecast2028 - totalCurrent) / totalCurrent * 100).toFixed(1)}% artış
+                {yuzde(((forecast2028 - totalCurrent) / totalCurrent * 100), 1)} artış
               </div>
             </div>
           );

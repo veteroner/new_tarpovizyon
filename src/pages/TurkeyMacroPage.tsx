@@ -479,9 +479,9 @@ export default function TurkeyMacroPage() {
                     {SECTOR_SHORT[code]}
                   </td>
                   <td className="py-2 px-3 text-right font-mono">{fmtMilyar(s.cari)}</td>
-                  <td className="py-2 px-3 text-right">{share.toFixed(1)}%</td>
+                  <td className="py-2 px-3 text-right">{yuzde(share, 1)}</td>
                   <td className={`py-2 px-3 text-right font-bold ${s.zincir_degisim >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {s.zincir_degisim >= 0 ? '+' : ''}{s.zincir_degisim.toFixed(2)}%
+                    {s.zincir_degisim >= 0 ? '+' : ''}{yuzde(s.zincir_degisim, 2)}
                   </td>
                   <td className="py-2 px-3">
                     <div className="w-full rounded-full h-2" style={{ background: 'var(--bg-primary)' }}>

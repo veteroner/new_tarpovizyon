@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { KpiData } from './useTurkeyAnimalProductionData';
@@ -28,7 +29,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.redMeat.value)} ton</div>
             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.redMeat.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.redMeat.change >= 0 ? '+' : ''}{kpiData.redMeat.change.toFixed(1)}% Yıllık Değişim
+              {kpiData.redMeat.change >= 0 ? '+' : ''}{yuzde(kpiData.redMeat.change, 1)} Yıllık Değişim
             </div>
           </div>
         </div>
@@ -42,7 +43,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{formatValue(kpiData.milk.value)} ton</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.milk.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.milk.change >= 0 ? '+' : ''}{kpiData.milk.change.toFixed(1)}% Yıllık Değişim
+              {kpiData.milk.change >= 0 ? '+' : ''}{yuzde(kpiData.milk.change, 1)} Yıllık Değişim
             </div>
           </div>
         </div>
@@ -55,7 +56,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{(kpiData.egg.value / 1000).toFixed(2)} Milyar adet</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.egg.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.egg.change >= 0 ? '+' : ''}{kpiData.egg.change.toFixed(1)}% Yıllık Değişim
+              {kpiData.egg.change >= 0 ? '+' : ''}{yuzde(kpiData.egg.change, 1)} Yıllık Değişim
             </div>
           </div>
         </div>
@@ -68,7 +69,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.honey.value)} ton</div>
             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
               {kpiData.honey.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.honey.change >= 0 ? '+' : ''}{kpiData.honey.change.toFixed(1)}% Yıllık Değişim
+              {kpiData.honey.change >= 0 ? '+' : ''}{yuzde(kpiData.honey.change, 1)} Yıllık Değişim
             </div>
           </div>
         </div>
@@ -82,12 +83,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK BBO (KIRMIZI ET)</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{cagr5Year.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{yuzde(cagr5Year, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>SÜT VERİMLİLİK TRENDİ</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{milkProductivityTrend >= 0 ? '+' : ''}{milkProductivityTrend.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{milkProductivityTrend >= 0 ? '+' : ''}{yuzde(milkProductivityTrend, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 3 yıl büyüme</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

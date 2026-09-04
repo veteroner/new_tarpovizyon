@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import type { TuikEggData } from './eggProductionTypes';
 
 interface EggIntelligencePanelProps {
@@ -39,12 +40,12 @@ export function EggIntelligencePanel({ tuikData }: EggIntelligencePanelProps) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
         <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
           <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>YUMURTA CAGR</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{eggCAGR.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(eggCAGR, 1)}</div>
           <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>{years} Yıl Büyüme</div>
         </div>
         <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
           <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>TAVUK CAGR</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{layerCAGR.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(layerCAGR, 1)}</div>
           <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Popülasyon ({years}Y)</div>
         </div>
         <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
@@ -54,7 +55,7 @@ export function EggIntelligencePanel({ tuikData }: EggIntelligencePanelProps) {
         </div>
         <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
           <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>HİBRİT PAYI</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{hybridShare.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(hybridShare, 1)}</div>
           <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Modernizasyon</div>
         </div>
       </div>

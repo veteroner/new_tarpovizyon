@@ -1,3 +1,4 @@
+import { SON_YIL } from '../plant/plantTypes';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchAgg, num } from '../../services/d1';
 
@@ -55,7 +56,7 @@ export interface ProvincialPlantData {
 export function useProvincialPlantData(): ProvincialPlantData {
   const pageRef = useRef<HTMLDivElement>(null);
 
-  const [selectedYear, setSelectedYear] = useState('y2024');
+  const [selectedYear, setSelectedYear] = useState(`y${SON_YIL}`);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedUnsur, setSelectedUnsur] = useState('Üretim');
   const [selectedRegion, setSelectedRegion] = useState('Tümü');

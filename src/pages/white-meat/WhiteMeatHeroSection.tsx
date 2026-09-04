@@ -87,17 +87,17 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
                 <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>KESİM CAGR</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{slaughterCAGR.toFixed(1)}%</div>
+                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(slaughterCAGR, 1)}</div>
                 <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>{years} Yıl Büyüme</div>
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
                 <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>ÜRETİM CAGR</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{meatCAGR.toFixed(1)}%</div>
+                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(meatCAGR, 1)}</div>
                 <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Et Üretimi ({years}Y)</div>
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
                 <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>KULUÇKA BAŞARI</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{hatchSuccessChange > 0 ? '+' : ''}{hatchSuccessChange.toFixed(1)}%</div>
+                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{hatchSuccessChange > 0 ? '+' : ''}{yuzde(hatchSuccessChange, 1)}</div>
                 <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Verimlilik Artışı</div>
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>

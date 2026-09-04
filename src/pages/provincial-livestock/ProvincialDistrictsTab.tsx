@@ -168,7 +168,7 @@ export default function ProvincialDistrictsTab({
                       </td>
                       <td style={{ padding: '16px 8px', textAlign: 'right' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                          {district.provinceShare.toFixed(2)}%
+                          {yuzde(district.provinceShare, 2)}
                         </div>
                         <div style={{
                           height: '4px',
@@ -196,7 +196,7 @@ export default function ProvincialDistrictsTab({
                           background: district.growthRate >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                           color: district.growthRate >= 0 ? '#22c55e' : '#ef4444'
                         }}>
-                          {district.growthRate >= 0 ? '↗' : '↘'} {Math.abs(district.growthRate).toFixed(1)}%
+                          {district.growthRate >= 0 ? '↗' : '↘'} {yuzde(Math.abs(district.growthRate), 1)}
                         </div>
                       </td>
                       <td style={{ padding: '16px 8px', textAlign: 'center' }}>

@@ -58,7 +58,7 @@ export function LivestockCompetitionPage() {
       background: v > 0 ? 'rgba(34,197,94,.2)' : v < 0 ? 'rgba(239,68,68,.2)' : 'rgba(245,158,11,.2)',
       color: v > 0 ? POS : v < 0 ? NEG : NEUT,
     }}>
-      {v > 0 ? '↑' : v < 0 ? '↓' : '→'} {Math.abs(v).toFixed(1)}% BBO
+      {v > 0 ? '↑' : v < 0 ? '↓' : '→'} {yuzde(Math.abs(v), 1)} BBO
     </span>
   );
 

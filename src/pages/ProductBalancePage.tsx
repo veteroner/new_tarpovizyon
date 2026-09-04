@@ -497,7 +497,7 @@ export default function ProductBalancePage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-black" style={{ color: getHeatColor(a.value) }}>
-                      {a.value.toFixed(0)}%
+                      {yuzde(a.value, 0)}
                     </p>
                     <p className={`text-[10px] ${a.trend < 0 ? 'text-red-500' : 'text-green-500'}`}>
                       {a.trend >= 0 ? '↑' : '↓'} {Math.abs(a.trend).toFixed(1)} puan

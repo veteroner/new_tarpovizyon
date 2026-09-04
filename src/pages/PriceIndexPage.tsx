@@ -1,3 +1,4 @@
+import { yuzde } from '../utils/sayi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area, Cell, LabelList } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, Activity, BarChart3, Thermometer } from 'lucide-react';
 import {
@@ -337,7 +338,7 @@ export default function PriceIndexPage() {
                     <div className="table-subtext">Ortalama endeks: {formatIndex(p.value)}</div>
                   </div>
                   <div className="table-value" style={{ color: p.change >= 0 ? '#ef4444' : '#22c55e' }}>
-                    {p.change >= 0 ? '+' : ''}{p.change.toFixed(1)}%
+                    {p.change >= 0 ? '+' : ''}{yuzde(p.change, 1)}
                   </div>
                 </div>
               ))}

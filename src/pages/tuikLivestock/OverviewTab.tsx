@@ -45,7 +45,7 @@ export default function OverviewTab({
         </div>
         <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className="kpi-icon orange"><TrendingUp size={18} aria-hidden="true" /></div></div>
-          <div className={`kpi-value ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange > 0 ? '+' : ''}{yearChange.toFixed(1)}%</div>
+          <div className={`kpi-value ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange > 0 ? '+' : ''}{yuzde(yearChange, 1)}</div>
           <div className="kpi-subtitle">Bir önceki yıla göre</div>
         </div>
       </div>

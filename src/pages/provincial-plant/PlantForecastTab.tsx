@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import type { ProvincialData, AggregatedMetrics } from './provincialPlantUtils';
 import { formatNumber } from './provincialPlantUtils';
 
@@ -89,7 +90,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
                         color: 'var(--text-secondary)',
                         marginTop: '2px'
                       }}>
-                        Büyüme: {province.growthRate.toFixed(1)}%/yıl
+                        Büyüme: {yuzde(province.growthRate, 1)}/yıl
                       </div>
                     </td>
                     <td style={{ padding: '16px 8px', textAlign: 'right' }}>
@@ -171,7 +172,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
                 color: 'var(--text-secondary)',
                 marginBottom: '16px'
               }}>
-                Yıllık büyüme: <strong>{(scenarioGrowth * 100).toFixed(1)}%</strong>
+                Yıllık büyüme: <strong>{yuzde((scenarioGrowth * 100), 1)}</strong>
               </div>
               <div style={{
                 fontSize: '24px',
@@ -194,7 +195,7 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
                 color: colors[idx],
                 textAlign: 'center'
               }}>
-                {((forecast2028 - totalCurrent) / totalCurrent * 100).toFixed(1)}% artış
+                {yuzde(((forecast2028 - totalCurrent) / totalCurrent * 100), 1)} artış
               </div>
             </div>
           );

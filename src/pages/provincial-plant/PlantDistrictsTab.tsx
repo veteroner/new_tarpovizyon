@@ -136,7 +136,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                       </td>
                       <td style={{ padding: '16px 8px', textAlign: 'right' }}>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>
-                          {district.provinceShare.toFixed(2)}%
+                          {yuzde(district.provinceShare, 2)}
                         </div>
                         <div style={{
                           height: '6px',
@@ -160,7 +160,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                           fontWeight: 700,
                           color: district.growthRate >= 0 ? '#22c55e' : '#ef4444'
                         }}>
-                          {district.growthRate >= 0 ? '+' : ''}{district.growthRate.toFixed(1)}%
+                          {district.growthRate >= 0 ? '+' : ''}{yuzde(district.growthRate, 1)}
                         </div>
                       </td>
                       <td style={{ padding: '16px 8px', textAlign: 'center' }}>

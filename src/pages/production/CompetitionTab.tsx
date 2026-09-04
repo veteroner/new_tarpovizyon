@@ -68,7 +68,7 @@ export function CompetitionTab({
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(16,185,129,0.07)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)' }}>
                     <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-secondary)', minWidth: '20px' }}>{i + 1}</span>
                     <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</span>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>+{c.growth.toFixed(1)}%</span>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>+{yuzde(c.growth, 1)}</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{formatMetric(c.production)}</span>
                   </div>
                 ))}
@@ -81,7 +81,7 @@ export function CompetitionTab({
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(239,68,68,0.07)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-secondary)', minWidth: '20px' }}>{i + 1}</span>
                     <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</span>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{c.growth.toFixed(1)}%</span>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{yuzde(c.growth, 1)}</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{formatMetric(c.production)}</span>
                   </div>
                 ))}
@@ -185,7 +185,7 @@ export function CompetitionTab({
                   if (active && payload?.[0]) { const d = payload[0].payload; return (
                     <div style={{ padding: '8px 12px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}>
                       <div style={{ fontWeight: 700, color: d.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{d.isTurkey ? 'TR · ' : ''}{d.name}</div>
-                      <div>Büyüme: {d.x.toFixed(1)}%</div><div>Üretim: {formatValue(d.y)}</div>
+                      <div>Büyüme: {yuzde(d.x, 1)}</div><div>Üretim: {formatValue(d.y)}</div>
                     </div>); } return null;
                 }} />
                 <ReferenceLine x={0} stroke="#6b7280" strokeDasharray="4 4" />

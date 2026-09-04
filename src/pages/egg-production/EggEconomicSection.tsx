@@ -94,7 +94,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <div style={{ fontSize: '1.5rem' }}><BarChart3 size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: filteredData[0]?.karlilik >= 0 ? '#22c55e' : '#ef4444' }}>
-            {filteredData[0]?.karlilik.toFixed(2)}%
+            {yuzde(filteredData[0]?.karlilik, 2)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
         </div>
@@ -207,7 +207,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
           <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ortalama Karlılık</div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: filteredData.reduce((sum, d) => sum + d.karlilik, 0) / filteredData.length >= 0 ? '#22c55e' : '#ef4444' }}>
-              {(filteredData.reduce((sum, d) => sum + d.karlilik, 0) / filteredData.length).toFixed(2)}%
+              {yuzde((filteredData.reduce((sum, d) => sum + d.karlilik, 0) / filteredData.length), 2)}
             </div>
           </div>
           <div style={{ padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>

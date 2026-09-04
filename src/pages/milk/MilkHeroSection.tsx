@@ -58,7 +58,7 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
               YILLIK DEĞİŞİM
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
-              {yoy >= 0 ? '+' : ''}{yoy.toFixed(1)}%
+              {yoy >= 0 ? '+' : ''}{yuzde(yoy, 1)}
             </div>
             <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
               Önceki yıla göre
@@ -224,12 +224,12 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>10 YILLIK CAGR</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr >= 0 ? '+' : ''}{cagr.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr >= 0 ? '+' : ''}{yuzde(cagr, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>YILLIK DEĞİŞİM</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yoy >= 0 ? '+' : ''}{yoy.toFixed(1)}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yoy >= 0 ? '+' : ''}{yuzde(yoy, 1)}</div>
             <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son yıl</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>

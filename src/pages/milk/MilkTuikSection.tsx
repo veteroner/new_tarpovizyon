@@ -120,7 +120,7 @@ export default function MilkTuikSection({
                 YILLIK DEĞİŞİM
               </div>
               <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                {tuikYoyChange >= 0 ? '+' : ''}{tuikYoyChange.toFixed(1)}%
+                {tuikYoyChange >= 0 ? '+' : ''}{yuzde(tuikYoyChange, 1)}
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function MilkTuikSection({
                   5 YILLIK DEĞİŞİM
                 </div>
                 <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-                  {fiveYearChange >= 0 ? '+' : ''}{fiveYearChange.toFixed(1)}%
+                  {fiveYearChange >= 0 ? '+' : ''}{yuzde(fiveYearChange, 1)}
                 </div>
               </div>
             </div>

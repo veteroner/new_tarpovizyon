@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { useMemo } from 'react';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
@@ -227,7 +228,7 @@ export default function MilkEconomicsSection({
                   KARLILIK ORANI
                 </div>
                 <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {(latest?.karlilik ?? 0) >= 0 ? '+' : ''}{latest?.karlilik.toFixed(2)}%
+                  {(latest?.karlilik ?? 0) >= 0 ? '+' : ''}{yuzde(latest?.karlilik, 2)}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
                   {latest?.tarih}

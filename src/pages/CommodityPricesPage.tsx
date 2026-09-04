@@ -723,7 +723,7 @@ export default function CommodityPricesPage() {
             <div className="kpi-card">
               <div className="kpi-header"><span className="kpi-title">ORT. DEĞİŞİM</span></div>
               <div className={`kpi-value ${avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {avgChange >= 0 ? '+' : ''}{avgChange.toFixed(2)}%
+                {avgChange >= 0 ? '+' : ''}{yuzde(avgChange, 2)}
               </div>
               <div className="kpi-subtitle">Günlük ortalama</div>
             </div>
@@ -795,7 +795,7 @@ export default function CommodityPricesPage() {
                         color: c.changePct >= 0 ? '#22c55e' : '#ef4444',
                         fontWeight: 600, fontSize: '0.85rem',
                       }}>
-                        <span>{c.changePct >= 0 ? '▲' : '▼'} {Math.abs(c.changePct).toFixed(2)}%</span>
+                        <span>{c.changePct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(c.changePct), 2)}</span>
                         <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>
                           {c.change >= 0 ? '+' : ''}{c.change.toFixed(2)}
                         </span>
@@ -838,7 +838,7 @@ export default function CommodityPricesPage() {
                       ${selectedCommodity.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                     <div style={{ color: selectedCommodity.changePct >= 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
-                      {selectedCommodity.changePct >= 0 ? '▲' : '▼'} {Math.abs(selectedCommodity.changePct).toFixed(2)}%
+                      {selectedCommodity.changePct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(selectedCommodity.changePct), 2)}
                     </div>
                   </div>
                   <ChartInsightButton title={`${translateCommodity(selectedCommodity.name)} Fiyat Grafiği`} description="Emtia fiyat grafiği" data={chartData.map(p => ({ date: new Date(p.t * 1000).toLocaleDateString('tr-TR'), price: p.c }))} context={{ section: 'Emtia Fiyatları' }} compact />
@@ -1122,7 +1122,7 @@ export default function CommodityPricesPage() {
                       </div>
                       {card.pct != null && (
                         <div style={{ fontSize: '0.8rem', fontWeight: 700, color: card.pct >= 0 ? '#16a34a' : '#dc2626', background: card.pct >= 0 ? '#f0fdf4' : '#fef2f2', padding: '0.22rem 0.5rem', borderRadius: '0.45rem', whiteSpace: 'nowrap' }}>
-                          {card.pct >= 0 ? '▲' : '▼'} {Math.abs(card.pct).toFixed(1)}%
+                          {card.pct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(card.pct), 1)}
                         </div>
                       )}
                     </div>
@@ -1188,7 +1188,7 @@ export default function CommodityPricesPage() {
                       )}
                       {detailCardData.pct != null && (
                         <div style={{ fontSize: '1rem', fontWeight: 700, color: detailCardData.pct >= 0 ? '#4ade80' : '#f87171', marginTop: '0.25rem' }}>
-                          {detailCardData.pct >= 0 ? '▲' : '▼'} {Math.abs(detailCardData.pct).toFixed(1)}% (ay/ay)
+                          {detailCardData.pct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(detailCardData.pct), 1)} (ay/ay)
                         </div>
                       )}
                     </div>
@@ -1412,7 +1412,7 @@ export default function CommodityPricesPage() {
                                   style={{ background: r.iso3 === 'TUR' ? '#eff6ff' : i % 2 === 0 ? '#fff' : '#f8fafc', borderBottom: '1px solid #f1f5f9', fontWeight: r.iso3 === 'TUR' ? 700 : 400 }}
                                 >
                                   <td style={{ padding: '0.5rem 0.75rem', color: '#64748b', fontWeight: 600, fontSize: '0.82rem' }}>
-                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                                    {i < 3 ? `${i + 1}.` : i + 1}
                                   </td>
                                   <td style={{ padding: '0.5rem 0.75rem', color: '#0f172a' }}>
                                     {r.iso3 === 'TUR' ? '🇹🇷 ' : ''}{COUNTRY_TR[r.name] ?? r.name}
@@ -1604,7 +1604,7 @@ export default function CommodityPricesPage() {
                                     background: pct >= 0 ? '#f0fdf4' : '#fef2f2',
                                     padding: '0.2rem 0.5rem', borderRadius: '0.4rem',
                                   }}>
-                                    {pct >= 0 ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%
+                                    {pct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(pct), 1)}
                                   </div>
                                 )}
                                 {sparkData.length > 2 && (

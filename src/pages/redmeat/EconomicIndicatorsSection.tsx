@@ -120,7 +120,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <div className="kpi-icon blue"><BarChart3 size={18} aria-hidden="true" /></div>
           </div>
           <div className="kpi-value" style={{ color: filteredEconomicData[0]?.karlilik >= 0 ? '#22c55e' : '#ef4444' }}>
-            {filteredEconomicData[0]?.karlilik.toFixed(2)}%
+            {yuzde(filteredEconomicData[0]?.karlilik, 2)}
           </div>
           <div className="kpi-subtitle">{filteredEconomicData[0]?.tarih}</div>
         </div>

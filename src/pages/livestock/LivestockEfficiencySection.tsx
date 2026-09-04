@@ -439,7 +439,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                   <span>Lidere fark: {yuzde(g.gapToLeader, 0)}</span>
                   <span style={{ color: '#f59e0b' }}>▎Dünya Ort.</span>
                   <span style={{ color: g.gapToAvg >= 0 ? '#22c55e' : '#ef4444' }}>
-                    Ort.{g.gapToAvg >= 0 ? '+' : ''}{g.gapToAvg.toFixed(0)}%
+                    Ort.{g.gapToAvg >= 0 ? '+' : ''}{yuzde(g.gapToAvg, 0)}
                   </span>
                 </div>
               </div>

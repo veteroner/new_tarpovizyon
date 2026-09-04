@@ -17,12 +17,12 @@ export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: Tu
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
           <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>KOVAN CAGR</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.cagr >= 0 ? '+' : ''}{tuikKovanKpi.cagr.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.cagr >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.cagr, 1)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
           <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>SON YIL DEĞİŞİM</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.yoy >= 0 ? '+' : ''}{tuikKovanKpi.yoy.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.yoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.yoy, 1)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Kovan sayısı artışı</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
@@ -32,7 +32,7 @@ export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: Tu
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
           <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BALMUMU DEĞİŞİM</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{tuikKovanKpi.balmumuYoy.toFixed(1)}%</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.balmumuYoy, 1)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son yıl balmumu</div>
         </div>
       </div>

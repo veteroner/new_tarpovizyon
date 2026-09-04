@@ -1,3 +1,4 @@
+import { yuzde } from '../../utils/sayi';
 import { type KpiMetrics, COLORS, formatNumber, formatTon } from './beekeepingTypes';
 
 export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
@@ -32,7 +33,7 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
             {formatNumber(kpiMetrics.totalBeekeepers)}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            {kpiMetrics.beekeeperGrowth >= 0 ? '+' : ''}{kpiMetrics.beekeeperGrowth.toFixed(1)}% ({sonYil} vs {oncekiYil})
+            {kpiMetrics.beekeeperGrowth >= 0 ? '+' : ''}{yuzde(kpiMetrics.beekeeperGrowth, 1)} ({sonYil} vs {oncekiYil})
           </div>
         </div>
       </div>

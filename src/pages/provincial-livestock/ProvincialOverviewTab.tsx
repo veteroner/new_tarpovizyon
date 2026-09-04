@@ -106,7 +106,7 @@ export default function ProvincialOverviewTab({
                       fontSize: '14px',
                       fontWeight: 700
                     }}>
-                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                      {idx < 3 ? `${idx + 1}.` : idx + 1}
                     </div>
                   </td>
                   <td style={{ padding: '16px 8px' }}>
@@ -162,12 +162,12 @@ export default function ProvincialOverviewTab({
                       background: province.growthRate >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                       color: province.growthRate >= 0 ? '#22c55e' : '#ef4444'
                     }}>
-                      {province.growthRate >= 0 ? '↗' : '↘'} {Math.abs(province.growthRate).toFixed(1)}%
+                      {province.growthRate >= 0 ? '↗' : '↘'} {yuzde(Math.abs(province.growthRate), 1)}
                     </div>
                   </td>
                   <td style={{ padding: '16px 8px', textAlign: 'right' }}>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {province.marketShare.toFixed(2)}%
+                      {yuzde(province.marketShare, 2)}
                     </div>
                     <div style={{
                       marginTop: '4px',
@@ -373,7 +373,7 @@ export default function ProvincialOverviewTab({
                 background: region.growthRate >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                 color: region.growthRate >= 0 ? '#22c55e' : '#ef4444'
               }}>
-                {region.growthRate >= 0 ? '↗' : '↘'} {Math.abs(region.growthRate).toFixed(1)}%
+                {region.growthRate >= 0 ? '↗' : '↘'} {yuzde(Math.abs(region.growthRate), 1)}
               </div>
             </div>
           ))}

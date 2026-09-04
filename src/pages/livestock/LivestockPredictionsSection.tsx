@@ -426,7 +426,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                 <div key={i} style={{background: isUp ? 'rgba(34,197,94,.06)' : 'rgba(239,68,68,.06)', border: `1px solid ${isUp ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)'}`, borderRadius: '12px', padding: '14px'}}>
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px'}}>
                     <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', maxWidth: '70%', lineHeight: 1.3}}>{translateProduct(tf.product)}</div>
-                    <span style={{fontSize: '10px', fontWeight: 700, color: isUp ? '#22c55e' : '#ef4444', background: isUp ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', borderRadius: '6px', padding: '2px 8px'}}>{isUp ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />} {tf.changePercent > 0 ? '+' : ''}{tf.changePercent.toFixed(1)}%</span>
+                    <span style={{fontSize: '10px', fontWeight: 700, color: isUp ? '#22c55e' : '#ef4444', background: isUp ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', borderRadius: '6px', padding: '2px 8px'}}>{isUp ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />} {tf.changePercent > 0 ? '+' : ''}{yuzde(tf.changePercent, 1)}</span>
                   </div>
                   <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px'}}>
                     <div><div style={{fontSize: '10px', color: 'var(--text-secondary)'}}>Mevcut</div><div style={{fontWeight: 700, fontSize: '13px'}}>{formatShort(tf.current)}</div></div>
