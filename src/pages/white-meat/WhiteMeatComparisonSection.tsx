@@ -66,10 +66,10 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
           {/* Ticaret KPI Kartları */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
             {[
-              { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '📤', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${yuzde(tradeIntelligence.yoyExport, 1)} YoY` },
-              { label: `İTHALAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ithalat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#ef4444', icon: '📥', sub: 'Yem hammaddesi ağırlıklı' },
-              { label: 'NET TİCARET DENGESİ', value: `$${tradeIntelligence.netBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: tradeIntelligence.netBalance > 0 ? '#10b981' : '#ef4444', icon: '⚖️', sub: tradeIntelligence.netBalance > 0 ? '✅ Net ihracatçı' : '❌ Net ithalatçı' },
-              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${yuzde(tradeIntelligence.exportCAGR, 1)}`, color: '#3b82f6', icon: '📈', sub: `${tradeIntelligence.ilkYil}–${tradeIntelligence.latest.yil} bileşik` },
+              { label: `İHRACAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ihracat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#22c55e', icon: '', sub: `${tradeIntelligence.yoyExport >= 0 ? '+' : ''}${yuzde(tradeIntelligence.yoyExport, 1)} YoY` },
+              { label: `İTHALAT (${tradeIntelligence.latest.yil})`, value: `$${tradeIntelligence.latest.ithalat_musd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: '#ef4444', icon: '', sub: 'Yem hammaddesi ağırlıklı' },
+              { label: 'NET TİCARET DENGESİ', value: `$${tradeIntelligence.netBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} M`, color: tradeIntelligence.netBalance > 0 ? '#10b981' : '#ef4444', icon: '', sub: tradeIntelligence.netBalance > 0 ? 'Net ihracatçı' : 'Net ithalatçı' },
+              { label: 'İHRACAT CAGR', value: `${tradeIntelligence.exportCAGR >= 0 ? '+' : ''}${yuzde(tradeIntelligence.exportCAGR, 1)}`, color: '#3b82f6', icon: '', sub: `${tradeIntelligence.ilkYil}–${tradeIntelligence.latest.yil} bileşik` },
             ].map(kpi => (
               <div key={kpi.label} className="kpi-card" style={{ borderTop: `3px solid ${kpi.color}` }}>
                 <div className="kpi-header"><span className="kpi-title" style={{ fontSize: '0.7rem' }}>{kpi.label}</span><span style={{ fontSize: '1.5rem' }}>{kpi.icon}</span></div>
@@ -91,7 +91,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
             <div className="chart-card" style={{ gridColumn: 'span 2' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <h3 className="chart-title" style={{ marginBottom: 0 }}>İhracat vs İthalat Trendi (M$)</h3>
-                <ChartInsightButton title="📊 Piliç Eti Dış Ticaret Trendi" description="Türkiye piliç eti ihracat ve ithalat gelişimi" data={tradeData} context={{ section: 'Ticaret' }} />
+                <ChartInsightButton title="Piliç Eti Dış Ticaret Trendi" description="Türkiye piliç eti ihracat ve ithalat gelişimi" data={tradeData} context={{ section: 'Ticaret' }} />
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={tradeData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -123,7 +123,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <h3 className="chart-title" style={{ marginBottom: 0 }}>Beyaz Et Türlerinin Yıllık Karşılaştırması (ton)</h3>
-            <ChartInsightButton title="📈 Beyaz Et Türlerinin Yıllık Karşılaştırması" description="Tavuk, hindi ve bıldırcın eti yıllık üretim karşılaştırması" data={tuikData} context={{ section: 'Karşılaştırma' }} />
+            <ChartInsightButton title="Beyaz Et Türlerinin Yıllık Karşılaştırması" description="Tavuk, hindi ve bıldırcın eti yıllık üretim karşılaştırması" data={tuikData} context={{ section: 'Karşılaştırma' }} />
           </div>
           <ResponsiveContainer width="100%" height={420}>
             <ComposedChart data={(() => {
@@ -155,7 +155,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <h3 className="chart-title" style={{ marginBottom: 0 }}>Son Yıl Beyaz Et Bileşimi</h3>
-            <ChartInsightButton title="🥧 Son Yıl Beyaz Et Bileşimi" description="Son yıl beyaz et tür dağılımı" data={tuikData.slice(0,1)} context={{ section: 'Bileşim' }} compact />
+            <ChartInsightButton title="Son Yıl Beyaz Et Bileşimi" description="Son yıl beyaz et tür dağılımı" data={tuikData.slice(0,1)} context={{ section: 'Bileşim' }} compact />
           </div>
           <div style={{ padding: '20px' }}>
             {(() => {
@@ -201,7 +201,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
         <div className="chart-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <h3 className="chart-title" style={{ marginBottom: 0 }}>Toplam Beyaz Et Trendi</h3>
-            <ChartInsightButton title="📈 Toplam Beyaz Et Trendi" description="Tüm beyaz et türlerinin toplam üretim trendi" data={tuikData} context={{ section: 'Toplam Trend' }} compact />
+            <ChartInsightButton title="Toplam Beyaz Et Trendi" description="Tüm beyaz et türlerinin toplam üretim trendi" data={tuikData} context={{ section: 'Toplam Trend' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={(() => {

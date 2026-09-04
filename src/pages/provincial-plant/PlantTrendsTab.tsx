@@ -148,7 +148,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             📈 22 Yıllık Trend (2004-2025)
           </h3>
-          <ChartInsightButton title="📈 22 Yıllık Trend" description="Uzun dönem bitkisel üretim trendi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+          <ChartInsightButton title="22 Yıllık Trend" description="Uzun dönem bitkisel üretim trendi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart
@@ -202,7 +202,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Yıllık Büyüme Oranları
           </h3>
-          <ChartInsightButton title="📊 Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+          <ChartInsightButton title="Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart

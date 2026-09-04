@@ -24,7 +24,7 @@ import {
 } from './redMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
-import { Beef, Calculator, Trophy } from 'lucide-react';
+import { Beef, Calculator, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 type Props = {
   filteredSeries: YearPoint[];
@@ -88,7 +88,7 @@ export default function ProductionOverviewSection({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YILLIK DEĞİŞİM</span>
-            <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? '📈' : '📉'}</div>
+            <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
           </div>
           <div className="kpi-value" style={{ color: yoy >= 0 ? '#22c55e' : '#ef4444' }}>
             {yuzde(yoy, 1)}
@@ -196,7 +196,7 @@ export default function ProductionOverviewSection({
 
       {/* Section 2: Üretim Trendi */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
-        <ChartCard title={<>Kırmızı Et Üretimi Trendi {trendRangeLabel && `(${trendRangeLabel})`}</>} span={2} action={<ChartInsightButton title={`📈 Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />}>
+        <ChartCard title={<>Kırmızı Et Üretimi Trendi {trendRangeLabel && `(${trendRangeLabel})`}</>} span={2} action={<ChartInsightButton title={`Kırmızı Et Üretimi Trendi (${trendRangeLabel})`} description="Türkiye kırmızı et üretimi uzun dönem trendi" data={filteredSeries} context={{ section: 'Üretim Trendi' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={filteredSeries} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -212,7 +212,7 @@ export default function ProductionOverviewSection({
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title={<>Tür Bazında Dağılım ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="🥧 Tür Bazında Dağılım" description="Tür bazında kırmızı et üretim dağılımı" data={breakdown} context={{ year: latest?.year }} compact />}>
+        <ChartCard title={<>Tür Bazında Dağılım ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="Tür Bazında Dağılım" description="Tür bazında kırmızı et üretim dağılımı" data={breakdown} context={{ year: latest?.year }} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie
@@ -235,7 +235,7 @@ export default function ProductionOverviewSection({
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title={<>Büyükbaş vs Küçükbaş ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="📊 Büyükbaş vs Küçükbaş" description="Büyükbaş ve küçükbaş et üretimi karşılaştırması" data={buyukbasKucukbasBreakdown} context={{ year: latest?.year }} compact />}>
+        <ChartCard title={<>Büyükbaş vs Küçükbaş ({latest?.year ?? '-'})</>} action={<ChartInsightButton title="Büyükbaş vs Küçükbaş" description="Büyükbaş ve küçükbaş et üretimi karşılaştırması" data={buyukbasKucukbasBreakdown} context={{ year: latest?.year }} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie

@@ -75,12 +75,12 @@ export default function LivestockStocksPage() {
         borderRadius: '12px',
         border: '1px solid var(--border)'
       }}>
-        {renderTabButton('overview', '📊', 'Genel Bakış')}
-        {renderTabButton('predictions', '🔮', 'Tahminler & Trendler')}
-        {renderTabButton('efficiency', '⚡', 'Verimlilik Analizi')}
-        {renderTabButton('stocks', '🐄', 'Canlı Hayvan Stokları')}
-        {renderTabButton('primary', '🥩', 'Birincil Ürünler')}
-        {renderTabButton('processed', '🏭', 'İşlenmiş Ürünler')}
+        {renderTabButton('overview', '', 'Genel Bakış')}
+        {renderTabButton('predictions', '', 'Tahminler & Trendler')}
+        {renderTabButton('efficiency', '', 'Verimlilik Analizi')}
+        {renderTabButton('stocks', '', 'Canlı Hayvan Stokları')}
+        {renderTabButton('primary', '', 'Birincil Ürünler')}
+        {renderTabButton('processed', '', 'İşlenmiş Ürünler')}
       </div>
 
       {/* Year Filter */}

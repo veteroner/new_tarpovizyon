@@ -41,10 +41,10 @@ export function OverviewTab({
         <KPICard title="İşlenmiş Üretim" value={formatValue(overviewKPIs.processedTotal)} subtitle={`İşleme oranı: %${overviewKPIs.processingRatio.toFixed(1)}`} icon={Factory} color="purple" />
       </div>
       <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <KPICard title="🇹🇷 Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.turkeyYoY, 1)}`} icon={Leaf} color="green" large />
-        <KPICard title="🇹🇷 Ekim Alanı" value={formatHa(overviewKPIs.turkeyArea)} subtitle={`${overviewKPIs.turkeyProductCount} ürün`} icon={MapPin} color="teal" />
-        <KPICard title="🇹🇷 Ort. Verim" value={formatYield(overviewKPIs.turkeyYield)} subtitle={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? '✅ Dünya üstü' : '⚠️ Dünya altı'} icon={TrendingUp} color={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'green' : 'red'} />
-        <KPICard title="🇹🇷 İşlenmiş" value={formatValue(overviewKPIs.turkeyProcessedTotal)} subtitle={`İşleme: %${overviewSupplyChain?.turkeyProcessingRatio?.toFixed(1) || '?'}`} icon={Factory} color="orange" />
+        <KPICard title="Türkiye Üretim" value={formatValue(overviewKPIs.turkeyTotal)} subtitle={`Dünya ${overviewKPIs.turkeyRank}. | Pay: %${overviewKPIs.turkeyShare.toFixed(1)} | Yıllık: ${overviewKPIs.turkeyYoY >= 0 ? '+' : ''}${yuzde(overviewKPIs.turkeyYoY, 1)}`} icon={Leaf} color="green" large />
+        <KPICard title="Ekim Alanı" value={formatHa(overviewKPIs.turkeyArea)} subtitle={`${overviewKPIs.turkeyProductCount} ürün`} icon={MapPin} color="teal" />
+        <KPICard title="Ort. Verim" value={formatYield(overviewKPIs.turkeyYield)} subtitle={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'Dünya üstü' : 'Dünya altı'} icon={TrendingUp} color={overviewKPIs.turkeyYield > overviewKPIs.worldYield ? 'green' : 'red'} />
+        <KPICard title="İşlenmiş" value={formatValue(overviewKPIs.turkeyProcessedTotal)} subtitle={`İşleme: %${overviewSupplyChain?.turkeyProcessingRatio?.toFixed(1) || '?'}`} icon={Factory} color="orange" />
       </div>
 
       <div style={{ marginBottom: '24px' }}><InsightCard insights={overviewInsights} maxDisplay={10} /></div>
@@ -75,7 +75,7 @@ export function OverviewTab({
       )}
 
       <div className="chart-grid" style={{ marginBottom: '24px' }}>
-        <ChartCard title="🇹🇷 Türkiye Ürün Kategorileri (2023)" action={<ChartInsightButton title="Türkiye Ürün Kategorileri (2023)" description="Türkiye bitkisel üretim kategori dağılımı" data={overviewCategoryData} context={{ dünyaToplamUretim: overviewKPIs.worldTotal, türkiyeToplamUretim: overviewKPIs.turkeyTotal }} />}>
+        <ChartCard title="Türkiye Ürün Kategorileri (2023)" action={<ChartInsightButton title="Türkiye Ürün Kategorileri (2023)" description="Türkiye bitkisel üretim kategori dağılımı" data={overviewCategoryData} context={{ dünyaToplamUretim: overviewKPIs.worldTotal, türkiyeToplamUretim: overviewKPIs.turkeyTotal }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie data={overviewCategoryData} cx="50%" cy="50%" innerRadius={70} outerRadius={120} paddingAngle={2} dataKey="value"
@@ -86,7 +86,7 @@ export function OverviewTab({
             </PieChart>
           </ResponsiveContainer>
         </ChartCard>
-        <ChartCard title="🌍 Top 15 Üretici Ülke (2023)" action={<ChartInsightButton title="Top 15 Üretici Ülke (2023)" description="Dünya bitkisel üretiminde lider ülkeler" data={overviewTopCountries} context={{ türkiyeSira: overviewKPIs.turkeyRank, türkiyePayi: overviewKPIs.turkeyShare }} />}>
+        <ChartCard title="Top 15 Üretici Ülke (2023)" action={<ChartInsightButton title="Top 15 Üretici Ülke (2023)" description="Dünya bitkisel üretiminde lider ülkeler" data={overviewTopCountries} context={{ türkiyeSira: overviewKPIs.turkeyRank, türkiyePayi: overviewKPIs.turkeyShare }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={overviewTopCountries} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -104,7 +104,7 @@ export function OverviewTab({
       </div>
 
       <div className="chart-grid" style={{ marginBottom: '24px' }}>
-        <ChartCard title="📈 Dünya Üretim Trendi" action={<ChartInsightButton title="Dünya Üretim Trendi" description="Yıllık dünya bitkisel üretim değişimi" data={overviewTrends} context={{ yillikDegisim: overviewKPIs.worldYoY }} />}>
+        <ChartCard title="Dünya Üretim Trendi" action={<ChartInsightButton title="Dünya Üretim Trendi" description="Yıllık dünya bitkisel üretim değişimi" data={overviewTrends} context={{ yillikDegisim: overviewKPIs.worldYoY }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={overviewTrends}>
               <defs><linearGradient id="ovPG" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.8} /><stop offset="95%" stopColor="#10b981" stopOpacity={0.1} /></linearGradient></defs>
@@ -116,7 +116,7 @@ export function OverviewTab({
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
-        <ChartCard title="📊 Verim Trendi (kg/ha)" action={<ChartInsightButton title="Verim Trendi (kg/ha)" description="Dünya ortalama verim trendi" data={overviewTrends} context={{ dünyaOrtVerim: overviewKPIs.worldYield, türkiyeVerim: overviewKPIs.turkeyYield }} />}>
+        <ChartCard title="Verim Trendi (kg/ha)" action={<ChartInsightButton title="Verim Trendi (kg/ha)" description="Dünya ortalama verim trendi" data={overviewTrends} context={{ dünyaOrtVerim: overviewKPIs.worldYield, türkiyeVerim: overviewKPIs.turkeyYield }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={overviewTrends}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

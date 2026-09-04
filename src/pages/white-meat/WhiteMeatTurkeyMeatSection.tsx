@@ -94,7 +94,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
 
       {/* Hindi Eti Yıllık Trend */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
-        <ChartCard title="📈 Hindi Eti Yıllık Üretim Trendi" span={2} action={<ChartInsightButton title="📈 Hindi Eti Yıllık Üretim Trendi" description="Yıllık hindi eti üretim verisi" data={turkeyMeatData} context={{ section: 'Trend' }} />}>
+        <ChartCard title="Hindi Eti Yıllık Üretim Trendi" span={2} action={<ChartInsightButton title="Hindi Eti Yıllık Üretim Trendi" description="Yıllık hindi eti üretim verisi" data={turkeyMeatData} context={{ section: 'Trend' }} />}>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={turkeyMeatData.slice().reverse()}>
               <defs>
@@ -138,7 +138,7 @@ export default function WhiteMeatTurkeyMeatSection({ turkeyMeatData, monthlyTurk
           </div>
 
           <div className="chart-grid">
-            <ChartCard title="📊 Aylık Üretim Dağılımı" span={2} action={<ChartInsightButton title="📊 Aylık Üretim Dağılımı" description="Aylık hindi eti üretim dağılımı" data={turkeyMeatData} context={{ section: 'Aylık' }} compact />}>
+            <ChartCard title="Aylık Üretim Dağılımı" span={2} action={<ChartInsightButton title="Aylık Üretim Dağılımı" description="Aylık hindi eti üretim dağılımı" data={turkeyMeatData} context={{ section: 'Aylık' }} compact />}>
               <ResponsiveContainer width="100%" height={380}>
                 <BarChart data={monthlyTurkeyMeat}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

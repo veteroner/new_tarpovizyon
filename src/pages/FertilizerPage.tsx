@@ -18,12 +18,12 @@ import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
-  { id: 'trade', label: 'Ticaret Dengesi', icon: '⚖️' },
-  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '🏆' },
-  { id: 'turkey', label: 'Türkiye Profili', icon: '🇹🇷' },
-  { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'Akıllı Analiz', icon: '🧠' },
+  { id: 'overview', label: 'Genel Bakış', icon: '' },
+  { id: 'trade', label: 'Ticaret Dengesi', icon: '' },
+  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '' },
+  { id: 'turkey', label: 'Türkiye Profili', icon: 'TR' },
+  { id: 'forecast', label: 'Trend & Tahmin', icon: '' },
+  { id: 'alerts', label: 'Akıllı Analiz', icon: '' },
 ];
 
 export default function FertilizerPage() {
@@ -281,10 +281,10 @@ export default function FertilizerPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                 {intelligenceAlerts.map((alert: IntelligenceAlert) => {
                   const severityColors: Record<string, { bg: string; border: string; icon: string }> = {
-                    critical: { bg: 'rgba(239, 68, 68, 0.1)', border: '#ef4444', icon: '🔴' },
-                    warning: { bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b', icon: '⚠️' },
-                    positive: { bg: 'rgba(34, 197, 94, 0.1)', border: '#22c55e', icon: '🟢' },
-                    info: { bg: 'rgba(59, 130, 246, 0.1)', border: '#3b82f6', icon: '💡' },
+                    critical: { bg: 'rgba(239, 68, 68, 0.1)', border: '#ef4444', icon: '' },
+                    warning: { bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b', icon: '' },
+                    positive: { bg: 'rgba(34, 197, 94, 0.1)', border: '#22c55e', icon: '' },
+                    info: { bg: 'rgba(59, 130, 246, 0.1)', border: '#3b82f6', icon: '' },
                   };
                   const colors = severityColors[alert.severity] || severityColors.info;
                   return (

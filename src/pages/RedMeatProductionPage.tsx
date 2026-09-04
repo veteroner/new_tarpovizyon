@@ -18,14 +18,14 @@ const config: FaoPageConfig = {
     'Meat of pig with the bone, fresh or chilled',
     'Meat of sheep, fresh or chilled',
   ],
-  pageTitle: '🥩 Kırmızı Et Üretimi',
+  pageTitle: 'Kırmızı Et Üretimi',
   pageSubtitle: 'Dünya kırmızı et üretimi verileri - Ton bazında ({year})',
   comparisonTitle: 'Et Türü Karşılaştırması',
   distributionTitle: 'Et Türü Dağılımı',
   primaryColor: '#ef4444',
   unit: 'ton',
   productPlaceholder: 'Kırmızı et türü seçin...',
-  kpiIcon: '🥩',
+  kpiIcon: '',
 };
 
 export default function RedMeatProductionPage() {

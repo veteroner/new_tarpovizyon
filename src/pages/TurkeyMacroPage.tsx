@@ -513,7 +513,7 @@ export default function TurkeyMacroPage() {
           <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
             <p className="text-purple-300 font-bold mb-1">Bölgesel Eşitsizlik</p>
             <p>En zengin il ({incomeTop[0]?.yer}) ile en yoksul il ({incomeBottom[0]?.yer}) arasında {gapRatio.toFixed(1)}x gelir farkı.
-            {gapRatio > 4 ? ' 🔴 Kritik eşitsizlik seviyesi.' : gapRatio > 3 ? ' 🟠 Yüksek eşitsizlik.' : ' 🟡 Orta seviye.'}</p>
+            {gapRatio > 4 ? ' Kritik eşitsizlik seviyesi.' : gapRatio > 3 ? ' 🟠 Yüksek eşitsizlik.' : ' Orta seviye.'}</p>
           </div>
         </div>
       </div>

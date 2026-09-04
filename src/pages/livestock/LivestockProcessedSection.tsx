@@ -176,7 +176,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       const growths = products.map(p => {
         const past = pastMap[p.product] || 0;
         const cagr = past > 0 ? (Math.pow(p.total / past, 1 / 5) - 1) * 100 : 0;
-        const lifecycle = cagr > 5 ? '🌱 Emerging' : cagr > 3 ? '🚀 Growth' : cagr > 0 ? '💎 Mature' : '📉 Declining';
+        const lifecycle = cagr > 5 ? 'Emerging' : cagr > 3 ? 'Growth' : cagr > 0 ? 'Mature' : 'Declining';
         return { product: p.product, cagr, current: p.total, lifecycle };
       }).sort((a, b) => b.cagr - a.cagr);
       setProcessedGrowthData(growths);
@@ -237,7 +237,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           </div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE SIRASI</span>
+          <div className="kpi-header"><span className="kpi-title">TÜRKİYE SIRASI</span>
             <div className="kpi-icon red">#{processedKPIs.turkeyRank}</div>
           </div>
           <div className="kpi-value">{formatShort(processedKPIs.turkeyTotal)}</div>
@@ -270,7 +270,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
 
       {/* Turkey Best Products */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">🇹🇷 Türkiye'nin Güçlü Olduğu İşlenmiş Ürünler</h3>
+        <h3 className="chart-title">Türkiye'nin Güçlü Olduğu İşlenmiş Ürünler</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 15, padding: 15 }}>
           {processedProductData.filter(p => p.turkeyRank > 0 && p.turkeyRank <= 20).sort((a, b) => a.turkeyRank - b.turkeyRank).slice(0, 8).map((p, i) => (
             <div key={i} style={{
@@ -326,8 +326,8 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
               <XAxis type="number" stroke="var(--text-secondary)" tickFormatter={v => `${Number(v).toFixed(0)}M`} />
               <YAxis type="category" dataKey="name" stroke="var(--text-secondary)" width={95} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-                formatter={(v: number, n: string) => [`${(v as number).toFixed(2)}M ton`, n === 'dairy' ? '🧀 Süt Ürünleri' : n === 'fats' ? '🫒 Yağlar' : '📦 Diğer']} />
-              <Legend formatter={(v: string) => v === 'dairy' ? '🧀 Süt Ürünleri' : v === 'fats' ? '🫒 Yağlar' : '📦 Diğer'} />
+                formatter={(v: number, n: string) => [`${(v as number).toFixed(2)}M ton`, n === 'dairy' ? 'Süt Ürünleri' : n === 'fats' ? 'Yağlar' : 'Diğer']} />
+              <Legend formatter={(v: string) => v === 'dairy' ? 'Süt Ürünleri' : v === 'fats' ? 'Yağlar' : 'Diğer'} />
               <Bar dataKey="dairy" stackId="a" fill="#8b5cf6" />
               <Bar dataKey="fats" stackId="a" fill="#f59e0b" />
               <Bar dataKey="other" stackId="a" fill="#06b6d4" radius={[0, 4, 4, 0]} />
@@ -335,7 +335,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📊 Ürnün CAGR & Yaşam Döngüsü (5 Yıllık)" action={<ChartInsightButton title="İşlenmiş Ürnün CAGR & Yaşam Döngüsü" description="5 yıllık işlenmiş hayvansal ürünlerin büyüme ve yaşam döngüsü analizi" data={processedGrowthData.slice(0, 15)} context={{}} compact />}>
+        <ChartCard title="Ürnün CAGR & Yaşam Döngüsü (5 Yıllık)" action={<ChartInsightButton title="İşlenmiş Ürnün CAGR & Yaşam Döngüsü" description="5 yıllık işlenmiş hayvansal ürünlerin büyüme ve yaşam döngüsü analizi" data={processedGrowthData.slice(0, 15)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={processedGrowthData.slice(0, 15).map(g => ({
@@ -361,15 +361,15 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
       </div>
 
       {/* Turkey Trend */}
-      <ChartCard title="📈 Türkiye İşlenmiş Ürnün Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />}>
+      <ChartCard title="Türkiye İşlenmiş Ürnün Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye İşlenmiş Ürnün Trendi" description="Türkiye'nin tüm yıllar işlenmiş hayvansal üretim trendi" data={processedTurkeyTrend} context={{}} />}>
         <ResponsiveContainer width="100%" height={350}>
           <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" stroke="var(--text-secondary)" />
             <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(Number(v) / 1e6).toFixed(1)}M`} width={46} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-              formatter={(v: number, n: string) => [formatNumber(v) + ' ton', n === 'dairy' ? '🧀 Süt Ürünleri' : n === 'fats' ? '🫒 Yağlar' : '📦 Diğer']} />
-            <Legend formatter={(v: string) => v === 'dairy' ? '🧀 Süt Ürünleri' : v === 'fats' ? '🫒 Yağlar' : '📦 Diğer'} />
+              formatter={(v: number, n: string) => [formatNumber(v) + ' ton', n === 'dairy' ? 'Süt Ürünleri' : n === 'fats' ? 'Yağlar' : 'Diğer']} />
+            <Legend formatter={(v: string) => v === 'dairy' ? 'Süt Ürünleri' : v === 'fats' ? 'Yağlar' : 'Diğer'} />
             <Area type="monotone" dataKey="dairy" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.5} />
             <Area type="monotone" dataKey="fats" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.4} />
             <Area type="monotone" dataKey="other" stackId="1" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />

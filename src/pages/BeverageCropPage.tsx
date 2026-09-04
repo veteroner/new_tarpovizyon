@@ -1,3 +1,4 @@
+import { CupSoda } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -31,7 +32,7 @@ const CAY_HASAT = [
 ];
 
 const bevExtra = (
-  <ChartCard title="🍵 Rize Çayı Hasat Sezonu Takvimi" action={<ChartInsightButton title="🍵 Rize Çayı Hasat" description="Rize çayı hasat sezonu takvimi" data={CAY_HASAT} context={{ section: 'Mevsimsellik' }} compact />}>
+  <ChartCard title="Rize Çayı Hasat Sezonu Takvimi" action={<ChartInsightButton title="Rize Çayı Hasat" description="Rize çayı hasat sezonu takvimi" data={CAY_HASAT} context={{ section: 'Mevsimsellik' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Yılda 3 füliz dönemi: Mayıs (1. füliz), Temmuz (2. füliz), Eylül (3. füliz) · En kaliteli çay 1. fülizden elde edilir.
     </p>
@@ -63,7 +64,7 @@ export default function BeverageCropPage() {
     <TuikPlantCategoryPage
       title="İçecek & Baharat Bitkileri"
       subtitle={`Türkiye il/ilçe/bölge bazlı içecek ve baharat bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🍵"
+      icon={<CupSoda size={30} aria-hidden="true" />}
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={ICECEK_URUNLER}
       defaultProducts={['Çay Yaprakları']}

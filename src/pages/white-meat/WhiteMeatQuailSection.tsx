@@ -101,7 +101,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
 
       {/* Bıldırcın Eti Yıllık Trend */}
       <div className="chart-grid" style={{ marginTop: '30px' }}>
-        <ChartCard title="📈 Bıldırcın Eti Yıllık Üretim Trendi" span={2} action={<ChartInsightButton title="📈 Bıldırcın Eti Yıllık Üretim Trendi" description="Yıllık bıldırcın eti üretim verisi" data={quailMeatData} context={{ section: 'Trend' }} />}>
+        <ChartCard title="Bıldırcın Eti Yıllık Üretim Trendi" span={2} action={<ChartInsightButton title="Bıldırcın Eti Yıllık Üretim Trendi" description="Yıllık bıldırcın eti üretim verisi" data={quailMeatData} context={{ section: 'Trend' }} />}>
           <ResponsiveContainer width="100%" height={380}>
             <ComposedChart data={quailMeatData.slice().reverse()}>
               <defs>
@@ -122,7 +122,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
 
         {/* Kesilen Bıldırcın vs Et */}
         {quailSlaughterData.length > 0 && (
-          <ChartCard title="🔄 Kesilen Bıldırcın vs Et Üretimi" span={2} action={<ChartInsightButton title="🔄 Kesilen Bıldırcın vs Et Üretimi" description="Kesilen bıldırcın sayısı ile et üretim karşılaştırması" data={quailMeatData} context={{ section: 'Kesim vs Et' }} compact />}>
+          <ChartCard title="Kesilen Bıldırcın vs Et Üretimi" span={2} action={<ChartInsightButton title="Kesilen Bıldırcın vs Et Üretimi" description="Kesilen bıldırcın sayısı ile et üretim karşılaştırması" data={quailMeatData} context={{ section: 'Kesim vs Et' }} compact />}>
             <ResponsiveContainer width="100%" height={380}>
               <ComposedChart data={(() => {
                 const merged = quailMeatData.slice().reverse().map(d => {
@@ -148,7 +148,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
       {/* Bıldırcın Aylık Dağılım */}
       {monthlyQuailMeat.some(m => m.value > 0) && (
         <div className="chart-grid" style={{ marginTop: '20px' }}>
-          <ChartCard title={<>Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</>} span={2} action={<ChartInsightButton title="📅 Aylık Bıldırcın Eti Üretimi" description="En son yıl aylık bıldırcın eti üretimi" data={quailMeatData} context={{ year: quailMeatData[0]?.year }} compact />}>
+          <ChartCard title={<>Aylık Bıldırcın Eti Üretimi ({quailMeatData[0]?.year})</>} span={2} action={<ChartInsightButton title="Aylık Bıldırcın Eti Üretimi" description="En son yıl aylık bıldırcın eti üretimi" data={quailMeatData} context={{ year: quailMeatData[0]?.year }} compact />}>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={monthlyQuailMeat}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

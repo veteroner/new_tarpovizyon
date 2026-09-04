@@ -145,7 +145,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Kovan Sayısı Gelişimi (Eski Tip + Yeni Tip)
             </h3>
-            <ChartInsightButton title="🪔 Kovan Sayısı Gelişimi" description="Eski ve yeni tip kovan sayısı yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
+            <ChartInsightButton title="Kovan Sayısı Gelişimi" description="Eski ve yeni tip kovan sayısı yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={tuikKovanYear} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -231,7 +231,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Balmumu Üretimi Trendi (Ton)
             </h3>
-            <ChartInsightButton title="🕯️ Balmumu Üretimi Trendi" description="Balmumu üretimi yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Balmumu' }} compact />
+            <ChartInsightButton title="Balmumu Üretimi Trendi" description="Balmumu üretimi yıllık trend" data={tuikKovanYear} context={{ section: 'TÜİK Balmumu' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={tuikKovanYear} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -297,7 +297,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Kovan Başına Balmumu Verimi (kg/kovan)
             </h3>
-            <ChartInsightButton title="📊 Kovan Başına Balmumu Verimi" description="kg/kovan verimlilik trendi" data={tuikKovanYear} context={{ section: 'TÜİK Verim' }} compact />
+            <ChartInsightButton title="Kovan Başına Balmumu Verimi" description="kg/kovan verimlilik trendi" data={tuikKovanYear} context={{ section: 'TÜİK Verim' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart 
@@ -339,7 +339,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Yeni Tip Kovan Oranı Gelişimi (%)
             </h3>
-            <ChartInsightButton title="🔄 Yeni Tip Kovan Oranı Gelişimi" description="Yeni/eski tip kovan oranı trendi" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
+            <ChartInsightButton title="Yeni Tip Kovan Oranı Gelişimi" description="Yeni/eski tip kovan oranı trendi" data={tuikKovanYear} context={{ section: 'TÜİK Kovan' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart 
@@ -390,7 +390,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                 En Fazla Kovan Olan İller (2024 - TÜİK)
               </h3>
-              <ChartInsightButton title="🪔 En Fazla Kovan Olan İller" description="İl bazında kovan sıralaması" data={tuikTopKovan} context={{ section: 'İl Kovan' }} compact />
+              <ChartInsightButton title="En Fazla Kovan Olan İller" description="İl bazında kovan sıralaması" data={tuikTopKovan} context={{ section: 'İl Kovan' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopKovan} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
@@ -422,7 +422,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                 En Fazla Balmumu Üreten İller (2024 - TÜİK)
               </h3>
-              <ChartInsightButton title="🕯️ En Fazla Balmumu Üreten İller" description="İl bazında balmumu sıralaması" data={tuikTopBalmumu} context={{ section: 'İl Balmumu' }} compact />
+              <ChartInsightButton title="En Fazla Balmumu Üreten İller" description="İl bazında balmumu sıralaması" data={tuikTopBalmumu} context={{ section: 'İl Balmumu' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>

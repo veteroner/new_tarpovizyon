@@ -1,3 +1,4 @@
+import { Shirt } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -24,7 +25,7 @@ const PAMUK_KALITE = [
 ];
 
 const fiberExtra = (
-  <ChartCard title="🧵 Pamuk Lif Kalite Göstergeleri — Türkiye vs Dünya Referansı" action={<ChartInsightButton title="🧵 Pamuk Lif Kalitesi" description="Pamuk lif kalite göstergeleri" data={PAMUK_KALITE} context={{ section: 'Lif Ürünler' }} compact />}>
+  <ChartCard title="Pamuk Lif Kalite Göstergeleri — Türkiye vs Dünya Referansı" action={<ChartInsightButton title="Pamuk Lif Kalitesi" description="Pamuk lif kalite göstergeleri" data={PAMUK_KALITE} context={{ section: 'Lif Ürünler' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       ICAC (Uluslararası Pamuk Danışma Komitesi) kriterlerine göre kalite endeksleri (0–100). Türkiye pamuğu lif uzunluğu ve uniformitede referansın üzerindedir.
     </p>
@@ -49,7 +50,7 @@ export default function FiberCropPage() {
     <TuikPlantCategoryPage
       title="Lif Bitkileri Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı lif bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🧵"
+      icon={<Shirt size={30} aria-hidden="true" />}
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={LIF_URUNLER}
       defaultProducts={['Pamuk, Çırçırlanmamış (Kütlü)', 'Tütün, İşlenmemiş']}

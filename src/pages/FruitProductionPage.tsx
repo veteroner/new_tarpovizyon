@@ -1,3 +1,4 @@
+import { Apple } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -33,7 +34,7 @@ const TR_MEYVE_PAYLARI = [
 const MEYVE_RENKLER = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#6366f1'];
 
 const fruitExtra = (
-  <ChartCard title="🏆 Türkiye'nin Dünya Meyve Üretimindeki Payı (%)" action={<ChartInsightButton title="🏆 Meyve Üretimi Dünya Payı" description="Türkiye dünya meyve üretimindeki payı" data={TR_MEYVE_PAYLARI} context={{ section: 'Meyve Üretimi' }} compact />}>
+  <ChartCard title="Türkiye'nin Dünya Meyve Üretimindeki Payı (%)" action={<ChartInsightButton title="Meyve Üretimi Dünya Payı" description="Türkiye dünya meyve üretimindeki payı" data={TR_MEYVE_PAYLARI} context={{ section: 'Meyve Üretimi' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Türkiye; kiraz, kayısı, vişne ve kızılcık üretiminde dünya birincisidir · Kaynak: FAO 2022
     </p>
@@ -62,7 +63,7 @@ export default function FruitProductionPage() {
     <TuikPlantCategoryPage
       title="Meyve Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı meyve üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🍎"
+      icon={<Apple size={30} aria-hidden="true" />}
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={MEYVE_URUNLER}
       defaultProducts={['Elma (Golden)', 'Kayısı', 'Kiraz']}

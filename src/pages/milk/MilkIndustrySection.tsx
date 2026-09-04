@@ -45,7 +45,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Ürün Dağılım Haritası
             </h3>
-            <ChartInsightButton title="🎯 Ürün Dağılım Haritası" description="Süt sanayii ürün dağılım radar grafik" data={industrySutData} context={{ section: 'Süt Sanayii' }} compact />
+            <ChartInsightButton title="Ürün Dağılım Haritası" description="Süt sanayii ürün dağılım radar grafik" data={industrySutData} context={{ section: 'Süt Sanayii' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <RadarChart data={[
@@ -77,7 +77,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Yoğurt Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🥣 Yoğurt Üretimi (Aylık)" description="Aylık yoğurt üretim miktarı" data={industrySutData} context={{ urun: 'yogurt' }} compact />
+            <ChartInsightButton title="Yoğurt Üretimi (Aylık)" description="Aylık yoğurt üretim miktarı" data={industrySutData} context={{ urun: 'yogurt' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -103,7 +103,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Peynir Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🧀 Peynir Üretimi (Aylık)" description="Aylık peynir üretim miktarı" data={industrySutData} context={{ urun: 'peynir' }} compact />
+            <ChartInsightButton title="Peynir Üretimi (Aylık)" description="Aylık peynir üretim miktarı" data={industrySutData} context={{ urun: 'peynir' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -129,7 +129,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Ayran Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🥤 Ayran Üretimi (Aylık)" description="Aylık ayran üretim miktarı" data={industrySutData} context={{ urun: 'ayran' }} compact />
+            <ChartInsightButton title="Ayran Üretimi (Aylık)" description="Aylık ayran üretim miktarı" data={industrySutData} context={{ urun: 'ayran' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -155,7 +155,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               İçme Sütü Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🥛 İçme Sütü Üretimi (Aylık)" description="Aylık içme sütü üretim miktarı" data={industrySutData} context={{ urun: 'icme_sutu' }} compact />
+            <ChartInsightButton title="İçme Sütü Üretimi (Aylık)" description="Aylık içme sütü üretim miktarı" data={industrySutData} context={{ urun: 'icme_sutu' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -181,7 +181,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Tereyağı Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🧈 Tereyağı Üretimi (Aylık)" description="Aylık tereyağı üretim miktarı" data={industrySutData} context={{ urun: 'tereyagi' }} compact />
+            <ChartInsightButton title="Tereyağı Üretimi (Aylık)" description="Aylık tereyağı üretim miktarı" data={industrySutData} context={{ urun: 'tereyagi' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -207,7 +207,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Süt Tozu Üretimi (Aylık)
             </h3>
-            <ChartInsightButton title="🥛 Süt Tozu Üretimi (Aylık)" description="Aylık süt tozu üretim miktarı" data={industrySutData} context={{ urun: 'sut_tozu' }} compact />
+            <ChartInsightButton title="Süt Tozu Üretimi (Aylık)" description="Aylık süt tozu üretim miktarı" data={industrySutData} context={{ urun: 'sut_tozu' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <LineChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -233,7 +233,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Sanayiye Giden Ham İnek Sütü (Aylık Trend)
             </h3>
-            <ChartInsightButton title="📈 Sanayiye Giden Ham İnek Sütü (Aylık Trend)" description="Sanayiye giden ham inek sütü aylık trend" data={industrySutData} context={{ urun: 'ham_inek_sutu' }} />
+            <ChartInsightButton title="Sanayiye Giden Ham İnek Sütü (Aylık Trend)" description="Sanayiye giden ham inek sütü aylık trend" data={industrySutData} context={{ urun: 'ham_inek_sutu' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>

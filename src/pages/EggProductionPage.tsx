@@ -11,14 +11,14 @@ const config: FaoPageConfig = {
     'Hen eggs in shell, fresh',
     'Eggs from other birds in shell, fresh, n.e.c.',
   ],
-  pageTitle: '🥚 Yumurta Üretimi',
+  pageTitle: 'Yumurta Üretimi',
   pageSubtitle: 'Dünya yumurta üretimi verileri - Adet bazlı ({year})',
   comparisonTitle: 'Yumurta Türü Karşılaştırması',
   distributionTitle: 'Yumurta Türü Dağılımı',
   primaryColor: '#f59e0b',
   unit: 'adet',
   productPlaceholder: 'Yumurta türü seçin...',
-  kpiIcon: '🥚',
+  kpiIcon: '',
 };
 
 export default function EggProductionPage() {

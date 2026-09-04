@@ -1,3 +1,4 @@
+import { Nut } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -19,7 +20,7 @@ const FINDIK_DUNYA = [
 ].sort((a, b) => b.ton - a.ton);
 
 const nutExtra = (
-  <ChartCard title="🌰 Dünya Fındık Üretiminde Türkiye (2022, bin ton)" action={<ChartInsightButton title="🌰 Fındık Üretimi" description="Dünya fındık üretiminde Türkiye" data={FINDIK_DUNYA} context={{ section: 'Sert Kabuklu' }} compact />}>
+  <ChartCard title="Dünya Fındık Üretiminde Türkiye (2022, bin ton)" action={<ChartInsightButton title="Fındık Üretimi" description="Dünya fındık üretiminde Türkiye" data={FINDIK_DUNYA} context={{ section: 'Sert Kabuklu' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Türkiye, dünya fındık üretiminin yaklaşık <strong>%70'ini</strong> tek başına karşılıyor.
       Kaynak: FAO 2022 · Kırmızı çubuk = Türkiye
@@ -49,7 +50,7 @@ export default function NutProductionPage() {
     <TuikPlantCategoryPage
       title="Sert Kabuklu Meyve Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı sert kabuklu meyve üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🥜"
+      icon={<Nut size={30} aria-hidden="true" />}
       urunGrup="Meyveler Içecek Ve Baharat Bitkileri"
       urunFilter={SERT_KABUKLU_URUNLER}
       defaultProducts={['Fındık', 'Ceviz', 'Şam Fıstığı (Antep Fıstığı)']}

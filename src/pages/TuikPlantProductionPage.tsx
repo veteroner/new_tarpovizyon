@@ -15,7 +15,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
-import { BarChart3, Trophy } from 'lucide-react';
+import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
@@ -233,7 +233,7 @@ export default function TuikPlantProductionPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">🇹🇷 TÜİK Bitkisel Üretim</h1>
+        <h1 className="page-title">TÜİK Bitkisel Üretim</h1>
         <p className="page-subtitle">Türkiye İl Bazında Bitkisel Üretim Verileri - {yearLabel}</p>
       </div>
 
@@ -276,7 +276,7 @@ export default function TuikPlantProductionPage() {
               <div className="kpi-subtitle">{unit} ({yearLabel})</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? '📈' : '📉'}</div></div>
+              <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div></div>
               <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearChange, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
@@ -311,7 +311,7 @@ export default function TuikPlantProductionPage() {
           )}
 
           <div className="chart-grid">
-            <ChartCard title={`📅 Yıllık Üretim Trendi (${ILK_YIL}-${SON_YIL})`} span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description={`Yıllık üretim trendi (${ILK_YIL}-${SON_YIL})`} data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
+            <ChartCard title={`Yıllık Üretim Trendi (${ILK_YIL}-${SON_YIL})`} span={2} action={<ChartInsightButton title="Yıllık Üretim Trendi" description={`Yıllık üretim trendi (${ILK_YIL}-${SON_YIL})`} data={yearlyData} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -344,7 +344,7 @@ export default function TuikPlantProductionPage() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="🥧 İl Payları Dağılımı" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />}>
+            <ChartCard title="İl Payları Dağılımı" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı" data={cityData.slice(0,10)} context={{ section: 'Bitkisel Üretim' }} compact />}>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie 

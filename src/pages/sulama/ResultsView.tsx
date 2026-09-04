@@ -244,7 +244,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <h3 style={{ marginBottom: 0 }}>Aylık Su Dengesi — {state.il}</h3>
-          <ChartInsightButton title="📊 Aylık Su Dengesi" description="Aylık su dengesi analizi" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+          <ChartInsightButton title="Aylık Su Dengesi" description="Aylık su dengesi analizi" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
           {bolgeMeta && <span style={{ marginRight: 8 }}>{bolgeMeta.ad}</span>}
@@ -281,7 +281,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             <h3>Su Karşılama Oranı Göstergesi</h3>
             <p className="sp-chart-desc">
               Sezonluk efektif sulama ve yağışın bitki ETc talebini karşılama yüzdesi.
-              {karsilama > 75 ? ' ✅ İyi düzey' : karsilama > 50 ? ' ⚠️ Orta düzey' : ' 🚨 Düşük düzey'}
+              {karsilama > 75 ? ' ✅ İyi düzey' : karsilama > 50 ? ' Orta düzey' : ' 🚨 Düşük düzey'}
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '32px', flexWrap: 'wrap', padding: '8px 0' }}>
               <div style={{ position: 'relative', width: 220, height: 140 }}>
@@ -321,7 +321,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <h3 style={{ marginBottom: 0 }}>Aylık Yağış &amp; ETo — Alan Grafiği</h3>
-          <ChartInsightButton title="🌧️ Yağış &amp; ETo" description="Aylık yağış ve ETo alan grafiği" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+          <ChartInsightButton title="Yağış &amp; ETo" description="Aylık yağış ve ETo alan grafiği" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
           Toplam yağış (mavi) ve bitkiye faydalı yağış kısmı (açık mavi) ile referans buharlaşma-terleme (ETo) trendleri.
@@ -359,7 +359,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
       <div className="sp-chart-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <h3 style={{ marginBottom: 0 }}>Bitki Su İhtiyacı (ETc) vs Sulama — Bileşik Grafik</h3>
-          <ChartInsightButton title="🌿 ETc vs Sulama" description="Bitki su ihtiyacı ve sulama karşılaşması" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
+          <ChartInsightButton title="ETc vs Sulama" description="Bitki su ihtiyacı ve sulama karşılaşması" data={calc.aylikDenge} context={{ section: 'Sulama Hesap' }} compact />
         </div>
         <p className="sp-chart-desc">
           Aylık ETc (bar) ile brüt sulama miktarı (bar) ve ETo trendi (çizgi) karşılaştırması.
@@ -547,7 +547,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
         <div className="sp-schedule-grid">
           {cropData.donem.map((donem, idx) => {
             const kc = cropData.donemKc[idx];
-            const suLabel = kc < 0.6 ? '💧 Az' : kc < 1.0 ? '💧💧 Orta' : '💧💧💧 Yüksek';
+            const suLabel = kc < 0.6 ? 'Az' : kc < 1.0 ? 'Orta' : 'Yüksek';
             return (
               <div key={idx} className={`sp-schedule-item ${state.gelismeDonemi === idx ? 'sp-schedule-item--current' : ''}`}>
                 <div className="sp-schedule-donem">{donem}</div>

@@ -203,7 +203,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
                   İlçe Üretim (Top 10)
                 </h3>
-                <ChartInsightButton title="📊 İlçe Üretimi" description="Top 10 ilçe üretim dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
+                <ChartInsightButton title="İlçe Üretimi" description="Top 10 ilçe üretim dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart
@@ -251,7 +251,7 @@ export function PlantDistrictsTab({ selectedProvince, districtData }: Props) {
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
                   İl Payı Dağılımı (Top 10)
                 </h3>
-                <ChartInsightButton title="🥧 İl Payı Dağılımı" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
+                <ChartInsightButton title="İl Payı Dağılımı" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>

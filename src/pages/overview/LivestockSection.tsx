@@ -51,7 +51,7 @@ export function LivestockSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`📊 Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} span={2} action={<ChartInsightButton title={`Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />}>
+        <ChartCard title={`Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} span={2} action={<ChartInsightButton title={`Hayvan Varlığı Dağılımı (${HAYVAN_ULKE_YIL})`} description="Türkiye hayvan türlerine göre varlık dağılımı" data={data.livestockStocks.breakdown} context={{ sığır: formatNumber(data.livestockStocks.cattle)+' baş', koyun: formatNumber(data.livestockStocks.sheep)+' baş', keçi: formatNumber(data.livestockStocks.goat)+' baş', kanatlı: formatNumber(data.livestockStocks.poultry)+' baş' }} />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data.livestockStocks.breakdown} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

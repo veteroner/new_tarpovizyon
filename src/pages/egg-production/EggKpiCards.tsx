@@ -1,7 +1,7 @@
 import { yuzde } from '../../utils/sayi';
 import type { YearPoint } from './eggProductionTypes';
 import { formatMillion, formatTL } from './eggProductionTypes';
-import { Egg, Trophy, Wallet } from 'lucide-react';
+import { Egg, Trophy, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface EggKpiCardsProps {
   latest: YearPoint | undefined;
@@ -27,7 +27,7 @@ export function EggKpiCards({ latest, yoy, peak, eggPrices, eggPriceDate, eggPri
       <div className="kpi-card">
         <div className="kpi-header">
           <span className="kpi-title">YILLIK DEĞİŞİM</span>
-          <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? '📈' : '📉'}</div>
+          <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
         </div>
         <div className="kpi-value" style={{ color: yoy >= 0 ? '#22c55e' : '#ef4444' }}>
           {yuzde(yoy, 1)}

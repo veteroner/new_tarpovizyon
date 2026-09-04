@@ -15,7 +15,7 @@ export default function TuikPlantCategoryPage(props: TuikPlantCategoryPageProps)
     <div>
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">{icon} {title}</h1>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{icon}{title}</h1>
         <p className="page-subtitle">{subtitle}</p>
       </div>
 

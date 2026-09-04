@@ -213,9 +213,9 @@ export default function ProvincialDistrictsTab({
                                 district.trend === 'decreasing' ? '#ef4444' :
                                 '#64748b'
                         }}>
-                          {district.trend === 'increasing' ? '📈 Artış' :
-                           district.trend === 'decreasing' ? '📉 Düşüş' :
-                           '➡️ Sabit'}
+                          {district.trend === 'increasing' ? 'Artış' :
+                           district.trend === 'decreasing' ? 'Düşüş' :
+                           'Sabit'}
                         </div>
                       </td>
                     </tr>
@@ -243,7 +243,7 @@ export default function ProvincialDistrictsTab({
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
                   İlçe Popülasyon Dağılımı
                 </h3>
-                <ChartInsightButton title="📊 İlçe Popülasyonu" description="İlçe bazında hayvan dağılımı" data={districtData} context={{ section: 'İlçe' }} compact />
+                <ChartInsightButton title="İlçe Popülasyonu" description="İlçe bazında hayvan dağılımı" data={districtData} context={{ section: 'İlçe' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart
@@ -292,7 +292,7 @@ export default function ProvincialDistrictsTab({
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
                   İl İçi Pay Dağılımı (Top 10)
                 </h3>
-                <ChartInsightButton title="🥧 İl İçi Pay" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
+                <ChartInsightButton title="İl İçi Pay" description="Top 10 ilçe pay dağılımı" data={districtData.slice(0, 10)} context={{ section: 'İlçe' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>

@@ -14,7 +14,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { COLORS, type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
-import { Sprout, TriangleAlert, Trophy } from 'lucide-react';
+import { Sprout, TriangleAlert, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -252,7 +252,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <div className="kpi-subtitle">ton · {primaryKPIs.productCount} ürün · {primaryKPIs.countryCount} ülke</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: primaryKPIs.globalCAGR5 >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: primaryKPIs.globalCAGR5 >= 0 ? '#22c55e' : '#ef4444'}}>{primaryKPIs.globalCAGR5 >= 0 ? '📈' : '📉'}</div></div>
+            <div className="kpi-header"><span className="kpi-title">5Y CAGR</span><div className="kpi-icon" style={{background: primaryKPIs.globalCAGR5 >= 0 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: primaryKPIs.globalCAGR5 >= 0 ? '#22c55e' : '#ef4444'}}>{primaryKPIs.globalCAGR5 >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div></div>
             <div className="kpi-value" style={{color: primaryKPIs.globalCAGR5 >= 0 ? '#22c55e' : '#ef4444'}}>{yuzde(primaryKPIs.globalCAGR5, 1)}</div>
             <div className="kpi-subtitle">Küresel yıllık büyüme</div>
           </div>
@@ -262,19 +262,19 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <div className="kpi-subtitle">{yuzde(primaryKPIs.leaderShare, 1)} pazar payı</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE SIRA</span></div>
+            <div className="kpi-header"><span className="kpi-title">TÜRKİYE SIRA</span></div>
             <div className="kpi-value" style={{color: '#a855f7'}}>#{primaryKPIs.turkeyRank || '-'}</div>
             <div className="kpi-subtitle">{formatNumber(primaryKPIs.turkeyTotal)} ton</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE PAY</span></div>
+            <div className="kpi-header"><span className="kpi-title">TÜRKİYE PAY</span></div>
             <div className="kpi-value" style={{color: '#3b82f6'}}>{yuzde(primaryKPIs.turkeyShare, 2)}</div>
             <div className="kpi-subtitle">Küresel üretimdeki pay</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE CAGR</span></div>
+            <div className="kpi-header"><span className="kpi-title">TÜRKİYE CAGR</span></div>
             <div className="kpi-value" style={{color: primaryKPIs.turkeyCAGR5 >= 0 ? '#22c55e' : '#ef4444'}}>{yuzde(primaryKPIs.turkeyCAGR5, 1)}</div>
-            <div className="kpi-subtitle">{primaryKPIs.turkeyCAGR5 > primaryKPIs.globalCAGR5 ? '✅ Küreselden hızlı' : '⚠️ Küreselden yavaş'}</div>
+            <div className="kpi-subtitle">{primaryKPIs.turkeyCAGR5 > primaryKPIs.globalCAGR5 ? 'Küreselden hızlı' : 'Küreselden yavaş'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">YÜKSELEN</span><div className="kpi-icon green"><Sprout size={18} aria-hidden="true" /></div></div>
@@ -297,10 +297,10 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
         <h3 className="chart-title">Ürün Yaşam Döngüsü Matrisi</h3>
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginTop: '12px'}}>
           {primaryProductCAGR.slice(0, 12).map((p, i) => {
-            const lcStyle = p.lifecycle === 'emerging' ? {bg: 'rgba(34,197,94,.1)', border: '#22c55e', badge: '🌱 Emerging', color: '#22c55e'}
-              : p.lifecycle === 'growth' ? {bg: 'rgba(59,130,246,.1)', border: '#3b82f6', badge: '📈 Growth', color: '#3b82f6'}
-              : p.lifecycle === 'mature' ? {bg: 'rgba(168,85,247,.1)', border: '#a855f7', badge: '⚖️ Mature', color: '#a855f7'}
-              : {bg: 'rgba(239,68,68,.1)', border: '#ef4444', badge: '📉 Declining', color: '#ef4444'};
+            const lcStyle = p.lifecycle === 'emerging' ? {bg: 'rgba(34,197,94,.1)', border: '#22c55e', badge: 'Emerging', color: '#22c55e'}
+              : p.lifecycle === 'growth' ? {bg: 'rgba(59,130,246,.1)', border: '#3b82f6', badge: 'Growth', color: '#3b82f6'}
+              : p.lifecycle === 'mature' ? {bg: 'rgba(168,85,247,.1)', border: '#a855f7', badge: 'Mature', color: '#a855f7'}
+              : {bg: 'rgba(239,68,68,.1)', border: '#ef4444', badge: 'Declining', color: '#ef4444'};
             return (
               <div key={i} style={{background: lcStyle.bg, border: `1px solid ${lcStyle.border}`, borderRadius: '12px', padding: '14px', position: 'relative'}}>
                 <span style={{position: 'absolute', top: '8px', right: '8px', fontSize: '10px', fontWeight: 700, color: lcStyle.color, background: 'var(--bg-card)', borderRadius: '6px', padding: '2px 8px', border: `1px solid ${lcStyle.border}`}}>{lcStyle.badge}</span>
@@ -318,7 +318,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Product CAGR Chart + Country Growth Quadrant */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <ChartCard title="📊 Ürnün CAGR Karşılaştırması (5Y)" action={<ChartInsightButton title="Ürnün CAGR Karşılaştırması" description="Birincil hayvansal ürünlerin 5 yıllık büléik büyüme analizi" data={primaryProductCAGR.slice(0, 12)} context={{}} compact />}>
+        <ChartCard title="Ürnün CAGR Karşılaştırması (5Y)" action={<ChartInsightButton title="Ürnün CAGR Karşılaştırması" description="Birincil hayvansal ürünlerin 5 yıllık büléik büyüme analizi" data={primaryProductCAGR.slice(0, 12)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={380}>
             <BarChart data={primaryProductCAGR.slice(0, 12).map(p => ({...p, product: translateProduct(p.product)}))} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -340,7 +340,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="🌐 Ülke Büyüme Kadranı" action={<ChartInsightButton title="Ülke Büyüme Kadranı" description="Ülkelerin pazar payı ve büyüme hızı dağılımı" data={primaryCountryCAGR.slice(0, 25)} context={{}} compact />}>
+        <ChartCard title="Ülke Büyüme Kadranı" action={<ChartInsightButton title="Ülke Büyüme Kadranı" description="Ülkelerin pazar payı ve büyüme hızı dağılımı" data={primaryCountryCAGR.slice(0, 25)} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={380}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -370,7 +370,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Top 20 Country Ranking */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <ChartCard title="🌍 Top 20 Ülke Üretim Sıralaması" span={2} action={<ChartInsightButton title="Top 20 Ülke Üretim Sıralaması" description="Birincil hayvansal üretimde önde gelen 20 ülke" data={primaryCountryData.slice(0, 20)} context={{}} />}>
+        <ChartCard title="Top 20 Ülke Üretim Sıralaması" span={2} action={<ChartInsightButton title="Top 20 Ülke Üretim Sıralaması" description="Birincil hayvansal üretimde önde gelen 20 ülke" data={primaryCountryData.slice(0, 20)} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={primaryCountryData.slice(0, 20)}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -393,7 +393,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
       {/* Turkey Product Profile */}
       {primaryTurkeyProducts.length > 0 && (
         <div className="chart-card" style={{marginTop: '20px'}}>
-          <h3 className="chart-title">🇹🇷 Türkiye Ürün Profili</h3>
+          <h3 className="chart-title">Türkiye Ürün Profili</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px', marginTop: '12px'}}>
             {primaryTurkeyProducts.slice(0, 8).map((tp, i) => {
               const maxProd = primaryTurkeyProducts[0]?.production || 1;
@@ -417,7 +417,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
 
       {/* Yearly Trend + Country CAGR Table */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <ChartCard title="📅 Küresel Üretim Trendi" action={<ChartInsightButton title="Küresel Birincil Hayvansal Üretim Trendi" description="Uzun vadeli küresel birincil hayvansal üretim trendi" data={primaryYearlyData} context={{}} compact />}>
+        <ChartCard title="Küresel Üretim Trendi" action={<ChartInsightButton title="Küresel Birincil Hayvansal Üretim Trendi" description="Uzun vadeli küresel birincil hayvansal üretim trendi" data={primaryYearlyData} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={primaryYearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -449,7 +449,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
                   return (
                     <tr key={i} style={{borderBottom: '1px solid var(--border)', background: isTurkey ? 'rgba(239,68,68,.08)' : 'transparent'}}>
                       <td style={{padding: '6px', fontWeight: isTurkey ? 700 : 400}}>{i + 1}</td>
-                      <td style={{padding: '6px', fontWeight: isTurkey ? 700 : 400, color: isTurkey ? '#ef4444' : 'var(--text-primary)'}}>{isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
+                      <td style={{padding: '6px', fontWeight: isTurkey ? 700 : 400, color: isTurkey ? '#ef4444' : 'var(--text-primary)'}}>{isTurkey ? 'TR · ' : ''}{c.country}</td>
                       <td style={{padding: '6px', textAlign: 'right'}}>{formatShort(c.total)}</td>
                       <td style={{padding: '6px', textAlign: 'right'}}>{yuzde(c.share, 1)}</td>
                       <td style={{padding: '6px', textAlign: 'right', fontWeight: 600, color: c.cagr5 >= 0 ? '#22c55e' : '#ef4444'}}>

@@ -53,7 +53,7 @@ export function MilkSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`🥧 Süt Türlerine Göre Dağılım (${yil})`} action={<ChartInsightButton title={`Süt Türlerine Göre Dağılım (${yil})`} description="İnek, koyun ve keçi sütü dağılımı" data={data.milkProduction.breakdown} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', inekSütü: formatNumber(data.milkProduction.cattle)+' ton', koyunSütü: formatNumber(data.milkProduction.sheep)+' ton' }} />}>
+        <ChartCard title={`Süt Türlerine Göre Dağılım (${yil})`} action={<ChartInsightButton title={`Süt Türlerine Göre Dağılım (${yil})`} description="İnek, koyun ve keçi sütü dağılımı" data={data.milkProduction.breakdown} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', inekSütü: formatNumber(data.milkProduction.cattle)+' ton', koyunSütü: formatNumber(data.milkProduction.sheep)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -74,7 +74,7 @@ export function MilkSection({ data }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title={`📈 Süt Üretim Trendi (2010-${yil})`} action={<ChartInsightButton title={`Süt Üretim Trendi (2010-${yil})`} description="Yıllık süt üretimi değişimi" data={data.milkProduction.yearly} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton' }} />}>
+        <ChartCard title={`Süt Üretim Trendi (2010-${yil})`} action={<ChartInsightButton title={`Süt Üretim Trendi (2010-${yil})`} description="Yıllık süt üretimi değişimi" data={data.milkProduction.yearly} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data.milkProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

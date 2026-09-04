@@ -14,7 +14,7 @@ import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '
 import { formatNumber, formatShort } from './livestockUtils';
 import { pctTick } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
-import { Flame, Rocket, TriangleAlert, Zap } from 'lucide-react';
+import { Flame, Rocket, TriangleAlert, Zap, TrendingUp, TrendingDown } from 'lucide-react';
 
 const R_BIR = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -267,13 +267,13 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
         severity: downTrend > upTrend ? 'high' : 'medium', category: 'TREND' });
       if (hasProphet) {
         ins.push({ id: `pr${iid++}`, type: 'achievement',
-          message: `🧠 Prophet modeli aktif: Güven bantları %%80 CI, trend kırılma noktaları otomatik tespit, çapraz-doğrulama ile gerçek performans ölçümü.`,
+          message: `Prophet modeli aktif: Güven bantları %%80 CI, trend kırılma noktaları otomatik tespit, çapraz-doğrulama ile gerçek performans ölçümü.`,
           severity: 'low', category: 'MODEL' });
       }
       if (turkeyForecasts.length > 0) {
         const trGrowing = turkeyForecasts.filter(t => t.changePercent > 0);
         ins.push({ id: `pr${iid++}`, type: trGrowing.length > turkeyForecasts.length / 2 ? 'growth' : 'warning',
-          message: `🇹🇷 Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${translateProduct(trGrowing[0].product)} (+%${trGrowing[0].changePercent.toFixed(1)})` : ''}`,
+          message: `Türkiye: ${turkeyForecasts.length} üründe tahmin. ${trGrowing.length} üründe büyüme bekleniyor.${trGrowing[0] ? ` En hızlı: ${translateProduct(trGrowing[0].product)} (+%${trGrowing[0].changePercent.toFixed(1)})` : ''}`,
           severity: 'medium', category: 'TÜRKİYE' });
       }
       if (risks.length > 0) {
@@ -334,7 +334,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <div className="kpi-subtitle">CAGR &lt; -5%</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE</span></div>
+            <div className="kpi-header"><span className="kpi-title">TÜRKİYE</span></div>
             <div className="kpi-value" style={{color: '#a855f7'}}>{predKPIs.turkeyForecasts}</div>
             <div className="kpi-subtitle">Ürün tahmini</div>
           </div>
@@ -346,7 +346,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       {/* Global Forecast Chart */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <ChartCard title="🔮 Küresel Üretim Tahmini — Prophet (Tarihçe + 3Y Projeksiyon)" span={2} action={<ChartInsightButton title="Küresel Üretim Tahmini" description="Prophet modeli ile küresel üretim tahmin ve projeksiyon analizi" data={predForecastChart} context={{}} />}>
+        <ChartCard title="Küresel Üretim Tahmini — Prophet (Tarihçe + 3Y Projeksiyon)" span={2} action={<ChartInsightButton title="Küresel Üretim Tahmini" description="Prophet modeli ile küresel üretim tahmin ve projeksiyon analizi" data={predForecastChart} context={{}} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={predForecastChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -370,7 +370,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
 
       {/* R² vs Growth Scatter + Anomaly Timeline */}
       <div className="chart-grid" style={{marginTop: '20px'}}>
-        <ChartCard title="📐 Çapraz-Doğrulama R² × Büyüme Oranı" action={<ChartInsightButton title="Tahmin Doğrulama: R² × Büyüme" description="Model doğruluk ve büyüme oranı scatter analizi" data={predR2GrowthScatter} context={{}} compact />}>
+        <ChartCard title="Çapraz-Doğrulama R² × Büyüme Oranı" action={<ChartInsightButton title="Tahmin Doğrulama: R² × Büyüme" description="Model doğruluk ve büyüme oranı scatter analizi" data={predR2GrowthScatter} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -396,11 +396,11 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             </ScatterChart>
           </ResponsiveContainer>
           <div style={{fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '4px'}}>
-            Güvenilir+Büyüme &nbsp; 🔴 Güvenilir+Düşüş &nbsp; ⚪ Düşük Güven
+            Güvenilir+Büyüme &nbsp; Güvenilir+Düşüş &nbsp; ⚪ Düşük Güven
           </div>
         </ChartCard>
 
-        <ChartCard title="⚡ Anomali Zaman Çizelgesi" action={<ChartInsightButton title="Anomali Zaman Çizelgesi" description="Yıllara göre ani artış ve düşü anomali tespitleri" data={predAnomalyTimeline} context={{}} compact />}>
+        <ChartCard title="Anomali Zaman Çizelgesi" action={<ChartInsightButton title="Anomali Zaman Çizelgesi" description="Yıllara göre ani artış ve düşü anomali tespitleri" data={predAnomalyTimeline} context={{}} compact />}>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={predAnomalyTimeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -418,7 +418,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
       {/* Turkey Forecast Cards */}
       {predTurkeyForecasts.length > 0 && (
         <div className="chart-card" style={{marginTop: '20px'}}>
-          <h3 className="chart-title">🇹🇷 Türkiye Ürün Tahminleri ({parseInt(selectedYear) + 3})</h3>
+          <h3 className="chart-title">Türkiye Ürün Tahminleri ({parseInt(selectedYear) + 3})</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px', marginTop: '12px'}}>
             {predTurkeyForecasts.slice(0, 8).map((tf, i) => {
               const isUp = tf.changePercent >= 0;
@@ -426,7 +426,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                 <div key={i} style={{background: isUp ? 'rgba(34,197,94,.06)' : 'rgba(239,68,68,.06)', border: `1px solid ${isUp ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)'}`, borderRadius: '12px', padding: '14px'}}>
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px'}}>
                     <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', maxWidth: '70%', lineHeight: 1.3}}>{translateProduct(tf.product)}</div>
-                    <span style={{fontSize: '10px', fontWeight: 700, color: isUp ? '#22c55e' : '#ef4444', background: isUp ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', borderRadius: '6px', padding: '2px 8px'}}>{isUp ? '📈' : '📉'} {tf.changePercent > 0 ? '+' : ''}{tf.changePercent.toFixed(1)}%</span>
+                    <span style={{fontSize: '10px', fontWeight: 700, color: isUp ? '#22c55e' : '#ef4444', background: isUp ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', borderRadius: '6px', padding: '2px 8px'}}>{isUp ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />} {tf.changePercent > 0 ? '+' : ''}{tf.changePercent.toFixed(1)}%</span>
                   </div>
                   <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px'}}>
                     <div><div style={{fontSize: '10px', color: 'var(--text-secondary)'}}>Mevcut</div><div style={{fontWeight: 700, fontSize: '13px'}}>{formatShort(tf.current)}</div></div>
@@ -435,7 +435,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                   </div>
                   <div style={{marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)'}}>
                     Trend: <span style={{fontWeight: 600, color: tf.trend === 'ACCELERATING' || tf.trend.includes('UP') || tf.trend === 'EXPONENTIAL' ? '#22c55e' : tf.trend === 'DOWN' || tf.trend === 'DECLINING' ? '#ef4444' : '#f59e0b'}}>
-                    {tf.trend === 'ACCELERATING' || tf.trend === 'EXPONENTIAL' ? '🚀 Hızlanan Artış' : tf.trend.includes('UP') ? '📈 Yükselen' : tf.trend === 'DOWN' || tf.trend === 'DECLINING' ? '📉 Düşüş' : '➡️ Stabil'}
+                    {tf.trend === 'ACCELERATING' || tf.trend === 'EXPONENTIAL' ? 'Hızlanan Artış' : tf.trend.includes('UP') ? 'Yükselen' : tf.trend === 'DOWN' || tf.trend === 'DECLINING' ? 'Düşüş' : 'Stabil'}
                     </span>
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                     <span style={{fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
                       background: pred.trend === 'ACCELERATING' || pred.trend.includes('UP') || pred.trend === 'EXPONENTIAL' ? 'rgba(34,197,94,.15)' : pred.trend === 'DOWN' || pred.trend === 'DECLINING' ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
                       color: pred.trend === 'ACCELERATING' || pred.trend.includes('UP') || pred.trend === 'EXPONENTIAL' ? '#22c55e' : pred.trend === 'DOWN' || pred.trend === 'DECLINING' ? '#ef4444' : '#f59e0b'}}>
-                      {pred.trend === 'ACCELERATING' || pred.trend === 'EXPONENTIAL' ? '🚀 Hızlanan' : pred.trend.includes('UP') ? '📈 Yükselen' : pred.trend === 'DOWN' || pred.trend === 'DECLINING' ? '📉 Düşüş' : '➡️ Stabil'}
+                      {pred.trend === 'ACCELERATING' || pred.trend === 'EXPONENTIAL' ? 'Hızlanan' : pred.trend.includes('UP') ? 'Yükselen' : pred.trend === 'DOWN' || pred.trend === 'DECLINING' ? 'Düşüş' : 'Stabil'}
                     </span>
                   </td>
                   <td style={{padding: '6px', textAlign: 'right', fontWeight: 600, color: pred.r2 > 0.8 ? '#22c55e' : pred.r2 > 0.6 ? '#f59e0b' : '#94a3b8'}}>{pred.r2.toFixed(3)}</td>
@@ -500,7 +500,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
               return (
                 <div key={idx} style={{background: 'var(--bg-card)', border: `1px solid ${sColor}40`, borderRadius: '12px', padding: '14px', position: 'relative'}}>
                   <span style={{position: 'absolute', top: '8px', right: '8px', fontSize: '10px', fontWeight: 700, color: sColor, background: `${sColor}15`, borderRadius: '6px', padding: '2px 8px'}}>
-                    {severity === 'critical' ? '🔴 KRİTİK' : severity === 'high' ? '🟠 YÜKSEK' : '🟡 ORTA'}
+                    {severity === 'critical' ? 'KRİTİK' : severity === 'high' ? 'YÜKSEK' : 'ORTA'}
                   </span>
                   <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px'}}>{risk.country}</div>
                   <div style={{fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', maxWidth: '70%'}}>{translateProduct(risk.product)}</div>
@@ -537,7 +537,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
                       <span style={{fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
                         background: a.type === 'SPIKE' ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)',
                         color: a.type === 'SPIKE' ? '#22c55e' : '#ef4444'}}>
-                        {a.type === 'SPIKE' ? '📈 ARTIŞ' : '📉 DÜŞÜŞ'}
+                        {a.type === 'SPIKE' ? 'ARTIŞ' : 'DÜŞÜŞ'}
                       </span>
                     </td>
                     <td style={{padding: '6px', textAlign: 'right', fontWeight: 600, color: Math.abs(a.zScore) > 3 ? '#ef4444' : '#f59e0b'}}>{a.zScore.toFixed(2)}</td>

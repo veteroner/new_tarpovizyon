@@ -38,7 +38,7 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 6: Scatter — Alan vs Üretim vs Verim ─── */}
       {scatterData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title={<>Alan – Üretim – Verim İlişkisi ({selectedYear})</>} span={2} action={<ChartInsightButton title="🔵 Alan–Üretim–Verim" description="Scatter: alan vs üretim vs verim" data={scatterData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title={<>Alan – Üretim – Verim İlişkisi ({selectedYear})</>} span={2} action={<ChartInsightButton title="Alan–Üretim–Verim" description="Scatter: alan vs üretim vs verim" data={scatterData} context={{ section: 'Analiz' }} compact />}>
             <p style={{ color: 'var(--text-secondary)', fontSize: 12, margin: '0 0 8px 0' }}>
               X: Ekilen Alan (Dekar) — Y: Üretim (Ton) — Nokta Boyutu: Verim (Kg/Dekar)
             </p>
@@ -77,7 +77,7 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 7: İlçe Detayı ─── */}
       {selectedProvince && districtData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title={<>🏨️ {selectedProvince} İlçe Detayı ({selectedYear})</>} span={2} action={<ChartInsightButton title="🏨️ İlçe Detayı" description="İlçe bazında detay" data={districtData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title={<>{selectedProvince} İlçe Detayı ({selectedYear})</>} span={2} action={<ChartInsightButton title="İlçe Detayı" description="İlçe bazında detay" data={districtData} context={{ section: 'Analiz' }} compact />}>
             <ResponsiveContainer width="100%" height={Math.max(250, districtData.length * 30)}>
               <BarChart data={districtData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -99,7 +99,7 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 8 & 9: Treemap + Radar ─── */}
       {cityData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title="🗺️ Üretim Yoğunlaşması" action={<ChartInsightButton title="🗺️ Üretim Yoğunlaşması" description="Üretim yoğunlaşma analizi" data={cityData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title="Üretim Yoğunlaşması" action={<ChartInsightButton title="Üretim Yoğunlaşması" description="Üretim yoğunlaşma analizi" data={cityData} context={{ section: 'Analiz' }} compact />}>
             <ResponsiveContainer width="100%" height={340}>
               <Treemap
                 data={cityData.slice(0, 15)}
@@ -126,7 +126,7 @@ export default function PlantAnalysisCharts({
           </ChartCard>
 
           {radarData.length > 0 && (
-            <ChartCard title="🎯 Top İller — Çoklu Yıl Karşılaşması" action={<ChartInsightButton title="🎯 Top İller" description="Çoklu yıl karşılaştirması" data={cityData} context={{ section: 'Analiz' }} compact />}>
+            <ChartCard title="Top İller — Çoklu Yıl Karşılaşması" action={<ChartInsightButton title="Top İller" description="Çoklu yıl karşılaştirması" data={cityData} context={{ section: 'Analiz' }} compact />}>
               <ResponsiveContainer width="100%" height={340}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--border)" />
@@ -149,9 +149,9 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 10 & 11: Üretim-Alan-Verim + Decomposition ─── */}
       {yieldTrendData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title="📊 Üretim-Alan-Verim Trendi" action={<ChartInsightButton title="📊 Üretim-Alan-Verim Trendi" description="Trend analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title="Üretim-Alan-Verim Trendi" action={<ChartInsightButton title="Üretim-Alan-Verim Trendi" description="Trend analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '8px' }}>
-              Üretim (ton) | 🟢 Alan (dekar) | 🟠 Verim (kg/dek)
+              Üretim (ton) | Alan (dekar) | 🟠 Verim (kg/dek)
             </p>
             <ResponsiveContainer width="100%" height={280}>
               <ComposedChart data={yieldTrendData}>
@@ -172,7 +172,7 @@ export default function PlantAnalysisCharts({
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="🧬 Üretim Artışı Kaynağı" action={<ChartInsightButton title="🧬 Üretim Artışı Kaynağı" description="Alan ve verim kaynaklı artış analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title="Üretim Artışı Kaynağı" action={<ChartInsightButton title="Üretim Artışı Kaynağı" description="Alan ve verim kaynaklı artış analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
             {(() => {
               const hasDecomposition = yieldTrendData.some(d =>
                 (d.alanEtkisi && Math.abs(d.alanEtkisi) > 0.01) ||
@@ -192,7 +192,7 @@ export default function PlantAnalysisCharts({
                         tickFormatter={v => fmtShort(v)} label={{ value: 'Üretim Değişimi (ton)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} width={58} />
                       <Tooltip formatter={(v: number, name: string) => [
                         `${v >= 0 ? '+' : ''}${fmt(v)} ton`,
-                        name === 'alanEtkisi' ? '🟩 Alan Etkisi' : name === 'verimEtkisi' ? '🟨 Verim Etkisi' : '🟦 Sinerjik Etki'
+                        name === 'alanEtkisi' ? 'Alan Etkisi' : name === 'verimEtkisi' ? 'Verim Etkisi' : 'Sinerjik Etki'
                       ]}
                         contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11 }} />
                       <Legend wrapperStyle={{ fontSize: 10 }} />

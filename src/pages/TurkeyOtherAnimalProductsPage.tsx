@@ -23,7 +23,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR, SERIES } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
-import { CalendarDays, Trophy } from 'lucide-react';
+import { CalendarDays, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-2025
 const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
@@ -38,14 +38,14 @@ interface ProductOption {
 }
 
 const PRODUCTS: ProductOption[] = [
-  { id: 'merinos_yapagi', label: 'Merinos Yapağı', hayvan: 'Koyun', urun: 'Yapağı', icon: '🐑', birim: 'Ton' },
-  { id: 'yerli_yapagi', label: 'Yerli Yapağı', hayvan: 'Koyun', urun: 'Yapağı', icon: '🐑', birim: 'Ton' },
-  { id: 'tiftik', label: 'Tiftik', hayvan: 'Keçi', urun: 'Tiftik', icon: '🐐', birim: 'Ton' },
-  { id: 'keci_kili', label: 'Keçi Kılı', hayvan: 'Keçi', urun: 'Keçi Kılı', icon: '🐐', birim: 'Ton' },
-  { id: 'balmumu', label: 'Balmumu', hayvan: 'Arı', urun: 'Balmumu', icon: '🐝', birim: 'Ton' },
-  { id: 'ipek_bocegi', label: 'İpek Böceği Kozası', hayvan: 'İpek Böceği', urun: 'İpek Böceği Kozası', icon: '🦋', birim: 'Ton' },
-  { id: 'kovan_eski', label: 'Kovan (Eski Tip)', hayvan: 'Arı', urun: 'Kovan', icon: '🍯', birim: 'Adet' },
-  { id: 'kovan_yeni', label: 'Kovan (Yeni Tip)', hayvan: 'Arı', urun: 'Kovan', icon: '🍯', birim: 'Adet' },
+  { id: 'merinos_yapagi', label: 'Merinos Yapağı', hayvan: 'Koyun', urun: 'Yapağı', icon: '', birim: 'Ton' },
+  { id: 'yerli_yapagi', label: 'Yerli Yapağı', hayvan: 'Koyun', urun: 'Yapağı', icon: '', birim: 'Ton' },
+  { id: 'tiftik', label: 'Tiftik', hayvan: 'Keçi', urun: 'Tiftik', icon: '', birim: 'Ton' },
+  { id: 'keci_kili', label: 'Keçi Kılı', hayvan: 'Keçi', urun: 'Keçi Kılı', icon: '', birim: 'Ton' },
+  { id: 'balmumu', label: 'Balmumu', hayvan: 'Arı', urun: 'Balmumu', icon: '', birim: 'Ton' },
+  { id: 'ipek_bocegi', label: 'İpek Böceği Kozası', hayvan: 'İpek Böceği', urun: 'İpek Böceği Kozası', icon: '', birim: 'Ton' },
+  { id: 'kovan_eski', label: 'Kovan (Eski Tip)', hayvan: 'Arı', urun: 'Kovan', icon: '', birim: 'Adet' },
+  { id: 'kovan_yeni', label: 'Kovan (Yeni Tip)', hayvan: 'Arı', urun: 'Kovan', icon: '', birim: 'Adet' },
 ];
 
 interface YearPoint {
@@ -260,7 +260,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                 <span className="kpi-title">{summary.label}</span>
                 {summary.change !== 0 && (
                   <div className={`kpi-icon ${summary.change >= 0 ? 'green' : 'red'}`}>
-                    {summary.change >= 0 ? '📈' : '📉'}
+                    {summary.change >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}
                   </div>
                 )}
               </div>
@@ -286,7 +286,7 @@ export default function TurkeyOtherAnimalProductsPage() {
               <div className="kpi-subtitle">{currentProduct.birim} ({latestYear})</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? '📈' : '📉'}</div></div>
+              <div className="kpi-header"><span className="kpi-title">YILLIK DEĞİŞİM</span><div className={`kpi-icon ${yearChange >= 0 ? 'green' : 'red'}`}>{yearChange >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div></div>
               <div className="kpi-value" style={{ color: yearChange >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearChange, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
@@ -321,7 +321,7 @@ export default function TurkeyOtherAnimalProductsPage() {
             </div>
 
             {growthData.length > 0 && (
-              <ChartCard title="📊 Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranı (%)" data={growthData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
+              <ChartCard title="Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranı (%)" data={growthData} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={growthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -360,7 +360,7 @@ export default function TurkeyOtherAnimalProductsPage() {
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title="🥧 İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı (Top 10)" data={cityData.slice(0,10)} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
+              <ChartCard title="İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl payları dağılımı (Top 10)" data={cityData.slice(0,10)} context={{ section: 'Diğer Hayvansal Ürünler' }} compact />}>
                 <ResponsiveContainer width="100%" height={450}>
                   <PieChart>
                     <Pie

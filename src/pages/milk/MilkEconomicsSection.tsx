@@ -87,7 +87,7 @@ export default function MilkEconomicsSection({
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                 Ülkelere Göre Süt Fiyatları
               </h3>
-              <ChartInsightButton title="💵 Ülkelere Göre Süt Fiyatları" description="Dünya süt fiyatları karşılaştırması" data={worldMilkPrices ? [worldMilkPrices] : []} context={{ birim: 'USD/kg' }} compact />
+              <ChartInsightButton title="Ülkelere Göre Süt Fiyatları" description="Dünya süt fiyatları karşılaştırması" data={worldMilkPrices ? [worldMilkPrices] : []} context={{ birim: 'USD/kg' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart 
@@ -273,7 +273,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Fiyat ve Maliyet Trendi
                 </h3>
-                <ChartInsightButton title="💰 Fiyat ve Maliyet Trendi" description="Çiğ süt fiyat ve maliyet karşılaştırma trendi" data={chronological} context={{ section: 'Ekonomik Göstergeler' }} />
+                <ChartInsightButton title="Fiyat ve Maliyet Trendi" description="Çiğ süt fiyat ve maliyet karşılaştırma trendi" data={chronological} context={{ section: 'Ekonomik Göstergeler' }} />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <ComposedChart data={chronological}>
@@ -361,7 +361,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Süt Yemi Fiyatları (19% HP)
                 </h3>
-                <ChartInsightButton title="🌾 Süt Yemi Fiyatları (19% HP)" description="Süt yemi fiyat trendi" data={chronological} context={{ yem: 'sut_yemi' }} compact />
+                <ChartInsightButton title="Süt Yemi Fiyatları (19% HP)" description="Süt yemi fiyat trendi" data={chronological} context={{ yem: 'sut_yemi' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <ComposedChart data={chronological}>
@@ -384,7 +384,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Mısır Silajı Fiyatları
                 </h3>
-                <ChartInsightButton title="🌽 Mısır Silajı Fiyatları" description="Mısır silajı fiyat trendi" data={chronological} context={{ yem: 'misir_silaji' }} compact />
+                <ChartInsightButton title="Mısır Silajı Fiyatları" description="Mısır silajı fiyat trendi" data={chronological} context={{ yem: 'misir_silaji' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <ComposedChart data={chronological}>
@@ -407,7 +407,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Yonca Fiyatları
                 </h3>
-                <ChartInsightButton title="🍀 Yonca Fiyatları" description="Yonca fiyat trendi" data={chronological} context={{ yem: 'yonca' }} compact />
+                <ChartInsightButton title="Yonca Fiyatları" description="Yonca fiyat trendi" data={chronological} context={{ yem: 'yonca' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <ComposedChart data={chronological}>
@@ -430,7 +430,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Süt-Yem Paritesi
                 </h3>
-                <ChartInsightButton title="📈 Süt-Yem Paritesi" description="Süt-yem paritesi ve destek dahil parite" data={chronological} context={{ section: 'Parite' }} />
+                <ChartInsightButton title="Süt-Yem Paritesi" description="Süt-yem paritesi ve destek dahil parite" data={chronological} context={{ section: 'Parite' }} />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <ComposedChart data={chronological}>
@@ -454,7 +454,7 @@ export default function MilkEconomicsSection({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                   Destek Oranı (Fiyat İçinde Destek Payı)
                 </h3>
-                <ChartInsightButton title="🎁 Destek Oranı (Fiyat İçinde Destek Payı)" description="Yıllık ortalama destek oranı" data={yearlySupport} context={{ section: 'Destek' }} compact />
+                <ChartInsightButton title="Destek Oranı (Fiyat İçinde Destek Payı)" description="Yıllık ortalama destek oranı" data={yearlySupport} context={{ section: 'Destek' }} compact />
               </div>
               <ResponsiveContainer width="100%" height={340}>
                 <BarChart data={yearlySupport}>

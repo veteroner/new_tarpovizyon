@@ -114,7 +114,7 @@ export function SystemLandStep({ state, setState, cropData, goStep4 }: Props) {
           <div className="sp-donem-select">
             {cropData.donem.map((donem, idx) => {
               const kc = cropData.donemKc[idx];
-              const suDurumu = kc < 0.6 ? '💧 Az' : kc < 1.0 ? '💧💧 Orta' : '💧💧💧 Yüksek';
+              const suDurumu = kc < 0.6 ? 'Az' : kc < 1.0 ? 'Orta' : 'Yüksek';
               return (
                 <label key={idx} className={`sp-donem-btn ${state.gelismeDonemi === idx ? 'sp-donem-btn--active' : ''}`}>
                   <input type="radio" name="donem" value={idx} checked={state.gelismeDonemi === idx}

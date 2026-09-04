@@ -124,7 +124,7 @@ export default function TradeOverviewTab() {
         <KPICard
           title="Dış Ticaret Dengesi"
           value={formatMoney(balance)}
-          subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'}
+          subtitle={balance >= 0 ? 'Fazla' : 'Açık'}
           icon={Scale}
           color={balance >= 0 ? 'green' : 'orange'}
         />
@@ -221,7 +221,7 @@ export default function TradeOverviewTab() {
             </span>
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-            {balance >= 0 ? '🟢 FAZLA' : '🔴 AÇIK'}
+            {balance >= 0 ? 'FAZLA' : 'AÇIK'}
           </div>
           <div style={{ fontSize: 13, color: balance >= 0 ? '#10b981' : '#ef4444' }}>
             {formatMoney(Math.abs(balance))} {balance >= 0 ? 'dış ticaret fazlası' : 'dış ticaret açığı'}
@@ -245,7 +245,7 @@ export default function TradeOverviewTab() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📈 Yıllık Trend + Ticaret Dengesi (2000–2025)" action={<ChartInsightButton title="Yıllık Trend + Ticaret Dengesi" description="2000-2025 ihracat, ithalat ve denge" data={yearlyData} context={overviewContext} />}>
+        <ChartCard title="Yıllık Trend + Ticaret Dengesi (2000–2025)" action={<ChartInsightButton title="Yıllık Trend + Ticaret Dengesi" description="2000-2025 ihracat, ithalat ve denge" data={yearlyData} context={overviewContext} />}>
           {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
               hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
               taşındı — bkz. components/ui/SplitAxisChart. */}
@@ -353,7 +353,7 @@ export default function TradeOverviewTab() {
       {/* Sankey: İhracat Akış */}
       {topExpCountries.length > 0 && (
         <FlowSankeyCard
-          title={`🌊 İhracat Akış Haritası — Türkiye → Hedef Ülkeler (${selectedYear})`}
+          title={`İhracat Akış Haritası — Türkiye → Hedef Ülkeler (${selectedYear})`}
           subtitle={`${GROUP_FILTER_LABELS[productGroupFilter]} ihracatının ülkelere dağılımı`}
           nodes={[
             { name: 'Türkiye', color: '#10b981' },
@@ -369,7 +369,7 @@ export default function TradeOverviewTab() {
 
       {topImpCountries.length > 0 && (
         <FlowSankeyCard
-          title={`🌊 İthalat Akış Haritası — Kaynak Ülkeler → Türkiye (${selectedYear})`}
+          title={`İthalat Akış Haritası — Kaynak Ülkeler → Türkiye (${selectedYear})`}
           subtitle={`${GROUP_FILTER_LABELS[productGroupFilter]} ithalatının kaynak ülke dağılımı`}
           nodes={[
             ...topImpCountries.map(c => ({
@@ -409,7 +409,7 @@ export default function TradeOverviewTab() {
                         background: p.category === 'bitkisel' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
                         color: p.category === 'bitkisel' ? '#10b981' : '#ef4444',
                       }}>
-                        {p.category === 'bitkisel' ? '🌿 Bitkisel' : '🐄 Hayvansal'}
+                        {p.category === 'bitkisel' ? 'Bitkisel' : 'Hayvansal'}
                       </span>
                     </td>
                     <td style={{ padding: '8px', textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
@@ -449,7 +449,7 @@ export default function TradeOverviewTab() {
                         background: p.category === 'bitkisel' ? 'rgba(245,158,11,0.15)' : 'rgba(139,92,246,0.15)',
                         color: p.category === 'bitkisel' ? '#f59e0b' : '#8b5cf6',
                       }}>
-                        {p.category === 'bitkisel' ? '🌿 Bitkisel' : '🐄 Hayvansal'}
+                        {p.category === 'bitkisel' ? 'Bitkisel' : 'Hayvansal'}
                       </span>
                     </td>
                     <td style={{ padding: '8px', textAlign: 'right', color: '#f59e0b', fontWeight: 600 }}>

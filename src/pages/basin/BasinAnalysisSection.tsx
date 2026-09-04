@@ -101,14 +101,14 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           { 
             label: 'Toplam Havza Sayısı', 
             value: basinSummary.length, 
-            icon: '🌊', 
+            icon: '', 
             color: '#3b82f6',
             desc: 'Türkiye geneli'
           },
           { 
             label: 'En Çok Üreten Havza', 
             value: basinProductionStats[0]?.basinName.split(' ').slice(0, 2).join(' ') || '-', 
-            icon: '🏆', 
+            icon: '', 
             color: '#10b981',
             desc: `${(basinProductionStats[0]?.toplam_uretim || 0).toLocaleString('tr-TR')} ton`,
             isText: true
@@ -116,7 +116,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           { 
             label: 'Toplam Üretim', 
             value: Math.round(basinProductionStats.reduce((sum, b) => sum + b.toplam_uretim, 0)), 
-            icon: '🌾', 
+            icon: '', 
             color: '#f59e0b',
             desc: 'Ton (2024)',
             suffix: ' M'
@@ -124,7 +124,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           { 
             label: 'Ortalama Ürün Çeşitliliği', 
             value: Math.round(basinProductionStats.reduce((sum, b) => sum + b.urun_cesit, 0) / (basinProductionStats.length || 1)), 
-            icon: '🎯', 
+            icon: '', 
             color: '#8b5cf6',
             desc: 'Çeşit/Havza'
           }
@@ -175,7 +175,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
           <h3 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, marginBottom: 0 }}>
             Havza Üretim Karşılaşması (2024 - Ton)
           </h3>
-          <ChartInsightButton title="🌾 Havza Karşılaşması" description="Havza bazında üretim karşılaşması" data={basinProductionStats} context={{ section: 'Havza Analiz' }} compact />
+          <ChartInsightButton title="Havza Karşılaşması" description="Havza bazında üretim karşılaşması" data={basinProductionStats} context={{ section: 'Havza Analiz' }} compact />
         </div>
         {loadingBasinStats ? (
           <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>

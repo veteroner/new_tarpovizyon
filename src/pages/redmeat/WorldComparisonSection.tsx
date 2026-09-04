@@ -123,9 +123,9 @@ export default function WorldComparisonSection({
             * görüntü. Tarihi başlığa yazılıyor ki güncel fiyat sanılmasın.
             */}
           <ChartCard
-            title={`💰 Dünya Karkas Et Fiyatları (USD/kg)${worldCarcassPrices?.anlikGoruntuTarihi ? ` — ${worldCarcassPrices.anlikGoruntuTarihi} anlık görüntüsü` : ''}`}
+            title={`Dünya Karkas Et Fiyatları (USD/kg)${worldCarcassPrices?.anlikGoruntuTarihi ? ` — ${worldCarcassPrices.anlikGoruntuTarihi} anlık görüntüsü` : ''}`}
             span={2}
-            action={<ChartInsightButton title="💰 Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />}
+            action={<ChartInsightButton title="Dünya Karkas Et Fiyatları (USD/kg)" description="Dünya ülkeleri karkas et fiyat karşılaştırması" data={worldCarcassPriceTreemap} context={{ birim: 'USD/kg' }} />}
           >
             <ResponsiveContainer width="100%" height={400}>
               <Treemap
@@ -182,7 +182,7 @@ export default function WorldComparisonSection({
       {/* Section 5: Verimlilik Karşılaştırması */}
       {productivityRadarData.length > 0 && (
         <div className="chart-grid" style={{ marginTop: '30px' }}>
-          <ChartCard title="🎯 Verimlilik Karşılaştırması (11 Ülke)" action={<ChartInsightButton title="🎯 Verimlilik Karşılaştırması (11 Ülke)" description="Karkas verimi verimlilik karşılaştırması" data={productivityRadarData} context={{ section: 'Verimlilik' }} compact />}>
+          <ChartCard title="Verimlilik Karşılaştırması (11 Ülke)" action={<ChartInsightButton title="Verimlilik Karşılaştırması (11 Ülke)" description="Karkas verimi verimlilik karşılaştırması" data={productivityRadarData} context={{ section: 'Verimlilik' }} compact />}>
             <ResponsiveContainer width="100%" height={380}>
               <RadarChart data={productivityRadarData}>
                 <PolarGrid stroke="var(--border)" />
@@ -204,7 +204,7 @@ export default function WorldComparisonSection({
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="🌍 Türkiye Dünya Karkas Ağırlığı Dağılımında Nerede?" span={2} action={<ChartInsightButton title="🌍 Dünya Karkas Ağırlığı Dağılımı" description="Türkiye'nin dünya karkas ağırlığı dağılımındaki yeri" data={carcassWeightHistogram} context={{ section: 'Histogram', turkiyeKarkas }} compact />}>
+          <ChartCard title="Türkiye Dünya Karkas Ağırlığı Dağılımında Nerede?" span={2} action={<ChartInsightButton title="Dünya Karkas Ağırlığı Dağılımı" description="Türkiye'nin dünya karkas ağırlığı dağılımındaki yeri" data={carcassWeightHistogram} context={{ section: 'Histogram', turkiyeKarkas }} compact />}>
             <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
               Her sütun bir karkas ağırlığı aralığındaki ülke sayısını gösterir.
               {turkiyeKarkas > 0 && <> Kırmızı sütun Türkiye'nin bulunduğu aralık — <strong>{turkiyeKarkas.toFixed(0)} kg</strong>.</>}

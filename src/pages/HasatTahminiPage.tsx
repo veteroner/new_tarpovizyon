@@ -19,10 +19,10 @@ import ResultsView  from './hasat/ResultsView';
 import './HasatTahminiPage.css';
 
 const STEPS = [
-  { n: 1, icon: '📍', label: 'Konum' },
-  { n: 2, icon: '🌾', label: 'Ürün' },
-  { n: 3, icon: '📐', label: 'Arazi' },
-  { n: 4, icon: '📊', label: 'Sonuçlar' },
+  { n: 1, icon: '', label: 'Konum' },
+  { n: 2, icon: '', label: 'Ürün' },
+  { n: 3, icon: '', label: 'Arazi' },
+  { n: 4, icon: '', label: 'Sonuçlar' },
 ];
 
 export function HasatTahminiPage(): React.ReactElement {

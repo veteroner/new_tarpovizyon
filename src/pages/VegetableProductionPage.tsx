@@ -1,3 +1,4 @@
+import { Carrot } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 
@@ -73,7 +74,7 @@ export default function VegetableProductionPage() {
     <TuikPlantCategoryPage
       title="Sebze Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı sebze üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🥬"
+      icon={<Carrot size={30} aria-hidden="true" />}
       urunGrup="Sebzeler"
       defaultProducts={['Domates (Sofralık)', 'Biber (Sivri)', 'Hıyar (Sofralık)']}
       extraSection={vegExtra}

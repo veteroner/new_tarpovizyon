@@ -31,7 +31,7 @@ export function GIProductsTab({ productGroupData }: Props) {
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Ürün Gruplarına Göre Dağılım (Top 15)
           </h3>
-          <ChartInsightButton title="📊 Ürün Grupları" description="Coğrafi işaretli ürün grupları dağılımı" data={productGroupData} context={{ section: 'Coğrafi İşaretler Ürünler' }} compact />
+          <ChartInsightButton title="Ürün Grupları" description="Coğrafi işaretli ürün grupları dağılımı" data={productGroupData} context={{ section: 'Coğrafi İşaretler Ürünler' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart

@@ -19,12 +19,12 @@ import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../utils
 import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
-  { id: 'overview', label: 'Genel Bakis', icon: '🌍', desc: 'Dunya arazi kullanimi ozeti' },
-  { id: 'transformation', label: 'Arazi Donusumu', icon: '🔄', desc: 'Arazi tipi degisim analizi' },
-  { id: 'benchmark', label: 'Ulke Siralamasi', icon: '🏆', desc: 'Arazi verimliligi karsilastirma' },
-  { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷', desc: 'Turkiye arazi intelligence' },
-  { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮', desc: 'Zaman serisi projeksiyonlari' },
-  { id: 'alerts', label: 'İçgörüler', icon: '🧠', desc: 'Otomatik uyarılar ve içgörüler' },
+  { id: 'overview', label: 'Genel Bakis', icon: '', desc: 'Dunya arazi kullanimi ozeti' },
+  { id: 'transformation', label: 'Arazi Donusumu', icon: '', desc: 'Arazi tipi degisim analizi' },
+  { id: 'benchmark', label: 'Ulke Siralamasi', icon: '', desc: 'Arazi verimliligi karsilastirma' },
+  { id: 'turkey', label: 'Turkiye Profili', icon: 'TR', desc: 'Turkiye arazi intelligence' },
+  { id: 'forecast', label: 'Trend & Tahmin', icon: '', desc: 'Zaman serisi projeksiyonlari' },
+  { id: 'alerts', label: 'İçgörüler', icon: '', desc: 'Otomatik uyarılar ve içgörüler' },
 ];
 
 export default function LandUsePage() {
@@ -169,7 +169,7 @@ export default function LandUsePage() {
               )}
               {transformFlowModel && (
                 <FlowSankeyCard
-                  title={`🌊 Türkiye Arazi Dönüşüm Sinyali (${transformFlowModel.startYear} → ${transformFlowModel.endYear})`}
+                  title={`Türkiye Arazi Dönüşüm Sinyali (${transformFlowModel.startYear} → ${transformFlowModel.endYear})`}
                   subtitle="Tarım toplamı ve sulama altyapısını dışarıda bırakan, açık crosswalk kurallarıyla kaybeden arazi tiplerinden kazanan tiplerine türetilmiş yönlü akış sinyali. Gerçek parsel bazlı geçiş matrisi değildir."
                   nodes={transformFlowModel.nodes}
                   links={transformFlowModel.links}
@@ -359,10 +359,10 @@ export default function LandUsePage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                 {intelligenceAlerts.map((alert: IntelligenceAlert) => {
                   const severityColors: Record<string, { bg: string; border: string; icon: string }> = {
-                    critical: { bg: 'rgba(239, 68, 68, 0.1)', border: '#ef4444', icon: '🔴' },
-                    warning: { bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b', icon: '⚠️' },
-                    positive: { bg: 'rgba(34, 197, 94, 0.1)', border: '#22c55e', icon: '🟢' },
-                    info: { bg: 'rgba(59, 130, 246, 0.1)', border: '#3b82f6', icon: '💡' }
+                    critical: { bg: 'rgba(239, 68, 68, 0.1)', border: '#ef4444', icon: '' },
+                    warning: { bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b', icon: '' },
+                    positive: { bg: 'rgba(34, 197, 94, 0.1)', border: '#22c55e', icon: '' },
+                    info: { bg: 'rgba(59, 130, 246, 0.1)', border: '#3b82f6', icon: '' }
                   };
                   const colors = severityColors[alert.severity] || severityColors.info;
                   return (

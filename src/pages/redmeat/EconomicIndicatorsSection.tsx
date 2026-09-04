@@ -145,7 +145,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
 
       {/* Karkas Fiyat Trendi */}
       <div className="chart-grid">
-        <ChartCard title="📈 Karkas Fiyat Trendi" span={2} action={<ChartInsightButton title="📈 Karkas Fiyat Trendi" description="Dana ve kuzu karkas fiyat trendi" data={filteredEconomicData} context={{ section: 'Fiyat Trendi' }} />}>
+        <ChartCard title="Karkas Fiyat Trendi" span={2} action={<ChartInsightButton title="Karkas Fiyat Trendi" description="Dana ve kuzu karkas fiyat trendi" data={filteredEconomicData} context={{ section: 'Fiyat Trendi' }} />}>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -170,7 +170,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
 
       {/* Maliyet, Karlılık, Dolar/Yem */}
       <div className="chart-grid" style={{ marginTop: '20px' }}>
-        <ChartCard title="💰 Maliyet vs Fiyat" action={<ChartInsightButton title="💰 Maliyet vs Fiyat" description="Dana karkas maliyet ve fiyat karşılaştırması" data={filteredEconomicData} context={{ section: 'Maliyet-Fiyat' }} compact />}>
+        <ChartCard title="Maliyet vs Fiyat" action={<ChartInsightButton title="Maliyet vs Fiyat" description="Dana karkas maliyet ve fiyat karşılaştırması" data={filteredEconomicData} context={{ section: 'Maliyet-Fiyat' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -187,7 +187,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📊 Karlılık Trendi" action={<ChartInsightButton title="📊 Karlılık Trendi" description="Dana karkas karlılık oranı trendi" data={filteredEconomicData} context={{ section: 'Karlılık' }} compact />}>
+        <ChartCard title="Karlılık Trendi" action={<ChartInsightButton title="Karlılık Trendi" description="Dana karkas karlılık oranı trendi" data={filteredEconomicData} context={{ section: 'Karlılık' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -202,7 +202,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="💱 Dolar Kuru &amp; Yem Fiyatları" action={<ChartInsightButton title="💱 Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />}>
+        <ChartCard title="Dolar Kuru &amp; Yem Fiyatları" action={<ChartInsightButton title="Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -226,7 +226,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
 
       {/* Korelasyon Analizi */}
       <div className="chart-grid" style={{ marginTop: '20px' }}>
-        <ChartCard title="🔄 Dolar-Fiyat Korelasyonu" action={<ChartInsightButton title="🔄 Dolar-Fiyat Korelasyonu" description="Dolar kuru ile dana karkas fiyatı korelasyon analizi" data={filteredEconomicData} context={{ section: 'Korelasyon' }} compact />}>
+        <ChartCard title="Dolar-Fiyat Korelasyonu" action={<ChartInsightButton title="Dolar-Fiyat Korelasyonu" description="Dolar kuru ile dana karkas fiyatı korelasyon analizi" data={filteredEconomicData} context={{ section: 'Korelasyon' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -255,7 +255,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📈 Besilik Hayvan Fiyatları" action={<ChartInsightButton title="📈 Besilik Hayvan Fiyatları" description="Besilik dana ve küçükbaş hayvan fiyatları" data={filteredEconomicData} context={{ section: 'Besilik Fiyatlar' }} compact />}>
+        <ChartCard title="Besilik Hayvan Fiyatları" action={<ChartInsightButton title="Besilik Hayvan Fiyatları" description="Besilik dana ve küçükbaş hayvan fiyatları" data={filteredEconomicData} context={{ section: 'Besilik Fiyatlar' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -272,7 +272,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📉 Fiyat-Maliyet Farkı" action={<ChartInsightButton title="📉 Fiyat-Maliyet Farkı" description="Dana karkas fiyat-maliyet farkı trendi" data={filteredEconomicData} context={{ section: 'Fiyat-Maliyet Fark' }} compact />}>
+        <ChartCard title="Fiyat-Maliyet Farkı" action={<ChartInsightButton title="Fiyat-Maliyet Farkı" description="Dana karkas fiyat-maliyet farkı trendi" data={filteredEconomicData} context={{ section: 'Fiyat-Maliyet Fark' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

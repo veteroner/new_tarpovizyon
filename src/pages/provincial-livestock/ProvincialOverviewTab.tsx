@@ -218,7 +218,7 @@ export default function ProvincialOverviewTab({
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
               İl Bazında Dağılım (Top 15)
             </h3>
-            <ChartInsightButton title="📊 İl Bazında Dağılım" description="Top 15 il dağılımı" data={filteredProvincialData.slice(0, 15)} context={{ section: 'Genel Bakış' }} compact />
+            <ChartInsightButton title="İl Bazında Dağılım" description="Top 15 il dağılımı" data={filteredProvincialData.slice(0, 15)} context={{ section: 'Genel Bakış' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart
@@ -265,7 +265,7 @@ export default function ProvincialOverviewTab({
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
               Bölgesel Dağılım
             </h3>
-            <ChartInsightButton title="🥧 Bölgesel Dağılım" description="Bölgelere göre dağılım" data={filteredProvincialData} context={{ section: 'Genel Bakış' }} compact />
+            <ChartInsightButton title="Bölgesel Dağılım" description="Bölgelere göre dağılım" data={filteredProvincialData} context={{ section: 'Genel Bakış' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
@@ -393,7 +393,7 @@ export default function ProvincialOverviewTab({
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Türkiye İl Dağılım Haritası (Coğrafi Bölgeler)
           </h3>
-          <ChartInsightButton title="🗺️ İl Dağılım Haritası" description="Harita: il bazlı hayvan popülasyonu" data={filteredProvincialData} context={{ section: 'Harita' }} compact />
+          <ChartInsightButton title="İl Dağılım Haritası" description="Harita: il bazlı hayvan popülasyonu" data={filteredProvincialData} context={{ section: 'Harita' }} compact />
         </div>
         {filteredProvincialData.length === 0 ? (
           <div style={{ color: 'var(--text-secondary)', fontSize: '14px', padding: '20px', textAlign: 'center' }}>

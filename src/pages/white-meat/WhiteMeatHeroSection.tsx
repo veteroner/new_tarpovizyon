@@ -12,7 +12,7 @@ import type { YearPoint, TuikChickenData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
-import { Bird } from 'lucide-react';
+import { Bird, TrendingUp, TrendingDown } from 'lucide-react';
 
 type Props = {
   series: YearPoint[];
@@ -37,7 +37,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YILLIK DEĞİŞİM</span>
-            <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? '📈' : '📉'}</div>
+            <div className={`kpi-icon ${yoy >= 0 ? 'green' : 'red'}`}>{yoy >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
           </div>
           <div className="kpi-value" style={{ color: yoy >= 0 ? '#22c55e' : '#ef4444' }}>
             {yuzde(yoy, 1)}
@@ -111,7 +111,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
       })()}
 
       <div className="chart-grid">
-        <ChartCard title="📈 Kanatlı Eti Üretimi Trendi" span={2} action={<ChartInsightButton title="📈 Kanatlı Eti Üretimi Trendi" description="Kanatlı eti uzun dönem üretim trendi" data={series} context={{ section: 'Trend' }} />}>
+        <ChartCard title="Kanatlı Eti Üretimi Trendi" span={2} action={<ChartInsightButton title="Kanatlı Eti Üretimi Trendi" description="Kanatlı eti uzun dönem üretim trendi" data={series} context={{ section: 'Trend' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

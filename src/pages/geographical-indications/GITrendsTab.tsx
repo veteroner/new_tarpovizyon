@@ -29,7 +29,7 @@ export function GITrendsTab({ yearlyTrend }: Props) {
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Yıllık Tescil ve Başvuru Sayıları
           </h3>
-          <ChartInsightButton title="📊 Yıllık Tescil Trendi" description="Yıllık tescil ve başvuru sayıları trendi" data={yearlyTrend} context={{ section: 'Coğrafi İşaretler Trend' }} compact />
+          <ChartInsightButton title="Yıllık Tescil Trendi" description="Yıllık tescil ve başvuru sayıları trendi" data={yearlyTrend} context={{ section: 'Coğrafi İşaretler Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart data={yearlyTrend} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>

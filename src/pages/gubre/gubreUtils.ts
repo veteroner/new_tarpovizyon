@@ -149,9 +149,9 @@ export function calculate(state: WizardState, productsList: FertilizerProduct[] 
 
   let ph_uyari: string | undefined;
   if (state.toprak.ph < crop.ph_min) {
-    ph_uyari = `⚠️ Toprak pH değeri düşük (${state.toprak.ph}). Kireçleme önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
+    ph_uyari = `Toprak pH değeri düşük (${state.toprak.ph}). Kireçleme önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
   } else if (state.toprak.ph > crop.ph_max) {
-    ph_uyari = `⚠️ Toprak pH değeri yüksek (${state.toprak.ph}). Kükürt uygulaması önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
+    ph_uyari = `Toprak pH değeri yüksek (${state.toprak.ph}). Kükürt uygulaması önerilir (hedef: ${crop.ph_min}-${crop.ph_max})`;
   }
 
   return {

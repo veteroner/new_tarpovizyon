@@ -495,8 +495,8 @@ export default function ProductBalancePage() {
                       a.severity === 'critical' ? 'text-red-600' :
                       a.severity === 'warning' ? 'text-orange-600' : 'text-yellow-600'
                     }`}>
-                      {a.severity === 'critical' ? '🔴 KRİTİK' :
-                       a.severity === 'warning' ? '🟠 UYARI' : '🟡 İZLEME'}
+                      {a.severity === 'critical' ? 'KRİTİK' :
+                       a.severity === 'warning' ? 'UYARI' : 'İZLEME'}
                     </p>
                   </div>
                   <div className="text-right">
@@ -525,26 +525,26 @@ export default function ProductBalancePage() {
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
               <p className="text-green-300 font-bold mb-1">Arz Durumu</p>
               <p>{selfSufficiency >= 100
-                ? `✅ Kendine yeterli (${yuzde(selfSufficiency, 0)}). Üretim iç talebi karşılıyor.`
+                ? `Kendine yeterli (${yuzde(selfSufficiency, 0)}). Üretim iç talebi karşılıyor.`
                 : selfSufficiency >= 70
-                ? `⚠️ Kısmen yeterli (${yuzde(selfSufficiency, 0)}). İthalata %${importDep.toFixed(0)} bağımlılık.`
-                : `🔴 Yetersiz (${yuzde(selfSufficiency, 0)}). Kritik ithalat bağımlılığı: %${importDep.toFixed(0)}.`}</p>
+                ? `Kısmen yeterli (${yuzde(selfSufficiency, 0)}). İthalata %${importDep.toFixed(0)} bağımlılık.`
+                : `Yetersiz (${yuzde(selfSufficiency, 0)}). Kritik ithalat bağımlılığı: %${importDep.toFixed(0)}.`}</p>
             </div>
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
               <p className="text-blue-300 font-bold mb-1">Üretim Trendi</p>
               <p>{prodYoY > 5
-                ? `📈 Güçlü artış (+${yuzde(prodYoY, 1)}). Üretim kapasitesi genişliyor.`
+                ? `Güçlü artış (+${yuzde(prodYoY, 1)}). Üretim kapasitesi genişliyor.`
                 : prodYoY > 0
-                ? `📊 Hafif artış (+${yuzde(prodYoY, 1)}). İstikrarlı üretim.`
+                ? `Hafif artış (+${yuzde(prodYoY, 1)}). İstikrarlı üretim.`
                 : prodYoY > -5
-                ? `📉 Hafif düşüş (${yuzde(prodYoY, 1)}). İzlenmeli.`
-                : `🔴 Sert düşüş (${yuzde(prodYoY, 1)}). Acil müdahale gerekli.`}</p>
+                ? `Hafif düşüş (${yuzde(prodYoY, 1)}). İzlenmeli.`
+                : `Sert düşüş (${yuzde(prodYoY, 1)}). Acil müdahale gerekli.`}</p>
             </div>
             <div className="rounded-lg p-3" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
               <p className="text-orange-300 font-bold mb-1">Ticaret Dengesi</p>
               <p>{exports > imports
-                ? `🏆 Net ihracatçı. İhracat/ithalat: ${(exports/Math.max(imports,1)).toFixed(1)}x.`
-                : `🔻 Net ithalatçı. İthalat/ihracat: ${(imports/Math.max(exports,1)).toFixed(1)}x.`}
+                ? `Net ihracatçı. İhracat/ithalat: ${(exports/Math.max(imports,1)).toFixed(1)}x.`
+                : `Net ithalatçı. İthalat/ihracat: ${(imports/Math.max(exports,1)).toFixed(1)}x.`}
                 {' '}AB payı: İhracat {yuzde(get('İhracat AB 27-28') > 0? (get('İhracat AB 27-28') / exports * 100) : 0, 0)},
                 İthalat {yuzde(get('İthalat AB 27-28') > 0? (get('İthalat AB 27-28') / imports * 100) : 0, 0)}.</p>
             </div>

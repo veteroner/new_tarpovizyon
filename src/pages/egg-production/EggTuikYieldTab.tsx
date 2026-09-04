@@ -41,7 +41,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
     <>
       {/* Yumurtacı Tavuk Sayısı Trendi */}
       <div className="chart-grid">
-        <ChartCard title="🐔 Yumurtacı Tavuk Sayısı Trendi" span={2} action={<ChartInsightButton title="🐔 Yumurtacı Tavuk Sayısı Trendi" description="Yumurtacı tavuk sayısı trendi" data={layerChartData} context={{ section: 'Layer Count' }} compact />}>
+        <ChartCard title="Yumurtacı Tavuk Sayısı Trendi" span={2} action={<ChartInsightButton title="Yumurtacı Tavuk Sayısı Trendi" description="Yumurtacı tavuk sayısı trendi" data={layerChartData} context={{ section: 'Layer Count' }} compact />}>
           {hasLayerChartData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>
@@ -80,7 +80,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
 
       {/* Verim Trendi */}
       <div className="chart-grid">
-        <ChartCard title="📊 Tavuk Başına Yumurta Verimi Trendi" span={2} action={<ChartInsightButton title="📊 Tavuk Başına Yumurta Verimi Trendi" description="Tavuk başına yumurta verimi trendi" data={yieldData} context={{ section: 'Verim Trend' }} compact />}>
+        <ChartCard title="Tavuk Başına Yumurta Verimi Trendi" span={2} action={<ChartInsightButton title="Tavuk Başına Yumurta Verimi Trendi" description="Tavuk başına yumurta verimi trendi" data={yieldData} context={{ section: 'Verim Trend' }} compact />}>
           {hasYieldData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>
@@ -113,7 +113,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
 
       {/* Kuluçka Yumurtası Trendi */}
       <div className="chart-grid">
-        <ChartCard title="🥚 Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi)" span={2} action={<ChartInsightButton title="🥚 Kuluçkaya Basılan Yumurta" description="Layer civciv üretimi için kuluçkaya basılan yumurta sayısı" data={hatchData} context={{ section: 'Kuluçka' }} compact />}>
+        <ChartCard title="Kuluçkaya Basılan Yumurta (Layer Civciv Üretimi)" span={2} action={<ChartInsightButton title="Kuluçkaya Basılan Yumurta" description="Layer civciv üretimi için kuluçkaya basılan yumurta sayısı" data={hatchData} context={{ section: 'Kuluçka' }} compact />}>
           {hasHatchData ? (
             <>
               <ResponsiveContainer width="100%" height={360}>

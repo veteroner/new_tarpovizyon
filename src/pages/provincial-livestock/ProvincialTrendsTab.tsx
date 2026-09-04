@@ -178,7 +178,7 @@ export default function ProvincialTrendsTab({
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             📊 {yearRange[0]}-{yearRange[1]} Yılları Arası Hayvan Popülasyon Trendi
           </h3>
-          <ChartInsightButton title="📊 Popülasyon Trendi" description="Yıllar arası trend analizi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+          <ChartInsightButton title="Popülasyon Trendi" description="Yıllar arası trend analizi" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart
@@ -233,7 +233,7 @@ export default function ProvincialTrendsTab({
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Yıllık Büyüme Oranları (%)
           </h3>
-          <ChartInsightButton title="📊 Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
+          <ChartInsightButton title="Büyüme Oranları" description="Yıllık büyüme yüzdeleri" data={yearlyTrendData} context={{ section: 'Trend' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart

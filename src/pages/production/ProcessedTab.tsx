@@ -44,9 +44,9 @@ export function ProcessedTab({
       {processedKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
           <KPICard title="Dünya Toplam" value={formatValue(processedKPIs.worldTotal)} subtitle={`Lider: ${processedKPIs.leader} (%${processedKPIs.leaderShare.toFixed(1)})`} icon={Globe} color="blue" large />
-          <KPICard title="🇹🇷 Türkiye" value={formatValue(processedKPIs.turkeyProduction)} subtitle={processedKPIs.turkeyRank > 0 ? `${processedKPIs.turkeyRank}. | %${processedKPIs.turkeyShare.toFixed(1)}` : 'Sıralama dışı'} icon={Factory} color="green" />
+          <KPICard title="Türkiye" value={formatValue(processedKPIs.turkeyProduction)} subtitle={processedKPIs.turkeyRank > 0 ? `${processedKPIs.turkeyRank}. | %${processedKPIs.turkeyShare.toFixed(1)}` : 'Sıralama dışı'} icon={Factory} color="green" />
           <KPICard title="Dünya CAGR" value={`${processedKPIs.worldCAGR >= 0 ? '+' : ''}${yuzde(processedKPIs.worldCAGR, 2)}`} subtitle="Bileşik büyüme" icon={TrendingUp} color={processedKPIs.worldCAGR >= 0 ? 'green' : 'red'} />
-          <KPICard title="🇹🇷 CAGR" value={`${processedKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(processedKPIs.turkeyCAGR, 2)}`} subtitle="Türkiye büyüme" icon={Activity} color={processedKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
+          <KPICard title="CAGR" value={`${processedKPIs.turkeyCAGR >= 0 ? '+' : ''}${yuzde(processedKPIs.turkeyCAGR, 2)}`} subtitle="Türkiye büyüme" icon={Activity} color={processedKPIs.turkeyCAGR >= 0 ? 'green' : 'red'} />
         </div>
 
         <div style={{ marginBottom: '24px' }}><InsightCard insights={processedInsights} maxDisplay={6} /></div>
@@ -61,7 +61,7 @@ export function ProcessedTab({
               {processedTopCountries.slice(0, 15).map((c: any) => (
                 <tr key={c.country} style={{ borderBottom: '1px solid var(--border)', background: c.isTurkey ? 'rgba(255,107,53,0.1)' : 'transparent', fontWeight: c.isTurkey ? 700 : 400 }}>
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.rank}</td>
-                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
+                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatMetric(c.production)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{yuzde(c.share, 1)}</td>
                 </tr>
@@ -71,21 +71,21 @@ export function ProcessedTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="📈 Trend — Dünya vs Türkiye" action={<ChartInsightButton title="İşlenmiş Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye işlenmiş ürün trendi" data={processedTrends} context={{ ürün: processedProduct }} />}>
+          <ChartCard title="Trend — Dünya vs Türkiye" action={<ChartInsightButton title="İşlenmiş Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye işlenmiş ürün trendi" data={processedTrends} context={{ ürün: processedProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={processedTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
                 <YAxis yAxisId="right" orientation="right" tick={{ fill: TURKEY_COLOR, fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
-                <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'world' ? 'Dünya' : '🇹🇷 Türkiye']} />
-                <Legend formatter={(v) => v === 'world' ? 'Dünya' : '🇹🇷 Türkiye'} />
+                <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'world' ? 'Dünya' : 'Türkiye']} />
+                <Legend formatter={(v) => v === 'world' ? 'Dünya' : 'Türkiye'} />
                 <Line yAxisId="left" type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />
                 <Line yAxisId="right" type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="🥧 Pazar Payı — Top 10" action={<ChartInsightButton title="İşlenmiş Ürün Pazar Payı — Top 10" description="İşlenmiş üretimde lider 10 ülke pazar payı" data={processedTopCountries.slice(0, 10)} context={{ ürün: processedProduct }} />}>
+          <ChartCard title="Pazar Payı — Top 10" action={<ChartInsightButton title="İşlenmiş Ürün Pazar Payı — Top 10" description="İşlenmiş üretimde lider 10 ülke pazar payı" data={processedTopCountries.slice(0, 10)} context={{ ürün: processedProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={processedTopCountries.slice(0, 10)} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="production" nameKey="country"

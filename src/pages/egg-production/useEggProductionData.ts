@@ -291,22 +291,22 @@ export function useEggProductionData() {
     let cancelled = false;
     const loadEggPrices = async () => {
       try {
-        console.log('🥚 Fetching egg prices...');
+        console.log('Fetching egg prices...');
         const res = await fetchEggPrices();
-        console.log('🥚 Egg prices response:', res);
+        console.log('Egg prices response:', res);
 
         if (!cancelled) {
           if (res.prices && Object.keys(res.prices).length > 0) {
             setEggPrices(res.prices);
             setEggPriceError(null);
           } else {
-            console.warn('⚠️ No prices returned from API');
+            console.warn('No prices returned from API');
             setEggPriceError('Fiyatlar yüklenemedi');
           }
           if (res.date) setEggPriceDate(res.date);
         }
       } catch (error) {
-        console.error('❌ Egg prices fetch error:', error);
+        console.error('Egg prices fetch error:', error);
         if (!cancelled) setEggPriceError('API hatası');
       }
     };

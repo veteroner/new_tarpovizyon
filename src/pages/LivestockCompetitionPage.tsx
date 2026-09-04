@@ -91,7 +91,7 @@ export function LivestockCompetitionPage() {
       {/* ── KPI Row 1 – Turkey basics ──────────────────────── */}
       <div className="kpi-grid">
         <div className="kpi-card large">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 TÜRKİYE TOPLAM ÜRETİM</span></div>
+          <div className="kpi-header"><span className="kpi-title">TÜRKİYE TOPLAM ÜRETİM</span></div>
           <div className="kpi-value" style={{ fontSize: '1.8rem', color: TURKEY_COLOR }}>
             {turkeyData ? fmtVal(turkeyData.total) : 'N/A'}
           </div>
@@ -138,7 +138,7 @@ export function LivestockCompetitionPage() {
             color: hhi.concentration === 'VERY_HIGH' ? NEG : hhi.concentration === 'HIGH' ? NEUT : POS
           }}>{hhi.hhi.toFixed(0)}</div>
           <div className="kpi-subtitle">
-            {hhi.concentration === 'LOW' ? '✅ Rekabetçi' : hhi.concentration === 'MODERATE' ? '⚠️ Orta' : hhi.concentration === 'HIGH' ? '🟡 Yüksek' : '🔴 Çok yüksek'}
+            {hhi.concentration === 'LOW' ? 'Rekabetçi' : hhi.concentration === 'MODERATE' ? 'Orta' : hhi.concentration === 'HIGH' ? 'Yüksek' : 'Çok yüksek'}
           </div>
         </div>
         <div className="kpi-card">
@@ -155,7 +155,7 @@ export function LivestockCompetitionPage() {
 
       {/* ── Turkey Share ───────────────────────────────────── */}
       <div className="chart-card" style={{ marginTop: 20 }}>
-        <h3 className="chart-title">🇹🇷 Türkiye'nin Dünya Payı ({selectedYear})</h3>
+        <h3 className="chart-title">Türkiye'nin Dünya Payı ({selectedYear})</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 15, padding: 15 }}>
           {([
             { label: 'Et Üretimi', val: turkeyData?.meat || 0, w: world.meat, color: '#ef4444', emoji: '🥩' },
@@ -210,7 +210,7 @@ export function LivestockCompetitionPage() {
         </ChartCard>
 
         {/* BCG Matrix */}
-        <ChartCard title="🎯 Rekabet Pozisyon Matrisi (Büyüme × Pay)" action={<ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />}>
+        <ChartCard title="Rekabet Pozisyon Matrisi (Büyüme × Pay)" action={<ChartInsightButton title="Rekabet Pozisyon Matrisi" description="Büyüme ve pazar payı matrisi" data={bcgData} context={{ section: 'Rekabet' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 30, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -276,12 +276,12 @@ export function LivestockCompetitionPage() {
                     (c.country.length > 15 ? c.country.substring(0, 15) + '..' : c.country) === val);
                   const t = d ? isTR(d.country) : false;
                   return <text x={px} y={py} dy={4} textAnchor="end" fill={t ? TURKEY_COLOR : 'var(--text-secondary)'} fontWeight={t ? 700 : 400} fontSize={11}>
-                    {t ? '🇹🇷 ' : ''}{val}
+                    {t ? 'TR · ' : ''}{val}
                   </text>;
                 }} interval={0} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`${(v as number).toFixed(2)}M ton`, n === 'meat' ? 'Et' : n === 'milk' ? 'Süt' : 'Yumurta']} />
-              <Legend formatter={v => v === 'meat' ? '🥩 Et' : v === 'milk' ? '🥛 Süt' : '🥚 Yumurta'} />
+              <Legend formatter={v => v === 'meat' ? 'Et' : v === 'milk' ? 'Süt' : 'Yumurta'} />
               <Bar dataKey="meat" stackId="a" fill="#ef4444" />
               <Bar dataKey="milk" stackId="a" fill="#3b82f6" />
               <Bar dataKey="eggs" stackId="a" fill="#f59e0b" radius={[0, 4, 4, 0]} />
@@ -290,7 +290,7 @@ export function LivestockCompetitionPage() {
         </ChartCard>
 
         {/* Radar */}
-        <ChartCard title="📊 Türkiye vs Top 2 – Kategori Karşılaştırması" action={<ChartInsightButton title="Türkiye vs Top 2 Karşılaştırması" description="Türkiye vs top 2 kategori karşılaştırması" data={radarData} context={{ section: 'Rekabet' }} compact />}>
+        <ChartCard title="Türkiye vs Top 2 – Kategori Karşılaştırması" action={<ChartInsightButton title="Türkiye vs Top 2 Karşılaştırması" description="Türkiye vs top 2 kategori karşılaştırması" data={radarData} context={{ section: 'Rekabet' }} compact />}>
           {top2.length >= 2 && radarData.length > 0 && (
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart data={radarData}>
@@ -312,15 +312,15 @@ export function LivestockCompetitionPage() {
       </div>
 
       {/* ── Turkey Trend ───────────────────────────────────── */}
-      <ChartCard title="📈 Türkiye Üretim Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
+      <ChartCard title="Türkiye Üretim Trendi (Tüm Yıllar)" action={<ChartInsightButton title="Türkiye Üretim Trendi" description="Türkiye hayvansal üretim trendi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={turkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" stroke="var(--text-secondary)" />
             <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} domain={LINE_Y_DOMAIN} width={46} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-              formatter={(v: number, n: string) => [fmtVal(v) + ' ton', n === 'meat' ? '🥩 Et' : n === 'milk' ? '🥛 Süt' : '🥚 Yumurta']} />
-            <Legend formatter={v => v === 'meat' ? '🥩 Et' : v === 'milk' ? '🥛 Süt' : '🥚 Yumurta'} />
+              formatter={(v: number, n: string) => [fmtVal(v) + ' ton', n === 'meat' ? 'Et' : n === 'milk' ? 'Süt' : 'Yumurta']} />
+            <Legend formatter={v => v === 'meat' ? 'Et' : v === 'milk' ? 'Süt' : 'Yumurta'} />
             <Line type="monotone" dataKey="meat" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444', r: 3 }} />
             <Line type="monotone" dataKey="milk" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} />
             <Line type="monotone" dataKey="eggs" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 3 }} />
@@ -378,7 +378,7 @@ export function LivestockCompetitionPage() {
           return { year, hhi: Math.round(hhi_val * 10000) };
         });
         return (
-          <ChartCard title="📊 Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi" action={<ChartInsightButton title="Piyasa Konsantrasyon HHI" description="Piyasa konsantrasyon HHI zaman serisi" data={hhiSeries} context={{ section: 'Konsantrasyon' }} compact />}>
+          <ChartCard title="Piyasa Konsantrasyon Endeksi (HHI) Zaman Serisi" action={<ChartInsightButton title="Piyasa Konsantrasyon HHI" description="Piyasa konsantrasyon HHI zaman serisi" data={hhiSeries} context={{ section: 'Konsantrasyon' }} compact />}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0 0 8px' }}>
               HHI &lt; 1500 = Rekabetçi · 1500–2500 = Orta · &gt; 2500 = Yoğunlaşmış piyasa (DOJ kriterleri)
             </p>
@@ -481,7 +481,7 @@ export function LivestockCompetitionPage() {
                     color: r.rank <= 3 ? '#f59e0b' : 'var(--text-primary)' }}>{r.rank}</td>
                   <td style={{ padding: 12, fontWeight: r.isTurkey ? 700 : 500,
                     color: r.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>
-                    {r.isTurkey ? '🇹🇷 ' : ''}{r.country}
+                    {r.isTurkey ? 'TR · ' : ''}{r.country}
                   </td>
                   <td style={{ padding: 12, textAlign: 'right', fontWeight: 600 }}>{fmtVal(r.total)}</td>
                   <td style={{ padding: 12, textAlign: 'right', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{fmtVal(r.meat)}</td>
@@ -516,7 +516,7 @@ export function LivestockCompetitionPage() {
               style={{ background: 'var(--bg-card)', width: '100%', maxWidth: 720, maxHeight: '80vh', overflow: 'auto', padding: 24, borderTopLeftRadius: 16, borderTopRightRadius: 16, border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: 700 }}>
-                  {isTR(drillCountry) ? '🇹🇷 ' : '🌍 '}{drillCountry} — Ürün Detayı ({selectedYear})
+                  {isTR(drillCountry) ? 'TR · ' : '🌍 '}{drillCountry} — Ürün Detayı ({selectedYear})
                 </h3>
                 <button onClick={() => setDrillCountry(null)}
                   style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: '0.85rem' }}>

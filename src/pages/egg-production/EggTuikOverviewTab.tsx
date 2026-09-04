@@ -66,7 +66,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
 
       {/* Kombine Üretim Grafiği */}
       <div className="chart-grid">
-        <ChartCard title="📊 Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" span={2} action={<ChartInsightButton title="📊 Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" description="Yumurta üretimi ve yumurtacı tavuk sayısı karşılaştırması" data={tuikData} context={{ section: 'Dual Axis' }} />}>
+        <ChartCard title="Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" span={2} action={<ChartInsightButton title="Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" description="Yumurta üretimi ve yumurtacı tavuk sayısı karşılaştırması" data={tuikData} context={{ section: 'Dual Axis' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={tuikData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -93,7 +93,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
 
       {/* Üretim Akışı */}
       <div className="chart-grid">
-        <ChartCard title="🔄 Üretim Akışı: Tavuk → Yumurta (2025)" span={2} action={<ChartInsightButton title="🔄 Üretim Akışı: Tavuk → Yumurta (2025)" description="2025 tavuktan yumurtaya üretim akışı" data={tuikData} context={{ year: 2025 }} compact />}>
+        <ChartCard title="Üretim Akışı: Tavuk → Yumurta (2025)" span={2} action={<ChartInsightButton title="Üretim Akışı: Tavuk → Yumurta (2025)" description="2025 tavuktan yumurtaya üretim akışı" data={tuikData} context={{ year: 2025 }} compact />}>
           <div style={{ padding: '30px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
             <div style={{ textAlign: 'center', flex: '1', minWidth: '220px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '10px' }}><Bird size={22} aria-hidden="true" /></div>

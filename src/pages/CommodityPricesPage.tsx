@@ -10,22 +10,38 @@ import type { CommodityItem, ChartPoint, GiewsSerie, GiewsDatapoint, GiewsPriceR
 import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
-import { TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  TrendingDown, TrendingUp, Wheat, Bean, Factory, Coffee, Beef, Milk, Zap,
+  TreePine, FlaskConical, Drumstick, Gem, Banknote, Package, type LucideIcon,
+} from 'lucide-react';
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'Tahıllar': '🌾',
-  'Yağlı Tohumlar': '🫘',
-  'Endüstriyel': '🏭',
-  'Tropikal': '☕',
-  'Hayvancılık': '🐄',
-  'Süt Ürünleri': '🥛',
-  'Enerji': '⚡',
-  'Orman Ürünleri': '🪵',
-  'Gübre': '🧪',
-  'Et & Gıda': '🥩',
-  'Metaller': '🥇',
-  'Döviz': '💱',
+/*
+ * Kategori ikonları — emoji DEĞİL, lucide bileşenleri.
+ *
+ * Emoji glifi işletim sistemine göre değişiyor (aynı liste iOS'ta ve
+ * Android'de başka görünüyordu) ve ekran okuyucu onu adıyla okuyor:
+ * "buğday başağı Tahıllar". `ui-ux-pro-max`'in `no-emoji-icons` kuralı.
+ */
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  'Tahıllar': Wheat,
+  'Yağlı Tohumlar': Bean,
+  'Endüstriyel': Factory,
+  'Tropikal': Coffee,
+  'Hayvancılık': Beef,
+  'Süt Ürünleri': Milk,
+  'Enerji': Zap,
+  'Orman Ürünleri': TreePine,
+  'Gübre': FlaskConical,
+  'Et & Gıda': Drumstick,
+  'Metaller': Gem,
+  'Döviz': Banknote,
 };
+
+/** Kategori adının yanına ikonunu koyar; listede yoksa nötr kutu. */
+function KategoriIkon({ kategori, boyut = 16 }: { kategori: string; boyut?: number }) {
+  const I = CATEGORY_ICONS[kategori] ?? Package;
+  return <I size={boyut} aria-hidden="true" style={{ flex: 'none' }} />;
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Tahıllar': 'from-amber-500 to-yellow-600',
@@ -643,7 +659,7 @@ export default function CommodityPricesPage() {
       <BackToHome />
       <div className="page-header">
         <h1 className="page-title">
-          {activeTab === 'yahoo' ? '📊 Borsa & Vadeli Piyasa Fiyatları' : activeTab === 'fao' ? '🌍 Ülkelerin Yurtiçi Tarım Ürünleri Fiyatları' : '🌐 Küresel Emtia Fiyatları'}
+          {activeTab === 'yahoo' ? 'Borsa & Vadeli Piyasa Fiyatları' : activeTab === 'fao' ? 'Ülkelerin Yurtiçi Tarım Ürünleri Fiyatları' : 'Küresel Emtia Fiyatları'}
         </h1>
         <p className="page-subtitle">
           {activeTab === 'yahoo' ? 'Yahoo Finance canlı vadeli işlem ve spot piyasa göstergeleri' : activeTab === 'fao' ? 'FAO GIEWS ülke bazlı yerel market fiyatları ve çoklu ülke karşılaştırması' : 'FAO FPMA · 90 uluslararası emtia serisi · Gübre, Enerji, Tahıllar, Et, Süt ve daha fazlası'}
@@ -671,7 +687,7 @@ export default function CommodityPricesPage() {
               transition: 'all 0.2s',
             }}
           >
-            {tab === 'yahoo' ? '📊 Borsa & Vadeli Piyasa' : tab === 'fao' ? '🌍 Ülkelerin Yurtiçi Tarım Ürünleri' : '🌐 Küresel Emtia Fiyatları'}
+            {tab === 'yahoo' ? 'Borsa & Vadeli Piyasa' : tab === 'fao' ? 'Ülkelerin Yurtiçi Tarım Ürünleri' : 'Küresel Emtia Fiyatları'}
           </button>
         ))}
       </div>
@@ -733,7 +749,7 @@ export default function CommodityPricesPage() {
                     boxShadow: selectedCategory === cat ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
                   }}
                 >
-                  {cat === 'all' ? '🌐 Tümü' : `${CATEGORY_ICONS[cat] || '📦'} ${cat}`}
+                  {cat === 'all' ? 'Tümü' : <><KategoriIkon kategori={cat} boyut={14} /> {cat}</>}
                 </button>
               ))}
             </div>
@@ -743,7 +759,7 @@ export default function CommodityPricesPage() {
           {Object.entries(grouped).map(([category, items]) => (
             <div key={category} style={{ marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {CATEGORY_ICONS[category] || '📦'} {category}
+                <KategoriIkon kategori={category} boyut={18} /> {category}
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                 {items.map(c => (
@@ -767,7 +783,7 @@ export default function CommodityPricesPage() {
                         <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{c.symbol} • {c.unit}</div>
                       </div>
                       <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r ${CATEGORY_COLORS[category] || 'from-gray-500 to-gray-600'} text-white`}>
-                        {CATEGORY_ICONS[category] || '📦'}
+                        <KategoriIkon kategori={category} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -899,7 +915,7 @@ export default function CommodityPricesPage() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? '⏳ Güncelleniyor...' : '🔄 Fiyatları Güncelle'}
+              {loading ? '⏳ Güncelleniyor...' : 'Fiyatları Güncelle'}
             </button>
           </div>
         </>
@@ -1057,7 +1073,7 @@ export default function CommodityPricesPage() {
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
               <input
                 type="text"
-                placeholder="🔍 Ürün ara... (buğday, mısır, pirinç...)"
+                placeholder="Ürün ara... (buğday, mısır, pirinç...)"
                 value={faoSearch}
                 onChange={e => setFaoSearch(e.target.value)}
                 style={{ flex: 1, minWidth: 200, padding: '0.6rem 1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '0.87rem', background: '#fff', outline: 'none' }}
@@ -1310,11 +1326,11 @@ export default function CommodityPricesPage() {
                       {/* World KPIs */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
                         {[
-                          { icon: '🌐', label: 'Dünya Ortalaması', value: `$${worldAvg.toFixed(2)}`, sub: `${worldRankings.length} ülke` },
-                          { icon: '🇹🇷', label: 'Türkiye Sırası', value: turkeyRank > 0 ? `#${turkeyRank}` : 'Veri yok', sub: `/ ${worldRankings.length} ülke` },
-                          { icon: '💸', label: 'En Pahalı', value: `$${worldRankings[0]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[0]?.name] ?? worldRankings[0]?.name ?? '').slice(0, 18) },
-                          { icon: '💚', label: 'En Ucuz', value: `$${worldRankings[worldRankings.length - 1]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[worldRankings.length - 1]?.name] ?? worldRankings[worldRankings.length - 1]?.name ?? '').slice(0, 18) },
-                          { icon: '📊', label: 'Fiyat Uçurumu', value: worldSpread > 0 ? `${worldSpread.toFixed(1)}x` : '-', sub: 'en pahalı / en ucuz' },
+                          { icon: '', label: 'Dünya Ortalaması', value: `$${worldAvg.toFixed(2)}`, sub: `${worldRankings.length} ülke` },
+                          { icon: '', label: 'Türkiye Sırası', value: turkeyRank > 0 ? `#${turkeyRank}` : 'Veri yok', sub: `/ ${worldRankings.length} ülke` },
+                          { icon: '', label: 'En Pahalı', value: `$${worldRankings[0]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[0]?.name] ?? worldRankings[0]?.name ?? '').slice(0, 18) },
+                          { icon: '', label: 'En Ucuz', value: `$${worldRankings[worldRankings.length - 1]?.latestUsd.toFixed(2)}`, sub: (COUNTRY_TR[worldRankings[worldRankings.length - 1]?.name] ?? worldRankings[worldRankings.length - 1]?.name ?? '').slice(0, 18) },
+                          { icon: '', label: 'Fiyat Uçurumu', value: worldSpread > 0 ? `${worldSpread.toFixed(1)}x` : '-', sub: 'en pahalı / en ucuz' },
                         ].map(kpi => (
                           <div key={kpi.label} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '0.85rem 0.65rem', textAlign: 'center' }}>
                             <div style={{ fontSize: '1.4rem' }}>{kpi.icon}</div>
@@ -1525,7 +1541,7 @@ export default function CommodityPricesPage() {
                           transition: 'all 0.2s',
                         }}
                       >
-                        {cat === 'all' ? '🌐 Tümü' : `${INTL_CAT_ICONS[cat] || '📦'} ${cat}`}
+                        {cat === 'all' ? 'Tümü' : `${INTL_CAT_ICONS[cat] || '📦'} ${cat}`}
                       </button>
                     ))}
                   </div>

@@ -185,7 +185,7 @@ export default function PlantTradeTab() {
       <div className="kpi-grid">
         <KPICard title="Bitkisel İhracat" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
         <KPICard title="Bitkisel İthalat" value={formatMoney(totalImp)} subtitle={`Yıllık: ${impChange >= 0 ? '+' : ''}${yuzde(impChange, 1)}`} icon={TrendingDown} color="orange" large />
-        <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={ArrowLeftRight} color={balance >= 0 ? 'green' : 'orange'} />
+        <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? 'Fazla' : 'Açık'} icon={ArrowLeftRight} color={balance >= 0 ? 'green' : 'orange'} />
         <KPICard title="Ürün Sayısı" value={String(productCount)} subtitle="Bitkisel ürün grubu" icon={Leaf} color="green" />
         <KPICard title="Ülke Sayısı" value={String(countryCount)} subtitle="Ticaret ortağı" icon={Zap} color="blue" />
         <KPICard title="İhracat/İthalat" value={(totalImp > 0 ? (totalExp / totalImp) : 0).toFixed(2)} subtitle="Karşılama oranı" icon={ArrowLeftRight} color="purple" />
@@ -207,7 +207,7 @@ export default function PlantTradeTab() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📈 Yıllık Bitkisel Trend + Denge" action={<ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />}>
+        <ChartCard title="Yıllık Bitkisel Trend + Denge" action={<ChartInsightButton title="Yıllık Bitkisel Trend + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={plantContext} />}>
           {/*
             * "Denge" ihracat ile ithalatın FARKI — türetilmiş seri. Eskiden
             * ikinci bir y ekseninde çiziliyordu ve iki eksen AYNI birimi

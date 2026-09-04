@@ -1,3 +1,4 @@
+import { Bean } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
@@ -25,7 +26,7 @@ const PROTEIN_KARSI = [
 ];
 
 const legumeExtra = (
-  <ChartCard title="💪 Baklagiller vs Hayvansal Protein (g protein / 100 g)" action={<ChartInsightButton title="💪 Baklagil Protein" description="Baklagiller vs hayvansal protein karşılaşması" data={PROTEIN_KARSI} context={{ section: 'Baklagiller' }} compact />}>
+  <ChartCard title="Baklagiller vs Hayvansal Protein (g protein / 100 g)" action={<ChartInsightButton title="Baklagil Protein" description="Baklagiller vs hayvansal protein karşılaşması" data={PROTEIN_KARSI} context={{ section: 'Baklagiller' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Baklagiller, hayvansal kaynaklara yakın protein içeriğiyle sürdürülebilir beslenmenin temel taşlarıdır.
       Yeşil = baklagil · Turuncu = hayvansal referans
@@ -57,7 +58,7 @@ export default function LegumeProductionPage() {
     <TuikPlantCategoryPage
       title="Baklagil Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı baklagil üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🫘"
+      icon={<Bean size={30} aria-hidden="true" />}
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={BAKLAGIL_URUNLER}
       defaultProducts={['Nohut, Kuru', 'Mercimek, Kuru (Kırmızı)', 'Fasulye, Kuru']}

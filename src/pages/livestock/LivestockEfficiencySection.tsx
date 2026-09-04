@@ -237,7 +237,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       const gap = [
         {
-          category: 'Et Verimi', icon: '🥩', unit: 'kg/hayvan',
+          category: 'Et Verimi', icon: '', unit: 'kg/hayvan',
           turkeyVal: turkey.meatEff, leaderVal: leaderMeat.meatEff, leaderCountry: leaderMeat.country,
           worldAvg: avgMeat, gapToLeader: leaderMeat.meatEff > 0 ? ((leaderMeat.meatEff - turkey.meatEff) / leaderMeat.meatEff * 100) : 0,
           gapToAvg: avgMeat > 0 ? ((turkey.meatEff - avgMeat) / avgMeat * 100) : 0,
@@ -245,7 +245,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           trend: trMeatCAGR > 2 ? 'improving' : trMeatCAGR > 0 ? 'stable' : 'declining',
         },
         {
-          category: 'Süt Verimi', icon: '🥛', unit: 'kg/inek',
+          category: 'Süt Verimi', icon: '', unit: 'kg/inek',
           turkeyVal: turkey.milkEff, leaderVal: leaderMilk.milkEff, leaderCountry: leaderMilk.country,
           worldAvg: avgMilk, gapToLeader: leaderMilk.milkEff > 0 ? ((leaderMilk.milkEff - turkey.milkEff) / leaderMilk.milkEff * 100) : 0,
           gapToAvg: avgMilk > 0 ? ((turkey.milkEff - avgMilk) / avgMilk * 100) : 0,
@@ -253,7 +253,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           trend: trMilkCAGR > 2 ? 'improving' : trMilkCAGR > 0 ? 'stable' : 'declining',
         },
         {
-          category: 'Yumurta Verimi', icon: '🥚', unit: 'adet/tavuk',
+          category: 'Yumurta Verimi', icon: '', unit: 'adet/tavuk',
           turkeyVal: turkey.eggEff, leaderVal: leaderEgg.eggEff, leaderCountry: leaderEgg.country,
           worldAvg: avgEgg, gapToLeader: leaderEgg.eggEff > 0 ? ((leaderEgg.eggEff - turkey.eggEff) / leaderEgg.eggEff * 100) : 0,
           gapToAvg: avgEgg > 0 ? ((turkey.eggEff - avgEgg) / avgEgg * 100) : 0,
@@ -360,21 +360,21 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
           <div className="kpi-subtitle">Et/Süt/Yumurta Verimlilik Analizi ({selectedYear})</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 ET VERİMİ</span><div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div></div>
+          <div className="kpi-header"><span className="kpi-title">ET VERİMİ</span><div className="kpi-icon red"><Beef size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trMeatEff > effKPIs.worldAvgMeat ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trMeatEff.toFixed(0)}
           </div>
           <div className="kpi-subtitle">kg/hayvan • Sıra: #{effKPIs.trMeatRank}/{effKPIs.countryCount}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 SÜT VERİMİ</span><div className="kpi-icon blue"><Milk size={18} aria-hidden="true" /></div></div>
+          <div className="kpi-header"><span className="kpi-title">SÜT VERİMİ</span><div className="kpi-icon blue"><Milk size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trMilkEff > effKPIs.worldAvgMilk ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trMilkEff.toFixed(0)}
           </div>
           <div className="kpi-subtitle">kg/inek • Sıra: #{effKPIs.trMilkRank}/{effKPIs.countryCount}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-header"><span className="kpi-title">🇹🇷 YUMURTA VERİMİ</span><div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div></div>
+          <div className="kpi-header"><span className="kpi-title">YUMURTA VERİMİ</span><div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value" style={{ color: effKPIs.trEggEff > effKPIs.worldAvgEgg ? '#22c55e' : '#ef4444' }}>
             {effKPIs.trEggEff.toFixed(0)}
           </div>
@@ -416,12 +416,12 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                   background: g.trend === 'improving' ? 'rgba(34,197,94,0.15)' : g.trend === 'stable' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
                   color: g.trend === 'improving' ? '#22c55e' : g.trend === 'stable' ? '#f59e0b' : '#ef4444',
                 }}>
-                  {g.trend === 'improving' ? '📈 İyileşiyor' : g.trend === 'stable' ? '➡️ Stabil' : '📉 Düşüşte'}
+                  {g.trend === 'improving' ? 'İyileşiyor' : g.trend === 'stable' ? 'Stabil' : 'Düşüşte'}
                 </span>
               </div>
               <div style={{ marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)' }}>
-                  <span>🇹🇷 Türkiye: {g.turkeyVal.toFixed(0)} {g.unit}</span>
+                  <span>Türkiye: {g.turkeyVal.toFixed(0)} {g.unit}</span>
                   <span>🏆 {g.leaderCountry}: {g.leaderVal.toFixed(0)} {g.unit}</span>
                 </div>
                 <div style={{ position: 'relative', height: 24, background: 'var(--bg-secondary)', borderRadius: 12, overflow: 'hidden', marginTop: 4 }}>
@@ -450,9 +450,9 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                 color: g.catchUpYears === null ? '#22c55e' : g.catchUpYears > 30 ? '#ef4444' : '#f59e0b',
               }}>
                 {g.catchUpYears === null
-                  ? '✅ Lideri zaten yakaladı veya trend yetersiz'
+                  ? 'Lideri zaten yakaladı veya trend yetersiz'
                   : g.catchUpYears > 50
-                    ? `⚠️ Mevcut hızla yakalama ${g.catchUpYears}+ yıl — yapısal reform şart`
+                    ? `Mevcut hızla yakalama ${g.catchUpYears}+ yıl — yapısal reform şart`
                     : `⏱️ Tahmini yakalama süresi: ${g.catchUpYears} yıl`
                 }
               </div>
@@ -463,7 +463,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
 
       <div className="chart-grid">
         {/* Efficiency Scatter */}
-        <ChartCard title="📊 Et Verimi vs Üretim Hacmi (Top 50)" action={<ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />}>
+        <ChartCard title="Et Verimi vs Üretim Hacmi (Top 50)" action={<ChartInsightButton title="Et Verimi vs Üretim Hacmi" description="Ülkeler için et verimi ve üretim hacmi scatter analizi" data={effScatterData} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -490,7 +490,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
         </ChartCard>
 
         {/* Segmented Analysis */}
-        <ChartCard title="🌍 Segmentasyon: Gelişmiş / Gelişmekte / Türkiye" action={<ChartInsightButton title="Verimlilik Segmentasyon Analizi" description="Gelişmiş, gelişmekte olan ülkeler ve Türkiye verimlilik karşılaştırması" data={effBestPractices} context={{}} compact />}>
+        <ChartCard title="Segmentasyon: Gelişmiş / Gelişmekte / Türkiye" action={<ChartInsightButton title="Verimlilik Segmentasyon Analizi" description="Gelişmiş, gelişmekte olan ülkeler ve Türkiye verimlilik karşılaştırması" data={effBestPractices} context={{}} compact />}>
           {(() => {
             const devAvg = effBestPractices.filter(d => d.segment === 'Gelişmiş');
             const devingAvg = effBestPractices.filter(d => d.segment === 'Gelişmekte');
@@ -509,7 +509,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                 eggEff: devingAvg.reduce((s, d) => s + d.eggEff, 0) / (devingAvg.length || 1),
               },
               {
-                segment: '🇹🇷 Türkiye',
+                segment: 'Türkiye',
                 meatEff: trRow?.meatEff || 0,
                 milkEff: trRow?.milkEff || 0,
                 eggEff: trRow?.eggEff || 0,
@@ -536,7 +536,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
         </ChartCard>
 
         {/* Efficiency Trends */}
-        <ChartCard title="📈 Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)" action={<ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />}>
+        <ChartCard title="Verimlilik Trendleri: Türkiye vs Dünya (15 Yıl)" action={<ChartInsightButton title="Verimlilik Trendleri: Türkiye vs Dünya" description="15 yıllık Türkiye ve dünya verimlilik trendi karşılaştırması" data={efficiencyTrends} context={{}} />}>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={efficiencyTrends} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -546,8 +546,8 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
               <Legend />
               <Line type="monotone" dataKey="avgMeatEfficiency" stroke="#ef4444" strokeWidth={2} name="Dünya Et" dot={{ r: 3 }} />
               <Line type="monotone" dataKey="avgMilkEfficiency" stroke="#3b82f6" strokeWidth={2} name="Dünya Süt" dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="trMeatEfficiency" stroke="#ef4444" strokeWidth={3} strokeDasharray="6 3" name="🇹🇷 Et" dot={{ r: 4, fill: '#ef4444' }} />
-              <Line type="monotone" dataKey="trMilkEfficiency" stroke="#3b82f6" strokeWidth={3} strokeDasharray="6 3" name="🇹🇷 Süt" dot={{ r: 4, fill: '#3b82f6' }} />
+              <Line type="monotone" dataKey="trMeatEfficiency" stroke="#ef4444" strokeWidth={3} strokeDasharray="6 3" name="Et" dot={{ r: 4, fill: '#ef4444' }} />
+              <Line type="monotone" dataKey="trMilkEfficiency" stroke="#3b82f6" strokeWidth={3} strokeDasharray="6 3" name="Süt" dot={{ r: 4, fill: '#3b82f6' }} />
             </LineChart>
           </ResponsiveContainer>
           <div style={{ padding: '12px 16px', marginTop: 12, background: 'rgba(59,130,246,0.1)', borderRadius: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
@@ -581,7 +581,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                       fontWeight: isTR ? 700 : 400,
                     }}>
                       <td style={{ padding: '8px 12px' }}>{i + 1}</td>
-                      <td style={{ padding: '8px 12px' }}>{isTR ? '🇹🇷 ' : ''}{bp.country}</td>
+                      <td style={{ padding: '8px 12px' }}>{isTR ? 'TR · ' : ''}{bp.country}</td>
                       <td style={{ padding: '8px 12px' }}>
                         <span style={{
                           padding: '2px 8px', borderRadius: 12, fontSize: 11,

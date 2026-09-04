@@ -63,7 +63,7 @@ export function TakvimViews({
                 className={`tt-view-btn${viewMode === m ? ' tt-view-btn--active' : ''}`}
                 onClick={() => setViewMode(m)}
               >
-                {m === 'takvim' ? '📅 Takvim' : m === 'liste' ? '📋 Liste' : '📊 Çizelge'}
+                {m === 'takvim' ? 'Takvim' : m === 'liste' ? 'Liste' : 'Çizelge'}
               </button>
             ))}
           </div>

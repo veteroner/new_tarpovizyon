@@ -26,7 +26,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
     <>
       {/* Üretim Trendleri */}
       <div className="chart-grid">
-        <ChartCard title="🥚 Yıllık Yumurta Üretimi (2010-2025)" action={<ChartInsightButton title="🥚 Yıllık Yumurta Üretimi (2010-2025)" description="Yıllık yumurta üretim trendi" data={tuikData} context={{ section: 'Yıllık Üretim' }} compact />}>
+        <ChartCard title="Yıllık Yumurta Üretimi (2010-2025)" action={<ChartInsightButton title="Yıllık Yumurta Üretimi (2010-2025)" description="Yıllık yumurta üretim trendi" data={tuikData} context={{ section: 'Yıllık Üretim' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={tuikData.slice().reverse()}>
               <defs>
@@ -59,7 +59,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
           </div>
         </ChartCard>
 
-        <ChartCard title="🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" action={<ChartInsightButton title="🐔 Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" description="Yıllık yumurtacı tavuk sayısı trendi" data={tuikData} context={{ section: 'Tavuk Sayı' }} compact />}>
+        <ChartCard title="Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" action={<ChartInsightButton title="Yıllık Yumurtacı Tavuk Sayısı (2010-2025)" description="Yıllık yumurtacı tavuk sayısı trendi" data={tuikData} context={{ section: 'Tavuk Sayı' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={tuikData.slice().reverse()}>
               <defs>
@@ -101,7 +101,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
           </div>
 
           <div className="chart-grid">
-            <ChartCard title="🥚 Aylık Yumurta Üretimi (2025)" action={<ChartInsightButton title="🥚 Aylık Yumurta Üretimi (2025)" description="2025 aylık yumurta üretimi" data={monthlyEgg} context={{ year: 2025 }} compact />}>
+            <ChartCard title="Aylık Yumurta Üretimi (2025)" action={<ChartInsightButton title="Aylık Yumurta Üretimi (2025)" description="2025 aylık yumurta üretimi" data={monthlyEgg} context={{ year: 2025 }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={monthlyEgg}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -129,7 +129,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             </ChartCard>
 
             {monthlyLayer.length > 0 && (
-              <ChartCard title="🐔 Aylık Yumurtacı Tavuk Sayısı (2025)" action={<ChartInsightButton title="🐔 Aylık Yumurtacı Tavuk Sayısı (2025)" description="2025 aylık yumurtacı tavuk sayısı" data={monthlyLayer} context={{ year: 2025 }} compact />}>
+              <ChartCard title="Aylık Yumurtacı Tavuk Sayısı (2025)" action={<ChartInsightButton title="Aylık Yumurtacı Tavuk Sayısı (2025)" description="2025 aylık yumurtacı tavuk sayısı" data={monthlyLayer} context={{ year: 2025 }} compact />}>
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={monthlyLayer}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

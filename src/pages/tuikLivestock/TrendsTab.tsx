@@ -53,7 +53,7 @@ export default function TrendsTab({
 
       {/* Trend Line with Predictions */}
       {regressionAnalysis && (
-        <ChartCard title={<>Trend Çizgisi ve 3 Yıllık Projeksiyon (R² = {regressionAnalysis.r2.toFixed(3)})</>} action={<ChartInsightButton title="📉 Trend ve Projeksiyon" description="Regresyon ile tahmin analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
+        <ChartCard title={<>Trend Çizgisi ve 3 Yıllık Projeksiyon (R² = {regressionAnalysis.r2.toFixed(3)})</>} action={<ChartInsightButton title="Trend ve Projeksiyon" description="Regresyon ile tahmin analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={[...yearlyData, ...regressionAnalysis.predictions]}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -71,7 +71,7 @@ export default function TrendsTab({
 
       {/* Anomali Tespiti */}
       {anomalies.length > 0 && (
-        <ChartCard title="⚠️ Anomali Tespiti (Beklenmedik Değişimler)" action={<ChartInsightButton title="⚠️ Anomali Tespiti" description="Beklenmedik değişimler" data={anomalies} context={{ section: 'Anomali' }} compact />}>
+        <ChartCard title="Anomali Tespiti (Beklenmedik Değişimler)" action={<ChartInsightButton title="Anomali Tespiti" description="Beklenmedik değişimler" data={anomalies} context={{ section: 'Anomali' }} compact />}>
           <div style={{ padding: '20px' }}>
             {anomalies.map((anomaly, idx) => (
               <div key={idx} style={{ padding: '12px', marginBottom: '8px', background: 'var(--card-bg)', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
@@ -87,7 +87,7 @@ export default function TrendsTab({
 
       {/* Sankey Diagram */}
       {sankeyData.nodes.length > 0 && (
-        <ChartCard title="🌊 Hayvan Akış Diyagramı (Son 3 Yıl)" action={<ChartInsightButton title="🌊 Akış Diyagramı" description="Yıllar arası hayvan sayısı akışı" data={sankeyData.nodes} context={{ section: 'Akış' }} compact />}>
+        <ChartCard title="Hayvan Akış Diyagramı (Son 3 Yıl)" action={<ChartInsightButton title="Akış Diyagramı" description="Yıllar arası hayvan sayısı akışı" data={sankeyData.nodes} context={{ section: 'Akış' }} compact />}>
           <div style={{ padding: '20px', textAlign: 'center' }}>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
               Yıllar arası {selectedAnimal} sayısının akışı
@@ -126,7 +126,7 @@ export default function TrendsTab({
 
       {/* Scatter Plot */}
       {scatterData.length > 0 && (
-        <ChartCard title="📊 Yıllık Değer Korelasyon Grafiği (Scatter Plot)" action={<ChartInsightButton title="📊 Korelasyon Grafiği" description="Dağılım ve korelasyon analizi" data={scatterData} context={{ section: 'Korelasyon' }} compact />}>
+        <ChartCard title="Yıllık Değer Korelasyon Grafiği (Scatter Plot)" action={<ChartInsightButton title="Korelasyon Grafiği" description="Dağılım ve korelasyon analizi" data={scatterData} context={{ section: 'Korelasyon' }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 20, right: 8, bottom: 20, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

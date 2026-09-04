@@ -63,7 +63,7 @@ export default function OverviewTab({
           </div>
         </div>
 
-        <ChartCard title={<>Hayvan Grubu Özeti ({yearLabel})</>} action={<ChartInsightButton title="📊 Hayvan Grubu Özeti" description="Hayvan grubu dağılımı" data={groupChartData} context={{ section: 'Hayvan Grubu' }} compact />}>
+        <ChartCard title={<>Hayvan Grubu Özeti ({yearLabel})</>} action={<ChartInsightButton title="Hayvan Grubu Özeti" description="Hayvan grubu dağılımı" data={groupChartData} context={{ section: 'Hayvan Grubu' }} compact />}>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={groupChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -82,7 +82,7 @@ export default function OverviewTab({
 
       {/* Trend + Growth */}
       <div className="chart-grid">
-        <ChartCard title={<>📈 {selectedAnimal} Trend Grafiği (2004–2025)</>} action={<ChartInsightButton title="📈 Trend Grafiği" description="Yıllık trend analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
+        <ChartCard title={<>{selectedAnimal} Trend Grafiği (2004–2025)</>} action={<ChartInsightButton title="Trend Grafiği" description="Yıllık trend analizi" data={yearlyData} context={{ section: 'Trend' }} compact />}>
           <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -94,7 +94,7 @@ export default function OverviewTab({
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="📊 Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="📊 Yıllık Büyüme Oranı" description="Yıllık büyüme oranları" data={growthData} context={{ section: 'Büyüme' }} compact />}>
+        <ChartCard title="Yıllık Büyüme Oranı (%)" action={<ChartInsightButton title="Yıllık Büyüme Oranı" description="Yıllık büyüme oranları" data={growthData} context={{ section: 'Büyüme' }} compact />}>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={growthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -114,7 +114,7 @@ export default function OverviewTab({
       {/* Category Charts */}
       {categoryData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title={<>Kategori Dağılımı — {selectedAnimal}</>} action={<ChartInsightButton title="🥧 Kategori Dağılımı" description="Kategori dağılımı" data={categoryData} context={{ section: 'Kategori' }} compact />}>
+          <ChartCard title={<>Kategori Dağılımı — {selectedAnimal}</>} action={<ChartInsightButton title="Kategori Dağılımı" description="Kategori dağılımı" data={categoryData} context={{ section: 'Kategori' }} compact />}>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={120} innerRadius={50} dataKey="value"
@@ -127,7 +127,7 @@ export default function OverviewTab({
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="📊 Kategori Karşılaştırma" action={<ChartInsightButton title="📊 Kategori Karşılaştırma" description="Kategori karşılaştırması" data={categoryData} context={{ section: 'Kategori' }} compact />}>
+          <ChartCard title="Kategori Karşılaştırma" action={<ChartInsightButton title="Kategori Karşılaştırma" description="Kategori karşılaştırması" data={categoryData} context={{ section: 'Kategori' }} compact />}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={categoryData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -147,7 +147,7 @@ export default function OverviewTab({
 
       {/* City Bar + Pie */}
       <div className="chart-grid">
-        <ChartCard title={<>İl Bazında {selectedAnimal} Sayısı ({yearLabel})</>} action={<ChartInsightButton title="🏙️ İl Bazında Dağılım" description="İl bazında sayısı" data={cityData} context={{ section: 'İl Dağılım' }} compact />}>
+        <ChartCard title={<>İl Bazında {selectedAnimal} Sayısı ({yearLabel})</>} action={<ChartInsightButton title="İl Bazında Dağılım" description="İl bazında sayısı" data={cityData} context={{ section: 'İl Dağılım' }} compact />}>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={cityData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -163,7 +163,7 @@ export default function OverviewTab({
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="🥧 İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="🥧 İl Payları Dağılımı" description="İl pay dağılımı" data={cityData.slice(0, 10)} context={{ section: 'İl Dağılım' }} compact />}>
+        <ChartCard title="İl Payları Dağılımı (Top 10)" action={<ChartInsightButton title="İl Payları Dağılımı" description="İl pay dağılımı" data={cityData.slice(0, 10)} context={{ section: 'İl Dağılım' }} compact />}>
           <ResponsiveContainer width="100%" height={450}>
             <PieChart>
               <Pie data={cityData.slice(0, 10)} cx="50%" cy="50%" outerRadius={140} innerRadius={40}

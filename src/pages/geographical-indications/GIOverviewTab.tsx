@@ -69,7 +69,7 @@ export function GIOverviewTab({
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
               Durum Dağılımı
             </h3>
-            <ChartInsightButton title="📊 Durum Dağılımı" description="Coğrafi işaretli ürünlerin durum dağılımı" data={statusPieData} context={{ section: 'Coğrafi İşaretler' }} compact />
+            <ChartInsightButton title="Durum Dağılımı" description="Coğrafi işaretli ürünlerin durum dağılımı" data={statusPieData} context={{ section: 'Coğrafi İşaretler' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -111,7 +111,7 @@ export function GIOverviewTab({
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
               İşaret Türü Dağılımı
             </h3>
-            <ChartInsightButton title="🏷️ İşaret Türü Dağılımı" description="Coğrafi işaret türüne göre dağılım" data={typeData} context={{ section: 'Coğrafi İşaretler' }} compact />
+            <ChartInsightButton title="İşaret Türü Dağılımı" description="Coğrafi işaret türüne göre dağılım" data={typeData} context={{ section: 'Coğrafi İşaretler' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>

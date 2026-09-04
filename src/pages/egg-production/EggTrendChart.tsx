@@ -11,7 +11,7 @@ interface EggTrendChartProps {
 export function EggTrendChart({ series }: EggTrendChartProps) {
   return (
     <div className="chart-grid">
-      <ChartCard title="📈 Yumurta Üretimi Trendi" span={2} action={<ChartInsightButton title="📈 Yumurta Üretimi Trendi" description="Yumurta üretimi uzun dönem trendi" data={series} context={{ section: 'Trend' }} />}>
+      <ChartCard title="Yumurta Üretimi Trendi" span={2} action={<ChartInsightButton title="Yumurta Üretimi Trendi" description="Yumurta üretimi uzun dönem trendi" data={series} context={{ section: 'Trend' }} />}>
         <ResponsiveContainer width="100%" height={360}>
           <AreaChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

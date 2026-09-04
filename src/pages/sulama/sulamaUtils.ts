@@ -458,11 +458,11 @@ export function calculate(
 
         if (depletion >= raw) {
           if (rainTomorrow >= 5) {
-            not = '🌧️ Yarın yağış bekleniyor, ertelenebilir';
+            not = 'Yarın yağış bekleniyor, ertelenebilir';
           } else {
             sulamaNet = depletion * coverage;
             depletion = Math.max(0, depletion - sulamaNet);
-            not = '💧 Toprak açığı (RAW) aşıldı';
+            not = 'Toprak açığı (RAW) aşıldı';
           }
         }
       } else {

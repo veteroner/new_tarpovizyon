@@ -15,14 +15,14 @@ const config: FaoPageConfig = {
     'Meat of ducks, fresh or chilled',
     'Meat of turkeys, fresh or chilled',
   ],
-  pageTitle: '🍗 Beyaz Et Üretimi',
+  pageTitle: 'Beyaz Et Üretimi',
   pageSubtitle: 'Dünya kanatlı hayvan eti üretimi verileri - Ton bazında ({year})',
   comparisonTitle: 'Kanatlı Et Karşılaştırması',
   distributionTitle: 'Kanatlı Et Dağılımı',
   primaryColor: '#f59e0b',
   unit: 'ton',
   productPlaceholder: 'Beyaz et türü seçin...',
-  kpiIcon: '🍗',
+  kpiIcon: '',
 };
 
 export default function WhiteMeatProductionPage() {

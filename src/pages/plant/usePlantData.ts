@@ -388,16 +388,16 @@ export function usePlantData({
     const totalYieldEffect = recent.reduce((s, d) => s + Math.abs(d.verimEtkisi || 0), 0);
     if (totalAreaEffect < 0.01 && totalYieldEffect < 0.01) {
       const recentProduction = yieldTrendData.slice(-5);
-      if (recentProduction.length < 2) return '📊 Analiz için veri yetersiz';
+      if (recentProduction.length < 2) return 'Analiz için veri yetersiz';
       const firstYear = recentProduction[0].uretim;
       const lastYear = recentProduction[recentProduction.length - 1].uretim;
       const change = lastYear - firstYear;
-      if (Math.abs(change) < 0.01) return '⚪ Stabil üretim';
-      return change > 0 ? '🟢 Üretim artışı (Kaynak belirlenemedi)' : '🔴 Üretim düşüşü';
+      if (Math.abs(change) < 0.01) return 'Stabil üretim';
+      return change > 0 ? 'Üretim artışı (Kaynak belirlenemedi)' : 'Üretim düşüşü';
     }
-    if (totalAreaEffect > totalYieldEffect * 1.5) return '🟢 Alan genişlemesi odaklı';
-    if (totalYieldEffect > totalAreaEffect * 1.5) return '🟡 Verim artışı odaklı';
-    return '🔵 Dengeli büyüme';
+    if (totalAreaEffect > totalYieldEffect * 1.5) return 'Alan genişlemesi odaklı';
+    if (totalYieldEffect > totalAreaEffect * 1.5) return 'Verim artışı odaklı';
+    return 'Dengeli büyüme';
   }, [yieldTrendData]);
 
   const radarYears = useMemo(() => [

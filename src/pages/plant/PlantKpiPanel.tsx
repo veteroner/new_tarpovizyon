@@ -1,6 +1,6 @@
 import { yuzde } from '../../utils/sayi';
 import { fmt } from './plantTypes';
-import { BarChart3, Trophy } from 'lucide-react';
+import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface PlantKpiPanelProps {
   totalValue: number;
@@ -32,7 +32,7 @@ export default function PlantKpiPanel({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">YILLIK DEĞİŞİM</span>
-            <div className={`kpi-icon ${yoyChange >= 0 ? 'green' : 'red'}`}>{yoyChange >= 0 ? '📈' : '📉'}</div>
+            <div className={`kpi-icon ${yoyChange >= 0 ? 'green' : 'red'}`}>{yoyChange >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
           </div>
           <div className="kpi-value" style={{ color: yoyChange >= 0 ? '#22c55e' : '#ef4444' }}>
             {yuzde(yoyChange, 1)}

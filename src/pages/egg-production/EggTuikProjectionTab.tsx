@@ -105,7 +105,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
 
       {/* 2026 Aylık Yumurta Projeksiyonu */}
       <div className="chart-grid">
-        <ChartCard title="🥚 2026 Aylık Yumurta Üretim Projeksiyonu" span={2} action={<ChartInsightButton title="🥚 2026 Aylık Yumurta Üretim Projeksiyonu" description="2026 yılı aylık yumurta üretim projeksiyonu" data={projection2026Egg} context={{ year: 2026 }} compact />}>
+        <ChartCard title="2026 Aylık Yumurta Üretim Projeksiyonu" span={2} action={<ChartInsightButton title="2026 Aylık Yumurta Üretim Projeksiyonu" description="2026 yılı aylık yumurta üretim projeksiyonu" data={projection2026Egg} context={{ year: 2026 }} compact />}>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={projection2026Egg}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -145,7 +145,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       )}
       {hasLayerData && (
         <div className="chart-grid">
-          <ChartCard title="🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu" span={2} action={<ChartInsightButton title="🐔 2026 Aylık Yumurtacı Tavuk Projeksiyonu" description="2026 yılı aylık yumurtacı tavuk sayısı projeksiyonu" data={projection2026Layer} context={{ year: 2026 }} compact />}>
+          <ChartCard title="2026 Aylık Yumurtacı Tavuk Projeksiyonu" span={2} action={<ChartInsightButton title="2026 Aylık Yumurtacı Tavuk Projeksiyonu" description="2026 yılı aylık yumurtacı tavuk sayısı projeksiyonu" data={projection2026Layer} context={{ year: 2026 }} compact />}>
             <ResponsiveContainer width="100%" height={400}>
               <ComposedChart data={projection2026Layer}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

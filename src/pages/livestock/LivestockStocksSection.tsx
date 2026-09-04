@@ -344,7 +344,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">🇹🇷 5Y CAGR</span></div>
             <div className="kpi-value" style={{color: stocksKPIs.turkeyCAGR5 > 0 ? '#22c55e' : '#ef4444'}}>{yuzde(stocksKPIs.turkeyCAGR5, 2)}</div>
-            <div className="kpi-subtitle">{stocksKPIs.turkeyCAGR5 > stocksKPIs.globalCAGR5 ? '✅ Küresel ortalamanın üstünde' : '⚠️ Küresel ortalamanın altında'}</div>
+            <div className="kpi-subtitle">{stocksKPIs.turkeyCAGR5 > stocksKPIs.globalCAGR5 ? 'Küresel ortalamanın üstünde' : 'Küresel ortalamanın altında'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">EN HIZLI BÜYÜYEN</span><div className="kpi-icon green"><Rocket size={18} aria-hidden="true" /></div></div>
@@ -359,7 +359,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
           <div className="kpi-card">
             <div className="kpi-header"><span className="kpi-title">KONSANTRASYON</span></div>
             <div className="kpi-value">{stocksKPIs.hhi.toFixed(0)}</div>
-            <div className="kpi-subtitle">HHI · {stocksKPIs.hhi < 500 ? '🟢 Dağınık' : stocksKPIs.hhi < 1500 ? '🟡 Orta' : '🔴 Yoğun'}</div>
+            <div className="kpi-subtitle">HHI · {stocksKPIs.hhi < 500 ? 'Dağınık' : stocksKPIs.hhi < 1500 ? 'Orta' : 'Yoğun'}</div>
           </div>
         </div>
       )}
@@ -536,7 +536,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
       {/* Row 6: Turkey Profile Cards */}
       {stocksTurkeyProfile.length > 0 && (
         <div style={{marginTop: '24px'}}>
-          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>🇹🇷 Türkiye Hayvan Profili</h3>
+          <h3 style={{fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px'}}>Türkiye Hayvan Profili</h3>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px'}}>
             {stocksTurkeyProfile.map((p, i) => (
               <div key={i} style={{background: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)'}}>
@@ -578,7 +578,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                         background: r.type === 'collapse' ? 'rgba(239,68,68,.15)' : r.type === 'sharp_decline' ? 'rgba(249,115,22,.15)' : 'rgba(34,197,94,.15)',
                         color: r.type === 'collapse' ? '#ef4444' : r.type === 'sharp_decline' ? '#f97316' : '#22c55e'
                       }}>
-                        {r.type === 'collapse' ? '💀 ÇÖKÜŞ' : r.type === 'sharp_decline' ? '📉 DÜŞÜŞ' : '🚀 PATLAMA'}
+                        {r.type === 'collapse' ? 'ÇÖKÜŞ' : r.type === 'sharp_decline' ? 'DÜŞÜŞ' : 'PATLAMA'}
                       </span>
                     </td>
                     <td style={{padding: '10px 16px', color: 'var(--text-primary)', fontWeight: '500'}}>{r.country}</td>
@@ -617,7 +617,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
                     <tr key={i} style={{borderBottom: '1px solid var(--border)', background: isTurkey ? 'rgba(239,68,68,.06)' : 'transparent'}}>
                       <td style={{padding: '10px 16px', color: 'var(--text-secondary)', fontWeight: '500'}}>{i + 1}</td>
                       <td style={{padding: '10px 16px', color: 'var(--text-primary)', fontWeight: isTurkey ? '700' : '500'}}>
-                        {isTurkey ? '🇹🇷 ' : ''}{c.country}
+                        {isTurkey ? 'TR · ' : ''}{c.country}
                       </td>
                       <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-primary)'}}>{formatNumber(c.total)}</td>
                       <td style={{padding: '10px 16px', textAlign: 'right', color: 'var(--text-secondary)'}}>{yuzde(c.share, 2)}</td>

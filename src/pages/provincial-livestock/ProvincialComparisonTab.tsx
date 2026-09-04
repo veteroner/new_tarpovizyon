@@ -42,7 +42,7 @@ export default function ProvincialComparisonTab({
           <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0 }}>
             Top 20 İl Karşılaştırma
           </h3>
-          <ChartInsightButton title="📊 Top 20 İl Karşılaştırma" description="İl bazında hayvan popülasyonu" data={filteredProvincialData.slice(0, 20)} context={{ section: 'İl Karşılaştırma' }} compact />
+          <ChartInsightButton title="Top 20 İl Karşılaştırma" description="İl bazında hayvan popülasyonu" data={filteredProvincialData.slice(0, 20)} context={{ section: 'İl Karşılaştırma' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={500}>
           <BarChart

@@ -38,7 +38,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Kırmızı Et Türlerine Göre Dağılım
             </h3>
-            <ChartInsightButton title="📊 Kırmızı Et Dağılımı" description="Et türlerine göre dağılım" data={redMeatBreakdown} context={{ section: 'Kırmızı Et' }} compact />
+            <ChartInsightButton title="Kırmızı Et Dağılımı" description="Et türlerine göre dağılım" data={redMeatBreakdown} context={{ section: 'Kırmızı Et' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
@@ -63,7 +63,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                 Kırmızı Et Türleri (Son 5 Yıl)
               </h3>
-              <ChartInsightButton title="📈 Kırmızı Et Trend" description="Kırmızı et türleri yıllık trendi" data={redMeatTrendData} context={{ section: 'Kırmızı Et' }} compact />
+              <ChartInsightButton title="Kırmızı Et Trend" description="Kırmızı et türleri yıllık trendi" data={redMeatTrendData} context={{ section: 'Kırmızı Et' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={redMeatTrendData}>
@@ -88,7 +88,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                 Büyükkbaş vs Küçükkbaş Karşılaştırması
               </h3>
-              <ChartInsightButton title="🐂 Büyükkbaş vs Küçükkbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
+              <ChartInsightButton title="Büyükkbaş vs Küçükkbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={350}>
               <ComposedChart data={buyukbasKucukbasData}>

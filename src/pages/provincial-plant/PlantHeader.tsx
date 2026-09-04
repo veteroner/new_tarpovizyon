@@ -70,7 +70,7 @@ export function PlantHeader({
           boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2)'
         }}>
           <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '8px', fontWeight: 600 }}>
-            {selectedUnsur === 'Üretim' ? '🌾 Toplam Üretim' : selectedUnsur === 'Ekilen Alan' ? '📏 Toplam Ekilen Alan' : '📊 Toplam Verim'}
+            {selectedUnsur === 'Üretim' ? 'Toplam Üretim' : selectedUnsur === 'Ekilen Alan' ? 'Toplam Ekilen Alan' : 'Toplam Verim'}
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px' }}>
             {formatNumber(metrics.totalProduction)}
@@ -350,12 +350,12 @@ export function PlantHeader({
         paddingBottom: '8px'
       }}>
         {[
-          { id: 'overview', icon: '🗺️', label: 'İl Genel Bakış', desc: 'Provincial Overview' },
-          { id: 'districts', icon: '📍', label: 'İlçe Detayları', desc: 'District Deep Dive' },
-          { id: 'trends', icon: '📈', label: 'Zaman Serisi', desc: 'Time Series & Trends' },
-          { id: 'comparison', icon: '⚖️', label: 'Karşılaştırma', desc: 'Comparative Analysis' },
-          { id: 'correlation', icon: '🔗', label: 'Korelasyon', desc: 'Ürünler arası içgörü' },
-          { id: 'forecast', icon: '🔮', label: 'Tahmin', desc: 'Forecasting & Projection' }
+          { id: 'overview', icon: '', label: 'İl Genel Bakış', desc: 'Provincial Overview' },
+          { id: 'districts', icon: '', label: 'İlçe Detayları', desc: 'District Deep Dive' },
+          { id: 'trends', icon: '', label: 'Zaman Serisi', desc: 'Time Series & Trends' },
+          { id: 'comparison', icon: '', label: 'Karşılaştırma', desc: 'Comparative Analysis' },
+          { id: 'correlation', icon: '', label: 'Korelasyon', desc: 'Ürünler arası içgörü' },
+          { id: 'forecast', icon: '', label: 'Tahmin', desc: 'Forecasting & Projection' }
         ].map(tab => (
           <button
             key={tab.id}

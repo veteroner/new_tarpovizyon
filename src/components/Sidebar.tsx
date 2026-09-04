@@ -118,7 +118,7 @@ export function Sidebar({ apiConnected, isOpen }: SidebarProps) {
           </NavLink>
         ))}
 
-        <div className="nav-section-title">🇹🇷 TÜİK Türkiye</div>
+        <div className="nav-section-title">TÜİK Türkiye</div>
         
         {tuikDataItems.map((item) => (
           <NavLink

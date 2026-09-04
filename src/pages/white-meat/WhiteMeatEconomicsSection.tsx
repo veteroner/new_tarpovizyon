@@ -111,7 +111,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: 0 }}>Fiyat Gelişimi</h3>
-            <ChartInsightButton title="💰 Fiyat Gelişimi" description="Üretici, tüketici ve maliyet fiyat trendi" data={filteredData} context={{ section: 'Fiyat' }} compact />
+            <ChartInsightButton title="Fiyat Gelişimi" description="Üretici, tüketici ve maliyet fiyat trendi" data={filteredData} context={{ section: 'Fiyat' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={filteredData.slice().reverse()}>
@@ -133,7 +133,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: 0 }}>Karlılık Trendi</h3>
-            <ChartInsightButton title="📊 Karlılık Trendi" description="Kanatlı eti üretimi karlılık oranı" data={filteredData} context={{ section: 'Karlılık' }} compact />
+            <ChartInsightButton title="Karlılık Trendi" description="Kanatlı eti üretimi karlılık oranı" data={filteredData} context={{ section: 'Karlılık' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={filteredData.slice().reverse()}>
@@ -155,7 +155,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: 0 }}>Yem Fiyatı ve Paritesi</h3>
-            <ChartInsightButton title="🌾 Yem Fiyatı ve Paritesi" description="Besi yemi fiyatı ve parite trendi" data={filteredData} context={{ section: 'Yem' }} compact />
+            <ChartInsightButton title="Yem Fiyatı ve Paritesi" description="Besi yemi fiyatı ve parite trendi" data={filteredData} context={{ section: 'Yem' }} compact />
           </div>
           {/* Sağ eksendeki seri soldakilerden TÜRETİLMİŞ; iki ölçeğin keyfi
               hizası sahte bir kesişme üretiyordu. Ortak x eksenli şeride
@@ -176,7 +176,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: 0 }}>Üretici Fiyatı-Maliyet Farkı</h3>
-            <ChartInsightButton title="💵 Üretici Fiyatı-Maliyet Farkı" description="Üretici fiyatı ile maliyet arasındaki fark" data={filteredData} context={{ section: 'Maliyet Fark' }} compact />
+            <ChartInsightButton title="Üretici Fiyatı-Maliyet Farkı" description="Üretici fiyatı ile maliyet arasındaki fark" data={filteredData} context={{ section: 'Maliyet Fark' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={filteredData.slice().reverse()}>

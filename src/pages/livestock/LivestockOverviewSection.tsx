@@ -336,12 +336,12 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
               <div className="kpi-card">
                 <div className="kpi-header"><span className="kpi-title">KONSANTRASYON</span></div>
                 <div className="kpi-value">{(intelligenceMetrics.marketHHI ?? 0).toFixed(0)}</div>
-                <div className="kpi-subtitle">HHI · {(intelligenceMetrics.marketHHI ?? 0) < 500 ? '🟢 Dağınık' : (intelligenceMetrics.marketHHI ?? 0) < 1500 ? '🟡 Orta' : '🔴 Yoğun'}</div>
+                <div className="kpi-subtitle">HHI · {(intelligenceMetrics.marketHHI ?? 0) < 500 ? 'Dağınık' : (intelligenceMetrics.marketHHI ?? 0) < 1500 ? 'Orta' : 'Yoğun'}</div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-header"><span className="kpi-title">VOLATİLİTE</span></div>
                 <div className="kpi-value">{yuzde((intelligenceMetrics.volatility ?? 0), 1)}</div>
-                <div className="kpi-subtitle">{(intelligenceMetrics.volatility ?? 0) < 5 ? '🟢 Düşük' : (intelligenceMetrics.volatility ?? 0) < 15 ? '🟡 Orta' : '🔴 Yüksek'}</div>
+                <div className="kpi-subtitle">{(intelligenceMetrics.volatility ?? 0) < 5 ? 'Düşük' : (intelligenceMetrics.volatility ?? 0) < 15 ? 'Orta' : 'Yüksek'}</div>
               </div>
             </>
           )}
@@ -402,7 +402,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
               <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>ton</div>
             </div>
             <div style={{background: 'rgba(239,68,68,.08)', borderRadius: '12px', padding: '16px', textAlign: 'center'}}>
-              <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>🇹🇷 Birincil Sıra</div>
+              <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Birincil Sıra</div>
               <div style={{fontSize: '1.5rem', fontWeight: 700, color: '#ef4444'}}>#{execSummary.turkeyPrimaryRank || '—'}</div>
               <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>dünya</div>
             </div>
@@ -413,11 +413,11 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Cross-Tab Navigation */}
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginTop: '20px'}}>
         {[
-          {tab: 'stocks' as Tab, icon: '🐄', label: 'Canlı Hayvan', desc: 'Stok ve tür analizi'},
-          {tab: 'primary' as Tab, icon: '🥩', label: 'Birincil Üretim', desc: 'Et, süt, yumurta'},
-          {tab: 'processed' as Tab, icon: '🏭', label: 'İşlenmiş Ürünler', desc: 'Katma değerli'},
-          {tab: 'efficiency' as Tab, icon: '⚡', label: 'Verimlilik', desc: 'Ülke karşılaştırma'},
-          {tab: 'predictions' as Tab, icon: '🔮', label: 'Tahminler', desc: 'AI projeksiyon'},
+          {tab: 'stocks' as Tab, icon: '', label: 'Canlı Hayvan', desc: 'Stok ve tür analizi'},
+          {tab: 'primary' as Tab, icon: '', label: 'Birincil Üretim', desc: 'Et, süt, yumurta'},
+          {tab: 'processed' as Tab, icon: '', label: 'İşlenmiş Ürünler', desc: 'Katma değerli'},
+          {tab: 'efficiency' as Tab, icon: '', label: 'Verimlilik', desc: 'Ülke karşılaştırma'},
+          {tab: 'predictions' as Tab, icon: '', label: 'Tahminler', desc: 'AI projeksiyon'},
         ].map(item => (
           <button key={item.tab} onClick={() => setActiveTab(item.tab)}
             style={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s'}}>
@@ -431,7 +431,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Row 3: 20-Year Trend */}
       {overviewTrend.length > 0 && (
         <div className="chart-grid" style={{marginTop: '24px'}}>
-          <ChartCard title="📈 Küresel Hayvan Stoku Trendi (20 Yıl)" span={2} action={<ChartInsightButton title="Küresel Hayvan Stoku Trendi (20 Yıl)" description="Uzun vadeli küresel hayvan stok trendi" data={overviewTrend} context={{}} />}>
+          <ChartCard title="Küresel Hayvan Stoku Trendi (20 Yıl)" span={2} action={<ChartInsightButton title="Küresel Hayvan Stoku Trendi (20 Yıl)" description="Uzun vadeli küresel hayvan stok trendi" data={overviewTrend} context={{}} />}>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={overviewTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -449,7 +449,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
       {/* Row 4: Growth Quadrant */}
       {countryGrowthData.length > 0 && (
         <div className="chart-grid" style={{marginTop: '20px'}}>
-          <ChartCard title="🎯 Ülke Growth Quadrant (CAGR × Pazar Payı)" span={2} action={<ChartInsightButton title="Ülke Growth Quadrant (CAGR × Pazar Payı)" description="Ülkelerin CAGR ve pazar payı dağılımı" data={countryGrowthData.slice(0, 30)} context={{}} />}>
+          <ChartCard title="Ülke Growth Quadrant (CAGR × Pazar Payı)" span={2} action={<ChartInsightButton title="Ülke Growth Quadrant (CAGR × Pazar Payı)" description="Ülkelerin CAGR ve pazar payı dağılımı" data={countryGrowthData.slice(0, 30)} context={{}} />}>
             <ResponsiveContainer width="100%" height={400}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -487,7 +487,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
                   background: livestockMapType === type ? 'var(--primary)' : 'var(--bg-primary)',
                   color: livestockMapType === type ? 'white' : 'var(--text-secondary)',
                   cursor: 'pointer', fontSize: '12px', fontWeight: 600}}>
-                {type === 'total' ? '📊 Toplam' : type === 'cattle' ? '🐄 Sığır+Manda' : type === 'sheep' ? '🐑 Koyun' : '🐐 Keçi'}
+                {type === 'total' ? 'Toplam' : type === 'cattle' ? 'Sığır+Manda' : type === 'sheep' ? 'Koyun' : 'Keçi'}
               </button>
             ))}
           </div>

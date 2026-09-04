@@ -1,3 +1,4 @@
+import { Flower2 } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -25,7 +26,7 @@ const YAG_ICERIK = [
 const YAG_RENKLER = ['#fbbf24', '#f59e0b', '#f97316', '#ef4444', '#fb923c', '#fcd34d', '#fde68a', '#84cc16'];
 
 const oilseedExtra = (
-  <ChartCard title="🧴 Yağlı Tohumlarda Yağ İçeriği Karşılaşması (%)" action={<ChartInsightButton title="🧴 Yağ İçeriği" description="Yağlı tohumlarda yağ içeriği karşılaşması" data={YAG_ICERIK} context={{ section: 'Yağlı Tohumlar' }} compact />}>
+  <ChartCard title="Yağlı Tohumlarda Yağ İçeriği Karşılaşması (%)" action={<ChartInsightButton title="Yağ İçeriği" description="Yağlı tohumlarda yağ içeriği karşılaşması" data={YAG_ICERIK} context={{ section: 'Yağlı Tohumlar' }} compact />}>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingBottom: 12 }}>
       Tohum başına ortalama yağ içeriği oranı. Susam ve yerfıstığı en zengin yağ kaynakları arasında yer alır.
     </p>
@@ -54,7 +55,7 @@ export default function OilseedProductionPage() {
     <TuikPlantCategoryPage
       title="Yağlı Tohum Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı yağlı tohum üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🌻"
+      icon={<Flower2 size={30} aria-hidden="true" />}
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={YAGLI_TOHUM_URUNLER}
       defaultProducts={['Ayçiçeği Tohumu (Yağlık)', 'Soya Fasulyesi']}

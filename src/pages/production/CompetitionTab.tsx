@@ -51,9 +51,9 @@ export function CompetitionTab({
 
       {compKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-          <KPICard title="🇹🇷 Sıralama" value={compKPIs.turkeyRank > 0 ? `${compKPIs.turkeyRank}.` : '-'} subtitle={`${compKPIs.totalProducers} üretici`} icon={Target} color="blue" large />
+          <KPICard title="Sıralama" value={compKPIs.turkeyRank > 0 ? `${compKPIs.turkeyRank}.` : '-'} subtitle={`${compKPIs.totalProducers} üretici`} icon={Target} color="blue" large />
           <KPICard title="Lider" value={compKPIs.leader.substring(0, 15)} subtitle={`%${compKPIs.leaderShare.toFixed(1)}`} icon={Award} color="orange" />
-          <KPICard title="HHI" value={compKPIs.latestHHI.toFixed(0)} subtitle={compKPIs.latestHHI > 2500 ? '🔴 Çok Yoğun' : compKPIs.latestHHI > 1500 ? '🟡 Yoğun' : '🟢 Rekabetçi'} icon={BarChart2} color={compKPIs.latestHHI > 2500 ? 'red' : compKPIs.latestHHI > 1500 ? 'orange' : 'green'} />
+          <KPICard title="HHI" value={compKPIs.latestHHI.toFixed(0)} subtitle={compKPIs.latestHHI > 2500 ? 'Çok Yoğun' : compKPIs.latestHHI > 1500 ? 'Yoğun' : 'Rekabetçi'} icon={BarChart2} color={compKPIs.latestHHI > 2500 ? 'red' : compKPIs.latestHHI > 1500 ? 'orange' : 'green'} />
           <KPICard title="Aktif Ülke" value={compKPIs.totalProducers.toString()} subtitle="Üretim yapan" icon={Globe} color="teal" />
         </div>
 
@@ -67,7 +67,7 @@ export function CompetitionTab({
                 {(compTopMovers.gainers || []).slice(0, 5).map((c: any, i: number) => (
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(16,185,129,0.07)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)' }}>
                     <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-secondary)', minWidth: '20px' }}>{i + 1}</span>
-                    <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</span>
+                    <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</span>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>+{c.growth.toFixed(1)}%</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{formatMetric(c.production)}</span>
                   </div>
@@ -80,7 +80,7 @@ export function CompetitionTab({
                 {(compTopMovers.decliners || []).slice(0, 5).map((c: any, i: number) => (
                   <div key={c.country} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(239,68,68,0.07)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-secondary)', minWidth: '20px' }}>{i + 1}</span>
-                    <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</span>
+                    <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</span>
                     <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{c.growth.toFixed(1)}%</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{formatMetric(c.production)}</span>
                   </div>
@@ -115,7 +115,7 @@ export function CompetitionTab({
           ];
           const tile = (label: string, val: number, hint: string) => {
             const color = val >= 1.5 ? '#10b981' : val >= 1.0 ? '#3b82f6' : val >= 0.7 ? '#f59e0b' : '#ef4444';
-            const badge = val >= 1.5 ? '🏆 Avantaj' : val >= 1.0 ? '✅ Üzerinde' : val >= 0.7 ? '⚠️ Altında' : '🔴 Zayıf';
+            const badge = val >= 1.5 ? 'Avantaj' : val >= 1.0 ? 'Üzerinde' : val >= 0.7 ? 'Altında' : 'Zayıf';
             return (
               <div style={{ padding: '14px', background: 'var(--bg)', border: `1px solid ${color}33`, borderLeft: `4px solid ${color}`, borderRadius: '8px' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</div>
@@ -163,7 +163,7 @@ export function CompetitionTab({
               {compMatrix.slice(0, 15).map((c: any) => (
                 <tr key={c.country} style={{ borderBottom: '1px solid var(--border)', background: c.isTurkey ? 'rgba(255,107,53,0.1)' : 'transparent', fontWeight: c.isTurkey ? 700 : 400 }}>
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.rank}</td>
-                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
+                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatMetric(c.production)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{yuzde(c.share, 1)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatHa(c.area)}</td>
@@ -175,7 +175,7 @@ export function CompetitionTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="🔬 Büyüme vs Üretim (Scatter)" action={<ChartInsightButton title="Büyüme vs Üretim (Scatter)" description="Ülkelerin üretim büyüme oranı ve üretim hacmi dağılımı" data={compBubbleData} context={{ ürün: compProduct }} />}>
+          <ChartCard title="Büyüme vs Üretim (Scatter)" action={<ChartInsightButton title="Büyüme vs Üretim (Scatter)" description="Ülkelerin üretim büyüme oranı ve üretim hacmi dağılımı" data={compBubbleData} context={{ ürün: compProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -184,7 +184,7 @@ export function CompetitionTab({
                 <Tooltip content={({ active, payload }: any) => {
                   if (active && payload?.[0]) { const d = payload[0].payload; return (
                     <div style={{ padding: '8px 12px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}>
-                      <div style={{ fontWeight: 700, color: d.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{d.isTurkey ? '🇹🇷 ' : ''}{d.name}</div>
+                      <div style={{ fontWeight: 700, color: d.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{d.isTurkey ? 'TR · ' : ''}{d.name}</div>
                       <div>Büyüme: {d.x.toFixed(1)}%</div><div>Üretim: {formatValue(d.y)}</div>
                     </div>); } return null;
                 }} />
@@ -194,7 +194,7 @@ export function CompetitionTab({
               </ScatterChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="📉 HHI Konsantrasyon Trendi" action={<ChartInsightButton title="HHI Konsantrasyon Trendi" description="Herfindahl-Hirschman endeksi ile pazar yoğunlaşma trendi" data={compHHITimeline} context={{ hhi: compKPIs?.latestHHI }} />}>
+          <ChartCard title="HHI Konsantrasyon Trendi" action={<ChartInsightButton title="HHI Konsantrasyon Trendi" description="Herfindahl-Hirschman endeksi ile pazar yoğunlaşma trendi" data={compHHITimeline} context={{ hhi: compKPIs?.latestHHI }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={compHHITimeline}>
                 <defs>

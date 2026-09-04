@@ -272,7 +272,7 @@ export default function ProductIntelligenceTab() {
           <div className="kpi-grid">
             <KPICard title={`İhracat (${yearForMonthly})`} value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
             <KPICard title={`İthalat (${yearForMonthly})`} value={formatMoney(totalImp)} subtitle="Yıllık toplam" icon={TrendingDown} color="orange" large />
-            <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
+            <KPICard title="Denge" value={formatMoney(balance)} subtitle={balance >= 0 ? 'Fazla' : 'Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
             <KPICard title="1. Partner" value={topCountry} subtitle="En büyük ihracat ülkesi" icon={Globe} color="blue" />
           </div>
 
@@ -309,7 +309,7 @@ export default function ProductIntelligenceTab() {
           </div>
 
           {/* Country Table */}
-          <ChartCard title={<>🌍 {selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedProduct} Ülke Bazlı Ticaret`} description="İlk 12 ülke için milyon USD bazında ihracat ve ithalat" data={countryBarData} context={productContext} />}>
+          <ChartCard title={<>{selectedProduct} — Ülke Bazlı Ticaret ({yearForMonthly})</>} action={<ChartInsightButton title={`${selectedProduct} Ülke Bazlı Ticaret`} description="İlk 12 ülke için milyon USD bazında ihracat ve ithalat" data={countryBarData} context={productContext} />}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={countryBarData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -360,7 +360,7 @@ export default function ProductIntelligenceTab() {
 
           {/* ScatterChart + RadarChart grid */}
           <div className="chart-grid" style={{ marginTop: 16 }}>
-            <ChartCard title="🎯 Ülke Fırsat Matrisi — İhracat Payı vs. Denge" action={<ChartInsightButton title={`${selectedProduct} Ülke Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={scatterData} context={productContext} />}>
+            <ChartCard title="Ülke Fırsat Matrisi — İhracat Payı vs. Denge" action={<ChartInsightButton title={`${selectedProduct} Ülke Fırsat Matrisi`} description="X ihracat payı, Y denge, Z ihracat hacmi" data={scatterData} context={productContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Yeşil: fazla · Kırmızı: açık · Daire büyüklüğü: ihracat hacmi
               </div>
@@ -404,7 +404,7 @@ export default function ProductIntelligenceTab() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title={<>🕸️ {selectedProduct} Rekabet Profili</>} action={<ChartInsightButton title={`${selectedProduct} Rekabet Profili`} description="0-100 normalize rekabet skorları" data={radarData} context={productContext} />}>
+            <ChartCard title={<>{selectedProduct} Rekabet Profili</>} action={<ChartInsightButton title={`${selectedProduct} Rekabet Profili`} description="0-100 normalize rekabet skorları" data={radarData} context={productContext} />}>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
                 Her boyut 0–100 skor · Büyük alan = güçlü rekabet pozisyonu
               </div>
@@ -421,7 +421,7 @@ export default function ProductIntelligenceTab() {
           </div>
 
           {/* Treemap — ülke ihracat dağılımı */}
-          <ChartCard title={<>🗺️ {selectedProduct} — Ülke İhracat Dağılımı (Treemap)</>} action={<ChartInsightButton title={`${selectedProduct} Ülke İhracat Dağılımı`} description="İlk 15 ülkenin ihracat ağırlığı" data={treemapData} context={productContext} />}>
+          <ChartCard title={<>{selectedProduct} — Ülke İhracat Dağılımı (Treemap)</>} action={<ChartInsightButton title={`${selectedProduct} Ülke İhracat Dağılımı`} description="İlk 15 ülkenin ihracat ağırlığı" data={treemapData} context={productContext} />}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Alan büyüklüğü ihracat değerine orantılı · İlk 15 ülke
             </div>

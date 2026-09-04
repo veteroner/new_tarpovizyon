@@ -82,7 +82,7 @@ export default function LandStep({
       <div className="hz-field">
         <label className="hz-label">Toprak Kalitesi</label>
         <div className="hz-toggle-row">
-          {([['iyi', '🟢 İyi (+%15)'], ['orta', '🟡 Orta'], ['zayif', '🔴 Zayıf (-%15)']] as const).map(([val, lbl]) => (
+          {([['iyi', 'İyi (+%15)'], ['orta', 'Orta'], ['zayif', 'Zayıf (-%15)']] as const).map(([val, lbl]) => (
             <button key={val}
               className={`hz-toggle-btn ${state.toprakKalite === val ? 'hz-toggle-btn--active' : ''}`}
               onClick={() => setState(s => ({ ...s, toprakKalite: val }))}>
@@ -172,7 +172,7 @@ export default function LandStep({
       <div className="hz-btn-row">
         <button className="hz-btn hz-btn--secondary" onClick={() => setState(s => ({ ...s, step: 2 }))}>← Geri</button>
         <button className="hz-btn hz-btn--primary" onClick={goResults} disabled={loading || state.alan <= 0}>
-          {loading ? '⏳ Hesaplanıyor…' : '📊 Sonuçları Gör →'}
+          {loading ? '⏳ Hesaplanıyor…' : 'Sonuçları Gör →'}
         </button>
       </div>
     </div>

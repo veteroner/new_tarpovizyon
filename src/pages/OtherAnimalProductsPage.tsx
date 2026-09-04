@@ -14,14 +14,14 @@ const config: FaoPageConfig = {
     'Beeswax',
     'Wool, shorn',
   ],
-  pageTitle: '🐝 Diğer Hayvansal Ürünler',
+  pageTitle: 'Diğer Hayvansal Ürünler',
   pageSubtitle: 'Bal, Yün, İpek ve diğer hayvansal ürünler - Ton bazında ({year})',
   comparisonTitle: 'Ürün Karşılaştırması',
   distributionTitle: 'Ürün Dağılımı',
   primaryColor: '#f59e0b',
   unit: 'ton',
   productPlaceholder: 'Ürün seçin...',
-  kpiIcon: '🐝',
+  kpiIcon: '',
 };
 
 export default function OtherAnimalProductsPage() {

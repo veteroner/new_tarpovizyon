@@ -19,7 +19,7 @@ import { SERIES } from '../utils/chartColors';
 import { BAR_COLOR } from '../utils/chartColors';
 import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
-import { BarChart3, Trophy } from 'lucide-react';
+import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
 const COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)
 
@@ -161,7 +161,7 @@ export default function MacroEconomicPage() {
               <div className="kpi-subtitle">{selectedYear} yılı</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-header"><span className="kpi-title">YILLIK BÜYÜME</span><div className={`kpi-icon ${yearGrowth >= 0 ? 'green' : 'red'}`}>{yearGrowth >= 0 ? '📈' : '📉'}</div></div>
+              <div className="kpi-header"><span className="kpi-title">YILLIK BÜYÜME</span><div className={`kpi-icon ${yearGrowth >= 0 ? 'green' : 'red'}`}>{yearGrowth >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div></div>
               <div className="kpi-value" style={{ color: yearGrowth >= 0 ? '#22c55e' : '#ef4444' }}>{yuzde(yearGrowth, 1)}</div>
               <div className="kpi-subtitle">Önceki yıla göre</div>
             </div>
@@ -210,7 +210,7 @@ export default function MacroEconomicPage() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="🥧 Top 8 Ülke Payı" action={<ChartInsightButton title="Top 8 Ülke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />}>
+            <ChartCard title="Top 8 Ülke Payı" action={<ChartInsightButton title="Top 8 Ülke Payı" description="Top 8 ülke payı" data={countryData.slice(0,8)} context={{ section: 'Makroekonomi' }} compact />}>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie 

@@ -218,7 +218,7 @@ export default function ResultsView({
           <span className="hz-param">📍 {state.ilce}, {state.il}</span>
           <span className="hz-param">🌾 {state.urun}</span>
           <span className="hz-param">📐 {state.alan.toLocaleString('tr-TR')} da</span>
-          <span className="hz-param">{state.sulama ? '🚿 Sulamalı (+%25)' : '💧 Sulamasız'}</span>
+          <span className="hz-param">{state.sulama ? 'Sulamalı (+%25)' : 'Sulamasız'}</span>
           <span className="hz-param">Toprak: {state.toprakKalite === 'iyi' ? 'İyi (+%15)' : state.toprakKalite === 'zayif' ? 'Zayıf (-%15)' : 'Orta'}</span>
           <span className="hz-param">Veri: {calc.dataLevel === 'ilce' ? 'İlçe' : calc.dataLevel === 'il' ? 'İl Ort.' : 'Türkiye Ort.'}</span>
           <span className="hz-param">Model: Linear Regresyon (R² = {calc.regR2.toFixed(2)})</span>

@@ -32,7 +32,7 @@ export function BeekeepingProductivitySection({ treemapData }: { treemapData: Tr
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
             İl Bazlı Bal Üretim Haritası
           </h3>
-          <ChartInsightButton title="📍 İl Bazlı Bal Üretim Haritası" description="Treemap: il bazlı bal üretim dağılımı" data={treemapData} context={{ section: 'İl Dağılım' }} compact />
+          <ChartInsightButton title="İl Bazlı Bal Üretim Haritası" description="Treemap: il bazlı bal üretim dağılımı" data={treemapData} context={{ section: 'İl Dağılım' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={500}>
           <Treemap

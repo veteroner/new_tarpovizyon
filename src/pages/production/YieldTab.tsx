@@ -50,7 +50,7 @@ export function YieldTab({
 
       {yieldKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-          <KPICard title="🇹🇷 Verim" value={formatYield(yieldKPIs.turkeyYield)} subtitle={`${yieldKPIs.turkeyRank}./${yieldKPIs.totalRanked}`} icon={Target} color={yieldKPIs.turkeyYield > yieldKPIs.worldAvgYield ? 'green' : 'red'} large />
+          <KPICard title="Verim" value={formatYield(yieldKPIs.turkeyYield)} subtitle={`${yieldKPIs.turkeyRank}./${yieldKPIs.totalRanked}`} icon={Target} color={yieldKPIs.turkeyYield > yieldKPIs.worldAvgYield ? 'green' : 'red'} large />
           <KPICard title="Dünya Ort." value={formatYield(yieldKPIs.worldAvgYield)} subtitle="Tüm üreticiler" icon={Globe} color="blue" />
           <KPICard title="Lider" value={formatYield(yieldKPIs.leaderYield)} subtitle={yieldKPIs.leader} icon={Award} color="purple" />
           <KPICard title="Gap" value={`%${yieldKPIs.gapToLeader.toFixed(0)}`} subtitle={yieldKPIs.catchUpYears ? `~${yieldKPIs.catchUpYears}y` : 'N/A'} icon={AlertTriangle} color={yieldKPIs.gapToLeader > 50 ? 'red' : 'orange'} />
@@ -59,7 +59,7 @@ export function YieldTab({
         <div style={{ marginBottom: '24px' }}><InsightCard insights={yieldInsights} maxDisplay={6} /></div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="📊 Verim Gap Analizi" action={<ChartInsightButton title="Verim Gap Analizi" description="Türkiye ve dünya verim karşılaştırması" data={yieldGapData} context={{ ürün: yieldProduct, türkiyeVerim: yieldKPIs?.turkeyYield, dünyaOrtVerim: yieldKPIs?.worldAvgYield }} />}>
+          <ChartCard title="Verim Gap Analizi" action={<ChartInsightButton title="Verim Gap Analizi" description="Türkiye ve dünya verim karşılaştırması" data={yieldGapData} context={{ ürün: yieldProduct, türkiyeVerim: yieldKPIs?.turkeyYield, dünyaOrtVerim: yieldKPIs?.worldAvgYield }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={yieldGapData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -72,7 +72,7 @@ export function YieldTab({
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="📊 Segmented — Gelişmiş vs Gelişmekte" action={<ChartInsightButton title="Verim: Gelişmiş vs Gelişmekte" description="Gelişmiş ve gelişmekte olan ülkeler verim karşılaştırması" data={yieldSegmented} context={{ ürün: yieldProduct }} />}>
+          <ChartCard title="Segmented — Gelişmiş vs Gelişmekte" action={<ChartInsightButton title="Verim: Gelişmiş vs Gelişmekte" description="Gelişmiş ve gelişmekte olan ülkeler verim karşılaştırması" data={yieldSegmented} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={yieldSegmented}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -88,7 +88,7 @@ export function YieldTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="🔬 Alan vs Verim (Scatter)" action={<ChartInsightButton title="Alan vs Verim Dağılımı" description="Ülkeler için ekim alanı ve verim korelasyonu" data={yieldScatter} context={{ ürün: yieldProduct }} />}>
+          <ChartCard title="Alan vs Verim (Scatter)" action={<ChartInsightButton title="Alan vs Verim Dağılımı" description="Ülkeler için ekim alanı ve verim korelasyonu" data={yieldScatter} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -97,7 +97,7 @@ export function YieldTab({
                 <Tooltip content={({ active, payload }: any) => {
                   if (active && payload?.[0]) { const d = payload[0].payload; return (
                     <div style={{ padding: '8px 12px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}>
-                      <div style={{ fontWeight: 700, color: d.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{d.isTurkey ? '🇹🇷 ' : ''}{d.name}</div>
+                      <div style={{ fontWeight: 700, color: d.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{d.isTurkey ? 'TR · ' : ''}{d.name}</div>
                       <div>Alan: {formatHa(d.x)}</div><div>Verim: {formatYield(d.y)}</div><div>Üretim: {formatValue(d.z)}</div>
                     </div>); } return null;
                 }} />
@@ -106,14 +106,14 @@ export function YieldTab({
               </ScatterChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="📈 Verim Trendi — Dünya vs Türkiye" action={<ChartInsightButton title="Verim Trendi — Dünya vs Türkiye" description="Yıllık verim trendi karşılaştırması" data={yieldTrends} context={{ ürün: yieldProduct }} />}>
+          <ChartCard title="Verim Trendi — Dünya vs Türkiye" action={<ChartInsightButton title="Verim Trendi — Dünya vs Türkiye" description="Yıllık verim trendi karşılaştırması" data={yieldTrends} context={{ ürün: yieldProduct }} />}>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={yieldTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                 <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-                <Tooltip formatter={(v: unknown, n: unknown) => [formatYield(Number(v)), n === 'world' ? 'Dünya' : '🇹🇷 Türkiye']} />
-                <Legend formatter={(v) => v === 'world' ? 'Dünya' : '🇹🇷 Türkiye'} />
+                <Tooltip formatter={(v: unknown, n: unknown) => [formatYield(Number(v)), n === 'world' ? 'Dünya' : 'Türkiye']} />
+                <Legend formatter={(v) => v === 'world' ? 'Dünya' : 'Türkiye'} />
                 <Line type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />
                 <Line type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
               </LineChart>
@@ -131,7 +131,7 @@ export function YieldTab({
               {yieldBestPractices.map((c: any) => (
                 <tr key={c.country} style={{ borderBottom: '1px solid var(--border)', background: c.isTurkey ? 'rgba(255,107,53,0.1)' : 'transparent', fontWeight: c.isTurkey ? 700 : 400 }}>
                   <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.rank}</td>
-                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? '🇹🇷 ' : ''}{c.country}</td>
+                  <td style={{ padding: '10px 8px', color: c.isTurkey ? TURKEY_COLOR : 'var(--text-primary)' }}>{c.isTurkey ? 'TR · ' : ''}{c.country}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 600 }}>{formatYield(c.yieldVal)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatMetric(c.production)}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatHa(c.area)}</td>

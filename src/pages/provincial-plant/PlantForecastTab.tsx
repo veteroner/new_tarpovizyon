@@ -162,9 +162,9 @@ export function PlantForecastTab({ top10Provinces, metrics, yearRange }: Props) 
                 color: colors[idx],
                 marginBottom: '12px'
               }}>
-                {scenario === 'Optimistic' ? '🌟 İyimser Senaryo' : 
-                 scenario === 'Realistic' ? '🎯 Gerçekçi Senaryo' : 
-                 '⚠️ Kart Senaryo'}
+                {scenario === 'Optimistic' ? 'İyimser Senaryo' : 
+                 scenario === 'Realistic' ? 'Gerçekçi Senaryo' : 
+                 'Kart Senaryo'}
               </div>
               <div style={{
                 fontSize: '12px',

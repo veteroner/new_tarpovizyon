@@ -168,7 +168,7 @@ export default function PriceIndexPage() {
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
-            <ChartCard title="📈 Aylık Trend" action={<ChartInsightButton title="Aylık Trend" description="Aylık fiyat trendi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
+            <ChartCard title="Aylık Trend" action={<ChartInsightButton title="Aylık Trend" description="Aylık fiyat trendi" data={monthlyData} context={{ section: 'Fiyat Endeksi' }} compact />}>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -197,7 +197,7 @@ export default function PriceIndexPage() {
 
           {scissorData.length > 0 && (
             <div className="chart-grid">
-              <ChartCard title="✂️ Fiyat Makası — Gıda TÜFE vs GFE (Girdi Fiyat)" span={2} action={<ChartInsightButton title="Fiyat Makası" description="Gıda tüfe vs gfe girdi fiyat makası" data={scissorData} context={{ section: 'Fiyat Endeksi' }} compact />}>
+              <ChartCard title="Fiyat Makası — Gıda TÜFE vs GFE (Girdi Fiyat)" span={2} action={<ChartInsightButton title="Fiyat Makası" description="Gıda tüfe vs gfe girdi fiyat makası" data={scissorData} context={{ section: 'Fiyat Endeksi' }} compact />}>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 12 }}>
                   Pozitif fark = Girdi fiyatları tüketici fiyatlarından yüksek → Çiftçi sıkışması (kırmızı bar). Çizgiler TÜFE/GFE endekslerini gösterir.
                 </p>
@@ -221,10 +221,10 @@ export default function PriceIndexPage() {
                   const recent = scissorData.slice(-3);
                   const avgGap = recent.reduce((s, d) => s + d.gap, 0) / (recent.length || 1);
                   const signal = avgGap > 5
-                    ? { text: 'Çiftçi Sıkışması: Girdi fiyatları tüketici fiyatlarının üzerinde', color: '#ef4444', icon: '🔴' }
+                    ? { text: 'Çiftçi Sıkışması: Girdi fiyatları tüketici fiyatlarının üzerinde', color: '#ef4444', icon: '' }
                     : avgGap < -5
-                      ? { text: 'Çiftçi Avantajı: Tüketici fiyatları girdi fiyatlarının üzerinde', color: '#22c55e', icon: '🟢' }
-                      : { text: 'Dengeli: Girdi ve tüketici fiyatları yakın seyirde', color: '#f59e0b', icon: '🟡' };
+                      ? { text: 'Çiftçi Avantajı: Tüketici fiyatları girdi fiyatlarının üzerinde', color: '#22c55e', icon: '' }
+                      : { text: 'Dengeli: Girdi ve tüketici fiyatları yakın seyirde', color: '#f59e0b', icon: '' };
                   return (
                     <div style={{ marginTop: 12, padding: '10px 16px', borderRadius: 8, background: `${signal.color}15`, border: `1px solid ${signal.color}30`, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 18 }}>{signal.icon}</span>
@@ -258,7 +258,7 @@ export default function PriceIndexPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
-              <ChartCard title="📊 Yıllık Değişim Oranı (%)" action={<ChartInsightButton title="Yıllık Değişim Oranı" description="Yıllık değişim oranı (%)" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />}>
+              <ChartCard title="Yıllık Değişim Oranı (%)" action={<ChartInsightButton title="Yıllık Değişim Oranı" description="Yıllık değişim oranı (%)" data={topProducts} context={{ section: 'Fiyat Endeksi' }} compact />}>
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={[...topProducts].sort((a, b) => b.change - a.change)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

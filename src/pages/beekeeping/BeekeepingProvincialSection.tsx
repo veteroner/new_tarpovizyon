@@ -61,7 +61,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               En Çok Arıcı Olan İller ({sonYil})
             </h3>
-            <ChartInsightButton title="🐝 En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
+            <ChartInsightButton title="En Çok Arıcı Olan İller" description="İl bazında arıcı sayısı sıralaması" data={topBeekeepers} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topBeekeepers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
@@ -95,7 +95,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               En Fazla Bal Üreten İller
             </h3>
-            <ChartInsightButton title="🍯 En Fazla Bal Üreten İller" description="İl bazında bal üretimi sıralaması" data={topProducers} context={{ section: 'İl Liderlik' }} compact />
+            <ChartInsightButton title="En Fazla Bal Üreten İller" description="İl bazında bal üretimi sıralaması" data={topProducers} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topProducers} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
@@ -129,7 +129,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               En Yüksek Verimli İller (kg/kovan)
             </h3>
-            <ChartInsightButton title="📊 En Yüksek Verimli İller" description="kg/kovan bazında verimlilik sıralaması" data={topYield} context={{ section: 'İl Liderlik' }} compact />
+            <ChartInsightButton title="En Yüksek Verimli İller" description="kg/kovan bazında verimlilik sıralaması" data={topYield} context={{ section: 'İl Liderlik' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
@@ -163,7 +163,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Bal Çeşitleri Dağılımı
             </h3>
-            <ChartInsightButton title="🌸 Bal Çeşitleri Dağılımı" description="Bal çeşitlerinin dağılımı" data={honeyTypesData} context={{ section: 'Bal Çeşitleri' }} compact />
+            <ChartInsightButton title="Bal Çeşitleri Dağılımı" description="Bal çeşitlerinin dağılımı" data={honeyTypesData} context={{ section: 'Bal Çeşitleri' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>

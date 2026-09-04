@@ -44,7 +44,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData, ilkYil, sonYil }: 
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Arıcı Sayısı Gelişimi
             </h3>
-            <ChartInsightButton title="🐝 Arıcı Sayısı Gelişimi" description="Arıcı sayısı yıllık gelişim trendi" data={yearTrendData} context={{ section: 'Arıcı' }} compact />
+            <ChartInsightButton title="Arıcı Sayısı Gelişimi" description="Arıcı sayısı yıllık gelişim trendi" data={yearTrendData} context={{ section: 'Arıcı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <AreaChart data={yearTrendData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>

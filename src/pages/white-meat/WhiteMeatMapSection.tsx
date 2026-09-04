@@ -38,7 +38,7 @@ export default function WhiteMeatMapSection({ provincialPoultry,
                 transition: 'all 0.2s'
               }}
             >
-              {type === 'total' ? '🐔 Toplam' : type === 'broiler' ? '🍗 Et Tavuğu' : '🥚 Yumurta Tavuğu'}
+              {type === 'total' ? 'Toplam' : type === 'broiler' ? 'Et Tavuğu' : 'Yumurta Tavuğu'}
             </button>
           ))}
         </div>
@@ -46,7 +46,7 @@ export default function WhiteMeatMapSection({ provincialPoultry,
       <ChartCard title={<>{poultryMapType === 'total' && 'Et Tavuğu + Yumurta Tavuğu (Toplam)'}
             {poultryMapType === 'broiler' && 'Et Tavuğu (Etlik Piliç)'}
             {poultryMapType === 'layer' && 'Yumurta Tavuğu (Yumurtacı Tavuk)'}
-            {provincialYear && ` (${provincialYear})`}</>} action={<ChartInsightButton title="🗺️ İl Bazlı Kanatlı Hayvan Varlığı" description="Türkiye il bazlı kanatlı hayvan varlığı dağılımı" data={provincialPoultry} context={{ section: 'İl Dağılımı' }} compact />}>
+            {provincialYear && ` (${provincialYear})`}</>} action={<ChartInsightButton title="İl Bazlı Kanatlı Hayvan Varlığı" description="Türkiye il bazlı kanatlı hayvan varlığı dağılımı" data={provincialPoultry} context={{ section: 'İl Dağılımı' }} compact />}>
         {provincialPoultry.length === 0 && (
           <div style={{ marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
             İl bazlı veriler yükleniyor…

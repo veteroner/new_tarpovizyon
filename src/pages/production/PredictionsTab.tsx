@@ -64,16 +64,16 @@ export function PredictionsTab({
 
       {predKPIs && (<>
         <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-          <KPICard title="🇹🇷 Mevcut" value={formatValue(predKPIs.currentProduction)} subtitle="2023 üretim" icon={Leaf} color="blue" large />
+          <KPICard title="Mevcut" value={formatValue(predKPIs.currentProduction)} subtitle="2023 üretim" icon={Leaf} color="blue" large />
           <KPICard title="Tahmin 2028" value={formatValue(predKPIs.forecastProduction)} subtitle={`${predKPIs.prodChange >= 0 ? '+' : ''}${yuzde(predKPIs.prodChange, 1)}`} icon={predKPIs.prodChange >= 0 ? TrendingUp : TrendingDown} color={predKPIs.prodChange >= 0 ? 'green' : 'red'} />
-          <KPICard title="Model R²" value={predKPIs.r2Production.toFixed(3)} subtitle={predKPIs.r2Production > 0.9 ? '✅ Güçlü' : predKPIs.r2Production > 0.7 ? '🟡 Orta' : '⚠️ Zayıf'} icon={Activity} color={predKPIs.r2Production > 0.9 ? 'green' : predKPIs.r2Production > 0.7 ? 'orange' : 'red'} />
-          <KPICard title="Verim Tahmin" value={formatYield(predKPIs.forecastYield)} subtitle={predKPIs.forecastYield > predKPIs.currentYield ? '📈 Artış bekleniyor' : '📉 Düşüş bekleniyor'} icon={Target} color={predKPIs.forecastYield > predKPIs.currentYield ? 'green' : 'red'} />
+          <KPICard title="Model R²" value={predKPIs.r2Production.toFixed(3)} subtitle={predKPIs.r2Production > 0.9 ? 'Güçlü' : predKPIs.r2Production > 0.7 ? 'Orta' : 'Zayıf'} icon={Activity} color={predKPIs.r2Production > 0.9 ? 'green' : predKPIs.r2Production > 0.7 ? 'orange' : 'red'} />
+          <KPICard title="Verim Tahmin" value={formatYield(predKPIs.forecastYield)} subtitle={predKPIs.forecastYield > predKPIs.currentYield ? 'Artış bekleniyor' : 'Düşüş bekleniyor'} icon={Target} color={predKPIs.forecastYield > predKPIs.currentYield ? 'green' : 'red'} />
         </div>
 
         <div style={{ marginBottom: '24px' }}><InsightCard insights={predInsights} maxDisplay={6} /></div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="📈 Türkiye Üretim Tahmini" action={<ChartInsightButton title="Türkiye Üretim Tahmini" description="Türkiye bitkisel üretim tahmin modeli" data={prodSeries} context={{ ürün: predProduct, tahminiUretim2028: predKPIs?.forecastProduction, modelR2: predKPIs?.r2Production }} />}>
+          <ChartCard title="Türkiye Üretim Tahmini" action={<ChartInsightButton title="Türkiye Üretim Tahmini" description="Türkiye bitkisel üretim tahmin modeli" data={prodSeries} context={{ ürün: predProduct, tahminiUretim2028: predKPIs?.forecastProduction, modelR2: predKPIs?.r2Production }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={prodSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -88,7 +88,7 @@ export function PredictionsTab({
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="🌍 Dünya Üretim Tahmini" action={<ChartInsightButton title="Dünya Üretim Tahmini" description="Dünya bitkisel üretim tahmin modeli" data={worldSeries} context={{ ürün: predProduct }} />}>
+          <ChartCard title="Dünya Üretim Tahmini" action={<ChartInsightButton title="Dünya Üretim Tahmini" description="Dünya bitkisel üretim tahmin modeli" data={worldSeries} context={{ ürün: predProduct }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={worldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -106,7 +106,7 @@ export function PredictionsTab({
         </div>
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="📊 Verim Tahmini (kg/ha)" action={<ChartInsightButton title="Verim Tahmini (kg/ha)" description="Bitkisel üretim verim tahmin modeli" data={yieldSeries} context={{ ürün: predProduct, tahminiVerim: predKPIs?.forecastYield }} />}>
+          <ChartCard title="Verim Tahmini (kg/ha)" action={<ChartInsightButton title="Verim Tahmini (kg/ha)" description="Bitkisel üretim verim tahmin modeli" data={yieldSeries} context={{ ürün: predProduct, tahminiVerim: predKPIs?.forecastYield }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={yieldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -121,7 +121,7 @@ export function PredictionsTab({
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="🗺️ Alan Tahmini (ha)" action={<ChartInsightButton title="Alan Tahmini (ha)" description="Ekim alanı tahmin modeli" data={areaSeries} context={{ ürün: predProduct }} />}>
+          <ChartCard title="Alan Tahmini (ha)" action={<ChartInsightButton title="Alan Tahmini (ha)" description="Ekim alanı tahmin modeli" data={areaSeries} context={{ ürün: predProduct }} />}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={areaSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

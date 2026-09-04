@@ -154,7 +154,7 @@ export default function AnimalTradeTab() {
 
   // HHI for export concentration
   const expHHI = useMemo(() => calcHHI(countries.map(c => c.exp)), [countries]);
-  const hhiLabel = expHHI > 2500 ? '🔴 Yüksek Yoğunlaşma' : expHHI > 1500 ? '🟡 Orta' : '🟢 Çeşitlendirilmiş';
+  const hhiLabel = expHHI > 2500 ? 'Yüksek Yoğunlaşma' : expHHI > 1500 ? 'Orta' : 'Çeşitlendirilmiş';
 
   // Pie data for product share
   const pieData = useMemo(() =>
@@ -214,7 +214,7 @@ export default function AnimalTradeTab() {
       <div className="kpi-grid">
         <KPICard title="Hayvansal İhracat" value={formatMoney(totalExp)} subtitle={`Yıllık: ${yoyGrowth >= 0 ? '+' : ''}${yuzde(yoyGrowth, 1)}`} icon={TrendingUp} color="green" large />
         <KPICard title="Hayvansal İthalat" value={formatMoney(totalImp)} subtitle={`Yıllık: ${impChange >= 0 ? '+' : ''}${yuzde(impChange, 1)}`} icon={TrendingDown} color="orange" large />
-        <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? '✅ Fazla' : '⚠️ Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
+        <KPICard title="Ticaret Dengesi" value={formatMoney(balance)} subtitle={balance >= 0 ? 'Fazla' : 'Açık'} icon={Scale} color={balance >= 0 ? 'green' : 'orange'} />
         <KPICard title="Ürün Sayısı" value={String(productCount)} subtitle="Hayvansal ürün grubu" icon={Beef} color="red" />
         <KPICard title="Ülke Sayısı" value={String(countryCount)} subtitle="Ticaret ortağı" icon={Zap} color="blue" />
         <KPICard title="HHI Endeksi" value={String(expHHI)} subtitle={hhiLabel} icon={AlertTriangle} color={expHHI > 2500 ? 'orange' : 'green'} />
@@ -265,7 +265,7 @@ export default function AnimalTradeTab() {
             <span style={{ color: balance >= 0 ? '#10b981' : '#f59e0b', fontWeight: 700, fontSize: 13 }}>Ticaret Dengesi</span>
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-            {balance >= 0 ? '🟢 FAZLA' : '🔴 AÇIK'}
+            {balance >= 0 ? 'FAZLA' : 'AÇIK'}
           </div>
           <div style={{ fontSize: 12, color: balance >= 0 ? '#10b981' : '#f59e0b' }}>
             {formatMoney(Math.abs(balance))}
@@ -361,7 +361,7 @@ export default function AnimalTradeTab() {
 
       {/* Yearly trend */}
       <div className="chart-grid">
-        <ChartCard title="📈 Yıllık Hayvansal Ticaret Trendi + Denge" action={<ChartInsightButton title="Yıllık Hayvansal Ticaret Trendi + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={animalContext} />}>
+        <ChartCard title="Yıllık Hayvansal Ticaret Trendi + Denge" action={<ChartInsightButton title="Yıllık Hayvansal Ticaret Trendi + Denge" description="Yıllara göre ihracat, ithalat ve denge" data={yearlyData} context={animalContext} />}>
           {/*
             * "Denge" ihracat ile ithalatın FARKI — türetilmiş seri. Eskiden
             * ikinci bir y ekseninde çiziliyordu ve iki eksen AYNI birimi

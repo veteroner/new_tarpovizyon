@@ -1,3 +1,4 @@
+import { Candy } from 'lucide-react';
 import { ILK_YIL, SON_YIL } from './plant/plantTypes';
 import TuikPlantCategoryPage from './TuikPlantCategoryPage';
 
@@ -63,7 +64,7 @@ export default function SugarCropProductionPage() {
     <TuikPlantCategoryPage
       title="Şeker Bitkileri Üretimi"
       subtitle={`Türkiye il/ilçe/bölge bazlı şeker bitkileri üretim analizi — TÜİK ${ILK_YIL}–${SON_YIL}`}
-      icon="🍬"
+      icon={<Candy size={30} aria-hidden="true" />}
       urunGrup="Tahıllar Ve Diğer Bitkisel Ürünler"
       urunFilter={SEKER_URUNLER}
       defaultProducts={['Şeker Pancarı']}

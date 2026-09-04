@@ -31,7 +31,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Tavuk Eti Üretimi (Aylık Trend)
             </h3>
-            <ChartInsightButton title="🍗 Tavuk Eti Üretimi" description="Aylık tavuk eti üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
+            <ChartInsightButton title="Tavuk Eti Üretimi" description="Aylık tavuk eti üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
@@ -51,7 +51,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Yumurta Üretimi (Aylık Trend)
             </h3>
-            <ChartInsightButton title="🥚 Yumurta Üretimi" description="Aylık yumurta üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
+            <ChartInsightButton title="Yumurta Üretimi" description="Aylık yumurta üretim trendi" data={poultryMonthlyData} context={{ section: 'Kanatlı' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>

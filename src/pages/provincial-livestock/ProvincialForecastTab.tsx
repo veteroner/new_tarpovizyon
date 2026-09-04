@@ -169,9 +169,9 @@ export default function ProvincialForecastTab({
                 color: colors[idx],
                 marginBottom: '12px'
               }}>
-                {scenario === 'Optimistic' ? '🌟 İyimser Senaryo' :
-                 scenario === 'Realistic' ? '🎯 Gerçekçi Senaryo' :
-                 '⚠️ Kart Senaryo'}
+                {scenario === 'Optimistic' ? 'İyimser Senaryo' :
+                 scenario === 'Realistic' ? 'Gerçekçi Senaryo' :
+                 'Kart Senaryo'}
               </div>
               <div style={{
                 fontSize: '12px',

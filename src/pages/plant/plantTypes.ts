@@ -132,7 +132,9 @@ export interface YieldTrendRow {
 export interface TuikPlantCategoryPageProps {
   title: string;
   subtitle: string;
-  icon: string;
+  /* Emoji DEĞİL: lucide bileşeni. Emoji glifi işletim sistemine göre
+     değişiyor ve ekran okuyucuda ad olarak okunuyor. */
+  icon: React.ReactNode;
   urunGrup: string;
   urunFilter?: string[];
   defaultProducts?: string[];

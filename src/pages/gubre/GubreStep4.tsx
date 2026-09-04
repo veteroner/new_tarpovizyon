@@ -48,7 +48,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           background: state.senaryo === 'tutucu' ? '#dbeafe' : state.senaryo === 'agresif' ? '#fef3c7' : '#d1fae5',
           color: state.senaryo === 'tutucu' ? '#1e40af' : state.senaryo === 'agresif' ? '#92400e' : '#065f46',
         }}>
-          {state.senaryo === 'tutucu' ? '🛡️ Tutumlu Senaryo (-%20)' : state.senaryo === 'agresif' ? '🚀 Maksimum Senaryo (+%20)' : '⚖️ Standart Senaryo'}
+          {state.senaryo === 'tutucu' ? 'Tutumlu Senaryo (-%20)' : state.senaryo === 'agresif' ? 'Maksimum Senaryo (+%20)' : 'Standart Senaryo'}
         </span>
         <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
           Taslak gübre planı — profesyonel uygulama öncesi uzman görüşü alınız
@@ -370,8 +370,8 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           </div>
           <p className="gh-comparison-note">
             {result.toplam_maliyet_kimyasal < result.toplam_maliyet_organik
-              ? '💡 Kimyasal gübre daha ekonomik ancak organik gübre toprak sağlığını uzun vadede iyileştirir.'
-              : '💡 Organik gübre bu durumda daha ekonomik ve toprak için daha faydalıdır.'}
+              ? 'Kimyasal gübre daha ekonomik ancak organik gübre toprak sağlığını uzun vadede iyileştirir.'
+              : 'Organik gübre bu durumda daha ekonomik ve toprak için daha faydalıdır.'}
           </p>
         </div>
       )}

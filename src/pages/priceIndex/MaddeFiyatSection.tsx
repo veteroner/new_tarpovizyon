@@ -70,7 +70,7 @@ export default function MaddeFiyatSection() {
         {sonDonem && <> · son dönem <strong>{sonDonem}</strong></>} · {urunler.length} ürün.
       </p>
 
-      <ChartCard title={<>📈 {aktifUrun}{aktifBirim && ` (${aktifBirim})`}
+      <ChartCard title={<>{aktifUrun}{aktifBirim && ` (${aktifBirim})`}
             {sonFiyat !== undefined && <> — son: <strong>{tl(sonFiyat)}</strong></>}</>} action={<ChartInsightButton title={`${aktifUrun} fiyat trendi`} description="Aylık TL fiyat trendi"
             data={seri} context={{ birim: aktifBirim }} compact />}>
         <select
@@ -107,9 +107,9 @@ export default function MaddeFiyatSection() {
 
       <div className="chart-grid">
         <DegisimGrafigi veri={enCokArtan} renk="#ef4444"
-          baslik={`📈 En Çok Artan (${sonDonem})`} />
+          baslik={`En Çok Artan (${sonDonem})`} />
         <DegisimGrafigi veri={enCokAzalan} renk="#22c55e"
-          baslik={`📉 En Çok Azalan (${sonDonem})`} />
+          baslik={`En Çok Azalan (${sonDonem})`} />
       </div>
     </>
   );

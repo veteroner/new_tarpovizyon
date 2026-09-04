@@ -315,8 +315,8 @@ export function DetailedTable<T extends object>({
             background: 'var(--bg-primary)'
           }}>
             {searchTerm
-              ? '🔍 Arama kriterine uygun sonuç bulunamadı.'
-              : (emptyMessage || '📊 Veri bulunamadı.')}
+              ? 'Arama kriterine uygun sonuç bulunamadı.'
+              : (emptyMessage || 'Veri bulunamadı.')}
           </div>
         ) : (
           paginatedData.map((row, rowIndex) => (

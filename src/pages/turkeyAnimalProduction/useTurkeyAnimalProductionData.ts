@@ -378,16 +378,16 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
   }, [historicalData]);
 
   const growthStrategy = useMemo(() => {
-    if (redMeatData.length < 3) return '📊 Veri yetersiz';
+    if (redMeatData.length < 3) return 'Veri yetersiz';
     const recent = redMeatData.slice(-3);
     const first = recent[0]; const last = recent[recent.length - 1];
     const meatGrowth = last.toplam - first.toplam;
-    if (Math.abs(meatGrowth) < 100) return '⚪ Stabil üretim';
+    if (Math.abs(meatGrowth) < 100) return 'Stabil üretim';
     const buyukbasGrowth = last.buyukbas_toplam - first.buyukbas_toplam;
     const kucukbasGrowth = last.kucukbas_toplam - first.kucukbas_toplam;
-    if (Math.abs(buyukbasGrowth) > Math.abs(kucukbasGrowth) * 1.5) return meatGrowth > 0 ? '🐮 Büyükbaş odaklı büyüme' : '🔴 Büyükbaş azalışı';
-    if (Math.abs(kucukbasGrowth) > Math.abs(buyukbasGrowth) * 1.5) return meatGrowth > 0 ? '🐑 Küçükbaş odaklı büyüme' : '🔴 Küçükbaş azalışı';
-    return meatGrowth > 0 ? '🟢 Dengeli büyüme' : '🟡 Karma trend';
+    if (Math.abs(buyukbasGrowth) > Math.abs(kucukbasGrowth) * 1.5) return meatGrowth > 0 ? 'Büyükbaş odaklı büyüme' : 'Büyükbaş azalışı';
+    if (Math.abs(kucukbasGrowth) > Math.abs(buyukbasGrowth) * 1.5) return meatGrowth > 0 ? 'Küçükbaş odaklı büyüme' : 'Küçükbaş azalışı';
+    return meatGrowth > 0 ? 'Dengeli büyüme' : 'Karma trend';
   }, [redMeatData]);
 
   // suppress unused import warning

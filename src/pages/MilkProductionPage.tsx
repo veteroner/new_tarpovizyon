@@ -15,14 +15,14 @@ const config: FaoPageConfig = {
     'Raw milk of buffalo',
     'Raw milk of goats',
   ],
-  pageTitle: '🥛 Süt Üretimi',
+  pageTitle: 'Süt Üretimi',
   pageSubtitle: 'Dünya süt üretimi verileri - Ton bazında ({year})',
   comparisonTitle: 'Süt Türü Karşılaştırması',
   distributionTitle: 'Süt Türü Dağılımı',
   primaryColor: '#3b82f6',
   unit: 'ton',
   productPlaceholder: 'Süt türü seçin...',
-  kpiIcon: '🥛',
+  kpiIcon: '',
 };
 
 export default function MilkProductionPage() {

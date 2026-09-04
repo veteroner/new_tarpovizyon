@@ -53,7 +53,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Toplam Süt Üretimi Trendi (Tüm Yıllar)
             </h3>
-            <ChartInsightButton title="📈 Toplam Süt Üretimi Trendi (Tüm Yıllar)" description="Türkiye toplam süt üretimi tarihsel trendi" data={series} context={{ section: 'Süt Üretimi' }} />
+            <ChartInsightButton title="Toplam Süt Üretimi Trendi (Tüm Yıllar)" description="Türkiye toplam süt üretimi tarihsel trendi" data={series} context={{ section: 'Süt Üretimi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -86,7 +86,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Türlere Göre Dağılım ({latest?.year ?? '-'})
             </h3>
-            <ChartInsightButton title="🥧 Türlere Göre Dağılım" description="Tür bazında süt üretimi dağılımı" data={latestBreakdown.rows} context={{ year: latest?.year }} />
+            <ChartInsightButton title="Türlere Göre Dağılım" description="Tür bazında süt üretimi dağılımı" data={latestBreakdown.rows} context={{ year: latest?.year }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <PieChart>
@@ -123,7 +123,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Yıllık Büyüme Oranları (%)
             </h3>
-            <ChartInsightButton title="📊 Yıllık Büyüme Oranları (%)" description="Son 15 yıl süt üretimi büyüme oranları" data={growthRates.slice(-15)} context={{ section: 'Büyüme' }} compact />
+            <ChartInsightButton title="Yıllık Büyüme Oranları (%)" description="Son 15 yıl süt üretimi büyüme oranları" data={growthRates.slice(-15)} context={{ section: 'Büyüme' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <LineChart data={growthRates.slice(-15)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -159,7 +159,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Son 5 Yıl Toplam Üretim Trendi
             </h3>
-            <ChartInsightButton title="📈 Son 5 Yıl Toplam Üretim Trendi" description="Son 5 yıl toplam süt üretimi trendi" data={series.slice(-5)} context={{ section: 'Üretim Trendi' }} />
+            <ChartInsightButton title="Son 5 Yıl Toplam Üretim Trendi" description="Son 5 yıl toplam süt üretimi trendi" data={series.slice(-5)} context={{ section: 'Üretim Trendi' }} />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -201,7 +201,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Büyükbaş (Son 5 Yıl)
             </h3>
-            <ChartInsightButton title="🐄 Büyükbaş Süt Üretimi (Son 5 Yıl)" description="Büyükbaş hayvan süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'cattle' }} compact />
+            <ChartInsightButton title="Büyükbaş Süt Üretimi (Son 5 Yıl)" description="Büyükbaş hayvan süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'cattle' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -229,7 +229,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Koyun (Son 5 Yıl)
             </h3>
-            <ChartInsightButton title="🐑 Koyun Süt Üretimi (Son 5 Yıl)" description="Koyun süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'sheep' }} compact />
+            <ChartInsightButton title="Koyun Süt Üretimi (Son 5 Yıl)" description="Koyun süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'sheep' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -257,7 +257,7 @@ export default function MilkProductionSection({
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
               Keçi (Son 5 Yıl)
             </h3>
-            <ChartInsightButton title="🐐 Keçi Süt Üretimi (Son 5 Yıl)" description="Keçi süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'goat' }} compact />
+            <ChartInsightButton title="Keçi Süt Üretimi (Son 5 Yıl)" description="Keçi süt üretimi son 5 yıl" data={series.slice(-5)} context={{ type: 'goat' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -304,7 +304,7 @@ export default function MilkProductionSection({
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                     Süt Verimi Trendi (Litre/Baş)
                   </h3>
-                  <ChartInsightButton title="📈 Süt Verimi Trendi (Litre/Baş)" description="Türkiye süt verimi trendi" data={productivity} context={{ section: 'Verimlilik' }} />
+                  <ChartInsightButton title="Süt Verimi Trendi (Litre/Baş)" description="Türkiye süt verimi trendi" data={productivity} context={{ section: 'Verimlilik' }} />
                 </div>
                 <ResponsiveContainer width="100%" height={340}>
                   <ComposedChart data={productivity} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
@@ -347,7 +347,7 @@ export default function MilkProductionSection({
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
                     Dünya Karkas Verimi Karşılaştırması
                   </h3>
-                  <ChartInsightButton title="🌍 Dünya Karkas Verimi Karşılaştırması" description="Türkiye vs dünya karkas verim karşılaştırması" data={productivityComparison} context={{ section: 'Verimlilik' }} />
+                  <ChartInsightButton title="Dünya Karkas Verimi Karşılaştırması" description="Türkiye vs dünya karkas verim karşılaştırması" data={productivityComparison} context={{ section: 'Verimlilik' }} />
                 </div>
                 <ResponsiveContainer width="100%" height={340}>
                   <BarChart data={productivityComparison} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
