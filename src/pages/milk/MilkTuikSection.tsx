@@ -83,7 +83,9 @@ export default function MilkTuikSection({
         ))}
       </div>
 
-      {/* KPI kartları — ortak kart katmanı (StatCard). Degrade zemin ve emoji
+      {/* Değişim ölçülerinde `delta` YOK, `ton` var: ölçünün kendisi zaten
+          değişim olduğu için delta rozeti aynı sayıyı ikinci kez yazardı.
+          KPI kartları — ortak kart katmanı (StatCard). Degrade zemin ve emoji
           filigranı kaldırıldı; değişim kartının zemini işarete göre yeşil/bordo
           oluyordu, yön artık delta okuyla taşınıyor ve zemin sabit kalıyor. */}
       {tuikLatestYear && (
@@ -95,13 +97,13 @@ export default function MilkTuikSection({
           <StatCard
             label="Yıllık değişim"
             value={yuzde(tuikYoyChange, 1, true)}
-            delta={tuikYoyChange}
+            ton={tuikYoyChange >= 0 ? 'olumlu' : 'olumsuz'}
           />
           {fiveYearChange !== null && (
             <StatCard
               label="5 yıllık değişim"
               value={yuzde(fiveYearChange, 1, true)}
-              delta={fiveYearChange}
+              ton={fiveYearChange >= 0 ? 'olumlu' : 'olumsuz'}
             />
           )}
           {maxMonth && (

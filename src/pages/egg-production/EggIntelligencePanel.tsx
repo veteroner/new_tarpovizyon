@@ -1,4 +1,5 @@
 import { yuzde } from '../../utils/sayi';
+import { Card } from '../../components/ui/Card';
 import type { TuikEggData } from './eggProductionTypes';
 
 interface EggIntelligencePanelProps {
@@ -26,39 +27,28 @@ export function EggIntelligencePanel({ tuikData }: EggIntelligencePanelProps) {
     (lastYear.nativeLayer + lastYear.hybridLayer > 0 ? lastYear.nativeLayer + lastYear.hybridLayer : 0);
   const hybridShare = denomForHybrid > 0 ? (lastYear.hybridLayer / denomForHybrid) * 100 : 0;
 
+  /* Degrade zemin + %15 opak beyaz cam karolar kaldırıldı: o zeminde 10 px
+     yardımcı yazı WCAG kontrast sınırının altındaydı. Ortak `.hero-ozet`
+     düzeni — aynı panel arıcılık ve hayvansal üretim sayfalarında da var. */
+  const ogeler = [
+    { etiket: 'Yumurta BBO', deger: yuzde(eggCAGR, 1, true), alt: `${years} yıl büyüme` },
+    { etiket: 'Tavuk BBO', deger: yuzde(layerCAGR, 1, true), alt: `Popülasyon (${years} yıl)` },
+    { etiket: 'Verim artışı', deger: `${yieldChange > 0 ? '+' : ''}${yieldChange.toFixed(0)}`, alt: 'Adet/tavuk/yıl' },
+    { etiket: 'Hibrit payı', deger: yuzde(hybridShare, 1), alt: 'Modernizasyon' },
+  ];
+
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
-      borderRadius: '16px',
-      padding: '24px',
-      marginTop: '24px',
-      boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)',
-    }}>
-      <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        Yumurta İçgörü Özeti
-      </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-        <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>YUMURTA CAGR</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(eggCAGR, 1)}</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>{years} Yıl Büyüme</div>
-        </div>
-        <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>TAVUK CAGR</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(layerCAGR, 1)}</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Popülasyon ({years}Y)</div>
-        </div>
-        <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>VERİM ARTIŞI</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yieldChange > 0 ? '+' : ''}{yieldChange.toFixed(0)}</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Adet/Tavuk/Yıl</div>
-        </div>
-        <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>HİBRİT PAYI</div>
-          <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(hybridShare, 1)}</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Modernizasyon</div>
-        </div>
+    <Card className="hero-ozet" aralik="normal">
+      <h3 className="ui-card-title hero-ozet-baslik">Yumurta içgörü özeti</h3>
+      <div className="hero-ozet-izgara">
+        {ogeler.map((o) => (
+          <div className="hero-ozet-oge" key={o.etiket}>
+            <div className="hero-ozet-etiket">{o.etiket}</div>
+            <div className="hero-ozet-deger">{o.deger}</div>
+            <div className="hero-ozet-alt">{o.alt}</div>
+          </div>
+        ))}
       </div>
-    </div>
+    </Card>
   );
 }

@@ -11,7 +11,7 @@ import {
 import type { YearPoint, TuikChickenData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { ChartCard } from '../../components/ui/Card';
+import { Card, ChartCard } from '../../components/ui/Card';
 import { Bird, TrendingUp, TrendingDown } from 'lucide-react';
 
 type Props = {
@@ -74,39 +74,24 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
         const hatchSuccessChange = lastYear.hatchRate - firstYear.hatchRate;
         
         return (
-          <div style={{
-            background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
-            borderRadius: '16px',
-            padding: '24px',
-            marginTop: '24px',
-            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)',
-          }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Beyaz Et İçgörü Özeti
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-              <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>KESİM CAGR</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(slaughterCAGR, 1)}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>{years} Yıl Büyüme</div>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>ÜRETİM CAGR</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{yuzde(meatCAGR, 1)}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Et Üretimi ({years}Y)</div>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>KULUÇKA BAŞARI</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{hatchSuccessChange > 0 ? '+' : ''}{yuzde(hatchSuccessChange, 1)}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Verimlilik Artışı</div>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '500', marginBottom: '8px' }}>TAVUK BAŞI VERİM</div>
-                <div style={{ fontSize: '20px', color: '#fff', fontWeight: '700' }}>{lastYear.yieldPerBird.toFixed(2)} kg</div>
-                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '4px' }}>Güncel Performans</div>
-              </div>
+          /* Degrade zemin + cam karolar kaldırıldı; ortak `.hero-ozet` düzeni. */
+          <Card className="hero-ozet" aralik="normal">
+            <h3 className="ui-card-title hero-ozet-baslik">Beyaz et içgörü özeti</h3>
+            <div className="hero-ozet-izgara">
+              {[
+                { etiket: 'Kesim BBO', deger: yuzde(slaughterCAGR, 1, true), alt: `${years} yıl büyüme` },
+                { etiket: 'Üretim BBO', deger: yuzde(meatCAGR, 1, true), alt: `Et üretimi (${years} yıl)` },
+                { etiket: 'Kuluçka başarısı', deger: yuzde(hatchSuccessChange, 1, true), alt: 'Verimlilik değişimi' },
+                { etiket: 'Tavuk başı verim', deger: `${lastYear.yieldPerBird.toFixed(2)} kg`, alt: 'Güncel performans' },
+              ].map((o) => (
+                <div className="hero-ozet-oge" key={o.etiket}>
+                  <div className="hero-ozet-etiket">{o.etiket}</div>
+                  <div className="hero-ozet-deger">{o.deger}</div>
+                  <div className="hero-ozet-alt">{o.alt}</div>
+                </div>
+              ))}
             </div>
-          </div>
+          </Card>
         );
       })()}
 

@@ -1,4 +1,5 @@
 import { yuzde } from '../../utils/sayi';
+import { Card } from '../../components/ui/Card';
 import { fmt } from './plantTypes';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -51,40 +52,24 @@ export default function PlantKpiPanel({
         </div>
       </div>
 
-      {/* ─── 🧠 Intelligence Panel ─── */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
-        borderRadius: '12px',
-        padding: '20px',
-        marginTop: '20px',
-        color: 'white'
-      }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          Tarım İçgörü Özeti
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK CAGR</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{yuzde(cagr5Year, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>VERİMLİLİK TRENDİ</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yieldTrend >= 0 ? '+' : ''}{yuzde(yieldTrend, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 3 yıl verim değişimi</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>TAHMİN {selectedYear + 1}</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{forecast > 0 ? fmt(forecast) : '-'}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Linear trend tahmini</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BÜYÜME STRATEJİSİ</div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>{growthDriver}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 5 yıl analizi</div>
-          </div>
+      {/* Degrade zemin + cam karolar kaldırıldı; ortak `.hero-ozet` düzeni. */}
+      <Card className="hero-ozet" aralik="normal">
+        <h3 className="ui-card-title hero-ozet-baslik">Tarım içgörü özeti</h3>
+        <div className="hero-ozet-izgara">
+          {[
+            { etiket: '5 yıllık BBO', deger: yuzde(cagr5Year, 1, true), alt: 'Yıllık bileşik büyüme' },
+            { etiket: 'Verimlilik trendi', deger: yuzde(yieldTrend, 1, true), alt: 'Son 3 yıl verim değişimi' },
+            { etiket: `Tahmin ${selectedYear + 1}`, deger: forecast > 0 ? fmt(forecast) : '—', alt: 'Doğrusal trend tahmini' },
+            { etiket: 'Büyüme stratejisi', deger: growthDriver, alt: 'Son 5 yıl analizi' },
+          ].map((o) => (
+            <div className="hero-ozet-oge" key={o.etiket}>
+              <div className="hero-ozet-etiket">{o.etiket}</div>
+              <div className="hero-ozet-deger">{o.deger}</div>
+              <div className="hero-ozet-alt">{o.alt}</div>
+            </div>
+          ))}
         </div>
-      </div>
+      </Card>
     </>
   );
 }

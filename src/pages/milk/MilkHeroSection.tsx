@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Card, StatCard } from '../../components/ui/Card';
 import { yuzde } from '../../utils/sayi';
 import { formatTon, type WorldRankings } from './milkUtils';
 
@@ -15,235 +15,64 @@ export default function MilkHeroSection({ latest, yoy, cattleShare, cagr, suffic
   return (
     <>
       {/* Hero KPI Section */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-        gap: '20px', 
-        marginBottom: '32px' 
-      }}>
-        <div style={{ 
-          background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-          padding: '28px', 
-          borderRadius: '16px', 
-          boxShadow: 'var(--tv-golge)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-              TOPLAM ÜRETİM {latest?.year}
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-              {formatTon(latest?.totalTon ?? 0)}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
-              Yıllık süt üretimi
-            </div>
-          </div>
-        </div>
-
-        <div style={{ 
-          background: yoy >= 0 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
-          padding: '28px', 
-          borderRadius: '16px', 
-          boxShadow: `0 4px 16px ${yoy >= 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}>{yoy >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
-              YILLIK DEĞİŞİM
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
-              {yoy >= 0 ? '+' : ''}{yuzde(yoy, 1)}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
-              Önceki yıla göre
-            </div>
-          </div>
-        </div>
-
-        <div style={{ 
-          background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-          padding: '28px', 
-          borderRadius: '16px', 
-          boxShadow: 'var(--tv-golge)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-              BÜYÜKBAŞ PAYI
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-              {yuzde(cattleShare, 1)}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
-              Toplam üretimde
-            </div>
-          </div>
-        </div>
-
-        <div style={{ 
-          background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-          padding: '28px', 
-          borderRadius: '16px', 
-          boxShadow: 'var(--tv-golge)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-              10 YILLIK CAGR
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-              {yuzde(cagr, 1)}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '12px' }}>
-              Bileşik büyüme
-            </div>
-          </div>
-        </div>
-
+      {/*
+        Yedi kart tek kart katmanında. Eskiden ikisi (yıllık değişim, yeterlilik)
+        işaretine göre zeminini yeşil/bordo yapıyor, kalanı beyaz kart oluyordu —
+        aynı ızgarada iki farklı okuma biçimi. Yön artık delta okuyla taşınıyor.
+      */}
+      <div className="kpi-grid">
+        <StatCard
+          label={`Toplam üretim ${latest?.year ?? ''}`}
+          value={formatTon(latest?.totalTon ?? 0)}
+          sub="Yıllık süt üretimi"
+        />
+        {/* Ölçünün KENDİSİ değişim olduğu için `delta` verilmiyor: verilseydi
+            aynı sayı hem değer hem rozet olarak iki kez yazılırdı ("%-4,9 ▼%4,9").
+            Yön burada anlamsal ton şeridiyle taşınıyor. */}
+        <StatCard
+          label="Yıllık değişim"
+          value={yuzde(yoy, 1, true)}
+          sub="Önceki yıla göre"
+          ton={yoy >= 0 ? 'olumlu' : 'olumsuz'}
+        />
+        <StatCard label="Büyükbaş payı" value={yuzde(cattleShare, 1)} sub="Toplam üretimde" />
+        <StatCard label="10 yıllık BBO" value={yuzde(cagr, 1, true)} sub="Bileşik büyüme" />
         {sufficiency && (
-          <div style={{
-            background: Number(sufficiency.sut_ton) >= 1 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
-            padding: '28px',
-            borderRadius: '16px',
-            boxShadow: Number(sufficiency.sut_ton) >= 1 ? '0 4px 16px rgba(34, 197, 94, 0.2)' : '0 4px 16px rgba(239, 68, 68, 0.2)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', marginBottom: '12px' }}>
-                YETERLİLİK
-              </div>
-              <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
-                {yuzde((Number(sufficiency.sut_ton) * 100), 0)}
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginTop: '12px' }}>
-                {Number(sufficiency.sut_ton) >= 1 ? 'Yeterli' : 'Yetersiz'}
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Yeterlilik"
+            value={yuzde(Number(sufficiency.sut_ton) * 100, 0)}
+            sub={Number(sufficiency.sut_ton) >= 1 ? 'Yeterli' : 'Yetersiz'}
+            ton={Number(sufficiency.sut_ton) >= 1 ? 'olumlu' : 'olumsuz'}
+          />
         )}
-
         {worldRankings && (
           <>
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '28px', 
-              borderRadius: '16px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-                  İNEK SÜT ÜRETİMİ
-                </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
-                  Dünya #{worldRankings.cattle.world}
-                </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
-                  AB #{worldRankings.cattle.eu}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '28px', 
-              borderRadius: '16px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-                  KOYUN SÜT ÜRETİMİ
-                </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
-                  Dünya #{worldRankings.sheep.world}
-                </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
-                  AB #{worldRankings.sheep.eu}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '28px', 
-              borderRadius: '16px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, fontSize: '8rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '12px' }}>
-                  KEÇİ SÜT ÜRETİMİ
-                </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1, marginBottom: '8px' }}>
-                  Dünya #{worldRankings.goat.world}
-                </div>
-                <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', lineHeight: 1 }}>
-                  AB #{worldRankings.goat.eu}
-                </div>
-              </div>
-            </div>
+            <StatCard label="İnek sütü üretimi" value={`Dünya #${worldRankings.cattle.world}`} sub={`AB #${worldRankings.cattle.eu}`} />
+            <StatCard label="Koyun sütü üretimi" value={`Dünya #${worldRankings.sheep.world}`} sub={`AB #${worldRankings.sheep.eu}`} />
+            <StatCard label="Keçi sütü üretimi" value={`Dünya #${worldRankings.goat.world}`} sub={`AB #${worldRankings.goat.eu}`} />
           </>
         )}
       </div>
 
-      {/* Intelligence Panel */}
-      <div style={{ 
-        background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '48px',
-        color: 'white'
-      }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          Süt Üretimi İçgörü Özeti
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>10 YILLIK CAGR</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr >= 0 ? '+' : ''}{yuzde(cagr, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>YILLIK DEĞİŞİM</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yoy >= 0 ? '+' : ''}{yuzde(yoy, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son yıl</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BÜYÜKBAŞ PAYI</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yuzde(cattleShare, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Toplam üretimde</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>YETERLİLİK</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sufficiency ? `${yuzde((Number(sufficiency.sut_ton) * 100), 0)}` : '-'}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>{sufficiency && Number(sufficiency.sut_ton) >= 1 ? 'Yeterli' : 'Yetersiz'}</div>
-          </div>
+      {/* Degrade zemin + cam karolar kaldırıldı; ortak `.hero-ozet` düzeni. */}
+      <Card className="hero-ozet" aralik="normal">
+        <h3 className="ui-card-title hero-ozet-baslik">Süt üretimi içgörü özeti</h3>
+        <div className="hero-ozet-izgara">
+          {[
+            { etiket: '10 yıllık BBO', deger: yuzde(cagr, 1, true), alt: 'Yıllık bileşik büyüme' },
+            { etiket: 'Yıllık değişim', deger: yuzde(yoy, 1, true), alt: 'Son yıl' },
+            { etiket: 'Büyükbaş payı', deger: yuzde(cattleShare, 1), alt: 'Toplam üretimde' },
+            { etiket: 'Yeterlilik', deger: sufficiency ? yuzde(Number(sufficiency.sut_ton) * 100, 0) : '—',
+              alt: sufficiency && Number(sufficiency.sut_ton) >= 1 ? 'Yeterli' : 'Yetersiz' },
+          ].map((o) => (
+            <div className="hero-ozet-oge" key={o.etiket}>
+              <div className="hero-ozet-etiket">{o.etiket}</div>
+              <div className="hero-ozet-deger">{o.deger}</div>
+              <div className="hero-ozet-alt">{o.alt}</div>
+            </div>
+          ))}
         </div>
-      </div>
+      </Card>
     </>
   );
 }

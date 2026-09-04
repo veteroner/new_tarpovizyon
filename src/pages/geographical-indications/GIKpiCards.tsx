@@ -1,3 +1,4 @@
+import { StatCard } from '../../components/ui/Card';
 import { yuzde } from '../../utils/sayi';
 import type { GIMetrics } from './giTypes';
 import { formatNumber } from './giTypes';
@@ -6,61 +7,37 @@ interface Props {
   metrics: GIMetrics;
 }
 
-const kpiConfig = [
-  {
-    key: 'total' as const,
-    label: 'Toplam Ürün',
-    sub: 'Tescilli + Başvuru',
-    gradient: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)'
-  },
+/**
+ * Coğrafi işaret KPI kartları.
+ *
+ * Altı kartın her biri kendi degradesini taşıyordu — yeşil, zümrüt, kehribar,
+ * mavi, pembe, mor. Altı ölçünün altısı da aynı türden (sayım) olduğu için bu
+ * renkler hiçbir ayrım kodlamıyordu; yalnızca gökkuşağı üretiyordu. Ortak kart
+ * katmanına alındı, zemin nötr.
+ */
+const KPI_LISTESI = [
+  { key: 'total' as const, label: 'Toplam ürün', sub: () => 'Tescilli + başvuru' },
   {
     key: 'registered' as const,
     label: 'Tescilli',
-    sub: (m: GIMetrics) => `${yuzde(((m.registered / m.total) * 100), 1)} Tescil Oranı`,
-    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+    sub: (m: GIMetrics) => (m.total > 0 ? `${yuzde((m.registered / m.total) * 100, 1)} tescil oranı` : '—'),
   },
-  {
-    key: 'pending' as const,
-    label: 'Başvuruda',
-    sub: 'İnceleme Aşamasında',
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-  },
-  {
-    key: 'provinceCount' as const,
-    label: 'İl Sayısı',
-    sub: 'Farklı İl',
-    gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-  },
-  {
-    key: 'productGroupCount' as const,
-    label: 'Ürün Grubu',
-    sub: 'Farklı Kategori',
-    gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)'
-  },
-  {
-    key: 'typeCount' as const,
-    label: 'İşaret Türü',
-    sub: 'Farklı Tür',
-    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-  }
+  { key: 'pending' as const, label: 'Başvuruda', sub: () => 'İnceleme aşamasında' },
+  { key: 'provinceCount' as const, label: 'İl sayısı', sub: () => 'Farklı il' },
+  { key: 'productGroupCount' as const, label: 'Ürün grubu', sub: () => 'Farklı kategori' },
+  { key: 'typeCount' as const, label: 'İşaret türü', sub: () => 'Farklı tür' },
 ];
 
 export function GIKpiCards({ metrics }: Props) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px',
-      marginBottom: '32px'
-    }}>
-      {kpiConfig.map((item) => (
-        <div key={item.key} style={{ background: item.gradient, borderRadius: '12px', padding: '24px', color: 'white' }}>
-          <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>{item.label}</div>
-          <div style={{ fontSize: '36px', fontWeight: 800 }}>{formatNumber(metrics[item.key])}</div>
-          <div style={{ fontSize: '12px', opacity: 0.85, marginTop: '4px' }}>
-            {typeof item.sub === 'function' ? item.sub(metrics) : item.sub}
-          </div>
-        </div>
+    <div className="kpi-grid">
+      {KPI_LISTESI.map((item) => (
+        <StatCard
+          key={item.key}
+          label={item.label}
+          value={formatNumber(metrics[item.key])}
+          sub={item.sub(metrics)}
+        />
       ))}
     </div>
   );
