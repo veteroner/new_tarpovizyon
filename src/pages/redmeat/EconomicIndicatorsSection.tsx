@@ -1,6 +1,6 @@
 import { endeksle } from '../../utils/endeks';
 import { yuzde } from '../../utils/sayi';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Area,
   AreaChart,
@@ -31,15 +31,23 @@ type Props = {
 };
 
 export default function EconomicIndicatorsSection({ economicData }: Props) {
-  const [econStartDate, setEconStartDate] = useState('');
-  const [econEndDate, setEconEndDate] = useState('');
-
-  useEffect(() => {
-    if (economicData.length > 0 && !econEndDate) {
-      setEconEndDate(economicData[0].tarih);
-      setEconStartDate(economicData[Math.min(11, economicData.length - 1)].tarih);
-    }
-  }, [economicData, econEndDate]);
+  /*
+   * VARSAYILAN ARALIK DURUMDA DEĞİL, TÜRETİLİYOR.
+   *
+   * Eskiden bir efekt veri gelince `setEconEndDate` + `setEconStartDate`
+   * çağırıyordu. Bu, "veriden durum başlat" kalıbı: efekt render'dan SONRA
+   * çalıştığı için sayfa bir kare boş aralıkla çiziliyor, sonra state
+   * değişip ikinci kez çiziliyordu (zincirleme render). React derleyicisi de
+   * bunu hata olarak işaretliyordu.
+   *
+   * Şimdi kullanıcı seçimi boşken varsayılan doğrudan veriden okunuyor.
+   * Seçim yapılınca kullanıcının değeri kazanıyor.
+   */
+  const [secilenBas, setEconStartDate] = useState('');
+  const [secilenBit, setEconEndDate] = useState('');
+  const econEndDate = secilenBit || economicData[0]?.tarih || '';
+  const econStartDate = secilenBas
+    || economicData[Math.min(11, economicData.length - 1)]?.tarih || '';
 
   const filteredEconomicData = useMemo(() => {
     if (!econStartDate || !econEndDate) return economicData;

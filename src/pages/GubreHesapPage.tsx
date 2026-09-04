@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WizardState, CalcResult } from './gubre/gubreTypes';
 import { calculate, calcConfidenceScore } from './gubre/gubreUtils';
@@ -17,20 +17,29 @@ export default function GubreHesapPage() {
     il: '', alan: 50, urun: '', hedef_verim: 0,
     toprak: null, gubre_tipi: 'her_ikisi', senaryo: 'standart',
   });
-  const [result, setResult] = useState<CalcResult | null>(null);
   const [error, setError] = useState('');
   const pricing = useFertilizerPricing();
 
-  // Step 4'teyken fiyat değişikliklerinde otomatik yeniden hesapla
-  useEffect(() => {
-    if (step === 4 && state.toprak && state.urun) {
-      try {
-        setResult(calculate(state, pricing.effectiveProducts));
-      } catch {
-        // ignore
-      }
+  /*
+   * SONUÇ DURUM DEĞİL, TÜRETİLİYOR.
+   *
+   * `result` üç ayrı yerden yazılıyordu: 3. adımdan geçerken, fiyatlar
+   * değişince bir efektten, ve sıfırlarken. Ama sonuç zaten
+   * (state, fiyatlar, adım) üçlüsünün SAF FONKSİYONU — durumda tutmanın tek
+   * getirdiği şey, efektin render'dan sonra çalışıp sayfayı ikinci kez
+   * çizmesiydi (zincirleme render; React derleyicisi de hata veriyordu).
+   *
+   * Artık `useMemo`: girdi değişince kendiliğinden yeniden hesaplanıyor,
+   * senkron kalıyor, sıfırlamak için ayrı bir çağrı gerekmiyor.
+   */
+  const result = useMemo<CalcResult | null>(() => {
+    if (step !== 4 || !state.toprak || !state.urun) return null;
+    try {
+      return calculate(state, pricing.effectiveProducts);
+    } catch {
+      return null;
     }
-  }, [pricing.effectiveProducts, step, state]);
+  }, [step, state, pricing.effectiveProducts]);
 
   const handleNext = () => {
     setError('');
@@ -39,9 +48,12 @@ export default function GubreHesapPage() {
     if (step === 2 && !state.toprak) return setError('Lütfen toprak analizi bilgilerini girin');
     if (step === 3) {
       try {
-        setResult(calculate(state, pricing.effectiveProducts));
+        /* Sonucu SAKLAMIYORUZ; burada yalnızca hesabın geçtiğini doğruluyoruz
+           ki hatalı girdiyle 4. adıma geçilmesin. Değerin kendisini useMemo
+           üretiyor. */
+        calculate(state, pricing.effectiveProducts);
         setStep(4);
-      } catch (_err) {
+      } catch {
         setError('Hesaplama hatası');
       }
     } else {
@@ -53,7 +65,6 @@ export default function GubreHesapPage() {
   const handleReset = () => {
     setStep(1);
     setState({ il: '', alan: 50, urun: '', hedef_verim: 0, toprak: null, gubre_tipi: 'her_ikisi', senaryo: 'standart' });
-    setResult(null);
     setError('');
   };
 

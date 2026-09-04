@@ -134,45 +134,62 @@ export async function sayfaBul(
  * çağıran tarafta ve tek bir yerde: "yerel arama sonuç bulamadı mı?"
  */
 export function useModelArama(ogeler: MenuItem[], metin: string, etkin: boolean) {
-  const [araniyor, setAraniyor] = useState(false);
-  const [sonuc, setSonuc] = useState<ModelSonucu | null>(null);
+  /*
+   * ─── DURUM YALNIZCA AĞDAN GELENİ TUTUYOR ──────────────────────────────────
+   * Eskiden efekt, geçersiz sorgu ve önbellek isabeti hâllerinde de
+   * `setSonuc`/`setAraniyor` çağırıyordu. İkisi de EŞZAMANLI setState: efekt
+   * render'dan sonra çalışıp durumu değiştirdiği için bileşen bir kez boşa
+   * çiziliyordu (zincirleme render; React derleyicisi de hata veriyordu).
+   *
+   * Oysa o iki hâl zaten TÜRETİLEBİLİR — sorgu kısa mı, önbellekte var mı,
+   * ikisi de render sırasında bilinebiliyor. Durumda yalnızca gerçekten
+   * beklenmesi gereken şey kalıyor: ağdan dönen cevap ve hangi soruya ait
+   * olduğu.
+   */
+  const [agdan, setAgdan] = useState<{ soru: string; sonuc: ModelSonucu | null } | null>(null);
+  const [bekleniyor, setBekleniyor] = useState<string | null>(null);
   const iptalRef = useRef<AbortController | null>(null);
+
+  const soru = metin.trim();
+  const gecerli = etkin && soru.length >= EN_AZ_HARF;
+  const onbellekteki = gecerli ? onbellek.get(anahtar(soru, 1)) : undefined;
 
   useEffect(() => {
     iptalRef.current?.abort();
-    const soru = metin.trim();
-
-    if (!etkin || soru.length < EN_AZ_HARF) {
-      setSonuc(null);
-      setAraniyor(false);
-      return;
-    }
-
-    /* Önbellekte varsa beklemeye ve "aranıyor" göstermeye gerek yok. */
-    const hazir = onbellek.get(anahtar(soru, 1));
-    if (hazir) {
-      setSonuc(hazir[0] ?? null);
-      setAraniyor(false);
-      return;
-    }
+    /* Geçersiz sorgu ya da önbellek isabeti: istek YOK, durum dokunulmuyor —
+       ikisi de aşağıda render sırasında türetiliyor. */
+    if (!gecerli || onbellekteki) return;
 
     const ctrl = new AbortController();
     iptalRef.current = ctrl;
-    setAraniyor(true);
-    setSonuc(null);
 
     /*
      * Her tuşta istek atılmıyor. Kullanıcı yazmayı bırakınca tek istek gidiyor;
      * yoksa "yumurta" yazan biri için yedi ayrı çağrı yapılırdı.
+     *
+     * "Aranıyor" işareti de BEKLEME BİTİNCE yakılıyor, efektin içinde değil.
+     * İkisi birden doğru: efektte eşzamanlı setState zincirleme render
+     * üretiyordu, ve bekleme süresinde henüz uçan bir istek yokken çark
+     * döndürmek kullanıcıya yanlış şey söylüyordu.
      */
     const zaman = setTimeout(() => {
+      setBekleniyor(soru);
       sayfaBul(soru, ogeler, ctrl.signal)
-        .then((r) => { if (!ctrl.signal.aborted) { setSonuc(r); setAraniyor(false); } })
-        .catch(() => { if (!ctrl.signal.aborted) setAraniyor(false); });
+        .then((r) => {
+          if (ctrl.signal.aborted) return;
+          setAgdan({ soru, sonuc: r });
+          setBekleniyor(null);
+        })
+        .catch(() => { if (!ctrl.signal.aborted) setBekleniyor(null); });
     }, BEKLEME_MS);
 
     return () => { clearTimeout(zaman); ctrl.abort(); };
-  }, [ogeler, metin, etkin]);
+  }, [ogeler, soru, gecerli, onbellekteki]);
 
-  return { araniyor, sonuc };
+  /* Üç kaynak, öncelik sırasıyla: geçersiz → boş, önbellek → anında,
+     ağ → yalnızca AYNI soruya aitse (eski cevap yeni sorguya sızmasın). */
+  if (!gecerli) return { araniyor: false, sonuc: null };
+  if (onbellekteki) return { araniyor: false, sonuc: onbellekteki[0] ?? null };
+  if (agdan?.soru === soru) return { araniyor: false, sonuc: agdan.sonuc };
+  return { araniyor: bekleniyor === soru, sonuc: null };
 }
