@@ -26,9 +26,15 @@ const DK = 60_000;
 const SAAT = 60 * DK;
 const GUN = 24 * SAAT;
 
-/** "3 saat önce", "dün", "5 gün önce" — mutlak tarih ipucunda kalıyor. */
-function goreliZaman(ms: number): string {
-  const fark = Date.now() - ms;
+/**
+ * "3 saat önce", "dün", "5 gün önce" — mutlak tarih ipucunda kalıyor.
+ *
+ * `simdi` DIŞARIDAN geliyor: `Date.now()` render sırasında çağrılırsa saf
+ * olmayan bir okuma olur (React aynı render'ı iki kez çalıştırdığında farklı
+ * sonuç verir). Zaman durumda tutuluyor, dakikada bir tazeleniyor.
+ */
+function goreliZaman(ms: number, simdi: number): string {
+  const fark = simdi - ms;
   if (fark < 2 * DK) return 'az önce';
   if (fark < SAAT) return `${Math.round(fark / DK)} dakika önce`;
   if (fark < GUN) return `${Math.round(fark / SAAT)} saat önce`;
@@ -55,10 +61,10 @@ export function VeriTazeligi() {
   useSyncExternalStore(damgaAbone, damgaSurumuAl, damgaSurumuAl);
   const damgalar = damgalariAl();
 
-  /* Göreli zaman kendiliğinden eskiyor; dakikada bir yeniden çiziyoruz. */
-  const [, tikla] = useState(0);
+  /* Göreli zaman kendiliğinden eskiyor; dakikada bir tazeleniyor. */
+  const [simdi, setSimdi] = useState(() => Date.now());
   useEffect(() => {
-    const z = setInterval(() => tikla((n) => n + 1), DK);
+    const z = setInterval(() => setSimdi(Date.now()), DK);
     return () => clearInterval(z);
   }, []);
 
@@ -67,7 +73,7 @@ export function VeriTazeligi() {
 
   /* Sayfa en bayat verisi kadar tazedir. */
   const [enEskiTablo, enEski] = kayitlar.reduce((a, b) => (b[1] < a[1] ? b : a));
-  const gun = (Date.now() - enEski) / GUN;
+  const gun = (simdi - enEski) / GUN;
   const durum = gun > 90 ? 'eski' : gun > 30 ? 'orta' : 'taze';
 
   return (
@@ -82,7 +88,7 @@ export function VeriTazeligi() {
     >
       <Clock size={13} aria-hidden="true" />
       <span>
-        Veri güncelliği: <b>{goreliZaman(enEski)}</b>
+        Veri güncelliği: <b>{goreliZaman(enEski, simdi)}</b>
         {kayitlar.length > 1 && (
           <span className="vt-ek"> · {kayitlar.length} kaynağın en eskisi</span>
         )}
