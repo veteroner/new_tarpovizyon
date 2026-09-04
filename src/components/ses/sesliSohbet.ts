@@ -133,7 +133,8 @@ async function tur(benimOturum: number): Promise<void> {
 
   guncelle({ asama: 'dusunuyor', soru });
 
-  let cevap = '';
+  /* Başlangıç değeri gereksizdi: try içinde her yolda atanıyor. */
+  let cevap: string;
   try {
     cevap = cevaplayici ? await cevaplayici(soru) : '';
   } catch {

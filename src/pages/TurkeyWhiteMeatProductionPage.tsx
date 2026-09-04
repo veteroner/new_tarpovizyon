@@ -1,5 +1,6 @@
 import { useWhiteMeatData } from './white-meat/useWhiteMeatData';
-import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
+import SectionTabs from '../components/SectionTabs';
+import { useSectionTab, type SectionTab } from '../components/bolumSekmeleri';
 import WhiteMeatHeroSection from './white-meat/WhiteMeatHeroSection';
 import WhiteMeatMapSection from './white-meat/WhiteMeatMapSection';
 import WhiteMeatEconomicsSection from './white-meat/WhiteMeatEconomicsSection';

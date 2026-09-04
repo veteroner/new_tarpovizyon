@@ -9,12 +9,18 @@ import ProvincialCorrelationTab from './provincial-livestock/ProvincialCorrelati
 import ProvincialForecastTab from './provincial-livestock/ProvincialForecastTab';
 
 export default function TurkeyProvincialLivestockPage() {
-  const data = useProvincialLivestockData();
+  /*
+   * `pageRef` AYRI alınıyor — bkz. TurkeyProvincialPlantPage'deki aynı not.
+   * Ref düz nesnenin içinde döndüğü için `data.pageRef` okununca derleyici
+   * nesnenin tamamını ref sayıyor ve ardından gelen her `data.X` erişimi
+   * "render sırasında ref okuma" hatası veriyordu.
+   */
+  const { pageRef, ...data } = useProvincialLivestockData();
 
   if (data.loading) return <Loading />;
 
   return (
-    <div ref={data.pageRef} style={{ padding: '24px', maxWidth: '1600px', margin: '0 auto' }}>
+    <div ref={pageRef} style={{ padding: '24px', maxWidth: '1600px', margin: '0 auto' }}>
       <ProvincialLivestockHeader
         metrics={data.metrics}
         selectedYear={data.selectedYear}

@@ -6,7 +6,8 @@ import { GubreStep1 } from './gubre/GubreStep1';
 import { GubreStep2 } from './gubre/GubreStep2';
 import { GubreStep3 } from './gubre/GubreStep3';
 import { GubreStep4 } from './gubre/GubreStep4';
-import { useFertilizerPricing, FertilizerPricingPanel } from './gubre/FertilizerPricingPanel';
+import { FertilizerPricingPanel } from './gubre/FertilizerPricingPanel';
+import { useFertilizerPricing } from './gubre/useFertilizerPricing';
 import './GubreHesapPage.css';
 
 export default function GubreHesapPage() {

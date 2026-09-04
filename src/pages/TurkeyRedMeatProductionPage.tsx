@@ -18,7 +18,8 @@ import {
   type WorldRankings,
   extractYear,
 } from './redmeat/redMeatUtils';
-import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
+import SectionTabs from '../components/SectionTabs';
+import { useSectionTab, type SectionTab } from '../components/bolumSekmeleri';
 import RangeChips from '../components/RangeChips';
 import ProductionOverviewSection from './redmeat/ProductionOverviewSection';
 import SpeciesDetailSection from './redmeat/SpeciesDetailSection';

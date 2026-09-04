@@ -9,12 +9,20 @@ import { PlantCorrelationTab } from './provincial-plant/PlantCorrelationTab';
 import { PlantForecastTab } from './provincial-plant/PlantForecastTab';
 
 export default function TurkeyProvincialPlantPage() {
-  const data = useProvincialPlantData();
+  /*
+   * `pageRef` AYRI alınıyor.
+   *
+   * Kanca ref'i düz nesnenin içinde döndürüyor; `data.pageRef` okunduğu anda
+   * React derleyicisi NESNENİN TAMAMINI ref sayıyor ve ardından gelen her
+   * `data.X` erişimi "render sırasında ref okuma" hatası veriyor — tek dosyada
+   * 20'ye yakın hata. Ref'i ayırınca geriye düz veri nesnesi kalıyor.
+   */
+  const { pageRef, ...data } = useProvincialPlantData();
 
   if (data.loading) return <Loading />;
 
   return (
-    <div ref={data.pageRef} style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div ref={pageRef} style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
       <PlantHeader
         activeTab={data.activeTab}
         setActiveTab={data.setActiveTab}

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import { GRUPLAR } from './VitrinHeader';
+import { GRUPLAR } from './vitrinGruplar';
 
 /**
  * Vitrin footer'ı — ana sayfada ve veri sayfalarının altında aynısı.

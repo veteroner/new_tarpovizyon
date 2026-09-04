@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSectionTab, type SectionTab } from './bolumSekmeleri';
 
-export type SectionTab = {
-  id: string;
-  label: string;
-};
 
 type Props = {
   tabs: SectionTab[];
@@ -24,21 +20,6 @@ type Props = {
  * Aktif sekme URL'de tutuluyor (`?bolum=uretim`): paylaşılan bağlantı doğru
  * bölümü açıyor, tarayıcı geri tuşu sekmeler arasında çalışıyor.
  */
-export function useSectionTab(tabs: SectionTab[], param = 'bolum') {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const raw = searchParams.get(param);
-  const gecerli = tabs.some(t => t.id === raw);
-  const active = gecerli ? (raw as string) : tabs[0]?.id;
-
-  const setActive = (id: string) => {
-    const next = new URLSearchParams(searchParams);
-    next.set(param, id);
-    setSearchParams(next, { replace: false });
-  };
-
-  return { active, setActive };
-}
-
 export default function SectionTabs({ tabs, param = 'bolum' }: Props) {
   const { active, setActive } = useSectionTab(tabs, param);
   const seritRef = useRef<HTMLDivElement>(null);

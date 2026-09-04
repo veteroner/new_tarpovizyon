@@ -1,3 +1,4 @@
+import { GRUPLAR } from './vitrinGruplar';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X, TrendingUp, Sparkles } from 'lucide-react';
@@ -22,12 +23,7 @@ import { Menu, X, TrendingUp, Sparkles } from 'lucide-react';
  * Apple'ın kendi menüsünde de dolu CTA yok — sadece bağlantılar.
  */
 
-export const GRUPLAR = [
-  { ad: 'Makro Veriler', yol: '/tarpovizyon-basic/makro/genel', kok: '/tarpovizyon-basic/makro' },
-  { ad: 'Hayvancılık', yol: '/tarpovizyon-basic/genel/hayvansal-uretim', kok: '/tarpovizyon-basic/genel' },
-  { ad: 'Bitkisel Üretim', yol: '/tarpovizyon-basic/bitkisel-genel/uretim-ozeti', kok: '/tarpovizyon-basic/bitkisel' },
-  { ad: 'Bölgesel Veriler', yol: '/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim', kok: '/tarpovizyon-basic/il-duzeyinde' },
-];
+
 
 export function VitrinHeader({
   arama,

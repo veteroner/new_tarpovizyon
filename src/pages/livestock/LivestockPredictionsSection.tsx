@@ -114,7 +114,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
         }
       });
 
-      let forecasts: Array<{ country: string; rawCountry: string; product: string; forecast: Array<{year: number; value: number}>; trend: string; r2: number; historical: YearValue[]; upperBounds: number[]; lowerBounds: number[] }> = [];
+      const forecasts: Array<{ country: string; rawCountry: string; product: string; forecast: Array<{year: number; value: number}>; trend: string; r2: number; historical: YearValue[]; upperBounds: number[]; lowerBounds: number[] }> = [];
 
       if (hasProphet) {
         const prophetGrouped = new Map<string, { forecasts: Array<{year: number; value: number; lower: number; upper: number}>; trend: string; r2: number }>();

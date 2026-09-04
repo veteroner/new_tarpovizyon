@@ -1,4 +1,5 @@
-import SectionTabs, { useSectionTab, type SectionTab } from '../components/SectionTabs';
+import SectionTabs from '../components/SectionTabs';
+import { useSectionTab, type SectionTab } from '../components/bolumSekmeleri';
 import { useMilkData } from './milk/useMilkData';
 import MilkHeroSection from './milk/MilkHeroSection';
 import MilkProductionSection from './milk/MilkProductionSection';
