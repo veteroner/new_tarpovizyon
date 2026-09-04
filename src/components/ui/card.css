@@ -137,6 +137,24 @@
 .ui-ton-uyari    { border-left-color: var(--warning); }
 .ui-ton-bilgi    { border-left-color: var(--primary); }
 
+/*
+ * Kart içindeki açıklama metni.
+ *
+ * Grafiklerin yanındaki "bu sayı nereden geliyor" paragrafları için. Satır
+ * uzunluğu 68 karaktere sınırlı: kart geniş ekranda 1.200 px olabiliyor ve
+ * sınırsız satır gözün satır başını bulmasını zorlaştırıyor.
+ */
+.ui-prose {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  max-width: 68ch;
+}
+
+.ui-prose p { margin: 0 0 10px; }
+.ui-prose p:last-child { margin-bottom: 0; }
+.ui-prose b { color: var(--text-primary); font-weight: 600; }
+
 /* ─── Mobil ──────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   .ui-chart-card { padding: 14px; }

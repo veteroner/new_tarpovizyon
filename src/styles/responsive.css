@@ -411,6 +411,19 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * Bölüm İÇİNDE ikinci bir seçim şeridi (ör. ürün seçimi).
+ *
+ * Aynı çip görünümü ama yapışkan DEĞİL: iki yapışkan şerit üst üste binip
+ * içeriği örtüyor. Alt çizgi de kalkıyor — bölüm sekmesiyle karışmasın.
+ */
+.section-tabs--inline {
+  position: static;
+  border-bottom: none;
+  background: transparent;
+  padding-top: 0;
+}
+
 /* ─── Aralık çipleri (RangeChips) ────────────────────────────────────────── */
 .range-chips {
   display: flex;
