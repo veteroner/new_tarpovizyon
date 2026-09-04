@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
-import { KpiCard, formatNumber } from '../charts/KpiCard';
+import { KpiCard } from '../charts/KpiCard';
+import { formatNumber } from '../charts/kpiBicim';
 import { TurkeyProvinceMap } from '../charts/TurkeyProvinceMap';
 import { RankingBlock } from '../charts/RankingBlock';
 import { RankedTable } from '../charts/RankedTable';

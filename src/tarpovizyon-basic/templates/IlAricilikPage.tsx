@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
-import { KpiCard, formatNumber } from '../charts/KpiCard';
+import { KpiCard } from '../charts/KpiCard';
+import { formatNumber } from '../charts/kpiBicim';
 import { TurkeyProvinceMap } from '../charts/TurkeyProvinceMap';
 import { RankingBlock } from '../charts/RankingBlock';
 import { RankedTable } from '../charts/RankedTable';
@@ -17,14 +17,16 @@ export function IlAricilikPage({ config }: { config: IlAricilikPageConfig }) {
   );
   const items = rows.map((r) => ({ name: String(r.il), value: Number(r.bal_uretimi_ton) })).filter((i) => Number.isFinite(i.value));
 
-  const kovanItems = useMemo(
-    () => rows.map((r) => ({ name: String(r.il), value: Number(r.toplam_kovan) })).filter((i) => Number.isFinite(i.value)),
-    [rows]
-  );
-  const ariciItems = useMemo(
-    () => rows.map((r) => ({ name: String(r.il), value: Number(r.aricilik_yapan_isletme_sayisi) })).filter((i) => Number.isFinite(i.value)),
-    [rows]
-  );
+  /* Elle `useMemo` KALDIRILDI: React derleyicisi bu iki türevi zaten
+     ezberliyor ve mevcut memo'yu koruyamadığı için dosyanın tamamını
+     derlemeden atlıyordu ("Compilation Skipped"). Hemen üstteki `items` ve
+     `mapValues` de memo'suz — dosya kendi içinde tutarlı hâle geldi. */
+  const kovanItems = rows
+    .map((r) => ({ name: String(r.il), value: Number(r.toplam_kovan) }))
+    .filter((i) => Number.isFinite(i.value));
+  const ariciItems = rows
+    .map((r) => ({ name: String(r.il), value: Number(r.aricilik_yapan_isletme_sayisi) }))
+    .filter((i) => Number.isFinite(i.value));
 
   const totalBal = items.reduce((s, i) => s + i.value, 0);
   const totalKovan = kovanItems.reduce((s, i) => s + i.value, 0);

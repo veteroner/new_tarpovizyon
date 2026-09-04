@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows } from '../api';
-import { KpiCard, formatNumber } from '../charts/KpiCard';
+import { KpiCard } from '../charts/KpiCard';
+import { formatNumber } from '../charts/kpiBicim';
 import { OranCubugu } from '../charts/OranCubugu';
 import { YearlyChart, type SeriesConfig } from '../charts/YearlyChart';
 import { TradeTrendSection } from '../charts/TradeTrendSection';

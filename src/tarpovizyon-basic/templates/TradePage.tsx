@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows, type Row } from '../api';
-import { KpiCard, formatNumber } from '../charts/KpiCard';
+import { KpiCard } from '../charts/KpiCard';
+import { formatNumber } from '../charts/kpiBicim';
 import { WorldChoroplethMap } from '../charts/WorldChoroplethMap';
 import { RankedTable } from '../charts/RankedTable';
 

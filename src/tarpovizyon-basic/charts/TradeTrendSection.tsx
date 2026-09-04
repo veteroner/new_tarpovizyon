@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { KpiCard, formatNumber } from '../charts/KpiCard';
+import { KpiCard } from '../charts/KpiCard';
+
+import { formatNumber } from '../charts/kpiBicim';
 import { YearlyChart } from './YearlyChart';
 import { RankedTable } from './RankedTable';
 import { useYearRangeFilter } from './DateRangeFilter';

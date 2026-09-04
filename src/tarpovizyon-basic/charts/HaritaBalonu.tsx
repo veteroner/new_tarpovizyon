@@ -1,3 +1,4 @@
+import type { BalonBilgisi } from './balonBilgisi';
 /**
  * Harita bilgi balonu — Türkiye ve dünya haritalarında ortak.
  *
@@ -15,18 +16,7 @@
  * sıralamak gereksiz iş olurdu).
  */
 
-export type BalonBilgisi = {
-  ad: string;
-  deger: number;
-  /** 1'den başlayan sıra. */
-  sira: number;
-  /** Sıralamaya giren toplam öğe sayısı. */
-  toplamOge: number;
-  /** Toplam içindeki pay, yüzde. */
-  pay: number;
-  x: number;
-  y: number;
-};
+
 
 const bicim = new Intl.NumberFormat('tr-TR');
 
@@ -65,11 +55,3 @@ export function HaritaBalonu({ bilgi, birim }: { bilgi: BalonBilgisi; birim?: st
  * Haritada bir kez (useMemo içinde) çağrılıp her hover'da yeniden
  * hesaplanmaması için ayrı tutuldu.
  */
-export function siraVePayHesapla(values: Record<string, number>) {
-  const gecerli = Object.entries(values).filter(([, v]) => Number.isFinite(v) && v > 0);
-  const toplam = gecerli.reduce((s, [, v]) => s + v, 0);
-  const sirali = [...gecerli].sort((a, b) => b[1] - a[1]);
-  const sira = new Map<string, number>();
-  sirali.forEach(([ad], i) => sira.set(ad, i + 1));
-  return { toplam, sira, toplamOge: sirali.length };
-}

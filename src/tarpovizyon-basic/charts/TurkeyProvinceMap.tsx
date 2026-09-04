@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { normalizeTurkish } from '../../pages/basin/basinUtils';
 import { pathFor, shouldExcludeDistrict, type DistrictFeature } from './districtGeo';
-import { HaritaBalonu, siraVePayHesapla, type BalonBilgisi } from './HaritaBalonu';
+import { HaritaBalonu } from './HaritaBalonu';
+
+import { siraVePayHesapla, type BalonBilgisi } from './balonBilgisi';
 
 type GeoFeatureCollection = { type: 'FeatureCollection'; features: DistrictFeature[] };
 

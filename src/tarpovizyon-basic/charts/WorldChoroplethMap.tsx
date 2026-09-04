@@ -3,7 +3,8 @@ import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 import { normalizeCountryKey, toWorldGeoCountryKey, translateCountry } from '../../utils/countryTranslations';
 import { resolveFaoCountryKey } from './faoCountryOverrides';
-import { HaritaBalonu, siraVePayHesapla, type BalonBilgisi } from './HaritaBalonu';
+import { HaritaBalonu } from './HaritaBalonu';
+import { siraVePayHesapla, type BalonBilgisi } from './balonBilgisi';
 
 type GeoFeature = { type: 'Feature'; properties?: { name?: string }; geometry: unknown };
 type GeoFeatureCollection = { type: 'FeatureCollection'; features: GeoFeature[] };
