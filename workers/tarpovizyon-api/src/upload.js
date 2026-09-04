@@ -28,6 +28,7 @@
 
 import { totpDogrula } from './totp.js';
 import { bildirEllaYazim } from './bildirim.js';
+import { damgala } from './damga.js';
 
 export const MAX_ROWS = 500;
 
@@ -178,6 +179,21 @@ export async function handleRows(request, env, ROUTES) {
 
   if (!ifadeler.length) return { status: 200, body: { guncellenen: 0, eklenen: 0 } };
   await env.DB.batch(ifadeler);
+
+  /*
+   * Önbellek damgası — yazmadan hemen SONRA. Bu olmadan panelden kaydedilen
+   * düzeltme siteye bir saate kadar yansımıyordu: okuma yanıtları kenarda
+   * duruyor ve hiçbir şey onları geçersizleştirmiyordu.
+   *
+   * Kendi try/catch'i var. Yazma başarılı oldu; damga atılamadı diye kullanıcıya
+   * hata döndürmek, olan biteni yanlış anlatır (veri D1'de) ve düzeltmeyi tekrar
+   * göndermeye iter. En kötü hâli eski davranış: bir saatlik gecikme.
+   */
+  try {
+    await damgala(env.DB, [tablo]);
+  } catch (e) {
+    console.error('Damga yazılamadı (veri yazıldı):', e.message);
+  }
 
   /*
    * Yazma bittikten SONRA bildirim. İzlenen bir tabloya (çiğ süt / kırmızı et

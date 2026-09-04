@@ -16,25 +16,22 @@ export type Row = Record<string, string | number | null>;
 type ParamValue = string | number | undefined | null;
 
 /**
- * Veri sürümü — her isteğe `_v` olarak ekleniyor.
+ * ELLE SÜRÜMLEME KALDIRILDI.
  *
- * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
- * Worker yanıtları `Cache-Control: max-age=3600` ile dönüyor. D1'e yeni veri
- * yazıldığında TARAYICI aynı URL için eski gövdeyi bir saat daha sunuyor.
- * Ölçülmüş vaka: bitkisel y2025 il verisi yüklendikten sonra aynı URL
- * varsayılan `fetch` ile 2025'i SIFIR, `cache: 'reload'` ile 97.656.036
- * döndürdü. Worker'ın kendi önbelleğini sürümlemek yetmiyor, çünkü istemci
- * URL'si değişmiyor.
+ * Burada `VERI_SURUM` diye bir sabit vardı ve her isteğe `_v` olarak
+ * ekleniyordu: D1'e toplu veri yazdıktan sonra elle artırıp dağıtmak
+ * gerekiyordu, unutulursa sayfa bir saat eski veri gösteriyordu.
  *
- * Sürüm URL'nin parçası olunca yeni değer yeni bir kaynak sayılıyor ve hem
- * tarayıcı hem ara önbellekler baştan çekiyor.
+ * Yerini `veri_damga` mekanizması aldı (workers/.../damga.js). Worker artık
+ * önbellek anahtarına TABLONUN DAMGASINI koyuyor — damga yazma anında
+ * değiştiği için o tablonun bütün eski anahtarları kendiliğinden erişilemez
+ * oluyor, kaç farklı parametre kombinasyonu olursa olsun. Ayrıca istemciye
+ * giden `Cache-Control` kenar önbelleğinden AYRILDI (60 sn), yani tarayıcı da
+ * bir saat eski gövdeye yapışmıyor.
  *
- * TOPLU VERİ YÜKLEMESİNDEN SONRA BURAYI ARTIR; Worker'daki `VERI_SURUM` ile
- * aynı tutulması gerekmiyor ama karışmasın diye aynı numara kullanılıyor.
- *
- * 2 → bitkisel y2025 il/ilçe verisi (130.543 satır).
+ * Yani: elle artırılacak bir numara kalmadı.
  */
-export const VERI_SURUM = 2;
+
 
 function buildUrl(path: string, params: Record<string, ParamValue> = {}): string {
   const url = new URL(`${API_BASE}/api/${path}`);
@@ -42,7 +39,6 @@ function buildUrl(path: string, params: Record<string, ParamValue> = {}): string
     if (v === undefined || v === null || v === '') continue;
     url.searchParams.set(k, String(v));
   }
-  url.searchParams.set('_v', String(VERI_SURUM));
   return url.toString();
 }
 

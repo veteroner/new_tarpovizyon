@@ -19,6 +19,7 @@
 
 import { DATASETS } from './datasets.mjs';
 import { bildirGerekiyorsa } from './bildirim.mjs';
+import { damgala } from '../lib/damga.mjs';
 
 const TOKEN_URL = 'https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token';
 const SDMX_BASE = 'https://nsiws.tuik.gov.tr/rest/data/TR,';
@@ -453,17 +454,39 @@ async function main() {
   }
 
   const results = [];
+  const degisenTablolar = [];
   for (const ds of DATASETS) {
     try {
       const yazici = { wide: syncWide, long: syncLong, monthCols: syncMonthCols }[ds.kind];
       if (!yazici) throw new Error(`Bilinmeyen veri seti türü: ${ds.kind}`);
-      results.push(await yazici(ds));
+      const r = await yazici(ds);
+      results.push(r);
+      // Yalnızca gerçekten satır değişen tablolar damgalanır: değişmeyen bir
+      // tablonun önbelleğini atmak boşuna D1 okuması demek olurdu.
+      if (r.inserted + r.updated > 0) degisenTablolar.push(ds.table);
     } catch (e) {
       results.push({ dataset: ds.name, status: 'error', inserted: 0, updated: 0, latestPeriod: null, message: e.message });
     }
   }
 
   await writeLog(startedAt, results);
+
+  /*
+   * Önbellek damgası. Bu adım olmadan senkron D1'i tazeler ama site bir saate
+   * kadar eski veriyi göstermeye devam eder — senkron Worker'a hiç uğramadığı
+   * (Cloudflare HTTP API'sine doğrudan yazdığı) için okuma önbelleğini
+   * geçersizleştirecek başka bir yol yok.
+   *
+   * Yazma bittikten sonra ve kendi try/catch'iyle: veri D1'de, damga
+   * atılamadıysa en kötü sonuç eski davranış.
+   */
+  if (!DRY_RUN && degisenTablolar.length) {
+    try {
+      await damgala(d1, degisenTablolar);
+    } catch (e) {
+      console.error('Damga adımı hata verdi (veri yazıldı, önbellek 1 saat bayat kalabilir):', e.message);
+    }
+  }
 
   /*
    * Bildirim, log yazıldıktan SONRA: modül "önceki dönemi" loga bakarak

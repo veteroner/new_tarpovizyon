@@ -27,6 +27,7 @@ import { tmpdir } from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import * as XLSX from 'xlsx';
+import { damgaSql } from './lib/damga.mjs';
 
 const calistir = promisify(execFile);
 const KOK = new URL('../workers/tarpovizyon-api/', import.meta.url).pathname;
@@ -176,8 +177,17 @@ if (!YAZ) { console.log('\n(--yaz verilmedi, D1\'e yazılmadı)'); process.exit(
 if (!kabul.length) { console.log('\nYazılacak satır yok.'); process.exit(0); }
 
 const s = (v) => `'${String(v).replace(/'/g, "''")}'`;
-const sql = kabul.map((k) =>
-  `INSERT INTO bitkisel_tr_uretim_detay (urun, unsur, yil, deger) VALUES (${s(k.d1Ad)}, 'Üretim', ${k.yil}, ${k.deger});`).join('\n');
+/*
+ * Yazma ifadelerinin SONUNA önbellek damgası. Bu satır olmadan yeni yıl D1'e
+ * girer ama sayfa bir saate kadar eski hâlini gösterir: Worker'ın okuma
+ * yanıtları kenar önbelleğinde duruyor ve anahtarları tablonun damgasını
+ * taşıyor.
+ */
+const sql = [
+  ...kabul.map((k) =>
+    `INSERT INTO bitkisel_tr_uretim_detay (urun, unsur, yil, deger) VALUES (${s(k.d1Ad)}, 'Üretim', ${k.yil}, ${k.deger});`),
+  damgaSql(['bitkisel_tr_uretim_detay']),
+].join('\n');
 const yol = join(tmpdir(), `bitkisel-${Date.now()}.sql`);
 writeFileSync(yol, sql);
 try {

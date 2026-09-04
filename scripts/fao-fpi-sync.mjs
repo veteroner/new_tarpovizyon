@@ -27,6 +27,7 @@
  */
 
 import * as XLSX from 'xlsx';
+import { damgaSql } from './lib/damga.mjs';
 
 const SAYFA = 'https://www.fao.org/worldfoodsituation/foodpricesindex/en/';
 const API = process.env.TARPOVIZYON_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
@@ -143,6 +144,14 @@ if (!yaz) {
   if (ifadeler.length > 4) console.log(`… ve ${ifadeler.length - 4} tane daha`);
   process.exit(0);
 }
+
+/*
+ * Önbellek damgası — yazma ifadelerinin SONUNA ekleniyor, yani son öbekte
+ * veriden sonra çalışıyor. Bu olmadan yeni ay D1'e girer ama sayfa bir saate
+ * kadar eski değeri gösterir: Worker'ın okuma yanıtları kenar önbelleğinde
+ * duruyor ve anahtarları tablonun damgasını taşıyor.
+ */
+ifadeler.push(damgaSql(['fao_urunler_aylik']));
 
 /*
  * ─── NEDEN ÖBEKLİ YAZILIYOR ────────────────────────────────────────────────

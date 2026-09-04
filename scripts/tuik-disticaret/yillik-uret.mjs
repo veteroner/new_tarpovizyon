@@ -20,6 +20,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { sorgu, dosyaCalistir } from './d1.mjs';
 import { YEDEK_DIZIN } from './ikizler.mjs';
+import { damgaSql } from '../lib/damga.mjs';
 
 const TABLOLAR = ['tuik_ticaret_hayvansal', 'tuik_ticaret_bitkisel'];
 
@@ -75,10 +76,14 @@ for (const tablo of TABLOLAR) {
   }
 
   // Türetme tek SQL ifadesiyle: veri D1'den çıkmıyor.
+  // Sonundaki damga, bu tablonun kenar önbelleğindeki eski yanıtlarını
+  // geçersizleştiriyor; olmazsa yıllık satırlar D1'e girer ama sayfa bir saate
+  // kadar onları göstermez.
   await dosyaCalistir(`
     INSERT INTO ${tablo} (duzey_1,duzey_2,duzey_3,ana_urun,yil,ay,alt_urunkod,alt_urun,
       ulkekod,ulke,miktar_birim,ihracat_mik,ithalat_mik,deger_birim,ihracat_deger,ithalat_deger)
-    ${turetSelect(tablo, YIL)};`);
+    ${turetSelect(tablo, YIL)};
+    ${damgaSql([tablo])}`);
 
   const sonra = (await sorgu(`SELECT COUNT(*) n, COALESCE(SUM(ihracat_deger),0) ihr
     FROM ${tablo} WHERE yil=${YIL} AND duzey_3='yil'`))[0];

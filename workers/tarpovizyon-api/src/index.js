@@ -656,6 +656,7 @@ import { TABLO_SAYFALARI } from './tabloSayfalari.js';
 import { handleAi } from './ai.js';
 import { handleSayfaBul } from './sayfaBul.js';
 import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
+import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -722,28 +723,29 @@ export default {
      */
     if (request.method === 'GET') {
       const onbellek = caches.default;
+
       /*
-       * ─── ÖNBELLEK ANAHTARINA VERİ SÜRÜMÜ ────────────────────────────────
-       * Önbellek yalnızca URL'ye göre anahtarlanıyordu ve TTL 1 saatti. D1'e
-       * yeni yıl yazıldığında sayfa bir saat boyunca ESKİ yanıtı alıyordu —
-       * ölçülmüş vaka: bitkisel y2025 il verisi yüklendikten sonra 22
-       * sütunlu sorgu 2025'i sıfır döndürmeye devam etti, aynı URL önbellek
-       * kırıcıyla çağrılınca doğru değer geldi.
+       * Anahtara tablonun DAMGASI giriyor. Damga, o tabloya en son ne zaman
+       * yazıldığını söylüyor; yazma anında değiştiği için tablonun bütün eski
+       * önbellek anahtarları — kaç farklı parametre kombinasyonu olursa olsun —
+       * tek hamlede erişilemez oluyor. Tek tek silmek mümkün değildi: bir tablo
+       * onlarca farklı URL'yle önbellekte duruyor ve günlük senkron D1'e HTTP
+       * API'den yazıp Worker'a hiç uğramıyor.
        *
-       * Sürüm anahtarın parçası: VERI_SURUM artırılıp Worker dağıtılınca
-       * bütün önbellek bir anda geçersiz oluyor. Veri yüklemesinden sonra
-       * beklemek yerine tek satır değiştirilip dağıtılıyor.
-       *
-       * (Tam otomatik çözüm `veri_damga` tablosunu her istekte okumak olurdu
-       * ama bu, önbelleğin kurtardığı D1 okumasını geri getirir.)
+       * Ayrı hostname değil, aynı URL'ye eklenen parametre: `caches.default`
+       * özel hostname'li anahtarlarda güvenilir değil. `__v` sorguya sızmıyor —
+       * yanıt her zaman özgün `url`den üretiliyor, ayrıca `buildAgg` tanımadığı
+       * parametreleri atlıyor ve ROUTES yolu yalnızca adı geçen filtreleri
+       * okuyor.
        */
-      const anahtar = new Request(
-        new URL(request.url).toString()
-          + (request.url.includes('?') ? '&' : '?') + `_v=${VERI_SURUM}`,
-        request,
-      );
+      const harita = await damgaHaritasi(env, ctx, url.origin);
+      const damga = damgaSec(harita, slugTablosu(slug, { ROUTES, AGG, TRADE_TABLES }));
+      const anahtarUrl = new URL(request.url);
+      anahtarUrl.searchParams.set('__v', String(damga));
+      const anahtar = new Request(anahtarUrl.toString(), request);
+
       const hazir = await onbellek.match(anahtar);
-      if (hazir) return hazir;
+      if (hazir) return istemciyeGore(hazir);
 
       if (await okumaSiniriAsildi(request, env)) {
         return json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, 429);
@@ -755,10 +757,16 @@ export default {
        * bir D1 arızasını saatlerce kalıcı hâle getirirdi.
        */
       if (yanit.ok) {
-        const saklanacak = new Response(yanit.clone().body, yanit);
+        // Gövde zaten JSON.stringify ile bellekte; iki kopya çıkarmak için
+        // tamponlamak akış klonlamasından hem basit hem güvenli.
+        const govde = await yanit.arrayBuffer();
+        const baslik = new Headers(yanit.headers);
+
+        const saklanacak = new Response(govde, { status: yanit.status, headers: new Headers(baslik) });
         saklanacak.headers.set('Cache-Control', `public, max-age=${ONBELLEK_SN}`);
-        ctx?.waitUntil?.(onbellek.put(anahtar, saklanacak.clone()));
-        return saklanacak;
+        ctx?.waitUntil?.(onbellek.put(anahtar, saklanacak));
+
+        return istemciyeGore(new Response(govde, { status: yanit.status, headers: baslik }));
       }
       return yanit;
     }
@@ -768,24 +776,36 @@ export default {
 };
 
 /**
- * Okuma yanıtının önbellekte kalma süresi.
+ * Yanıtın KENAR önbelleğinde kalma süresi.
  *
  * Veri günde en fazla bir kez tazeleniyor (senkron işleri günlük), yani
  * bir saatlik önbellek hiçbir tazeliği kaçırmıyor ama aynı sorgunun
- * tekrarını D1'e hiç indirmiyor.
+ * tekrarını D1'e hiç indirmiyor. Anahtar damgalı olduğu için bu sürenin uzun
+ * olması artık bayatlık üretmiyor: yazma anında anahtarın kendisi değişiyor.
  */
 const ONBELLEK_SN = 3600;
 
 /**
- * Veri sürümü — önbellek anahtarının parçası.
+ * Yanıtın TARAYICI önbelleğinde kalma süresi — kenardan AYRI ve çok daha kısa.
  *
- * D1'e toplu veri yazdıktan sonra BURAYI ARTIR ve Worker'ı dağıt; eski
- * yanıtlar anında geçersiz olur. Artırılmazsa yeni veri en geç bir saat
- * (ONBELLEK_SN) sonra görünür.
+ * Eskiden saklanan ve döndürülen yanıt aynı nesneydi, yani tarayıcı da
+ * `max-age=3600` alıyordu. Sonuç: kenar önbelleği kusursuz tazelense bile,
+ * sayfayı son bir saat içinde açmış bir ziyaretçi kendi tarayıcısından eski
+ * veriyi görmeye devam ediyordu — damga bunu tek başına çözmez. Frontend
+ * Worker'ı doğrudan çağırıyor (arada Netlify yok), yani bu başlık gerçekten
+ * son kullanıcının tarayıcısına gidiyor.
  *
- * 2 → bitkisel y2025 il/ilçe verisi (130.543 satır) yüklendi.
+ * Kısa tutmanın bedeli fazladan D1 okuması DEĞİL: yenilenen istek kenar
+ * önbelleğinden karşılanıyor, yalnızca bir Worker isteği kadar maliyeti var.
  */
-const VERI_SURUM = 2;
+const ISTEMCI_SN = 60;
+
+/** Kenar için saklanan yanıtı istemciye gidecek hâle çevirir (kısa TTL). */
+function istemciyeGore(yanit) {
+  const doner = new Response(yanit.body, yanit);
+  doner.headers.set('Cache-Control', `public, max-age=${ISTEMCI_SN}`);
+  return doner;
+}
 
 /**
  * Okuma uçları için hız sınırı — AI'dan AYRI ve daha yüksek eşikli.

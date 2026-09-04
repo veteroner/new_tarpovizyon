@@ -33,6 +33,7 @@ import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import * as XLSX from 'xlsx';
+import { damgaSql } from './lib/damga.mjs';
 
 const calistir = promisify(execFile);
 const KOK = new URL('../workers/tarpovizyon-api/', import.meta.url).pathname;
@@ -140,6 +141,12 @@ const sql = [
   `DELETE FROM bitkisel_bulten_grup WHERE bulten = ${s(BULTEN)};`,
   ...kayitlar.map((k) => `INSERT INTO bitkisel_bulten_grup (dosya,grup,yil,deger,tahmin,bulten)
      VALUES (${s(k.dosya)},${s(k.grup)},${k.yil},${k.deger},${k.tahmin},${s(BULTEN)});`),
+  /*
+   * Önbellek damgası — yığının SONUNDA. Bu satır olmadan bülten D1'e girer ama
+   * sayfa bir saate kadar önceki bülteni gösterir: Worker'ın okuma yanıtları
+   * kenar önbelleğinde duruyor ve anahtarları tablonun damgasını taşıyor.
+   */
+  damgaSql(['bitkisel_bulten_grup']),
 ].join('\n');
 
 const { writeFileSync, unlinkSync } = await import('node:fs');
