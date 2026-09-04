@@ -742,28 +742,20 @@ export default {
        * okuyor.
        */
       const harita = await damgaHaritasi(env, ctx, url.origin);
-      const damga = damgaSec(harita, slugTablosu(slug, { ROUTES, AGG, TRADE_TABLES }));
+      const tablo = slugTablosu(slug, { ROUTES, AGG, TRADE_TABLES });
+      const damga = damgaSec(harita, tablo);
       const anahtarUrl = new URL(request.url);
       anahtarUrl.searchParams.set('__v', String(damga));
       const anahtar = new Request(anahtarUrl.toString(), request);
 
       const hazir = await onbellek.match(anahtar);
-      if (hazir) return istemciyeGore(hazir);
+      if (hazir) return istemciyeGore(hazir, damga, tablo);
 
       if (await okumaSiniriAsildi(request, env)) {
         return json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, 429);
       }
 
       const yanit = await okumaCevabi(request, env, url, slug);
-      /*
-       * Damga İSTEMCİYE de gidiyor: sayfa "bu veri en son ne zaman
-       * tazelendi" diyebilsin. Önbellek anahtarında zaten var; başlığa
-       * koymak fazladan D1 okuması getirmiyor.
-       */
-      if (damga) {
-        yanit.headers.set('X-Veri-Damga', String(damga));
-        yanit.headers.set('X-Veri-Tablo', slugTablosu(slug, { ROUTES, AGG, TRADE_TABLES }) ?? '');
-      }
       /*
        * Yalnızca BAŞARILI yanıt saklanıyor. Hatayı önbelleğe almak, geçici
        * bir D1 arızasını saatlerce kalıcı hâle getirirdi.
@@ -778,7 +770,7 @@ export default {
         saklanacak.headers.set('Cache-Control', `public, max-age=${ONBELLEK_SN}`);
         ctx?.waitUntil?.(onbellek.put(anahtar, saklanacak));
 
-        return istemciyeGore(new Response(govde, { status: yanit.status, headers: baslik }));
+        return istemciyeGore(new Response(govde, { status: yanit.status, headers: baslik }), damga, tablo);
       }
       return yanit;
     }
@@ -812,10 +804,22 @@ const ONBELLEK_SN = 3600;
  */
 const ISTEMCI_SN = 60;
 
-/** Kenar için saklanan yanıtı istemciye gidecek hâle çevirir (kısa TTL). */
-function istemciyeGore(yanit) {
+/**
+ * Kenar için saklanan yanıtı istemciye gidecek hâle çevirir (kısa TTL) ve
+ * damga başlıklarını yazar.
+ *
+ * DAMGA BURADA YAZILIYOR, ıskalama yolunda DEĞİL: önce yalnızca ıskada
+ * yazıyordu ve kenar önbelleğinde eskiden kalan yanıtlar başlıksız
+ * dönüyordu — ölçüldü, dağıtımdan sonra sayfa hiç damga görmedi. Bu
+ * fonksiyon hem ıska hem isabet yolundan geçiyor.
+ */
+function istemciyeGore(yanit, damga, tablo) {
   const doner = new Response(yanit.body, yanit);
   doner.headers.set('Cache-Control', `public, max-age=${ISTEMCI_SN}`);
+  if (damga) {
+    doner.headers.set('X-Veri-Damga', String(damga));
+    doner.headers.set('X-Veri-Tablo', tablo ?? '');
+  }
   return doner;
 }
 
