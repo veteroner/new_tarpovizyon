@@ -4,6 +4,8 @@ import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, BarChart, Bar, Cell
 } from 'recharts';
+import { Coins, Milk, Scale, TrendingUp } from 'lucide-react';
+import { StatCard } from '../../components/ui/Card';
 import { type MilkEconomicData, type WorldMilkPrices } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 
@@ -164,98 +166,39 @@ export default function MilkEconomicsSection({
             </div>
           </div>
 
-          {/* KPI Kartları */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', 
-            gap: '20px', 
-            marginBottom: '32px' 
-          }}>
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '24px', borderRadius: '14px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
-                  ÜSK TAVSİYE FİYATI
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-                  {latest?.usk_cig_sut_tavsiye_fiyati_tl_lt.toFixed(2)} ₺/lt
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
-                  {latest?.tarih}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', 
-              padding: '24px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(249, 115, 22, 0.25)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-                  ÜRETİM MALİYETİ
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {latest?.cig_sut_uretim_maliyeti_tl_lt.toFixed(2)} ₺/lt
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                  {latest?.tarih}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: (latest?.karlilik ?? 0) >= 0 
-                ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' 
-                : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
-              padding: '24px', borderRadius: '14px',
-              boxShadow: (latest?.karlilik ?? 0) >= 0 
-                ? '0 4px 16px rgba(34, 197, 94, 0.25)'
-                : '0 4px 16px rgba(239, 68, 68, 0.25)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-                  KARLILIK ORANI
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {(latest?.karlilik ?? 0) >= 0 ? '+' : ''}{yuzde(latest?.karlilik, 2)}
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-                  {latest?.tarih}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '24px', borderRadius: '14px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>
-                  SÜT YEM PARİTESİ
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-                  {latest?.sut_yem_paritesi.toFixed(2)}
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
-                  {latest?.tarih}
-                </div>
-              </div>
-            </div>
+          {/*
+            Dört ölçü tek kart katmanında (StatCard). Eskiden ikisi degrade
+            zemin + beyaz yazı, ikisi beyaz kart + koyu yazıydı; kârlılık kartı
+            da işaretine göre zeminini yeşil/bordo yapıyordu — yani aynı kart
+            bazen okunur bazen düşük kontrastlıydı. Kârlılığın işareti artık
+            `delta` okuyla ve metin renginde taşınıyor, zemin sabit kalıyor.
+          */}
+          <div className="kpi-grid">
+            <StatCard
+              label="ÜSK tavsiye fiyatı"
+              value={`${latest?.usk_cig_sut_tavsiye_fiyati_tl_lt.toFixed(2)} ₺/lt`}
+              sub={latest?.tarih}
+              icon={<Milk size={18} aria-hidden="true" />}
+            />
+            <StatCard
+              label="Üretim maliyeti"
+              value={`${latest?.cig_sut_uretim_maliyeti_tl_lt.toFixed(2)} ₺/lt`}
+              sub={latest?.tarih}
+              icon={<Coins size={18} aria-hidden="true" />}
+            />
+            <StatCard
+              label="Kârlılık oranı"
+              value={yuzde(latest?.karlilik, 2, true)}
+              delta={latest?.karlilik}
+              sub={latest?.tarih}
+              icon={<TrendingUp size={18} aria-hidden="true" />}
+            />
+            <StatCard
+              label="Süt yem paritesi"
+              value={latest?.sut_yem_paritesi.toFixed(2)}
+              sub={latest?.tarih}
+              icon={<Scale size={18} aria-hidden="true" />}
+            />
           </div>
 
           {/* Fiyat ve Maliyet Trendi */}
@@ -294,56 +237,23 @@ export default function MilkEconomicsSection({
             </div>
           </div>
 
-          {/* Yem Fiyatları KPI */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-            gap: '16px', 
-            marginBottom: '24px' 
-          }}>
-            <div style={{ 
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
-              padding: '20px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.25)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>SÜT YEMİ (19% HP)</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{latest?.sut_yemi_19_hp.toFixed(2)} ₺/kg</div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '20px', borderRadius: '14px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>MISIR SİLAJI</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.misir_silaji.toFixed(2)} ₺/kg</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
-              </div>
-            </div>
-
-            <div style={{ 
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', 
-              padding: '20px', borderRadius: '14px',
-              boxShadow: 'var(--tv-golge)',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '5rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>YONCA</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{latest?.yonca.toFixed(2)} ₺/kg</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '8px', fontWeight: '600' }}>{latest?.tarih}</div>
-              </div>
-            </div>
+          {/* Yem fiyatları — aynı kart katmanı, degrade yok. */}
+          <div className="kpi-grid">
+            <StatCard
+              label="Süt yemi (%19 HP)"
+              value={`${latest?.sut_yemi_19_hp.toFixed(2)} ₺/kg`}
+              sub={latest?.tarih}
+            />
+            <StatCard
+              label="Mısır silajı"
+              value={`${latest?.misir_silaji.toFixed(2)} ₺/kg`}
+              sub={latest?.tarih}
+            />
+            <StatCard
+              label="Yonca"
+              value={`${latest?.yonca.toFixed(2)} ₺/kg`}
+              sub={latest?.tarih}
+            />
           </div>
 
           {/* Yem Fiyatları Detay Grafikleri */}

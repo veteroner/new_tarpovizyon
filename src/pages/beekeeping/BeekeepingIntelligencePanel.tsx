@@ -1,41 +1,36 @@
+import { Card } from '../../components/ui/Card';
 import { yuzde } from '../../utils/sayi';
 import { type TuikKovanKpi } from './beekeepingTypes';
 
+/**
+ * Arıcılığın türev ölçüleri — büyüme, modernizasyon, balmumu değişimi.
+ *
+ * Eskiden yeşil degrade zemin üzerinde %15 opak beyaz "cam" karolardı; o
+ * zeminde 10–11 px yardımcı yazı WCAG kontrast sınırının altında kalıyordu.
+ * Artık `hero-ozet` düzeniyle aynı: düz kart, nötr zemin, tek başlık ayracı.
+ * Aynı kalıp `turkeyAnimalProduction/HeroSection` içinde de kullanılıyor —
+ * iki panelin görünüşü artık ayrışmıyor.
+ */
 export function BeekeepingIntelligencePanel({ tuikKovanKpi }: { tuikKovanKpi: TuikKovanKpi }) {
+  const ogeler = [
+    { etiket: 'Kovan BBO', deger: yuzde(tuikKovanKpi.cagr, 1, true), alt: 'Yıllık bileşik büyüme' },
+    { etiket: 'Son yıl değişim', deger: yuzde(tuikKovanKpi.yoy, 1, true), alt: 'Kovan sayısı değişimi' },
+    { etiket: 'Eski tip kovan payı', deger: yuzde(tuikKovanKpi.eskiPay, 1), alt: 'Modernizasyon seviyesi' },
+    { etiket: 'Balmumu değişim', deger: yuzde(tuikKovanKpi.balmumuYoy, 1, true), alt: 'Son yıl balmumu' },
+  ];
+
   return (
-    <div style={{ 
-      background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)',
-      borderRadius: '12px',
-      padding: '20px',
-      marginTop: '48px',
-      marginBottom: '48px',
-      color: 'white'
-    }}>
-      <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        Arıcılık İçgörü Özeti
-      </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-        <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-          <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>KOVAN CAGR</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.cagr >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.cagr, 1)}</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
-        </div>
-        <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-          <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>SON YIL DEĞİŞİM</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.yoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.yoy, 1)}</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Kovan sayısı artışı</div>
-        </div>
-        <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-          <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>ESKİ TİP KOVAN PAYI</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{yuzde(tuikKovanKpi.eskiPay, 1)}</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Modernizasyon seviyesi</div>
-        </div>
-        <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-          <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BALMUMU DEĞİŞİM</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{tuikKovanKpi.balmumuYoy >= 0 ? '+' : ''}{yuzde(tuikKovanKpi.balmumuYoy, 1)}</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son yıl balmumu</div>
-        </div>
+    <Card className="hero-ozet" aralik="normal">
+      <h3 className="ui-card-title hero-ozet-baslik">Arıcılık içgörü özeti</h3>
+      <div className="hero-ozet-izgara">
+        {ogeler.map((o) => (
+          <div className="hero-ozet-oge" key={o.etiket}>
+            <div className="hero-ozet-etiket">{o.etiket}</div>
+            <div className="hero-ozet-deger">{o.deger}</div>
+            <div className="hero-ozet-alt">{o.alt}</div>
+          </div>
+        ))}
       </div>
-    </div>
+    </Card>
   );
 }

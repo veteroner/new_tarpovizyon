@@ -66,6 +66,15 @@ export type KpiMetrics = {
   totalHoneyProduction: number;
   totalBeeswaxProduction: number;
   avgYield: number;
+  /*
+   * Üç ölçü ÜÇ AYRI YILDAN geliyor ve bu gizlenmemeli:
+   * arıcı sayısı `il_arici_sayisi_yillik`'ten, kovan/balmumu TÜİK ülke
+   * satırından (2025'i boş, o yüzden bir yıl geride), bal ise
+   * `tr_hayvansal_urun_uretimi`'nden. Kart etiketleri bu alanları basıyor;
+   * hepsine tek yıl yazmak, eskiden olduğu gibi, yalan söylemek olur.
+   */
+  kovanYili: string;
+  balYili: string;
 };
 
 export const COLORS = {

@@ -1,9 +1,33 @@
-import { sayi } from '../../utils/sayi';
-import { yuzde } from '../../utils/sayi';
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Beef, Droplets, Egg, Hexagon } from 'lucide-react';
+import { Card, StatCard } from '../../components/ui/Card';
+import { sayi } from '../../utils/sayi';
 import type { KpiData } from './useTurkeyAnimalProductionData';
 import { formatValue } from './turkeyAnimalProductionTypes';
+
+/**
+ * Sayfa başındaki dört KPI ve içgörü paneli.
+ *
+ * ─── NEDEN YENİDEN YAZILDI ──────────────────────────────────────────────────
+ * Dört kart, dört ayrı muamele görüyordu: kırmızı et koyu bordo degrade +
+ * beyaz yazı, süt beyaz kart + koyu yazı, yumurta KEHRİBAR degrade + KOYU
+ * yazı, bal neredeyse AYNI kehribar degrade + BEYAZ yazı. Yani iki kart aynı
+ * zemin rengini paylaşıp zıt yazı rengi kullanıyordu. Üstüne dördü de 48
+ * satır içi stille elle kuruluydu.
+ *
+ * `StatCard` bu iş için zaten vardı (ui/Card.tsx) ama kod tabanında HİÇBİR
+ * sayfa onu kullanmıyordu — sistem yazılmış, benimsenmemişti. Zemin artık
+ * dördünde de nötr, sayı `tabular-nums` ile hizalı.
+ *
+ * Dört kartın hiçbirinde ton şeridi YOK ve bu kasıtlı. Ton renkleri anlamsal
+ * (olumlu/olumsuz/uyarı); ürün kimliğini onlarla kodlamak "kırmızı et = kötü"
+ * diye okunuyordu. Üstelik `bilgi` ile `birincil` aynı `--primary` değerine
+ * düşüyor, yani dört karttan ikisi zaten aynı şeridi taşıyordu. Kimliği ikon
+ * veriyor, rengi yalnız değişim taşıyor.
+ *
+ * Değişim oku ve rengi `delta`dan geliyor; renk tek başına anlam taşımasın
+ * diye ok işareti de basılıyor.
+ */
 
 interface HeroSectionProps {
   kpiData: KpiData | null;
@@ -14,96 +38,67 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
-  kpiData, cagr5Year, milkProductivityTrend, forecastRedMeat, growthStrategy
+  kpiData, cagr5Year, milkProductivityTrend, forecastRedMeat, growthStrategy,
 }) => {
   if (!kpiData) return null;
 
+  const ozet = [
+    { etiket: '5 yıllık BBO (kırmızı et)', deger: `%${sayi(cagr5Year, 1)}`, alt: 'Yıllık bileşik büyüme' },
+    { etiket: 'Süt verimlilik trendi', deger: `%${sayi(milkProductivityTrend, 1)}`, alt: 'Son 3 yıl büyüme' },
+    { etiket: 'Tahmin (kırmızı et)', deger: forecastRedMeat > 0 ? `${formatValue(forecastRedMeat)} ton` : '—', alt: 'Doğrusal trend tahmini' },
+    { etiket: 'Büyüme stratejisi', deger: growthStrategy, alt: 'Son 3 yıl analizi' },
+  ];
+
   return (
     <>
-      {/* Hero KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '48px' }}>
-        {/* Red Meat */}
-        <div style={{ background: 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(239, 68, 68, 0.25)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM KIRMIZI ET</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.redMeat.value)} ton</div>
-            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-              {kpiData.redMeat.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.redMeat.change >= 0 ? '+' : ''}{yuzde(kpiData.redMeat.change, 1)} Yıllık Değişim
-            </div>
-          </div>
-        </div>
-
-        {/* Milk */}
-        <div style={{ background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM SÜT ÜRETİMİ</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{formatValue(kpiData.milk.value)} ton</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
-              {kpiData.milk.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.milk.change >= 0 ? '+' : ''}{yuzde(kpiData.milk.change, 1)} Yıllık Değişim
-            </div>
-          </div>
-        </div>
-
-        {/* Egg */}
-        <div style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', padding: '24px', borderRadius: '14px', boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '10px' }}>TOPLAM YUMURTA</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>{sayi(kpiData.egg.value / 1000, 2)} Milyar adet</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--tv-ikincil, #6e6e73)', marginTop: '10px', fontWeight: '600' }}>
-              {kpiData.egg.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.egg.change >= 0 ? '+' : ''}{yuzde(kpiData.egg.change, 1)} Yıllık Değişim
-            </div>
-          </div>
-        </div>
-
-        {/* Honey */}
-        <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', padding: '24px', borderRadius: '14px', boxShadow: '0 4px 16px rgba(245, 158, 11, 0.25)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>TOPLAM BAL ÜRETİMİ</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>{formatValue(kpiData.honey.value)} ton</div>
-            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-              {kpiData.honey.change >= 0 ? <TrendingUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <TrendingDown size={14} style={{ display: 'inline', marginRight: '4px' }} />}
-              {kpiData.honey.change >= 0 ? '+' : ''}{yuzde(kpiData.honey.change, 1)} Yıllık Değişim
-            </div>
-          </div>
-        </div>
+      <div className="kpi-grid">
+        <StatCard
+          label="Toplam kırmızı et"
+          value={`${formatValue(kpiData.redMeat.value)} ton`}
+          delta={kpiData.redMeat.change}
+          sub="Yıllık değişim"
+          icon={<Beef size={18} aria-hidden="true" />}
+        />
+        <StatCard
+          label="Toplam süt üretimi"
+          value={`${formatValue(kpiData.milk.value)} ton`}
+          delta={kpiData.milk.change}
+          sub="Yıllık değişim"
+          icon={<Droplets size={18} aria-hidden="true" />}
+        />
+        <StatCard
+          label="Toplam yumurta"
+          value={`${sayi(kpiData.egg.value / 1000, 2)} milyar adet`}
+          delta={kpiData.egg.change}
+          sub="Yıllık değişim"
+          icon={<Egg size={18} aria-hidden="true" />}
+        />
+        <StatCard
+          label="Toplam bal üretimi"
+          value={`${formatValue(kpiData.honey.value)} ton`}
+          delta={kpiData.honey.change}
+          sub="Yıllık değişim"
+          icon={<Hexagon size={18} aria-hidden="true" />}
+        />
       </div>
 
-      {/* Intelligence Panel */}
-      <div style={{ background: 'linear-gradient(135deg, var(--tv-vurgu, #17693a) 0%, var(--tv-vurgu-koyu, #12522d) 100%)', borderRadius: '12px', padding: '20px', marginBottom: '48px', color: 'white' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          Hayvansal Üretim İçgörü Özeti
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>5 YILLIK BBO (KIRMIZI ET)</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cagr5Year >= 0 ? '+' : ''}{yuzde(cagr5Year, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Yıllık bileşik büyüme</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>SÜT VERİMLİLİK TRENDİ</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{milkProductivityTrend >= 0 ? '+' : ''}{yuzde(milkProductivityTrend, 1)}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 3 yıl büyüme</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>TAHMİN (KIRMIZI ET)</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{forecastRedMeat > 0 ? formatValue(forecastRedMeat) : '-'} ton</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Doğrusal trend tahmini</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '11px', opacity: 0.9, marginBottom: '4px' }}>BÜYÜME STRATEJİSİ</div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>{growthStrategy}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Son 3 yıl analizi</div>
-          </div>
+      {/*
+        İçgörü paneli eskiden yeşil degrade zemin + yarı saydam cam karolardı.
+        Degradenin üstündeki %15 opak beyaz kutularda küçük yazı kontrastı
+        WCAG sınırının altında kalıyordu. Artık düz kart; vurgu yalnız başlıkta.
+      */}
+      <Card className="hero-ozet" aralik="normal">
+        <h3 className="ui-card-title hero-ozet-baslik">Hayvansal üretim içgörü özeti</h3>
+        <div className="hero-ozet-izgara">
+          {ozet.map((o) => (
+            <div className="hero-ozet-oge" key={o.etiket}>
+              <div className="hero-ozet-etiket">{o.etiket}</div>
+              <div className="hero-ozet-deger">{o.deger}</div>
+              <div className="hero-ozet-alt">{o.alt}</div>
+            </div>
+          ))}
         </div>
-      </div>
+      </Card>
     </>
   );
 };

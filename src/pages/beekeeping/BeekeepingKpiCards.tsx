@@ -1,6 +1,18 @@
-import { yuzde } from '../../utils/sayi';
-import { type KpiMetrics, COLORS, formatNumber, formatTon } from './beekeepingTypes';
+import { Hexagon, Package, Users, Wheat } from 'lucide-react';
+import { StatCard } from '../../components/ui/Card';
+import { type KpiMetrics, formatNumber, formatTon } from './beekeepingTypes';
 
+/**
+ * Arıcılık KPI kartları.
+ *
+ * Eskiden dört kart da degrade zemin + beyaz yazıyla elle kuruluydu — aynı
+ * şablonun `MilkEconomicsSection` ve `MilkTuikSection`'a da kopyalanmış hâli.
+ * Ortak kart katmanı (`StatCard`) zaten vardı ve hiçbir sayfa kullanmıyordu.
+ *
+ * Renk artık kartın zeminini boyamıyor: kimliği ikon, değişimi delta rengi
+ * (ok işaretiyle birlikte) taşıyor. Degradenin üstündeki %80 opak beyaz alt
+ * yazı zaten WCAG kontrast sınırının altındaydı.
+ */
 export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
   kpiMetrics: KpiMetrics;
   /* Yıllar veriden geliyor; etiketlere sabit yıl yazmak, uca yeni yıl
@@ -9,103 +21,34 @@ export function BeekeepingKpiCards({ kpiMetrics, sonYil, oncekiYil }: {
   oncekiYil: string;
 }) {
   return (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', 
-      gap: '20px', 
-      marginBottom: '32px' 
-    }}>
-      {/* Total Beekeepers */}
-      <div style={{ 
-        background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.accent} 100%)`, 
-        padding: '24px', 
-        borderRadius: '14px',
-        boxShadow: '0 4px 16px rgba(245, 158, 11, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-            TOPLAM ARICI SAYISI
-          </div>
-          <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-            {formatNumber(kpiMetrics.totalBeekeepers)}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            {kpiMetrics.beekeeperGrowth >= 0 ? '+' : ''}{yuzde(kpiMetrics.beekeeperGrowth, 1)} ({sonYil} vs {oncekiYil})
-          </div>
-        </div>
-      </div>
-
-      {/* Total Hives */}
-      <div style={{ 
-        background: `linear-gradient(135deg, ${COLORS.secondary} 0%, ${COLORS.primary} 100%)`, 
-        padding: '24px', 
-        borderRadius: '14px',
-        boxShadow: '0 4px 16px rgba(251, 191, 36, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-            TOPLAM KOVAN SAYISI
-          </div>
-          <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-            {formatNumber(kpiMetrics.totalHives)}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Aktif Kovan ({sonYil})
-          </div>
-        </div>
-      </div>
-
-      {/* Honey Production */}
-      <div style={{ 
-        background: `linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.emerald} 100%)`, 
-        padding: '24px', 
-        borderRadius: '14px',
-        boxShadow: '0 4px 16px rgba(16, 185, 129, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-            BAL ÜRETİMİ
-          </div>
-          <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-            {formatTon(kpiMetrics.totalHoneyProduction)}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Yıllık Toplam ({sonYil})
-          </div>
-        </div>
-      </div>
-
-      {/* Beeswax Production */}
-      <div style={{ 
-        background: `linear-gradient(135deg, ${COLORS.blue} 0%, ${COLORS.cyan} 100%)`, 
-        padding: '24px', 
-        borderRadius: '14px',
-        boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '10px' }}>
-            BALMUMU ÜRETİMİ
-          </div>
-          <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-            {formatTon(kpiMetrics.totalBeeswaxProduction)}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', marginTop: '10px', fontWeight: '600' }}>
-            Yıllık Toplam ({sonYil})
-          </div>
-        </div>
-      </div>
+    <div className="kpi-grid">
+      <StatCard
+        label="Toplam arıcı sayısı"
+        value={formatNumber(kpiMetrics.totalBeekeepers)}
+        delta={kpiMetrics.beekeeperGrowth}
+        sub={`${sonYil} / ${oncekiYil}`}
+        icon={<Users size={18} aria-hidden="true" />}
+      />
+      {/* Yıllar ölçü başına ayrı: TÜİK ülke satırı kovan/balmumuda bir yıl
+          geride, bal ayrı tablodan geliyor. Üçüne tek yıl yazmak yanlış. */}
+      <StatCard
+        label="Toplam kovan sayısı"
+        value={formatNumber(kpiMetrics.totalHives)}
+        sub={`Aktif kovan (${kpiMetrics.kovanYili})`}
+        icon={<Package size={18} aria-hidden="true" />}
+      />
+      <StatCard
+        label="Bal üretimi"
+        value={formatTon(kpiMetrics.totalHoneyProduction)}
+        sub={`Yıllık toplam (${kpiMetrics.balYili})`}
+        icon={<Wheat size={18} aria-hidden="true" />}
+      />
+      <StatCard
+        label="Balmumu üretimi"
+        value={formatTon(kpiMetrics.totalBeeswaxProduction)}
+        sub={`Yıllık toplam (${kpiMetrics.kovanYili})`}
+        icon={<Hexagon size={18} aria-hidden="true" />}
+      />
     </div>
   );
 }

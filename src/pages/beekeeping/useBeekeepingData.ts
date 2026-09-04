@@ -19,6 +19,8 @@ export function useBeekeepingData() {
   const [provinceData, setProvinceData] = useState<ProvinceData[]>([]);
   const [tuikKovanYear, setTuikKovanYear] = useState<TuikKovanYearData[]>([]);
   const [tuikProvinceKovan, setTuikProvinceKovan] = useState<TuikProvinceKovan[]>([]);
+  /* Ulusal bal üretimi — il tablosu bozuk olduğu için tek güvenilir kaynak. */
+  const [ulusalBal, setUlusalBal] = useState<{ yil: string; deger: number } | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -79,7 +81,10 @@ export function useBeekeepingData() {
         const tuikYears = ['2004','2005','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
         const tuikRes = { data: await fetchRows(R_URETIM, { duzeykod: 1, limit: 500 })
           .then((rows) => rows.filter((r) => ['Balmumu', 'Kovan'].includes(String(r.urun ?? '')))) };
-        
+
+        /* Blok dışında da gerekiyor: il sorgusunun yılı buradan seçiliyor. */
+        let tuikYearData: TuikKovanYearData[] = [];
+
         if (tuikRes.data && tuikRes.data.length > 0) {
           const findRow = (urun: string, tur: string) => 
             tuikRes.data!.find((r: Record<string, string | number>) => r.urun === urun && r.tur === tur);
@@ -88,7 +93,7 @@ export function useBeekeepingData() {
           const yeniRow = findRow('Kovan', 'Yeni Tip');
           const balmumuRow = findRow('Balmumu', '');
           
-          const tuikYearData: TuikKovanYearData[] = tuikYears
+          tuikYearData = tuikYears
             .map(year => {
               // NOT: MySQL'de kovan sayıları '1.234.567' biçiminde METİNDİ,
               // sorgular nokta siliyordu. D1'de sayısal — silmek ondalıklı
@@ -109,17 +114,23 @@ export function useBeekeepingData() {
           setTuikKovanYear(tuikYearData);
         }
 
-        // İl bazlı kovan & balmumu (en güncel yıl)
-        // SUM(CASE WHEN …) pivotu istemcide; sıralama toplam kovana göre.
+        /*
+         * İl bazlı kovan & balmumu — yıl SABİT DEĞİL.
+         *
+         * Burada `sum: ['2024']` yazılıydı; tabloya 2025 girdiğinde il kırılımı
+         * bir yıl geride kalıyordu. Yıl artık ülke serisinin son dolu yılından
+         * geliyor, yani veri ilerledikçe kendiliğinden ilerliyor.
+         */
+        const ilYili = tuikYearData.at(-1)?.year ?? '2024';
         const provRaw = await fetchAgg(R_URETIM, {
-          groupBy: ['yer', 'urun', 'tur'], sum: ['2024'],
+          groupBy: ['yer', 'urun', 'tur'], sum: [ilYili],
           where: { duzeykod: 3 }, whereIn: { urun: ['Balmumu', 'Kovan'] },
         });
         const ilHaritasi = new Map<string, { yer: string; eskiTip: number; yeniTip: number; balmumu: number }>();
         for (const r of provRaw) {
           const yer = String(r.yer ?? '');
           const kayit = ilHaritasi.get(yer) ?? { yer, eskiTip: 0, yeniTip: 0, balmumu: 0 };
-          const v = num(r['sum_2024']);
+          const v = num(r[`sum_${ilYili}`]);
           const urun = String(r.urun ?? '');
           const tur = String(r.tur ?? '');
           if (urun === 'Kovan' && tur === 'Eski Tip') kayit.eskiTip += v;
@@ -140,6 +151,14 @@ export function useBeekeepingData() {
           }));
           setTuikProvinceKovan(provKovan);
         }
+        /* Ulusal bal serisi: `tr_hayvansal_urun_uretimi` yıl bazlı tek satır. */
+        const balSatirlari = await fetchRows('tr/hayvansal-urun-uretimi', { limit: 200 });
+        const sonBal = balSatirlari
+          .map((r) => ({ yil: String(r.yil ?? ''), deger: num(r.bal_uretimi) }))
+          .filter((r) => r.yil && r.deger > 0)
+          .sort((a, b) => a.yil.localeCompare(b.yil))
+          .at(-1);
+        if (sonBal) setUlusalBal(sonBal);
       } catch (tuikError) {
         console.warn('TÜİK kovan/balmumu verileri yüklenemedi:', tuikError);
       }
@@ -155,9 +174,17 @@ export function useBeekeepingData() {
     loadData();
   }, [loadData]);
 
-  // Calculate year trend data
+  /*
+   * Arıcı sayısı trendi.
+   *
+   * Yıl listesi burada 2013–2023 diye SABİT YAZILIYDI; tablo 2025'e kadar
+   * dolu olduğu hâlde grafik 2023'te bitiyordu. Artık veride hangi yıl varsa
+   * o çiziliyor — `gorulenYillar` pivotu zaten her yılı satıra koyuyor.
+   */
   const yearTrendData = useMemo<YearTrendData[]>(() => {
-    const years = ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'];
+    const years = [...new Set(
+      beekeeperYearData.flatMap((row) => Object.keys(row).filter((k) => /^\d{4}$/.test(k))),
+    )].sort();
     return years.map(year => {
       const totalBeekeepers = beekeeperYearData.reduce((sum, row) => sum + (row[year as keyof BeekeeperYearData] as number || 0), 0);
       return {
@@ -208,12 +235,38 @@ export function useBeekeepingData() {
       ? ((totalBeekeepersSon - totalBeekeepersOnceki) / totalBeekeepersOnceki * 100)
       : 0;
 
-    const totalHives = provinceData.reduce((sum, row) => sum + row.toplam_kovan_adet, 0);
-    const totalHoneyProduction = provinceData.reduce((sum, row) => sum + row.bal_uretimi_ton, 0);
-    const totalBeeswaxProduction = provinceData.reduce((sum, row) => sum + row.balmumu_uretimi_ton, 0);
-    const avgYield = provinceData.length > 0 
-      ? provinceData.reduce((sum, row) => sum + row.bal_verimi_kg, 0) / provinceData.length 
-      : 0;
+    /*
+     * ─── KOVAN / BAL / BALMUMU ARTIK İL TABLOSUNDAN TOPLANMIYOR ─────────────
+     *
+     * `il_bal_cesitleri` iki ayrı şekilde bozuk ve toplamı yayımlanabilir
+     * değil — ölçüldü:
+     *
+     *  1) BAL sütunu altı ilde kendi `bal_verimi_kg` sütunuyla çelişiyor.
+     *     Adana 47.088 t yazıyor, kovan×verim 12.264 t veriyor; Kocaeli
+     *     45.383'e karşı 4.243. Net fazlalık 98.767 ton. 81 ilin toplamı
+     *     213.995 t çıkıyordu ve sayfa bunu KPI olarak gösteriyordu —
+     *     Türkiye'nin gerçek bal üretiminin iki katından fazla.
+     *
+     *  2) KOVAN sütunlarında binlik ayracı ondalık nokta olarak okunmuş:
+     *     Adıyaman `toplam_kovan` = 77,76 (olması gereken 77.760), Ordu
+     *     `yeni_kovan_sayisi` = 611,40 (611.400). 19 ilde toplam ≠ yeni+eski.
+     *
+     * Tablonun VİNTAJI da 2023: düzeltilmiş bal toplamı 115.228 ≈ TÜİK 2023
+     * (114.889) ve balmumu toplamı 3.969 ≈ TÜİK 2023 (3.971). Sayfa ise bu
+     * sayıların hepsini arıcı sayısının yılıyla (2025) etiketliyordu.
+     *
+     * Bu yüzden üç ölçü de TÜİK'in kendi ülke serisinden geliyor. İl tablosu
+     * yalnızca BAL ÇEŞİDİ kırılımı için kullanılmaya devam ediyor; oradaki
+     * metin alanı bu bozukluklardan etkilenmiyor.
+     */
+    const sonTuik = tuikKovanYear.at(-1);
+    const totalHives = sonTuik?.toplam ?? 0;
+    const totalBeeswaxProduction = sonTuik?.balmumu ?? 0;
+    const totalHoneyProduction = ulusalBal?.deger ?? 0;
+
+    /* Verim ağırlıklı olmalı: 81 ilin verim ortalamasını almak, iki kovanlık
+       ili 800 bin kovanlık ille eşit sayar. Ülke verimi = bal / kovan. */
+    const avgYield = totalHives > 0 ? (totalHoneyProduction * 1000) / totalHives : 0;
 
     return {
       totalBeekeepers: totalBeekeepersSon,
@@ -222,8 +275,10 @@ export function useBeekeepingData() {
       totalHoneyProduction,
       totalBeeswaxProduction,
       avgYield,
+      kovanYili: sonTuik?.year ?? '',
+      balYili: ulusalBal?.yil ?? '',
     };
-  }, [beekeeperYearData, provinceData, sonYil, oncekiYil]);
+  }, [beekeeperYearData, tuikKovanYear, ulusalBal, sonYil, oncekiYil]);
 
   // Top provinces by beekeepers
   const topBeekeepers = useMemo(() => {

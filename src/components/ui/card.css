@@ -137,6 +137,50 @@
 .ui-ton-uyari    { border-left-color: var(--warning); }
 .ui-ton-bilgi    { border-left-color: var(--primary); }
 
+/* ─── İçgörü özeti şeridi ────────────────────────────────────────────────── */
+/*
+ * Dört küçük ölçünün tek kart içinde yan yana durduğu düzen. Ayrı kartlara
+ * bölmek yerine tek kart: bunlar bağımsız KPI değil, üstteki dört kartın
+ * TÜREVİ (büyüme oranı, tahmin, strateji) — kart sayısını ikiye katlamak
+ * hangisinin ana ölçü olduğunu gizliyordu.
+ */
+.hero-ozet { margin-bottom: 24px; }
+
+.hero-ozet-baslik {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-ozet-izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.hero-ozet-etiket {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.hero-ozet-deger {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-ozet-alt {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
 /*
  * Kart içindeki açıklama metni.
  *

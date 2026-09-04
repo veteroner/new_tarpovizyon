@@ -9,7 +9,6 @@ const YIL_SUTUNU = yilSutunu(HAYVAN_IL_YIL);
 const R_CANLI = 'tuik/hayvancilik-canlihayvan';
 const R_URETIM = 'tuik/hayvancilik-hayvansaluretim';
 const TOPLAM_SATIRLARI = ['TOPLAM', 'Toplam', 'TÜRKİYE', 'Türkiye'];
-import { getRegionByProvince } from '../../utils/productionCategories';
 import {
   COLORS, formatValue
 } from './turkeyAnimalProductionTypes';
@@ -323,26 +322,32 @@ export function useTurkeyAnimalProductionData(): UseTurkeyAnimalProductionDataRe
   const worldMilkRanking = useMemo(() => buildWorldRanking(worldData, 'Sığırların çiğ sütü'), [worldData]);
   const worldChickenRanking = useMemo(() => buildWorldRanking(worldData, 'Tavuk eti'), [worldData]);
 
-  const mapData = useMemo(() => {
-    const regionMap = new Map<string, number>();
-    cityData.forEach(item => {
-      const region = getRegionByProvince(item.il);
-      const cur = regionMap.get(region) || 0;
-      let v: number;
-      switch (mapFilter) {
-        case 'sigir': v = item.sigir; break;
-        case 'manda': v = item.manda; break;
-        case 'koyun': v = item.koyun; break;
-        case 'keci': v = item.keci; break;
-        case 'kovan': v = item.kovan; break;
-        case 'etTavugu': v = item.etTavugu; break;
-        case 'yumurtaTavugu': v = item.yumurtaTavugu; break;
-        default: v = item.sigir + item.manda + item.koyun + item.keci;
-      }
-      regionMap.set(region, cur + v);
-    });
-    return Array.from(regionMap.entries()).map(([name, value]) => ({ name, value }));
-  }, [cityData, mapFilter]);
+  /*
+   * Harita verisi İL bazında.
+   *
+   * Eskiden burada iller `getRegionByProvince` ile BÖLGEYE toplanıyordu ve
+   * harita her ili kendi bölgesinin toplamıyla boyuyordu. TurkeyHeatMap önce
+   * il anahtarına, bulamazsa bölge anahtarına bakıyor (`valueByRegionKey.get
+   * (provinceKey) ?? valueByRegionKey.get(regionKey)`), yani bölge satırları
+   * verilince BÜTÜN Karadeniz illeri aynı sayıyı gösteriyordu: Trabzon'un
+   * mandası 52.062 görünüyordu, gerçeği 214.
+   *
+   * Başlık zaten "İl Bazlı Dağılım" diyordu; yapılan iş başlıkla çelişiyordu.
+   */
+  const mapData = useMemo(() => cityData.map(item => {
+    let value: number;
+    switch (mapFilter) {
+      case 'sigir': value = item.sigir; break;
+      case 'manda': value = item.manda; break;
+      case 'koyun': value = item.koyun; break;
+      case 'keci': value = item.keci; break;
+      case 'kovan': value = item.kovan; break;
+      case 'etTavugu': value = item.etTavugu; break;
+      case 'yumurtaTavugu': value = item.yumurtaTavugu; break;
+      default: value = item.sigir + item.manda + item.koyun + item.keci;
+    }
+    return { name: item.il, value };
+  }), [cityData, mapFilter]);
 
   // ─── Intelligence Metrics ─────────────────────────────────────────────────
 

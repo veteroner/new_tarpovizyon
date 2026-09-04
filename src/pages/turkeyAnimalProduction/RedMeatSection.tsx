@@ -86,9 +86,9 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', gridColumn: 'span 2' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
-                Büyükkbaş vs Küçükkbaş Karşılaştırması
+                Büyükbaş vs Küçükbaş Karşılaştırması
               </h3>
-              <ChartInsightButton title="Büyükkbaş vs Küçükkbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
+              <ChartInsightButton title="Büyükbaş vs Küçükbaş" description="Karşılaştırmalı trend" data={buyukbasKucukbasData} context={{ section: 'Kırmızı Et' }} compact />
             </div>
             <ResponsiveContainer width="100%" height={350}>
               <ComposedChart data={buyukbasKucukbasData}>

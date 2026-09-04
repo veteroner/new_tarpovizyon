@@ -56,7 +56,15 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart data={endeksle(historicalChartData, ['Süt (M ton)', 'Kırmızı Et (K ton)', 'Kanatlı (K ton)', 'Yumurta (M adet)', 'Bal (K ton)'])}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
+            {/*
+              * interval={0}: her yıl etiketlensin.
+              *
+              * `minTickGap={16}` ile recharts çakışan etiketi SESSİZCE atıyordu;
+              * 10 yıllık görünümde eksen "…2022 2023 2025" diye gidiyor ve
+              * 2024 veride olduğu hâlde yokmuş gibi okunuyordu. Etiketler zaten
+              * -45° eğik, hepsi sığıyor.
+              */}
+            <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={70} interval={0} />
             {/*
               * TEK EKSEN, ENDEKSLİ.
               *

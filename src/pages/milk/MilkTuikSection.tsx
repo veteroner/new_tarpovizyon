@@ -1,4 +1,3 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import { yuzde } from '../../utils/sayi';
 import { useMemo } from 'react';
 import {
@@ -7,6 +6,7 @@ import {
 } from 'recharts';
 import { TUIK_SUT_URUNLER, AY_ADLARI, AY_TAM, formatShort, type TuikSutUrunData } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { StatCard } from '../../components/ui/Card';
 import { BAR_COLOR } from '../../utils/chartColors';
 
 type Props = {
@@ -83,86 +83,33 @@ export default function MilkTuikSection({
         ))}
       </div>
 
-      {/* KPI Kartları */}
+      {/* KPI kartları — ortak kart katmanı (StatCard). Degrade zemin ve emoji
+          filigranı kaldırıldı; değişim kartının zemini işarete göre yeşil/bordo
+          oluyordu, yön artık delta okuyla taşınıyor ve zemin sabit kalıyor. */}
       {tuikLatestYear && (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-          gap: '16px', 
-          marginBottom: '28px' 
-        }}>
-          <div style={{
-            background: `linear-gradient(135deg, ${TUIK_SUT_URUNLER.find(u => u.id === selectedTuikSutUrun)?.color || '#3b82f6'} 0%, ${TUIK_SUT_URUNLER.find(u => u.id === selectedTuikSutUrun)?.color || '#3b82f6'}dd 100%)`,
-            padding: '24px', borderRadius: '14px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>
-              {TUIK_SUT_URUNLER.find(u => u.id === selectedTuikSutUrun)?.emoji}
-            </div>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
-                {tuikLatestYear.yil} YILLIK TOPLAM
-              </div>
-              <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                {new Intl.NumberFormat('tr-TR').format(tuikLatestYear.toplam)} {tuikLatestYear.birim}
-              </div>
-            </div>
-          </div>
-
-          <div style={{
-            background: tuikYoyChange >= 0 ? 'linear-gradient(135deg, #17693a 0%, #12522d 100%)' : 'linear-gradient(135deg, #9b3d51 0%, #7d3142 100%)',
-            padding: '24px', borderRadius: '14px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}>{tuikYoyChange >= 0 ? <TrendingUp size={18} aria-hidden="true" /> : <TrendingDown size={18} aria-hidden="true" />}</div>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
-                YILLIK DEĞİŞİM
-              </div>
-              <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                {tuikYoyChange >= 0 ? '+' : ''}{yuzde(tuikYoyChange, 1)}
-              </div>
-            </div>
-          </div>
-
+        <div className="kpi-grid">
+          <StatCard
+            label={`${tuikLatestYear.yil} yıllık toplam`}
+            value={`${new Intl.NumberFormat('tr-TR').format(tuikLatestYear.toplam)} ${tuikLatestYear.birim}`}
+          />
+          <StatCard
+            label="Yıllık değişim"
+            value={yuzde(tuikYoyChange, 1, true)}
+            delta={tuikYoyChange}
+          />
           {fiveYearChange !== null && (
-            <div style={{
-              background: 'var(--tv-kart, #fff)',
-          border: '1px solid var(--tv-cizgi-ince, rgba(0,0,0,.07))',
-              padding: '24px', borderRadius: '14px',
-              boxShadow: 'var(--tv-golge)', position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--tv-ikincil, #6e6e73)', marginBottom: '8px' }}>
-                  5 YILLIK DEĞİŞİM
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--tv-murekkep, #1d1d1f)', lineHeight: 1 }}>
-                  {fiveYearChange >= 0 ? '+' : ''}{yuzde(fiveYearChange, 1)}
-                </div>
-              </div>
-            </div>
+            <StatCard
+              label="5 yıllık değişim"
+              value={yuzde(fiveYearChange, 1, true)}
+              delta={fiveYearChange}
+            />
           )}
-
           {maxMonth && (
-            <div style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              padding: '24px', borderRadius: '14px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '6rem', opacity: 0.1 }}></div>
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}>
-                  EN YOĞUN AY
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {maxMonth.ayTam}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', marginTop: '6px' }}>
-                  {new Intl.NumberFormat('tr-TR').format(maxMonth.miktar)} {tuikLatestYear.birim}
-                </div>
-              </div>
-            </div>
+            <StatCard
+              label="En yoğun ay"
+              value={maxMonth.ayTam}
+              sub={`${new Intl.NumberFormat('tr-TR').format(maxMonth.miktar)} ${tuikLatestYear.birim}`}
+            />
           )}
         </div>
       )}

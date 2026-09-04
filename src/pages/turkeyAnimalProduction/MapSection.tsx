@@ -12,13 +12,15 @@ interface MapSectionProps {
 const MapSection: React.FC<MapSectionProps> = ({ mapData, mapFilter, setMapFilter }) => {
   if (mapData.length === 0) return null;
 
+  /* Metin de "bölge" diyordu; harita artık gerçekten il bazında (bkz.
+     useTurkeyAnimalProductionData → mapData). */
   const mapDescription = (() => {
-    if (mapFilter === 'toplam') return 'Bölgelere göre toplam hayvan sayısı (Sığır + Manda + Koyun + Keçi)';
-    if (mapFilter === 'kovan') return 'Bölgelere göre kovan sayısı';
-    if (mapFilter === 'etTavugu') return 'Bölgelere göre et tavuğu sayısı';
-    if (mapFilter === 'yumurtaTavugu') return 'Bölgelere göre yumurta tavuğu sayısı';
+    if (mapFilter === 'toplam') return 'İl bazında toplam hayvan sayısı (sığır + manda + koyun + keçi)';
+    if (mapFilter === 'kovan') return 'İl bazında kovan sayısı';
+    if (mapFilter === 'etTavugu') return 'İl bazında et tavuğu sayısı';
+    if (mapFilter === 'yumurtaTavugu') return 'İl bazında yumurta tavuğu sayısı';
     const nameMap: Record<string, string> = { sigir: 'sığır', manda: 'manda', koyun: 'koyun', keci: 'keçi' };
-    return `Bölgelere göre ${nameMap[mapFilter] || mapFilter} sayısı`;
+    return `İl bazında ${nameMap[mapFilter] || mapFilter} sayısı`;
   })();
 
   const filters: { key: MapFilterKey; label: string; color: string }[] = [
