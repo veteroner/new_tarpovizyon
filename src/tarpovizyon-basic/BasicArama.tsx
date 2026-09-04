@@ -40,8 +40,11 @@ export function BasicArama() {
   const yerelBos = !cikti.bos && cikti.sonuclar.length === 0;
   const model = useModelArama(tumOgeler, metin, yerelBos);
 
-  /* Sorgu değişince imleç başa dönmeli; yoksa eski satır seçili kalıyor. */
-  useEffect(() => { setImlec(0); }, [metin]);
+  /* Sorgu değişince imleç başa dönmeli; yoksa eski satır seçili kalıyor.
+     Efektte DEĞİL yazma olayında: efektte setState çağırmak render'dan sonra
+     ikinci bir çizim tetikliyor (zincirleme render). Pro'daki komut paletinde
+     de aynı şekilde. */
+  const metniDegistir = (v: string) => { setMetin(v); setImlec(0); setAcik(true); };
 
   useEffect(() => {
     function disariTiklandi(e: MouseEvent) {
@@ -86,7 +89,7 @@ export function BasicArama() {
         type="search"
         className="tvb-arama__giris"
         value={metin}
-        onChange={(e) => { setMetin(e.target.value); setAcik(true); }}
+        onChange={(e) => metniDegistir(e.target.value)}
         onFocus={() => setAcik(true)}
         onKeyDown={tus}
         placeholder="Sayfa ara"

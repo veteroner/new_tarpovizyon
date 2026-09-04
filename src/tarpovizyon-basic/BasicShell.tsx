@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { NAV_GROUPS } from './pages';
 import { BasicArama } from './BasicArama';
@@ -54,15 +54,29 @@ export function BasicShell() {
     g.sections.some((s) => location.pathname.startsWith(`/tarpovizyon-basic/${s.path}/`))
   );
 
-  // Close menus on route change; keep the active group pre-expanded in the mobile drawer.
-  useEffect(() => {
-    setOpenGroup(null);
-    setMobileOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (mobileOpen && activeGroup) setMobileGroup(activeGroup.label);
-  }, [mobileOpen, activeGroup]);
+  /*
+   * ─── MENÜ DURUMU YOLA BAĞLANDI, EFEKTLE SIFIRLANMIYOR ─────────────────────
+   * Eskiden iki efekt vardı: biri rota değişince menüleri kapatıyor, biri
+   * çekmece açılınca aktif grubu genişletiyordu. İkisi de efekt içinde
+   * EŞZAMANLI setState: React render'ı bitirdikten sonra durumu değiştirip
+   * ikinci bir çizim tetikliyordu (zincirleme render).
+   *
+   * İkisi de türetilebilir. Menü durumu hangi yolda açıldığını da tutuyor;
+   * yol değişince açık sayılmıyor — ayrıca sıfırlamaya gerek kalmıyor.
+   * Çekmecede genişleyen grup ise "kullanıcı bir şey seçtiyse o, yoksa aktif
+   * grup" diye okunuyor.
+   */
+  const [oncekiYol, setOncekiYol] = useState(location.pathname);
+  if (oncekiYol !== location.pathname) {
+    /* React'in belgelediği "prop değişince durumu ayarla" kalıbı: önceki değer
+       DURUMDA tutuluyor (ref'te değil — ref'i render sırasında okumak da
+       yasak). Koşul bir kez sağlanıyor, sonraki render'da eşitlendiği için
+       döngü olmuyor. */
+    setOncekiYol(location.pathname);
+    if (openGroup !== null) setOpenGroup(null);
+    if (mobileOpen) setMobileOpen(false);
+  }
+  const genisGrup = mobileGroup ?? activeGroup?.label ?? null;
 
   // Lock body scroll while the mobile drawer is open.
   useEffect(() => {
@@ -159,7 +173,7 @@ export function BasicShell() {
         </div>
         <div className="tvb-drawer__body">
           {NAV_GROUPS.map((group) => {
-            const expanded = mobileGroup === group.label;
+            const expanded = genisGrup === group.label;
             return (
               <div key={group.label} className="tvb-drawer__group">
                 <button
