@@ -17,7 +17,6 @@ import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
-
 interface YearlyDataItem {
   year: string;
   [key: string]: string | number;
