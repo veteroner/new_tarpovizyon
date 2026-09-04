@@ -10,6 +10,7 @@ import {
 import { KomutPaleti } from './nav/KomutPaleti';
 import { paletiAc } from './nav/kabukOlaylari';
 import { HizliErisim } from './nav/HizliErisim';
+import { VeriTazeligi } from './VeriTazeligi';
 import { KardesGecisi } from './nav/KardesGecisi';
 import { AsistanPanosu } from './nav/AsistanPanosu';
 import '../styles/TarpoShell.css';
@@ -199,6 +200,12 @@ export default function TarpoShell() {
       <HizliErisim />
 
       <main className="tarpo-content">
+        {/*
+          * Tazelik göstergesi içeriğin EN BAŞINDA: kullanıcı rakamlara
+          * bakmadan önce ne kadar güncel olduklarını görsün. Veri gelmeden
+          * hiçbir şey çizmiyor.
+          */}
+        <VeriTazeligi />
         {/*
           * Kardeş geçişi: aynı bölümün diğer konuları. Kabukta DEĞİL,
           * içerikte — üst çubuk + kırıntı + hızlı erişim zaten üç şerit;

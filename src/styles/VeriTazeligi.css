@@ -1,0 +1,35 @@
+/**
+ * Veri tazeliği şeridi.
+ *
+ * Kabuğun altına, içerikten önce oturuyor: kullanıcı rakamlara bakmadan önce
+ * ne kadar taze olduklarını görsün. Renk TEK BAŞINA anlam taşımıyor — metin
+ * zaten "3 gün önce" diyor; renk yalnızca vurgu.
+ */
+.vt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 14px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  width: fit-content;
+  font-size: 12.5px;
+  line-height: 1.4;
+  cursor: help;
+  border: 1px solid var(--tv-cizgi-ince, rgba(0, 0, 0, .07));
+  background: var(--tv-zemin-2, #f5f5f7);
+  color: var(--tv-ikincil, #6e6e73);
+}
+.vt b { color: var(--tv-murekkep, #1d1d1f); font-weight: 600; }
+.vt svg { flex: none; }
+.vt-ek { opacity: .75; }
+
+/* Üç kademe: 30 günden taze, 90 güne kadar orta, sonrası eski. */
+.vt-taze { background: var(--tv-vurgu-sis, rgba(23, 105, 58, .08)); }
+.vt-taze svg { color: var(--tv-vurgu, #17693a); }
+.vt-orta svg { color: #b87611; }
+.vt-eski {
+  background: rgba(184, 118, 17, .10);
+  border-color: rgba(184, 118, 17, .28);
+}
+.vt-eski svg { color: #b87611; }

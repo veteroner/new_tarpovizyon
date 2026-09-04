@@ -42,8 +42,48 @@ function buildUrl(path: string, params: Record<string, ParamValue> = {}): string
   return url.toString();
 }
 
+/**
+ * Tazelik damgaları — hangi tablo en son ne zaman yazıldı.
+ *
+ * Worker her yanıta `X-Veri-Damga` ve `X-Veri-Tablo` koyuyor. Sayfa
+ * "bu veri ne zaman tazelendi" diyebilsin diye burada biriktiriliyor;
+ * fazladan istek YOK, zaten gelen yanıtın başlığı okunuyor.
+ *
+ * Modül düzeyinde tutuluyor çünkü bir sayfa onlarca uç çağırıyor ve gösterge
+ * hepsinin EN ESKİSİNİ göstermeli — sayfa en bayat verisi kadar tazedir.
+ */
+const DAMGALAR = new Map<string, number>();
+const damgaDinleyiciler = new Set<() => void>();
+
+/*
+ * Sürüm sayacı. `useSyncExternalStore`'un anlık görüntüsü DEĞİŞMEZ bir değer
+ * olmalı; Map'in kendisini döndürmek işe yaramıyor çünkü referans hep aynı
+ * kalıyor ve React "değişmedi" deyip yeniden çizmiyor. (Bu hatayı yaptım:
+ * damgalar geliyordu, gösterge hiç görünmüyordu.)
+ */
+let damgaSurum = 0;
+
+/** Damga haritası değişince haber verir (React aboneliği için). */
+export function damgaAbone(f: () => void): () => void {
+  damgaDinleyiciler.add(f);
+  return () => damgaDinleyiciler.delete(f);
+}
+
+/** Değişmez anlık görüntü: her yeni damgada artan sayaç. */
+export const damgaSurumuAl = (): number => damgaSurum;
+
+/** Şu ana kadar görülen tablo → son yazma zamanı (ms). */
+export const damgalariAl = (): Map<string, number> => DAMGALAR;
+
 async function getJson(url: string): Promise<{ data?: Row[]; error?: string; count?: number }> {
   const res = await fetch(url);
+  const damga = Number(res.headers.get('X-Veri-Damga'));
+  const tablo = res.headers.get('X-Veri-Tablo');
+  if (tablo && Number.isFinite(damga) && damga > 0 && DAMGALAR.get(tablo) !== damga) {
+    DAMGALAR.set(tablo, damga);
+    damgaSurum += 1;
+    damgaDinleyiciler.forEach((f) => f());
+  }
   const body = await res.json().catch(() => null);
   if (!res.ok || !body || body.error) {
     throw new Error(body?.error ? String(body.error) : `D1 API hatası: ${res.status}`);

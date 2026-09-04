@@ -556,6 +556,9 @@ async function uretimDetayYillik(env, urunler, unsur) {
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
+  /* Tazelik göstergesi için: bu başlık olmadan tarayıcı `X-Veri-Damga`yı
+     JS'ten okutmuyor (özel başlıklar varsayılan olarak gizli). */
+  'Access-Control-Expose-Headers': 'X-Veri-Damga, X-Veri-Tablo',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
@@ -752,6 +755,15 @@ export default {
       }
 
       const yanit = await okumaCevabi(request, env, url, slug);
+      /*
+       * Damga İSTEMCİYE de gidiyor: sayfa "bu veri en son ne zaman
+       * tazelendi" diyebilsin. Önbellek anahtarında zaten var; başlığa
+       * koymak fazladan D1 okuması getirmiyor.
+       */
+      if (damga) {
+        yanit.headers.set('X-Veri-Damga', String(damga));
+        yanit.headers.set('X-Veri-Tablo', slugTablosu(slug, { ROUTES, AGG, TRADE_TABLES }) ?? '');
+      }
       /*
        * Yalnızca BAŞARILI yanıt saklanıyor. Hatayı önbelleğe almak, geçici
        * bir D1 arızasını saatlerce kalıcı hâle getirirdi.
