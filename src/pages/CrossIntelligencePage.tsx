@@ -1,4 +1,5 @@
-import { yuzde } from '../utils/sayi';
+import { GRID, seriesColor, STATUS, AXIS } from '../utils/chartColors';
+import { yuzde, sayi, kisa, eksen } from '../utils/sayi';
 import {
   Bar, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceLine,
   ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, PolarGrid,
@@ -117,22 +118,41 @@ export default function CrossIntelligencePage() {
           </h3>
           <ChartInsightButton title={`${product.label} — Üretim × İthalat × İhracat × Fiyat`} description="Üretim, ithalat, ihracat ve fiyat trendi" data={crossData} context={{ section: 'Çapraz Zeka' }} compact />
           </div>
-          <ResponsiveContainer width="100%" height={350}>
-            <ComposedChart data={crossData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="year" fontSize={10} />
-              <YAxis yAxisId="left" fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} width={46} />
-              <YAxis yAxisId="right" orientation="right" fontSize={9} domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip formatter={(v: number, name: string) => {
-                if (name.includes('Fiyat') || name.includes('Yeterlilik')) return [v.toFixed(1), name];
-                return [v > 1e6 ? `${(v / 1e6).toFixed(2)}M ton` : `${(v / 1e3).toFixed(0)}K ton`, name];
-              }} />
+          {/*
+            * ÇİFT EKSEN İKİYE BÖLÜNDÜ.
+            *
+            * Burada üç miktar serisi (ton) ile iki endeks serisi (fiyat, %)
+            * tek grafikte iki ayrı ölçekteydi. İki eksen, iki seriyi istediğin
+            * yerde kesiştirmene izin verir — kesişimin hiçbir anlamı yoktur,
+            * eksen aralığını değiştirince kaybolur. Okuyucu bunu bilmez.
+            *
+            * Şimdi iki grafik, ORTAK X EKSENİ: üstte miktarlar, altta endeks.
+            * Aynı yıl hizada kalıyor, karşılaştırma korunuyor, sahte kesişim
+            * üretilmiyor. Alt grafiğin ekseni de sıfırdan başlamıyor —
+            * endeks 100 çevresinde okunur.
+            */}
+          <ResponsiveContainer width="100%" height={230}>
+            <ComposedChart data={crossData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+              <XAxis dataKey="year" fontSize={10} tick={false} height={1} />
+              <YAxis fontSize={9} tickFormatter={(v: number) => eksen(v)} width={54} />
+              <Tooltip formatter={(v: number, name: string) => [`${kisa(v, { birim: 'ton' })}`, name]} />
               <Legend />
-              <Bar yAxisId="left" dataKey="production" fill="#10b981" name="Üretim" opacity={0.7} />
-              <Bar yAxisId="left" dataKey="imports" fill="#ef4444" name="İthalat" opacity={0.7} />
-              <Bar yAxisId="left" dataKey="exports" fill="#3b82f6" name="İhracat" opacity={0.7} />
-              <Line yAxisId="right" type="monotone" dataKey="priceIndex" stroke="#8b5cf6" strokeWidth={2.5} name="Fiyat Endeksi" dot={{ r: 3 }} />
-              <Line yAxisId="right" type="monotone" dataKey="sufficiency" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" name="Yeterlilik %" dot={{ r: 3 }} />
+              <Bar dataKey="production" fill={seriesColor(0)} name="Üretim" opacity={0.85} />
+              <Bar dataKey="imports" fill={seriesColor(1)} name="İthalat" opacity={0.85} />
+              <Bar dataKey="exports" fill={seriesColor(2)} name="İhracat" opacity={0.85} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={130}>
+            <ComposedChart data={crossData} margin={{ top: 0, right: 8, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+              <XAxis dataKey="year" fontSize={10} />
+              <YAxis fontSize={9} domain={LINE_Y_DOMAIN} width={54}
+                tickFormatter={(v: number) => sayi(v)} />
+              <Tooltip formatter={(v: number, name: string) => [sayi(v, 1), name]} />
+              <Legend />
+              <Line type="monotone" dataKey="priceIndex" stroke={seriesColor(3)} strokeWidth={2.5} name="Fiyat Endeksi" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="sufficiency" stroke={seriesColor(4)} strokeWidth={2} strokeDasharray="5 5" name="Yeterlilik %" dot={{ r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -455,20 +475,33 @@ export default function CrossIntelligencePage() {
               <ComposedChart data={anomalyData} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" fontSize={10} />
-                <YAxis yAxisId="prod" fontSize={9} tickFormatter={v => (v as number) > 1e6 ? `${((v as number) / 1e6).toFixed(0)}M` : `${((v as number) / 1e3).toFixed(0)}K`} width={46} />
-                <YAxis yAxisId="z" orientation="right" fontSize={9} domain={[-3.5, 3.5]} tickFormatter={v => `z${(v as number) >= 0 ? '+' : ''}${v}`} width={46} />
-                <Tooltip formatter={(v: number, name: string) => {
-                  if (name === 'Z-Skor') return [`z=${v}`, 'Z-Skor'];
-                  return [v > 1e6 ? `${(v / 1e6).toFixed(2)}M ton` : `${(v / 1e3).toFixed(0)}K ton`, 'Üretim'];
-                }} />
-                <ReferenceLine yAxisId="z" y={1.5} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: '+1.5σ', fontSize: 9, fill: '#f59e0b', position: 'right' }} />
-                <ReferenceLine yAxisId="z" y={-1.5} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: '-1.5σ', fontSize: 9, fill: '#f59e0b', position: 'right' }} />
-                <Bar yAxisId="prod" dataKey="production" name="Üretim" isAnimationActive={false}>
+                {/*
+                  * TEK EKSEN — z-skoru.
+                  *
+                  * Burada üretim çubukları ile z-skoru çizgisi iki ayrı
+                  * ölçekte üst üsteydi. Ama z ZATEN üretimden türetiliyor
+                  * (yıllar arası standart sapma); çizgi ile çubuklar AYNI
+                  * BİLGİYİ iki kez gösteriyordu, sadece farklı ölçeklenmiş.
+                  * İkinci eksen hiçbir şey eklemiyordu.
+                  *
+                  * Şimdi çubuklar doğrudan z değeri. ±1,5σ referans çizgileri
+                  * artık aynı ölçekte, yani anlamlı: eşiği aşan çubuk gözle
+                  * görülüyor. Ham üretim ipucunda duruyor.
+                  */}
+                <YAxis fontSize={9} domain={[-3.5, 3.5]} width={52}
+                  tickFormatter={(v: number) => `z${v >= 0 ? '+' : ''}${sayi(v, 1)}`} />
+                <Tooltip formatter={(v: number, _n: string, p: { payload?: { production?: number } }) => [
+                  `z = ${sayi(v, 2)}  (${kisa(p?.payload?.production ?? 0, { birim: 'ton' })})`,
+                  'Sapma',
+                ]} />
+                <ReferenceLine y={1.5} stroke={STATUS.uyari} strokeDasharray="4 2" label={{ value: '+1,5σ', fontSize: 9, fill: STATUS.uyari, position: 'right' }} />
+                <ReferenceLine y={-1.5} stroke={STATUS.uyari} strokeDasharray="4 2" label={{ value: '-1,5σ', fontSize: 9, fill: STATUS.uyari, position: 'right' }} />
+                <ReferenceLine y={0} stroke={AXIS} />
+                <Bar dataKey="z" name="Sapma" isAnimationActive={false}>
                   {anomalyData.map((d, i) => (
-                    <Cell key={i} fill={d.isOutlier ? '#ef4444' : '#10b981'} fillOpacity={0.8} />
+                    <Cell key={i} fill={d.isOutlier ? STATUS.kritik : seriesColor(0)} fillOpacity={0.85} />
                   ))}
                 </Bar>
-                <Line yAxisId="z" type="monotone" dataKey="z" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name="Z-Skor" />
               </ComposedChart>
             </ResponsiveContainer>
             <div className="flex items-center gap-4 mt-3 text-xs" style={{ color: 'var(--text-secondary)' }}>

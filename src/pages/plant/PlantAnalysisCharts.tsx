@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Treemap,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ComposedChart, Line,
+  ComposedChart, Line, ReferenceLine,
   ScatterChart, Scatter, ZAxis, Cell,
   LabelList,
 } from 'recharts';
@@ -11,7 +11,8 @@ import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
-import { BAR_COLOR } from '../../utils/chartColors';
+import { BAR_COLOR, GRID, AXIS, seriesColor } from '../../utils/chartColors';
+import { sayi, kisa } from '../../utils/sayi';
 import { ChartCard } from '../../components/ui/Card';
 
 interface PlantAnalysisChartsProps {
@@ -33,6 +34,24 @@ export default function PlantAnalysisCharts({
   selectedProvince, setSelectedProvince,
   selectedUnsur, currentBirim, selectedYear, radarYears,
 }: PlantAnalysisChartsProps) {
+  /*
+   * Endeks: her seri KENDİ ilk dolu yılına göre 100. Üç farklı birimi
+   * (ton / dekar / kg-dek) tek eksende karşılaştırmanın tek dürüst yolu.
+   * Ham değerler `ham_*` alanlarında duruyor, ipucunda gösteriliyor.
+   */
+  const endeksVerisi = (() => {
+    const ilk = (alan: keyof YieldTrendRow) =>
+      yieldTrendData.find((r) => Number(r[alan]) > 0)?.[alan] as number | undefined;
+    const t0 = { uretim: ilk('uretim'), alan: ilk('alan'), verim: ilk('verim') };
+    return yieldTrendData.map((r) => ({
+      year: r.year,
+      uretim: t0.uretim ? (r.uretim / t0.uretim) * 100 : 0,
+      alan: t0.alan ? (r.alan / t0.alan) * 100 : 0,
+      verim: t0.verim ? (r.verim / t0.verim) * 100 : 0,
+      ham_uretim: r.uretim, ham_alan: r.alan, ham_verim: r.verim,
+    }));
+  })();
+
   return (
     <>
       {/* ─── Grafik 6: Scatter — Alan vs Üretim vs Verim ─── */}
@@ -149,25 +168,43 @@ export default function PlantAnalysisCharts({
       {/* ─── Grafik 10 & 11: Üretim-Alan-Verim + Decomposition ─── */}
       {yieldTrendData.length > 0 && (
         <div className="chart-grid">
-          <ChartCard title="Üretim-Alan-Verim Trendi" action={<ChartInsightButton title="Üretim-Alan-Verim Trendi" description="Trend analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
+          <ChartCard title="Üretim–Alan–Verim Trendi (ilk yıl = 100)" action={<ChartInsightButton title="Üretim-Alan-Verim Trendi" description="Trend analizi" data={yieldTrendData} context={{ section: 'Analiz' }} compact />}>
+            {/*
+              * ÜÇ AYRI Y EKSENİ KALDIRILDI, ENDEKSE GEÇİLDİ.
+              *
+              * Burada üretim (ton), alan (dekar) ve verim (kg/dek) üç farklı
+              * ölçekte üst üste çiziliyordu. İki (hele üç) eksen, çizgileri
+              * istediğin yerde kesiştirmene izin verir — kesişimin hiçbir
+              * anlamı yoktur, eksen aralığını değiştirince kaybolur. Okuyucu
+              * bunu bilmez, kesişimi olay sanar.
+              *
+              * Üstelik bu üçlü çarpımsal ilişkili: üretim ≈ alan × verim.
+              * Okuyucunun sorusu "üretim alandan mı verimden mi arttı" — buna
+              * cevap veren şey mutlak değer değil, ORANSAL değişim. Üçü de ilk
+              * yıla göre endekslendi: tek eksen, doğrudan karşılaştırılabilir
+              * eğriler, ve %100 çizgisi başlangıcı işaretliyor.
+              */}
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '8px' }}>
-              Üretim (ton) | Alan (dekar) | 🟠 Verim (kg/dek)
+              Üç seri de {endeksVerisi[0]?.year ?? 'ilk'} yılına göre endeksli (100 = başlangıç).
+              Mutlak değerler için ipucuna bakın.
             </p>
             <ResponsiveContainer width="100%" height={280}>
-              <ComposedChart data={yieldTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} />
-                <YAxis yAxisId="uretim" tick={{ fill: '#3b82f6', fontSize: 9 }} tickFormatter={v => fmtShort(v)} width={46} />
-                <YAxis yAxisId="alan" orientation="right" tick={{ fill: '#22c55e', fontSize: 9 }} tickFormatter={v => fmtShort(v)} width={46} />
-                <YAxis yAxisId="verim" orientation="right" tick={{ fill: '#f59e0b', fontSize: 9 }} tickFormatter={v => fmtShort(v)} dx={40} width={46} />
-                <Tooltip formatter={(v: number, name: string) => [
-                  name === 'uretim' ? `${fmt(v)} ton` : name === 'alan' ? `${fmt(v)} dekar` : `${v.toFixed(1)} kg/dek`,
-                  name === 'uretim' ? 'Üretim' : name === 'alan' ? 'Ekilen Alan' : 'Verim'
-                ]}
+              <ComposedChart data={endeksVerisi}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+                <XAxis dataKey="year" tick={{ fill: AXIS, fontSize: 9 }} />
+                <YAxis tick={{ fill: AXIS, fontSize: 9 }} width={46}
+                  tickFormatter={(v: number) => sayi(v)} />
+                <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
+                <Tooltip formatter={(v: number, name: string, p: { payload?: Record<string, number> }) => {
+                  const ham = p?.payload?.[`ham_${name}`];
+                  const birim = name === 'uretim' ? 'ton' : name === 'alan' ? 'dekar' : 'kg/dek';
+                  const ad = name === 'uretim' ? 'Üretim' : name === 'alan' ? 'Ekilen Alan' : 'Verim';
+                  return [`${sayi(v, 1)}  (${ham !== undefined ? kisa(ham) : '—'} ${birim})`, ad];
+                }}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11 }} />
-                <Line yAxisId="uretim" type="monotone" dataKey="uretim" name="Üretim" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                <Line yAxisId="alan" type="monotone" dataKey="alan" name="Alan" stroke="#22c55e" strokeWidth={2} dot={false} />
-                <Line yAxisId="verim" type="monotone" dataKey="verim" name="Verim" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="uretim" name="Üretim" stroke={seriesColor(0)} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="alan" name="Alan" stroke={seriesColor(1)} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="verim" name="Verim" stroke={seriesColor(2)} strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </ChartCard>
