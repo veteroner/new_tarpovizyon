@@ -13,7 +13,6 @@ import {
 } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
@@ -195,17 +194,33 @@ export default function AgriculturalEmploymentPage() {
               <div className="chart-grid">
                 <ChartCard title="Turkiye Tarim Istihdami Trendi" span={2} action={<ChartInsightButton title="Türkiye Tarım İstihdamı Trendi" description="Türkiye tarım istihdamı zaman serisi" data={turkeyTrend} context={{ section: 'Türkiye' }} compact />}>
                   <ResponsiveContainer width="100%" height={350}>
+                    {/*
+                      * ÇİFT EKSEN İKİYE BÖLÜNDÜ.
+                      *
+                      * Kişi sayısı (toplam/erkek/kadın) ile kadın ORANI (%) tek
+                      * grafikte iki ölçekteydi. Oran endekslenemez — yüzdenin
+                      * yüzdesi olur — o yüzden endeks değil BÖLME uygulandı.
+                      * Üstte sayılar, altta oran, X ekseni ortak.
+                      */}
                     <ComposedChart data={turkeyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis yAxisId="left" tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                       <Tooltip formatter={(v: number, name: string) => [name.includes('Oran') ? `%${Number(v).toFixed(1)}` : formatPop(v), name]} />
                       <Legend />
-                      <Area yAxisId="left" type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
-                      <Bar yAxisId="left" dataKey="male" name="Erkek" fill="#3b82f6" opacity={0.6} />
-                      <Bar yAxisId="left" dataKey="female" name="Kadin" fill="#ec4899" opacity={0.6} />
-                      <Line yAxisId="right" type="monotone" dataKey="femaleRatio" name="Kadin Oran (%)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
+                      <Area type="monotone" dataKey="total" name="Toplam" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} />
+                      <Bar dataKey="male" name="Erkek" fill="#3b82f6" opacity={0.6} />
+                      <Bar dataKey="female" name="Kadin" fill="#ec4899" opacity={0.6} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height={120}>
+                    <ComposedChart data={turkeyTrend} margin={{ top: 0, right: 8, bottom: 4, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46}
+                        tickFormatter={(v: number) => yuzde(v, 0)} />
+                      <Tooltip formatter={(v: number) => [yuzde(v, 1), 'Kadın oranı']} />
+                      <Line type="monotone" dataKey="femaleRatio" name="Kadın Oranı" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </ChartCard>

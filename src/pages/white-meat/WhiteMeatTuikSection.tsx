@@ -1,4 +1,5 @@
-import { yuzde } from '../../utils/sayi';
+import { endeksle } from '../../utils/endeks';
+import { yuzde, sayi } from '../../utils/sayi';
 import {
   Area,
   AreaChart,
@@ -18,7 +19,6 @@ import {
 import type { TuikTab, TuikChickenData, MonthlyData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import {
   BarChart3, Beef, Bird, Egg,
@@ -114,15 +114,16 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
           <div className="chart-grid">
             <ChartCard title="Kesilen Tavuk vs Et Üretimi (2010-2025)" span={2} action={<ChartInsightButton title="Kesilen Tavuk vs Et Üretimi (2010-2025)" description="Kesilen tavuk sayısı ve et üretimi karşılaştırması" data={tuikData} context={{ section: 'Kesim-Et' }} />}>
               <ResponsiveContainer width="100%" height={360}>
-                <ComposedChart data={tuikData.slice().reverse()}>
+                {/* TEK EKSEN, ENDEKSLİ. Kesilen tavuk (bin adet) ile et üretimi (ton) farklı birim; iki eksende sahte kesişim üretiyordu.
+                    Her seri kendi ilk dolu yılına göre 100; ham değerler ipucunda. */}
+                <ComposedChart data={endeksle(tuikData.slice().reverse(), ['slaughtered', 'meatProduction'])}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} label={{ value: 'Kesilen Tavuk (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} label={{ value: 'Et Üretimi (ton)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => sayi(v)} label={{ value: 'Endeks (ilk yıl = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="slaughtered" name="Kesilen Tavuk (bin adet)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
-                  <Line yAxisId="right" type="monotone" dataKey="meatProduction" name="Et Üretimi (ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 4 }} />
+                  <Bar dataKey="slaughtered" name="Kesilen Tavuk (bin adet)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
+                  <Line type="monotone" dataKey="meatProduction" name="Et Üretimi (ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 4 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </ChartCard>

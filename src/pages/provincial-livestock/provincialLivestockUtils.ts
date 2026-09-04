@@ -18,19 +18,19 @@ export const YEARS = Array.from({ length: 22 }, (_, i) => 2004 + i); // 2004-202
 export const YEAR_COLUMNS = YEARS.map(y => `y${y}`);
 
 export const ANIMAL_GROUPS = [
-  { id: 'Sığır', name: 'Sığır (Büyükbaş)', icon: '🐄', color: '#22c55e' },
-  { id: 'Manda', name: 'Manda', icon: '🐃', color: '#14b8a6' },
-  { id: 'Koyun', name: 'Koyun', icon: '🐑', color: '#3b82f6' },
-  { id: 'Keçi', name: 'Keçi', icon: '🐐', color: '#8b5cf6' },
-  { id: 'Tavuk', name: 'Tavuk', icon: '🐔', color: '#f59e0b' },
-  { id: 'Hindi', name: 'Hindi', icon: '🦃', color: '#ef4444' },
-  { id: 'Ördek', name: 'Ördek', icon: '🦆', color: '#06b6d4' },
-  { id: 'Kaz', name: 'Kaz', icon: '🪿', color: '#84cc16' },
-  { id: 'At', name: 'At', icon: '🐴', color: '#f97316' },
-  { id: 'Eşek', name: 'Eşek', icon: '🫏', color: '#6366f1' },
-  { id: 'Katır', name: 'Katır', icon: '🐴', color: '#a3e635' },
-  { id: 'Deve', name: 'Deve', icon: '🐪', color: '#d946ef' },
-  { id: 'Domuz', name: 'Domuz', icon: '🐷', color: '#ec4899' },
+  { id: 'Sığır', name: 'Sığır (Büyükbaş)', icon: '', color: '#22c55e' },
+  { id: 'Manda', name: 'Manda', icon: '', color: '#14b8a6' },
+  { id: 'Koyun', name: 'Koyun', icon: '', color: '#3b82f6' },
+  { id: 'Keçi', name: 'Keçi', icon: '', color: '#8b5cf6' },
+  { id: 'Tavuk', name: 'Tavuk', icon: '', color: '#f59e0b' },
+  { id: 'Hindi', name: 'Hindi', icon: '', color: '#ef4444' },
+  { id: 'Ördek', name: 'Ördek', icon: '', color: '#06b6d4' },
+  { id: 'Kaz', name: 'Kaz', icon: '', color: '#84cc16' },
+  { id: 'At', name: 'At', icon: '', color: '#f97316' },
+  { id: 'Eşek', name: 'Eşek', icon: '', color: '#6366f1' },
+  { id: 'Katır', name: 'Katır', icon: '', color: '#a3e635' },
+  { id: 'Deve', name: 'Deve', icon: '', color: '#d946ef' },
+  { id: 'Domuz', name: 'Domuz', icon: '', color: '#ec4899' },
 ];
 
 export const REGION_COLORS: Record<string, string> = {

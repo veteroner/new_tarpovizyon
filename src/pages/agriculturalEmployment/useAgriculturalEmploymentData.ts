@@ -19,12 +19,12 @@ const R = 'fao/nufus-istihdam-tarim';
 export type Tab = 'overview' | 'gender' | 'concentration' | 'turkey' | 'forecast' | 'alerts';
 
 export const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
-  { id: 'gender', label: 'Cinsiyet Analizi', icon: '⚧️' },
-  { id: 'concentration', label: 'Yogunlasma', icon: '📊' },
+  { id: 'overview', label: 'Genel Bakis', icon: '' },
+  { id: 'gender', label: 'Cinsiyet Analizi', icon: '' },
+  { id: 'concentration', label: 'Yogunlasma', icon: '' },
   { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷' },
-  { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'İçgörüler', icon: '🧠' },
+  { id: 'forecast', label: 'Trend & Tahmin', icon: '' },
+  { id: 'alerts', label: 'İçgörüler', icon: '' },
 ];
 
 export const CHART_COLORS = SERIES;  // tek kaynak: utils/chartColors (doğrulanmış kategorik sıra)

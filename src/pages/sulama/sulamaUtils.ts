@@ -174,10 +174,10 @@ export const FERTIGASYON_DEFAULTS: Record<string, { n: number; p: number; k: num
 };
 
 export const STEPS = [
-  { n: 1, icon: '📍', label: 'Konum & İklim' },
-  { n: 2, icon: '🌾', label: 'Ürün' },
-  { n: 3, icon: '💧', label: 'Sistem & Arazi' },
-  { n: 4, icon: '📊', label: 'Sonuçlar' },
+  { n: 1, icon: '', label: 'Konum & İklim' },
+  { n: 2, icon: '', label: 'Ürün' },
+  { n: 3, icon: '', label: 'Sistem & Arazi' },
+  { n: 4, icon: '', label: 'Sonuçlar' },
 ] as const;
 
 export const INITIAL: WizardState = {

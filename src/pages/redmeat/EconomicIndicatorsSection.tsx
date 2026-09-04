@@ -1,3 +1,4 @@
+import { endeksle } from '../../utils/endeks';
 import { yuzde } from '../../utils/sayi';
 import { useState, useMemo, useEffect } from 'react';
 import {
@@ -204,11 +205,13 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
 
         <ChartCard title="Dolar Kuru &amp; Yem Fiyatları" action={<ChartInsightButton title="Dolar Kuru & Yem Fiyatları" description="Dolar kuru ve besi yemi fiyatları trendi" data={filteredEconomicData} context={{ section: 'Kur-Yem' }} compact />}>
           <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
+            {/* TEK EKSEN, ENDEKSLİ. Dolar kuru (TL) ile besi yemi fiyatı (TL/kg) farklı
+                  büyüklükte; iki eksende çizilince kesişimleri eksen aralığının eseri
+                  oluyordu. İkisi de ilk dolu aya göre 100. */}
+              <ComposedChart data={endeksle(filteredEconomicData.slice().reverse(), ['dolar_kuru_tl', 'besi_yemi_fiyatlari_tl_kg'])} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => {
@@ -217,8 +220,8 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
                 }}
               />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="dolar_kuru_tl" name="Dolar Kuru" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
-              <Line yAxisId="right" type="monotone" dataKey="besi_yemi_fiyatlari_tl_kg" name="Besi Yemi" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
+              <Line type="monotone" dataKey="dolar_kuru_tl" name="Dolar Kuru" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
+              <Line type="monotone" dataKey="besi_yemi_fiyatlari_tl_kg" name="Besi Yemi" stroke="#eab308" strokeWidth={2.5} dot={{ fill: '#eab308', r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </ChartCard>

@@ -1,3 +1,4 @@
+import { endeksle } from '../../utils/endeks';
 import { yuzde } from '../../utils/sayi';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -7,7 +8,6 @@ import {
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
@@ -54,11 +54,12 @@ export function ComparativeSection({ data }: Props) {
       <div className="chart-grid">
         <ChartCard title={`Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} span={2} action={<ChartInsightButton title={`Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} description="Süt, et ve yumurta üretiminin karşılaştırmalı trendi" data={combinedData} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange }} />}>
           <ResponsiveContainer width="100%" height={350}>
-            <ComposedChart data={combinedData}>
+            {/* TEK EKSEN, ENDEKSLİ. Süt ve et (ton) ile yumurta (adet) farklı birim; iki eksende çizmek sahte kesişim üretiyordu.
+                  Her seri kendi ilk dolu yılına göre 100. Ham değerler ipucunda. */}
+              <ComposedChart data={endeksle(combinedData, ['süt', 'et', 'yumurta'])}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => formatShort(v) + 'M'} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
               <Tooltip
                 formatter={(value: number, name: string) => {
                   if (name === 'yumurta') return [formatNumber(value) + ' Milyon adet', 'Yumurta'];
@@ -66,9 +67,9 @@ export function ComparativeSection({ data }: Props) {
                 }}
               />
               <Legend />
-              <Area yAxisId="left" type="monotone" dataKey="süt" fill={COLORS.milk[0]} fillOpacity={0.3} stroke={COLORS.milk[0]} name="Süt (ton)" />
-              <Area yAxisId="left" type="monotone" dataKey="et" fill={COLORS.meat[0]} fillOpacity={0.3} stroke={COLORS.meat[0]} name="Et (ton)" />
-              <Line yAxisId="right" type="monotone" dataKey="yumurta" stroke={COLORS.egg[0]} strokeWidth={3} name="Yumurta (M adet)" />
+              <Area type="monotone" dataKey="süt" fill={COLORS.milk[0]} fillOpacity={0.3} stroke={COLORS.milk[0]} name="Süt (ton)" />
+              <Area type="monotone" dataKey="et" fill={COLORS.meat[0]} fillOpacity={0.3} stroke={COLORS.meat[0]} name="Et (ton)" />
+              <Line type="monotone" dataKey="yumurta" stroke={COLORS.egg[0]} strokeWidth={3} name="Yumurta (M adet)" />
             </ComposedChart>
           </ResponsiveContainer>
         </ChartCard>

@@ -5,12 +5,12 @@ import type { Insight } from '../../components/InsightCard';
 export type Tab = 'overview' | 'primary' | 'processed' | 'yield' | 'competition' | 'predictions';
 
 export const TABS: { id: Tab; label: string; icon: string; desc: string }[] = [
-  { id: 'overview', label: 'Genel Bakış', icon: '🌍', desc: 'Dünya bitkisel üretim özeti' },
-  { id: 'primary', label: 'Birincil Üretim', icon: '🌾', desc: 'FAO birincil ürün analizi' },
-  { id: 'processed', label: 'İşlenmiş Üretim', icon: '🏭', desc: 'İşlenmiş tarım ürünleri' },
-  { id: 'yield', label: 'Verim Analizi', icon: '📊', desc: 'Verim ve açık analizi' },
-  { id: 'competition', label: 'Rekabet Analizi', icon: '⚔️', desc: 'Küresel rekabet matrisi' },
-  { id: 'predictions', label: 'Tahminler', icon: '🔮', desc: 'Üretim & verim projeksiyonları' },
+  { id: 'overview', label: 'Genel Bakış', icon: '', desc: 'Dünya bitkisel üretim özeti' },
+  { id: 'primary', label: 'Birincil Üretim', icon: '', desc: 'FAO birincil ürün analizi' },
+  { id: 'processed', label: 'İşlenmiş Üretim', icon: '', desc: 'İşlenmiş tarım ürünleri' },
+  { id: 'yield', label: 'Verim Analizi', icon: '', desc: 'Verim ve açık analizi' },
+  { id: 'competition', label: 'Rekabet Analizi', icon: '', desc: 'Küresel rekabet matrisi' },
+  { id: 'predictions', label: 'Tahminler', icon: '', desc: 'Üretim & verim projeksiyonları' },
 ];
 
 // Çin: üretim tablolarında düz 'China' satırı yok, yalnızca mainland/Taiwan/HK/Macao

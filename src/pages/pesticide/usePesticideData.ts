@@ -55,12 +55,12 @@ export type Tab = 'overview' | 'composition' | 'concentration' | 'turkey' | 'for
 
 // ---------- CONSTANTS ----------
 export const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakış', icon: '🌍' },
-  { id: 'composition', label: 'Kullanım Profili', icon: '🧪' },
-  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '🏆' },
+  { id: 'overview', label: 'Genel Bakış', icon: '' },
+  { id: 'composition', label: 'Kullanım Profili', icon: '' },
+  { id: 'concentration', label: 'Pazar Yoğunluğu', icon: '' },
   { id: 'turkey', label: 'Türkiye Profili', icon: '🇹🇷' },
-  { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'Akıllı Analiz', icon: '🧠' },
+  { id: 'forecast', label: 'Trend & Tahmin', icon: '' },
+  { id: 'alerts', label: 'Akıllı Analiz', icon: '' },
 ];
 
 export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];

@@ -1,3 +1,4 @@
+import { endeksle } from '../../utils/endeks';
 import {
   Area,
   Bar,
@@ -14,7 +15,6 @@ import {
 } from 'recharts';
 import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Bird, TrendingUp, Utensils } from 'lucide-react';
 
@@ -124,21 +124,21 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
         {quailSlaughterData.length > 0 && (
           <ChartCard title="Kesilen Bıldırcın vs Et Üretimi" span={2} action={<ChartInsightButton title="Kesilen Bıldırcın vs Et Üretimi" description="Kesilen bıldırcın sayısı ile et üretim karşılaştırması" data={quailMeatData} context={{ section: 'Kesim vs Et' }} compact />}>
             <ResponsiveContainer width="100%" height={380}>
-              <ComposedChart data={(() => {
+              {/* TEK EKSEN. Kesilen bıldırcın (bin adet) ile et (ton) farklı birim. */}
+                <ComposedChart data={endeksle((() => {
                 const merged = quailMeatData.slice().reverse().map(d => {
                   const slaughter = quailSlaughterData.find(s => s.year === d.year);
                   return { year: d.year, meat: d.production, slaughtered: slaughter?.production || 0 };
                 });
                 return merged;
-              })()}>
+              })(), ['slaughtered', 'meat'])}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Et (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Kesilen (bin adet)', angle: 90, position: 'insideRight', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks (ilk = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
                 <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                 <Legend />
-                <Bar yAxisId="right" dataKey="slaughtered" name="Kesilen (bin adet)" fill="#06b6d4" radius={[4, 4, 0, 0]} opacity={0.7} />
-                <Line yAxisId="left" type="monotone" dataKey="meat" name="Et (ton)" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} />
+                <Bar dataKey="slaughtered" name="Kesilen (bin adet)" fill="#06b6d4" radius={[4, 4, 0, 0]} opacity={0.7} />
+                <Line type="monotone" dataKey="meat" name="Et (ton)" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </ChartCard>

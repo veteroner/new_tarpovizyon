@@ -1,18 +1,19 @@
-import { yuzde } from '../../utils/sayi';
+import { AXIS } from '../../utils/chartColors';
+import { endeksle } from '../../utils/endeks';
+import { yuzde, sayi } from '../../utils/sayi';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Globe, Leaf, TrendingUp, Activity, Wheat, AlertTriangle, TrendingDown } from 'lucide-react';
 import {
   LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
 import { KPICard } from '../../components/KPICard';
 import { InsightCard } from '../../components/InsightCard';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatMetric } from '../../utils/livestockCalculations';
-import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
+import { formatValue, formatHa, formatYield, TURKEY_COLOR, CHART_COLORS } from './productionTypes';
 import type { Insight, PrimaryKPIs } from './productionTypes';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 
 interface PrimaryTabProps {
@@ -114,17 +115,24 @@ export function PrimaryTab({
         )}
 
         <div className="chart-grid" style={{ marginBottom: '24px' }}>
-          <ChartCard title="Trend — Dünya vs Türkiye" action={<ChartInsightButton title="Birincil Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye üretim değişimi" data={primaryTrends} context={{ ürün: primaryProduct, türkiyeCAGR: primaryKPIs?.turkeyCAGR, dünyaCAGR: primaryKPIs?.worldCAGR }} />}>
+          <ChartCard title="Trend — Dünya vs Türkiye" action={<ChartInsightButton title="Birincil Üretim Trendi — Dünya vs Türkiye" description="Yıllık dünya ve Türkiye üretim değişimi" data={endeksle(primaryTrends, ['world', 'turkey'])} context={{ ürün: primaryProduct, türkiyeCAGR: primaryKPIs?.turkeyCAGR, dünyaCAGR: primaryKPIs?.worldCAGR }} />}>
             <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={primaryTrends}>
+              <LineChart data={endeksle(primaryTrends, ['world', 'turkey'])}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fill: TURKEY_COLOR, fontSize: 11 }} tickFormatter={formatShort} domain={LINE_Y_DOMAIN} width={46} />
+                {/*
+                  * TEK EKSEN, ENDEKSLİ. Dünya ile Türkiye aynı ölçüyü farklı
+                  * büyüklükte taşıyor; iki eksende çizmek çizgileri istediğin
+                  * yerde kesiştirmeye izin veriyordu — kesişimin anlamı yoktu.
+                  * Sorunun cevabı zaten oransal: hangisi daha hızlı büyüdü?
+                  */}
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46}
+                  tickFormatter={(v: number) => sayi(v)} />
+                <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'world' ? 'Dünya' : 'Türkiye']} />
                 <Legend formatter={(v) => v === 'world' ? 'Dünya' : 'Türkiye'} />
-                <Line yAxisId="left" type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />
-                <Line yAxisId="right" type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
+                <Line type="monotone" dataKey="world" stroke="#3b82f6" strokeWidth={2} dot={false} name="world" />
+                <Line type="monotone" dataKey="turkey" stroke={TURKEY_COLOR} strokeWidth={2.5} strokeDasharray="6 3" dot={false} name="turkey" />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>

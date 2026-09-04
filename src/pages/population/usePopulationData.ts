@@ -26,12 +26,12 @@ const sonYil = () => (sonYilCache ??= latestYear(R, 'year').then((y) => y ?? 202
 export type Tab = 'overview' | 'urbanization' | 'demographics' | 'turkey' | 'forecast' | 'alerts';
 
 export const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Genel Bakis', icon: '🌍' },
-  { id: 'urbanization', label: 'Kentlesme', icon: '🏙️' },
-  { id: 'demographics', label: 'Demografi', icon: '⚧️' },
+  { id: 'overview', label: 'Genel Bakis', icon: '' },
+  { id: 'urbanization', label: 'Kentlesme', icon: '' },
+  { id: 'demographics', label: 'Demografi', icon: '' },
   { id: 'turkey', label: 'Turkiye Profili', icon: '🇹🇷' },
-  { id: 'forecast', label: 'Trend & Tahmin', icon: '🔮' },
-  { id: 'alerts', label: 'İçgörüler', icon: '🧠' },
+  { id: 'forecast', label: 'Trend & Tahmin', icon: '' },
+  { id: 'alerts', label: 'İçgörüler', icon: '' },
 ];
 
 export const CHART_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];

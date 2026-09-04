@@ -10,7 +10,6 @@ import { ModelWarningBox } from '../../components/ModelWarningBox';
 import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
 import { calculate } from './gubreUtils';
 import type { CalcResult, WizardState, FertilizerProduct } from './gubreTypes';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { Bolt, Gem, Wrench, Zap } from 'lucide-react';
 
 interface Props {
@@ -191,11 +190,11 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
               <strong> Kalın işaretli</strong> sütun seçili senaryodur.
             </p>
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={scenarioData} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
+              {/* TEK EKSEN. Toplam maliyet (₺) ile verim (ton/da) farklı birim. */}
+                <ComposedChart data={scenarioData} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="senaryo" tick={{ fontSize: 12 }} />
-                <YAxis yAxisId="left" tick={{ fontSize: 11 }} label={{ value: '₺ Toplam Maliyet', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} tickFormatter={(v) => `₺${(v / 1000).toFixed(0)}k`} width={58} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} label={{ value: 'Verim (ton/da)', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} domain={LINE_Y_DOMAIN} width={58} />
+                <YAxis tick={{ fontSize: 11 }} label={{ value: '₺ Toplam Maliyet', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} tickFormatter={(v) => `₺${(v / 1000).toFixed(0)}k`} width={58} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     if (name === 'Toplam Maliyet') return [`₺${value.toLocaleString()}`, name];
@@ -204,12 +203,12 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar yAxisId="left"  dataKey="maliyet" name="Toplam Maliyet" radius={[4, 4, 0, 0]}>
+                <Bar  dataKey="maliyet" name="Toplam Maliyet" radius={[4, 4, 0, 0]}>
                   {scenarioData.map((d, i) => (
                     <Cell key={i} fill={isCurrent(d.senaryo) ? '#1d4ed8' : '#93c5fd'} />
                   ))}
                 </Bar>
-                <Line yAxisId="right" dataKey="verim" name="Hedef Verim" stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981' }} />
+                <Line dataKey="verim" name="Hedef Verim" stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981' }} />
               </ComposedChart>
             </ResponsiveContainer>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginTop: 12 }}>

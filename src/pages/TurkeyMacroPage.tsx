@@ -8,7 +8,7 @@ import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { fetchAgg, fetchRows, num } from '../services/d1';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 /* ─── Constants ─── */
@@ -314,20 +314,27 @@ export default function TurkeyMacroPage() {
         <ChartInsightButton title="Tarım Sektörünün 25 Yıllık Serüveni" description="GSYH payı ve reel büyüme trendi" data={agriChartData} context={{ section: 'Makro Türkiye' }} compact />
         </div>
         <ResponsiveContainer width="100%" height={350}>
+          {/*
+            * İKİ EKSEN KALKTI — ZATEN İKİ YÜZDE VARDI.
+            *
+            * Solda 'GSYH Payı (%)', sağda 'Reel Büyüme (%)' çiziliyordu. İkisi de
+            * YÜZDE, yani aynı birim; iki ayrı ölçeğe bölmenin hiçbir gerekçesi
+            * yoktu ve çizgilerin kesişimi tamamen eksen aralığının eseriydi.
+            * Tek eksen: pay %5–8 bandında, büyüme sıfırın iki yanında —
+            * ikisi de okunuyor ve artık gerçekten karşılaştırılabilir.
+            */}
           <ComposedChart data={agriChartData} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="yil" tick={{ fontSize: 10 }} interval={2} />
-            <YAxis yAxisId="left" domain={[0, 'auto']} tickFormatter={v => v + '%'} tick={{ fontSize: 10 }}
+            <YAxis domain={['auto', 'auto']} tickFormatter={v => v + '%'} tick={{ fontSize: 10 }}
                    label={{ value: 'GSYH Payı (%)', angle: -90, position: 'insideLeft', fontSize: 10 }} width={58} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }}
-                   label={{ value: 'Büyüme (%)', angle: 90, position: 'insideRight', fontSize: 10 }} domain={LINE_Y_DOMAIN} width={58} />
             <Tooltip formatter={(v: number, name: string) => [
               name.includes('GSYH') ? v.toFixed(0) + ' Milyar ₺' : v.toFixed(2) + '%', name
             ]} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Area yAxisId="left" type="monotone" dataKey="GSYH Payı (%)"
+            <Area type="monotone" dataKey="GSYH Payı (%)"
                   fill="#16a34a" fillOpacity={0.15} stroke="#16a34a" strokeWidth={2} dot={{ r: 2 }} />
-            <Bar yAxisId="right" dataKey="Reel Büyüme (%)" radius={[3, 3, 0, 0]}>
+            <Bar dataKey="Reel Büyüme (%)" radius={[3, 3, 0, 0]}>
               {agriChartData.map((d, i) => (
                 <Cell key={i} fill={d['Reel Büyüme (%)'] >= 0 ? '#22c55e' : '#ef4444'} opacity={0.7} />
               ))}

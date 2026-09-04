@@ -1,9 +1,11 @@
+import { AXIS } from '../../utils/chartColors';
+import { sayi } from '../../utils/sayi';
+import { endeksle } from '../../utils/endeks';
 import React from 'react';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
-  Tooltip, Legend, Area, Line
+  Tooltip, Legend, Area, Line, ReferenceLine
 } from 'recharts';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface HistoricalTrendsSectionProps {
   historicalChartData: Record<string, string | number>[];
@@ -28,7 +30,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
             Tarihsel Üretim Trendleri
           </h2>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-            {donem} dönemi hayvansal ürün üretim trendleri
+            {donem} dönemi — her seri kendi ilk yılına göre endeksli (100 = başlangıç)
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -52,18 +54,32 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
 
       <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', marginBottom: '48px' }}>
         <ResponsiveContainer width="100%" height={400}>
-          <ComposedChart data={historicalChartData}>
+          <ComposedChart data={endeksle(historicalChartData, ['Süt (M ton)', 'Kırmızı Et (K ton)', 'Kanatlı (K ton)', 'Yumurta (M adet)', 'Bal (K ton)'])}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-            <YAxis yAxisId="left" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+            {/*
+              * TEK EKSEN, ENDEKSLİ.
+              *
+              * Burada süt (milyon ton) solda, kırmızı et (bin ton), kanatlı
+              * (bin ton), yumurta (milyon adet) ve bal (bin ton) SAĞDA tek
+              * eksende toplanmıştı — dört farklı birim aynı ölçeğe basılıyor,
+              * üstelik ikinci bir eksene karşı. Kesişimlerin hiçbiri gerçek
+              * değildi; eksen aralığı değişince kayboluyorlardı.
+              *
+              * Beş seri de ilk dolu yılına göre 100'e endekslendi. Grafiğin
+              * zaten sorduğu soru bu: hangisi daha hızlı büyüdü? Ham değerler
+              * ipucunda duruyor.
+              */}
+            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={48}
+              tickFormatter={(v: number) => sayi(v)} />
+            <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
             <Legend />
-            <Area yAxisId="left" type="monotone" dataKey="Süt (M ton)" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} strokeWidth={2} />
-            <Line yAxisId="right" type="monotone" dataKey="Kırmızı Et (K ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 3 }} />
-            <Line yAxisId="right" type="monotone" dataKey="Kanatlı (K ton)" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 3 }} />
-            <Line yAxisId="right" type="monotone" dataKey="Yumurta (M adet)" stroke="#fbbf24" strokeWidth={2} dot={{ fill: '#fbbf24', r: 2 }} />
-            <Line yAxisId="right" type="monotone" dataKey="Bal (K ton)" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 2 }} />
+            <Area type="monotone" dataKey="Süt (M ton)" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} strokeWidth={2} />
+            <Line type="monotone" dataKey="Kırmızı Et (K ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 3 }} />
+            <Line type="monotone" dataKey="Kanatlı (K ton)" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 3 }} />
+            <Line type="monotone" dataKey="Yumurta (M adet)" stroke="#fbbf24" strokeWidth={2} dot={{ fill: '#fbbf24', r: 2 }} />
+            <Line type="monotone" dataKey="Bal (K ton)" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

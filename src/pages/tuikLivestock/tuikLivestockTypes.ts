@@ -51,19 +51,19 @@ export interface CorrelationData {
 }
 
 export const ANIMAL_GROUPS = [
-  { id: 'Sığır', name: 'Sığır (Büyükbaş)', icon: '🐄' },
-  { id: 'Manda', name: 'Manda', icon: '🐃' },
-  { id: 'Koyun', name: 'Koyun', icon: '🐑' },
-  { id: 'Keçi', name: 'Keçi', icon: '🐐' },
-  { id: 'Tavuk', name: 'Tavuk', icon: '🐔' },
-  { id: 'Hindi', name: 'Hindi', icon: '🦃' },
-  { id: 'Ördek', name: 'Ördek', icon: '🦆' },
-  { id: 'Kaz', name: 'Kaz', icon: '🪿' },
-  { id: 'At', name: 'At', icon: '🐴' },
-  { id: 'Eşek', name: 'Eşek', icon: '🫏' },
-  { id: 'Katır', name: 'Katır', icon: '🐴' },
-  { id: 'Deve', name: 'Deve', icon: '🐪' },
-  { id: 'Domuz', name: 'Domuz', icon: '🐷' },
+  { id: 'Sığır', name: 'Sığır (Büyükbaş)', icon: '' },
+  { id: 'Manda', name: 'Manda', icon: '' },
+  { id: 'Koyun', name: 'Koyun', icon: '' },
+  { id: 'Keçi', name: 'Keçi', icon: '' },
+  { id: 'Tavuk', name: 'Tavuk', icon: '' },
+  { id: 'Hindi', name: 'Hindi', icon: '' },
+  { id: 'Ördek', name: 'Ördek', icon: '' },
+  { id: 'Kaz', name: 'Kaz', icon: '' },
+  { id: 'At', name: 'At', icon: '' },
+  { id: 'Eşek', name: 'Eşek', icon: '' },
+  { id: 'Katır', name: 'Katır', icon: '' },
+  { id: 'Deve', name: 'Deve', icon: '' },
+  { id: 'Domuz', name: 'Domuz', icon: '' },
 ];
 
 export const TABLE_NAME = 'tuik_hayvancilik_canlihayvan';
