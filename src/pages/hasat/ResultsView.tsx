@@ -10,6 +10,7 @@ import { ModelWarningBox } from '../../components/ModelWarningBox';
 import type { WizardState, CalcResult, ClimateRisk, SavedForecast } from './hasatUtils';
 import { clearHistory } from './hasatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface ChartRow {
   yil: string | number;
@@ -236,7 +237,7 @@ export default function ResultsView({
           <ComposedChart data={chartData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="yil" />
-            <YAxis tickFormatter={(v: number) => v.toFixed(0)} width={46} />
+            <YAxis tickFormatter={(v: number) => v.toFixed(0)} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip formatter={(v: number | number[]) => {
               if (Array.isArray(v)) return [`${v[0].toFixed(0)} – ${v[1].toFixed(0)} Kg/da`, 'Güven Aralığı'];
               return [`${v.toFixed(0)} Kg/da`];

@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 import type { TuikChickenData, TuikTurkeyMeatData, PoultryTradeData } from './whiteMeatUtils';
 import { formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -219,7 +220,7 @@ export default function WhiteMeatComparisonSection({ tuikData, turkeyMeatData, q
             })()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Toplam']} />
               <Area type="monotone" dataKey="toplam" name="Toplam Beyaz Et" fill="#10b981" stroke="#10b981" fillOpacity={0.3} strokeWidth={3} />
             </AreaChart>

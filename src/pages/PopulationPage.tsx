@@ -14,6 +14,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 import { ChartCard } from '../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 export default function PopulationPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -80,7 +81,7 @@ export default function PopulationPage() {
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Area type="monotone" dataKey="total" name="Toplam" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} />
@@ -241,7 +242,7 @@ export default function PopulationPage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [v ? formatPop(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gercek" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} connectNulls />

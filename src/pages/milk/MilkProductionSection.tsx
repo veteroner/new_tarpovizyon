@@ -60,7 +60,7 @@ export default function MilkProductionSection({
             <ComposedChart data={series} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]} 
                 labelFormatter={(label) => `Yıl: ${label}`}
@@ -166,7 +166,7 @@ export default function MilkProductionSection({
             <ComposedChart data={series.slice(-5)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [formatTon(value)]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} 
@@ -311,7 +311,7 @@ export default function MilkProductionSection({
                   <ComposedChart data={productivity} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                     <Tooltip 
                       formatter={(value: number) => [`${value.toFixed(1)} lt/baş`]}
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

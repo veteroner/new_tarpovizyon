@@ -13,7 +13,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { useTradeIntelligenceData, MONTHS_TR } from './useTradeIntelligenceData';
 import type { HHIResult } from './useTradeIntelligenceData';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 const RISK_COLORS = { low: '#10b981', medium: '#f59e0b', high: '#ef4444', critical: '#991b1b' };
 
@@ -362,7 +362,7 @@ export default function TradeIntelligenceTab() {
             <AreaChart data={seasonalProfileData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="ax" fontSize={10} />
-              <YAxis fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} width={46} />
+              <YAxis fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: number) => [formatMoney(v), '']} />
               <Legend />
               {seasonalData.slice(0, 3).map((s, i) => (

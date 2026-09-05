@@ -34,7 +34,7 @@ import {
 } from '../../utils/livestockCalculations';
 import { type Tab, type DataItem, formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { pctTick } from '../../utils/chartTicks';
+import { pctTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Beef, Egg, Milk, Rocket } from 'lucide-react';
 
@@ -436,7 +436,7 @@ export default function LivestockOverviewSection({ selectedYear, setActiveTab, s
               <AreaChart data={overviewTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                 <Tooltip formatter={(value: number) => [formatNumber(value), 'Hayvan Stoku']}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                 <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2.5} />

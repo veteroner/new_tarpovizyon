@@ -139,7 +139,7 @@ export default function WhiteMeatEconomicsSection({ economicData, econStartDate,
             <AreaChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${yuzde(value, 2)}`]}

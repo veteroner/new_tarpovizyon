@@ -83,7 +83,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -109,7 +109,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -135,7 +135,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -161,7 +161,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -187,7 +187,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -239,7 +239,7 @@ export default function MilkIndustrySection({ industrySutData }: Props) {
             <ComposedChart data={reversed} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${(value / 1000).toFixed(1)} bin ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

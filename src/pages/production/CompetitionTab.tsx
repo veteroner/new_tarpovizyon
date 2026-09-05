@@ -15,6 +15,7 @@ import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, formatShort, formatHa, formatYield, TURKEY_COLOR } from './productionTypes';
 import type { Insight, CompKPIs } from './productionTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 // Local icon stand-ins
 const Target: typeof Globe = Globe;
@@ -205,7 +206,7 @@ export function CompetitionTab({
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                 <Tooltip formatter={(v: unknown) => [Number(v).toFixed(0), 'HHI']} />
                 <ReferenceLine y={2500} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Çok Yoğun', fill: '#ef4444', fontSize: 11 }} />
                 <ReferenceLine y={1500} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'Yoğun', fill: '#f59e0b', fontSize: 11 }} />

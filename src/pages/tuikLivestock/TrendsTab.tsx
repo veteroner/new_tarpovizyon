@@ -9,6 +9,7 @@ import { formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = Pick<UseTuikLivestockDataReturn,
   | 'selectedAnimal' | 'yearLabel'
@@ -58,7 +59,7 @@ export default function TrendsTab({
             <ComposedChart data={[...yearlyData, ...regressionAnalysis.predictions]}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number, name: string) => [`${formatNumber(value)} baş`, name]} />
               <Legend />
               <Area type="monotone" dataKey="value" name="Gerçek Veri" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} tooltipType="none" legendType="none" />

@@ -192,7 +192,7 @@ export function LivestockCompetitionPage() {
             <AreaChart data={mktShareChart} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(v, 0)}`} width={46} />
+              <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${yuzde(v, 0)}`} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 formatter={(v: number, n: string) => [`${yuzde((v as number), 2)}`, n]} />
               <Legend />

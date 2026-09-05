@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, ReferenceLine
 } from 'recharts';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface HistoricalTrendsSectionProps {
   historicalChartData: Record<string, string | number>[];
@@ -79,7 +80,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
               * ipucunda duruyor.
               */}
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={48}
-              tickFormatter={(v: number) => sayi(v)} />
+              tickFormatter={(v: number) => sayi(v)} domain={LINE_Y_DOMAIN} />
             <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
             <Legend />

@@ -11,6 +11,7 @@ import { fetchAgg, latestYear, num } from '../../services/d1';
 
 import { ChartCard } from '../../components/ui/Card';
 import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 const R = 'tuik/ticaret-hayvansal';
 // Düzey filtreleri eski SQL'dekiyle birebir: bu tabloda hangi kırılım
@@ -328,7 +329,7 @@ export default function AnimalTradeTab() {
             <AreaChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e6).toFixed(0)}M`} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => `$${(Number(v) / 1e6).toFixed(0)}M`} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
               <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
               <Area type="monotone" dataKey="exp" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} strokeWidth={2} />

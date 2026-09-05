@@ -151,14 +151,23 @@ export function useEggProductionData() {
             else if (urun.includes('Kuluçkaya Basılan')) yearData.hatchedEggs = value;
           });
 
-          // tuik_hayvancilik_canlihayvan tablosundan yıllık layer count çek
-          const canlihayvanRes = { data: (await fetchRows('tuik/hayvancilik-canlihayvan', { limit: 5000 })
-            .catch(() => []))
-            .filter((r) => String(r.grup ?? '') === 'Tavuk'
-              && /Yumurta/i.test(String(r.kategori ?? ''))
-              && (['TÜRKİYE', 'Türkiye'].includes(String(r.yer ?? ''))
-                || /lke/i.test(String(r.duzey ?? ''))))
-            .slice(0, 3) };
+          /*
+           * Yumurta tavuğu sayısı — SUNUCUDA süzülüyor.
+           *
+           * Burada süzgeçsiz `limit: 5000` çekilip istemcide eleniyordu.
+           * Tabloda 72.605 satır var ve bunların yalnızca 67'si ülke düzeyi;
+           * sıralama `id ASC` olduğu için ülke satırı ilk 5.000'e hiç
+           * girmiyordu. Sonuç: `layerCount` her yıl 0 kalıyor, "Yumurta
+           * Üretimi vs Yumurtacı Tavuk" grafiğinde tavuk serisi düz sıfır
+           * çizgisi oluyordu (canlı ölçüm: veri bandı %0).
+           *
+           * Uç `duzeykod` ve `grup` süzgeçlerini destekliyor; tek satır
+           * dönüyor: TÜRKİYE / Yumurta Tavuğu (2025: 122,6 milyon baş).
+           */
+          const canlihayvanRes = { data: (await fetchRows('tuik/hayvancilik-canlihayvan', {
+            duzeykod: 1, grup: 'Tavuk', limit: 100,
+          }).catch(() => []))
+            .filter((r) => /Yumurta/i.test(String(r.kategori ?? ''))) };
 
           if (canlihayvanRes.data && canlihayvanRes.data.length > 0) {
             const row = canlihayvanRes.data[0] as Record<string, unknown>;
@@ -178,11 +187,21 @@ export function useEggProductionData() {
             });
           }
 
+          /*
+           * İKİ SERİ FARKLI BİRİMDE — bölmeden önce eşitlenmeli.
+           *
+           *   eggProduction : BİN adet   (2025: 19.892.694 → 19,9 milyar yumurta)
+           *   layerCount    : baş        (2025: 122.589.270 tavuk)
+           *
+           * Doğrudan bölünce 0,16 çıkıyordu ve sayfa "Ortalama tavuk başına
+           * verim: 0 adet/yıl" yazıyordu. 1.000 ile çarpılınca 162 adet/yıl —
+           * ticari yumurtacı için beklenen aralık.
+           */
           const tuikDataArray: TuikEggData[] = Array.from(yearMap.values())
             .filter(d => d.eggProduction > 0)
             .map((d) => ({
               ...d,
-              yieldPerBird: d.layerCount > 0 ? d.eggProduction / d.layerCount : 0,
+              yieldPerBird: d.layerCount > 0 ? (d.eggProduction * 1000) / d.layerCount : 0,
             }))
             .sort((a, b) => Number(b.year) - Number(a.year));
 

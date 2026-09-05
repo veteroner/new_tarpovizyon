@@ -9,7 +9,7 @@ const EX = { preset: 'v1' as const, col: 'area' };
 import ProductSelector from '../components/ProductSelector';
 import { translateCountry } from '../utils/countryTranslations';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { BAR_COLOR, seriesColor } from '../utils/chartColors';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
@@ -273,7 +273,7 @@ export default function LandCoverPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(value: number) => [formatArea(value), 'Alan']} />
                   <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                 </AreaChart>

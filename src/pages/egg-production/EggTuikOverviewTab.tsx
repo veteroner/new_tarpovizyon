@@ -67,7 +67,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
 
       {/* Kombine Üretim Grafiği */}
       <div className="chart-grid">
-        <ChartCard title="Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" span={2} action={<ChartInsightButton title="Yumurta Üretimi vs Yumurtacı Tavuk (Dual Axis)" description="Yumurta üretimi ve yumurtacı tavuk sayısı karşılaştırması" data={tuikData} context={{ section: 'Dual Axis' }} />}>
+        <ChartCard title="Yumurta Üretimi ve Yumurtacı Tavuk — ilk yıl = 100" span={2} action={<ChartInsightButton title="Yumurta Üretimi ve Yumurtacı Tavuk — ilk yıl = 100" description="Yumurta üretimi ve yumurtacı tavuk sayısı — her seri ilk dolu yılına göre endeksli" data={tuikData} context={{ section: 'Endeks' }} />}>
           <ResponsiveContainer width="100%" height={360}>
             {/* TEK EKSEN, ENDEKSLİ. Yumurta üretimi (bin adet) ile tavuk sayısı (bin baş) farklı büyüklükte; soru zaten "hangisi daha hızlı büyüdü".
                   Her seri kendi ilk dolu yılına göre 100; ham değerler ipucunda. */}
@@ -81,7 +81,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend />
               <Bar dataKey="eggProduction" name="Yumurta Üretimi (bin adet)" fill="#f59e0b" opacity={0.7} radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="layerCount" name="Yumurtacı Tavuk (bin adet)" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} />
+              <Line type="monotone" dataKey="layerCount" name="Yumurtacı Tavuk (baş)" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </ChartCard>

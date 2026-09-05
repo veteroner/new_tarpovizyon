@@ -17,6 +17,7 @@ import type { TuikTurkeyMeatData, MonthlyData } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Bird, TrendingUp, Utensils } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   quailMeatData: TuikTurkeyMeatData[];
@@ -112,7 +113,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="production" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorQuail)" tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="production" stroke="#7c3aed" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 4 }} activeDot={{ r: 6 }} />

@@ -10,7 +10,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { formatNumber, formatShort } from './livestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { truncTick } from '../../utils/chartTicks';
+import { truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 
 interface Props {
@@ -366,7 +366,7 @@ export default function LivestockProcessedSection({ selectedYear, setLoading }: 
           <AreaChart data={processedTurkeyTrend} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" stroke="var(--text-secondary)" />
-            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(Number(v) / 1e6).toFixed(1)}M`} width={46} />
+            <YAxis stroke="var(--text-secondary)" tickFormatter={v => `${(Number(v) / 1e6).toFixed(1)}M`} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
               formatter={(v: number, n: string) => [formatNumber(v) + ' ton', n === 'dairy' ? 'Süt Ürünleri' : n === 'fats' ? 'Yağlar' : 'Diğer']} />
             <Legend formatter={(v: string) => v === 'dairy' ? 'Süt Ürünleri' : v === 'fats' ? 'Yağlar' : 'Diğer'} />

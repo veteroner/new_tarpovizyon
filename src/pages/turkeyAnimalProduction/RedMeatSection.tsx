@@ -8,6 +8,7 @@ import {
 import { COLORS } from './turkeyAnimalProductionTypes';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface RedMeatSectionProps {
   redMeatBreakdown: { name: string; value: number; color: string }[];
@@ -94,7 +95,7 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
               <ComposedChart data={buyukbasKucukbasData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} domain={LINE_Y_DOMAIN} />
                 <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
                 <Legend />
                 <Area type="monotone" dataKey="Büyükbaş" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.4} strokeWidth={2} />

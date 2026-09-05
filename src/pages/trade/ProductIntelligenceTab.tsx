@@ -13,6 +13,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { formatMoney } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 const R_BIT = 'tuik/ticaret-bitkisel';
 const R_HAY = 'tuik/ticaret-hayvansal';
@@ -283,7 +284,7 @@ export default function ProductIntelligenceTab() {
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
                   <Area type="monotone" dataKey="exp" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2} />

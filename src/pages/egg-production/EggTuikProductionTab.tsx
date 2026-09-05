@@ -14,6 +14,7 @@ import type { TuikEggData, MonthlyEggData } from './eggProductionTypes';
 import { formatShort } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface EggTuikProductionTabProps {
   tuikData: TuikEggData[];
@@ -40,7 +41,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [(value * 1000).toLocaleString('tr-TR') + ' adet', 'Üretim']}
@@ -73,7 +74,7 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v * 1000)}
-                label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [(value * 1000).toLocaleString('tr-TR') + ' adet', 'Tavuk']}

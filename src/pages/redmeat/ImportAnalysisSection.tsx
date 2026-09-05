@@ -282,7 +282,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} ton`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -297,7 +297,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} baş`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -312,7 +312,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [`${formatNumber(value)} baş`]}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -328,7 +328,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
               <AreaChart data={importData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
                 <Tooltip 
                   formatter={(value: number) => [`$${formatNumber(value)}`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -347,7 +347,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <AreaChart data={importData} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number, name: string) => {
                   if (name === 'Karkas Et') return [`${formatNumber(value)} ton`, name];

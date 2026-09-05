@@ -13,7 +13,7 @@ const R = 'tuik/bitkisel-uretim';
 import ProductSelector from '../components/ProductSelector';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { BAR_COLOR, seriesColor, topNvediger } from '../utils/chartColors';
-import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -322,7 +322,7 @@ export default function TuikPlantProductionPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(value: number) => [`${formatTon(value)} ${unit}`, selectedUnsur]} />
                   <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                 </AreaChart>

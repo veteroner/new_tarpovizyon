@@ -41,7 +41,7 @@ const sonTamYil = async () =>
   String((await latestYear(R_BIT, 'yil', { minShare: 0.9 })) ?? new Date().getFullYear() - 1);
 import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import countryProfilesData from '../../data/countryProfiles.json';
-import { truncTick } from '../../utils/chartTicks';
+import { truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 
 interface CountryProfile {
@@ -444,7 +444,7 @@ export default function CountryIntelligenceTab() {
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={v => formatMoney(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                   <Legend formatter={v => v === 'exp' ? 'İhracat' : 'İthalat'} />
                   <Area type="monotone" dataKey="exp" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2} />
@@ -730,7 +730,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide width={46} />
+                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                         <Area type="monotone" dataKey="exp" stroke="#10b981" fill="url(#countryDrawerExp)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="url(#countryDrawerImp)" strokeWidth={2} dot={false} />
@@ -760,7 +760,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide width={46} />
+                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number, name: string) => [`${yuzde(v, 1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
                         <Area type="monotone" dataKey="expShare" stroke="#6366f1" fill="url(#countryDrawerExpShare)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="impShare" stroke="#ef4444" fill="url(#countryDrawerImpShare)" strokeWidth={2} dot={false} />

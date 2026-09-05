@@ -13,6 +13,7 @@ import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { Card, ChartCard } from '../../components/ui/Card';
 import { Bird, TrendingUp, TrendingDown } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   series: YearPoint[];
@@ -103,7 +104,7 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                tickFormatter={(v) => formatShort(Number(v))} width={46} />
+                tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 formatter={(value: number) => [formatTon(value), 'Kanatlı Eti']}
                 labelFormatter={(label) => `Yıl: ${label}`}

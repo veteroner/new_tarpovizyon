@@ -7,7 +7,7 @@ import {
 import { formatNumber, formatShort } from './tuikLivestockTypes';
 import type { UseTuikLivestockDataReturn } from './useTuikLivestockData';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Beef, TrendingUp, Trophy } from 'lucide-react';
@@ -87,7 +87,7 @@ export default function OverviewTab({
             <AreaChart data={yearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" angle={-30} textAnchor="end" height={60} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number) => [`${formatNumber(value)} baş`, selectedAnimal]} />
               <Area type="monotone" dataKey="value" name={selectedAnimal} stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} strokeWidth={2} />
             </AreaChart>

@@ -10,7 +10,7 @@ import {
 import { COLORS, fmt, fmtShort } from './plantTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { CityRow, ScatterRow, DistrictRow, YieldTrendRow } from './plantTypes';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { BAR_COLOR, GRID, AXIS, seriesColor } from '../../utils/chartColors';
 import { sayi, kisa } from '../../utils/sayi';
 import { ChartCard } from '../../components/ui/Card';
@@ -193,7 +193,7 @@ export default function PlantAnalysisCharts({
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
                 <XAxis dataKey="year" tick={{ fill: AXIS, fontSize: 9 }} />
                 <YAxis tick={{ fill: AXIS, fontSize: 9 }} width={46}
-                  tickFormatter={(v: number) => sayi(v)} />
+                  tickFormatter={(v: number) => sayi(v)} domain={LINE_Y_DOMAIN} />
                 <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
                 <Tooltip formatter={(v: number, name: string, p: { payload?: Record<string, number> }) => {
                   const ham = p?.payload?.[`ham_${name}`];

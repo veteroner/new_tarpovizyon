@@ -9,6 +9,7 @@ import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   data: OverviewData;
@@ -59,7 +60,7 @@ export function ComparativeSection({ data }: Props) {
               <ComposedChart data={endeksle(combinedData, ['süt', 'et', 'yumurta'])}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 formatter={(value: number, name: string) => {
                   if (name === 'yumurta') return [formatNumber(value) + ' Milyon adet', 'Yumurta'];

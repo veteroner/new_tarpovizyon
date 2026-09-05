@@ -58,7 +58,7 @@ export function SplitAxisChart({
           {/* Ana grafikte x etiketi yok — şeritle paylaşıyor, iki kez yazmak
               dikey yeri boşa harcıyor ve iki ayrı grafik izlenimi veriyor. */}
           <XAxis dataKey={xKey} tick={false} axisLine={false} height={0} {...xProps} />
-          <YAxis tick={eksenStili} width={46} tickFormatter={yFormat} />
+          <YAxis tick={eksenStili} width={46} tickFormatter={yFormat} domain={LINE_Y_DOMAIN} />
           <Tooltip
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
           />

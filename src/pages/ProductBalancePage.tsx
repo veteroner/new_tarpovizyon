@@ -11,7 +11,7 @@ import { ErrorState } from '../components/ErrorState';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
 import { useProductBalanceData, YEAR_LABELS, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { compactValue } from '../utils/chartTicks';
+import { compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 
 const CYAN = '#06b6d4';
@@ -453,7 +453,7 @@ export default function ProductBalancePage() {
               <AreaChart data={perCapitaChartData} margin={{ top: 10, right: 8, bottom: 10, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-                <YAxis tickFormatter={v => v.toFixed(0)} tick={{ fontSize: 10 }} width={46} />
+                <YAxis tickFormatter={v => v.toFixed(0)} tick={{ fontSize: 10 }} width={46} domain={LINE_Y_DOMAIN} />
                 <Tooltip formatter={(v: number) => [v.toFixed(1) + ' Kg', '']} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 {perCapitaProducts.map((p, i) => (

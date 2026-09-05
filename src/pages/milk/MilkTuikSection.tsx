@@ -8,6 +8,7 @@ import { TUIK_SUT_URUNLER, AY_ADLARI, AY_TAM, formatShort, type TuikSutUrunData 
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { StatCard } from '../../components/ui/Card';
 import { BAR_COLOR } from '../../utils/chartColors';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   tuikSutData: TuikSutUrunData[];
@@ -137,7 +138,7 @@ export default function MilkTuikSection({
             <ComposedChart data={tuikSelectedData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [new Intl.NumberFormat('tr-TR').format(value) + ' ton']}
                 labelFormatter={(label) => `Yıl: ${label}`}

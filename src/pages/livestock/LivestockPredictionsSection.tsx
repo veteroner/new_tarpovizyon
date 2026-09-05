@@ -12,7 +12,7 @@ import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateCAGR, forecastLinear, detectAnomalies, type YearValue } from '../../utils/livestockCalculations';
 import { formatNumber, formatShort } from './livestockUtils';
-import { pctTick } from '../../utils/chartTicks';
+import { pctTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Flame, Rocket, TriangleAlert, Zap, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -351,7 +351,7 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
             <AreaChart data={predForecastChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number, name: string) => [formatNumber(value), name === 'actual' ? 'Gerçek' : name === 'forecast' ? 'Tahmin' : name === 'upper' ? 'İyimser' : 'Kötümser']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Area type="monotone" dataKey="upper" stroke="none" fill="#22c55e" fillOpacity={0.1} name="upper" />

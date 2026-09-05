@@ -13,7 +13,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { translateProduct } from '../../utils/productTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { type DataItem, type PrimaryTab, formatNumber, formatShort } from './livestockUtils';
-import { VALUE_HEADROOM, compactValue, pctTick, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, pctTick, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Sprout, TriangleAlert, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -423,7 +423,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
             <AreaChart data={primaryYearlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number) => [formatNumber(value), 'Üretim (ton)']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
               <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} strokeWidth={2.5} />

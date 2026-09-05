@@ -246,7 +246,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
               <YAxis 
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => v.toLocaleString('tr-TR')}
-                label={{ value: 'Balmumu (Ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                label={{ value: 'Balmumu (Ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [value.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' ton', 'Balmumu']}

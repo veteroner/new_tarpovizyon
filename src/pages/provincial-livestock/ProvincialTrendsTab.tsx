@@ -11,6 +11,7 @@ import {
 } from './provincialLivestockUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { BarChart3, TrendingUp } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   yearRange: [number, number];
@@ -197,7 +198,7 @@ export default function ProvincialTrendsTab({
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => formatShort(value)} width={46} />
+              tickFormatter={(value) => formatShort(value)} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

@@ -9,6 +9,7 @@ import { kisa, eksen, sayi, yuzde } from '../../../utils/sayi';
 import {
   useTicaretSerisi, useUlkeKirilimi, useDunyaSiralamasi, siraVePay, useAgacYasYapisi,
 } from './ticaretVerisi';
+import { LINE_Y_DOMAIN } from '../../../utils/chartTicks';
 
 /**
  * Bitkisel sayfaların ek bölümleri — her ürün grubuna KENDİ sorusu.
@@ -150,7 +151,7 @@ export function YagliTohumBagimlilik() {
           <LineChart data={veri}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
             <XAxis dataKey="yil" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis tick={{ fill: AXIS, fontSize: 11 }} width={54} tickFormatter={(v: number) => eksen(v)} />
+            <YAxis tick={{ fill: AXIS, fontSize: 11 }} width={54} tickFormatter={(v: number) => eksen(v)} domain={LINE_Y_DOMAIN} />
             <Tooltip formatter={(v: number, ad: string) => [kisa(v, { birim: 'ton' }), ad]}
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} />
             <Legend />

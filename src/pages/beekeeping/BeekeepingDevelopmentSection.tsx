@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { type YearTrendData, COLORS, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 export function BeekeepingDevelopmentSection({ yearTrendData, ilkYil, sonYil }: {
   yearTrendData: YearTrendData[];
@@ -56,7 +57,7 @@ export function BeekeepingDevelopmentSection({ yearTrendData, ilkYil, sonYil }: 
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatNumber} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 formatter={(value: number) => [formatNumber(value) + ' arıcı', 'Toplam Arıcı']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

@@ -8,6 +8,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
 import { Beef } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   data: OverviewData;
@@ -118,7 +119,7 @@ export function MeatSection({ data }: Props) {
             <AreaChart data={data.meatProduction.yearly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="meat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
             </AreaChart>

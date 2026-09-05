@@ -130,7 +130,7 @@ export default function LandUsePage() {
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatArea(v), 'Tarim Arazisi']} />
                       <Area type="monotone" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                     </AreaChart>
@@ -334,7 +334,7 @@ export default function LandUsePage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [v ? formatArea(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="turkeyHistorical" name="Turkiye (Gercek)" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} connectNulls />

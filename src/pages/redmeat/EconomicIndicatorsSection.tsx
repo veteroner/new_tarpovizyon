@@ -201,7 +201,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
             <AreaChart data={filteredEconomicData.slice().reverse()} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${yuzde(value, 2)}`]}
@@ -219,7 +219,7 @@ export default function EconomicIndicatorsSection({ economicData }: Props) {
               <ComposedChart data={endeksle(filteredEconomicData.slice().reverse(), ['dolar_kuru_tl', 'besi_yemi_fiyatlari_tl_kg'])} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => {

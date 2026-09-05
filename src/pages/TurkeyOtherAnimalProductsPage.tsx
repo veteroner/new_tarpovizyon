@@ -10,7 +10,7 @@ import { useSectionTab, type SectionTab } from '../components/bolumSekmeleri';
 import { ChartCard } from '../components/ui/Card';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { AXIS, BAR_COLOR, BAR_HIGHLIGHT, BAR_MUTED, GRID, seriesColor } from '../utils/chartColors';
-import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { endeksle } from '../utils/endeks';
 import { kisa, eksen, sayi, yuzde } from '../utils/sayi';
 import {
@@ -152,7 +152,7 @@ function UrunDetayi({ seriler }: { seriler: UrunSerisi[] }) {
             <AreaChart data={trend}>
               <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
               <XAxis dataKey="yil" tick={eksenStili} stroke={AXIS} />
-              <YAxis tickFormatter={eksen} tick={eksenStili} stroke={AXIS} width={52} />
+              <YAxis tickFormatter={eksen} tick={eksenStili} stroke={AXIS} width={52} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: number) => [birimliDeger(v, u.birim), u.ad]} />
               <Area
                 type="monotone" dataKey="deger" name={u.ad}
@@ -288,7 +288,7 @@ function UzunDonem({ seriler }: { seriler: UrunSerisi[] }) {
           <LineChart data={endeksVeri}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
             <XAxis dataKey="yil" tick={eksenStili} stroke={AXIS} />
-            <YAxis tickFormatter={(v: number) => sayi(v)} tick={eksenStili} stroke={AXIS} width={48} />
+            <YAxis tickFormatter={(v: number) => sayi(v)} tick={eksenStili} stroke={AXIS} width={48} domain={LINE_Y_DOMAIN} />
             <Tooltip
               formatter={(v: number, ad, giris) => {
                 const s = gosterilen.find((x) => x.ad === ad);
@@ -358,7 +358,7 @@ function UzunDonem({ seriler }: { seriler: UrunSerisi[] }) {
           <AreaChart data={eskiTip?.seri ?? []}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
             <XAxis dataKey="yil" tick={eksenStili} stroke={AXIS} />
-            <YAxis tickFormatter={eksen} tick={eksenStili} stroke={AXIS} width={52} />
+            <YAxis tickFormatter={eksen} tick={eksenStili} stroke={AXIS} width={52} domain={LINE_Y_DOMAIN} />
             <Tooltip formatter={(v: number) => [birimliDeger(v, 'adet'), 'Eski tip kovan']} />
             <Area
               type="monotone" dataKey="deger" name="Eski tip kovan"

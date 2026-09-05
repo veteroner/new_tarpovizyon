@@ -15,6 +15,7 @@ import { formatMetric } from '../../utils/livestockCalculations';
 import { formatValue, TURKEY_COLOR } from './productionTypes';
 import type { Insight, ProcessedKPIs } from './productionTypes';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface ProcessedTabProps {
   processedProduct: string;
@@ -84,7 +85,7 @@ export function ProcessedTab({
                   * Sorunun cevabı zaten oransal: hangisi daha hızlı büyüdü?
                   */}
                 <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46}
-                  tickFormatter={(v: number) => sayi(v)} />
+                  tickFormatter={(v: number) => sayi(v)} domain={LINE_Y_DOMAIN} />
                 <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatValue(Number(v)), n === 'world' ? 'Dünya' : 'Türkiye']} />
                 <Legend formatter={(v) => v === 'world' ? 'Dünya' : 'Türkiye'} />

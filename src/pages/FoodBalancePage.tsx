@@ -15,7 +15,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { useFoodBalanceData, formatTon, formatShort, formatPercent } from './foodBalance/useFoodBalanceData';
 import type { Tab } from './foodBalance/useFoodBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
@@ -109,7 +109,7 @@ export default function FoodBalancePage() {
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Uretim']} />
                       <Area type="monotone" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
                     </AreaChart>
@@ -210,7 +210,7 @@ export default function FoodBalancePage() {
                       <ComposedChart data={tradeTrend}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                         <Legend />
                         <Area type="monotone" dataKey="production" name="Uretim" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
@@ -281,7 +281,7 @@ export default function FoodBalancePage() {
                     <ComposedChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
                       <Area type="monotone" dataKey="production" name="Uretim" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
@@ -310,7 +310,7 @@ export default function FoodBalancePage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [v ? formatTon(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gercek" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} connectNulls />

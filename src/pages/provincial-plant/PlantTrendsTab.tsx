@@ -6,6 +6,7 @@ import {
 import type { YearlyTrendData } from './provincialPlantUtils';
 import { formatNumber, formatShort, calculateCAGR } from './provincialPlantUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   yearRange: [number, number];
@@ -167,7 +168,7 @@ export function PlantTrendsTab({ yearRange, setYearRange, yearlyTrendData }: Pro
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
-              tickFormatter={(value) => formatShort(value)} width={46} />
+              tickFormatter={(value) => formatShort(value)} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

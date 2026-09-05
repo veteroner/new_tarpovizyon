@@ -13,7 +13,7 @@ import type { IntelligenceAlert } from '../utils/intelligenceCalculations';
 import { useFertilizerData, formatTon, formatUSD, formatShort } from './fertilizer/useFertilizerData';
 import type { Tab } from './fertilizer/useFertilizerData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
@@ -107,7 +107,7 @@ export default function FertilizerPage() {
                     <AreaChart data={overviewTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatTon(v), 'Toplam']} />
                       <Area type="monotone" dataKey="value" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
                     </AreaChart>
@@ -151,7 +151,7 @@ export default function FertilizerPage() {
                       <ComposedChart data={tradeTimeSeries}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                        <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                         <Legend />
                         <Area type="monotone" dataKey="import" name="İthalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
@@ -226,7 +226,7 @@ export default function FertilizerPage() {
                     <ComposedChart data={turkeyTrends}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatTon(v), '']} />
                       <Legend />
                       <Area type="monotone" dataKey="import" name="İthalat" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
@@ -254,7 +254,7 @@ export default function FertilizerPage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [v ? formatTon(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gerçek" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} connectNulls />

@@ -13,7 +13,7 @@ import { translateCountry } from '../../utils/countryTranslations';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { calculateHHI } from '../../utils/livestockCalculations';
 import { ANIMAL_ITEMS, type DataItem, formatNumber, formatShort } from './livestockUtils';
-import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { BAR_COLOR, seriesColor } from '../../utils/chartColors';
 import { Rocket, Trophy } from 'lucide-react';
 
@@ -408,7 +408,7 @@ export default function LivestockStocksSection({ selectedYear, selectedItems, se
             <AreaChart data={stocksDeepTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(stocksDeepTrend.length / 15))} />
-              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number) => [formatNumber(value), '']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
               <Legend />
               {selectedItems.map((id, idx) => {

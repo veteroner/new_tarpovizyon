@@ -25,6 +25,7 @@ import {
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
 import { Beef, Calculator, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   filteredSeries: YearPoint[];
@@ -201,7 +202,7 @@ export default function ProductionOverviewSection({
             <AreaChart data={filteredSeries} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip 
                 labelFormatter={(label) => `Yıl: ${label}`} 
                 formatter={(value: number) => [formatTon(Number(value))]}

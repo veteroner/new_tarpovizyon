@@ -204,7 +204,7 @@ export default function DynamicChart({ config }: { config: ChartConfig }) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e2e8f0)" />
           <XAxis dataKey={xKey} stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }} />
           <YAxis stroke="var(--text-secondary, #64748b)" tick={{ fontSize: 11 }}
-            tickFormatter={(v: number) => v.toLocaleString('tr-TR')} width={46} />
+            tickFormatter={(v: number) => v.toLocaleString('tr-TR')} width={46} domain={LINE_Y_DOMAIN} />
           <Tooltip {...TOOLTIP_STYLE} formatter={fmt} />
           {activeSeries.length > 1 && <Legend />}
           {activeSeries.map((s, i) => {

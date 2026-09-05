@@ -8,6 +8,7 @@ import { Coins, Milk, Scale, TrendingUp } from 'lucide-react';
 import { StatCard } from '../../components/ui/Card';
 import { type MilkEconomicData, type WorldMilkPrices } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   worldMilkPrices: WorldMilkPrices | null;
@@ -223,7 +224,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip 
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [`${value.toFixed(2)} ₺/lt`]}
@@ -278,7 +279,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="sut_yemi_19_hp" name="Süt Yemi" fill="#f59e0b" stroke="#f59e0b" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="sut_yemi_19_hp" stroke="#d97706" strokeWidth={3} dot={{ fill: '#d97706', r: 3 }} />
@@ -301,7 +302,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="misir_silaji" name="Mısır Silajı" fill="#06b6d4" stroke="#06b6d4" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="misir_silaji" stroke="#0891b2" strokeWidth={3} dot={{ fill: '#0891b2', r: 3 }} />
@@ -324,7 +325,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="yonca" name="Yonca" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="yonca" stroke="#059669" strokeWidth={3} dot={{ fill: '#059669', r: 3 }} />

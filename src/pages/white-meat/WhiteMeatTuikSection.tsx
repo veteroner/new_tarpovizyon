@@ -23,6 +23,7 @@ import { ChartCard } from '../../components/ui/Card';
 import {
   BarChart3, Beef, Bird, Egg,
 } from 'lucide-react';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -197,7 +198,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v * 1000)} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(value: number) => [`${(value * 1000).toLocaleString('tr-TR')} adet`, 'Kesilen Tavuk']} labelFormatter={(label) => `Yıl: ${label}`} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Area type="monotone" dataKey="slaughtered" stroke="#f97316" fill="#f97316" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>
@@ -208,7 +209,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <AreaChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v) => formatShort(v)} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(value: number) => [`${value.toLocaleString('tr-TR')} ton`, 'Et Üretimi']} labelFormatter={(label) => `Yıl: ${label}`} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Area type="monotone" dataKey="meatProduction" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} strokeWidth={2.5} />
                 </AreaChart>

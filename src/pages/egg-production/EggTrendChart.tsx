@@ -3,6 +3,7 @@ import type { YearPoint } from './eggProductionTypes';
 import { formatMillion } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface EggTrendChartProps {
   series: YearPoint[];
@@ -18,7 +19,7 @@ export function EggTrendChart({ series }: EggTrendChartProps) {
             <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
             <YAxis
               tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-              tickFormatter={(v) => formatMillion(Number(v))} width={46} />
+              tickFormatter={(v) => formatMillion(Number(v))} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip
               formatter={(value: number) => [`${formatMillion(value)} milyon`, 'Yumurta']}
               labelFormatter={(label) => `Yıl: ${label}`}

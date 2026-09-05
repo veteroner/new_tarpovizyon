@@ -15,6 +15,7 @@ import type { Tab } from './agriculturalEmployment/useAgriculturalEmploymentData
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
+import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 
 export default function AgriculturalEmploymentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -81,7 +82,7 @@ export default function AgriculturalEmploymentPage() {
                     <AreaChart data={yearlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [formatPop(v), '']} />
                       <Legend />
                       <Area type="monotone" dataKey="total" name="Toplam" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
@@ -218,7 +219,7 @@ export default function AgriculturalEmploymentPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                       <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46}
-                        tickFormatter={(v: number) => yuzde(v, 0)} />
+                        tickFormatter={(v: number) => yuzde(v, 0)} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [yuzde(v, 1), 'Kadın oranı']} />
                       <Line type="monotone" dataKey="femaleRatio" name="Kadın Oranı" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} />
                     </ComposedChart>
@@ -244,7 +245,7 @@ export default function AgriculturalEmploymentPage() {
                     <ComposedChart data={forecastData.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                      <YAxis tickFormatter={formatShort} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                       <Tooltip formatter={(v: number) => [v ? formatPop(v) : '-', '']} />
                       <Legend />
                       <Area type="monotone" dataKey="historical" name="Gercek" stroke="#ff6b35" fill="#ff6b35" fillOpacity={0.2} connectNulls />

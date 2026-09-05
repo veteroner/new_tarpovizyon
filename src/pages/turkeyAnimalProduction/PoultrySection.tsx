@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface PoultrySectionProps {
   poultryMonthlyData: Record<string, string | number | null>[];
@@ -37,7 +38,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
               <Area type="monotone" dataKey="Tavuk Eti (ton)" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="Tavuk Eti (ton)" stroke="#059669" strokeWidth={3} dot={{ fill: '#059669', r: 3 }} />
@@ -57,7 +58,7 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: unknown) => `${v} M adet`} />
               <Area type="monotone" dataKey="Yumurta (M adet)" fill="#fbbf24" stroke="#fbbf24" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="Yumurta (M adet)" stroke="#f59e0b" strokeWidth={3} dot={{ fill: '#f59e0b', r: 3 }} />

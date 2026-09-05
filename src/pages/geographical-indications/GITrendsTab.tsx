@@ -4,6 +4,7 @@ import {
 import type { YearlyTrend } from './giTypes';
 import { formatNumber } from './giTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
+import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
 interface Props {
   yearlyTrend: YearlyTrend[];
@@ -35,7 +36,7 @@ export function GITrendsTab({ yearlyTrend }: Props) {
           <AreaChart data={yearlyTrend} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
-            <YAxis tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} width={46} />
+            <YAxis tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} width={46} domain={LINE_Y_DOMAIN} />
             <Tooltip
               contentStyle={{
                 background: 'var(--card-bg)',

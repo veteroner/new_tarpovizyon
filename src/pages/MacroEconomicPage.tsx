@@ -17,7 +17,7 @@ import { BackToHome } from '../components/BackToHome';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { seriesColor } from '../utils/chartColors';
 import { BAR_COLOR } from '../utils/chartColors';
-import { VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
+import { VALUE_HEADROOM, compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { BarChart3, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -182,7 +182,7 @@ export default function MacroEconomicPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
                   <Tooltip formatter={(value: number) => [formatValue(value), indicatorName]} />
                   <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
                 </AreaChart>
