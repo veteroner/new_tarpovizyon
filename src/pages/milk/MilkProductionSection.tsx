@@ -2,12 +2,12 @@ import { AXIS, STATUS, seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
-  Tooltip, Legend, Area, Line, PieChart, Pie, Cell,
-  BarChart, Bar, ReferenceLine
+  Tooltip, Legend, Area, Line, Cell,
+  BarChart, Bar, ReferenceLine, LabelList
 } from 'recharts';
 import { formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM } from '../../utils/chartTicks';
 
 type Props = {
   series: YearPoint[];
@@ -89,26 +89,33 @@ export default function MilkProductionSection({
             </h3>
             <ChartInsightButton title="Türlere Göre Dağılım" description="Tür bazında süt üretimi dağılımı" data={latestBreakdown.rows} context={{ year: latest?.year }} />
           </div>
+          {/*
+            * ÜÇ DEĞER İÇİN PASTA DEĞİL, YATAY ÇUBUK.
+            *
+            * Göz açı karşılaştırmasında kötü, uzunluk karşılaştırmasında iyidir.
+            * Üç dilimli halka grafik üç sayıyı okumanın en zor yoluydu; üstelik
+            * büyükbaş %94,7 olduğu için kalan iki dilim ince birer şerit olarak
+            * kalıyor ve etiketleri birbirine giriyordu. Çubukta üçü de okunur,
+            * pay ve mutlak değer yan yana yazılı.
+            */}
           <ResponsiveContainer width="100%" height={360}>
-            <PieChart>
-              <Pie
-                data={latestBreakdown.rows}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                innerRadius={60}
-                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
-                labelLine={{ stroke: 'var(--text-secondary)', strokeWidth: 1 }}
-              >
+            <BarChart data={latestBreakdown.rows} layout="vertical" margin={{ left: 8, right: 72 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+              <XAxis type="number" tickFormatter={(v) => formatShort(Number(v))} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} width={86} />
+              <Tooltip formatter={(value: number) => [formatTon(value), 'Üretim']} />
+              <Bar dataKey="value" name="Üretim" radius={[0, 4, 4, 0]}>
                 {latestBreakdown.rows.map((_, idx) => (
                   <Cell key={`cell-${idx}`} fill={seriesColor(idx)} />
                 ))}
-              </Pie>
-              <Tooltip formatter={(value: number) => [formatTon(value), ''] } />
-              <Legend />
-            </PieChart>
+                <LabelList
+                  dataKey="share"
+                  position="right"
+                  formatter={(v: number) => yuzde(v, 1)}
+                  style={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                />
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
 

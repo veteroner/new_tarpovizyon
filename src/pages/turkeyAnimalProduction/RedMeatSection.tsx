@@ -1,14 +1,14 @@
 import { yuzde } from '../../utils/sayi';
 import React from 'react';
 import {
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
+  ResponsiveContainer, Cell, Tooltip, LabelList,
   BarChart, Bar, CartesianGrid, XAxis, YAxis, Legend,
   ComposedChart, Area
 } from 'recharts';
 import { COLORS } from './turkeyAnimalProductionTypes';
 import { formatValue, formatShort } from './turkeyAnimalProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
-import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { LINE_Y_DOMAIN, VALUE_HEADROOM } from '../../utils/chartTicks';
 
 interface RedMeatSectionProps {
   redMeatBreakdown: { name: string; value: number; color: string }[];
@@ -41,19 +41,34 @@ const RedMeatSection: React.FC<RedMeatSectionProps> = ({
             </h3>
             <ChartInsightButton title="Kırmızı Et Dağılımı" description="Et türlerine göre dağılım" data={redMeatBreakdown} context={{ section: 'Kırmızı Et' }} compact />
           </div>
+          {/*
+            * DÖRT DEĞER İÇİN PASTA DEĞİL, YATAY ÇUBUK.
+            *
+            * Sığır payı büyük olduğu için manda ve keçi dilimleri iğne kadar
+            * kalıyor, etiketleri de birbirine giriyordu. Açı karşılaştırması
+            * zaten uzunluk karşılaştırmasından zordur; dört değerde pastanın
+            * bir üstünlüğü yok. Pay çubuğun ucunda yazılı.
+            */}
           <ResponsiveContainer width="100%" height={350}>
-            <PieChart>
-              <Pie
-                data={redMeatBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
-                paddingAngle={3} dataKey="value"
-                label={({ name, percent }) => `${name} ${yuzde(((percent || 0) * 100), 1)}`}
-              >
+            <BarChart data={redMeatBreakdown} layout="vertical" margin={{ left: 8, right: 68 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+              <XAxis type="number" tickFormatter={(v) => formatValue(Number(v))} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} width={78} />
+              <Tooltip formatter={(v: unknown) => [`${formatValue(Number(v))} ton`, 'Üretim']} />
+              <Bar dataKey="value" name="Üretim" radius={[0, 4, 4, 0]}>
                 {redMeatBreakdown.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
-              </Pie>
-              <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
-            </PieChart>
+                <LabelList
+                  dataKey="value" position="right"
+                  formatter={(v: number) => {
+                    const t = redMeatBreakdown.reduce((a, r) => a + r.value, 0);
+                    return t ? yuzde((v / t) * 100, 1) : '';
+                  }}
+                  style={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                />
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
 

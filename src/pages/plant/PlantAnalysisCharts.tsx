@@ -202,6 +202,8 @@ export default function PlantAnalysisCharts({
                   return [`${sayi(v, 1)}  (${ham !== undefined ? kisa(ham) : '—'} ${birim})`, ad];
                 }}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 11 }} />
+                {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
+                <Legend />
                 <Line type="monotone" dataKey="uretim" name="Üretim" stroke={seriesColor(0)} strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="alan" name="Alan" stroke={seriesColor(1)} strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="verim" name="Verim" stroke={seriesColor(2)} strokeWidth={2} dot={false} />

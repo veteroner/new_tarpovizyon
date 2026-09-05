@@ -354,6 +354,8 @@ export default function LivestockPredictionsSection({ selectedYear, setLoading }
               <YAxis tickFormatter={(v: number) => formatShort(v)} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(value: number, name: string) => [formatNumber(value), name === 'actual' ? 'Gerçek' : name === 'forecast' ? 'Tahmin' : name === 'upper' ? 'İyimser' : 'Kötümser']}
                 contentStyle={{background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px'}} />
+              {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
+              <Legend />
               <Area type="monotone" dataKey="upper" stroke="none" fill="#22c55e" fillOpacity={0.1} name="upper" />
               <Area type="monotone" dataKey="lower" stroke="none" fill="#ef4444" fillOpacity={0.1} name="lower" />
               <Area type="monotone" dataKey="actual" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2.5} name="actual" />

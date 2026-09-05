@@ -732,6 +732,8 @@ export default function CountryIntelligenceTab() {
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
                         <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
+                        {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
+                        <Legend />
                         <Area type="monotone" dataKey="exp" stroke="#10b981" fill="url(#countryDrawerExp)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="imp" stroke="#f59e0b" fill="url(#countryDrawerImp)" strokeWidth={2} dot={false} />
                       </AreaChart>
@@ -762,6 +764,8 @@ export default function CountryIntelligenceTab() {
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
                         <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
                         <Tooltip formatter={(v: number, name: string) => [`${yuzde(v, 1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
+                        {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
+                        <Legend />
                         <Area type="monotone" dataKey="expShare" stroke="#6366f1" fill="url(#countryDrawerExpShare)" strokeWidth={2} dot={false} />
                         <Area type="monotone" dataKey="impShare" stroke="#ef4444" fill="url(#countryDrawerImpShare)" strokeWidth={2} dot={false} />
                       </AreaChart>

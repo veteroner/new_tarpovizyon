@@ -140,16 +140,31 @@ farkları gözükmüyor" itirazının doğrudan karşılığı.
 
 ---
 
-## 6. Ne eksik: çok serili grafiklerin 24'ünde efsane yok
+## 6. Ne eksik: efsanesiz çok serili grafikler — 24 değil, 5
 
-Kaynak taraması: iki veya daha çok seri çizen ama `<Legend>` içermeyen **24**
-grafik. Renk tek başına kimlik taşıyamaz; hangi çizginin ne olduğu ipucuna
-gelmeden anlaşılmıyor.
+İlk sayım **24** demişti. Yanlıştı: sayaç `<Line>`/`<Area>`/`<Bar>` etiketlerini
+sayıyordu, oysa kod tabanındaki yaygın kalıp AYNI `dataKey`'i bir alan bir de
+çizgi olarak çizmek (dolgu + üstünde kalın çizgi). Bunlar tek serilik grafikler
+ve `legendType="none"` ile zaten efsaneden çıkarılmışlar. Sayım benzersiz
+`dataKey`'e çevrilince gerçek sayı **5**:
 
-Ayrıca **6 grafikte hiç `<Tooltip>` yok** — değeri okumanın hiçbir yolu kalmıyor.
+| Dosya | Seriler |
+|---|---|
+| `plant/PlantAnalysisCharts` | alan, üretim, verim |
+| `trade/CountryIntelligenceTab` | ihracat, ithalat |
+| `trade/CountryIntelligenceTab` | ihracat payı, ithalat payı |
+| `trade/TradeIntelligenceTab` | ihracat $/ton, ithalat $/ton |
+| `livestock/LivestockPredictionsSection` | gerçekleşen, tahmin, alt, üst |
 
-### Yapılacak
-İki+ serili grafiklere efsane, tooltipsiz grafiklere tooltip ekle.
+Bunlar gerçekten okunamıyordu — ihracat ile ithalat aynı grafikte, hangisinin
+hangisi olduğunu söyleyen hiçbir şey yok.
+
+**Tooltip bulgusu da yanlış çıktı.** İşaretlenen iki grafik `CommodityPrices`
+sayfasındaki 52 piksellik **sparkline**'lar; onlarda ipucu zaten olmamalı,
+değerler kartın kendi metninde yazıyor.
+
+### Yapıldı
+Beş grafiğe efsane eklendi. Tooltip'e dokunulmadı.
 
 ---
 
@@ -167,11 +182,30 @@ Dürüstlük gereği: iki bulgu ölçüldükten sonra elendi.
 
 ---
 
-## Öncelik sırası
+## 8. Denetim sırasında çıkan, listede olmayan iki veri hatası
 
-1. **Zaman serilerinde Y domain** (130 grafik) — en yaygın, en görünür, en ucuz.
-2. **Yıllık değişim grafikleri** — kullanıcının asıl istediği bilgi.
-3. **"(Dual Axis)" başlığı** — tek satır, yanıltıcı.
-4. **Küçük pastalar → çubuk**.
-5. **Eksik efsane/tooltip**.
-6. **Aylık eksen etiketleri**.
+Grafikler ölçülürken iki gerçek hata daha görüldü — ikisi de "grafik boş
+görünüyor"un altından çıktı:
+
+- **Yumurtacı tavuk serisi hiç çizilmiyordu** (bant %0). Kod
+  `tuik/hayvancilik-canlihayvan` ucundan süzgeçsiz 5.000 satır çekip istemcide
+  eliyordu; tabloda 72.605 satır var ve yalnız 67'si ülke düzeyi, sıralama
+  `id ASC` olduğu için ülke satırı o 5.000'e hiç girmiyordu. Sunucu süzgecine
+  taşındı (2025: 122.589.270 baş). Bant %0 → %42.
+- **Tavuk başına verim "0 adet/yıl" yazıyordu.** Yumurta BİN adet, tavuk BAŞ
+  birimindeydi; bölünce 0,16 çıkıyordu. Eşitlendi → 171 adet/yıl.
+
+---
+
+## Durum
+
+| # | İş | Durum |
+|---|---|---|
+| 1 | Zaman serilerinde Y domain | **Yapıldı** — 100 grafik |
+| 2 | "(Dual Axis)" başlığı | **Yapıldı** |
+| 5 | Yıllık değişim grafikleri | **Yapıldı** — `ui/YillikDegisim`, hayvansal üretim + beyaz et |
+| 4 | Küçük pastalar → çubuk | **Yapıldı** — süt (3 dilim), kırmızı et (4 dilim) |
+| 6 | Eksik efsane | **Yapıldı** — 5 grafik |
+| 3 | Aylık eksen etiketleri | Açık |
+| — | Kalan pastalar (37'nin geri kalanı) | Açık — dilim sayısı çalışma anında belli, tek tek ölçülmeli |
+| — | `YillikDegisim`'in diğer sayfalara yayılması | Açık |

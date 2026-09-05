@@ -294,6 +294,8 @@ export default function TradeIntelligenceTab() {
                     <XAxis dataKey="yil" fontSize={9} />
                     <YAxis fontSize={9} tickFormatter={v => `$${v.toFixed(0)}`} width={46} />
                     <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, '']} />
+                    {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
+                    <Legend />
                     <Bar dataKey="exp_usd_ton" fill="#10b981" name="İhracat $/birim" opacity={0.6} />
                     <Line dataKey="imp_usd_ton" stroke="#f59e0b" name="İthalat $/birim" strokeWidth={2} dot={false} />
                   </ComposedChart>
