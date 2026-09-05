@@ -12,6 +12,7 @@ import type { YearPoint, TuikChickenData } from './whiteMeatUtils';
 import { formatTon, formatShort } from './whiteMeatUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { Card, ChartCard } from '../../components/ui/Card';
+import { YillikDegisim } from '../../components/ui/YillikDegisim';
 import { Bird, TrendingUp, TrendingDown } from 'lucide-react';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 
@@ -113,6 +114,14 @@ export default function WhiteMeatHeroSection({ series, latest, yoy, worldRanking
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
+
+        {/* Seviyenin YANINA değişim: seviye eğrisinde birkaç piksel eden yıllık
+            farklar burada grafiğin yarısı kadar yer kaplıyor. */}
+        <YillikDegisim
+          span={2}
+          baslik="Kanatlı eti üretimi — yıllık değişim"
+          seri={series.map((p) => ({ etiket: p.year, deger: p.poultryTon }))}
+        />
       </div>
     </>
   );

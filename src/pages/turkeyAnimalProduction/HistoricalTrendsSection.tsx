@@ -1,12 +1,16 @@
 import { AXIS } from '../../utils/chartColors';
 import { sayi } from '../../utils/sayi';
 import { endeksle } from '../../utils/endeks';
+import { YillikDegisim } from '../../components/ui/YillikDegisim';
 import React from 'react';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
   Tooltip, Legend, Area, Line, ReferenceLine
 } from 'recharts';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+
+/** Endeks grafiğiyle AYNI beş seri — ikisi ayrışmasın diye tek listeden. */
+const SERILER = ['Süt (M ton)', 'Kırmızı Et (K ton)', 'Kanatlı (K ton)', 'Yumurta (M adet)', 'Bal (K ton)'] as const;
 
 interface HistoricalTrendsSectionProps {
   historicalChartData: Record<string, string | number>[];
@@ -55,7 +59,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
 
       <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', marginBottom: '48px' }}>
         <ResponsiveContainer width="100%" height={400}>
-          <ComposedChart data={endeksle(historicalChartData, ['Süt (M ton)', 'Kırmızı Et (K ton)', 'Kanatlı (K ton)', 'Yumurta (M adet)', 'Bal (K ton)'])}>
+          <ComposedChart data={endeksle(historicalChartData, [...SERILER])}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             {/*
               * interval={0}: her yıl etiketlensin.
@@ -91,6 +95,24 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
             <Line type="monotone" dataKey="Bal (K ton)" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
+      </div>
+
+      {/*
+        Endeks grafiği "hangisi daha hızlı büyüdü"yü anlatıyor ama "geçen yıl ne
+        oldu"yu anlatmıyor: endeks kümülatif, tek yıllık kırılmalar eğrinin
+        eğiminde kayboluyor. Beş serinin yıllık değişimi ayrı çiziliyor.
+      */}
+      <div className="chart-grid">
+        {SERILER.map((alan) => (
+          <YillikDegisim
+            key={alan}
+            baslik={`${alan} — yıllık değişim`}
+            adet={10}
+            seri={historicalChartData.map((d) => ({
+              etiket: String(d.yil), deger: Number(d[alan]) || 0,
+            }))}
+          />
+        ))}
       </div>
     </>
   );

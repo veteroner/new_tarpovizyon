@@ -1,9 +1,9 @@
-import { seriesColor } from '../../utils/chartColors';
+import { AXIS, STATUS, seriesColor } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
 import {
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis,
-  Tooltip, Legend, Area, Line, PieChart, Pie, Cell, LineChart,
-  BarChart, Bar
+  Tooltip, Legend, Area, Line, PieChart, Pie, Cell,
+  BarChart, Bar, ReferenceLine
 } from 'recharts';
 import { formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
@@ -127,23 +127,38 @@ export default function MilkProductionSection({
             <ChartInsightButton title="Yıllık Büyüme Oranları (%)" description="Son 15 yıl süt üretimi büyüme oranları" data={growthRates.slice(-15)} context={{ section: 'Büyüme' }} compact />
           </div>
           <ResponsiveContainer width="100%" height={360}>
-            <LineChart data={growthRates.slice(-15)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
+            {/*
+              * BÜYÜME ORANI GRAFİĞİ — burada `LINE_Y_DOMAIN` KULLANILMAZ.
+              *
+              * Seviye grafiklerinde ekseni auto bırakmak doğru (sıfırdan
+              * başlamak varyasyonu eziyor). Ama bu grafiğin ölçüsü zaten
+              * DEĞİŞİM: sıfır anlamlı bir eşik — üstü büyüme, altı küçülme.
+              * Auto eksen bütün yıllar pozitifken sıfırı ekran dışında
+              * bırakır ve okuyucu artı mı eksi mi olduğunu göremez.
+              *
+              * Bu yüzden sıfır domain'e zorlanıyor ve ayrıca çizgiyle
+              * işaretleniyor. Yön ayrıca çubuk renginde de taşınıyor.
+              */}
+            <ComposedChart data={growthRates.slice(-15)} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip 
-                formatter={(value: number) => [`${yuzde(value, 2)}`]}
+              <YAxis
+                tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                tickFormatter={(v: number) => yuzde(v, 0)}
+                domain={([min, max]: [number, number]) => [Math.min(0, min * 1.15), Math.max(0, max * 1.15)]}
+                width={52}
+              />
+              <Tooltip
+                formatter={(value: number) => [`${yuzde(value, 2)}`, 'Yıllık değişim']}
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="rate" 
-                name="Büyüme %" 
-                stroke="#3b82f6" 
-                strokeWidth={3}
-                dot={{ fill: '#3b82f6', r: 4 }}
-              />
-            </LineChart>
+              <ReferenceLine y={0} stroke={AXIS} />
+              <Bar dataKey="rate" name="Yıllık değişim" radius={[4, 4, 0, 0]}>
+                {growthRates.slice(-15).map((d, i) => (
+                  <Cell key={i} fill={d.rate >= 0 ? STATUS.iyi : STATUS.kritik} />
+                ))}
+              </Bar>
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
 
