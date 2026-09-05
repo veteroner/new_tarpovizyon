@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Header } from './components/Header';
 import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { GirisEkrani } from './components/GirisEkrani';
 import { ProgramSelectionPage } from './pages/ProgramSelectionPage';
@@ -123,11 +122,25 @@ function AppContent() {
    * Header burada da çizilirse iki başlık üst üste biner.
    */
   const isVitrinAraciPage = location.pathname.startsWith('/piyasa') || location.pathname === '/asistan';
-  // TarpoShell handles its own layout for all /tarpovizyon/* data pages
-  const isTarpoShellRoute =
-    location.pathname.startsWith('/tarpovizyon/') &&
-    !isTarpovizyonHome;
-  const hideHeader = isProgramSelection || isTarpovizyonSelection || isTarpovizyonHome || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage || isMobilePage || isTarpoShellRoute || isTarpovizyonBasicPage || isVitrinAraciPage;
+
+  /*
+   * ─── KABUK KARARI ROTA AĞACIYLA AYNI OLMALI ─────────────────────────────
+   *
+   * Burada `isTarpoShellRoute` yalnızca `/tarpovizyon/` önekine bakıyordu.
+   * Oysa veri kabuğu (`<Route element={<DataShell />}>`) YOL VERMEYEN bir
+   * düzen rotası: eşleşmeyen HER adres onun içine düşüyor ve kabuğu çiziyor.
+   * İki karar birbirinden ayrıldığı için `/bilinmeyen-sayfa` ya da elle
+   * yazılmış `//turkey/animal-production` gibi adreslerde `<main>` "header
+   * var" varsayıp üstten boşluk bırakıyordu.
+   *
+   * Karar tersine çevrildi: kabuk DIŞINDA kalan rotalar açıkça sayılıyor,
+   * geri kalan her şey kabuğun içinde. Böylece bilinmeyen adresler de doğru
+   * düzeni alıyor.
+   */
+  const kabukDisi = isProgramSelection || isTarpovizyonSelection || isMobilePage
+    || isVitrinAraciPage || isTarpovizyonBasicPage
+    || isRasyonPage || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
+  const isTarpoShellRoute = !kabukDisi && !isTarpovizyonHome;
 
   /*
    * Capacitor'daki kalıcı geri+ana sayfa çubuğu.
@@ -148,10 +161,19 @@ function AppContent() {
       {/* Mobile persistent nav — shown inside Capacitor on all non-mobile routes */}
       {showMobilePageHeader && <MobilePageHeader />}
 
-      {/* Header - Ana sayfa ve seçim sayfası dışında göster */}
-      {!hideHeader && <Header />}
-
-      <main className={isTarpoShellRoute ? 'tarpo-shell-host' : `${hideHeader ? '' : 'main-content with-header'} ${showMobilePageHeader ? 'pt-12' : ''}`}>
+      {/*
+        * ESKİ ÜST ŞERİT (`components/Header`, `.main-header`) KALDIRILDI.
+        *
+        * Ölçüm: canlıda dokuz rota denendi ve o şerit YALNIZCA `/tarpovizyon/`
+        * dışındaki bilinmeyen adreslerde çiziliyordu (ör. elle yazılan
+        * `//turkey/animal-production`). O adreslerde veri kabuğu da çizildiği
+        * için koyu TARPOL şeridi ile TarpoVizyon PRO şeridi ÜST ÜSTE biniyor,
+        * kullanıcı iki farklı menü görüyordu. Başka hiçbir rotada tek gezinme
+        * kaynağı değildi, yani kaldırılması hiçbir sayfayı menüsüz bırakmıyor.
+        *
+        * Bileşen ve `styles/Header.css` de silindi — başka çağıranı yoktu.
+        */}
+      <main className={isTarpoShellRoute ? 'tarpo-shell-host' : `${showMobilePageHeader ? 'pt-12' : ''}`}>
         {/*
           * 53 sayfa statik import ediliyordu; hepsi tek pakete giriyor ve
           * mobilde ilk açılışta 1 MB gzip indiriliyordu. Rotalar lazy'ye

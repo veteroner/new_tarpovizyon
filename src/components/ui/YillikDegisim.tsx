@@ -6,6 +6,7 @@ import {
 import { ChartCard } from './Card';
 import { AXIS, GRID, STATUS } from '../../utils/chartColors';
 import { yuzde } from '../../utils/sayi';
+import { degisimSerisi } from './degisimSerisi';
 
 /**
  * Yıldan yıla değişim grafiği.
@@ -27,8 +28,6 @@ import { yuzde } from '../../utils/sayi';
  * - Renk yönü taşır ama TEK BAŞINA taşımaz — değer her çubuğun ucunda yazılı.
  */
 
-export type DegisimNoktasi = { etiket: string | number; deger: number };
-
 type Props = {
   /** Seviye serisi: sırayla, eskiden yeniye. */
   seri: { etiket: string | number; deger: number }[];
@@ -40,19 +39,6 @@ type Props = {
   yukseklik?: number;
   action?: React.ReactNode;
 };
-
-/** Ardışık noktalar arası yüzde değişim. Sıfır/eksi tabanlar atlanıyor. */
-export function degisimSerisi(
-  seri: { etiket: string | number; deger: number }[],
-): DegisimNoktasi[] {
-  const cikti: DegisimNoktasi[] = [];
-  for (let i = 1; i < seri.length; i++) {
-    const onceki = seri[i - 1].deger;
-    if (!(onceki > 0)) continue;
-    cikti.push({ etiket: seri[i].etiket, deger: ((seri[i].deger - onceki) / onceki) * 100 });
-  }
-  return cikti;
-}
 
 export function YillikDegisim({
   seri, baslik = 'Yıllık değişim', not, adet = 12, span, yukseklik = 260, action,
