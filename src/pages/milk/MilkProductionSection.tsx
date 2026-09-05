@@ -152,7 +152,7 @@ export default function MilkProductionSection({
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v: number) => yuzde(v, 0)}
-                domain={([min, max]: [number, number]) => [Math.min(0, min * 1.15), Math.max(0, max * 1.15)]}
+                domain={[(dataMin: number) => Math.min(0, dataMin * 1.15), (dataMax: number) => Math.max(0, dataMax * 1.15)]}
                 width={52}
               />
               <Tooltip

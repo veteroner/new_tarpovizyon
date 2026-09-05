@@ -62,9 +62,7 @@ export function YillikDegisim({
             tickFormatter={(v: number) => yuzde(v, 0)}
             /* Sıfır her zaman içeride; uçlarda %15 pay bırakılıyor ki
                etiketler kartın kenarına yapışmasın. */
-            domain={([min, max]: [number, number]) => [
-              Math.min(0, min * 1.15), Math.max(0, max * 1.15),
-            ]}
+            domain={[(dataMin: number) => Math.min(0, dataMin * 1.15), (dataMax: number) => Math.max(0, dataMax * 1.15)]}
             width={54}
             stroke={AXIS}
           />

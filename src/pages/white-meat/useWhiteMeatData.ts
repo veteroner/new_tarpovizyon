@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchRows, fetchAgg, num, type Row } from '../../services/d1';
+import { HAYVAN_IL_YIL, yilSutunu } from '../../utils/hayvanYili';
 
 const R_KUMES = 'tuik/hayvancilik-kumeshayvanciligi';
 // TÜİK kümes tablosu 209 satır — bir kez çekilip tüm bölümlerde süzülüyor.
@@ -27,10 +28,7 @@ export function useWhiteMeatData(): WhiteMeatData {
   const [econEndDate, setEconEndDate] = useState<string>('');
   const [worldRanking, setWorldRanking] = useState<{ world: number; eu: number } | null>(null);
   const [provincialPoultry, setProvincialPoultry] = useState<RegionTotal[]>([]);
-  /*
-   * İl bazlı kanatlı sayıları TÜİK SDMX'te YOK (yalnızca MEDAS'ta); tablo
-   * 2024'te duruyor. Veri yılı başlıkta gösteriliyor ki güncel sanılmasın.
-   */
+  /* Harita verisinin yılı — başlıkta gösteriliyor ki güncel sanılmasın. */
   const [provincialYear, setProvincialYear] = useState<string>('');
   const [provincialBroilers, setProvincialBroilers] = useState<RegionTotal[]>([]);
   const [provincialLayers, setProvincialLayers] = useState<RegionTotal[]>([]);
@@ -144,22 +142,42 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       // İl bazlı kanatlı hayvan varlığı
       try {
-        // WHERE tarih = (SELECT MAX(tarih) …) karşılığı: en yeni tarih istemcide.
-        const ilHayvan = await fetchRows('il/hayvan-sayilari', { limit: 2000 });
-        const sonTarih = ilHayvan.reduce((en, r) => {
-          const t = String(r.tarih ?? '');
-          return t > en ? t : en;
-        }, '');
-        const provincialRes = { data: ilHayvan
-          .filter((r) => String(r.tarih ?? '') === sonTarih)
-          .sort((a, b) => String(a.il).localeCompare(String(b.il), 'tr'))
-          .map((r) => ({
-            province: String(r.il ?? ''),
-            broiler_count: num(r.et_tavugu_sayisi),
-            layer_count: num(r.yumurta_tavugu_sayisi),
-            total_poultry: num(r.et_tavugu_sayisi) + num(r.yumurta_tavugu_sayisi),
-          })) };
-        setProvincialYear(sonTarih.slice(0, 4));
+        /*
+         * ─── KAYNAK DEĞİŞTİ: il_hayvan_sayilari → TÜİK canlı hayvan ──────────
+         *
+         * Harita TAMAMEN GRİ çiziliyordu, efsanesi "0 — 0" diyordu.
+         *
+         * Sebep: `il/hayvan-sayilari` tablosunda 2025 satırları VAR (81 il) ama
+         * `et_tavugu_sayisi` ve `yumurta_tavugu_sayisi` sütunları 81 ilin
+         * 81'inde de BOŞ. Kod `MAX(tarih)` alıp 2025'i seçiyor ve sıfır
+         * buluyordu. (2024'te bile et tavuğu yalnız 53/81 ilde dolu.)
+         *
+         * `tuik_hayvancilik_canlihayvan` duzeykod=3'te 2025 dolu:
+         * et tavuğu 265.800.390, yumurta tavuğu 121.363.975 — ülke satırıyla
+         * tutarlı (İstanbul il satırlarında yok, o yüzden 80 il).
+         *
+         * DİKKAT — `il` DEĞİL `yer`: duzeykod=3 satırlarında il adı `yer`
+         * sütununda, `il` boş. Aynı tuzak hayvansal üretim haritasında da
+         * vardı ve orayı da bu şekilde düzeltmiştik.
+         */
+        const kanatliRaw = await fetchAgg('tuik/hayvancilik-canlihayvan', {
+          groupBy: ['yer', 'kategori'], sum: [yilSutunu(HAYVAN_IL_YIL)],
+          where: { duzeykod: 3, grup: 'Tavuk' }, limit: 500,
+        });
+        const ilKanatli = new Map<string, { province: string; broiler_count: number; layer_count: number }>();
+        for (const r of kanatliRaw) {
+          const il = String(r.yer ?? '');
+          if (!il) continue;
+          const kayit = ilKanatli.get(il) ?? { province: il, broiler_count: 0, layer_count: 0 };
+          const v = num(r[`sum_${yilSutunu(HAYVAN_IL_YIL)}`]);
+          if (/Et Tavu/i.test(String(r.kategori ?? ''))) kayit.broiler_count += v;
+          else if (/Yumurta Tavu/i.test(String(r.kategori ?? ''))) kayit.layer_count += v;
+          ilKanatli.set(il, kayit);
+        }
+        const provincialRes = { data: [...ilKanatli.values()]
+          .sort((a, b) => a.province.localeCompare(b.province, 'tr'))
+          .map((r) => ({ ...r, total_poultry: r.broiler_count + r.layer_count })) };
+        setProvincialYear(String(HAYVAN_IL_YIL));
         if (provincialRes.data && provincialRes.data.length > 0) {
           const totalMapped: RegionTotal[] = provincialRes.data.map((row) => ({
             name: String(row.province || ''),

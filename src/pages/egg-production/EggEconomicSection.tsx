@@ -1,5 +1,5 @@
 import { yuzde } from '../../utils/sayi';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import type { EggEconomicData } from './eggProductionTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
@@ -183,7 +183,25 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <BarChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              {/*
+                * SIFIR DOMAIN'E ZORLANIYOR — grafiğin HİÇ ÇİZİLMEMESİNİN sebebi.
+                *
+                * "Fiyat − maliyet" farkı ölçülen 12 ayın 12'sinde de NEGATİF
+                * (-5,9 … -21,6 ₺/kg). Recharts'ın varsayılan aralığı
+                * [0, dataMax]; dataMax negatif olunca aralık ters dönüyor ve
+                * çubuklar NEGATİF YÜKSEKLİKLE üretiliyor (ölçüldü: -11, -200,
+                * -148 …). SVG'de negatif yükseklikli dikdörtgen çizilmez, yani
+                * kart boş görünüyordu.
+                *
+                * Aralık sıfırı hep içeriyor: eksi çubuklar sıfır çizgisinden
+                * AŞAĞI doğru uzuyor, "zarar" görünür oluyor.
+                */}
+              <YAxis
+                tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                width={52}
+                domain={[(dataMin: number) => Math.min(0, dataMin * 1.1), (dataMax: number) => Math.max(0, dataMax * 1.1)]}
+              />
+              <ReferenceLine y={0} stroke="var(--viz-axis, var(--border))" />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
