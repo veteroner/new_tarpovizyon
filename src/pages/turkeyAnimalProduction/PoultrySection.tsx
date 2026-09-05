@@ -37,7 +37,14 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
+              {/*
+                interval={2}: 24 ayda her 3. ay etiketlenir — 8 etiket, eşit
+                aralıklı, deterministik. `minTickGap` ise çakışan etiketi
+                SESSİZCE atıyor ve hangi ayın düştüğü ekran genişliğine göre
+                değişiyordu; mevsimsellik bu grafiğin asıl bilgisi olduğu için
+                tepe ayının etiketsiz kalması kabul edilemez.
+              */}
+              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval={2} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={formatShort} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: unknown) => `${formatValue(Number(v))} ton`} />
               <Area type="monotone" dataKey="Tavuk Eti (ton)" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
@@ -57,7 +64,14 @@ const PoultrySection: React.FC<PoultrySectionProps> = ({ poultryMonthlyData }) =
           <ResponsiveContainer width="100%" height={350}>
             <ComposedChart data={poultryMonthlyData} margin={{ top: 10, right: 8, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
+              {/*
+                interval={2}: 24 ayda her 3. ay etiketlenir — 8 etiket, eşit
+                aralıklı, deterministik. `minTickGap` ise çakışan etiketi
+                SESSİZCE atıyor ve hangi ayın düştüğü ekran genişliğine göre
+                değişiyordu; mevsimsellik bu grafiğin asıl bilgisi olduğu için
+                tepe ayının etiketsiz kalması kabul edilemez.
+              */}
+              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} angle={-45} textAnchor="end" interval={2} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip formatter={(v: unknown) => `${v} M adet`} />
               <Area type="monotone" dataKey="Yumurta (M adet)" fill="#fbbf24" stroke="#fbbf24" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
