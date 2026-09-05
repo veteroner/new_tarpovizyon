@@ -144,6 +144,24 @@
 }
 .tarpo-ust-dg:hover { background: var(--tv-zemin-2, #f5f5f7); }
 
+/* İkonlu üst düğme (Emtia) — ikon ile yazı arasında nefes. */
+.tarpo-ust-dg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/*
+ * Üstteki kalıcı düğme o sayfadayken işaretli olmalı; yoksa kullanıcı zaten
+ * emtia sayfasındayken düğmeye tekrar basıyor ve hiçbir şey olmuyor.
+ */
+.tarpo-ust-dg.is-active {
+  background: var(--tv-vurgu-sis, #eaf3ee);
+  border-color: var(--tv-vurgu, #17693a);
+  color: var(--tv-vurgu, #17693a);
+  font-weight: 600;
+}
+
 /* ─── İçerik ────────────────────────────────────────────────────────────── */
 
 .tarpo-content {

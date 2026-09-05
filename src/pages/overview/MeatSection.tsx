@@ -22,13 +22,25 @@ export function MeatSection({ data }: Props) {
   return (
     <>
       <div className="section-header" style={{ marginTop: '3rem', marginBottom: '1rem', borderTop: '2px solid var(--border)', paddingTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#ef4444' }}>Et Üretimi</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)' }}>Et Üretimi</h2>
       </div>
 
+      {/*
+        * Kartlar ortak `StatCard` katmanında.
+        *
+        * Eskiden ilk kart `.kpi-card.large` idi: yeşil degrade zemin + beyaz
+        * yazı. Sayfalar bunun ÜSTÜNE satır içi renk yazıyordu — süt mavi
+        * (#3b82f6), et kırmızı (#ef4444), yumurta kehribar (#f59e0b). Sonuç
+        * YEŞİL ZEMİN ÜZERİNE MAVİ/KIRMIZI YAZI oluyordu; ölçüldü, değer rengi
+        * rgb(29,78,216) ve rgb(185,28,28) çıkıyordu. Okunmuyordu.
+        *
+        * Artık zemin nötr, sayı `tabular-nums`, kimlik ikonda. Renk yalnız
+        * değişim rozetinde anlam taşıyor.
+        */}
       <div className="kpi-grid">
-        <div className="kpi-card large" style={{ borderLeft: '4px solid #ef4444' }}>
-          <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon" style={{ background: '#fee2e2', color: '#ef4444' }}><Beef size={18} aria-hidden="true" /></div></div>
-          <div className="kpi-value" style={{ color: '#ef4444' }}>{formatNumber(data.meatProduction.total)} ton</div>
+        <div className="kpi-card">
+          <div className="kpi-header"><span className="kpi-title">TOPLAM ET</span><div className="kpi-icon"><Beef size={18} aria-hidden="true" /></div></div>
+          <div className="kpi-value">{formatNumber(data.meatProduction.total)} ton</div>
           <div className="kpi-subtitle">{yil} Yılı Toplam</div>
         </div>
         <div className="kpi-card">

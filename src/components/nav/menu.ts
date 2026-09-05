@@ -93,7 +93,13 @@ export const MENU: MenuCategory[] = [
       // Tek genel bakış sayfası var; /tarpovizyon/overview buraya YÖNLENDİRİYOR,
       // ayrı bir dünya sayfası değil. Kapsamsız.
       { label: 'Panoya Genel Bakış', any: '/tarpovizyon/turkey/overview' },
-      { label: 'Emtia Fiyatları', any: '/tarpovizyon/commodity-prices' },
+      /*
+       * Emtia Fiyatları buradan KALDIRILDI ve üst şeride taşındı
+       * (TarpoShell → EMTIA_YOLU). Menüde kalınca yalnızca "Genel Bakış"
+       * kategorisindeyken kardeş çip şeridinde görünüyordu; yani günlük
+       * bakılan bir ekran sayfaya göre kayboluyordu. Basic'teki gibi her
+       * sayfadan tek tıkla erişilebilir olması istendi.
+       */
       /*
        * AI Asistan buradan KALDIRILDI: mobilde alt sekme çubuğunda kendi
        * yeri var, menüde de durunca aynı ekrana iki ayrı yoldan gidiliyordu.

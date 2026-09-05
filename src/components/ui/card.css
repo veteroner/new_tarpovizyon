@@ -18,9 +18,21 @@
 
 .ui-chart-card {
   padding: 20px;
-  /* Ekran dışı grafikleri çizme; yer ayrıldığı için kaydırma zıplamıyor. */
+  /*
+   * Ekran dışı grafikleri çizme; yer ayrıldığı için kaydırma zıplamıyor.
+   *
+   * TAHMİN ÖLÇÜLDÜ. 420px yazıyordu ama gerçek kart yüksekliklerinin ortancası
+   * dört sayfada 365–442px, ağırlıklı olarak 382px. Her ekran dışı kart 38px
+   * fazla yer ayırınca Genel Bakış sayfası kaydırdıkça 263px KISALIYOR
+   * (7.592 → 7.329) ve kaydırma çubuğu elin altından kayıyordu — kullanıcının
+   * "scroll etmekte zorluk yaşadım" dediği şey bu.
+   *
+   * `auto` anahtar sözcüğü tarayıcının ilk çizimden sonra GERÇEK boyu
+   * hatırlamasını sağlıyor; buradaki sayı yalnızca ilk geçişte kullanılıyor.
+   * Ölçülen ortancaya çekildi.
+   */
   content-visibility: auto;
-  contain-intrinsic-size: auto 420px;
+  contain-intrinsic-size: auto 382px;
 }
 
 /* ─── Başlık satırı ──────────────────────────────────────────────────────── */

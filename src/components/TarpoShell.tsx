@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  ChevronRight, Globe, MapPin, Search,
+  ChevronRight, Globe, MapPin, Search, TrendingUp,
 } from 'lucide-react';
 import {
   MENU, BASIC_MENU, locate, scopeSwitchTarget, hasScope,
@@ -15,6 +15,9 @@ import { KardesGecisi } from './nav/KardesGecisi';
 import { AsistanPanosu } from './nav/AsistanPanosu';
 import '../styles/TarpoShell.css';
 import './TarpoShell.breadcrumb.css';
+
+/** Emtia fiyatları — üst şeritten her sayfadan erişilen tek ekran. */
+const EMTIA_YOLU = '/tarpovizyon/commodity-prices';
 
 /**
  * TarpoVizyon kabuğu — cam üst çubuk, kapsam anahtarı, konum izi.
@@ -148,6 +151,26 @@ export default function TarpoShell() {
             <Search size={14} />
             <span>Ara</span>
             <kbd>{macMi ? '⌘K' : 'Ctrl K'}</kbd>
+          </button>
+          {/*
+            * EMTİA FİYATLARI — üst şeritte kalıcı.
+            *
+            * Eskiden "Genel Bakış" kategorisinin altında, "Panoya Genel Bakış"
+            * ile kardeş bir sayfaydı; yalnızca o kategorideyken kardeş çip
+            * şeridinde görünüyordu. Yani günlük bakılan bir ekran, sayfaya
+            * göre KAYBOLUYORDU. Basic'te olduğu gibi her sayfadan tek tıkla
+            * erişilsin diye başlığa alındı.
+            *
+            * Fiyat verisi kapsamdan bağımsız (borsa/FAO), bu yüzden Araçlar
+            * gibi kırılım yolunun dışında duruyor.
+            */}
+          <button
+            className={`tarpo-ust-dg${location.pathname === EMTIA_YOLU ? ' is-active' : ''}`}
+            onClick={() => navigate(EMTIA_YOLU)}
+            title="Borsa, FAO ve hal fiyatları"
+          >
+            <TrendingUp size={14} aria-hidden="true" />
+            <span>Emtia</span>
           </button>
           {/* Araçlar kapsamdan bağımsız: hesaplayan/tahmin eden ekranlar
               kırılım yolunda değil, bu yüzden başlıkta kendi düğmesi var. */}

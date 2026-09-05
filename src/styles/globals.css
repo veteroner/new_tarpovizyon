@@ -149,16 +149,20 @@ body {
   border-color: var(--primary);
 }
 
+/*
+ * VURGU KARTI ARTIK BOYALI DEĞİL.
+ *
+ * Buraya yeşil degrade + beyaz yazı yazılıydı. Sayfalar bunun ÜSTÜNE satır içi
+ * renk basıyordu — süt mavi, et kırmızı, yumurta kehribar — ve ortaya YEŞİL
+ * ZEMİN ÜZERİNE MAVİ/KIRMIZI YAZI çıkıyordu (ölçüldü: rgb(29,78,216) ve
+ * rgb(185,28,28)). Okunmuyordu.
+ *
+ * `large` artık yalnızca "daha geniş ve sayısı daha iri" demek: zemin diğer
+ * kartlarla aynı, yazı mürekkep. Renk kartın tamamını boyamıyor; kimlik ikonda,
+ * anlam ise yalnızca değişim rozetinde.
+ */
 .kpi-card.large {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white;
-  border: none;
-  box-shadow: var(--shadow-lg), 0 4px 20px rgba(59, 130, 246, 0.3);
   min-height: 160px;
-}
-
-.kpi-card.large:hover {
-  box-shadow: var(--shadow-xl), 0 8px 30px rgba(59, 130, 246, 0.4);
 }
 
 .kpi-header {
@@ -211,7 +215,7 @@ body {
 }
 
 .kpi-card.large .kpi-title {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
 }
 
 .kpi-value {
@@ -223,7 +227,7 @@ body {
 
 .kpi-card.large .kpi-value {
   font-size: 2.5rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 .kpi-subtitle {
@@ -232,7 +236,7 @@ body {
 }
 
 .kpi-card.large .kpi-subtitle {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
 }
 
 /* Professional Chart Cards */

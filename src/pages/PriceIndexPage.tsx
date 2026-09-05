@@ -74,10 +74,11 @@ export default function PriceIndexPage() {
       ) : (
         <>
           <div className="kpi-grid">
-            <div className="kpi-card large" style={{ background: `linear-gradient(135deg, ${config.color}, ${config.color}cc)` }}>
+            {/* Satır içi degrade kaldırıldı: kart nötr, ürün rengi ikonda kalıyor. */}
+            <div className="kpi-card large">
               <div className="kpi-header">
                 <span className="kpi-title">YIL ORTALAMASI</span>
-                <div className="kpi-icon" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}><Activity size={18} /></div>
+                <div className="kpi-icon" style={{ background: `${config.color}1a`, color: config.color }}><Activity size={18} /></div>
               </div>
               <div className="kpi-value">{formatIndex(avgIndex)}</div>
               <div className="kpi-subtitle">{selectedProductName} · {selectedYear}</div>

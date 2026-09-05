@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { BASIC_MENU, type MenuItem } from '../../components/nav/menu';
+import { BASIC_MENU, visibleMenu, type MenuCategory, type MenuItem } from '../../components/nav/menu';
+import { isPlatform } from '../utils/platform';
 import { ara as aramaYap } from '../../components/nav/arama';
 import { useModelArama } from '../../components/nav/modelArama';
 import { MikrofonDugmesi } from '../../components/ses/MikrofonDugmesi';
@@ -19,23 +20,36 @@ import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
  * Artık aynı kaynağı okuyor. Yeni bir sayfa menüye eklendiğinde mobilde de
  * kendiliğinden çıkıyor.
  *
- * ─── NEDEN YALNIZCA BASIC ───────────────────────────────────────────────────
- * Liste eskiden Basic'in yanına Pro sayfalarını da (`visibleMenu`) ekliyordu.
- * Pro ayrı bir sürümde, kupon kodlu abonelikle gelecek; bu yayında uygulamanın
- * hiçbir yerinde görünmemesi gerekiyor. Mobil ana sayfa zaten yalnızca
- * `BASIC_MENU` okuyor, yani Pro'nun mobile sızdığı TEK yer burasıydı.
+ * ─── PRO WEBDE VAR, MAĞAZA DERLEMESİNDE YOK ─────────────────────────────────
+ * Liste bir süre YALNIZCA Basic gösteriyordu. Gerekçe mağaza sürümüydü: Pro
+ * kupon kodlu abonelikle gelecek ve uygulamada görünmemeli.
  *
- * Kapsam (Türkiye/Dünya) seçicisi de bu yüzden kalktı: yalnızca Pro
- * sayfalarını süzüyordu, Basic kapsamsız. Pro gidince süzecek bir şey kalmadı
- * ve kontrol hiçbir işe yaramayan bir düğmeye dönüşüyordu.
+ * Ama bu kod aynı zamanda pro.tarpovizyon.com'u da besliyor. Orada dar ekranda
+ * bu ekran açılıyor ve kullanıcı Pro alan adında Pro'ya HİÇ ulaşamıyordu:
+ * ölçüldü, /m/explore'da `/tarpovizyon/...` bağlantısı sıfırdı, listedeki 84
+ * satırın 84'ü de Basic sayfasıydı.
+ *
+ * Ayrım artık platformdan: Capacitor (mağaza derlemesi) yalnızca Basic görür,
+ * web hem Pro hem Basic. Böylece abonelik kararı da bozulmuyor.
  */
 
 export default function MobileExplorePage() {
   const navigate = useNavigate();
   const [ara, setAra] = useState('');
 
+  /*
+   * Gösterilecek menü. Mağaza derlemesinde yalnız Basic; webde Pro da.
+   * Pro menüsü kapsamlı (Türkiye/Dünya); mobilde kapsam seçici olmadığı için
+   * Türkiye alınıyor — mobil ana sayfa da Türkiye verisiyle açılıyor.
+   */
+  const magazaDerlemesi = isPlatform('capacitor');
+  const menu: MenuCategory[] = useMemo(
+    () => (magazaDerlemesi ? BASIC_MENU : [...visibleMenu('turkey', true), ...BASIC_MENU]),
+    [magazaDerlemesi],
+  );
+
   /* Sıralama listenin TAMAMINI görmeyi gerektiriyor, kategori kategori değil. */
-  const tumOgeler = useMemo(() => BASIC_MENU.flatMap((k) => k.items), []);
+  const tumOgeler = useMemo(() => menu.flatMap((k) => k.items), [menu]);
 
   const cikti = useMemo(() => aramaYap(tumOgeler, ara), [ara, tumOgeler]);
 
@@ -60,8 +74,14 @@ export default function MobileExplorePage() {
    * Süt hem Kırmızı Et bölümünde var ve iki satır birebir aynı görünüyordu.
    */
   const satir = (item: MenuItem) => {
-    // BASIC_MENU her öğeye `any` yazıyor — Basic sayfaları kapsamsız.
-    const yol = item.any!;
+    /*
+     * Basic öğelerinde yol `any`de; Pro öğelerinde kapsama göre `turkey`/
+     * `world` alanında olabiliyor. Yolu olmayan öğe atlanıyor — eskiden
+     * `item.any!` ile zorlanıyordu ve Pro öğesi gelince `undefined` yola
+     * gidiliyordu.
+     */
+    const yol = item.any ?? item.turkey ?? item.world;
+    if (!yol) return null;
     return <ListRow key={yol} title={item.label} subtitle={item.bolum} onClick={() => navigate(yol)} />;
   };
 
@@ -93,7 +113,7 @@ export default function MobileExplorePage() {
           * taşımıyor — hangi bölümden geldiği alt satırda yazıyor.
           */}
         {cikti.bos
-          ? BASIC_MENU.map((kat) => (
+          ? menu.map((kat) => (
             <ListGroup key={kat.title} header={kat.title}>
               {kat.items.map(satir)}
             </ListGroup>

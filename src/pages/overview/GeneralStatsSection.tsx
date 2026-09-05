@@ -30,7 +30,7 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
       </div>
 
       <div className="kpi-grid">
-        <div className="kpi-card large">
+        <div className="kpi-card">
           <div className="kpi-header"><span className="kpi-title">NÜFUS</span><div className="kpi-icon blue"><Users size={18} aria-hidden="true" /></div></div>
           <div className="kpi-value">{formatNumber(data.population)}</div>
           <div className="kpi-subtitle">{yl(y.population)} Yılı</div>
@@ -51,6 +51,26 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
           <div className="kpi-subtitle">Toplam alanın %{agriLandPercent}'i ({yl(y.land)})</div>
         </div>
       </div>
+
+      {/*
+        * HER SAYININ YILI NEDEN FARKLI — açıkça yazılıyor.
+        *
+        * Kartlarda nüfus 2026, GSYİH 2024, tarım arazisi 2023 yazıyor ve bu
+        * "sayfa bakımsız" gibi okunuyordu. Ölçüldü: üçü de kaynağının izin
+        * verdiği EN YENİ yıl.
+        *   - fao_ME_indicator (GSYİH) dünya genelinde 2024'te bitiyor.
+        *   - fao_land_use'da Türkiye için 2024–25 satırları VAR ama yalnız
+        *     ORMAN kalemleri (7 satır); tarım arazisi son kez 2023'te
+        *     yayımlanmış (38 kalem).
+        * Yani gecikme bizim değil, FAO'nun yayın takvimi. Yılları gizlemek
+        * yerine sebebini yazmak doğru olan.
+        */}
+      <p className="ui-prose" style={{ marginTop: '0.75rem' }}>
+        Her ölçü kendi kaynağının en yeni yılını gösteriyor; bu yüzden yıllar
+        farklı. FAO makro serisi <b>2024</b>&apos;te bitiyor, arazi kullanımında
+        ise 2024–25 için yalnızca orman kalemleri yayımlandı — tarım arazisinin
+        son yayımlandığı yıl <b>2023</b>.
+      </p>
 
       <div className="kpi-grid" style={{ marginTop: '1rem' }}>
         <div className="kpi-card">
