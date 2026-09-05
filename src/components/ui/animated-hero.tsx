@@ -82,7 +82,7 @@ function Hero() {
           </p>
 
           <div className="flex flex-row flex-wrap justify-center gap-3">
-            <Button size="lg" className="gap-2" onClick={() => navigate('/tarpovizyon-basic')}>
+            <Button size="lg" className="gap-2" onClick={() => navigate('/tarpovizyon/turkey')}>
               Veri platformuna gir <MoveRight className="h-4 w-4" />
             </Button>
             {/*

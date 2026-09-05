@@ -52,26 +52,37 @@ export type Bolum = {
 
 const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
+/*
+ * ─── VİTRİN BAĞLANTILARI PRO'YA BAKIYOR ─────────────────────────────────────
+ * Bu dosyadaki her `yol` `/tarpovizyon-basic/...` idi. Site pro.tarpovizyon.com
+ * üzerinde yayınlandığı için tanıtım sayfasının bütün menüsü ve kartları
+ * ziyaretçiyi Pro yerine BASIC modülüne götürüyordu.
+ *
+ * Yollar Pro karşılıklarına çevrildi (ör. makro/genel → turkey/macro,
+ * il-duzeyinde/havza-urun-deseni → turkey/basin-production). Tanıtım sayfası
+ * ve mobil indirme bağlantısı olduğu gibi kaldı; yalnız hedefler değişti.
+ */
+
 /** Ölçülen mevcut değerler — ilk boyama için. */
 const BASLANGIC: Bolum[] = [
   {
     id: 'makro',
     ad: 'Makro Veriler',
     ac: 'Tarımın ekonomideki yeri, fiyat endeksleri ve dış ticaret.',
-    yol: '/tarpovizyon-basic/makro/genel',
+    yol: '/tarpovizyon/turkey/macro',
     renk: 'var(--tv-d2)',
     kartlar: [
       {
         id: 'gsyh', etiket: "Tarımın GSYH'deki payı", deger: 5.6, birim: '', alt: '2024',
-        seri: [], yol: '/tarpovizyon-basic/makro/genel', yuzde: true,
+        seri: [], yol: '/tarpovizyon/turkey/macro', yuzde: true,
       },
       {
         id: 'gida', etiket: 'Gıda enflasyonu (yıllık)', deger: 37.53, birim: '', alt: 'Tem 2026',
-        seri: [], yol: '/tarpovizyon-basic/makro/tufe', yuzde: true,
+        seri: [], yol: '/tarpovizyon/turkey/price-index', yuzde: true,
       },
       {
         id: 'tarimufe', etiket: 'Tarım ÜFE (yıllık)', deger: 18.81, birim: '', alt: 'Tem 2026',
-        seri: [], yol: '/tarpovizyon-basic/makro/tarim-ufe', yuzde: true,
+        seri: [], yol: '/tarpovizyon/turkey/price-index', yuzde: true,
       },
     ],
   },
@@ -79,24 +90,24 @@ const BASLANGIC: Bolum[] = [
     id: 'hayvancilik',
     ad: 'Hayvancılık',
     ac: 'Hayvan varlığı, süt, kırmızı et, kanatlı ve arıcılık.',
-    yol: '/tarpovizyon-basic/genel/hayvansal-uretim',
+    yol: '/tarpovizyon/turkey/animal-production',
     renk: 'var(--tv-d3)',
     kartlar: [
       {
         id: 'sut', etiket: 'İnek sütü üretimi', deger: 20241858, birim: 'ton', alt: '2025',
         seri: [16706956, 17053653, 16996271, 16849348, 18831720, 20112619, 19592521,
                21749342, 21370116, 19912135, 19961908, 21098564, 20241858],
-        yol: '/tarpovizyon-basic/cig-sut/uretim-yeterlilik',
+        yol: '/tarpovizyon/turkey/milk',
       },
       {
         id: 'et', etiket: 'Büyükbaş kırmızı et', deger: 1325916, birim: 'ton', alt: '2025',
         seri: [803364, 820677, 867399, 961650, 1099709, 1287749, 1337320,
                1349870, 1471550, 1586333, 1685992, 1496824, 1325916],
-        yol: '/tarpovizyon-basic/kirmizi-et/uretim-yeterlilik',
+        yol: '/tarpovizyon/turkey/red-meat',
       },
       {
         id: 'varlik', etiket: 'Toplam hayvan varlığı', deger: 75583303, birim: 'baş', alt: '2025',
-        seri: [], yol: '/tarpovizyon-basic/genel/turkiye-hayvan-varligi',
+        seri: [], yol: '/tarpovizyon/turkey/tuik-livestock',
       },
     ],
   },
@@ -104,20 +115,20 @@ const BASLANGIC: Bolum[] = [
     id: 'bitkisel',
     ad: 'Bitkisel Üretim',
     ac: 'Tahıl, sebze, meyve ve endüstri bitkilerinde üretim, alan ve verim.',
-    yol: '/tarpovizyon-basic/bitkisel-genel/uretim-ozeti',
+    yol: '/tarpovizyon/turkey/plant-production',
     renk: 'var(--tv-d1)',
     kartlar: [
       {
         id: 'tahil', etiket: 'Tahıllar ve diğer bitkisel ürünler', deger: 66970000, birim: 'ton',
-        alt: '2025', seri: [], yol: '/tarpovizyon-basic/bitkisel-genel/uretim-ozeti',
+        alt: '2025', seri: [], yol: '/tarpovizyon/turkey/plant-production',
       },
       {
         id: 'sebze', etiket: 'Sebzeler', deger: 33300000, birim: 'ton', alt: '2025',
-        seri: [], yol: '/tarpovizyon-basic/bitkisel-genel/tr-uretim-miktari',
+        seri: [], yol: '/tarpovizyon/turkey/plant-production',
       },
       {
         id: 'meyve', etiket: 'Meyveler ve sert kabuklular', deger: 19618888, birim: 'ton',
-        alt: '2025', seri: [], yol: '/tarpovizyon-basic/bitkisel-genel/dis-ticaret',
+        alt: '2025', seri: [], yol: '/tarpovizyon/turkey/trade',
       },
     ],
   },
@@ -125,20 +136,20 @@ const BASLANGIC: Bolum[] = [
     id: 'il',
     ad: 'Bölgesel Veriler',
     ac: '81 ilde üretim, havza ürün deseni ve coğrafi işaretli ürünler.',
-    yol: '/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim',
+    yol: '/tarpovizyon/turkey/plant-provincial',
     renk: 'var(--tv-d4)',
     kartlar: [
       {
         id: 'topil', etiket: 'Hayvan varlığında ilk il', deger: 0, metin: '—', birim: '',
-        alt: 'yükleniyor', seri: [], yol: '/tarpovizyon-basic/il-duzeyinde/hayvansal-uretim',
+        alt: 'yükleniyor', seri: [], yol: '/tarpovizyon/turkey/provincial',
       },
       {
         id: 'havza', etiket: 'Tarım havzası', deger: 0, metin: '—', birim: '', alt: 'yükleniyor',
-        seri: [], yol: '/tarpovizyon-basic/il-duzeyinde/havza-urun-deseni',
+        seri: [], yol: '/tarpovizyon/turkey/basin-production',
       },
       {
         id: 'ci', etiket: 'Coğrafi işaretli ürün', deger: 0, metin: '—', birim: '',
-        alt: 'yükleniyor', seri: [], yol: '/tarpovizyon-basic/il-duzeyinde/cografi-isaret',
+        alt: 'yükleniyor', seri: [], yol: '/tarpovizyon/turkey/geographical-indication',
       },
     ],
   },

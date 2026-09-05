@@ -26,7 +26,6 @@ import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
  */
 import MobilePrivacyPolicyPage from './mobile/pages/MobilePrivacyPolicyPage';
 import MobileTermsPage from './mobile/pages/MobileTermsPage';
-const SelectionPage = lazy(() => import('./pages/SelectionPage').then(m => ({ default: m.SelectionPage })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const BolumPage = lazy(() => import('./pages/BolumPage'));
 const TradePage = lazy(() => import('./pages/TradePage').then(m => ({ default: m.TradePage })));
@@ -241,7 +240,19 @@ function AppContent() {
           {tarpovizyonBasicRoutes()}
           
           {/* TARPOVIZYON - Giriş ve Ana Sayfalar (TarpoShell dışında) */}
-          <Route path="/tarpovizyon" element={<GirisEkrani masaustu={<SelectionPage />} mobilYol="/m" />} />
+          {/*
+            * ESKİ ARA EKRAN KALDIRILDI.
+            *
+            * `/tarpovizyon` yeşil "TARPOL TarpoVizyon" seçim ekranını çiziyordu:
+            * dört kart (Dünya / Türkiye / Canlı Veriler / AI Asistan). Dördü de
+            * Pro kabuğunun ÜST ŞERİDİNDE zaten var — Dünya/Türkiye anahtarı,
+            * Araçlar ve Asistan. Yani ekran fazladan bir tık ve eski marka
+            * dilinden başka bir şey eklemiyordu.
+            *
+            * Doğrudan Türkiye panosuna yönleniyor; mobilde `GirisEkrani`
+            * eskiden /m'e götürüyordu, o davranış /m/explore ile korunuyor.
+            */}
+          <Route path="/tarpovizyon" element={<GirisEkrani masaustu={<Navigate to="/tarpovizyon/turkey" replace />} mobilYol="/m/explore" />} />
           <Route path="/tarpovizyon/overview" element={<Navigate to="/tarpovizyon/turkey/overview" replace />} />
           <Route path="/tarpovizyon/turkey/tuik-plant" element={<Navigate to="/tarpovizyon/turkey/plant-production" replace />} />
 
