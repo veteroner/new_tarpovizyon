@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows, num, type Row } from '../../services/d1';
 import {
-  KANATLI_ZINCIRI, SUT_ZINCIRI, YEM_BITKILERI, bilesikOrtalama, sonAy,
+  SUT_ZINCIRI, YEM_BITKILERI, bilesikOrtalama, sonAy,
   tufeUzeriFazla, yansima, yillikDegisim,
   type AySerisi, type Yansima, type ZincirDugum,
 } from './zincir';
@@ -14,7 +14,6 @@ import {
  * besleyen aynı uçlardan geliyor:
  *   yem bitkisi endeksleri → tuik/fiyatendex   (tuik_fiyatendex)
  *   TÜFE + gıda            → makro/tufe-aylik  (tufe_aylik)
- *   kanatlı maliyet/fiyat  → kanatli/maliyet-fiyat
  *   süt maliyet/fiyat      → cig-sut/ekonomik-gostergeler
  * Böylece bir tabloyu güncellemek hem Basic'i hem burayı aynı anda tazeliyor.
  */
@@ -49,7 +48,6 @@ function tarihtenSeri(satirlar: Row[], alan: string): AySerisi {
 
 export type ZincirVerisi = {
   yansima: Yansima | null;
-  kanatli: ZincirDugum[];
   sut: ZincirDugum[];
   /** Bileşiğin son 36 ayı — küçük grafik için. */
   bilesikSeri: { ay: string; deger: number }[];
@@ -60,9 +58,10 @@ export function useZincir() {
     queryKey: ['aktarim-zinciri'],
     staleTime: 30 * 60 * 1000,
     queryFn: async (): Promise<ZincirVerisi> => {
-      const [tufe, kanatli, sut, ...bitkiler] = await Promise.all([
+      /* Kanatlı maliyet-fiyat ucu ARTIK ÇEKİLMİYOR — kanatlı kolu kaldırıldı
+         (gerekçesi `zincir.ts`te). */
+      const [tufe, sut, ...bitkiler] = await Promise.all([
         fetchRows('makro/tufe-aylik', { limit: 600 }),
-        fetchRows('kanatli/maliyet-fiyat', { limit: 400 }),
         fetchRows('cig-sut/ekonomik-gostergeler', { limit: 400 }),
         ...YEM_BITKILERI.map((b) =>
           fetchRows('tuik/fiyatendex', { endeks: 'T-UFE', maddekod: b.maddekod, limit: 60 })),
@@ -101,7 +100,7 @@ export function useZincir() {
       /* Gıda kalemi zaten oran; yalnızca genel TÜFE'nin üzeri alınıyor. */
       const gidaFazla = tufeUzeriFazla(gidaDegisim, tufeDegisim);
 
-      const olcu = (iskelet: typeof KANATLI_ZINCIRI, seriler: Record<string, AySerisi>) =>
+      const olcu = (iskelet: typeof SUT_ZINCIRI, seriler: Record<string, AySerisi>) =>
         iskelet.map((halka): ZincirDugum => {
           const seri = seriler[halka.id];
           const son = seri ? sonAy(seri) : null;
@@ -110,13 +109,6 @@ export function useZincir() {
 
       return {
         yansima: yansima(bilesik),
-        kanatli: olcu(KANATLI_ZINCIRI, {
-          'yem-bitkisi': bilesik,
-          'yem-fiyati': fazla(tarihtenSeri(kanatli, 'yem_fiyati_tl_kg')),
-          maliyet: fazla(tarihtenSeri(kanatli, 'maliyet_tl_kg')),
-          'uretici-fiyati': fazla(tarihtenSeri(kanatli, 'uretici_fiyati_tl_kg')),
-          'gida-enflasyonu': gidaFazla,
-        }),
         sut: olcu(SUT_ZINCIRI, {
           'yem-bitkisi': bilesik,
           'yem-fiyati': fazla(tarihtenSeri(sut, 'sut_yemi_19hp')),

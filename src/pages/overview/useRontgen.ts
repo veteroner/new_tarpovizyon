@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows, num, type Row } from '../../services/d1';
 import {
-  MAKAS_PENCERE,
+  MAKAS_PENCERE, bayatMi,
   aktarimSinyali, gidaEnflasyonSinyali, girdiGrubuSinyali, karlilikSinyali,
   kisiBasiSinyali, makasSinyali, medyan, pariteSinyali, sirala, sonOrtalama,
   ticaretSinyali, uretimSinyali, varlikSinyali, yeterlilikSinyali, type Sinyal,
@@ -96,12 +96,12 @@ export function useRontgen() {
     queryKey: ['tarim-rontgeni'],
     staleTime: 30 * 60 * 1000,
     queryFn: async (): Promise<Sinyal[]> => {
+      /* Kanatlı ve yumurta maliyet-fiyat uçları ARTIK ÇEKİLMİYOR: beslenmeyen
+         seriden sinyal üretilmiyor, boşuna istek de atılmıyor. */
       const [
-        beyazEt, yumurta, sut, kirmiziEt, yeterlilik, uretim, tufe,
+        sut, kirmiziEt, yeterlilik, uretim, tufe,
         gfe, tarimUfe, varliklar, kisiBasi, disTicaret, ...bitkiler
       ] = await Promise.all([
-        fetchRows('kanatli/maliyet-fiyat', { limit: 400 }),
-        fetchRows('yumurta/maliyet-fiyat', { limit: 400 }),
         fetchRows('cig-sut/ekonomik-gostergeler', { limit: 400 }),
         fetchRows('kirmizi-et/ekonomik-gostergeler', { limit: 400 }),
         fetchRows('tr/yeterlilikler', { limit: 5 }),
@@ -120,10 +120,16 @@ export function useRontgen() {
       const ay = (r?: Row) => String(r?.tarih ?? '').slice(0, 7);
       const ekle = (s: Sinyal | null) => { if (s) sinyaller.push(s); };
 
-      /* ── EKONOMİ: kârlılık, dört sektör ────────────────────────────────── */
+      /* ── EKONOMİ: kârlılık ──────────────────────────────────────────────
+       *
+       * BEYAZ ET ve YUMURTA BURADA YOK. Bu iki sektörün maliyet-fiyat verisi
+       * elle besleniyordu ve kaynağa erişim kalmadı; yeni fiyat/maliyet/parite
+       * girilmeyecek. Beslenmeyen bir seriden kârlılık sinyali üretmek,
+       * donmuş sayıyı bugünün durumu diye sunmak olurdu.
+       *
+       * Tablolar duruyor (sayfalar geçmişi gösteriyor); röntgen onlardan
+       * "şu an şöyle" cümlesi kurmuyor. */
       const sektorler = [
-        { ad: 'Beyaz et', rows: beyazEt, yol: '/tarpovizyon/turkey/white-meat' },
-        { ad: 'Yumurta', rows: yumurta, yol: '/tarpovizyon/turkey/eggs' },
         { ad: 'Çiğ süt', rows: sut, yol: '/tarpovizyon/turkey/milk' },
         { ad: 'Kırmızı et', rows: kirmiziEt, yol: '/tarpovizyon/turkey/red-meat' },
       ];
@@ -287,7 +293,11 @@ export function useRontgen() {
           ayEkle(bilesikSon.ay, UCTAN_UCA.gecikmeAy), '/tarpovizyon/turkey/overview'));
       }
 
-      return sirala(sinyaller);
+      /* Tazelik damgası. Sinyal silinmiyor, İŞARETLENİYOR — ekran gizliyor ama
+         kaç tanesinin kaynağı bayat olduğunu da söyleyebiliyor. Kararı burada
+         verip orada saklamak, "sinyal yok" ile "kaynak eski" ayrımını
+         koruyor. */
+      return sirala(sinyaller.map((s) => ({ ...s, bayat: bayatMi(s.donem) })));
     },
   });
 }

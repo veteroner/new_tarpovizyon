@@ -55,7 +55,56 @@ export type Sinyal = {
   yol: string;
   /** Ölçünün dönemi. */
   donem?: string;
+  /** Kaynağı beklenen tazelik penceresini aştı mı — {@link bayatMi}. */
+  bayat?: boolean;
 };
+
+/* ── Tazelik ──────────────────────────────────────────────────────────────── */
+
+/**
+ * Bir sinyalin kaynağı ne kadar eskiyse "artık şu an değil".
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * Röntgen kendi kendini hesaplıyor, elle güncellenmiyor — ama beslediği
+ * tablolar elle güncelleniyor. Bir tablo beslenmezse röntgen susmaz: eski
+ * sayıyı GÜNCELMİŞ GİBİ göstermeye devam eder. Sessizce yanlış olmak,
+ * görünmez olmaktan kötü.
+ *
+ * ─── PENCERELER NEREDEN ─────────────────────────────────────────────────────
+ * Serinin YAYIM RİTMİNDEN, keyfi değil:
+ *   aylık seri → 3 ay.  TÜİK aylık bültenleri bir ay gecikmeli çıkıyor;
+ *                       üç ay, bir bültenin kaçırılmasına tolerans bırakıyor.
+ *   yıllık seri → 20 ay. Yıllık veri ertesi yılın ortasında yayımlanıyor;
+ *                       20 ay, "bir yayım dönemi tamamen atlandı" demek.
+ * Aynı eşikler `scripts/veri-kutugu.mjs`teki tazelik denetiminde de kullanılıyor.
+ */
+export const TAZELIK_AYLIK_AY = 3;
+export const TAZELIK_YILLIK_AY = 20;
+
+/**
+ * Dönem etiketinden bayatlık kararı.
+ *
+ * `donem` iki biçimde geliyor: 'YYYY-MM' (aylık) ya da 'YYYY' (yıllık). Sonuna
+ * eklenmiş açıklamalar ('2026-06 · 12 ay ort.') kırpılıyor. Dönemi olmayan
+ * sinyal denetlenemez — o zaman bayat SAYILMIYOR, çünkü "bilmiyoruz" ile
+ * "eski" aynı şey değil.
+ */
+export function bayatMi(donem: string | undefined, bugun = new Date()): boolean {
+  if (!donem) return false;
+  const aylik = donem.match(/^(\d{4})-(\d{2})/);
+  const yillik = donem.match(/^(\d{4})\s*$/);
+  const bugunAy = bugun.getFullYear() * 12 + bugun.getMonth() + 1;
+  if (aylik) {
+    const yas = bugunAy - (Number(aylik[1]) * 12 + Number(aylik[2]));
+    return yas > TAZELIK_AYLIK_AY;
+  }
+  if (yillik) {
+    /* Yıllık veri o yılın sonuna denk sayılıyor: 2024 verisi 2024-12'dir. */
+    const yas = bugunAy - (Number(yillik[1]) * 12 + 12);
+    return yas > TAZELIK_YILLIK_AY;
+  }
+  return false;
+}
 
 export const SEVIYE_SIRA: Record<Seviye, number> = {
   kritik: 0, uyari: 1, izle: 2, iyi: 3,

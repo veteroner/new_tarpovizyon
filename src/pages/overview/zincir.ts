@@ -109,43 +109,21 @@ export type Halka = {
  * Zincirin iskeleti. Değerler çalışma anında ölçülüp `ZincirDugum`e dönüşüyor;
  * burada duran şey ilişkilerin KENDİSİ, ölçüler değil.
  */
-export const KANATLI_ZINCIRI: Halka[] = [
-  {
-    id: 'yem-bitkisi',
-    baslik: 'Yem bitkisi fiyatları',
-    aciklama: 'Buğday, mısır, arpa, soya, ayçiçeği ve çiğit üretici fiyatlarının ortalaması.',
-    yol: '/tarpovizyon/turkey/price-index',
-  },
-  {
-    id: 'yem-fiyati',
-    baslik: 'Kanatlı yem fiyatı',
-    aciklama: 'Karma yemin kilogram fiyatı.',
-    gecis: { beta: 0.82, r: 0.95, gecikmeAy: 0, n: 67 },
-    yol: '/tarpovizyon/turkey/white-meat',
-  },
-  {
-    id: 'maliyet',
-    baslik: 'Üretim maliyeti',
-    aciklama: 'Kilogram canlı ağırlık başına maliyet.',
-    gecis: { beta: 0.99, r: 0.89, gecikmeAy: 1, n: 126 },
-    yol: '/tarpovizyon/turkey/white-meat',
-  },
-  {
-    id: 'uretici-fiyati',
-    baslik: 'Üretici fiyatı',
-    aciklama: 'Maliyet artışının fiyata yansıyan kısmı; dörtte biri üreticide kalıyor.',
-    gecis: { beta: 0.73, r: 0.57, gecikmeAy: 0, n: 112 },
-    yol: '/tarpovizyon/turkey/white-meat',
-  },
-  {
-    id: 'gida-enflasyonu',
-    baslik: 'Gıda enflasyonu',
-    aciklama: 'TÜFE gıda ve alkolsüz içecekler kalemi.',
-    gecis: { beta: 0.06, r: 0.54, gecikmeAy: 6, n: 105 },
-    yol: '/tarpovizyon/turkey/price-index',
-  },
-];
-
+/*
+ * ─── KANATLI KOLU KALDIRILDI ────────────────────────────────────────────────
+ * Burada ikinci bir zincir daha vardı: yem bitkisi → kanatlı yemi → maliyet →
+ * üretici fiyatı → gıda enflasyonu. Ölçümleri sütünkinden GÜÇLÜYDÜ
+ * (β=0,82 r=0,95; β=0,99 r=0,89; β=0,73 r=0,57).
+ *
+ * Kaldırılma sebebi ölçüm değil kaynak: kanatlı ve yumurta maliyet-fiyat
+ * tabloları elle besleniyordu ve o veriye erişim kalmadı. Beslenmeyen seriyle
+ * "şu an şöyle" demek, donmuş sayıyı bugünün durumu diye sunmak olurdu.
+ *
+ * Uçtan uca projeksiyon ETKİLENMEDİ: o, yem bitkisi baskısı ile gıda
+ * enflasyonu arasında DOĞRUDAN ölçülen ilişkiden geliyor (β=0,16 r=0,91) ve
+ * kanatlı serilerine hiç dokunmuyor. Ölçümler yukarıdaki yorumda duruyor;
+ * veri geri gelirse zincir yeniden kurulabilir.
+ */
 export const SUT_ZINCIRI: Halka[] = [
   {
     id: 'yem-bitkisi',

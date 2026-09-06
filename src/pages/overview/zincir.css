@@ -51,28 +51,19 @@
 
 .zn-yansima-metin strong { color: var(--text-primary); }
 
-/* Sekmeler: kanatlı / süt */
-.zn-sekmeler { display: flex; gap: 6px; }
-
-.zn-sekme {
-  min-height: 34px;
-  padding: 0 14px;
+/*
+ * Kol etiketi. Eskiden burada kanatlı/süt sekmeleri vardı; kanatlı kolu
+ * kaynağı beslenmediği için kaldırılınca tek düğmelik sekme çubuğu anlamsız
+ * kaldı — hangi zincirin gösterildiğini söyleyen düz bir etiket kaldı.
+ */
+.zn-kol {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 3px 10px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
 }
-
-.zn-sekme[aria-pressed='true'] {
-  color: var(--text-primary);
-  border-color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.zn-sekme:focus-visible { outline: 2px solid var(--accent, #16a34a); outline-offset: 2px; }
 
 /* Akış */
 .zn-akis {

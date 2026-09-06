@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card';
 import { useRontgen } from './useRontgen';
 import {
   KATEGORI_ETIKET, KATEGORI_NOT, KATEGORI_SIRA, SEVIYE_ETIKET,
+  TAZELIK_AYLIK_AY, TAZELIK_YILLIK_AY,
   type Kategori, type Seviye, type Sinyal,
 } from './rontgen';
 import './rontgen.css';
@@ -70,8 +71,20 @@ export function RontgenSection() {
   }
   if (isError || !sinyaller.length) return null;
 
-  const sayim = (s: Seviye) => sinyaller.filter((x) => x.seviye === s).length;
-  const gosterilen = iyiAcik ? sinyaller : sinyaller.filter((s) => s.seviye !== 'iyi');
+  /*
+   * Kaynağı bayat olan sinyaller listeden düşüyor.
+   *
+   * Röntgen kendini her açılışta hesaplıyor ama beslediği tabloların bir kısmı
+   * elle güncelleniyor. Beslenmeyen bir tablodan gelen sayıyı "şu an şöyle"
+   * diye göstermek, sessizce yanlış olmak demek. Gizlenen sayısı başlıkta
+   * duruyor: kaybolmuş gibi görünmesin, hangi tablonun beslenmesi gerektiği
+   * anlaşılsın.
+   */
+  const taze = sinyaller.filter((s) => !s.bayat);
+  const bayatSayi = sinyaller.length - taze.length;
+
+  const sayim = (s: Seviye) => taze.filter((x) => x.seviye === s).length;
+  const gosterilen = iyiAcik ? taze : taze.filter((s) => s.seviye !== 'iyi');
   const iyiSayi = sayim('iyi');
 
   const gruplar = KATEGORI_SIRA
@@ -90,6 +103,12 @@ export function RontgenSection() {
               {sayim(s)} {SEVIYE_ETIKET[s].toLocaleLowerCase('tr-TR')}
             </span>
           ))}
+          {bayatSayi > 0 && (
+            <span className="rg-rozet rg-rozet-bayat"
+              title={`Aylık seride ${TAZELIK_AYLIK_AY}, yıllık seride ${TAZELIK_YILLIK_AY} aydan eski kaynaklar gizlendi.`}>
+              {bayatSayi} kaynağı bayat
+            </span>
+          )}
         </div>
       </div>
 

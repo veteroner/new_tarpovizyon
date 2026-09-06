@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GitBranch, ArrowDown } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
@@ -16,9 +15,14 @@ import './zincir.css';
  *
  * ─── NEDEN BU KADAR ÇOK SAYI GÖSTERİYOR ─────────────────────────────────────
  * Her geçişte β, r ve n yazılı. Nedensellik iddiası, dayanağı gösterilmeden
- * yapıldığında kontrol edilemez hâle geliyor; okuyucu "r=0,57, n=112" ile
- * "r=0,95, n=67" arasındaki farkı görebilmeli. Zayıf halka gizlenmiyor,
+ * yapıldığında kontrol edilemez hâle geliyor; okuyucu "r=0,67, n=90" ile
+ * "r=0,90, n=67" arasındaki farkı görebilmeli. Zayıf halka gizlenmiyor,
  * yazılıyor.
+ *
+ * ─── NEDEN TEK ZİNCİR ───────────────────────────────────────────────────────
+ * Burada bir de kanatlı zinciri vardı ve ölçümleri sütünkinden güçlüydü.
+ * Kaldırılma sebebi ölçüm değil kaynak: kanatlı maliyet-fiyat verisi elle
+ * besleniyordu, erişim kalmadı. Ayrıntısı `zincir.ts`te.
  *
  * Sınamayı geçemeyen halkalar da altta duruyor. Elenen halkayı sessizce
  * çıkarmak, hiç sınamamakla aynı yere varır: okuyucu geriye kalanın seçilmiş
@@ -51,7 +55,6 @@ function Dugum({ d }: { d: ZincirDugum }) {
 
 export function ZincirSection() {
   const { data, isLoading, isError } = useZincir();
-  const [sekme, setSekme] = useState<'kanatli' | 'sut'>('kanatli');
 
   if (isLoading) {
     return (
@@ -64,7 +67,7 @@ export function ZincirSection() {
 
   const { yansima } = data;
   const seviye = yansimaSeviye(yansima.etki);
-  const halkalar = sekme === 'kanatli' ? data.kanatli : data.sut;
+  const halkalar = data.sut;
   const yon = yansima.etki >= 0 ? 'yukarı' : 'aşağı';
 
   return (
@@ -73,12 +76,7 @@ export function ZincirSection() {
         <h2 className="ui-card-title">
           <GitBranch size={18} aria-hidden="true" /> Aktarım zinciri
         </h2>
-        <div className="zn-sekmeler">
-          <button type="button" className="zn-sekme" aria-pressed={sekme === 'kanatli'}
-            onClick={() => setSekme('kanatli')}>Kanatlı</button>
-          <button type="button" className="zn-sekme" aria-pressed={sekme === 'sut'}
-            onClick={() => setSekme('sut')}>Çiğ süt</button>
-        </div>
+        <span className="zn-kol">Çiğ süt zinciri</span>
       </div>
 
       <div className={`zn-yansima zn-${seviye}`}>
@@ -93,7 +91,7 @@ export function ZincirSection() {
       </div>
 
       <div className="zn-akis">
-        {halkalar.map((h, i) => (
+        {halkalar.map((h) => (
           <div key={h.id}>
             {h.gecis && (
               <div className="zn-gecis">
@@ -106,7 +104,6 @@ export function ZincirSection() {
               </div>
             )}
             <Dugum d={h} />
-            {i === halkalar.length - 1 && null}
           </div>
         ))}
       </div>
