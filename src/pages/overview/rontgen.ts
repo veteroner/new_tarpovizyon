@@ -11,20 +11,40 @@
  * Model bu ekranın yerine değil, ÜSTÜNE gelebilir: sinyaller hesaplandıktan
  * sonra özetlenmesi ayrı bir iş. Önce ölçü, sonra cümle.
  *
+ * ─── KAPSAM: GİRDİDEN ÇIKTIYA ───────────────────────────────────────────────
+ * Röntgen zincirin tamamını tarıyor, tek bir halkasını değil:
+ *
+ *   GİRDİ        gübre, yem, enerji, ilaç, tohum, veteriner (GFE alt grupları)
+ *   EKONOMİ      kârlılık, parite, maliyet-fiyat makası
+ *   ÜRETİM       hayvansal üretim, hayvan varlığı
+ *   ARZ          yeterlilik derecesi, kişi başı üretim–tüketim
+ *   TİCARET      tarımsal dış ticaret dengesi
+ *   FİYAT        gıda enflasyonu, aktarım zinciri projeksiyonu
+ *
+ * Kategori sadece etiket değil: ekran bunlara göre gruplanıyor, çünkü otuz
+ * satırlık düz bir liste "neye bakmalıyım" sorusunu yeniden üretirdi.
+ *
  * ─── EŞİKLER NEREDEN ────────────────────────────────────────────────────────
  * Eşikler keyfi değil, ölçünün kendi anlamından:
- *   kârlılık  < 0   → üretici zarar ediyor (sıfır doğal eşik)
- *   yeterlilik< 1   → iç üretim tüketimi karşılamıyor (bire tam denk gelir)
- *   üretim    < -5% → tek yıllık dalgalanmanın ötesi
+ *   kârlılık   < 0   → üretici zarar ediyor (sıfır doğal eşik)
+ *   yeterlilik < 1   → iç üretim tüketimi karşılamıyor (bire tam denk gelir)
+ *   makas      > 0   → girdi, çıktıdan hızlı pahalanıyor (sıfır doğal eşik)
+ *   üretim     < -5% → tek yıllık dalgalanmanın ötesi
+ *   parite           → serinin KENDİ geçmiş medyanı (sektör folklorundan
+ *                      gelen "1,5 olmalı" gibi bir sayı uydurulmadı)
  * "Kritik" ile "uyarı" arasındaki ikinci eşik büyüklük içindir, yön değil.
  */
 
 /** Sinyalin aciliyeti. Renk TEK BAŞINA anlam taşımaz; her satırda etiket var. */
 export type Seviye = 'kritik' | 'uyari' | 'izle' | 'iyi';
 
+/** Zincirdeki yeri. Ekran bu alana göre gruplanıyor. */
+export type Kategori = 'girdi' | 'ekonomi' | 'uretim' | 'arz' | 'ticaret' | 'fiyat';
+
 export type Sinyal = {
   id: string;
   seviye: Seviye;
+  kategori: Kategori;
   /** Kısa başlık — ne olduğu. */
   baslik: string;
   /** Ölçülen değer, birimiyle. */
@@ -45,7 +65,27 @@ export const SEVIYE_ETIKET: Record<Seviye, string> = {
   kritik: 'Kritik', uyari: 'Uyarı', izle: 'İzle', iyi: 'İyi',
 };
 
-/* ── Kurallar ────────────────────────────────────────────────────────────── */
+export const KATEGORI_SIRA: Kategori[] = ['girdi', 'ekonomi', 'uretim', 'arz', 'ticaret', 'fiyat'];
+
+export const KATEGORI_ETIKET: Record<Kategori, string> = {
+  girdi: 'Girdi',
+  ekonomi: 'Ekonomi',
+  uretim: 'Üretim',
+  arz: 'Arz ve yeterlilik',
+  ticaret: 'Dış ticaret',
+  fiyat: 'Fiyat',
+};
+
+export const KATEGORI_NOT: Record<Kategori, string> = {
+  girdi: 'Üreticinin ödediği fiyatlar — gübre, yem, enerji, ilaç, tohum.',
+  ekonomi: 'Üreticiye kalan — kârlılık ve girdi-çıktı dengesi.',
+  uretim: 'Üretilen miktar ve onu üreten hayvan varlığı.',
+  arz: 'İç üretimin tüketimi karşılama durumu.',
+  ticaret: 'Tarımsal dış ticaretin yönü.',
+  fiyat: 'Tüketiciye yansıyan fiyat ve önümüzdeki döneme dair ölçülen baskı.',
+};
+
+/* ── Kurallar: EKONOMİ ────────────────────────────────────────────────────── */
 
 /**
  * Kârlılık kuralı.
@@ -57,57 +97,155 @@ export function karlilikSinyali(
   ad: string, karlilik: number | null, donem: string, yol: string,
 ): Sinyal | null {
   if (karlilik == null || !Number.isFinite(karlilik)) return null;
+  const ortak = { id: `karlilik-${ad}`, kategori: 'ekonomi' as const, donem, yol };
   if (karlilik >= 10) {
     return {
-      id: `karlilik-${ad}`, seviye: 'iyi', baslik: `${ad} üretimi kârda`,
-      olcu: `%${karlilik.toFixed(1)}`, donem, yol,
+      ...ortak, seviye: 'iyi', baslik: `${ad} üretimi kârda`,
+      olcu: `%${karlilik.toFixed(1)}`,
       aciklama: 'Üretici fiyatı maliyetin üzerinde.',
     };
   }
   if (karlilik >= 0) {
     return {
-      id: `karlilik-${ad}`, seviye: 'izle', baslik: `${ad} kâr marjı ince`,
-      olcu: `%${karlilik.toFixed(1)}`, donem, yol,
+      ...ortak, seviye: 'izle', baslik: `${ad} kâr marjı ince`,
+      olcu: `%${karlilik.toFixed(1)}`,
       aciklama: 'Maliyetteki küçük bir artış üretimi zarara çevirebilir.',
     };
   }
   return {
-    id: `karlilik-${ad}`,
+    ...ortak,
     seviye: karlilik < -10 ? 'kritik' : 'uyari',
     baslik: `${ad} üretimi zararda`,
-    olcu: `%${karlilik.toFixed(1)}`, donem, yol,
+    olcu: `%${karlilik.toFixed(1)}`,
     aciklama: 'Üretici maliyetin altında satıyor; sürdürülemezse arz daralır.',
   };
 }
 
 /**
- * Yeterlilik kuralı — iç üretimin tüketimi karşılama oranı.
+ * Maliyet makası — girdi enflasyonu eksi çıktı enflasyonu.
  *
- * 1,00 doğal eşik: altı ithalat bağımlılığı demek. Tabloda oran (1,17 gibi)
- * tutuluyor, yüzdeye çevriliyor.
+ * Tarım ekonomisinin en temel ölçüsü: üreticinin ÖDEDİĞİ fiyatlar (Girdi Fiyat
+ * Endeksi) ile ALDIĞI fiyatlar (Tarım ÜFE) arasındaki fark. Pozitifse makas
+ * üreticinin aleyhine açılıyor.
+ *
+ * ─── PENCERE NEDEN 12 AY ────────────────────────────────────────────────────
+ * Bu seçim ölçülerek yapıldı, çünkü makasın İŞARETİ pencereye göre değişiyor
+ * (2026-06 itibarıyla): 1 ay +22,5 · 3 ay +4,2 · 6 ay −1,8 · 12 ay −4,4.
+ * Yönü keyfi bir yumuşatma ayarına bağlı olan şey sinyal değil, düğmedir.
+ *
+ * 12 ay iki nedenle doğru pencere:
+ *   1. Tarım ÜFE mevsimsel, girdi endeksi değil. Kısa pencere, çıktı
+ *      fiyatlarının mevsimsel bir dilimini mevsimsel olmayan girdiyle
+ *      karşılaştırıyor — zıplamanın kaynağı bu. 12 ay tam bir üretim yılını
+ *      kapsayıp mevsimi dışarıda bırakıyor.
+ *   2. İstikrar ölçüldü: 12 aylık pencere 54 ayda 1 kez işaret değiştiriyor,
+ *      3 aylık 63 ayda 7 kez. İkincisi durumu değil gürültüyü raporlar.
+ *
+ * İki seri farklı aylarda bittiği için önce ORTAK aylar alınıyor; her birinin
+ * kendi son 12 ayını almak farklı dönemleri karşılaştırırdı.
  */
-export function yeterlilikSinyali(
-  ad: string, oran: number | null, yol: string,
+export const MAKAS_PENCERE = 12;
+export function makasSinyali(
+  girdi: number | null, cikti: number | null, donem: string, yol: string,
 ): Sinyal | null {
-  if (oran == null || !Number.isFinite(oran) || oran <= 0) return null;
-  const yuzde = oran * 100;
-  if (oran >= 1) {
+  if (girdi == null || cikti == null) return null;
+  const makas = girdi - cikti;
+  const ortak = { id: 'maliyet-makasi', kategori: 'ekonomi' as const, donem, yol };
+  if (makas <= 0) {
     return {
-      id: `yeterlilik-${ad}`, seviye: 'iyi', baslik: `${ad}: iç üretim yeterli`,
-      olcu: `%${yuzde.toFixed(0)}`, yol,
-      aciklama: 'Üretim tüketimi karşılıyor.',
+      ...ortak, seviye: 'iyi', baslik: 'Makas üreticinin lehine',
+      olcu: `${makas.toFixed(1)} puan`,
+      aciklama: `Ürün fiyatları (%${cikti.toFixed(1)}) girdiden (%${girdi.toFixed(1)}) hızlı artıyor.`,
     };
   }
   return {
-    id: `yeterlilik-${ad}`,
-    seviye: oran < 0.9 ? 'kritik' : 'uyari',
-    baslik: `${ad}: arz açığı`,
-    olcu: `%${yuzde.toFixed(0)}`, yol,
-    /* Ek almayan kuruluş: "%6'i" yanlış, "%6'sı" doğru ama son rakama göre
-       değişiyor. Cümleyi ek gerektirmeyecek şekilde kurmak daha sağlam. */
-    aciklama: `Aradaki %${(100 - yuzde).toFixed(0)} fark ithalatla kapanıyor.`,
+    ...ortak,
+    seviye: makas > 10 ? 'kritik' : 'uyari',
+    baslik: 'Maliyet makası açılıyor',
+    olcu: `+${makas.toFixed(1)} puan`,
+    aciklama: `Girdi %${girdi.toFixed(1)} artarken üretici fiyatları %${cikti.toFixed(1)} artıyor; fark üreticide kalıyor.`,
   };
 }
+
+/**
+ * Parite kuralı — bir birim ürünle kaç kilo yem alınabiliyor.
+ *
+ * Eşik serinin KENDİ geçmiş medyanı. Sektörde dolaşan "parite 1,5 olmalı" gibi
+ * sayılar var; hiçbiri bu veriden çıkmıyor, o yüzden kullanılmadı. Medyanın
+ * altına düşmek "geçmişteki tipik duruma göre kötüleşti" demek — bu, veriden
+ * çıkarılabilecek en güçlü ifade.
+ */
+export function pariteSinyali(
+  ad: string, simdi: number | null, medyan: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (simdi == null || medyan == null || !medyan) return null;
+  const sapma = ((simdi - medyan) / medyan) * 100;
+  const ortak = { id: `parite-${ad}`, kategori: 'ekonomi' as const, donem, yol };
+  if (sapma >= 0) {
+    return {
+      ...ortak, seviye: 'iyi', baslik: `${ad} paritesi geçmiş ortalamanın üzerinde`,
+      olcu: simdi.toFixed(2),
+      aciklama: `Uzun dönem medyanı ${medyan.toFixed(2)}; şu an %${Math.abs(sapma).toFixed(0)} yukarıda.`,
+    };
+  }
+  return {
+    ...ortak,
+    seviye: sapma < -15 ? 'kritik' : sapma < -5 ? 'uyari' : 'izle',
+    baslik: `${ad} paritesi geçmişin altında`,
+    olcu: simdi.toFixed(2),
+    aciklama: `Uzun dönem medyanı ${medyan.toFixed(2)}; şu an %${Math.abs(sapma).toFixed(0)} aşağıda — ürün, yemi eskisi kadar karşılamıyor.`,
+  };
+}
+
+/* ── Kurallar: GİRDİ ──────────────────────────────────────────────────────── */
+
+/** Bir girdi kaleminin sinyal üretmesi için farkın kaç ay üst üste sürmesi gerek. */
+export const GIRDI_SUREKLILIK = 3;
+
+/** Girdi kalemi, genel girdi enflasyonunu kaç puan aşarsa haber olur. */
+export const GIRDI_ESIK = 5;
+
+/**
+ * Girdi grubu kuralı — hangi girdi kalemi genel girdi enflasyonundan sapıyor.
+ *
+ * Eşik genel GFE: bir kalem ondan hızlı artıyorsa maliyeti o kalem çekiyor
+ * demektir. Mutlak yüzde eşiği (ör. %40) yıllara göre anlamsızlaşırdı.
+ *
+ * ─── NEDEN SÜREKLİLİK ŞARTI ─────────────────────────────────────────────────
+ * Tek aya bakan ilk sürüm gürültü raporluyordu. Ölçüldü (2025-07…2026-06):
+ * veteriner harcamalarının genel girdiden farkı Aralık'ta +39,6 puan, altı ay
+ * sonra −5,6. Tek aylık kural Aralık'ta "veteriner kritik" der, sonra sessizce
+ * kaybolurdu — kullanıcı sinyalin neden gittiğini hiç öğrenemezdi.
+ *
+ * Aynı dönemde gübre farkı 12 ayın 12'sinde de eşiğin üstünde kaldı. Aradaki
+ * fark tam olarak sinyal ile gürültü arasındaki fark; kural bunu ayırt etsin
+ * diye farkın {@link GIRDI_SUREKLILIK} ay ÜST ÜSTE sürmesi şart koşuldu.
+ *
+ * Aciliyet, son ayın sıçramasından değil süreklilik penceresinin
+ * ORTALAMASINDAN hesaplanıyor — aynı sebeple.
+ */
+export function girdiGrubuSinyali(
+  ad: string, sonFarklar: number[], grupSon: number, genelSon: number,
+  donem: string, yol: string,
+): Sinyal | null {
+  const pencere = sonFarklar.slice(-GIRDI_SUREKLILIK);
+  if (pencere.length < GIRDI_SUREKLILIK) return null;
+  if (!pencere.every((f) => f > GIRDI_ESIK)) return null;
+  const ortalamaFark = pencere.reduce((a, b) => a + b, 0) / pencere.length;
+  return {
+    id: `girdi-${ad}`,
+    kategori: 'girdi',
+    seviye: ortalamaFark > 15 ? 'kritik' : 'uyari',
+    baslik: `${ad} fiyatı girdi ortalamasını aşıyor`,
+    olcu: `%${grupSon.toFixed(1)}`,
+    donem,
+    yol,
+    aciklama: `Girdi ortalaması %${genelSon.toFixed(1)}; fark ${GIRDI_SUREKLILIK} aydır sürüyor, `
+      + `ortalama ${ortalamaFark.toFixed(1)} puan.`,
+  };
+}
+
+/* ── Kurallar: ÜRETİM ─────────────────────────────────────────────────────── */
 
 /**
  * Üretim değişimi kuralı.
@@ -124,12 +262,142 @@ export function uretimSinyali(
   if (degisim >= -5) return null;              // düşüş yoksa sinyal yok
   return {
     id: `uretim-${ad}`,
+    kategori: 'uretim',
     seviye: degisim < -10 ? 'kritik' : 'uyari',
     baslik: `${ad} üretimi düştü`,
-    olcu: `%${degisim.toFixed(1)}`, donem, yol,
+    olcu: `%${degisim.toFixed(1)}`,
+    donem,
+    yol,
     aciklama: 'Bir önceki yıla göre gerileme.',
   };
 }
+
+/**
+ * Hayvan varlığı kuralı.
+ *
+ * Üretimden AYRI bir sinyal: sürü küçülmesi bu yılın üretimini değil, gelecek
+ * yılların üretim tavanını belirliyor. %3 eşiği üretimdekinden dar, çünkü
+ * hayvan sayısı üretim kadar oynak değil — %3'lük bir daralma zaten büyük.
+ */
+export function varlikSinyali(
+  ad: string, onceki: number | null, son: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (!onceki || !son || onceki <= 0) return null;
+  const degisim = ((son - onceki) / onceki) * 100;
+  if (degisim >= -3) return null;
+  return {
+    id: `varlik-${ad}`,
+    kategori: 'uretim',
+    seviye: degisim < -8 ? 'kritik' : 'uyari',
+    baslik: `${ad} varlığı azaldı`,
+    olcu: `%${degisim.toFixed(1)}`,
+    donem,
+    yol,
+    aciklama: 'Sürü küçülmesi gelecek yılların üretim tavanını düşürür.',
+  };
+}
+
+/* ── Kurallar: ARZ ────────────────────────────────────────────────────────── */
+
+/**
+ * Yeterlilik kuralı — iç üretimin tüketimi karşılama oranı.
+ *
+ * 1,00 doğal eşik: altı ithalat bağımlılığı demek. Tabloda oran (1,17 gibi)
+ * tutuluyor, yüzdeye çevriliyor.
+ */
+export function yeterlilikSinyali(
+  ad: string, oran: number | null, yol: string,
+): Sinyal | null {
+  if (oran == null || !Number.isFinite(oran) || oran <= 0) return null;
+  const yuzde = oran * 100;
+  if (oran >= 1) {
+    return {
+      id: `yeterlilik-${ad}`, kategori: 'arz', seviye: 'iyi',
+      baslik: `${ad}: iç üretim yeterli`,
+      olcu: `%${yuzde.toFixed(0)}`, yol,
+      aciklama: 'Üretim tüketimi karşılıyor.',
+    };
+  }
+  return {
+    id: `yeterlilik-${ad}`,
+    kategori: 'arz',
+    seviye: oran < 0.9 ? 'kritik' : 'uyari',
+    baslik: `${ad}: arz açığı`,
+    olcu: `%${yuzde.toFixed(0)}`, yol,
+    /* Ek almayan kuruluş: "%6'i" yanlış, "%6'sı" doğru ama son rakama göre
+       değişiyor. Cümleyi ek gerektirmeyecek şekilde kurmak daha sağlam. */
+    aciklama: `Aradaki %${(100 - yuzde).toFixed(0)} fark ithalatla kapanıyor.`,
+  };
+}
+
+/**
+ * Kişi başı üretim–tüketim kuralı.
+ *
+ * Yeterlilikten farkı: yeterlilik oranı toplamlardan, bu ölçü kişi başına
+ * geliyor. Nüfus artarken üretim sabit kalırsa yeterlilik geç, bu ölçü erken
+ * uyarıyor. %5 eşiği ölçüm yönteminden gelen küçük farkları eliyor.
+ */
+export function kisiBasiSinyali(
+  ad: string, uretim: number | null, tuketim: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (!uretim || !tuketim || tuketim <= 0) return null;
+  const fark = ((uretim - tuketim) / tuketim) * 100;
+  if (Math.abs(fark) < 5) return null;         // dengede — haber değil
+  if (fark > 0) {
+    return {
+      id: `kisibasi-${ad}`, kategori: 'arz', seviye: 'iyi',
+      baslik: `${ad}: kişi başı üretim tüketimin üzerinde`,
+      olcu: `%${fark.toFixed(0)}`, donem, yol,
+      aciklama: 'Aradaki fark ihracat kapasitesi anlamına geliyor.',
+    };
+  }
+  return {
+    id: `kisibasi-${ad}`,
+    kategori: 'arz',
+    seviye: fark < -15 ? 'kritik' : 'uyari',
+    baslik: `${ad}: kişi başı üretim tüketimin altında`,
+    olcu: `%${fark.toFixed(0)}`, donem, yol,
+    aciklama: 'Nüfus başına düşen üretim tüketimi karşılamıyor.',
+  };
+}
+
+/* ── Kurallar: TİCARET ────────────────────────────────────────────────────── */
+
+/**
+ * Tarımsal dış ticaret dengesi.
+ *
+ * Sıfır doğal eşik: altı net ithalatçı demek. İkinci ölçü olarak YÖN de
+ * bakılıyor — fazla veriyorken daralıyorsa bu, tek başına pozitif rakamın
+ * gizlediği bir gidişat.
+ */
+export function ticaretSinyali(
+  ihracat: number | null, ithalat: number | null,
+  oncekiDenge: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (ihracat == null || ithalat == null) return null;
+  const denge = ihracat - ithalat;
+  const ortak = { id: 'tarim-dis-ticaret', kategori: 'ticaret' as const, donem, yol };
+  const bicim = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} milyar $`;
+  if (denge < 0) {
+    return {
+      ...ortak, seviye: 'uyari', baslik: 'Tarımsal dış ticaret açık veriyor',
+      olcu: bicim(denge),
+      aciklama: `İhracat ${ihracat.toFixed(1)}, ithalat ${ithalat.toFixed(1)} milyar dolar.`,
+    };
+  }
+  const daralma = oncekiDenge != null && denge < oncekiDenge;
+  return {
+    ...ortak,
+    seviye: daralma ? 'izle' : 'iyi',
+    baslik: daralma ? 'Tarımsal ticaret fazlası daralıyor' : 'Tarımsal dış ticaret fazla veriyor',
+    olcu: bicim(denge),
+    aciklama: daralma
+      ? `Bir önceki yıl ${bicim(oncekiDenge!)} idi.`
+      : `İhracat ${ihracat.toFixed(1)}, ithalat ${ithalat.toFixed(1)} milyar dolar.`,
+  };
+}
+
+/* ── Kurallar: FİYAT ──────────────────────────────────────────────────────── */
 
 /**
  * Gıda enflasyonu kuralı.
@@ -142,23 +410,70 @@ export function gidaEnflasyonSinyali(
 ): Sinyal | null {
   if (gida == null || genel == null) return null;
   const fark = gida - genel;
+  const ortak = { id: 'gida-enflasyon', kategori: 'fiyat' as const, donem, yol };
   if (fark <= 0) {
     return {
-      id: 'gida-enflasyon', seviye: 'iyi', baslik: 'Gıda enflasyonu genelin altında',
-      olcu: `%${gida.toFixed(1)}`, donem, yol,
+      ...ortak, seviye: 'iyi', baslik: 'Gıda enflasyonu genelin altında',
+      olcu: `%${gida.toFixed(1)}`,
       aciklama: `Genel TÜFE %${genel.toFixed(1)}.`,
     };
   }
   return {
-    id: 'gida-enflasyon',
+    ...ortak,
     seviye: fark > 5 ? 'kritik' : 'uyari',
     baslik: 'Gıda enflasyonu genelin üzerinde',
-    olcu: `%${gida.toFixed(1)}`, donem, yol,
+    olcu: `%${gida.toFixed(1)}`,
     aciklama: `Genel TÜFE %${genel.toFixed(1)} — aradaki fark ${fark.toFixed(1)} puan.`,
   };
 }
+
+/**
+ * Aktarım zinciri projeksiyonu.
+ *
+ * Röntgendeki TEK ileriye dönük satır. Ölçülen katsayı ve gecikme
+ * `zincir.ts`te; buradaki iş onu sinyale çevirmek. Eşik sıfır doğal:
+ * gıda enflasyonuna yukarı mı aşağı mı baskı geliyor.
+ */
+export function aktarimSinyali(
+  etki: number | null, hedefAy: string | null, yol: string,
+): Sinyal | null {
+  if (etki == null || !hedefAy) return null;
+  const ortak = { id: 'aktarim-zinciri', kategori: 'fiyat' as const, donem: hedefAy, yol };
+  const bicim = `${etki >= 0 ? '+' : '−'}${Math.abs(etki).toFixed(1)} puan`;
+  if (etki <= 0) {
+    return {
+      ...ortak, seviye: 'iyi', baslik: 'Yem bitkilerinden gelen baskı aşağı yönlü',
+      olcu: bicim,
+      aciklama: 'Bugünkü yem bitkisi fiyatları gıda enflasyonunu ileride aşağı çekiyor.',
+    };
+  }
+  return {
+    ...ortak,
+    seviye: etki > 3 ? 'kritik' : etki > 1 ? 'uyari' : 'izle',
+    baslik: 'Yem bitkilerinden gıda enflasyonuna baskı geliyor',
+    olcu: bicim,
+    aciklama: 'Bugünkü yem bitkisi fiyatlarının ileriye taşıdığı ölçülen etki.',
+  };
+}
+
+/* ── Sıralama ─────────────────────────────────────────────────────────────── */
 
 /** Sinyalleri aciliyete göre sıralar; eşitlikte başlığa göre. */
 export const sirala = (s: Sinyal[]): Sinyal[] =>
   [...s].sort((a, b) => SEVIYE_SIRA[a.seviye] - SEVIYE_SIRA[b.seviye]
     || a.baslik.localeCompare(b.baslik, 'tr'));
+
+/** Bir dizinin medyanı. Parite eşiği için — ortalama değil, çünkü şok yılları
+ *  ortalamayı kaydırıyor, medyanı kaydırmıyor. */
+export function medyan(v: number[]): number | null {
+  const s = v.filter(Number.isFinite).sort((a, b) => a - b);
+  if (!s.length) return null;
+  const o = Math.floor(s.length / 2);
+  return s.length % 2 ? s[o] : (s[o - 1] + s[o]) / 2;
+}
+
+/** Son n değerin ortalaması — oynak serileri yumuşatmak için. */
+export function sonOrtalama(v: number[], n: number): number | null {
+  const dilim = v.filter(Number.isFinite).slice(-n);
+  return dilim.length ? dilim.reduce((a, b) => a + b, 0) / dilim.length : null;
+}

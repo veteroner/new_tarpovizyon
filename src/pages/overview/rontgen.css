@@ -36,6 +36,37 @@
   max-width: 74ch;
 }
 
+/*
+ * Kategori başlığı.
+ *
+ * Grup adı ve altındaki açıklama aynı satırda başlıyor: açıklama ayrı bir
+ * paragraf olsaydı otuz satırlık listede altı fazladan blok daha eklerdi ve
+ * gruplama, çözdüğü dağınıklığı geri getirirdi.
+ */
+.rg-grup { margin-top: 18px; }
+.rg-grup:first-of-type { margin-top: 4px; }
+
+.rg-grup-bas {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.rg-grup-not {
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
 .rg-liste { list-style: none; margin: 0; padding: 0; }
 
 .rg-satir {
