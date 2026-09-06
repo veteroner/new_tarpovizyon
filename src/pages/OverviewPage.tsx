@@ -2,6 +2,7 @@ import { sayi } from '../utils/sayi';
 import { useOverviewData } from './overview/useOverviewData';
 import { GeneralStatsSection } from './overview/GeneralStatsSection';
 import { RontgenSection } from './overview/RontgenSection';
+import { ZincirSection } from './overview/ZincirSection';
 import { MilkSection } from './overview/MilkSection';
 import { MeatSection } from './overview/MeatSection';
 import { EggSection } from './overview/EggSection';
@@ -43,6 +44,16 @@ export function OverviewPage() {
         * gerekirdi — yani çözdüğü sorunu yeniden üretirdi.
         */}
       <RontgenSection />
+
+      {/*
+        * Zincir röntgenin HEMEN ALTINDA.
+        *
+        * Röntgen "şu an neyde sorun var" diyor, zincir "bugünkü hareket nereye
+        * varıyor". İkincisi ancak birincisi okunduktan sonra anlam kazanıyor;
+        * tersi sırada, henüz ne olduğunu bilmeyen okuyucuya ne olacağı
+        * anlatılmış olurdu.
+        */}
+      <ZincirSection />
 
       <GeneralStatsSection
         data={data}
