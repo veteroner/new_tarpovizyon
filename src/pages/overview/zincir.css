@@ -33,13 +33,6 @@
 .zn-uyari  { border-color: var(--viz-warning, #a8620a); }
 .zn-iyi    { border-color: var(--viz-good, #1b6b3a); }
 
-.zn-etki {
-  font-size: 1.6rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
 
 .zn-yansima-metin {
   flex: 1 1 22ch;
@@ -51,24 +44,11 @@
 
 .zn-yansima-metin strong { color: var(--text-primary); }
 
-/*
- * Kol etiketi. Eskiden burada kanatlı/süt sekmeleri vardı; kanatlı kolu
- * kaynağı beslenmediği için kaldırılınca tek düğmelik sekme çubuğu anlamsız
- * kaldı — hangi zincirin gösterildiğini söyleyen düz bir etiket kaldı.
- */
-.zn-kol {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 3px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-}
 
 /*
- * Öncülük grafiği. Yansıma kartıyla halka listesinin arasında duruyor:
- * önce iddia (kaç puan, ne zaman), sonra iddianın kanıtı, sonra iddianın
- * hangi yoldan geçtiği.
+ * Öncülük grafiği. Zincirin ALTINDA duruyor: önce sonuç cümlesi, sonra
+ * zincirin kendisi (oklarla), sonra iddianın kanıtı. Grafiği yukarı almak,
+ * daha ilk bakışta okuyucunun önüne iki çizgi koymak olurdu.
  */
 .zn-grafik {
   margin: 4px 0 18px;
@@ -108,13 +88,12 @@
 .zn-dugum {
   display: grid;
   grid-template-columns: 1fr auto;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  padding: 11px 0;
-  border-top: 1px solid var(--border);
+  padding: 9px 0;
 }
 
-.zn-akis .zn-dugum:last-of-type { border-bottom: 1px solid var(--border); }
+
 
 .zn-dugum-govde {
   display: flex;
@@ -131,61 +110,91 @@ a.zn-dugum-govde:focus-visible { outline: 2px solid var(--accent, #16a34a); outl
 .zn-dugum-ad { font-weight: 600; color: var(--text-primary); }
 .zn-dugum-not { font-size: 0.82rem; color: var(--text-secondary); }
 
-.zn-dugum-olcu {
-  text-align: right;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.zn-dugum-olcu small {
-  display: block;
-  font-weight: 500;
-  font-size: 0.72rem;
-  color: var(--text-secondary);
+@media (min-width: 900px) {
+  .zn-dugum { grid-template-columns: 1fr auto; }
 }
 
 /*
- * Geçiş satırı: iki düğüm arasındaki ölçülen ilişki.
- * Kenardaki çizgi zincirin sürdüğünü gösteriyor; bilgi yazının kendisinde.
+ * ─── SADE DİL, SADE DÜZEN ───────────────────────────────────────────────────
+ * Bu bölüm bir dönem ölçüm notlarıyla doluydu; hepsi doğruydu ama okuyucuya
+ * değil yönteme hizmet ediyordu. Ekranda kalanlar: tek cümle, oklu zincir,
+ * grafik. İstatistik katlanmış hâlde duruyor.
+ */
+
+/* Yön oku — sayı yerine yön. Ok TEK BAŞINA anlam taşımaz, yanında sözü var. */
+.zn-yon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zn-yon-yukari { color: var(--viz-critical, #b3261e); }
+.zn-yon-asagi  { color: var(--viz-good, #1b6b3a); }
+.zn-yon-duz    { color: var(--text-secondary); }
+
+.zn-yon-etiket { font-weight: 500; }
+
+/*
+ * Geçiş: yalnızca küçük bir ok, kutu değil.
+ *
+ * İlk hâlinde sol kenarlıklı bir satırdı ve düğüm satırlarının kendi
+ * kenarlıklarıyla birleşince her okun etrafında boş bir dikdörtgen çıkıyordu
+ * — göz onu "içi boş kart" diye okuyor ve zincirin aktığını göstermek yerine
+ * kesiyordu. Ok artık serbest duruyor.
  */
 .zn-gecis {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0 6px 14px;
-  margin-left: 6px;
-  border-left: 2px solid var(--border);
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  padding: 2px 0;
+  padding-left: 10px;
+  color: var(--border);
 }
 
-.zn-gecis-ok { color: var(--text-secondary); flex: none; }
+.zn-detay-dugme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
 
-.zn-not {
-  margin: 14px 0 0;
+.zn-detay-dugme:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+.zn-detay-dugme:focus-visible { outline: 2px solid var(--accent, #16a34a); outline-offset: 2px; }
+
+.zn-detay {
+  margin-top: 10px;
   font-size: 0.8rem;
   line-height: 1.6;
   color: var(--text-secondary);
-  max-width: 78ch;
 }
 
-.zn-not + .zn-not { margin-top: 8px; }
+.zn-detay p { margin: 0 0 8px; max-width: 78ch; }
 
-.zn-elenen {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
+.zn-detay-tablo {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 10px;
+  font-variant-numeric: tabular-nums;
 }
 
-.zn-elenen b { color: var(--text-primary); font-weight: 600; }
-
-@media (min-width: 900px) {
-  .zn-dugum { grid-template-columns: 1fr auto; }
+.zn-detay-tablo th,
+.zn-detay-tablo td {
+  text-align: left;
+  padding: 5px 8px 5px 0;
+  border-bottom: 1px solid var(--border);
 }
+
+.zn-detay-tablo th { font-weight: 600; color: var(--text-primary); }
+.zn-detay-tablo td:not(:first-child),
+.zn-detay-tablo th:not(:first-child) { text-align: right; }

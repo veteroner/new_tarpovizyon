@@ -147,14 +147,14 @@ export const SUT_ZINCIRI: Halka[] = [
   },
   {
     id: 'uretici-fiyati',
-    baslik: 'Tavsiye fiyatı',
+    baslik: 'Çiğ süt fiyatı',
     aciklama: 'USK tavsiye fiyatı maliyeti neredeyse tamamen takip ediyor.',
     gecis: { beta: 0.98, r: 0.82, gecikmeAy: 0, n: 92 },
     yol: '/tarpovizyon/turkey/milk',
   },
   {
     id: 'gida-enflasyonu',
-    baslik: 'Gıda enflasyonu',
+    baslik: 'Market gıda fiyatları',
     aciklama: 'TÜFE gıda ve alkolsüz içecekler kalemi.',
     gecis: { beta: 0.18, r: 0.72, gecikmeAy: 7, n: 84 },
     yol: '/tarpovizyon/turkey/price-index',

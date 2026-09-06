@@ -1,57 +1,66 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { GitBranch, ArrowDown } from 'lucide-react';
+import { GitBranch, ArrowDown, ArrowUp, ChevronDown } from 'lucide-react';
 import {
   CartesianGrid, Legend, Line, LineChart, ReferenceLine,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { Card } from '../../components/ui/Card';
+import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { useZincir } from './useZincir';
-import { UCTAN_UCA, ayYaz, yansimaSeviye, type ZincirDugum } from './zincir';
+import { UCTAN_UCA, ayYaz, type ZincirDugum } from './zincir';
 import './zincir.css';
 
 /**
- * Aktarım zinciri — "yem bitkisi fiyatı nereye gidiyor" ekranı.
+ * Aktarım zinciri — "yem ucuzlarsa markete ne olur" ekranı.
  *
- * ─── RÖNTGENDEN FARKI ───────────────────────────────────────────────────────
- * Röntgen "şu an neyde sorun var" diyor: bugünkü ölçüler, bugünkü eşikler.
- * Burası tek soruyu yanıtlıyor: bugünkü bir hareket NEREYE, NE KADAR ve KAÇ AY
- * SONRA varıyor. İkisi birbirinin yerine geçmiyor.
+ * ─── EKRANIN DİLİ ───────────────────────────────────────────────────────────
+ * Bu bölümün ilk hâli ölçüm notlarıyla doluydu: "genel TÜFE üzeri puan",
+ * "β=0,16", "aktarım 0,62 · r=0,90 · 90 ay ölçüm", ve altında yöntemi
+ * anlatan iki paragraf. Hepsi doğruydu ve hepsi YANLIŞ YERDEYDİ — okuyucuya
+ * değil, yöntemi savunmak için yazılmıştı. Konuya hakim olmayan biri ekranı
+ * açtığında ne olduğunu anlamıyordu.
  *
- * ─── NEDEN BU KADAR ÇOK SAYI GÖSTERİYOR ─────────────────────────────────────
- * Her geçişte β, r ve n yazılı. Nedensellik iddiası, dayanağı gösterilmeden
- * yapıldığında kontrol edilemez hâle geliyor; okuyucu "r=0,67, n=90" ile
- * "r=0,90, n=67" arasındaki farkı görebilmeli. Zayıf halka gizlenmiyor,
- * yazılıyor.
+ * Yöntem anlatımı artık burada, kodda; ölçümler `zincir.ts` başında. Ekranda
+ * kalan: tek cümlelik sonuç, bir grafik, ve yukarı/aşağı oklarla zincirin
+ * kendisi. Sayılar duruyor ama ikinci planda — "%−11 puan" başlığı değil,
+ * "yem bitkileri ucuzluyor" başlığı karşılıyor.
  *
- * ─── NEDEN TEK ZİNCİR ───────────────────────────────────────────────────────
- * Burada bir de kanatlı zinciri vardı ve ölçümleri sütünkinden güçlüydü.
- * Kaldırılma sebebi ölçüm değil kaynak: kanatlı maliyet-fiyat verisi elle
- * besleniyordu, erişim kalmadı. Ayrıntısı `zincir.ts`te.
- *
- * Sınamayı geçemeyen halkalar da altta duruyor. Elenen halkayı sessizce
- * çıkarmak, hiç sınamamakla aynı yere varır: okuyucu geriye kalanın seçilmiş
- * olduğunu bilemez.
+ * İstatistikler silinmedi, KATLANDI: "Ölçüm ayrıntısı" düğmesi altında.
+ * Meraklı okuyucu ve iddiayı sınamak isteyen kişi hâlâ bulabiliyor; sıradan
+ * okuyucunun önünü kesmiyor.
  */
 
-const puan = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} puan`;
+/** Ölçünün yönünü sade Türkçeye çevirir. */
+const yonSozu = (v: number | null, artan: string, azalan: string, notr: string) => {
+  if (v == null) return notr;
+  if (v > 1) return artan;
+  if (v < -1) return azalan;
+  return notr;
+};
 
 function Dugum({ d }: { d: ZincirDugum }) {
+  const yukari = (d.deger ?? 0) > 1;
+  const asagi = (d.deger ?? 0) < -1;
   const govde = (
     <>
       <span className="zn-dugum-ad">{d.baslik}</span>
-      <span className="zn-dugum-not">{d.aciklama}</span>
+      <span className="zn-dugum-not">
+        {yonSozu(d.deger, 'enflasyondan hızlı artıyor', 'enflasyonun gerisinde kalıyor',
+          'enflasyonla birlikte gidiyor')}
+      </span>
     </>
   );
   return (
     <div className="zn-dugum">
-      {/* Sarmalayıcı da bağlantı da sütun düzeninde olmalı: <Link> satır içi
-          kaldığında başlıkla açıklama yan yana yapışıyordu. */}
       {d.yol
         ? <Link to={d.yol} className="zn-dugum-govde">{govde}</Link>
         : <span className="zn-dugum-govde">{govde}</span>}
-      <span className="zn-dugum-olcu">
-        {d.deger == null ? '—' : puan(d.deger)}
-        {d.ay && <small>{ayYaz(d.ay)}</small>}
+      <span className={`zn-yon ${yukari ? 'zn-yon-yukari' : asagi ? 'zn-yon-asagi' : 'zn-yon-duz'}`}>
+        {yukari ? <ArrowUp size={18} aria-hidden="true" /> : asagi ? <ArrowDown size={18} aria-hidden="true" /> : '—'}
+        <span className="zn-yon-etiket">
+          {yukari ? 'artıyor' : asagi ? 'düşüyor' : 'yatay'}
+        </span>
       </span>
     </div>
   );
@@ -59,6 +68,7 @@ function Dugum({ d }: { d: ZincirDugum }) {
 
 export function ZincirSection() {
   const { data, isLoading, isError } = useZincir();
+  const [detay, setDetay] = useState(false);
 
   if (isLoading) {
     return (
@@ -70,68 +80,85 @@ export function ZincirSection() {
   if (isError || !data?.yansima) return null;
 
   const { yansima } = data;
-  const seviye = yansimaSeviye(yansima.etki);
-  const halkalar = data.sut;
-  const yon = yansima.etki >= 0 ? 'yukarı' : 'aşağı';
+  const ucuzluyor = yansima.bugun < 0;
+  const iyi = yansima.etki <= 0;
+
+  /* AI'ya verilen bağlam: ölçüler ve ne anlama geldikleri. Model sayıyı
+     görmeden cümle kurmasın diye ham seri de gidiyor. */
+  const aiBaglam = {
+    soru: 'Yem bitkisi fiyatlarındaki hareket gıda enflasyonuna ne yapar?',
+    yemBitkisiDurumu: `${ucuzluyor ? 'ucuzluyor' : 'pahalanıyor'} (genel enflasyona göre ${yansima.bugun.toFixed(1)} puan)`,
+    ölçülenGecikme: `${UCTAN_UCA.gecikmeAy} ay`,
+    ölçülenKatsayı: UCTAN_UCA.beta,
+    ilişkiGücü: `r=${UCTAN_UCA.r}`,
+    beklenenEtki: `gıda enflasyonuna ${yansima.etki.toFixed(1)} puan, ${ayYaz(yansima.hedefAy)} civarı`,
+    zincir: data.sut.map((h) => ({ adim: h.baslik, durum: h.deger })),
+    not: 'Değerler genel TÜFE üzeri puan; pozitif = enflasyondan hızlı artıyor.',
+  };
 
   return (
     <Card className="zn" aralik="normal">
       <div className="zn-bas">
         <h2 className="ui-card-title">
-          <GitBranch size={18} aria-hidden="true" /> Aktarım zinciri
+          <GitBranch size={18} aria-hidden="true" /> Yemden markete
         </h2>
-        <span className="zn-kol">Çiğ süt zinciri</span>
+        <ChartInsightButton
+          title="Yem bitkisi fiyatlarından gıda enflasyonuna aktarım"
+          description="Hayvan yemi yapılan ürünlerin fiyatı ile gıda enflasyonu arasındaki gecikmeli ilişki"
+          data={data.oncululuk}
+          context={aiBaglam}
+        />
       </div>
 
-      <div className={`zn-yansima zn-${seviye}`}>
-        <span className="zn-etki">{puan(yansima.etki)}</span>
+      {/* Tek cümlelik sonuç. Sayı değil, olay. */}
+      <div className={`zn-yansima ${iyi ? 'zn-iyi' : 'zn-uyari'}`}>
         <span className="zn-yansima-metin">
-          Yem bitkisi fiyatları {ayYaz(yansima.ay)} itibarıyla genel enflasyonun{' '}
-          <strong>{puan(yansima.bugun)}</strong> {yansima.bugun >= 0 ? 'üzerinde' : 'altında'}.
-          Geçmişte bu hareket gıda enflasyonuna <strong>{UCTAN_UCA.gecikmeAy} ay sonra</strong>{' '}
-          varıyordu — yani <strong>{ayYaz(yansima.hedefAy)}</strong> civarında{' '}
-          {puan(yansima.etki)} {yon} yönlü etki.
+          <strong>
+            Hayvan yemi yapılan ürünler {ucuzluyor ? 'ucuzluyor' : 'pahalanıyor'}.
+          </strong>
+          {' '}Geçmişte böyle olduğunda market fiyatları yaklaşık bir yıl sonra{' '}
+          {iyi ? 'yavaşlıyordu' : 'hızlanıyordu'} — bu kez{' '}
+          <strong>{ayYaz(yansima.hedefAy)}</strong> dolaylarına denk geliyor.
         </span>
       </div>
 
+      {/* Zincir: beş adım, yukarı/aşağı ok. Sayı yok. */}
+      <div className="zn-akis">
+        {data.sut.map((h) => (
+          <div key={h.id}>
+            {h.gecis && <div className="zn-gecis" aria-hidden="true"><ArrowDown size={14} /></div>}
+            <Dugum d={h} />
+          </div>
+        ))}
+      </div>
+
       {/*
-        * ─── ÖNCÜLÜK GRAFİĞİ ────────────────────────────────────────────────
-        * Zincirin en zor anlaşılan yanı, iddianın GECİKMELİ olması. Sayıyla
-        * anlatınca ("11 ay sonra") okuyucunun elinde inanmak ya da inanmamak
-        * dışında seçenek kalmıyor.
-        *
-        * Bu grafik iddianın kendisini gösteriyor: yem bitkisi çizgisi 11 ay
-        * KAYDIRILMIŞ hâlde çiziliyor. İki çizgi üst üste biniyorsa ölçülen
-        * ilişki gerçekten oradadır; binmiyorsa okuyucu da görür. Kaydırma
-        * gizlenmiyor, başlıkta yazıyor — kaydırılmış seriyi kaydırılmamış gibi
-        * sunmak, grafiğin söyleyebileceği en büyük yalan olurdu.
+        * Grafik, iddiayı sınanabilir kılıyor: kesikli çizgi yem bitkisi
+        * fiyatlarının bir yıl önceki hâlinden BEKLENEN etki, düz çizgi o ay
+        * GERÇEKLEŞEN gıda enflasyonu. Üst üste biniyorlarsa ilişki oradadır.
         */}
       {data.oncululuk.length > 12 && (
         <div className="zn-grafik">
           <div className="zn-grafik-bas">
-            Yem bitkisi fiyatlarının beklenen etkisi, gerçekleşen gıda enflasyonuyla
-            <span> · {UCTAN_UCA.gecikmeAy} ay kaydırılmış × {UCTAN_UCA.beta.toFixed(2)} ·
-              r={UCTAN_UCA.r.toFixed(2)} · {data.oncululuk.length} ay</span>
+            Beklenen etki, gerçekleşenle birlikte
           </div>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={190}>
             <LineChart data={data.oncululuk} margin={{ top: 6, right: 10, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                 interval="preserveStartEnd" minTickGap={40} />
-              {/* Sıfır çizgisi anlamlı: üstü "genel enflasyonun üzerinde". */}
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={44}
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={40}
                 tickFormatter={(v: number) => `${v > 0 ? '+' : ''}${v}`} />
               <ReferenceLine y={0} stroke="var(--text-secondary)" strokeDasharray="2 2" />
               <Tooltip
                 formatter={(v: number, ad: string) => [
-                  `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} puan`,
-                  ad === 'beklenenEtki' ? 'Yem bitkilerinden beklenen etki' : 'Gerçekleşen gıda enflasyonu',
+                  `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`,
+                  ad === 'beklenenEtki' ? 'Yemden beklenen' : 'Markette gerçekleşen',
                 ]}
                 labelFormatter={(l: string) => ayYaz(String(l))}
               />
               <Legend formatter={(v: string) => (v === 'beklenenEtki'
-                ? 'Yem bitkilerinden beklenen etki'
-                : 'Gerçekleşen gıda enflasyonu')} />
+                ? 'Yemden beklenen' : 'Markette gerçekleşen')} />
               <Line type="monotone" dataKey="beklenenEtki" stroke="var(--viz-warning, #a8620a)"
                 strokeWidth={2} dot={false} strokeDasharray="5 3" />
               <Line type="monotone" dataKey="gidaEnflasyonu" stroke="var(--viz-critical, #b3261e)"
@@ -139,64 +166,56 @@ export function ZincirSection() {
             </LineChart>
           </ResponsiveContainer>
           <p className="zn-grafik-not">
-            Her iki çizgi de <strong>genel TÜFE üzeri puan</strong>. Kesikli çizgi
-            yem bitkisi fiyatlarının {UCTAN_UCA.gecikmeAy} ay önceki hâlinin
-            ölçülen katsayıyla ({UCTAN_UCA.beta.toFixed(2)}) çarpılmışı — yani
-            modelin o ay için beklediği etki. Düz çizgi o ay gerçekten olan.
-            Ham seri çizilseydi yem bitkisi ±100 puan salınırken gıda
-            enflasyonu ±20'de kalırdı ve iki çizgi karşılaştırılamazdı;
-            katsayıyı uygulamak ikisini aynı birime getiriyor. İkisinin üst
-            üste binmesi, ölçülen ilişkinin sınanmasıdır — ayrıştığı yerler de
-            görünüyor.
+            İki çizgi ne kadar üst üste biniyorsa ilişki o kadar güçlü.
           </p>
         </div>
       )}
 
-      <div className="zn-akis">
-        {halkalar.map((h) => (
-          <div key={h.id}>
-            {h.gecis && (
-              <div className="zn-gecis">
-                <ArrowDown size={14} className="zn-gecis-ok" aria-hidden="true" />
-                <span>
-                  aktarım {h.gecis.beta.toFixed(2)} ·{' '}
-                  {h.gecis.gecikmeAy === 0 ? 'aynı ay' : `${h.gecis.gecikmeAy} ay sonra`} ·{' '}
-                  r={h.gecis.r.toFixed(2)} · {h.gecis.n} ay ölçüm
-                </span>
-              </div>
-            )}
-            <Dugum d={h} />
-          </div>
-        ))}
-      </div>
+      {/*
+        * Ölçüm ayrıntısı katlı.
+        *
+        * Silmedim: iddianın dayanağı gösterilmezse kontrol edilemez hâle
+        * gelir. Ama açık bırakmak da sıradan okuyucunun önünü kesiyordu.
+        */}
+      <button type="button" className="zn-detay-dugme" onClick={() => setDetay((v) => !v)}
+        aria-expanded={detay}>
+        <ChevronDown size={14} aria-hidden="true"
+          style={{ transform: detay ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />
+        Ölçüm ayrıntısı
+      </button>
 
-      <p className="zn-not">
-        Bütün değerler <strong>genel TÜFE üzeri puan</strong>: serinin yıllık
-        değişiminden genel enflasyonun yıllık değişimi çıkarılmış. Yüksek
-        enflasyonda her seri her seriyle korelasyon verir; ortak enflasyon
-        çıkarılmadan ölçülen ilişki sahte olur. “Aktarım”, öndeki ölçü 1 puan
-        oynadığında sonrakinde ölçülen ortalama oynama.
-      </p>
-      <p className="zn-not">
-        Baştaki büyüklük halkaların çarpımından değil, yem bitkisi baskısı ile
-        gıda enflasyonu arasında <strong>doğrudan</strong> ölçülen ilişkiden
-        geliyor (r={UCTAN_UCA.r.toFixed(2)}, tepe {UCTAN_UCA.gecikmeAy}. ayda,{' '}
-        {UCTAN_UCA.n} aylık ölçüm). Halkaları tek tek çarpmak büyüklüğü üçte
-        birine indiriyor: her halkada ölçüm gürültüsü katsayıyı aşağı çekiyor ve
-        yem bitkileri gıda sepetine yalnızca et/süt üzerinden değil ekmek, yağ,
-        şeker üzerinden de giriyor. Halkalar “nereden geçiyor” sorusunun cevabı,
-        çarpım tablosu değil.
-      </p>
-
-      <div className="zn-elenen">
-        <b>Sınamayı geçemediği için burada olmayan iki halka.</b>{' '}
-        <b>Kârlılık → arz:</b> süt kârlılığı ile aylık toplanan süt arasında
-        0–18 ay taramasında en yüksek ilişki yalnızca 0,34 ve ters işaretli —
-        “kârlılık düştü, arz daralır” cümlesi veriyle desteklenmedi.{' '}
-        <b>Buğday → makarna:</b> yurt içi buğday fiyatı ile makarnalık buğday
-        ithalatı 0,07, ihracatı −0,28; ayrıca işlenmiş ürün dış ticareti
-        veritabanında hiç yok. Ölçülemeyen zincir kurulmadı.
-      </div>
+      {detay && (
+        <div className="zn-detay">
+          <p>
+            Bütün değerler genel enflasyonun üzerindeki fark (puan). Yem bitkisi
+            bileşiği bugün <strong>{yansima.bugun.toFixed(1)}</strong>; ölçülen
+            ilişkiye göre gıda enflasyonuna{' '}
+            <strong>{yansima.etki.toFixed(1)} puan</strong> etki, {UCTAN_UCA.gecikmeAy}{' '}
+            ay sonra (β={UCTAN_UCA.beta}, r={UCTAN_UCA.r}, {UCTAN_UCA.n} aylık ölçüm).
+          </p>
+          <table className="zn-detay-tablo">
+            <thead>
+              <tr><th>Adım</th><th>Ölçü</th><th>Aktarım</th><th>Gecikme</th><th>r</th></tr>
+            </thead>
+            <tbody>
+              {data.sut.map((h) => (
+                <tr key={h.id}>
+                  <td>{h.baslik}</td>
+                  <td>{h.deger == null ? '—' : `${h.deger >= 0 ? '+' : '−'}${Math.abs(h.deger).toFixed(1)}`}</td>
+                  <td>{h.gecis ? h.gecis.beta.toFixed(2) : '—'}</td>
+                  <td>{h.gecis ? (h.gecis.gecikmeAy === 0 ? 'aynı ay' : `${h.gecis.gecikmeAy} ay`) : '—'}</td>
+                  <td>{h.gecis ? h.gecis.r.toFixed(2) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p>
+            Sınamayı geçemediği için zincire alınmayanlar: kârlılık → arz
+            (en yüksek ilişki 0,34 ve ters işaretli) ve buğday → makarna
+            (0,07; işlenmiş ürün dış ticareti veritabanında yok).
+          </p>
+        </div>
+      )}
     </Card>
   );
 }
