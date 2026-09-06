@@ -68,6 +68,9 @@ export interface OverviewData {
    * yazılıydı; veri ilerleyince "2024 rakamı, (2022) başlığı" gibi tutarsız
    * ekranlar çıkıyordu. Artık etiketler bu alandan besleniyor.
    */
+  /* Makro ölçülerin kaynağı — FAO mu Dünya Bankası mı. Sayfada yazılıyor:
+     kaynağı söylemeden kurum değiştirmek okuyucuyu yanıltır. */
+  macroKaynak: string;
   years: {
     macro: number | null;
     population: number | null;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import {
   MENU, BASIC_MENU, itemPath, hasScope, KAPSAM_ADI, type Kapsam, type MenuCategory,
@@ -82,6 +82,24 @@ export default function BolumPage() {
   const digerde = kategori.items.filter(
     (it) => !hasScope(it, kapsam) && hasScope(it, digerKapsam),
   );
+
+  /*
+   * ─── TEK SAYFALIK BÖLÜMDE ARA EKRAN YOK ─────────────────────────────────
+   *
+   * Bölüm sayfası bir SEÇİM ekranı: kategorideki sayfaları kart olarak dizer.
+   * Kategoride tek sayfa varsa seçilecek bir şey yoktur — kullanıcı "Genel
+   * Bakış"a basıyor, tek kartlık bir ekran çıkıyor, ona da basıyor, ancak o
+   * zaman veriye ulaşıyordu. İki tık, bir işe yarayan.
+   *
+   * (Genel Bakış bu duruma Emtia Fiyatları üst şeride taşınınca düştü:
+   * kategoride "Panoya Genel Bakış" tek başına kaldı.)
+   *
+   * `replace`: geri tuşu ara ekrana değil, gelinen yere dönsün.
+   */
+  if (tumBurada.length === 1 && digerde.length === 0) {
+    const tekYol = itemPath(tumBurada[0], kapsam);
+    if (tekYol) return <Navigate to={tekYol} replace />;
+  }
 
   /*
    * Süzme, komut paletiyle aynı Türkçe katlamayı kullanıyor: "uzum" yazan

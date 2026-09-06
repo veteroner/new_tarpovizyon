@@ -146,6 +146,13 @@ const ROUTES = {
   'tr/havza-urun-deseni': { table: 'havza_urun_deseni', filters: ['havza', 'il', 'ilce', 'urun'], order: '"havza" ASC', maxLimit: 10000 },
   'tr/cografi-isaret': { table: 'TPE_cografiisaret', filters: ['İl', 'Türü', 'Ürün grubu'], order: '"id" ASC', maxLimit: 10000 },
   'fao/me-indicator': { db: 'DUNYA', table: 'fao_ME_indicator', filters: [], order: 'rowid ASC', maxLimit: 10000 },
+  /*
+   * Dünya Bankası makro göstergeleri. FAO'nun ME serisi Türkiye için 2024'te
+   * bitiyor, Dünya Bankası 2025'i yayımlıyor — Genel Bakış kartları bu yüzden
+   * bir yıl geride kalıyordu. Kaynak KARIŞTIRILMIYOR: ayrı tablo, sayfada
+   * kaynağı yazılı. `scripts/dunya-bankasi-sync.mjs` besliyor.
+   */
+  'dunya-bankasi/makro': { table: 'dunya_bankasi_makro', filters: ['gosterge', 'yil'], order: 'yil ASC', maxLimit: 1000 },
   'fao/tahmin-sonuclari': { db: 'DUNYA', table: 'fao_tahmin_sonuclari', filters: [], order: 'rowid ASC', maxLimit: 10000 },
 };
 

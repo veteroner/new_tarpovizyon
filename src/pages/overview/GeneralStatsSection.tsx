@@ -67,9 +67,11 @@ export function GeneralStatsSection({ data, ruralPercent, urbanPercent, agriLand
         */}
       <p className="ui-prose" style={{ marginTop: '0.75rem' }}>
         Her ölçü kendi kaynağının en yeni yılını gösteriyor; bu yüzden yıllar
-        farklı. FAO makro serisi <b>2024</b>&apos;te bitiyor, arazi kullanımında
-        ise 2024–25 için yalnızca orman kalemleri yayımlandı — tarım arazisinin
-        son yayımlandığı yıl <b>2023</b>.
+        farklı. Makro göstergeler <b>{data.macroKaynak}</b> kaynaklı
+        ({yl(y.macro)}): FAO serisi 2024&apos;te bittiği için daha yeni yıl
+        yayımlandığında Dünya Bankası kullanılıyor. Arazi kullanımında 2024–25
+        için yalnızca orman kalemleri yayımlandı — tarım arazisinin son
+        yayımlandığı yıl <b>2023</b>.
       </p>
 
       <div className="kpi-grid" style={{ marginTop: '1rem' }}>

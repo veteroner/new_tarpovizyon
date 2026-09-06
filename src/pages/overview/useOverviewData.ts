@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchAgg, latestYear, num, type Row } from '../../services/d1';
+import { fetchAgg, fetchRows, latestYear, num, type Row } from '../../services/d1';
 import {
   COLORS,
   translateMilkItem, translateMeatItem, translateEggItem,
@@ -14,6 +14,8 @@ const R_ME = 'fao/me-indicator';
 const R_LAND = 'fao/land-use';
 const R_NUFUS = 'fao/nufus';
 const R_ISTIHDAM = 'fao/nufus-istihdam-tarim';
+/* Dünya Bankası makro — FAO'nun bitmediği yıllar için. */
+const R_DB_MAKRO = 'dunya-bankasi/makro';
 import { HAYVAN_ULKE_YIL, HAYVAN_BOLGE_YIL, yilSutunu } from '../../utils/hayvanYili';
 
 /*
@@ -71,6 +73,7 @@ export function useOverviewData(): UseOverviewDataReturn {
         eggTotalRes, eggBreakdownRes, eggYearlyRes,
         agriGdpRes, agriGdpShareRes, agriEmpRes, agriEmpShareRes,
         livestockStocksRes, regionalCattleRes, regionalSheepRes, regionalGoatRes, regionalPoultryRes,
+        dbMakro,
       ] = await Promise.all([
         fetchAgg(R_NUFUS, { max: ['TOPLAM', 'kirsal', 'sehir'], where: { year: nufusYil, area: TR } }),
         fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Gross Domestic Product', elementcode: EC_TOPLAM_USD, unit: 'million USD' } }),
@@ -94,6 +97,8 @@ export function useOverviewData(): UseOverviewDataReturn {
         fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
         fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], where: { grup: 'Keçi' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
         fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], whereIn: { duzey: ['bölge', 'bolge'], grup: ['Tavuk', 'Hindi'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
+        /* Dünya Bankası makro — FAO'dan daha yeni yıl varsa kullanılıyor. */
+        fetchRows(R_DB_MAKRO, { limit: 1000 }),
       ]);
 
       // Nüfus
@@ -102,13 +107,32 @@ export function useOverviewData(): UseOverviewDataReturn {
       const ruralPopulation = num(popData?.max_kirsal) * 1000;
       const urbanPopulation = num(popData?.max_sehir) * 1000;
 
-      // GSYİH
-      const gdp = (num(gdpRes[0]?.max_value)) * 1e6;
-      const gdpPerCapita = num(gdpPerCapitaRes[0]?.max_value);
+      /*
+       * ─── MAKRO: DÜNYA BANKASI DAHA YENİYSE O ─────────────────────────────
+       *
+       * FAO'nun ME serisi Türkiye için 2024'te bitiyor; Dünya Bankası 2025'i
+       * yayımlıyor. Sayfa bu yüzden bir yıl geride kalıyordu.
+       *
+       * Kaynaklar KARIŞTIRILMIYOR, SEÇİLİYOR: hangi kurum daha yeni yılı
+       * veriyorsa dört ölçünün DÖRDÜ DE ondan alınıyor ve `macroKaynak`
+       * sayfada yazılıyor. Yarısını birinden yarısını diğerinden almak
+       * tutarsız bir tablo üretirdi — iki kurumun 2024 GSYİH'si arasında
+       * zaten %3 fark var (farklı revizyon takvimleri).
+       */
+      const dbSonYil = Math.max(0, ...dbMakro.map((r: Row) => Number(r.yil) || 0));
+      const dbKullan = dbSonYil > (meYil ?? 0);
+      const dbDeger = (ad: string) =>
+        num(dbMakro.find((r: Row) => r.gosterge === ad && Number(r.yil) === dbSonYil)?.deger);
 
-      // Tarımsal katma değer
-      const agriculturalGDP = (num(agriGdpRes[0]?.max_value)) * 1e6;
-      const agriculturalGDPShare = num(agriGdpShareRes[0]?.max_value);
+      const gdp = dbKullan ? dbDeger('gsyh_usd') : (num(gdpRes[0]?.max_value)) * 1e6;
+      const gdpPerCapita = dbKullan
+        ? dbDeger('gsyh_kisi_basi_usd') : num(gdpPerCapitaRes[0]?.max_value);
+      const agriculturalGDP = dbKullan
+        ? dbDeger('tarimsal_katma_deger_usd') : (num(agriGdpRes[0]?.max_value)) * 1e6;
+      const agriculturalGDPShare = dbKullan
+        ? dbDeger('tarim_gsyh_payi') : num(agriGdpShareRes[0]?.max_value);
+      const macroKaynak = dbKullan ? 'Dünya Bankası' : 'FAO';
+      const macroYil = dbKullan ? dbSonYil : meYil;
 
       // Tarım istihdamı
       const agriculturalEmployment = (num(agriEmpRes[0]?.sum_total)) * 1000;
@@ -210,8 +234,9 @@ export function useOverviewData(): UseOverviewDataReturn {
         }));
 
       setData({
+        macroKaynak,
         years: {
-          macro: meYil, population: nufusYil, land: araziYil,
+          macro: macroYil, population: nufusYil, land: araziYil,
           employment: istihdamYil, livestock: hayvanYil,
         },
         population, ruralPopulation, urbanPopulation,
