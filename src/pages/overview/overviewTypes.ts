@@ -77,6 +77,15 @@ export interface OverviewData {
     land: number | null;
     employment: number | null;
     livestock: number | null;
+    /**
+     * Tür kırılımlarının (süt/et/yumurta pastaları) yılı.
+     *
+     * `livestock`ten AYRI, çünkü iki kaynak var: toplamlar ve trendler TÜİK
+     * özet tablosundan (bir yıl daha ileride), tür kırılımları FAO'dan
+     * geliyor — FAO'da ürün kalemi ayrımı var, TÜİK özetinde yok. Tek yıl
+     * alanı kullansaydık pastaların başlığı bir yıl yalan söylerdi.
+     */
+    livestockBreakdown: number | null;
   };
   population: number;
   ruralPopulation: number;

@@ -40,15 +40,18 @@ export const HAYVAN_IL_YIL = 2025;
 export const HAYVAN_ULKE_YIL = 2025;
 
 /**
- * duzey='bölge' satırları — 2024'te KALIYOR.
+ * duzey='bölge' satırları — ARTIK KULLANILMIYOR.
  *
- * Bölgede 2025 hiç yok ve türetilecek güvenilir kaynak da yok: il satırları
- * 81 değil 80 il içeriyor ve 2024'te kategori ayrımı bozulmuş. Uydurulmuş bir
- * bölge dağılımı yazmaktansa grafiğin kendi yılını söylemesi doğru.
+ * Bölge seviyesi iki türlü bozuk: 2025 hiç yok, 2024'te de Et Tavuğu ile
+ * Yumurta Tavuğu birebir aynı sayıyı taşıyor ve toplamları ülkenin %40'ı.
+ * Genel Bakış'ın haritası bir dönem buradan besleniyordu; harita 81 ilin
+ * çoğunda "Veri yok" diyor ve bir yıl geriden geliyordu.
  *
- * Bu yüzden Genel Bakış'ta ülke KPI'ları 2025, bölge grafikleri 2024 — ve
- * HER İKİSİ de kendi yılını başlığında yazıyor. Karışıklık, tarihi gizlemekten
- * değil, iki farklı yılı tek etiket altında toplamaktan doğar.
+ * Coğrafi dağılımın tamamı İL seviyesine (duzeykod=3) taşındı — orası 2025'te
+ * dolu ve ülke toplamıyla %0,5 içinde tutuyor. Bu sabit, bölge satırları
+ * düzeltilirse diye duruyor; yeni yerlerde kullanılmamalı.
+ *
+ * @deprecated İl seviyesini kullanın: {@link HAYVAN_IL_YIL}.
  */
 export const HAYVAN_BOLGE_YIL = 2024;
 

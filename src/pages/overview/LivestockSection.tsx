@@ -1,4 +1,4 @@
-import { HAYVAN_ULKE_YIL, HAYVAN_BOLGE_YIL } from '../../utils/hayvanYili';
+import { HAYVAN_ULKE_YIL, HAYVAN_IL_YIL } from '../../utils/hayvanYili';
 import { useState } from 'react';
 import {
   BarChart, Bar, Cell,
@@ -72,14 +72,14 @@ export function LivestockSection({ data }: Props) {
         <div className="chart-card" style={{ gridColumn: 'span 2' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
             {/*
-              * Yıl BAŞLIKTA, çünkü bu grafik yukarıdaki ülke rakamlarından
-              * BİR YIL GERİDE: bölge satırlarında 2025 yok. Ortak bir başlık
-              * altında toplasaydık iki farklı yıl tek yılmış gibi okunurdu.
+              * Başlık görünüme göre değişiyor: harita 81 ilin tamamını
+              * boyuyor, çubuk grafik ilk 12'sini gösteriyor. Tek bir "Top 12"
+              * başlığı haritayı yanlış anlatırdı.
               */}
             <h3 className="chart-title" style={{ marginBottom: 0 }}>
-              Bölgesel Dağılım (Top 12) · {HAYVAN_BOLGE_YIL}
+              {regionalView === 'map' ? 'İl Dağılımı' : 'En Yüksek 12 İl'} · {HAYVAN_IL_YIL}
             </h3>
-            <ChartInsightButton title="Bölgesel Hayvan Varlığı Dağılımı" description="İl bazlı hayvan varlığı dağılımı" data={data.livestockStocks.regional[regionalGroup] ?? []} context={{ seçiliTür: regionalGroup }} compact />
+            <ChartInsightButton title="İl Bazında Hayvan Varlığı Dağılımı" description="İl bazlı hayvan varlığı dağılımı" data={data.livestockStocks.regional[regionalGroup] ?? []} context={{ seçiliTür: regionalGroup }} compact />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div
                 role="tablist"
@@ -123,13 +123,13 @@ export function LivestockSection({ data }: Props) {
             />
           ) : (
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={data.livestockStocks.regional[regionalGroup]} margin={{ top: 10, right: 8, left: 4, bottom: 60 }}>
+              <BarChart data={data.livestockStocks.regional[regionalGroup].slice(0, 12)} margin={{ top: 10, right: 8, left: 4, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" angle={-35} textAnchor="end" height={80} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} interval="preserveStartEnd" minTickGap={16} />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
                 <Tooltip formatter={(value: number) => [formatNumber(value) + ' baş', '']} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {data.livestockStocks.regional[regionalGroup].map((entry, index) => (
+                  {data.livestockStocks.regional[regionalGroup].slice(0, 12).map((entry, index) => (
                     <Cell key={`cell-reg-${index}`} fill={entry.fill} />
                   ))}
                 </Bar>

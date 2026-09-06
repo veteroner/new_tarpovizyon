@@ -65,6 +65,39 @@
   border-radius: 999px;
 }
 
+/*
+ * Öncülük grafiği. Yansıma kartıyla halka listesinin arasında duruyor:
+ * önce iddia (kaç puan, ne zaman), sonra iddianın kanıtı, sonra iddianın
+ * hangi yoldan geçtiği.
+ */
+.zn-grafik {
+  margin: 4px 0 18px;
+  padding: 12px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.zn-grafik-bas {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0 10px 8px;
+}
+
+.zn-grafik-bas span {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.zn-grafik-not {
+  margin: 6px 10px 6px;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 78ch;
+}
+
 /* Akış */
 .zn-akis {
   display: flex;

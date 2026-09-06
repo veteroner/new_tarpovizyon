@@ -18,6 +18,9 @@ export function MeatSection({ data }: Props) {
   /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
      yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
   const yil = data.years.livestock ?? '';
+  /* Tür kırılımı FAO'dan geliyor ve bir yıl geride olabilir; kendi yılını
+     yazıyor (bkz. overviewTypes.ts → years.livestockBreakdown). */
+  const kirilimYil = data.years.livestockBreakdown ?? yil;
 
   return (
     <>
@@ -110,7 +113,7 @@ export function MeatSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`Et Türleri Dağılımı (${yil})`} action={<ChartInsightButton title={`Et Türleri Dağılımı (${yil})`} description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />}>
+        <ChartCard title={`Et Türleri Dağılımı (${kirilimYil})`} action={<ChartInsightButton title={`Et Türleri Dağılımı (${kirilimYil})`} description="Türkiye et türleri üretim dağılımı" data={data.meatProduction.breakdown} context={{ toplamEt: formatNumber(data.meatProduction.total)+' ton', kırmızıEt: formatNumber(data.meatProduction.redMeat)+' ton', beyazEt: formatNumber(data.meatProduction.whiteMeat)+' ton' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.meatProduction.breakdown} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

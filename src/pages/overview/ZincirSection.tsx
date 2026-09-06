@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 import { GitBranch, ArrowDown } from 'lucide-react';
+import {
+  CartesianGrid, Legend, Line, LineChart, ReferenceLine,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts';
 import { Card } from '../../components/ui/Card';
 import { useZincir } from './useZincir';
 import { UCTAN_UCA, ayYaz, yansimaSeviye, type ZincirDugum } from './zincir';
@@ -89,6 +93,64 @@ export function ZincirSection() {
           {puan(yansima.etki)} {yon} yönlü etki.
         </span>
       </div>
+
+      {/*
+        * ─── ÖNCÜLÜK GRAFİĞİ ────────────────────────────────────────────────
+        * Zincirin en zor anlaşılan yanı, iddianın GECİKMELİ olması. Sayıyla
+        * anlatınca ("11 ay sonra") okuyucunun elinde inanmak ya da inanmamak
+        * dışında seçenek kalmıyor.
+        *
+        * Bu grafik iddianın kendisini gösteriyor: yem bitkisi çizgisi 11 ay
+        * KAYDIRILMIŞ hâlde çiziliyor. İki çizgi üst üste biniyorsa ölçülen
+        * ilişki gerçekten oradadır; binmiyorsa okuyucu da görür. Kaydırma
+        * gizlenmiyor, başlıkta yazıyor — kaydırılmış seriyi kaydırılmamış gibi
+        * sunmak, grafiğin söyleyebileceği en büyük yalan olurdu.
+        */}
+      {data.oncululuk.length > 12 && (
+        <div className="zn-grafik">
+          <div className="zn-grafik-bas">
+            Yem bitkisi fiyatlarının beklenen etkisi, gerçekleşen gıda enflasyonuyla
+            <span> · {UCTAN_UCA.gecikmeAy} ay kaydırılmış × {UCTAN_UCA.beta.toFixed(2)} ·
+              r={UCTAN_UCA.r.toFixed(2)} · {data.oncululuk.length} ay</span>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={data.oncululuk} margin={{ top: 6, right: 10, left: 0, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="ay" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
+                interval="preserveStartEnd" minTickGap={40} />
+              {/* Sıfır çizgisi anlamlı: üstü "genel enflasyonun üzerinde". */}
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={44}
+                tickFormatter={(v: number) => `${v > 0 ? '+' : ''}${v}`} />
+              <ReferenceLine y={0} stroke="var(--text-secondary)" strokeDasharray="2 2" />
+              <Tooltip
+                formatter={(v: number, ad: string) => [
+                  `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} puan`,
+                  ad === 'beklenenEtki' ? 'Yem bitkilerinden beklenen etki' : 'Gerçekleşen gıda enflasyonu',
+                ]}
+                labelFormatter={(l: string) => ayYaz(String(l))}
+              />
+              <Legend formatter={(v: string) => (v === 'beklenenEtki'
+                ? 'Yem bitkilerinden beklenen etki'
+                : 'Gerçekleşen gıda enflasyonu')} />
+              <Line type="monotone" dataKey="beklenenEtki" stroke="var(--viz-warning, #a8620a)"
+                strokeWidth={2} dot={false} strokeDasharray="5 3" />
+              <Line type="monotone" dataKey="gidaEnflasyonu" stroke="var(--viz-critical, #b3261e)"
+                strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+          <p className="zn-grafik-not">
+            Her iki çizgi de <strong>genel TÜFE üzeri puan</strong>. Kesikli çizgi
+            yem bitkisi fiyatlarının {UCTAN_UCA.gecikmeAy} ay önceki hâlinin
+            ölçülen katsayıyla ({UCTAN_UCA.beta.toFixed(2)}) çarpılmışı — yani
+            modelin o ay için beklediği etki. Düz çizgi o ay gerçekten olan.
+            Ham seri çizilseydi yem bitkisi ±100 puan salınırken gıda
+            enflasyonu ±20'de kalırdı ve iki çizgi karşılaştırılamazdı;
+            katsayıyı uygulamak ikisini aynı birime getiriyor. İkisinin üst
+            üste binmesi, ölçülen ilişkinin sınanmasıdır — ayrıştığı yerler de
+            görünüyor.
+          </p>
+        </div>
+      )}
 
       <div className="zn-akis">
         {halkalar.map((h) => (

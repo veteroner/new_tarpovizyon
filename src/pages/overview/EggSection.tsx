@@ -18,6 +18,9 @@ export function EggSection({ data }: Props) {
   /* Yıl VERİDEN: '2023' elle yazılıydı, kaynak tablo ilerleyince etiket
      yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
   const yil = data.years.livestock ?? '';
+  /* Tür kırılımı FAO'dan geliyor ve bir yıl geride olabilir; kendi yılını
+     yazıyor (bkz. overviewTypes.ts → years.livestockBreakdown). */
+  const kirilimYil = data.years.livestockBreakdown ?? yil;
 
   return (
     <>
@@ -61,7 +64,7 @@ export function EggSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`Yumurta Türleri (${yil})`} action={<ChartInsightButton title={`Yumurta Türleri (${yil})`} description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />}>
+        <ChartCard title={`Yumurta Türleri (${kirilimYil})`} action={<ChartInsightButton title={`Yumurta Türleri (${kirilimYil})`} description="Tavuk ve diğer yumurta türleri dağılımı" data={data.eggProduction.breakdown} context={{ toplamYumurta: formatNumber(data.eggProduction.total)+' adet', tavukYumurtası: formatNumber(data.eggProduction.chicken)+' adet' }} />}>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie

@@ -1,15 +1,46 @@
 import { endeksle } from '../../utils/endeks';
 import { yuzde } from '../../utils/sayi';
 import {
-  BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  ComposedChart, Area, Line,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line, Cell,
 } from 'recharts';
 import { COLORS, formatNumber, formatShort } from './overviewTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+
+/**
+ * Karşılaştırmalı analizler.
+ *
+ * ─── BURADA NE DEĞİŞTİ VE NEDEN ─────────────────────────────────────────────
+ * Bu bölüm üç ayrı şekilde yanlıştı; üçü de "elmayla armudu aynı sepete
+ * koymak"tan geliyordu.
+ *
+ * 1. UYDURULMUŞ DİLİM. Pasta grafiğinde "Diğer Ürünler" diye bir dilim vardı
+ *    ve değeri `(süt + et) * 0.15` idi — yani hiçbir ölçüme dayanmayan, kodda
+ *    üretilmiş bir sayı. Silindi. Veriden gelmeyen hiçbir şey grafikte yer
+ *    almamalı; uydurulmuş bir dilim, yanlış bir dilimden daha kötü, çünkü
+ *    kaynağı yok ve düzeltilemez.
+ *
+ * 2. PASTANIN KENDİSİ. Kalan iki dilim (süt tonu, et tonu) aynı birimde ama
+ *    karşılaştırması anlamsız: 22 milyon ton süt ile 2,5 milyon ton et yan
+ *    yana konunca pasta "hayvansal üretimin %90'ı süt" diyor. Ağırlık, sütle
+ *    eti kıyaslamanın ölçüsü değil. Pasta silindi; yerine her ürünün KENDİ
+ *    ekseninde, KENDİ biriminde çizildiği küçük grafikler geldi. Karışık
+ *    birimleri tek çerçeveye sokmanın doğru cevabı, onları hiç aynı çerçeveye
+ *    sokmamak.
+ *
+ * 3. ENDEKS ETİKETİ YALAN SÖYLÜYORDU. Üstteki karşılaştırma grafiği aslında
+ *    ENDEKSLİ çiziliyordu (her seri ilk yılına göre 100) ama gösterge "Süt
+ *    (ton)", "Et (ton)" diyor, ipucu da değeri "ton" diye biçimlendiriyordu.
+ *    Y ekseni 90–210 arasıydı; okuyucu "et 180 ton" görüyordu. Etiketler
+ *    düzeltildi, ipucuna HAM değer de eklendi.
+ *
+ * Ayrıca "Kişi Başı Yıllık Tüketim Tahmini" kg ile adedi tek eksende
+ * topluyordu ve adı da yanlıştı — hesap üretim/nüfus, yani tüketim değil
+ * üretim. Adı düzeltildi, adet olan yumurta kendi grafiğine ayrıldı.
+ */
 
 interface Props {
   data: OverviewData;
@@ -45,6 +76,34 @@ export function ComparativeSection({ data }: Props) {
      yalan söylüyordu. `years.livestock` o tablonun en güncel dolu yılı. */
   const yil = data.years.livestock ?? '';
 
+  /* Endeksli seri. Ham değerler ipucunda gösterilebilsin diye yan yana
+     tutuluyor — endeksi "ton" diye etiketleyen eski hata bir daha olmasın. */
+  const endeksli = endeksle(combinedData, ['süt', 'et', 'yumurta']);
+  const hamDeger = new Map(combinedData.map((d) => [d.year, d]));
+
+  const kucukGrafikler = [
+    {
+      ad: 'Çiğ süt üretimi', birim: 'ton', renk: COLORS.milk[0],
+      seri: combinedData.map((d) => ({ year: d.year, deger: d.süt })),
+      degisim: milkChange,
+    },
+    {
+      ad: 'Et üretimi', birim: 'ton', renk: COLORS.meat[0],
+      seri: combinedData.map((d) => ({ year: d.year, deger: d.et })),
+      degisim: meatChange,
+    },
+    {
+      ad: 'Yumurta üretimi', birim: 'milyon adet', renk: COLORS.egg[0],
+      seri: combinedData.map((d) => ({ year: d.year, deger: d.yumurta })),
+      degisim: eggChange,
+    },
+  ];
+
+  const kisiBasiKg = [
+    { name: 'Süt', value: Math.round((data.milkProduction.total * 1000) / (data.population || 1)), fill: COLORS.milk[0] },
+    { name: 'Et', value: Math.round((data.meatProduction.total * 1000) / (data.population || 1)), fill: COLORS.meat[0] },
+  ];
+  const kisiBasiAdet = Math.round(data.eggProduction.total / (data.population || 1));
 
   return (
     <>
@@ -53,73 +112,114 @@ export function ComparativeSection({ data }: Props) {
       </div>
 
       <div className="chart-grid">
-        <ChartCard title={`Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} span={2} action={<ChartInsightButton title={`Hayvansal Üretim Kategorileri Karşılaştırması (2010-${yil})`} description="Süt, et ve yumurta üretiminin karşılaştırmalı trendi" data={combinedData} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange }} />}>
+        <ChartCard
+          title={`Üretim Büyümesi Karşılaştırması (2010-${yil})`}
+          span={2}
+          action={<ChartInsightButton title={`Üretim Büyümesi Karşılaştırması (2010-${yil})`} description="Süt, et ve yumurta üretiminin endekslenmiş büyüme karşılaştırması" data={endeksli} context={{ sütDeğişim: milkChange, etDeğişim: meatChange, yumurtaDeğişim: eggChange, ölçü: 'endeks, ilk yıl = 100' }} />}
+        >
+          <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '80ch' }}>
+            Süt ve et ton, yumurta adet cinsinden — aynı eksende ham hâlleriyle
+            kıyaslanamazlar. Her seri kendi ilk yılına göre <strong>100</strong>
+            {' '}kabul edilip endekslendi; grafik miktarı değil, <strong>büyüme
+            hızını</strong> karşılaştırıyor. Ham değerler ipucunda.
+          </p>
           <ResponsiveContainer width="100%" height={350}>
-            {/* TEK EKSEN, ENDEKSLİ. Süt ve et (ton) ile yumurta (adet) farklı birim; iki eksende çizmek sahte kesişim üretiyordu.
-                  Her seri kendi ilk dolu yılına göre 100. Ham değerler ipucunda. */}
-              <ComposedChart data={endeksle(combinedData, ['süt', 'et', 'yumurta'])}>
+            <LineChart data={endeksli}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
               <Tooltip
-                formatter={(value: number, name: string) => {
-                  if (name === 'yumurta') return [formatNumber(value) + ' Milyon adet', 'Yumurta'];
-                  return [formatNumber(value) + ' ton', name === 'süt' ? 'Süt' : 'Et'];
+                formatter={(value: number, name: string, props: { payload?: { year?: string | number } }) => {
+                  const ham = hamDeger.get(props.payload?.year as never);
+                  const anahtar = name as 'süt' | 'et' | 'yumurta';
+                  const birim = anahtar === 'yumurta' ? 'milyon adet' : 'ton';
+                  const etiket = anahtar === 'süt' ? 'Süt' : anahtar === 'et' ? 'Et' : 'Yumurta';
+                  const hamMetin = ham ? ` · ${formatNumber(ham[anahtar])} ${birim}` : '';
+                  return [`endeks ${formatNumber(Math.round(value))}${hamMetin}`, etiket];
                 }}
               />
               <Legend />
-              <Area type="monotone" dataKey="süt" fill={COLORS.milk[0]} fillOpacity={0.3} stroke={COLORS.milk[0]} name="Süt (ton)" />
-              <Area type="monotone" dataKey="et" fill={COLORS.meat[0]} fillOpacity={0.3} stroke={COLORS.meat[0]} name="Et (ton)" />
-              <Line type="monotone" dataKey="yumurta" stroke={COLORS.egg[0]} strokeWidth={3} name="Yumurta (M adet)" />
-            </ComposedChart>
+              <Line type="monotone" dataKey="süt" stroke={COLORS.milk[0]} strokeWidth={2} dot={false} name="Süt (endeks)" />
+              <Line type="monotone" dataKey="et" stroke={COLORS.meat[0]} strokeWidth={2} dot={false} name="Et (endeks)" />
+              <Line type="monotone" dataKey="yumurta" stroke={COLORS.egg[0]} strokeWidth={2} dot={false} name="Yumurta (endeks)" />
+            </LineChart>
           </ResponsiveContainer>
         </ChartCard>
       </div>
 
+      {/*
+        * Üç ürün, üç ayrı çerçeve.
+        *
+        * Burada eskiden bir pasta vardı: süt tonu, et tonu ve uydurulmuş bir
+        * "Diğer Ürünler" dilimi. Silindi. Farklı birimdeki ürünleri tek pasta
+        * ya da tek eksende toplamak yerine her birine kendi eksenini vermek,
+        * karışık birim sorununun tek dürüst çözümü — miktarlar kendi
+        * ölçeğinde okunuyor, kıyas ise yukarıdaki endeks grafiğinde yapılıyor.
+        */}
       <div className="chart-grid">
-        <ChartCard title={`Toplam Hayvansal Üretim Dağılımı (${yil})`} action={<ChartInsightButton title={`Toplam Hayvansal Üretim Dağılımı (${yil})`} description="Süt ve et üretiminin toplam içindeki payı" data={[{name:'Süt',value:data.milkProduction.total},{name:'Et',value:data.meatProduction.total}]} context={{ toplamSüt: formatNumber(data.milkProduction.total)+' ton', toplamEt: formatNumber(data.meatProduction.total)+' ton' }} />}>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: 'Süt Üretimi', value: data.milkProduction.total, fill: COLORS.milk[0] },
-                  { name: 'Et Üretimi', value: data.meatProduction.total, fill: COLORS.meat[0] },
-                  { name: 'Diğer Ürünler', value: (data.milkProduction.total + data.meatProduction.total) * 0.15, fill: COLORS.general[2] },
-                ]}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${yuzde(((percent ?? 0) * 100), 1)}`}
-              />
-              <Tooltip formatter={(value: number) => [formatNumber(value) + ' ton', '']} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            <p>* Yumurta farklı birimde olduğu için dahil edilmemiştir</p>
-          </div>
-        </ChartCard>
+        {kucukGrafikler.map((g) => (
+          <ChartCard
+            key={g.ad}
+            title={`${g.ad} (${g.birim})`}
+            action={<ChartInsightButton title={g.ad} description={`${g.ad} yıllık seyri`} data={g.seri} context={{ birim: g.birim, sonYıl: yil, yıllıkDeğişim: g.degisim }} compact />}
+          >
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={g.seri} margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" minTickGap={24} />
+                <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={46} domain={LINE_Y_DOMAIN} />
+                <Tooltip formatter={(v: number) => [`${formatNumber(v)} ${g.birim}`, g.ad]} />
+                <Line type="monotone" dataKey="deger" stroke={g.renk} strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              {yil} yılı değişimi: <strong>{g.degisim}</strong>
+            </p>
+          </ChartCard>
+        ))}
+      </div>
 
-        <ChartCard title="Kişi Başı Yıllık Tüketim Tahmini" action={<ChartInsightButton title="Kişi Başı Yıllık Tüketim Tahmini" description="Kişi başına süt, et ve yumurta tüketim tahmini" data={[{name:'Süt',value:Math.round((data.milkProduction.total*1000)/(data.population||1)),unit:'kg'},{name:'Et',value:Math.round((data.meatProduction.total*1000)/(data.population||1)),unit:'kg'},{name:'Yumurta',value:Math.round(data.eggProduction.total/(data.population||1)),unit:'adet'}]} context={{ nüfus: formatNumber(data.population) }} />}>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={[
-                { name: 'Süt', value: Math.round((data.milkProduction.total * 1000) / (data.population || 1)), fill: COLORS.milk[0], unit: 'kg' },
-                { name: 'Et', value: Math.round((data.meatProduction.total * 1000) / (data.population || 1)), fill: COLORS.meat[0], unit: 'kg' },
-                { name: 'Yumurta', value: Math.round(data.eggProduction.total / (data.population || 1)), fill: COLORS.egg[0], unit: 'adet' },
-              ]}
-            >
+      {/*
+        * Kişi başı üretim — kg olanlar ve adet olan AYRI.
+        *
+        * Eskiden üçü tek çubuk grafikteydi: süt ~250 kg, et ~25 kg, yumurta
+        * ~240 adet. Yumurtanın 240'ı sütün 250 kg'ıyla yan yana durunca göz
+        * "neredeyse eşit" diyordu; oysa biri kilogram, diğeri adet. Ayrıldı.
+        *
+        * Adı da yanlıştı: hesap üretim/nüfus, yani tüketim değil ÜRETİM.
+        */}
+      <div className="chart-grid">
+        <ChartCard
+          title="Kişi Başı Üretim — Süt ve Et (kg)"
+          action={<ChartInsightButton title="Kişi Başı Üretim (kg)" description="Kişi başına süt ve et üretimi" data={kisiBasiKg} context={{ nüfus: formatNumber(data.population), yıl: yil }} compact />}
+        >
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={kisiBasiKg}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
               <YAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
-              <Tooltip formatter={(value: number, _name: string, props: { payload?: { unit?: string } }) => [value + ' ' + (props.payload?.unit ?? ''), '']} />
+              <Tooltip formatter={(value: number) => [`${value} kg`, 'Kişi başı üretim']} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {[COLORS.milk[0], COLORS.meat[0], COLORS.egg[0]].map((fill, index) => (
-                  <Cell key={`cell-${index}`} fill={fill} />
-                ))}
+                {kisiBasiKg.map((k) => <Cell key={k.name} fill={k.fill} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            {yil} üretiminin nüfusa bölünmüşü — tüketim değil, üretim.
+          </p>
+        </ChartCard>
+
+        <ChartCard title="Kişi Başı Üretim — Yumurta (adet)">
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: 240, textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', fontWeight: 700, color: COLORS.egg[0], fontVariantNumeric: 'tabular-nums' }}>
+              {kisiBasiAdet}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>adet / kişi · {yil}</div>
+          </div>
+          <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            Yumurta adet cinsinden; yandaki kilogram ölçüsüyle aynı eksende
+            gösterilemeyeceği için ayrı duruyor.
+          </p>
         </ChartCard>
       </div>
 
@@ -137,7 +237,7 @@ export function ComparativeSection({ data }: Props) {
             Süt Üretimi
           </div>
           <div className="table-info" style={{ flex: 1 }}>{formatNumber(data.milkProduction.total)} ton</div>
-          <div className="table-value" style={{ width: '150px' }}>{Math.round((data.milkProduction.total * 1000) / (data.population || 1))} kg</div>
+          <div className="table-value" style={{ width: '150px' }}>{kisiBasiKg[0].value} kg</div>
           <div className="table-value green" style={{ width: '150px' }}>{milkChange}</div>
         </div>
         <div className="table-row">
@@ -146,7 +246,7 @@ export function ComparativeSection({ data }: Props) {
             Et Üretimi
           </div>
           <div className="table-info" style={{ flex: 1 }}>{formatNumber(data.meatProduction.total)} ton</div>
-          <div className="table-value" style={{ width: '150px' }}>{Math.round((data.meatProduction.total * 1000) / (data.population || 1))} kg</div>
+          <div className="table-value" style={{ width: '150px' }}>{kisiBasiKg[1].value} kg</div>
           <div className="table-value green" style={{ width: '150px' }}>{meatChange}</div>
         </div>
         <div className="table-row">
@@ -155,7 +255,7 @@ export function ComparativeSection({ data }: Props) {
             Yumurta Üretimi
           </div>
           <div className="table-info" style={{ flex: 1 }}>{formatNumber(data.eggProduction.total)} adet</div>
-          <div className="table-value" style={{ width: '150px' }}>{Math.round(data.eggProduction.total / (data.population || 1))} adet</div>
+          <div className="table-value" style={{ width: '150px' }}>{kisiBasiAdet} adet</div>
           <div className="table-value green" style={{ width: '150px' }}>{eggChange}</div>
         </div>
       </div>

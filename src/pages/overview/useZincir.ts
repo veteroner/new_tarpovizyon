@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchRows, num, type Row } from '../../services/d1';
 import {
-  SUT_ZINCIRI, YEM_BITKILERI, bilesikOrtalama, sonAy,
+  SUT_ZINCIRI, UCTAN_UCA, YEM_BITKILERI, bilesikOrtalama, sonAy,
   tufeUzeriFazla, yansima, yillikDegisim,
   type AySerisi, type Yansima, type ZincirDugum,
 } from './zincir';
@@ -35,6 +35,51 @@ function endekstenSeri(satirlar: Row[]): AySerisi {
   return s;
 }
 
+/**
+ * İki seriyi ölçülen gecikme kadar kaydırarak hizalar.
+ *
+ * Çıktının her satırı gıda enflasyonunun bir ayı; yanındaki yem bitkisi değeri
+ * o aydan {@link UCTAN_UCA.gecikmeAy} kadar öncesine ait. Kaydırma olmadan iki
+ * çizgi birbirini tutmuyor gibi görünüyor — ilişki zaten eşzamanlı değil,
+ * gecikmeli. Grafik ne ölçüldüyse onu göstermeli.
+ *
+ * Ayrıca gıda enflasyonu serisi yem bitkisi kadar geriye gitmiyor; yalnızca
+ * İKİSİNİN DE dolu olduğu aylar döndürülüyor ki grafiğin bir ucunda tek
+ * çizgi asılı kalmasın.
+ */
+function hizala(bilesik: AySerisi, gidaFazla: AySerisi) {
+  const geri = (anahtar: string, ay: number) => {
+    const [y, a] = anahtar.split('-').map(Number);
+    const toplam = a - ay;
+    const yil = y + Math.floor((toplam - 1) / 12);
+    const kalan = ((toplam - 1) % 12 + 12) % 12 + 1;
+    return `${yil}-${String(kalan).padStart(2, '0')}`;
+  };
+  return Object.keys(gidaFazla).sort()
+    .map((ay) => {
+      const kaynak = bilesik[geri(ay, UCTAN_UCA.gecikmeAy)];
+      return {
+        ay,
+        /*
+         * Ham seri DEĞİL, ölçülen katsayıyla çarpılmış hâli.
+         *
+         * Ham çizildiğinde yem bitkisi ±100 puan salınıyor, gıda enflasyonu
+         * ±20'de kalıyordu; iki çizgi aynı grafikte olmasına rağmen
+         * karşılaştırılamıyordu. Oysa β=0,16 zaten "yem 100 puan oynarsa gıda
+         * 16 puan oynar" demek. Katsayıyla çarpınca iki çizgi AYNI BİRİME
+         * geliyor ve grafik model iddiasının kendisini sınıyor: beklenen etki
+         * ile gerçekleşen enflasyon üst üste biniyor mu.
+         *
+         * Ölçek değiştirmek değil, ölçüyü uygulamak — ve ekranda hangi
+         * katsayının uygulandığı yazılı.
+         */
+        beklenenEtki: kaynak == null ? null : kaynak * UCTAN_UCA.beta,
+        gidaEnflasyonu: gidaFazla[ay] ?? null,
+      };
+    })
+    .filter((s) => s.beklenenEtki != null && s.gidaEnflasyonu != null);
+}
+
 /** Uzun (satır başına bir ay) düzeni ay serisine çevirir. */
 function tarihtenSeri(satirlar: Row[], alan: string): AySerisi {
   const s: AySerisi = {};
@@ -49,8 +94,16 @@ function tarihtenSeri(satirlar: Row[], alan: string): AySerisi {
 export type ZincirVerisi = {
   yansima: Yansima | null;
   sut: ZincirDugum[];
-  /** Bileşiğin son 36 ayı — küçük grafik için. */
-  bilesikSeri: { ay: string; deger: number }[];
+  /**
+   * Öncülük grafiği için hizalanmış seri.
+   *
+   * `ay` = gıda enflasyonunun ayı. `yemBitkisi` o aydan {@link UCTAN_UCA}
+   * kadar ÖNCEKİ aya ait — yani iki seri, ölçülen gecikme kadar kaydırılmış
+   * olarak yan yana duruyor. Grafik bu sayede "önce şu oldu, sonra bu oldu"
+   * ilişkisini gösterebiliyor; kaydırmasaydık iki oynak çizgi görünür,
+   * aradaki bağ görünmezdi.
+   */
+  oncululuk: { ay: string; beklenenEtki: number | null; gidaEnflasyonu: number | null }[];
 };
 
 export function useZincir() {
@@ -116,8 +169,7 @@ export function useZincir() {
           'uretici-fiyati': fazla(tarihtenSeri(sut, 'usk_tavsiye_fiyat_tl_lt')),
           'gida-enflasyonu': gidaFazla,
         }),
-        bilesikSeri: Object.keys(bilesik).sort().slice(-36)
-          .map((ay) => ({ ay, deger: bilesik[ay] })),
+        oncululuk: hizala(bilesik, gidaFazla),
       };
     },
   });

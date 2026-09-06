@@ -10,21 +10,32 @@ import type { OverviewData, DataItem, YearlyData } from './overviewTypes';
 // ayırıcısı VİRGÜL ('2173,8'); uç bu sütunu commaDecimal olarak biliyor ve
 // eski REPLACE(value,',','.')*1 ile aynı sonucu üretiyor.
 const R_LIVESTOCK = 'fao/livestock-primary';
+const R_TUIK_URETIM = 'tr/hayvansal-urun-uretimi';
 const R_ME = 'fao/me-indicator';
 const R_LAND = 'fao/land-use';
 const R_NUFUS = 'fao/nufus';
 const R_ISTIHDAM = 'fao/nufus-istihdam-tarim';
 /* Dünya Bankası makro — FAO'nun bitmediği yıllar için. */
 const R_DB_MAKRO = 'dunya-bankasi/makro';
-import { HAYVAN_ULKE_YIL, HAYVAN_BOLGE_YIL, yilSutunu } from '../../utils/hayvanYili';
+import { HAYVAN_ULKE_YIL, HAYVAN_IL_YIL, yilSutunu } from '../../utils/hayvanYili';
 
 /*
- * İki farklı yıl, çünkü iki seviyede iki farklı tazelik var: ülke satırı
- * 2025'e kadar dolu, bölge satırlarında 2025 hiç yok. Her grafik kendi yılını
- * başlığında yazıyor (bkz. utils/hayvanYili.ts).
+ * ─── HARİTA BÖLGEDEN İLE TAŞINDI ────────────────────────────────────────────
+ * Coğrafi dağılım eskiden `duzey='bölge'` satırlarından geliyordu ve iki türlü
+ * yanlıştı:
+ *   • Yıl bir geriydi — bölge satırlarında 2025 hiç yok, 2024 gösteriliyordu.
+ *   • Harita 81 ilin çoğunu boş bırakıyordu. Bileşen önce il adına bakıyor,
+ *     bulamazsa ilin bölgesine düşüyor; elimizde yalnızca 12 bölge olduğu için
+ *     listeye girmeyen her il "Veri yok" diyordu.
+ * Üstelik bölge 2024'ü kendi içinde de bozuk: Et Tavuğu ile Yumurta Tavuğu
+ * birebir aynı sayıyı taşıyor ve toplamları ülkenin %40'ı.
+ *
+ * İl satırları (duzeykod=3) 2025'te TAM (ölçüldü 2026-09-06): Sığır/Koyun/Keçi
+ * 81 il, Tavuk/Hindi 80 il; il toplamları ülke satırıyla %0,5 içinde tutuyor.
+ * İstanbul da bu seviyede var. Harita artık buradan besleniyor.
  */
 const ULKE_SUTUN = yilSutunu(HAYVAN_ULKE_YIL);
-const BOLGE_SUTUN = yilSutunu(HAYVAN_BOLGE_YIL);
+const IL_SUTUN = yilSutunu(HAYVAN_IL_YIL);
 
 const R_CANLI = 'tuik/hayvancilik-canlihayvan';
 const TR = 'Türkiye';
@@ -74,6 +85,7 @@ export function useOverviewData(): UseOverviewDataReturn {
         agriGdpRes, agriGdpShareRes, agriEmpRes, agriEmpShareRes,
         livestockStocksRes, regionalCattleRes, regionalSheepRes, regionalGoatRes, regionalPoultryRes,
         dbMakro,
+        tuikUretimRes,
       ] = await Promise.all([
         fetchAgg(R_NUFUS, { max: ['TOPLAM', 'kirsal', 'sehir'], where: { year: nufusYil, area: TR } }),
         fetchAgg(R_ME, { max: ['value'], where: { year: meYil, area: TR, item: 'Gross Domestic Product', elementcode: EC_TOPLAM_USD, unit: 'million USD' } }),
@@ -93,12 +105,14 @@ export function useOverviewData(): UseOverviewDataReturn {
         fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Employment in agriculture by age, total (15+)' } }),
         fetchAgg(R_ISTIHDAM, { sum: ['total'], where: { area: TR, yearcode: istihdamYil, indicator: 'Share of employment in agriculture in total employment' } }),
         fetchAgg(R_CANLI, { groupBy: ['grup'], sum: [ULKE_SUTUN], where: { duzey: 'ülke', yer: 'TÜRKİYE' }, whereIn: { grup: ['Sığır', 'Koyun', 'Keçi', 'Tavuk', 'Hindi'] } }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], where: { grup: 'Sığır' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], where: { grup: 'Koyun' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], where: { grup: 'Keçi' }, whereIn: { duzey: ['bölge', 'bolge'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
-        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [BOLGE_SUTUN], whereIn: { duzey: ['bölge', 'bolge'], grup: ['Tavuk', 'Hindi'] }, orderBy: `sum_${BOLGE_SUTUN}`, dir: 'desc', limit: 12 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [IL_SUTUN], where: { grup: 'Sığır' }, whereIn: { duzeykod: [3] }, orderBy: `sum_${IL_SUTUN}`, dir: 'desc', limit: 81 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [IL_SUTUN], where: { grup: 'Koyun' }, whereIn: { duzeykod: [3] }, orderBy: `sum_${IL_SUTUN}`, dir: 'desc', limit: 81 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [IL_SUTUN], where: { grup: 'Keçi' }, whereIn: { duzeykod: [3] }, orderBy: `sum_${IL_SUTUN}`, dir: 'desc', limit: 81 }),
+        fetchAgg(R_CANLI, { groupBy: ['yer'], sum: [IL_SUTUN], whereIn: { duzeykod: [3], grup: ['Tavuk', 'Hindi'] }, orderBy: `sum_${IL_SUTUN}`, dir: 'desc', limit: 81 }),
         /* Dünya Bankası makro — FAO'dan daha yeni yıl varsa kullanılıyor. */
         fetchRows(R_DB_MAKRO, { limit: 1000 }),
+        /* TÜİK hayvansal üretim özeti — Basic'in ve röntgenin okuduğu tablo. */
+        fetchRows(R_TUIK_URETIM, { limit: 200 }),
       ]);
 
       // Nüfus
@@ -212,6 +226,58 @@ export function useOverviewData(): UseOverviewDataReturn {
         egg: num(item.sum_value) * BIN_ADET,
       }));
 
+      /*
+       * ─── TOPLAM VE TREND: TÜİK, KIRILIM: FAO ──────────────────────────────
+       * Bu sayfa toplamları ve yıllık serileri FAO'dan alıyordu ve orada seri
+       * 2024'te bitiyor; TÜİK özet tablosunda 2025 var. Aynı rakam Basic'te ve
+       * röntgende TÜİK'ten okunduğu için Pro bir yıl geriden ve farklı bir
+       * kaynaktan konuşuyordu.
+       *
+       * Kaynak değiştirmenin bedeli ölçüldü (2024, 2026-09-06):
+       *   süt      FAO 22.487.757 ≡ TÜİK 22.487.756   (birebir; FAO TÜİK'ten alıyor)
+       *   et       FAO  4.675.983 ↔ TÜİK  4.618.026   (%1,2 — FAO'nun '%meat%'
+       *                                                süzgeci birkaç kalem fazla topluyor)
+       *   yumurta  FAO 22.477 M   ↔ TÜİK 21.155 M     (%6,3)
+       * Sütte fark yok, ette ihmal edilebilir; yumurtadaki farkta ulusal kaynak
+       * TÜİK ve platformun geri kalanı onu gösteriyor. Tutarlılık kazanıyor.
+       *
+       * TÜR KIRILIMLARI (pastalar) FAO'da KALIYOR: ürün kalemi ayrımı yalnızca
+       * orada var, TÜİK özeti beş ölçü tutuyor. Bu yüzden kırılımların yılı
+       * `years.livestockBreakdown` diye AYRI taşınıyor — tek yıl alanı
+       * kullansaydık pastaların başlığı bir yıl yalan söylerdi.
+       */
+      const tuikYillar = [...tuikUretimRes]
+        .map((r) => ({ yil: Number(r.yil), r }))
+        .filter((x) => Number.isFinite(x.yil) && x.yil >= 2010)
+        .sort((a, b) => a.yil - b.yil);
+      const tuikSonYil = tuikYillar.at(-1)?.yil ?? 0;
+      const tuikKullan = tuikSonYil > (hayvanYil ?? 0);
+
+      const milkTotalSon = tuikKullan
+        ? num(tuikYillar.at(-1)?.r.cig_sut_uretimi) : milkTotal;
+      const meatTotalSon = tuikKullan
+        ? num(tuikYillar.at(-1)?.r.kirmizi_et_uretimi) + num(tuikYillar.at(-1)?.r.kanatli_eti_ton)
+        : meatTotal;
+      /* TÜİK yumurtayı MİLYON adet tutuyor; sayfa adet bekliyor. */
+      const MILYON = 1_000_000;
+      const eggTotalSon = tuikKullan
+        ? num(tuikYillar.at(-1)?.r.yumurta_milyon_adet) * MILYON : eggTotal;
+
+      const milkYearlySon: YearlyData[] = tuikKullan
+        ? tuikYillar.map((x) => ({ year: String(x.yil), milk: num(x.r.cig_sut_uretimi) }))
+        : milkYearly;
+      const meatYearlySon: YearlyData[] = tuikKullan
+        ? tuikYillar.map((x) => ({
+          year: String(x.yil),
+          meat: num(x.r.kirmizi_et_uretimi) + num(x.r.kanatli_eti_ton),
+        }))
+        : meatYearly;
+      const eggYearlySon: YearlyData[] = tuikKullan
+        ? tuikYillar.map((x) => ({ year: String(x.yil), egg: num(x.r.yumurta_milyon_adet) * MILYON }))
+        : eggYearly;
+
+      const uretimYil = tuikKullan ? tuikSonYil : hayvanYil;
+
       // Hayvan varlığı
       const livestockStocksBreakdown: DataItem[] = livestockStocksRes.map((row, idx) => ({
         name: String(row.grup ?? ''),
@@ -225,10 +291,12 @@ export function useOverviewData(): UseOverviewDataReturn {
       const livestockPoultry = (livestockStocksBreakdown.find(l => l.name.includes('Tavuk'))?.value || 0)
         + (livestockStocksBreakdown.find(l => l.name.includes('Hindi'))?.value || 0);
 
+      /* 81 ilin tamamı dönüyor: harita hepsini boyuyor, çubuk grafik ilk
+         12'sini kendisi kesiyor. Sorguda kesseydik harita yine delik kalırdı. */
       const mapRegional = (rows: Row[], palette: string[]): DataItem[] =>
         rows.map((row, idx) => ({
           name: String(row.yer || ''),
-          value: num(row[`sum_${BOLGE_SUTUN}`]),
+          value: num(row[`sum_${IL_SUTUN}`]),
           fill: palette[idx % palette.length],
           unit: 'baş',
         }));
@@ -237,30 +305,31 @@ export function useOverviewData(): UseOverviewDataReturn {
         macroKaynak,
         years: {
           macro: macroYil, population: nufusYil, land: araziYil,
-          employment: istihdamYil, livestock: hayvanYil,
+          employment: istihdamYil, livestock: uretimYil,
+          livestockBreakdown: hayvanYil,
         },
         population, ruralPopulation, urbanPopulation,
         gdp, gdpPerCapita, agriculturalGDP, agriculturalGDPShare,
         agriculturalEmployment, agriculturalEmploymentShare, totalEmployment,
         agriculturalLand, totalLand, landUseData,
         milkProduction: {
-          total: milkTotal,
+          total: milkTotalSon,
           cattle: milkBreakdown.find(m => m.name.includes('İnek'))?.value || 0,
           sheep: milkBreakdown.find(m => m.name.includes('Koyun'))?.value || 0,
           goat: milkBreakdown.find(m => m.name.includes('Keçi'))?.value || 0,
           buffalo: milkBreakdown.find(m => m.name.includes('Manda'))?.value || 0,
-          breakdown: milkBreakdown, yearly: milkYearly,
+          breakdown: milkBreakdown, yearly: milkYearlySon,
         },
         meatProduction: {
-          total: meatTotal, redMeat, whiteMeat,
+          total: meatTotalSon, redMeat, whiteMeat,
           cattle, sheep, goat, buffalo, chicken, turkey,
-          breakdown: meatBreakdown, yearly: meatYearly,
+          breakdown: meatBreakdown, yearly: meatYearlySon,
         },
         eggProduction: {
-          total: eggTotal,
+          total: eggTotalSon,
           chicken: eggBreakdown[0]?.value || 0,
           other: eggBreakdown[1]?.value || 0,
-          breakdown: eggBreakdown, yearly: eggYearly,
+          breakdown: eggBreakdown, yearly: eggYearlySon,
         },
         livestockStocks: {
           cattle: livestockCattle, sheep: livestockSheep,
