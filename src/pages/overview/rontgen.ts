@@ -16,8 +16,8 @@
  *
  *   GİRDİ        gübre, yem, enerji, ilaç, tohum, veteriner (GFE alt grupları)
  *   EKONOMİ      kârlılık, parite, maliyet-fiyat makası
- *   ÜRETİM       hayvansal üretim, hayvan varlığı
- *   ARZ          yeterlilik derecesi, kişi başı üretim–tüketim
+ *   ÜRETİM       hayvansal üretim, hayvan varlığı, bitkisel üretim, ekilen alan
+ *   ARZ          yeterlilik derecesi (hayvansal + bitkisel), kişi başı üretim–tüketim
  *   TİCARET      tarımsal dış ticaret dengesi
  *   FİYAT        gıda enflasyonu, aktarım zinciri projeksiyonu
  *
@@ -29,9 +29,12 @@
  *   kârlılık   < 0   → üretici zarar ediyor (sıfır doğal eşik)
  *   yeterlilik < 1   → iç üretim tüketimi karşılamıyor (bire tam denk gelir)
  *   makas      > 0   → girdi, çıktıdan hızlı pahalanıyor (sıfır doğal eşik)
- *   üretim     < -5% → tek yıllık dalgalanmanın ötesi
+ *   üretim     < -5% → hayvansalda tek yıllık dalgalanmanın ötesi
  *   parite           → serinin KENDİ geçmiş medyanı (sektör folklorundan
  *                      gelen "1,5 olmalı" gibi bir sayı uydurulmadı)
+ *   bitkisel üretim  → ÜRÜNÜN KENDİ geçmiş medyanının katı. Sabit eşik burada
+ *                      işe yaramıyor: zeytinde %30 düşüş normal bir yıl,
+ *                      nohutta felaket (bkz. bitkiselUretimSinyali).
  * "Kritik" ile "uyarı" arasındaki ikinci eşik büyüklük içindir, yön değil.
  */
 
@@ -128,7 +131,7 @@ export const KATEGORI_ETIKET: Record<Kategori, string> = {
 export const KATEGORI_NOT: Record<Kategori, string> = {
   girdi: 'Üreticinin ödediği fiyatlar — gübre, yem, enerji, ilaç, tohum.',
   ekonomi: 'Üreticiye kalan — kârlılık ve girdi-çıktı dengesi.',
-  uretim: 'Üretilen miktar ve onu üreten hayvan varlığı.',
+  uretim: 'Üretilen miktar, ekilen alan ve hayvan varlığı.',
   arz: 'İç üretimin tüketimi karşılama durumu.',
   ticaret: 'Tarımsal dış ticaretin yönü.',
   fiyat: 'Tüketiciye yansıyan fiyat ve önümüzdeki döneme dair ölçülen baskı.',
@@ -322,6 +325,74 @@ export function uretimSinyali(
 }
 
 /**
+ * Bitkisel üretim kuralı — eşik ÜRÜNÜN KENDİ geçmişinden.
+ *
+ * ─── NEDEN SABİT EŞİK OLMUYOR ───────────────────────────────────────────────
+ * Hayvansal üretimdeki %5/%10 eşiği bitkiselde işe yaramıyor: bu ürünlerin
+ * yıllık değişiminin medyanı zaten %10,2 (ölçüldü, 16 ürün). Yani sabit eşik
+ * sıradan bir yılı "kritik" diye raporluyor — ilk denemede 13 ürün birden
+ * kritik çıktı ve röntgen "neye bakmalıyım" sorusunu yeniden üretti.
+ *
+ * Asıl sorun ürünlerin BİRBİRİNDEN çok farklı oynaması. 22 yıllık ölçüm:
+ *   sofralık domates  tipik değişim %2,9      nohut       %4,5
+ *   buğday            %7,2                    fındık     %24,2
+ *   yağlık zeytin     %26,9 (bir yıl var bir yıl yok)
+ * Zeytinde %30 düşüş normal bir yıl, nohutta felaket. Tek eşik ikisini de
+ * doğru sınıflandıramaz.
+ *
+ * Bu yüzden eşik her ürünün KENDİ geçmiş medyanının katı:
+ *   1,5× → uyarı  (tipik bir yıldan yarı yarıya büyük)
+ *   2,5× → kritik (tipik bir yılın iki buçuk katı)
+ * Sonuç sınandı: yağlık zeytin −%30,3 sinyal ÜRETMİYOR (kendi normali),
+ * nohut −%28,2 KRİTİK (kendi normalinin altı katı). Sabit eşik ikisine de
+ * "kritik" diyordu.
+ *
+ * Son yılın değişimi eşiğin hesabına KATILMIYOR; kendi kendini normalleştiren
+ * bir eşik, büyük şoku "demek ki normalmiş" diye eleyebilirdi.
+ */
+export const BITKISEL_UYARI_KAT = 1.5;
+export const BITKISEL_KRITIK_KAT = 2.5;
+
+/** En az kaç yıllık geçmiş olmadan kendi eşiği hesaplanmaz. */
+const BITKISEL_ASGARI_YIL = 6;
+
+export function bitkiselUretimSinyali(
+  ad: string, yilDeger: [number, number][], yol: string, alanMi = false,
+): Sinyal | null {
+  const sirali = [...yilDeger].sort((a, b) => a[0] - b[0]);
+  const degisimler: number[] = [];
+  for (let i = 1; i < sirali.length; i += 1) {
+    const onceki = sirali[i - 1][1];
+    if (onceki > 0) degisimler.push(((sirali[i][1] - onceki) / onceki) * 100);
+  }
+  if (degisimler.length < BITKISEL_ASGARI_YIL) return null;
+
+  const son = degisimler[degisimler.length - 1];
+  if (son >= 0) return null;
+  const tipik = medyan(degisimler.slice(0, -1).map(Math.abs));
+  if (tipik == null || tipik <= 0) return null;
+
+  const uyariEsik = BITKISEL_UYARI_KAT * tipik;
+  const kritikEsik = BITKISEL_KRITIK_KAT * tipik;
+  if (-son < uyariEsik) return null;
+
+  const donem = String(sirali[sirali.length - 1][0]);
+  const kat = (-son / tipik).toFixed(1);
+  return {
+    id: `${alanMi ? 'alan' : 'bitkisel-uretim'}-${ad}`,
+    kategori: 'uretim',
+    seviye: -son >= kritikEsik ? 'kritik' : 'uyari',
+    baslik: alanMi ? `${ad}: ekilen alan daraldı` : `${ad} üretimi düştü`,
+    olcu: `%${son.toFixed(1)}`,
+    donem,
+    yol,
+    aciklama: alanMi
+      ? `Bu ürün için olağan yıllık oynama %${tipik.toFixed(1)}; bu daralma onun ${kat} katı. Etkisi gelecek hasatta görülür.`
+      : `Bu ürün için olağan yıllık oynama %${tipik.toFixed(1)}; bu düşüş onun ${kat} katı.`,
+  };
+}
+
+/**
  * Hayvan varlığı kuralı.
  *
  * Üretimden AYRI bir sinyal: sürü küçülmesi bu yılın üretimini değil, gelecek
@@ -407,6 +478,41 @@ export function kisiBasiSinyali(
     baslik: `${ad}: kişi başı üretim tüketimin altında`,
     olcu: `%${fark.toFixed(0)}`, donem, yol,
     aciklama: 'Nüfus başına düşen üretim tüketimi karşılamıyor.',
+  };
+}
+
+/**
+ * Bitkisel ürün yeterliliği — ürün dengesi tablosundan.
+ *
+ * Hayvansal yeterlilikle aynı kural, farklı kaynak: burada oran değil YÜZDE
+ * tutuluyor (117,1 gibi), o yüzden ayrı bir işlev. Aynı eşik: 100 doğal
+ * sınır, altı ithalat bağımlılığı.
+ *
+ * ─── NEDEN YALNIZCA SEÇİLMİŞ ÜRÜNLER ────────────────────────────────────────
+ * Tabloda 74 ürün var; hepsini basmak röntgeni tek başına doldururdu ve
+ * "neye bakmalıyım" sorusunu yeniden üretirdi. Listeye giren ürünler
+ * `useRontgen.ts`te, stratejik önemine göre seçili — ekmeklik tahıl, yağ
+ * bitkisi, temel sebze.
+ */
+export function bitkiselYeterlilikSinyali(
+  ad: string, yuzde: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (yuzde == null || !Number.isFinite(yuzde) || yuzde <= 0) return null;
+  if (yuzde >= 100) {
+    return {
+      id: `bitkisel-yeterlilik-${ad}`, kategori: 'arz', seviye: 'iyi',
+      baslik: `${ad}: iç üretim yeterli`,
+      olcu: `%${yuzde.toFixed(0)}`, donem, yol,
+      aciklama: 'Üretim yurt içi kullanımı karşılıyor.',
+    };
+  }
+  return {
+    id: `bitkisel-yeterlilik-${ad}`,
+    kategori: 'arz',
+    seviye: yuzde < 85 ? 'kritik' : 'uyari',
+    baslik: `${ad}: arz açığı`,
+    olcu: `%${yuzde.toFixed(0)}`, donem, yol,
+    aciklama: `Yurt içi kullanımın %${(100 - yuzde).toFixed(0)} kadarı ithalatla karşılanıyor.`,
   };
 }
 

@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchRows, num, type Row } from '../../services/d1';
 import {
   MAKAS_PENCERE, bayatMi,
-  aktarimSinyali, gidaEnflasyonSinyali, girdiGrubuSinyali, karlilikSinyali,
+  aktarimSinyali, bitkiselUretimSinyali, bitkiselYeterlilikSinyali,
+  gidaEnflasyonSinyali, girdiGrubuSinyali, karlilikSinyali,
   kisiBasiSinyali, makasSinyali, medyan, pariteSinyali, sirala, sonOrtalama,
   ticaretSinyali, uretimSinyali, varlikSinyali, yeterlilikSinyali, type Sinyal,
 } from './rontgen';
@@ -91,6 +92,57 @@ const GIRDI_GRUPLARI = [
 
 const GIRDI_GENEL = 'Tarımsal Girdi Fiyat Endeksi';
 
+/**
+ * Röntgende izlenen bitkisel ürünler.
+ *
+ * ─── NEDEN SEÇİLMİŞ LİSTE, NEDEN BÜYÜKTEN KÜÇÜĞE DEĞİL ──────────────────────
+ * Tabloda 226 ürün var ve hepsini basmak röntgeni tek başına doldururdu.
+ * "En büyük N ürünü al" da işe yaramıyor: `deger` sütunu ton, adet ve dekarı
+ * AYNI yerde tutuyor, o yüzden ham büyüklüğe göre sıralayınca listenin
+ * tepesine kesme çiçekler çıkıyor (karanfil 889 milyon ADET, buğdayın 16
+ * milyon TONUNDAN büyük görünüyor). Birim karışıklığı sıralamayı anlamsız
+ * kılıyor.
+ *
+ * Bu yüzden liste ADA göre ve gıda güvenliği önemine göre seçildi. Her sinyal
+ * ürünü YALNIZCA KENDİSİYLE, yıldan yıla yüzde olarak karşılaştırdığı için
+ * birim sorunu sinyallerin içine sızmıyor.
+ *
+ * `ad` ekranda görünen kısa isim; `tablo` D1'deki tam ad.
+ */
+const BITKISEL_URUNLER = [
+  { ad: 'Buğday', tablo: 'Buğday, Durum Buğdayı Hariç' },
+  { ad: 'Durum buğdayı', tablo: 'Durum Buğdayı' },
+  { ad: 'Arpa', tablo: 'Arpa (Diğer)' },
+  { ad: 'Mısır', tablo: 'Mısır' },
+  { ad: 'Çeltik', tablo: 'Çeltik' },
+  { ad: 'Ayçiçeği', tablo: 'Ayçiçeği Tohumu (Yağlık)' },
+  { ad: 'Şeker pancarı', tablo: 'Şeker Pancarı' },
+  { ad: 'Patates', tablo: 'Patates (Tatlı Patates Hariç)' },
+  { ad: 'Kuru soğan', tablo: 'Soğan (Kuru)' },
+  { ad: 'Salçalık domates', tablo: 'Domates (Salçalık)' },
+  { ad: 'Sofralık domates', tablo: 'Domates (Sofralık)' },
+  { ad: 'Nohut', tablo: 'Nohut, Kuru' },
+  { ad: 'Kırmızı mercimek', tablo: 'Mercimek, Kuru (Kırmızı)' },
+  { ad: 'Pamuk', tablo: 'Pamuk, Çırçırlanmamış (Kütlü)' },
+  { ad: 'Fındık', tablo: 'Fındık' },
+  { ad: 'Yağlık zeytin', tablo: 'Yağlık Zeytinler (Zeytinyağı Üretimi İçin)' },
+] as const;
+
+/** Ürün dengesinden yeterliliği izlenen bitkisel ürünler. */
+const DENGE_URUNLERI = [
+  { ad: 'Buğday', tablo: 'Buğday (toplam)' },
+  { ad: 'Arpa', tablo: 'Arpa' },
+  { ad: 'Mısır', tablo: 'Mısır' },
+  { ad: 'Ayçiçeği', tablo: 'Ayçiçeği' },
+  { ad: 'Pirinç', tablo: 'Pirinç' },
+  { ad: 'Nohut', tablo: 'Nohut' },
+  { ad: 'Mercimek', tablo: 'Mercimek' },
+  { ad: 'Patates', tablo: 'Patates' },
+] as const;
+
+const BITKISEL_YOL = '/tarpovizyon/turkey/plant-production';
+const DENGE_YOL = '/tarpovizyon/turkey/product-balance';
+
 export function useRontgen() {
   return useQuery({
     queryKey: ['tarim-rontgeni'],
@@ -100,7 +152,8 @@ export function useRontgen() {
          seriden sinyal üretilmiyor, boşuna istek de atılmıyor. */
       const [
         sut, kirmiziEt, yeterlilik, uretim, tufe,
-        gfe, tarimUfe, varliklar, kisiBasi, disTicaret, ...bitkiler
+        gfe, tarimUfe, varliklar, kisiBasi, disTicaret,
+        bitkiselUretim, bitkiselAlan, urunDenge, ...bitkiler
       ] = await Promise.all([
         fetchRows('cig-sut/ekonomik-gostergeler', { limit: 400 }),
         fetchRows('kirmizi-et/ekonomik-gostergeler', { limit: 400 }),
@@ -112,6 +165,11 @@ export function useRontgen() {
         fetchRows('tr/hayvan-varliklari', { limit: 200 }),
         fetchRows('tr/kisi-basi-uretim-tuketim', { limit: 60 }),
         fetchRows('makro/tarim-disticaret', { limit: 60 }),
+        /* Bitkisel üretim ve ekilen alan — ürün × yıl. Filtre `unsur`da,
+           çünkü tablo verim ve ağaç sayısını da aynı yerde tutuyor. */
+        fetchRows('bitkisel/uretim-detay', { unsur: 'Üretim', limit: 20000 }),
+        fetchRows('bitkisel/uretim-detay', { unsur: 'Ekilen Alan', limit: 20000 }),
+        fetchRows('tuik/urundenge', { limit: 2000 }),
         ...YEM_BITKILERI.map((b) =>
           fetchRows('tuik/fiyatendex', { endeks: 'T-UFE', maddekod: b.maddekod, limit: 60 })),
       ]);
@@ -229,6 +287,57 @@ export function useRontgen() {
         for (const o of olcum) {
           ekle(uretimSinyali(o.ad, num(oncekiY.r[o.alan]) || null, num(sonY.r[o.alan]) || null,
             String(sonY.yil), o.yol));
+        }
+      }
+
+      /* ── ÜRETİM: bitkisel ürünler ─────────────────────────────────────────
+       *
+       * Ürün × yıl haritası kurulup son iki dolu yıl karşılaştırılıyor. Her
+       * ürün YALNIZCA KENDİSİYLE kıyaslandığı için tablodaki birim karışıklığı
+       * (ton/adet/dekar aynı sütunda) sinyale sızmıyor. */
+      const urunYilHaritasi = (rows: Row[]) => {
+        const m = new Map<string, Map<number, number>>();
+        for (const r of rows) {
+          const ad = String(r.urun ?? '');
+          const yil = Number(r.yil);
+          const deger = num(r.deger);
+          if (!ad || !Number.isFinite(yil) || !deger) continue;
+          if (!m.has(ad)) m.set(ad, new Map());
+          m.get(ad)!.set(yil, deger);
+        }
+        return m;
+      };
+      const uretimHaritasi = urunYilHaritasi(bitkiselUretim);
+      const alanHaritasi = urunYilHaritasi(bitkiselAlan);
+
+      /* Kural ürünün TÜM geçmişini istiyor: eşiği o ürünün kendi olağan
+         oynamasından hesaplıyor (bkz. rontgen.ts → bitkiselUretimSinyali). */
+      const seriye = (m: Map<number, number> | undefined): [number, number][] =>
+        (m ? [...m.entries()].sort((a, b) => a[0] - b[0]) : []);
+
+      for (const u of BITKISEL_URUNLER) {
+        ekle(bitkiselUretimSinyali(u.ad, seriye(uretimHaritasi.get(u.tablo)), BITKISEL_YOL));
+        ekle(bitkiselUretimSinyali(u.ad, seriye(alanHaritasi.get(u.tablo)), BITKISEL_YOL, true));
+      }
+
+      /* ── ARZ: bitkisel yeterlilik (ürün dengesi) ───────────────────────────
+       *
+       * Tablo geniş düzende ve sütun adları ÜRÜN YILI: 'y2023/24'. Son dolu
+       * sezon sütunu çalışma anında bulunuyor — elle yazılsaydı tablo
+       * ilerlediğinde sessizce eski sezonu göstermeye devam ederdi. */
+      const dengeSatirlari = urunDenge.filter((r) => String(r['fasıl'] ?? '') === 'Yeterlilik derecesi');
+      const sezonSutunlari = Object.keys(dengeSatirlari[0] ?? {})
+        .filter((k) => /^y\d{4}\/\d{2}$/.test(k))
+        .sort();
+      const sonSezon = [...sezonSutunlari].reverse()
+        .find((k) => dengeSatirlari.some((r) => num(r[k]) > 0));
+      if (sonSezon) {
+        const sezonEtiket = sonSezon.slice(1);          // 'y2023/24' → '2023/24'
+        for (const d of DENGE_URUNLERI) {
+          const satir = dengeSatirlari.find((r) => String(r.urun ?? '').trim() === d.tablo);
+          if (satir) {
+            ekle(bitkiselYeterlilikSinyali(d.ad, num(satir[sonSezon]) || null, sezonEtiket, DENGE_YOL));
+          }
         }
       }
 

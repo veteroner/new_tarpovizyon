@@ -74,6 +74,13 @@ const ROUTES = {
   'tuik/bitkisel-uretim': { table: 'tuik_bitkisel_uretim', filters: ['duzeykod', 'yerkod', 'yer', 'ili', 'urun', 'urunkod', 'urun_grup', 'ugkod', 'unsur', 'birim', 'duzey'], order: 'urun ASC', maxLimit: 10000 },
   'tuik/urundenge': { table: 'tuik_urundenge', filters: ['urun'], order: 'urun ASC', maxLimit: 2000 },
   /*
+   * Türkiye geneli bitkisel üretim ayrıntısı — ürün × unsur × yıl.
+   * `unsur` = Üretim | Ekilen Alan | Verim | Hasat Edilen Alan | ağaç sayıları.
+   * Tablo bugüne kadar yalnızca özel SQL rotalarından okunuyordu; röntgen
+   * ürün bazlı üretim ve ekilen alan değişimini buradan alıyor.
+   */
+  'bitkisel/uretim-detay': { table: 'bitkisel_tr_uretim_detay', filters: ['urun', 'unsur', 'yil'], order: 'yil ASC', maxLimit: 20000 },
+  /*
    * ENDEKS değil, GERÇEK TL FİYAT. tuik_fiyatendex 2020=100 endeksini
    * tutuyor ("ne kadar arttı"); bu uç maddenin kaç lira olduğunu veriyor.
    */
