@@ -1,0 +1,64 @@
+/* "Geçen yıl düştü — sonrasında ne olmuş?" tablosu. */
+.mo { margin-bottom: 24px; }
+
+.mo-bas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.mo-not {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 78ch;
+}
+
+.mo-kucuk { margin: 12px 0 0; font-size: 0.8rem; }
+
+/* Dar ekranda tablo KENDİ içinde kayar; sayfa yatay kaymaz. */
+.mo-tablo-sar { overflow-x: auto; }
+
+.mo-tablo {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.mo-tablo th,
+.mo-tablo td {
+  text-align: left;
+  padding: 9px 10px 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.86rem;
+}
+
+.mo-tablo th {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mo-ad { font-weight: 600; color: var(--text-primary); }
+
+/* Ok TEK BAŞINA anlam taşımıyor — yanında işaretli yüzde var. */
+.mo-eksi, .mo-arti {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.mo-eksi { color: var(--viz-critical, #b3261e); }
+.mo-arti { color: var(--viz-good, #1b6b3a); }
+
+.mo-oruntu { color: var(--text-secondary); }
+.mo-oruntu strong { color: var(--text-primary); }
+.mo-yok { font-style: italic; }

@@ -3,6 +3,7 @@ import { useOverviewData } from './overview/useOverviewData';
 import { GeneralStatsSection } from './overview/GeneralStatsSection';
 import { RontgenSection } from './overview/RontgenSection';
 import { ZincirSection } from './overview/ZincirSection';
+import { MakroOlcekSection } from './overview/MakroOlcekSection';
 import { MilkSection } from './overview/MilkSection';
 import { MeatSection } from './overview/MeatSection';
 import { EggSection } from './overview/EggSection';
@@ -54,6 +55,11 @@ export function OverviewPage() {
         * anlatılmış olurdu.
         */}
       <ZincirSection />
+
+      {/* Zincirden SONRA: zincir "bugünkü hareket nereye gidiyor" diyor,
+          burası "geçen yılki hareketi tarihte ne izlemiş". İkisi de ileriye
+          bakıyor ama biri ölçülen aktarımdan, diğeri tekrarlama örüntüsünden. */}
+      <MakroOlcekSection />
 
       <GeneralStatsSection
         data={data}
