@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { normalizeTurkish } from '../../pages/basin/basinUtils';
-import { pathFor, shouldExcludeDistrict, type DistrictFeature } from './districtGeo';
+import { geoMercator, geoPath } from 'd3-geo';
+import type { GeoPermissibleObjects } from 'd3-geo';
+import { normalizeProvinceKey } from '../../utils/productionCategories';
 import { HaritaBalonu } from './HaritaBalonu';
 
 import { siraVePayHesapla, type BalonBilgisi } from './balonBilgisi';
 
-type GeoFeatureCollection = { type: 'FeatureCollection'; features: DistrictFeature[] };
+/** İl poligonu dosyasının şekli — ad `Name` alanında (KML kökenli). */
+type ProvinceFeature = {
+  type: 'Feature';
+  properties?: { Name?: string; name?: string };
+  geometry: unknown;
+};
+type GeoFeatureCollection = { type: 'FeatureCollection'; features: ProvinceFeature[] };
 
 const COLOR_STEPS = ['#c7e9c0', '#78c679', '#f9d371', '#f4895f', '#de425b'];
 
@@ -26,10 +33,32 @@ function colorFor(value: number, breaks: number[]) {
   return COLOR_STEPS[Math.min(idx, COLOR_STEPS.length - 1)];
 }
 
-/** Province-level choropleth using the district-boundary geojson (no separate
- *  province polygon file exists) — every district within a province is painted
- *  the same color, which reads visually as a province map since adjacent
- *  same-province districts share borders. */
+/**
+ * İl bazlı choropleth.
+ *
+ * ─── NEDEN İL POLİGONU, NEDEN İLÇE DOSYASI DEĞİL ────────────────────────────
+ * Bu harita önce İLÇE sınırlı geojson'u çiziyor, her ilçeyi kendi ilinin
+ * değeriyle boyuyordu. Sonuç iki türlü yanlıştı:
+ *   • İl tek parça okunmuyordu — aynı renkteki ilçeler arasına beyaz sınır
+ *     çizildiği için il, içi bölünmüş bir yama gibi görünüyordu. Oysa veri
+ *     il düzeyinde; gösterilen ayrım verinin taşımadığı bir ayrımdı.
+ *   • Dosya 25 MB. 81 il için ilçe geometrisi indirmek, kullanılmayan
+ *     ayrıntı için sayfa başına 25 MB demekti.
+ *
+ * Artık il poligonu kullanılıyor (`public/turkey_provinces.json`, 81 il).
+ * Koordinat hassasiyeti 4 basamağa (~11 m) kırpılıp dosya 11,3 MB'tan
+ * 4,7 MB'a indi; il sınırı çiziminde bu fark görünmüyor.
+ *
+ * İLÇE VERİSİ OLAN sayfalar bu bileşeni kullanmıyor: havza sayfaları
+ * `HavzaDistrictMap` ile ilçeyi KENDİ değeriyle boyuyor. Ayrım şu: sınır
+ * ancak veri o düzeyde varsa çizilir.
+ *
+ * ─── PROJEKSİYON ────────────────────────────────────────────────────────────
+ * d3-geo kullanılıyor — Pro'daki `TurkeyHeatMap` ile aynı. İlçe dosyasında
+ * elle yazılmış doğrusal dönüşüm gerekiyordu çünkü o dosyanın poligonlarının
+ * yarısında sarım yönü tutarsız ve d3'ün kırpma algoritması arkalarına dolu
+ * dikdörtgen boyuyordu. İl dosyasında o sorun yok.
+ */
 export function TurkeyProvinceMap({ values, birim }: { values: Record<string, number>; birim?: string }) {
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
   const [hover, setHover] = useState<BalonBilgisi | null>(null);
@@ -37,16 +66,20 @@ export function TurkeyProvinceMap({ values, birim }: { values: Record<string, nu
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${import.meta.env.BASE_URL}turkey_districts.json`)
+    fetch(`${import.meta.env.BASE_URL}turkey_provinces.json`)
       .then((r) => r.json())
       .then((json) => { if (!cancelled) setGeoData(json); })
       .catch(() => { if (!cancelled) setGeoData(null); });
     return () => { cancelled = true; };
   }, []);
 
+  /* Ad eşlemesi Pro ile ORTAK: geojson "Afyon", "Çankiri", "Adiyaman" gibi
+     eksik/ASCII yazımlar taşıyor. `normalizeProvinceKey` bunları takma ad
+     tablosundan geçiriyor; düz küçük harfe çevirmek Afyonkarahisar'ı
+     eşleştiremezdi. */
   const byProvinceKey = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const [name, value] of Object.entries(values)) map[normalizeTurkish(name)] = value;
+    for (const [name, value] of Object.entries(values)) map[normalizeProvinceKey(name)] = value;
     return map;
   }, [values]);
 
@@ -59,31 +92,33 @@ export function TurkeyProvinceMap({ values, birim }: { values: Record<string, nu
   // Sıra ve pay bir kez hesaplanıyor; her hover'da 81 ili yeniden sıralamak gereksiz.
   const { toplam, sira, toplamOge } = useMemo(() => siraVePayHesapla(values), [values]);
 
-  const features = geoData?.features ?? [];
-  const withPaths = useMemo(
-    () => features
-      .filter((feat) => !shouldExcludeDistrict(feat))
-      .map((feat) => ({ feat, d: pathFor(feat.geometry) }))
-      .filter((f) => f.d),
-    [features]
-  );
+  const withPaths = useMemo(() => {
+    const features = geoData?.features ?? [];
+    if (!features.length) return [];
+    const projection = geoMercator();
+    try {
+      projection.fitSize([1200, 700], geoData as unknown as GeoPermissibleObjects);
+    } catch {
+      projection.center([35, 39]).scale(3400).translate([600, 350]);
+    }
+    const yol = geoPath(projection);
+    return features
+      .map((feat) => ({ feat, d: yol(feat as unknown as GeoPermissibleObjects) }))
+      .filter((f) => f.d);
+  }, [geoData]);
 
   return (
     <div ref={containerRef} className="tvb-map" onMouseLeave={() => setHover(null)}>
       <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" shapeRendering="geometricPrecision" style={{ width: '100%', height: 'auto', display: 'block' }}>
-        {/* Pass 1: fat same-color stroke to fill coordinate gaps between adjacent districts */}
+        {/*
+          * TEK GEÇİŞ. İlçe dosyasında iki geçiş gerekiyordu: komşu ilçe
+          * poligonları arasında koordinat boşlukları vardı ve altına kalın,
+          * aynı renkte bir kontur çizilmeseydi aralarında beyaz çizgiler
+          * kalıyordu. İl poligonları bitişik, o hileye gerek yok.
+          */}
         {withPaths.map(({ feat, d }, idx) => {
-          const provinceName = String(feat.properties?.province || '');
-          const value = byProvinceKey[normalizeTurkish(provinceName)];
-          const color = value !== undefined ? colorFor(value, breaks) : '#eef0f2';
-          return (
-            <path key={`gap-${idx}`} d={d as string} fill={color} stroke={color} strokeWidth={14} strokeLinejoin="round" strokeLinecap="round" paintOrder="stroke" />
-          );
-        })}
-        {/* Pass 2: thin borders + hover interaction */}
-        {withPaths.map(({ feat, d }, idx) => {
-          const provinceName = String(feat.properties?.province || '');
-          const value = byProvinceKey[normalizeTurkish(provinceName)];
+          const provinceName = String(feat.properties?.Name || feat.properties?.name || '');
+          const value = byProvinceKey[normalizeProvinceKey(provinceName)];
           const color = value !== undefined ? colorFor(value, breaks) : '#eef0f2';
           return (
             <path
