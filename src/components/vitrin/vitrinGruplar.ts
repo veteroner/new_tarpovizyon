@@ -1,16 +1,36 @@
 /* Vitrin grup listesi — bileşen dosyasından ayrıldı ki hızlı yenileme çalışsın. */
 
+import { surumYolu } from '../../utils/surum';
+
 /*
- * Yollar PRO'ya bakıyor.
+ * ─── YOLLAR ADRESE GÖRE ─────────────────────────────────────────────────────
+ * Bu liste bir dönem Basic'e, sonra Pro'ya sabitlendi. İkisi de yanlıştı:
+ * aynı derleme hem www.tarpovizyon.com'u (Basic) hem pro.tarpovizyon.com'u
+ * (Pro) sunuyor, o yüzden hedef derleme anında değil ÇALIŞMA ANINDA
+ * seçilmeli. Ayrıntı: utils/surum.ts.
  *
- * Dördü de `/tarpovizyon-basic/...` idi: site pro.tarpovizyon.com üzerinde
- * yayınlandığı hâlde tanıtım sayfasının üst menüsü ziyaretçiyi Basic modülüne
- * götürüyordu. `kok` alanı menüde "hangi grup etkin" işaretini seçiyor, bu
- * yüzden o da Pro önekine çevrildi.
+ * `kok` alanı menüde "hangi grup etkin" işaretini seçiyor; o da aynı kurala
+ * tabi, yoksa Basic'te hiçbir grup etkin görünmezdi.
  */
 export const GRUPLAR = [
-  { ad: 'Makro Veriler', yol: '/tarpovizyon/turkey/macro', kok: '/tarpovizyon/turkey/macro' },
-  { ad: 'Hayvancılık', yol: '/tarpovizyon/turkey/animal-production', kok: '/tarpovizyon/turkey/animal-production' },
-  { ad: 'Bitkisel Üretim', yol: '/tarpovizyon/turkey/plant-production', kok: '/tarpovizyon/turkey/plant-production' },
-  { ad: 'Bölgesel Veriler', yol: '/tarpovizyon/turkey/provincial', kok: '/tarpovizyon/turkey/provincial' },
+  {
+    ad: 'Makro Veriler',
+    yol: surumYolu('/tarpovizyon/turkey/macro', '/tarpovizyon-basic/makro/genel'),
+    kok: surumYolu('/tarpovizyon/turkey/macro', '/tarpovizyon-basic/makro'),
+  },
+  {
+    ad: 'Hayvancılık',
+    yol: surumYolu('/tarpovizyon/turkey/animal-production', '/tarpovizyon-basic/genel/hayvansal-uretim'),
+    kok: surumYolu('/tarpovizyon/turkey/animal-production', '/tarpovizyon-basic/genel'),
+  },
+  {
+    ad: 'Bitkisel Üretim',
+    yol: surumYolu('/tarpovizyon/turkey/plant-production', '/tarpovizyon-basic/bitkisel-genel/uretim-ozeti'),
+    kok: surumYolu('/tarpovizyon/turkey/plant-production', '/tarpovizyon-basic/bitkisel'),
+  },
+  {
+    ad: 'Bölgesel Veriler',
+    yol: surumYolu('/tarpovizyon/turkey/provincial', '/tarpovizyon-basic/il-duzeyinde/bitkisel-uretim'),
+    kok: surumYolu('/tarpovizyon/turkey/provincial', '/tarpovizyon-basic/il-duzeyinde'),
+  },
 ];

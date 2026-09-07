@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { BASIC_MENU, visibleMenu, type MenuCategory, type MenuItem } from '../../components/nav/menu';
+import { basicAlanAdi } from '../../utils/surum';
 import { isPlatform } from '../utils/platform';
 import { ara as aramaYap } from '../../components/nav/arama';
 import { useModelArama } from '../../components/nav/modelArama';
@@ -38,14 +39,23 @@ export default function MobileExplorePage() {
   const [ara, setAra] = useState('');
 
   /*
-   * Gösterilecek menü. Mağaza derlemesinde yalnız Basic; webde Pro da.
+   * Gösterilecek menü.
+   *
+   * Pro menüsü YAYINDAKİ ANA ALAN ADINDA GİZLİ. Eskiden ölçüt "mağaza
+   * derlemesi mi" idi ve web olan her yerde Pro menüsü açılıyordu — ama aynı
+   * derleme www.tarpovizyon.com'u da sunuyor, yani ana alan adındaki
+   * ziyaretçiye de Pro menüsü çıkıyordu. Sunucu tarafındaki
+   * `/tarpovizyon/*` yönlendirmesi yalnızca doğrudan girişleri yakalıyor;
+   * menüden tıklamak istemci tarafı yönlendirme olduğu için sunucuya hiç
+   * uğramıyordu.
+   *
    * Pro menüsü kapsamlı (Türkiye/Dünya); mobilde kapsam seçici olmadığı için
    * Türkiye alınıyor — mobil ana sayfa da Türkiye verisiyle açılıyor.
    */
-  const magazaDerlemesi = isPlatform('capacitor');
+  const proGizli = isPlatform('capacitor') || basicAlanAdi();
   const menu: MenuCategory[] = useMemo(
-    () => (magazaDerlemesi ? BASIC_MENU : [...visibleMenu('turkey', true), ...BASIC_MENU]),
-    [magazaDerlemesi],
+    () => (proGizli ? BASIC_MENU : [...visibleMenu('turkey', true), ...BASIC_MENU]),
+    [proGizli],
   );
 
   /* Sıralama listenin TAMAMINI görmeyi gerektiriyor, kategori kategori değil. */

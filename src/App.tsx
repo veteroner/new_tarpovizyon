@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { basicAlanAdi } from './utils/surum';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { GirisEkrani } from './components/GirisEkrani';
@@ -116,6 +117,24 @@ function AppContent() {
   const isTakvimPage = location.pathname === '/tarim-takvim';
   const isMobilePage = location.pathname.startsWith('/m');
   const isTarpovizyonBasicPage = location.pathname.startsWith('/tarpovizyon-basic');
+
+  /*
+   * ─── PRO, YAYINDAKİ ANA ALAN ADINDA KAPALI ────────────────────────────────
+   * netlify.toml `/tarpovizyon/*` için 301 koyuyor ama o kural yalnızca
+   * SUNUCUYA GİDEN isteği yakalıyor. Uygulama bir SPA: ziyaretçi `/` üzerinden
+   * girip uygulama içinden tıkladığında sunucuya hiç sorulmuyor ve Pro
+   * açılıyordu — adres çubuğunda `/tarpovizyon/...` görünüyor, oysa hiçbir
+   * istek atılmamış. Yayındaki Basic'in yerini bu yolla aldı.
+   *
+   * Burası o boşluğu kapatıyor: sunucu kuralının istemci tarafındaki
+   * karşılığı. Rota olarak yazılamaz — React Router rotaları sıraya değil
+   * ÖZGÜLLÜĞE göre seçiyor, `/tarpovizyon/*` daha az özgül olduğu için
+   * `/tarpovizyon/turkey` onu geçerdi.
+   *
+   * Yalnızca halka açık iki adreste devrede; yerel geliştirme, önizleme ve
+   * mağaza derlemesi etkilenmiyor (utils/surum.ts → basicAlanAdi).
+   */
+  const proKapali = basicAlanAdi() && location.pathname.startsWith('/tarpovizyon/');
   /*
    * Piyasa ve Asistan KENDİ başlıklarını (VitrinHeader) çiziyor; global
    * Header burada da çizilirse iki başlık üst üste biner.
@@ -154,6 +173,9 @@ function AppContent() {
     || isHasatPage || isSulamaPage || isGubrePage || isTakvimPage;
   const showMobilePageHeader =
     isPlatform('capacitor') && !isMobilePage && !isProgramSelection && !kabukluRota;
+
+  /* Pro kapalıysa hiçbir şey çizmeden ana sayfaya dön — kabuk bile kurulmasın. */
+  if (proKapali) return <Navigate to="/" replace />;
 
   return (
     <>
