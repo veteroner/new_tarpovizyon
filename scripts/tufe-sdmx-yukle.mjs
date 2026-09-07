@@ -172,9 +172,90 @@ for (const [anahtar, aylar] of grupla) {
     + `WHERE endeks='TUFE' AND d1=${d1} AND yil=${yil});`);
 }
 
+/*
+ * ─── BASIC'İN OKUDUĞU ÜÇ TABLO DA AYNI AKIŞTAN ──────────────────────────────
+ * Yukarısı `tuik_fiyatendex`i (Pro'nun tablosu) yazıyordu. Basic ise TÜFE
+ * sayfasında BAŞKA üç tabloyu okuyor — `tufe_aylik` (trend), `tufe_yillik_
+ * snapshot` ve `tufe_aylik_snapshot` (ana grup çubukları). Ağustos yayımlandığı
+ * halde mobil uygulama Temmuz'da kalmıştı: endeks tablosu tazelendi, bu üçü
+ * tazelenmedi. Aynı verinin iki ayrı besleme yolu olması sorunun kendisiydi.
+ *
+ * Üçü de `scripts/tufe-guncelle.mjs` ile TÜİK bülten JSON'undan besleniyordu;
+ * o dosya Node'dan 404 verdiği için elle çalıştırılması gerekiyordu — yani
+ * unutulmaya açıktı. Aynı sayılar bu SDMX akışında zaten var:
+ *
+ *   DEGISIM=2 → aylık % değişim   → tufe_aylik_snapshot.aylik_degisim
+ *   DEGISIM=4 → yıllık % değişim  → tufe_aylik.tufe / .gida_alkolsuz
+ *                                 → tufe_yillik_snapshot.yillik_degisim
+ *
+ * ─── KOD → AD EŞLEMESİ VARSAYIM DEĞİL, ÖLÇÜM ────────────────────────────────
+ * SDMX yalnız COICOP kodunu taşıyor, snapshot tabloları Türkçe grup adını.
+ * Eşleme "herhalde sırayla" diye kabul edilmedi: Temmuz 2026'nın 14 değeri
+ * D1'deki 14 satırla karşılaştırıldı ve 14/14 birebir tuttu (genel 31,75 ·
+ * gıda 37,53 · eğitim 44,18 …). Sıra yanlış olsaydı bu eşleşme çıkmazdı.
+ */
+const GRUP_ADLARI = [
+  'TÜFE (Genel Endeks)', 'Gıda ve alkolsüz içecekler', 'Alkollü içecekler ve tütün',
+  'Giyim ve ayakkabı', 'Konut', 'Mobilya ve ev eşyası', 'Sağlık', 'Ulaştırma',
+  'Bilgi ve iletişim', 'Eğlence ve kültür', 'Eğitim', 'Lokanta ve konaklama',
+  'Sigorta ve finansal hizmetler', 'Çeşitli mal ve hizmetler',
+];
+
+/** DEGISIM koduna göre {d1 → {dönem → değer}} çıkarır. */
+const oranSerisi = (degisim) => {
+  const cikti = new Map();
+  for (const s of satirlar) {
+    if (s.FREQ !== 'M' || s.DEGISIM !== degisim) continue;
+    const genel = s.SINIFLAMA_DUZEYI === 'TUFE';
+    if (!genel && !/^\d{2}$/.test(s.COICOP_2018)) continue;
+    const d1 = genel ? 0 : Number(s.COICOP_2018);
+    if (!cikti.has(d1)) cikti.set(d1, new Map());
+    cikti.get(d1).set(s.TIME_PERIOD, Number(s.OBS_VALUE));
+  }
+  return cikti;
+};
+
+const yillikOran = oranSerisi('4');
+const aylikOran = oranSerisi('2');
+const tumDonemler = [...new Set([...yillikOran.get(0)?.keys() ?? []])].sort();
+const sonDonem = tumDonemler.at(-1);
+const [sonYil, sonAy] = sonDonem.split('-').map(Number);
+
+const tirnak = (s) => `'${String(s).replace(/'/g, "''")}'`;
+
+/* tufe_aylik: her ay için genel TÜFE ve gıda grubunun YILLIK değişimi.
+   Var olan satır güncelleniyor, yoksa ekleniyor — tablo (yil, ay) anahtarında
+   benzersiz değil, o yüzden önce silip sonra eklemek yinelenen satır bırakırdı. */
+for (const donem of tumDonemler) {
+  const [yil, ay] = donem.split('-').map(Number);
+  const tufe = yillikOran.get(0)?.get(donem);
+  const gida = yillikOran.get(1)?.get(donem);
+  if (tufe == null || gida == null) continue;
+  ifadeler.push(
+    `UPDATE tufe_aylik SET tufe = ${tufe}, gida_alkolsuz = ${gida} WHERE yil=${yil} AND ay=${ay};`,
+    `INSERT INTO tufe_aylik (yil, ay, tufe, gida_alkolsuz) SELECT ${yil}, ${ay}, ${tufe}, ${gida} `
+      + `WHERE NOT EXISTS (SELECT 1 FROM tufe_aylik WHERE yil=${yil} AND ay=${ay});`,
+  );
+}
+
+/* Snapshot'lar tanım gereği TEK dönem tutuyor: son ay. Bu yüzden satır
+   eklemek değil, var olan 14 satırı ada göre güncellemek doğru olan. */
+for (const [i, ad] of GRUP_ADLARI.entries()) {
+  const y = yillikOran.get(i)?.get(sonDonem);
+  const a = aylikOran.get(i)?.get(sonDonem);
+  if (y != null) {
+    ifadeler.push(`UPDATE tufe_yillik_snapshot SET yillik_degisim = ${y} WHERE harcama_grubu = ${tirnak(ad)};`);
+  }
+  if (a != null) {
+    ifadeler.push(`UPDATE tufe_aylik_snapshot SET aylik_degisim = ${a} WHERE harcama_grubu = ${tirnak(ad)};`);
+  }
+}
+
 /* Damga da aynı dosyada: yazma ile damga ilerletme ayrılırsa, arada bir hata
    olduğunda tablo yeni ama önbellek eski kalıyor. */
-ifadeler.push(damgaSql([TABLO]));
+ifadeler.push(damgaSql([TABLO, 'tufe_aylik', 'tufe_yillik_snapshot', 'tufe_aylik_snapshot']));
 writeFileSync(SQL_YOL, ifadeler.join('\n'), 'utf8');
-console.log(`\n${ifadeler.length - 1} güncelleme + damga → ${SQL_YOL}`);
+console.log(`\nson dönem: ${sonYil}-${String(sonAy).padStart(2, '0')} `
+  + `(genel yıllık ${yillikOran.get(0)?.get(sonDonem)}%, gıda ${yillikOran.get(1)?.get(sonDonem)}%)`);
+console.log(`${ifadeler.length - 1} ifade + damga → ${SQL_YOL}`);
 console.log(`Çalıştır: npx wrangler d1 execute ${DB} --remote --file ${SQL_YOL}`);
