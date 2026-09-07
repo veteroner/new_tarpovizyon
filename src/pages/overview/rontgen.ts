@@ -632,3 +632,91 @@ export function sonOrtalama(v: number[], n: number): number | null {
   const dilim = v.filter(Number.isFinite).slice(-n);
   return dilim.length ? dilim.reduce((a, b) => a + b, 0) / dilim.length : null;
 }
+
+/* ── Kurallar: SEBZE–MEYVE FİYAT ŞOKU ─────────────────────────────────────── */
+
+/**
+ * Sebze–meyve fiyat şoku — İKİ AYRI SORU, İKİ AYRI KURAL.
+ *
+ * ─── NEDEN İKİ TANE ─────────────────────────────────────────────────────────
+ * "Sebzede fiyat şoku var mı" sorusunun iki farklı cevabı var ve tek kural
+ * ikisini birden veremiyor:
+ *
+ *   1. KATEGORİ ŞOKU — sebze-meyve TOPLU olarak tarımın geri kalanından hızlı
+ *      artıyor mu. (Ölçüldü 2026-07: sebze-meyve medyanı %44,6, tarım ÜFE
+ *      %18,8 — 25,8 puan fark.)
+ *   2. ÜRÜN ŞOKU — tek bir ürün DİĞER SEBZE-MEYVELERDEN ayrışıyor mu.
+ *
+ * Yalnızca birincisi olsaydı "biberde ne oluyor" görünmezdi; yalnızca
+ * ikincisi olsaydı bütün sebze aynı anda fırladığında hiçbir şey yanmazdı,
+ * çünkü herkes birlikte artınca kimse ortalamadan ayrışmaz.
+ *
+ * ─── ÜRÜN KURALININ ÖLÇÜTÜ TARIM ÜFE DEĞİL ──────────────────────────────────
+ * Ürün şoku, kalemin o AYDAKİ BÜTÜN SEBZE-MEYVE MEDYANINDAN sapması olarak
+ * ölçülüyor. Tarım ÜFE'den sapma olarak ölçmek iki türlü yanlıştı: tarım ÜFE
+ * çok oynak (ardışık aylarda %43 → %10 → %19) ve mevsimi taşımıyor — yazın
+ * bütün sebze birlikte pahalanınca 40 kalem birden "şok" derdi.
+ *
+ * ─── SÜREKLİLİK VE TAZELİK ──────────────────────────────────────────────────
+ * Girdi kuralındaki aynı gerekçeyle üç ay üst üste aynı yön şart. Ayrıca
+ * mevsimlik kalemler (nar, lahana, turp) yılın yalnızca bir bölümünde
+ * yayımlanıyor; son ayları eskide kalıyor ve {@link bayatMi} onları zaten
+ * gizliyor — dönem alanına o kalemin KENDİ son ayı yazılıyor, bugünün ayı
+ * değil.
+ */
+
+/** Ürün, diğer sebze-meyvelerden kendi olağanının kaç katı ayrışırsa haber. */
+export const URUN_SOK_KAT = 2;
+
+/** Sebze-meyve kategorisi tarım ÜFE'yi kaç puan aşarsa haber olur. */
+export const KATEGORI_SOK_PUAN = 10;
+
+export function sebzeMeyveKategoriSinyali(
+  medyanDegisim: number | null, tarimUfe: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (medyanDegisim == null || tarimUfe == null) return null;
+  const fark = medyanDegisim - tarimUfe;
+  if (Math.abs(fark) < KATEGORI_SOK_PUAN) return null;
+  const artiyor = fark > 0;
+  return {
+    id: 'sebze-meyve-kategori',
+    kategori: 'fiyat',
+    seviye: artiyor ? (fark > 20 ? 'kritik' : 'uyari') : 'iyi',
+    baslik: artiyor
+      ? 'Sebze ve meyve fiyatları tarımın geri kalanından hızlı artıyor'
+      : 'Sebze ve meyve fiyatları tarım ortalamasının gerisinde',
+    olcu: `%${medyanDegisim.toFixed(1)}`,
+    donem,
+    yol,
+    aciklama: `Tarım üretici fiyatları %${tarimUfe.toFixed(1)}; aradaki fark `
+      + `${Math.abs(fark).toFixed(1)} puan.`,
+  };
+}
+
+export function urunFiyatSokuSinyali(
+  ad: string, sonUcAy: number[], tipik: number | null, donem: string, yol: string,
+): Sinyal | null {
+  if (sonUcAy.length < 3 || tipik == null || tipik <= 0) return null;
+  /* Üç ay üst üste aynı yön — tek ayın sıçraması haber değil. */
+  const hepsiArti = sonUcAy.every((v) => v > 0);
+  const hepsiEksi = sonUcAy.every((v) => v < 0);
+  if (!hepsiArti && !hepsiEksi) return null;
+
+  const ortalama = sonUcAy.reduce((a, b) => a + b, 0) / sonUcAy.length;
+  const kat = Math.abs(ortalama) / tipik;
+  if (kat < URUN_SOK_KAT) return null;
+
+  return {
+    id: `urun-sok-${ad}`,
+    kategori: 'fiyat',
+    seviye: hepsiArti ? (kat >= 3 ? 'kritik' : 'uyari') : 'izle',
+    baslik: hepsiArti
+      ? `${ad} fiyatı diğer ürünlerden ayrıştı`
+      : `${ad} fiyatı diğer ürünlerin gerisinde kaldı`,
+    olcu: `${ortalama >= 0 ? '+' : '−'}${Math.abs(ortalama).toFixed(0)} puan`,
+    donem,
+    yol,
+    aciklama: `Sebze-meyve ortalamasından sapma; bu ürün için olağan sapma `
+      + `${tipik.toFixed(0)} puan, üç aydır ${kat.toFixed(1)} katı.`,
+  };
+}

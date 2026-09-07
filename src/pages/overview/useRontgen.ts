@@ -5,7 +5,8 @@ import {
   aktarimSinyali, bitkiselUretimSinyali, bitkiselYeterlilikSinyali,
   gidaEnflasyonSinyali, girdiGrubuSinyali, karlilikSinyali,
   kisiBasiSinyali, makasSinyali, medyan, pariteSinyali, sirala, sonOrtalama,
-  ticaretSinyali, uretimSinyali, varlikSinyali, yeterlilikSinyali, type Sinyal,
+  sebzeMeyveKategoriSinyali, ticaretSinyali, uretimSinyali, urunFiyatSokuSinyali,
+  varlikSinyali, yeterlilikSinyali, type Sinyal,
 } from './rontgen';
 import {
   UCTAN_UCA, YEM_BITKILERI, ayEkle, bilesikOrtalama, sonAy, tufeUzeriFazla,
@@ -140,6 +141,33 @@ const DENGE_URUNLERI = [
   { ad: 'Patates', tablo: 'Patates' },
 ] as const;
 
+/**
+ * Sebze–meyve fiyat şokunda izlenen T-ÜFE kalemleri.
+ *
+ * YAPRAK kalemler; grup toplamları (ör. "01_13_3 Meyvesi için yetiştirilen
+ * diğer sebzeler") LİSTEDE YOK. Toplamlar da girseydi hem aynı ürün iki kez
+ * sayılırdı hem de kesitsel medyan kendi alt kalemleriyle kirlenirdi.
+ *
+ * Domates ve hıyar kısa kodlu oldukları hâlde yaprak; uzunluk süzgeciyle
+ * seçilseydi ikisi de dışarıda kalırdı.
+ */
+const SEBZE_MEYVE_KODLARI = [
+  '01_13_12_00_01', '01_13_12_00_02', '01_13_13_00_01', '01_13_13_00_02',
+  '01_13_14_00_01', '01_13_14_00_02', '01_13_14_00_03', '01_13_16_00_00',
+  '01_13_21_00_00', '01_13_29_00_00', '01_13_31_00_01', '01_13_31_00_02',
+  '01_13_31_00_03', '01_13_33_00_00', '01_13_39_00_02', '01_13_41_00_01',
+  '01_13_42_00_02', '01_13_43_00_01', '01_13_43_00_02', '01_13_44_00_01',
+  '01_13_49_03_02', '01_13_51_00_00', '01_13_32', '01_13_34',
+  '01_22_12_00_00', '01_22_14_00_00', '01_23_11_00_01', '01_23_12_00_00',
+  '01_23_14_02', '01_24_21_00_00', '01_24_23_00_01', '01_24_24_00_01',
+  '01_24_25_00_00', '01_24_26_00_00', '01_24_27_00_00', '01_25_13_00_00',
+  '01_25_33_00_00', '01_25_34_00_00', '01_25_35_00_00', '01_25_90_00_03',
+];
+
+/** Kesitsel medyanın anlamlı olması için o ayda en az bu kadar kalem gerek. */
+const KESIT_ASGARI = 15;
+
+const FIYAT_YOL = '/tarpovizyon/turkey/price-index';
 const BITKISEL_YOL = '/tarpovizyon/turkey/plant-production';
 const DENGE_YOL = '/tarpovizyon/turkey/product-balance';
 
@@ -153,7 +181,7 @@ export function useRontgen() {
       const [
         sut, kirmiziEt, yeterlilik, uretim, tufe,
         gfe, tarimUfe, varliklar, kisiBasi, disTicaret,
-        bitkiselUretim, bitkiselAlan, urunDenge, ...bitkiler
+        bitkiselUretim, bitkiselAlan, urunDenge, sebzeMeyve, ...bitkiler
       ] = await Promise.all([
         fetchRows('cig-sut/ekonomik-gostergeler', { limit: 400 }),
         fetchRows('kirmizi-et/ekonomik-gostergeler', { limit: 400 }),
@@ -170,6 +198,10 @@ export function useRontgen() {
         fetchRows('bitkisel/uretim-detay', { unsur: 'Üretim', limit: 20000 }),
         fetchRows('bitkisel/uretim-detay', { unsur: 'Ekilen Alan', limit: 20000 }),
         fetchRows('tuik/urundenge', { limit: 2000 }),
+        /* Bütün T-ÜFE tek istekte (yalnızca 1.070 satır, ölçüldü) ve kalem
+           süzgeci YERELDE. Satır ucu çoklu değer süzgecini desteklemiyor —
+           `in_maddekod` sessizce yok sayılıp her şeyi döndürüyor. */
+        fetchRows('tuik/fiyatendex', { endeks: 'T-UFE', limit: 2000 }),
         ...YEM_BITKILERI.map((b) =>
           fetchRows('tuik/fiyatendex', { endeks: 'T-UFE', maddekod: b.maddekod, limit: 60 })),
       ]);
@@ -369,6 +401,60 @@ export function useRontgen() {
         ekle(ticaretSinyali(num(dtSon.r.ihracat_milyar_usd) || null,
           num(dtSon.r.ithalat_milyar_usd) || null, oncekiDenge,
           String(dtSon.yil), '/tarpovizyon/turkey/trade'));
+      }
+
+      /* ── FİYAT: sebze–meyve şoku ──────────────────────────────────────────
+       *
+       * İki ayrı kural (gerekçesi rontgen.ts'te): kategori toplu olarak tarım
+       * ÜFE'den ayrışıyor mu, ve tek tek kalemler kategorinin kendisinden
+       * ayrışıyor mu. */
+      const smKodlar = new Set<string>(SEBZE_MEYVE_KODLARI);
+      const smSeriler = new Map<string, { ad: string; degisim: AySerisi }>();
+      for (const kod of smKodlar) {
+        const satirlar = sebzeMeyve.filter((r) => String(r.maddekod ?? '') === kod);
+        if (!satirlar.length) continue;
+        const ad = String(satirlar[0].urun ?? kod);
+        const d = yillikDegisim(endekstenSeri(satirlar));
+        if (Object.keys(d).length) smSeriler.set(kod, { ad, degisim: d });
+      }
+
+      /* Kesitsel ölçüt: o aydaki bütün kalemlerin MEDYANI. Ortalama değil —
+         tek bir kalemin %300'lük sıçraması ortalamayı sürüklerdi. */
+      const ayaGoreDegerler = new Map<string, number[]>();
+      for (const { degisim } of smSeriler.values()) {
+        for (const [ay, v] of Object.entries(degisim)) {
+          if (!ayaGoreDegerler.has(ay)) ayaGoreDegerler.set(ay, []);
+          ayaGoreDegerler.get(ay)!.push(v);
+        }
+      }
+      const kesit: AySerisi = {};
+      for (const [ay, v] of ayaGoreDegerler) {
+        if (v.length >= KESIT_ASGARI) {
+          const m = medyan(v);
+          if (m != null) kesit[ay] = m;
+        }
+      }
+
+      const kesitSon = sonAy(kesit);
+      if (kesitSon) {
+        ekle(sebzeMeyveKategoriSinyali(
+          kesitSon.deger, ufeSeri[kesitSon.ay] ?? null, kesitSon.ay, FIYAT_YOL));
+      }
+
+      for (const { ad, degisim } of smSeriler.values()) {
+        /* Kalemin kesitten sapması. */
+        const sapma: AySerisi = {};
+        for (const [ay, v] of Object.entries(degisim)) {
+          if (kesit[ay] != null) sapma[ay] = v - kesit[ay];
+        }
+        const aylar = Object.keys(sapma).sort();
+        if (aylar.length < 24) continue;
+        const sonUc = aylar.slice(-3).map((a) => sapma[a]);
+        /* Eşik kalemin KENDİ geçmiş sapmasından; son üç ay hesaba katılmıyor. */
+        const tipik = medyan(aylar.slice(0, -3).map((a) => Math.abs(sapma[a])));
+        /* Dönem kalemin KENDİ son ayı: mevsimlik ürünler yılın bir bölümünde
+           yayımlanıyor, bugünün ayı yazılsaydı bayat veri taze görünürdü. */
+        ekle(urunFiyatSokuSinyali(ad, sonUc, tipik, aylar[aylar.length - 1], FIYAT_YOL));
       }
 
       /* ── FİYAT: gıda enflasyonu ───────────────────────────────────────── */
