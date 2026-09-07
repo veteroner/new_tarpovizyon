@@ -309,3 +309,50 @@ export function translateCountry(name: string): string {
 export function translateCountries(names: string[]): string[] {
   return names.map(translateCountry);
 }
+
+/*
+ * ─── ÜLKE Mİ, TOPLAM MI ─────────────────────────────────────────────────────
+ * FAO tabloları ülkelerle BÖLGE/KITA TOPLAMLARINI aynı sütunda tutuyor:
+ * "World", "Asia", "Europe", "Eastern Europe", "Net Food Importing Developing
+ * Countries"… Yukarıdaki sözlük bunları çeviriyor ama AYIRMIYOR; bu yüzden
+ * "en çok üreten ülkeler" sıralamalarının tepesine "Dünya" ve "Asya"
+ * çıkabiliyor ve ülkeler bir de toplamların içinde ikinci kez sayılıyor.
+ *
+ * `bolgeMi` o satırın ülke değil toplam olduğunu söylüyor. Sıralama, harita ve
+ * pay hesabı yapan her yer bunu süzmeli.
+ */
+
+/** FAO'nun ülke olmayan (bölge/kıta/ekonomik grup) satır adları. */
+const BOLGE_ADLARI = new Set([
+  'World',
+  'Africa', 'Americas', 'Asia', 'Europe', 'Oceania',
+  'Northern Africa', 'Sub-Saharan Africa', 'Eastern Africa', 'Middle Africa',
+  'Southern Africa', 'Western Africa',
+  'Northern America', 'Central America', 'Caribbean', 'South America',
+  'Central Asia', 'Eastern Asia', 'Southern Asia', 'South-eastern Asia', 'Western Asia',
+  'Eastern Europe', 'Northern Europe', 'Southern Europe', 'Western Europe',
+  'Australia and New Zealand', 'Melanesia', 'Micronesia', 'Polynesia',
+  'European Union (27)', 'European Union',
+  'Least Developed Countries', 'Land Locked Developing Countries',
+  'Small Island Developing States', 'Low Income Food Deficit Countries',
+  'Net Food Importing Developing Countries',
+  /*
+   * "China" FAO'da bir TOPLAM: Çin anakarası + Tayvan + Hong Kong + Makao.
+   * Ülke satırı "China, mainland". İkisi birlikte sayılırsa Çin iki kez
+   * girer; bu yüzden toplam olan eleniyor, ülke olan kalıyor.
+   */
+  'China',
+]);
+
+/** Bu ad bir ülke değil, bölge/kıta/ekonomik grup toplamı mı? */
+export function bolgeMi(ad: string): boolean {
+  if (!ad) return false;
+  const t = ad.trim();
+  if (BOLGE_ADLARI.has(t)) return true;
+  /* Sözlükte olmayan yeni toplamlar da yakalansın. */
+  return /\b(Countries|Union|Total|Region|Developing|Developed|Income)\b/i.test(t);
+}
+
+/** Yalnızca ülke satırlarını bırakır. */
+export const yalnizUlkeler = <T>(satirlar: T[], ad: (s: T) => string): T[] =>
+  satirlar.filter((s) => !bolgeMi(ad(s)));

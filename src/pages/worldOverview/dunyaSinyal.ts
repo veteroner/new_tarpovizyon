@@ -27,8 +27,12 @@
  * Hong Kong ve Makao'yu da içeren bir toplam.
  */
 
+/** Sinyalin neyi anlattığı — üretim mi, dış ticaret mi. */
+export type SinyalTuru = 'uretim' | 'ithalat' | 'ihracat';
+
 export type DunyaSinyal = {
   id: string;
+  tur: SinyalTuru;
   ulke: string;
   urun: string;
   /** Yıllık % değişim. */
@@ -88,9 +92,15 @@ export const URUNLER: { fao: string; ad: string }[] = [
   { fao: 'Rice', ad: 'Çeltik' },
 ];
 
-/** Ülke × ürün serisinden sinyal üretir; yoksa null. */
-export function uretimSinyali(
-  ulke: string, urun: string, yilDeger: [number, number][],
+/**
+ * Ülke × ürün serisinden sinyal üretir; yoksa null.
+ *
+ * Üretim, ithalat ve ihracat aynı kuralı paylaşıyor: hepsi ülkenin kendi
+ * geçmiş oynaklığına göre ölçülüyor. Ayrı işlevler yazmak, aynı eşiğin üç
+ * yerde ayrı ayrı sürüklenmesi demek olurdu.
+ */
+export function seriSinyali(
+  tur: SinyalTuru, ulke: string, urun: string, yilDeger: [number, number][],
 ): DunyaSinyal | null {
   const sirali = [...yilDeger].sort((a, b) => a[0] - b[0]);
   const degisimler: number[] = [];
@@ -115,7 +125,8 @@ export function uretimSinyali(
   if (kat < KAT_ESIK) return null;
 
   return {
-    id: `${ulke}-${urun}`,
+    id: `${tur}-${ulke}-${urun}`,
+    tur,
     ulke,
     urun,
     degisim: son,
@@ -129,3 +140,27 @@ export function uretimSinyali(
 /** Dikkat çekiciden sıradana: kendi olağanının kaç katı olduğuna göre. */
 export const sirala = (s: DunyaSinyal[]): DunyaSinyal[] =>
   [...s].sort((a, b) => b.kat - a.kat);
+
+/** Ekranda kullanılan söz — tür ve yöne göre. */
+export const SINYAL_SOZU: Record<SinyalTuru, { artis: string; azalis: string }> = {
+  uretim: { artis: 'üretimi arttı', azalis: 'üretimi düştü' },
+  ithalat: { artis: 'ithalatını artırdı', azalis: 'ithalatını azalttı' },
+  ihracat: { artis: 'ihracatını artırdı', azalis: 'ihracatını azalttı' },
+};
+
+/**
+ * Dış ticarette izlenen ürünler — FAO gıda denge tablosundaki adlarıyla.
+ *
+ * Bu tablonun 2023 yılı BOZUKTU: 16.319 ülke×ürün çifti iki kez yazılmıştı
+ * (2022 satırları 2023 damgasıyla yüklenmiş). FAO'nun kendi bulk dosyasıyla
+ * 380 çift üzerinde karşılaştırılıp düzeltildi; alt id'li satırın 2022 olduğu
+ * 380/380 doğrulandı. Düzeltmeden önce her ülke ithalatını %75–1300 artırmış
+ * görünüyordu.
+ */
+export const TICARET_URUNLERI: { fao: string; ad: string }[] = [
+  { fao: 'Bovine Meat', ad: 'Sığır eti' },
+  { fao: 'Poultry Meat', ad: 'Kanatlı eti' },
+  { fao: 'Milk - Excluding Butter', ad: 'Süt' },
+  { fao: 'Wheat and products', ad: 'Buğday' },
+  { fao: 'Maize and products', ad: 'Dane mısır' },
+];

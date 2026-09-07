@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, Globe2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { useDunyaOverview } from './worldOverview/useDunyaOverview';
+import { SINYAL_SOZU } from './worldOverview/dunyaSinyal';
 import './worldOverview/dunya.css';
 
 /**
@@ -35,7 +36,7 @@ export function WorldOverviewPage() {
         <div className="page-title-section">
           <h1 className="page-title">Dünyada Ne Oluyor</h1>
           <p className="page-subtitle">
-            Ülkelerin üretiminde olağandışı değişimler — FAO
+            Ülkelerin üretim ve dış ticaretinde olağandışı değişimler — FAO
             {yil ? ` · ${yil}` : ''}
           </p>
         </div>
@@ -48,7 +49,7 @@ export function WorldOverviewPage() {
           </h2>
           {sinyaller.length > 0 && (
             <ChartInsightButton
-              title="Ülkelerin üretiminde olağandışı değişimler"
+              title="Ülkelerin üretim ve dış ticaretinde olağandışı değişimler"
               description="Her ülke kendi geçmiş oynaklığına göre değerlendirildi"
               data={sinyaller}
               context={{
@@ -79,7 +80,7 @@ export function WorldOverviewPage() {
                   </span>
                   <span className="dn-govde">
                     <span className="dn-baslik">
-                      {s.ulke} · {s.urun} üretimi {s.yon === 'artis' ? 'arttı' : 'düştü'}
+                      {s.ulke} · {s.urun} {SINYAL_SOZU[s.tur][s.yon]}
                     </span>
                     <span className="dn-aciklama">
                       Bu ülke için olağan yıllık oynama %{s.tipik.toFixed(1)};
