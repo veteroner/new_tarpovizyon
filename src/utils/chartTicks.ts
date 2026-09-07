@@ -58,9 +58,39 @@ export const compactValue = (v: number): string => {
 };
 
 /**
+ * Bir sayıyı YUKARI, "yuvarlak" bir değere tamamlar.
+ *
+ * 1 · 2 · 2,5 · 5 · 10 katlarına çıkıyor — insanların eksende görmeye alışkın
+ * olduğu basamaklar. 154,338… → 200, 8,3 → 10, 0,047 → 0,05.
+ *
+ * Sıfır ve negatif olduğu gibi dönüyor: yukarı yuvarlamanın tanımı bu
+ * durumlarda tartışmalı ve buradaki tek kullanım alanı (eksen tepe payı)
+ * yalnızca pozitif değer görüyor.
+ */
+export function yuvarlakTavan(v: number): number {
+  if (!Number.isFinite(v) || v <= 0) return v;
+  const basamak = 10 ** Math.floor(Math.log10(v));
+  const oran = v / basamak;
+  const adim = [1, 2, 2.5, 5, 10].find((a) => oran <= a + 1e-9) ?? 10;
+  return adim * basamak;
+}
+
+/**
  * Yatay çubuk grafiklerinde sayısal eksene tepe payı.
  *
  * Değer etiketi çubuğun SAĞ ucunun dışına yazılıyor; en uzun çubuk çizim
  * alanının sonuna dayandığı için payı olmadan o etiket kırpılıyor.
+ *
+ * ─── NEDEN YUVARLANIYOR ─────────────────────────────────────────────────────
+ * Üst sınır bir dönem düz `max * 1.18` idi ve Recharts alan sınırını EKSEN
+ * ETİKETİ olarak basıyor: fiyat endeksi sayfasında eksenin ucunda
+ * "154.3380999999999" yazıyordu (130,795… × 1,18). Bu, dosyanın başındaki
+ * `pctTick` yorumunda anlatılan hatanın aynısı — orada tick biçimlendiricisiyle
+ * çözülmüştü, ama biçimlendiricisi olmayan her eksende yeniden ortaya çıkıyor.
+ *
+ * Kalıcı çözüm biçimlendirmek değil, SINIRIN KENDİSİNİ yuvarlak seçmek: o
+ * zaman etiket nasıl basılırsa basılsın temiz çıkıyor ve Recharts aradaki
+ * tick'leri de düzgün aralıklarla yerleştirebiliyor.
  */
-export const VALUE_HEADROOM: [number, (max: number) => number] = [0, (max: number) => max * 1.18];
+export const VALUE_HEADROOM: [number, (max: number) => number] =
+  [0, (max: number) => yuvarlakTavan(max * 1.18)];
