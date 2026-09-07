@@ -9,6 +9,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { OverviewData } from './overviewTypes';
 import { ChartCard } from '../../components/ui/Card';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 /**
  * Karşılaştırmalı analizler.
@@ -197,7 +198,7 @@ export function ComparativeSection({ data }: Props) {
             <BarChart data={kisiBasiKg}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+              <YAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
               <Tooltip formatter={(value: number) => [`${value} kg`, 'Kişi başı üretim']} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {kisiBasiKg.map((k) => <Cell key={k.name} fill={k.fill} />)}

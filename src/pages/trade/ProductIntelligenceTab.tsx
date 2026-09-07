@@ -14,6 +14,7 @@ import { formatMoney } from '../../services/api';
 import { fetchAgg, latestYear, num } from '../../services/d1';
 import { ChartCard } from '../../components/ui/Card';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 const R_BIT = 'tuik/ticaret-bitkisel';
 const R_HAY = 'tuik/ticaret-hayvansal';
@@ -371,8 +372,7 @@ export default function ProductIntelligenceTab() {
                   <XAxis
                     type="number" dataKey="x" name="İhracat Payı (%)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    label={{ value: 'İhracat Payı (%)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)', fontSize: 11 }}
-                  />
+                    label={{ value: 'İhracat Payı (%)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={eksenTick} />
                   <YAxis
                     type="number" dataKey="y" name="Denge ($M)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}

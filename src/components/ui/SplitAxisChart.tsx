@@ -2,6 +2,7 @@ import { ResponsiveContainer, ComposedChart, Line, CartesianGrid, XAxis, YAxis, 
 import type { ReactNode } from 'react';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import './splitAxis.css';
+import { ipucuBicim } from '../../utils/sayiBicim';
 
 /**
  * Ana grafik + altında türetilmiş seri şeridi.
@@ -60,8 +61,7 @@ export function SplitAxisChart({
           <XAxis dataKey={xKey} tick={false} axisLine={false} height={0} {...xProps} />
           <YAxis tick={eksenStili} width={46} tickFormatter={yFormat} domain={LINE_Y_DOMAIN} />
           <Tooltip
-            contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
-          />
+            contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }} formatter={ipucuBicim} />
           {children}
         </ComposedChart>
       </ResponsiveContainer>

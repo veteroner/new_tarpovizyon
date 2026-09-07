@@ -19,6 +19,7 @@ import {
 import { type TuikKovanYearData, type TuikKovanKpi, type TuikProvinceKovan, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   tuikKovanYear: TuikKovanYearData[];
@@ -427,7 +428,7 @@ export function BeekeepingTuikSection({ tuikKovanYear, tuikKovanKpi, tuikTopKova
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={tuikTopBalmumu} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
                 <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
                 <Tooltip 
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

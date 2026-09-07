@@ -18,6 +18,7 @@ import type {
   MetricsData,
 } from './basinUtils';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface BasinOverviewSectionProps {
   metrics: MetricsData;
@@ -237,7 +238,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
           <ResponsiveContainer width="100%" height={500}>
             <BarChart data={topProducts} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
               <YAxis 
                 type="category" 
                 dataKey="urun" 
@@ -325,7 +326,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={provinceLeaders} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                    <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
                     <YAxis 
                       type="category" 
                       dataKey="ili" 
@@ -357,7 +358,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={districtLeaders} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                    <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
                     <YAxis 
                       type="category" 
                       dataKey="yer" 
@@ -471,7 +472,7 @@ export default function BasinOverviewSection({ metrics, basinSummary, topProduct
                   dataKey="year" 
                   tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }}
                 />
-                <YAxis tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+                <YAxis tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} tickFormatter={eksenTick} />
                 <Tooltip 
                   contentStyle={{ 
                     background: 'rgba(30, 41, 59, 0.95)',

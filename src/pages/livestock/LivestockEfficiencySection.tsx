@@ -11,6 +11,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Beef, Egg, Milk } from 'lucide-react';
+import { eksenTick, ipucuBicim } from '../../utils/sayiBicim';
 
 const R_CANLI = 'fao/uretim-hayvansal-canlihayvan';
 const R_BIR = 'fao/uretim-hayvansal-birincil';
@@ -469,7 +470,7 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="totalProd" name="Toplam Üretim" stroke="var(--text-secondary)"
                 tickFormatter={(v: number) => v >= 1e6 ? `${(v/1e6).toFixed(0)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : `${v}`} />
-              <YAxis type="number" dataKey="meatEff" name="Et Verimi" stroke="var(--text-secondary)" unit=" kg" width={46} />
+              <YAxis type="number" dataKey="meatEff" name="Et Verimi" stroke="var(--text-secondary)" unit=" kg" width={46} tickFormatter={eksenTick} />
               <ZAxis type="number" dataKey="totalProd" range={[40, 400]} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
@@ -520,8 +521,8 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
                 <BarChart data={segData} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="segment" stroke="var(--text-secondary)" />
-                  <YAxis stroke="var(--text-secondary)" width={46} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+                  <YAxis stroke="var(--text-secondary)" width={46} tickFormatter={eksenTick} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} formatter={ipucuBicim} />
                   <Legend />
                   <Bar dataKey="meatEff" name="Et (kg/hayvan)" fill="#ef4444" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="milkEff" name="Süt (kg/inek)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -541,8 +542,8 @@ export default function LivestockEfficiencySection({ selectedYear, setLoading }:
             <LineChart data={efficiencyTrends} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" domain={LINE_Y_DOMAIN} width={46} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+              <YAxis stroke="var(--text-secondary)" domain={LINE_Y_DOMAIN} width={46} tickFormatter={eksenTick} />
+              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} formatter={ipucuBicim} />
               <Legend />
               <Line type="monotone" dataKey="avgMeatEfficiency" stroke="#ef4444" strokeWidth={2} name="Dünya Et" dot={{ r: 3 }} />
               <Line type="monotone" dataKey="avgMilkEfficiency" stroke="#3b82f6" strokeWidth={2} name="Dünya Süt" dot={{ r: 3 }} />

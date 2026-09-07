@@ -103,15 +103,34 @@ const csvAyristir = (metin) => {
 const tkn = await token();
 const satirlar = csvAyristir(await veri(tkn));
 
-/* Yalnızca aylık ENDEKS (DEGISIM=1) ve ana harcama grupları. */
+/*
+ * Yalnızca aylık ENDEKS (DEGISIM=1).
+ *
+ * İki tür satır alınıyor:
+ *   COICOP_2018 = '01'..'13'  → ana harcama grupları, D1'de d1=1..13
+ *   COICOP_2018 = '0'         → GENEL TÜFE, D1'de d1=0
+ *
+ * Genel satır ilk sürümde atlanmıştı ve sayfadaki "Aylık Endeks"/"Aylık
+ * Trend" grafikleri Temmuz'da kalmaya devam etti — o grafikler ana grupları
+ * değil genel TÜFE satırını okuyor. Ana grupları doldurup genel satırı
+ * atlamak, tam da düzeltilmek istenen boşluğu bırakıyordu.
+ *
+ * DİKKAT — genel satırın kodu '_Z' DEĞİL. SDMX'te "boyut yok" işareti olan
+ * '_Z', bu akışta COICOP_1999 sütununda duruyor; COICOP_2018'de genel TÜFE
+ * tek haneli '0' olarak geliyor. `/^\d{2}$/` iki hane şart koştuğu için '0'
+ * sessizce eleniyordu: betik hatasız çalışıp "286 grup×yıl yazıldı" diyor,
+ * üretilen SQL'de tek bir d1=0 satırı bulunmuyordu. Onun için süzgeç artık
+ * SINIFLAMA_DUZEYI'ne bakıyor — 'TUFE' genel, '2' ana grup — yani kod
+ * biçimine değil, TÜİK'in kendi etiketine dayanıyor.
+ */
 const endeks = satirlar.filter((s) => s.FREQ === 'M' && s.DEGISIM === '1'
-  && /^\d{2}$/.test(s.COICOP_2018));
+  && (s.SINIFLAMA_DUZEYI === 'TUFE' || /^\d{2}$/.test(s.COICOP_2018)));
 
 /* COICOP '01'..'13' → D1'in d1 sütunu 1..13. Ana grup satırı, o d1 için
    id sırasına göre İLK satır; alt kategoriler aynı d1'i paylaşıyor. */
 const grupla = new Map();
 for (const s of endeks) {
-  const d1 = Number(s.COICOP_2018);
+  const d1 = s.SINIFLAMA_DUZEYI === 'TUFE' ? 0 : Number(s.COICOP_2018);
   const [yil, ay] = s.TIME_PERIOD.split('-').map(Number);
   if (!Number.isFinite(d1) || !yil || !ay) continue;
   const anahtar = `${d1}|${yil}`;
@@ -126,7 +145,7 @@ console.log(`yıl aralığı: ${yillar[0]} → ${yillar.at(-1)}`);
 if (!SQL_YOL) {
   const son = yillar.at(-1);
   console.log(`\n${son} ana grup endeksleri:`);
-  for (let d1 = 1; d1 <= 13; d1 += 1) {
+  for (let d1 = 0; d1 <= 13; d1 += 1) {
     const v = grupla.get(`${d1}|${son}`);
     if (v) console.log(`  ${String(d1).padStart(2)}: ` + AYLAR.map((a) => (v[a] != null ? v[a].toFixed(1) : '—')).join(' '));
   }

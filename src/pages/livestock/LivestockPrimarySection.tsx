@@ -16,6 +16,7 @@ import { type DataItem, type PrimaryTab, formatNumber, formatShort } from './liv
 import { VALUE_HEADROOM, compactValue, pctTick, truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Sprout, TriangleAlert, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import { eksenTick } from '../../utils/sayiBicim';
 
 const R = 'fao/uretim-hayvansal-birincil';
 const EX = { preset: 'v1' as const, col: 'ulkead' };
@@ -345,7 +346,7 @@ export default function LivestockPrimarySection({ selectedYear, activePrimaryTab
           <ResponsiveContainer width="100%" height={380}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" dataKey="share" name="Pazar Payı" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} />
+              <XAxis type="number" dataKey="share" name="Pazar Payı" unit="%" tick={{fill: 'var(--text-secondary)', fontSize: 11}} tickFormatter={eksenTick} />
               <YAxis type="number" dataKey="cagr5" name="5Y CAGR" unit="%" tickFormatter={pctTick} tick={{fill: 'var(--text-secondary)', fontSize: 11}} width={46} />
               <ZAxis type="number" dataKey="total" range={[40, 400]} />
               <Tooltip

@@ -9,6 +9,7 @@ import MaddeFiyatSection from './priceIndex/MaddeFiyatSection';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
+import { eksenTick } from '../utils/sayiBicim';
 
 export default function PriceIndexPage() {
   const {
@@ -159,7 +160,7 @@ export default function PriceIndexPage() {
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Bar dataKey="value" name="Endeks" fill={config.color} radius={[4, 4, 0, 0]}>
                     {monthlyData.map((entry, i) => {
@@ -175,7 +176,7 @@ export default function PriceIndexPage() {
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Line type="monotone" dataKey="value" stroke={config.color} strokeWidth={3} dot={{ fill: config.color, r: 5 }} activeDot={{ r: 8 }} />
                 </LineChart>
@@ -189,7 +190,7 @@ export default function PriceIndexPage() {
                 <AreaChart data={yearlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval={Math.max(0, Math.floor(yearlyData.length / 12))} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                   <Tooltip formatter={(v: number) => [formatIndex(v), 'Ortalama Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Area type="monotone" dataKey="value" stroke={config.color} fill={config.color} fillOpacity={0.15} strokeWidth={2} />
                 </AreaChart>
@@ -247,7 +248,7 @@ export default function PriceIndexPage() {
                 <ResponsiveContainer width="100%" height={420}>
                   <BarChart data={topProducts} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                    <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
                     <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 9 }} width={110} tickFormatter={truncTick} interval={0} />
                     <Tooltip formatter={(v: number) => [formatIndex(v), 'Endeks']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8 }} />
                     <Bar dataKey="value" name="Endeks" radius={[0, 4, 4, 0]}>

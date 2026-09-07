@@ -24,6 +24,7 @@ import {
   BarChart3, Beef, Bird, Egg,
 } from 'lucide-react';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick, ipucuBicim } from '../../utils/sayiBicim';
 
 type Props = {
   tuikData: TuikChickenData[];
@@ -121,7 +122,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={(v: number) => sayi(v)} label={{ value: 'Endeks (ilk yıl = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={ipucuBicim} />
                   <Legend />
                   <Bar dataKey="slaughtered" name="Kesilen Tavuk (bin adet)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
                   <Line type="monotone" dataKey="meatProduction" name="Et Üretimi (ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 4 }} />
@@ -260,7 +261,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <LineChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[60, 100]} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[60, 100]} width={46} tickFormatter={eksenTick} />
                   <Tooltip formatter={(value: number) => [`${yuzde(value, 2)}`, 'Başarı Oranı']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Line type="monotone" dataKey="hatchRate" name="Kuluçka Başarı Oranı (%)" stroke="#22c55e" strokeWidth={3} dot={{ fill: '#22c55e', r: 5 }} />
                 </LineChart>
@@ -271,7 +272,7 @@ export default function WhiteMeatTuikSection({ tuikData, activeTuikTab, setActiv
                 <BarChart data={tuikData.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[0, 3]} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={[0, 3]} width={46} tickFormatter={eksenTick} />
                   <Tooltip formatter={(value: number) => [`${value.toFixed(3)} kg/baş`, 'Verim']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                   <Bar dataKey="yieldPerBird" name="Et Verimi" fill="#3b82f6" radius={[4, 4, 0, 0]}>
                     {tuikData.map((_, index) => (

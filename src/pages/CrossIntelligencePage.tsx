@@ -17,6 +17,7 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
 import { okunurMetin } from '../utils/contrast';
+import { eksenTick } from '../utils/sayiBicim';
 
 export default function CrossIntelligencePage() {
   const {
@@ -199,7 +200,7 @@ export default function CrossIntelligencePage() {
           <ScatterChart>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="x" name="Üretim (ton)" fontSize={9} tickFormatter={v => v > 1e6 ? `${(v / 1e6).toFixed(0)}M` : `${(v / 1e3).toFixed(0)}K`} />
-            <YAxis dataKey="y" name="Yeterlilik %" fontSize={9} domain={[0, 'auto']} width={46} />
+            <YAxis dataKey="y" name="Yeterlilik %" fontSize={9} domain={[0, 'auto']} width={46} tickFormatter={eksenTick} />
             <ZAxis dataKey="size" range={[50, 400]} />
             <Tooltip content={({ payload }) => {
               if (!payload?.[0]) return null;

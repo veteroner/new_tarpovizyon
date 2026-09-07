@@ -43,6 +43,7 @@ import { toWorldGeoCountryKey } from '../../utils/countryTranslations';
 import countryProfilesData from '../../data/countryProfiles.json';
 import { truncTick, LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface CountryProfile {
   name_tr: string;
@@ -549,8 +550,7 @@ export default function CountryIntelligenceTab() {
                   <XAxis
                     type="number" dataKey="x" name="İhracat Payı (%)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    label={{ value: 'İhracat Payı (%)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)', fontSize: 11 }}
-                  />
+                    label={{ value: 'İhracat Payı (%)', position: 'insideBottom', offset: -10, fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={eksenTick} />
                   <YAxis
                     type="number" dataKey="y" name="Denge ($M)"
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
@@ -730,7 +730,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
+                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                         <Tooltip formatter={(v: number, name: string) => [formatMoney(v), name === 'exp' ? 'İhracat' : 'İthalat']} />
                         {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
                         <Legend />
@@ -762,7 +762,7 @@ export default function CountryIntelligenceTab() {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} interval="preserveStartEnd" />
-                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} />
+                        <YAxis hide width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                         <Tooltip formatter={(v: number, name: string) => [`${yuzde(v, 1)}`, name === 'expShare' ? 'İhracat Payı' : 'İthalat Payı']} />
                         {/* İki+ seri: renk tek başına kimlik taşıyamaz. */}
                         <Legend />

@@ -16,6 +16,7 @@ import {
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import type { BasinSummary, BasinProductionStats, BasinData, BasinProduct } from './basinUtils';
 import { VALUE_HEADROOM, compactValue, truncTick } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface BasinAnalysisSectionProps {
   basinSummary: BasinSummary[];
@@ -514,7 +515,7 @@ export default function BasinAnalysisSection({ basinSummary, basinProductionStat
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={basinProducts} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+                  <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
                   <YAxis 
                     type="category" 
                     dataKey="urun" 

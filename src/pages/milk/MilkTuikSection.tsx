@@ -9,6 +9,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { StatCard } from '../../components/ui/Card';
 import { BAR_COLOR } from '../../utils/chartColors';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   tuikSutData: TuikSutUrunData[];
@@ -210,7 +211,7 @@ export default function MilkTuikSection({
               <BarChart data={tuikGrowthRates} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                 <Tooltip 
                   formatter={(value: number) => [`${yuzde(value, 1)}`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

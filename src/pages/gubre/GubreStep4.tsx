@@ -11,6 +11,7 @@ import { GUBRE_DATA_SOURCE, GUBRE_DATA_VERSION } from './gubreData';
 import { calculate } from './gubreUtils';
 import type { CalcResult, WizardState, FertilizerProduct } from './gubreTypes';
 import { Bolt, Gem, Wrench, Zap } from 'lucide-react';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface Props {
   result: CalcResult;
@@ -70,7 +71,7 @@ export function GubreStep4({ result, state, onReset, confidenceScore, effectiveP
           <BarChart data={result.chartData} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'kg/da', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'kg/da', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} tickFormatter={eksenTick} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} kg/da`, name]} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="ihtiyac" name="Toplam İhtiyaç"       fill="#3b82f6" radius={[3, 3, 0, 0]} />

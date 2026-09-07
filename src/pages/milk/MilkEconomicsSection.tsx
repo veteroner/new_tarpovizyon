@@ -9,6 +9,7 @@ import { StatCard } from '../../components/ui/Card';
 import { type MilkEconomicData, type WorldMilkPrices } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   worldMilkPrices: WorldMilkPrices | null;
@@ -111,7 +112,7 @@ export default function MilkEconomicsSection({
                   tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                   angle={-20}
                   textAnchor="end" interval="preserveStartEnd" minTickGap={16} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                 <Tooltip 
                   formatter={(value: number) => [`${value.toFixed(3)} USD/kg`]}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -224,7 +225,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                   <Tooltip 
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [`${value.toFixed(2)} ₺/lt`]}
@@ -279,7 +280,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="sut_yemi_19_hp" name="Süt Yemi" fill="#f59e0b" stroke="#f59e0b" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="sut_yemi_19_hp" stroke="#d97706" strokeWidth={3} dot={{ fill: '#d97706', r: 3 }} />
@@ -302,7 +303,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="misir_silaji" name="Mısır Silajı" fill="#06b6d4" stroke="#06b6d4" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="misir_silaji" stroke="#0891b2" strokeWidth={3} dot={{ fill: '#0891b2', r: 3 }} />
@@ -325,7 +326,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]} />
                   <Area type="monotone" dataKey="yonca" name="Yonca" fill="#10b981" stroke="#10b981" fillOpacity={0.4} strokeWidth={2} tooltipType="none" legendType="none" />
                   <Line type="monotone" dataKey="yonca" stroke="#059669" strokeWidth={3} dot={{ fill: '#059669', r: 3 }} />
@@ -348,7 +349,7 @@ export default function MilkEconomicsSection({
                 <ComposedChart data={chronological}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                   <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [`${value.toFixed(2)}`]} />
                   <Legend />
                   <Bar dataKey="sut_yem_paritesi" name="Süt-Yem Paritesi" fill="#3b82f6" radius={[6, 6, 0, 0]} fillOpacity={0.8} />
@@ -372,7 +373,7 @@ export default function MilkEconomicsSection({
                 <BarChart data={yearlySupport}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: '%', angle: 0, position: 'top', offset: 10 }} width={58} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: '%', angle: 0, position: 'top', offset: 10 }} width={58} tickFormatter={eksenTick} />
                   <Tooltip 
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(_value: number, _name: string, props: { payload?: { destekOrani?: number; avgDestek?: number; avgFiyat?: number } }) => {

@@ -25,6 +25,7 @@ import {
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { BAR_COLOR, BAR_HIGHLIGHT } from '../../utils/chartColors';
 import { ChartCard } from '../../components/ui/Card';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   worldCarcassPrices: WorldCarcassPrices | null;
@@ -224,7 +225,7 @@ export default function WorldComparisonSection({
                   angle={-45} 
                   textAnchor="end" 
                   height={70} interval="preserveStartEnd" minTickGap={16} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Ülke Sayısı', angle: -90, position: 'insideLeft' }} width={58} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Ülke Sayısı', angle: -90, position: 'insideLeft' }} width={58} tickFormatter={eksenTick} />
                 <Tooltip 
                   cursor={{ fill: 'var(--border)', opacity: 0.35 }}
                   formatter={(value: number) => [`${value} ülke`]}

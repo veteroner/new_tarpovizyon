@@ -30,6 +30,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Beef, Home, TrendingUp, Wallet } from 'lucide-react';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   importData: ImportData[];
@@ -347,7 +348,7 @@ export default function ImportAnalysisSection({ importData, series, importAnalyt
             <AreaChart data={importData} margin={{ top: 20, right: 8, left: 4, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
               <Tooltip 
                 formatter={(value: number, name: string) => {
                   if (name === 'Karkas Et') return [`${formatNumber(value)} ton`, name];

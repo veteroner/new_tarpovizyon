@@ -17,6 +17,7 @@ import type { ForecastSummary } from '../../services/weather';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { Droplets, TrendingUp } from 'lucide-react';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface Props {
   state: WizardState;
@@ -346,7 +347,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
             </defs>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} domain={LINE_Y_DOMAIN} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Area type="monotone" dataKey="yagis" name="Toplam Yağış" stroke="#3b82f6" fill="url(#gradYagis)" strokeWidth={2} />
@@ -370,7 +371,7 @@ export function ResultsView({ state, setState, calc, cropData, bolge, forecast, 
           <ComposedChart data={calc.aylikDenge} margin={{ top: 10, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis dataKey="ay" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} />
+            <YAxis tick={{ fontSize: 11 }} label={{ value: 'mm', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} width={58} tickFormatter={eksenTick} />
             <Tooltip formatter={(value: number, name: string) => [`${value.toFixed(1)} mm`, name]} labelFormatter={(l: string) => `${l}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="etc" name="ETc (Bitki Su Tüketimi)" fill="#e67e22" radius={[3, 3, 0, 0]} />

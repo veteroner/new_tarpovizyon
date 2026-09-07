@@ -17,6 +17,7 @@ import type { Tab } from './foodBalance/useFoodBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue, truncTick, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { eksenTick } from '../utils/sayiBicim';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Genel Bakis', icon: '' },
@@ -135,7 +136,7 @@ export default function FoodBalancePage() {
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart data={securityData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis type="number" domain={[0, 'dataMax']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                        <XAxis type="number" domain={[0, 'dataMax']} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={eksenTick} />
                         <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={110} tickFormatter={truncTick} interval={0} />
                         <Tooltip formatter={(v: number) => [`${yuzde(Number(v), 1)}`, 'Yeterlilik']} />
                         <Bar dataKey="sufficiency" radius={[0, 4, 4, 0]}>

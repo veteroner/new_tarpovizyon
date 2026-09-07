@@ -18,6 +18,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { ChartCard } from '../../components/ui/Card';
 import { BarChart3, Bird, TrendingUp, Utensils } from 'lucide-react';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { eksenTick, ipucuBicim } from '../../utils/sayiBicim';
 
 type Props = {
   quailMeatData: TuikTurkeyMeatData[];
@@ -113,7 +114,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Üretim (ton)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
               <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
               <Area type="monotone" dataKey="production" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorQuail)" tooltipType="none" legendType="none" />
               <Line type="monotone" dataKey="production" stroke="#7c3aed" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 4 }} activeDot={{ r: 6 }} />
@@ -135,8 +136,8 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
               })(), ['slaughtered', 'meat'])}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks (ilk = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
-                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} label={{ value: 'Endeks (ilk = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} tickFormatter={eksenTick} />
+                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={ipucuBicim} />
                 <Legend />
                 <Bar dataKey="slaughtered" name="Kesilen (bin adet)" fill="#06b6d4" radius={[4, 4, 0, 0]} opacity={0.7} />
                 <Line type="monotone" dataKey="meat" name="Et (ton)" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} />
@@ -154,7 +155,7 @@ export default function WhiteMeatQuailSection({ quailMeatData, quailSlaughterDat
               <BarChart data={monthlyQuailMeat}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                 <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(value: number) => [Number(value).toLocaleString('tr-TR') + ' ton', 'Üretim']} />
                 <Bar dataKey="value" name="Aylık Üretim" radius={[8, 8, 0, 0]}>
                   {monthlyQuailMeat.map((_, index) => (

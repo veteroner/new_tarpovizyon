@@ -5,6 +5,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 import { BarChart3, Wallet, Wheat } from 'lucide-react';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface EggEconomicSectionProps {
   economicData: EggEconomicData[];
@@ -119,7 +120,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <LineChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} tickFormatter={eksenTick} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${value.toFixed(2)} ₺/kg`]}
@@ -140,7 +141,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <AreaChart data={filteredData.slice().reverse()}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="tarih" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval="preserveStartEnd" minTickGap={16} />
-              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+              <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number) => [`${yuzde(value, 2)}`]}
@@ -199,8 +200,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 width={52}
-                domain={[(dataMin: number) => Math.min(0, dataMin * 1.1), (dataMax: number) => Math.max(0, dataMax * 1.1)]}
-              />
+                domain={[(dataMin: number) => Math.min(0, dataMin * 1.1), (dataMax: number) => Math.max(0, dataMax * 1.1)]} tickFormatter={eksenTick} />
               <ReferenceLine y={0} stroke="var(--viz-axis, var(--border))" />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

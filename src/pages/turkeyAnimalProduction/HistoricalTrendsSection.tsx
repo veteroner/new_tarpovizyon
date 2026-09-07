@@ -8,6 +8,7 @@ import {
   Tooltip, Legend, Area, Line, ReferenceLine
 } from 'recharts';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
+import { ipucuBicim } from '../../utils/sayiBicim';
 
 /** Endeks grafiğiyle AYNI beş seri — ikisi ayrışmasın diye tek listeden. */
 const SERILER = ['Süt (M ton)', 'Kırmızı Et (K ton)', 'Kanatlı (K ton)', 'Yumurta (M adet)', 'Bal (K ton)'] as const;
@@ -86,7 +87,7 @@ const HistoricalTrendsSection: React.FC<HistoricalTrendsSectionProps> = ({
             <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={48}
               tickFormatter={(v: number) => sayi(v)} domain={LINE_Y_DOMAIN} />
             <ReferenceLine y={100} stroke={AXIS} strokeDasharray="4 4" />
-            <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+            <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={ipucuBicim} />
             <Legend />
             <Area type="monotone" dataKey="Süt (M ton)" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.3} strokeWidth={2} />
             <Line type="monotone" dataKey="Kırmızı Et (K ton)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 3 }} />

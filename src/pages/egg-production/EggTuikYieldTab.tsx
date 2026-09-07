@@ -18,6 +18,7 @@ import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
 import { Bird, Egg } from 'lucide-react';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface EggTuikYieldTabProps {
   tuikData: TuikEggData[];
@@ -89,7 +90,7 @@ export function EggTuikYieldTab({ tuikData }: EggTuikYieldTabProps) {
                   <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                    label={{ value: 'Verim (adet/baş/yıl)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} />
+                    label={{ value: 'Verim (adet/baş/yıl)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} domain={LINE_Y_DOMAIN} width={58} tickFormatter={eksenTick} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     formatter={(value: number) => [value.toFixed(1) + ' adet/baş/yıl', 'Verim']}

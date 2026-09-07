@@ -8,6 +8,7 @@ import {
 import { formatTon, formatShort, type YearPoint, type Productivity, type ProductivityComparison } from './milkUtils';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   series: YearPoint[];
@@ -333,7 +334,7 @@ export default function MilkProductionSection({
                   <ComposedChart data={productivity} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="yil" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} domain={LINE_Y_DOMAIN} tickFormatter={eksenTick} />
                     <Tooltip 
                       formatter={(value: number) => [`${value.toFixed(1)} lt/baş`]}
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
@@ -381,7 +382,7 @@ export default function MilkProductionSection({
                       angle={-45}
                       textAnchor="end"
                       height={100} interval="preserveStartEnd" minTickGap={16} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} width={46} tickFormatter={eksenTick} />
                     <Tooltip 
                       formatter={(value: number) => [`${value} kg/baş`]}
                       contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}

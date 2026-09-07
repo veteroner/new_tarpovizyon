@@ -22,6 +22,7 @@ import {
 import { COLORS, formatNumber } from './beekeepingTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { VALUE_HEADROOM, compactValue } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 type Props = {
   /** Başlıktaki yıl veriden geliyor, sabit değil. */
@@ -135,7 +136,7 @@ export function BeekeepingProvincialSection({ sonYil, topBeekeepers, topProducer
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topYield} layout="vertical" margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} />
+              <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={VALUE_HEADROOM} tickFormatter={eksenTick} />
               <YAxis dataKey="il" type="category" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={75} interval={0} />
               <Tooltip 
                 formatter={(value: number) => [value.toFixed(1) + ' kg/kovan']}

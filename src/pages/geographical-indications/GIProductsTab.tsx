@@ -6,6 +6,7 @@ import type { ProductGroupData } from './giTypes';
 import { formatNumber } from './giTypes';
 import { ChartInsightButton } from '../../components/ChartInsightButton';
 import { truncTick } from '../../utils/chartTicks';
+import { eksenTick } from '../../utils/sayiBicim';
 
 interface Props {
   productGroupData: ProductGroupData[];
@@ -40,7 +41,7 @@ export function GIProductsTab({ productGroupData }: Props) {
             margin={{ top: 5, right: 8, left: 4, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} tickFormatter={eksenTick} />
             <YAxis
               type="category"
               dataKey="group"

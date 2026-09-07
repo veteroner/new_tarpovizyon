@@ -13,6 +13,7 @@ import { useLivestockCompetitionData, isTR } from './livestockCompetition/useLiv
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { ChartCard } from '../components/ui/Card';
+import { eksenTick, ipucuBicim } from '../utils/sayiBicim';
 
 /* ── Color constants ───────────────────────────────────────── */
 const TURKEY_COLOR = '#ef4444';
@@ -213,9 +214,9 @@ export function LivestockCompetitionPage() {
             <ScatterChart margin={{ top: 20, right: 8, bottom: 30, left: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis type="number" dataKey="share" stroke="var(--text-secondary)"
-                label={{ value: 'Pazar Payı (%)', position: 'bottom', fill: 'var(--text-secondary)', fontSize: 11 }} />
+                label={{ value: 'Pazar Payı (%)', position: 'bottom', fill: 'var(--text-secondary)', fontSize: 11 }} tickFormatter={eksenTick} />
               <YAxis type="number" dataKey="cagr" stroke="var(--text-secondary)"
-                label={{ value: 'BBO (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
+                label={{ value: 'BBO (%)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} tickFormatter={eksenTick} />
               <Tooltip content={({ payload }) => {
                 const d = payload?.[0]?.payload;
                 if (!d) return null;
@@ -299,7 +300,7 @@ export function LivestockCompetitionPage() {
                 <Radar name={top2[0].country} dataKey={top2[0].country} stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} strokeWidth={2} />
                 <Radar name={top2[1].country} dataKey={top2[1].country} stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} strokeWidth={2} />
                 <Legend />
-                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} formatter={ipucuBicim} />
               </RadarChart>
             </ResponsiveContainer>
           )}
@@ -390,7 +391,7 @@ export function LivestockCompetitionPage() {
               <LineChart data={hhiSeries} margin={{ top: 10, right: 8, left: 4, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" stroke="var(--text-secondary)" />
-                <YAxis stroke="var(--text-secondary)" domain={['auto', 'auto']} width={46} />
+                <YAxis stroke="var(--text-secondary)" domain={['auto', 'auto']} width={46} tickFormatter={eksenTick} />
                 <Tooltip
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                   formatter={(v: number) => [v.toLocaleString(), 'HHI']}

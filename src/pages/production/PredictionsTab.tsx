@@ -12,6 +12,7 @@ import { formatValue, formatShort, formatYield, formatHa } from './productionTyp
 import type { Insight, PredKPIs, ForecastData } from './productionTypes';
 import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 import { ChartCard } from '../../components/ui/Card';
+import { eksenTick } from '../../utils/sayiBicim';
 
 // Local icon stand-ins
 const Leaf: typeof TrendingUp = TrendingUp;
@@ -111,7 +112,7 @@ export function PredictionsTab({
               <LineChart data={yieldSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="year" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} domain={LINE_Y_DOMAIN} width={46} tickFormatter={eksenTick} />
                 <Tooltip formatter={(v: unknown, n: unknown) => [formatYield(Number(v)), n === 'actual' ? 'Gerçek' : 'Tahmin']} />
                 <Legend formatter={(v) => v === 'actual' ? 'Gerçek' : 'Tahmin'} />
                 <Line type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={2} dot={false} name="actual" connectNulls={false} />

@@ -18,6 +18,7 @@ import { ChartCard } from '../../components/ui/Card';
 import {
   BarChart3, Bird, Egg,
 } from 'lucide-react';
+import { ipucuBicim } from '../../utils/sayiBicim';
 
 interface EggTuikOverviewTabProps {
   tuikData: TuikEggData[];
@@ -78,7 +79,7 @@ export function EggTuikOverviewTab({ tuikData }: EggTuikOverviewTabProps) {
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v: number) => sayi(v)}
                 label={{ value: 'Endeks (ilk yıl = 100)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 11 }} width={58} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={ipucuBicim} />
               <Legend />
               <Bar dataKey="eggProduction" name="Yumurta Üretimi (bin adet)" fill="#f59e0b" opacity={0.7} radius={[4, 4, 0, 0]} />
               <Line type="monotone" dataKey="layerCount" name="Yumurtacı Tavuk (baş)" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} />

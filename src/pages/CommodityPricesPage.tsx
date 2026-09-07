@@ -14,6 +14,7 @@ import {
   TrendingDown, TrendingUp, Wheat, Bean, Factory, Coffee, Beef, Milk, Zap,
   TreePine, FlaskConical, Drumstick, Gem, Banknote, Package, type LucideIcon,
 } from 'lucide-react';
+import { eksenTick } from '../utils/sayiBicim';
 
 /*
  * Kategori ikonları — emoji DEĞİL, lucide bileşenleri.
@@ -874,7 +875,7 @@ export default function CommodityPricesPage() {
                       <LineChart data={chartData.map(p => ({ date: new Date(p.t * 1000).toLocaleDateString('tr-TR'), price: p.c }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                         <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
-                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']} width={46} />
+                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']} width={46} tickFormatter={eksenTick} />
                         <Tooltip
                           contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
                           formatter={(v: number) => [`$${v.toFixed(2)}`, 'Fiyat']}
