@@ -54,7 +54,16 @@ function uclariTopla(dizinler) {
       if (e.isDirectory()) {
         if (!/graphify-out|node_modules/.test(p)) gez(p);
       } else if (/\.(ts|tsx)$/.test(e.name)) {
-        const s = fs.readFileSync(p, 'utf8');
+        /*
+         * Yorumlar ÇIKARILIYOR. `oner_kanatli_uretimleri` "okunuyor"
+         * görünüyordu ama koddaki tek geçtiği yer "DİKKAT — 'oner/kanatli-
+         * uretimleri' DEĞİL" uyarısıydı: uç adı yalnız yorumda geçiyor, hiçbir
+         * fetch ona gitmiyor. Kullanılmayan bir tablo bayat rapor edilince,
+         * gerçekten bakılması gereken satırların arasına gürültü karışıyor.
+         */
+        const s = fs.readFileSync(p, 'utf8')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/(^|[^:])\/\/.*$/gm, '$1');
         for (const m of s.matchAll(/'([a-z0-9][a-z0-9/_-]*)'/g)) {
           if (ucTablo.has(m[1])) bulunan.add(m[1]);
         }
@@ -133,7 +142,22 @@ function sonDonem(db, tablo) {
       return null;
     }
     const r = d1(db, `SELECT MAX("${z}") v FROM "${tablo}"`);
-    return r[0]?.v == null ? null : String(r[0].v).slice(0, 10);
+    if (r[0]?.v == null) return null;
+    const son = String(r[0].v).slice(0, 10);
+
+    /*
+     * "2025-01-01" biçimi tek başına aylık seri demek DEĞİL.
+     * `tr_hayvan_varliklari` ve `il_hayvan_sayilari` yıllık serilerdir ama
+     * her yılı 1 Ocak damgasıyla tutuyorlar; biçime bakan eşik onları aylık
+     * sanıp 4 ay sınırı uyguluyor ve ikisini de BAYAT ilan ediyordu. Oysa
+     * TÜİK hayvan sayılarını bir yıl gecikmeli yayımlıyor — 2026 Eylül'de
+     * elde 2025 verisinin olması normal.
+     *
+     * Bu yüzden serinin aylık olup olmadığı VERİDEN ölçülüyor: dönemlerin
+     * ayları hep aynıysa seri yıllıktır, biçimi ne olursa olsun.
+     */
+    const ay = d1(db, `SELECT COUNT(DISTINCT substr("${z}", 6, 2)) n FROM "${tablo}"`);
+    return Number(ay[0]?.n) > 1 ? son : son.slice(0, 4);
   } catch { return null; }
 }
 
@@ -234,12 +258,56 @@ const esik = (t, donem) => {
   return /^\d{4}-\d{2}/.test(String(donem)) ? 4 : 20;
 };
 
-const bayat = satirlar.filter((s) => s.gecikme != null && s.gecikme > esik(s.tablo, s.donem));
+/*
+ * ─── KAYNAĞIN KENDİSİ NE YAYIMLAMIŞ ─────────────────────────────────────────
+ * Eşik tek başına "bayat mı" sorusunu cevaplayamıyor, çünkü kaynağın ne
+ * yayımladığını bilmiyor. Ölçüldü: 11 BAYAT satırın SEKİZİ bayat değildi —
+ * tablo, kaynağın en son yayımladığı dönemde duruyordu:
+ *
+ *   fao_balans            2023  FAO FBS bulk (4,8M satır) 2010→2023
+ *   fao_*_islenmis        2023  FAO QCL: tereyağı/şarap/peynir/margarin 2023'te
+ *                               (birincil ürünler 2024'te — ayrı yayım hızı)
+ *   bitkisel_global_uretim 2024 FAO QCL genel son yıl 2024
+ *   makro_tarim_gsyh      2024  SDMX UH_BH_GSYH_CARI 2000→2024
+ *   tuik_kisibasigelir    2024  SDMX DF_UH_BH_KISI_BASI 2000→2024
+ *
+ * Yanlış alarm zararsız değil: betiğin kendi kuralı gereği, güvenilmeyen
+ * rapor rapor olmamasından kötüdür. Sekiz sahte alarmın arasında duran üç
+ * gerçek alarm görülmez.
+ *
+ * Bu yüzden ölçülen kaynak dönemleri buraya yazılıyor. Sabit değer bayatlar,
+ * o yüzden her kayıt ÖLÇÜM TARİHİ taşıyor ve altı aydan eskiyse betik yeniden
+ * ölçmeyi söylüyor — sabitin sessizce yanlışa dönmesi engelleniyor.
+ */
+const KAYNAK_SON = {
+  fao_balans: { donem: '2023', olcum: '2026-09-07', nasil: 'FAO FBS bulk yıl aralığı 2010→2023' },
+  fao_uretim_bitkisel_islenmis: { donem: '2023', olcum: '2026-09-07', nasil: 'FAO QCL işlenmiş ürünler 2023' },
+  fao_uretim_hayvansal_islenmis: { donem: '2023', olcum: '2026-09-07', nasil: 'FAO QCL işlenmiş ürünler 2023' },
+  bitkisel_global_uretim: { donem: '2024', olcum: '2026-09-07', nasil: 'FAO QCL genel son yıl 2024' },
+  makro_tarim_gsyh: { donem: '2024', olcum: '2026-09-07', nasil: 'SDMX UH_BH_GSYH_CARI 2000→2024' },
+  tuik_kisibasigelir: { donem: '2024', olcum: '2026-09-07', nasil: 'SDMX DF_UH_BH_KISI_BASI 2000→2024' },
+};
+
+/** Ölçümün kendisi kaç aylık — 6 ayı geçerse yeniden ölçülmeli. */
+const OLCUM_OMRU_AY = 6;
+const olcumEski = [];
+for (const [t, k] of Object.entries(KAYNAK_SON)) {
+  const ay = gecikmeAy(k.olcum.slice(0, 7));
+  if (ay != null && ay > OLCUM_OMRU_AY) olcumEski.push(`${t} (${k.olcum})`);
+}
+
+/** Tablo kaynağın son yayımıyla aynı dönemdeyse bayat değildir. */
+const kaynakYetismis = (s) =>
+  KAYNAK_SON[s.tablo] != null && String(s.donem).startsWith(KAYNAK_SON[s.tablo].donem);
+
+const bayat = satirlar.filter((s) => s.gecikme != null
+  && s.gecikme > esik(s.tablo, s.donem) && !kaynakYetismis(s));
 
 const yaz = (s) => {
   const bayrak = s.sessiz ? 'SESSİZ'
     : s.gecikme == null ? ' yazma'
-      : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
+      : kaynakYetismis(s) ? ' kaynk'
+        : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
   console.log(`${bayrak} ${s.tablo.padEnd(38)} ${s.okuyan.padEnd(6)} ${String(s.donem).padEnd(13)} ${s.besleyen}`);
 };
 
@@ -260,6 +328,11 @@ if (sessizler.length) {
   console.log(`  ${sessizler.map((s) => s.tablo).join(', ')}`);
   console.log('  Bunlar sessizce donabilir. Çözüm: tabloya dönem sütunu eklemek');
   console.log('  ya da yazan yolu veri_damga\'ya bağlamak.');
+}
+
+if (olcumEski.length) {
+  console.log(`\n${olcumEski.length} kaynak ölçümü ${OLCUM_OMRU_AY} aydan eski — yeniden ölçülmeli:`);
+  console.log(`  ${olcumEski.join(', ')}`);
 }
 
 if (bayat.length) {
