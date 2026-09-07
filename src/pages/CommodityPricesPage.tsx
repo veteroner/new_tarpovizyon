@@ -789,7 +789,7 @@ export default function CommodityPricesPage() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                       <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>
-                        ${c.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        ${c.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                       <div style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
@@ -836,7 +836,7 @@ export default function CommodityPricesPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc' }}>
-                      ${selectedCommodity.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${selectedCommodity.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div style={{ color: selectedCommodity.changePct >= 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
                       {selectedCommodity.changePct >= 0 ? '▲' : '▼'} {yuzde(Math.abs(selectedCommodity.changePct), 2)}
@@ -1584,7 +1584,7 @@ export default function CommodityPricesPage() {
                                     <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
                                       ${latest.price_value < 100
                                         ? latest.price_value.toFixed(2)
-                                        : Math.round(latest.price_value).toLocaleString('en-US')}
+                                        : Math.round(latest.price_value).toLocaleString('tr-TR')}
                                     </div>
                                     <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '0.15rem' }}>
                                       /{serie.measure_unit_label} · {new Date(latest.date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' })}
@@ -1668,10 +1668,10 @@ export default function CommodityPricesPage() {
                     return (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1rem' }}>
                         {[
-                          { label: 'Son Fiyat', val: latest ? `$${latest.price_value < 100 ? latest.price_value.toFixed(2) : Math.round(latest.price_value).toLocaleString('en-US')}` : '-', color: '#f8fafc' },
+                          { label: 'Son Fiyat', val: latest ? `$${latest.price_value < 100 ? latest.price_value.toFixed(2) : Math.round(latest.price_value).toLocaleString('tr-TR')}` : '-', color: '#f8fafc' },
                           { label: 'Aylık Değ.', val: momPct != null ? `${momPct >= 0 ? '+' : ''}${yuzde(momPct, 1)}` : '-', color: momPct == null ? '#94a3b8' : momPct >= 0 ? '#22c55e' : '#ef4444' },
                           { label: 'Yıllık Değ.', val: yoyPct != null ? `${yoyPct >= 0 ? '+' : ''}${yuzde(yoyPct, 1)}` : '-', color: yoyPct == null ? '#94a3b8' : yoyPct >= 0 ? '#22c55e' : '#ef4444' },
-                          { label: '12A Ort.', val: h.length ? `$${avg12 < 100 ? avg12.toFixed(2) : Math.round(avg12).toLocaleString('en-US')}` : '-', color: '#94a3b8' },
+                          { label: '12A Ort.', val: h.length ? `$${avg12 < 100 ? avg12.toFixed(2) : Math.round(avg12).toLocaleString('tr-TR')}` : '-', color: '#94a3b8' },
                         ].map(stat => (
                           <div key={stat.label} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '0.75rem', padding: '0.75rem', textAlign: 'center' }}>
                             <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
@@ -1693,10 +1693,10 @@ export default function CommodityPricesPage() {
                         <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
                         <YAxis
                           stroke="rgba(255,255,255,0.3)" fontSize={10} domain={['auto', 'auto']}
-                          tickFormatter={(v: number) => `$${Number(v) < 100 ? Number(v).toFixed(1) : Math.round(Number(v)).toLocaleString('en-US')}`} width={46} />
+                          tickFormatter={(v: number) => `$${Number(v) < 100 ? Number(v).toFixed(1) : Math.round(Number(v)).toLocaleString('tr-TR')}`} width={46} />
                         <Tooltip
                           contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: '#f1f5f9' }}
-                          formatter={(v: number) => [`$${Number(v) < 100 ? Number(v).toFixed(2) : Math.round(Number(v)).toLocaleString('en-US')}`, `/${intlSelected.measure_unit_label}`]}
+                          formatter={(v: number) => [`$${Number(v) < 100 ? Number(v).toFixed(2) : Math.round(Number(v)).toLocaleString('tr-TR')}`, `/${intlSelected.measure_unit_label}`]}
                         />
                         <Line type="monotone" dataKey="price" stroke="#0ea5e9" strokeWidth={2} dot={false} />
                       </LineChart>

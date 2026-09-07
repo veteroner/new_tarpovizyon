@@ -108,7 +108,10 @@ export function PrimaryTab({
               </div>
               <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Etkin Üretici</div>
-                <div style={{ fontSize: '24px', fontWeight: 700 }}>{primaryHHI.effectiveCompetitors}</div>
+                {/* 10000/hhi bölmesi ham geliyor: biçimlendirilmeden basılınca
+                    ekranda "5.158791675751894" yazıyordu. Aynı değerin diğer
+                    beş kullanımı zaten tek hane yuvarlıyor. */}
+                <div style={{ fontSize: '24px', fontWeight: 700 }}>{sayi(primaryHHI.effectiveCompetitors, 1)}</div>
               </div>
             </div>
           </div>

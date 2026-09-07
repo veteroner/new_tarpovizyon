@@ -106,7 +106,10 @@ function d1(db, sql) {
 function zamanSutunu(db, tablo) {
   try {
     const adlar = d1(db, `PRAGMA table_info("${tablo}")`).map((r) => r.name);
-    for (const aday of ['tarih', 'donem', 'yil', 'year']) {
+    /* `yearcode` FAO'nun, `tahmin_yil`/`model_tarihi` tahmin tablosunun kendi
+       adlandırması. Aday listesi kısa olduğu için bu üç tablo "?" düşüyordu —
+       zaman sütunları OLMASINA rağmen ölçülmüyorlardı. */
+    for (const aday of ['tarih', 'donem', 'yil', 'year', 'yearcode', 'tahmin_yil', 'model_tarihi']) {
       const bul = adlar.find((a) => a.toLowerCase() === aday);
       if (bul) return bul;
     }
@@ -147,6 +150,36 @@ function gecikmeAy(donem) {
   return (bugun.getFullYear() - yil) * 12 + (bugun.getMonth() + 1 - ay);
 }
 
+/*
+ * ─── DÖNEMSİZ TABLOLAR: İKİNCİ ÖLÇÜM ────────────────────────────────────────
+ * Tabloların bir bölümünde zaman sütunu HİÇ YOK — `tr_yeterlilikler`,
+ * `makro_veriler`, `il_bal_cesitleri`, `*_snapshot` gibi tek vintajlı özetler.
+ * Bunlar rapora "?" düşüyordu ve "?" hiçbir şey söylemiyordu: tablo dün de
+ * yazılmış olabilirdi, üç yıl önce de. Ölçülemeyen tablo, ölçülüp temiz çıkan
+ * tabloyla aynı satıra yazılınca denetimin kendisi kör nokta üretiyor.
+ *
+ * `veri_damga` tam bu boşluğu dolduruyor: D1'e yazan her yol o tablonun
+ * damgasını ilerletiyor, yani "içerik ne kadar eski" ölçülemese de "en son ne
+ * zaman DOKUNULDU" ölçülebiliyor. Rapor artık üç durumu ayırıyor:
+ *
+ *   dönem var           → içerik tazeliği (asıl ölçüm)
+ *   dönem yok, damga var → yazma tazeliği  ("yazıldı: 2026-08-14")
+ *   ikisi de yok        → SESSİZ — denetlenemiyor
+ *
+ * SESSİZ olanlar çıkış kodunu ETKİLEMİYOR. Bunlar "bayat veri" değil
+ * "denetlenemeyen tablo": farklı bir iş gerektiriyorlar (tabloya yıl sütunu
+ * eklemek ya da yazan yolu damgaya bağlamak). İkisini aynı alarma koymak,
+ * gerçek bayatlık alarmını gürültüye boğardı.
+ */
+const damgalar = new Map();
+for (const db of [DB_BASIC, 'tarpovizyon-dunya']) {
+  try {
+    for (const r of d1(db, 'SELECT tablo, damga FROM veri_damga')) {
+      damgalar.set(`${db}|${r.tablo}`, Number(r.damga));
+    }
+  } catch { /* damga tablosu o DB'de yoksa sessiz geç */ }
+}
+
 const tablolar = new Map();
 for (const [uc, tbl] of ucTablo) {
   if (!proUc.has(uc) && !basicUc.has(uc)) continue;
@@ -167,12 +200,18 @@ for (const [tbl, k] of [...tablolar].sort()) {
   const besleyen = gunlukSenkron.has(tbl) ? 'günlük senkron'
     : elleYazan.has(tbl) ? [...elleYazan.get(tbl)].join(', ')
       : '—';
+  const damga = damgalar.get(`${db}|${tbl}`);
   satirlar.push({
     tablo: tbl,
     okuyan: k.pro && k.basic ? 'İKİSİ' : k.pro ? 'Pro' : 'Basic',
     besleyen,
-    donem: donem ?? '?',
+    donem: donem ?? (damga ? `yaz.${new Date(damga).toISOString().slice(0, 7)}` : 'SESSİZ'),
     gecikme,
+    /* Dönemsiz tabloda gecikme yerine yazma yaşı — eşikle karşılaştırılmıyor,
+       yalnız raporlanıyor; yazma tazeliği içerik tazeliğini kanıtlamaz. */
+    yazmaAyi: donem == null && damga
+      ? Math.round((Date.now() - damga) / (30 * 864e5)) : null,
+    sessiz: donem == null && !damga,
   });
 }
 
@@ -198,9 +237,10 @@ const esik = (t, donem) => {
 const bayat = satirlar.filter((s) => s.gecikme != null && s.gecikme > esik(s.tablo, s.donem));
 
 const yaz = (s) => {
-  const bayrak = s.gecikme == null ? '  ?  '
-    : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
-  console.log(`${bayrak} ${s.tablo.padEnd(38)} ${s.okuyan.padEnd(6)} ${String(s.donem).padEnd(11)} ${s.besleyen}`);
+  const bayrak = s.sessiz ? 'SESSİZ'
+    : s.gecikme == null ? ' yazma'
+      : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
+  console.log(`${bayrak} ${s.tablo.padEnd(38)} ${s.okuyan.padEnd(6)} ${String(s.donem).padEnd(13)} ${s.besleyen}`);
 };
 
 if (!YALNIZ_BAYAT) {
@@ -212,6 +252,14 @@ if (!YALNIZ_BAYAT) {
   console.log(`toplam ${satirlar.length} tablo · ikisinin ortak okuduğu: ${ortak} · beslenmeyen: ${satirlar.filter((s) => s.besleyen === '—').length}`);
 } else {
   bayat.forEach(yaz);
+}
+
+const sessizler = satirlar.filter((s) => s.sessiz);
+if (sessizler.length) {
+  console.log(`\n${sessizler.length} tablo DENETLENEMİYOR (zaman sütunu da yazma damgası da yok):`);
+  console.log(`  ${sessizler.map((s) => s.tablo).join(', ')}`);
+  console.log('  Bunlar sessizce donabilir. Çözüm: tabloya dönem sütunu eklemek');
+  console.log('  ya da yazan yolu veri_damga\'ya bağlamak.');
 }
 
 if (bayat.length) {
