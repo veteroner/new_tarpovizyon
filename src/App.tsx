@@ -90,6 +90,7 @@ const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
 const OverviewPage = lazy(() => import('./pages/OverviewPage').then(m => ({ default: m.OverviewPage })));
 import ErrorBoundary from './components/ErrorBoundary';
 import { tarpovizyonBasicRoutes } from './tarpovizyon-basic/routes';
+import { WorldOverviewPage } from './pages/WorldOverviewPage';
 
 import './styles/globals.css';
 // globals.css'ten SONRA: satır içi grid'leri mobilde ezen kurallar burada.
@@ -296,6 +297,10 @@ function AppContent() {
               */}
             <Route path="/tarpovizyon/turkey" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="turkey" />} />
             <Route path="/tarpovizyon/world" element={<GirisEkrani masaustu={<HomePage />} mobilYol="/m/explore" kapsam="world" />} />
+            {/* Dünya kapsamının KENDİ panosu. Türkiye panosu buraya
+                gösterilemezdi: içeriğinin tamamı TÜİK serilerine ve Türkiye
+                verisinden ölçülmüş eşiklere dayanıyor. */}
+            <Route path="/tarpovizyon/world/overview" element={<ErrorBoundary><WorldOverviewPage /></ErrorBoundary>} />
             {/* Kırılımın 1. basamağı: bölümün bu kapsamdaki konuları.
                 Kapsam başına ayrı statik rota — `:kapsam` parametreli tek
                 rota mevcut /tarpovizyon/turkey/... yollarını gölgeleyebilirdi. */}

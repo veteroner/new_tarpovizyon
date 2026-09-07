@@ -90,9 +90,24 @@ export const hasScope = (item: MenuItem, kapsam: Kapsam): boolean =>
 export const MENU: MenuCategory[] = [
   {
     id: 'genel-bakis', title: 'Genel Bakış', icon: Globe2, items: [
-      // Tek genel bakış sayfası var; /tarpovizyon/overview buraya YÖNLENDİRİYOR,
-      // ayrı bir dünya sayfası değil. Kapsamsız.
-      { label: 'Panoya Genel Bakış', any: '/tarpovizyon/turkey/overview' },
+      /*
+       * HER KAPSAMIN KENDİ PANOSU.
+       *
+       * Eskiden `any` idi: Dünya kapsamında da görünüyordu ama tıklayınca
+       * TÜRKİYE panosunu açıyordu — kullanıcı Dünya'yı seçmişken Türkiye
+       * verisine düşüyordu.
+       *
+       * Çözüm öğeyi Dünya'dan silmek değil, Dünya'ya KENDİ panosunu vermek
+       * oldu: ülkelerin üretim ve dış ticaretinde ne olduğunu gösteren ayrı
+       * bir sayfa. Türkiye panosunun tamamı Türkiye'ye özgü (TÜİK serileri,
+       * eşikleri Türkiye verisinden ölçülmüş röntgen, yem→gıda zinciri), o
+       * yüzden aynı sayfa iki kapsama hizmet edemezdi.
+       */
+      {
+        label: 'Panoya Genel Bakış',
+        turkey: '/tarpovizyon/turkey/overview',
+        world: '/tarpovizyon/world/overview',
+      },
       /*
        * Emtia Fiyatları buradan KALDIRILDI ve üst şeride taşındı
        * (TarpoShell → EMTIA_YOLU). Menüde kalınca yalnızca "Genel Bakış"

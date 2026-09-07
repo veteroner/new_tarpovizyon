@@ -4,6 +4,7 @@ import { MoveRight, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from './button';
+import { surumYolu } from '../../utils/surum';
 
 /**
  * TarpoVizyon hero — dönen kelime animasyonu.
@@ -82,7 +83,14 @@ function Hero() {
           </p>
 
           <div className="flex flex-row flex-wrap justify-center gap-3">
-            <Button size="lg" className="gap-2" onClick={() => navigate('/tarpovizyon/turkey')}>
+            {/*
+              * Hedef ADRESE GÖRE. Sabit `/tarpovizyon/turkey` yazılıydı; aynı
+              * derleme www.tarpovizyon.com'u da sunduğu için ana alan adında
+              * Pro'ya götürüyordu ve Pro oraya kapalı olduğu anda düğme
+              * çalışmıyor göründü. (utils/surum.ts)
+              */}
+            <Button size="lg" className="gap-2"
+              onClick={() => navigate(surumYolu('/tarpovizyon/turkey', '/tarpovizyon-basic'))}>
               Veri platformuna gir <MoveRight className="h-4 w-4" />
             </Button>
             {/*
