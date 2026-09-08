@@ -118,7 +118,11 @@ function zamanSutunu(db, tablo) {
     /* `yearcode` FAO'nun, `tahmin_yil`/`model_tarihi` tahmin tablosunun kendi
        adlandırması. Aday listesi kısa olduğu için bu üç tablo "?" düşüyordu —
        zaman sütunları OLMASINA rağmen ölçülmüyorlardı. */
-    for (const aday of ['tarih', 'donem', 'yil', 'year', 'yearcode', 'tahmin_yil', 'model_tarihi']) {
+    /* `created_at` iki `oner_dunya_*_fiyatlari` tablosunun, `tarihi` TPE
+       coğrafi işaret kaydının kendi adlandırması — üçü de zaman sütunu
+       TAŞIDIĞI HALDE "denetlenemiyor" grubunda duruyordu. */
+    for (const aday of ['tarih', 'donem', 'yil', 'year', 'yearcode',
+      'tahmin_yil', 'model_tarihi', 'created_at', 'updated_at', 'tarihi']) {
       const bul = adlar.find((a) => a.toLowerCase() === aday);
       if (bul) return bul;
     }
@@ -220,6 +224,74 @@ for (const db of [DB_BASIC, 'tarpovizyon-dunya']) {
   } catch { /* damga tablosu o DB'de yoksa sessiz geç */ }
 }
 
+/*
+ * ─── ZAMANSIZ REFERANS TABLOLARI ────────────────────────────────────────────
+ * Bunlarda zaman sütunu YOK ve OLMAMASI doğru: havza–il–ilçe eşlemesi ile
+ * coğrafi işaret kayıtları birer sözlük, seri değil. "Denetlenemiyor" diye
+ * raporlanmaları yanlış bir görev listesi üretiyordu — düzeltilecek bir şey
+ * yok. Ayrı bir sınıf olarak işaretleniyorlar ki gerçek kör noktalar
+ * (donabilecek veri tabloları) aralarında kaybolmasın.
+ */
+const REFERANS = new Set([
+  'havza', 'havzalist', 'havza_ilce', 'havza_urun_deseni',
+  'il_cografi_isaret', 'TPE_cografiisaret',
+]);
+
+/*
+ * ─── İÇERİK GÖZLEMİ: ZAMANSIZ VERİ TABLOLARI İÇİN ───────────────────────────
+ * Geriye kalanlar gerçek kör nokta: `tr_yeterlilikler`, `makro_veriler`,
+ * `il_bal_cesitleri`, `global_*`, `*_snapshot` … Tek vintaj tutuyorlar, zaman
+ * sütunları yok ve hiçbir yol damgalarını ilerletmiyor. Ne içeriklerinin ne
+ * de yazılma zamanlarının eskiliği ölçülebiliyordu.
+ *
+ * Ölçülemeyen şeyin yerine ölçülebilen konuyor: tablonun İÇERİĞİ. Her
+ * çalıştırmada satır sayısı ve bir toplam özeti alınıp `veri_gozlem`e
+ * yazılıyor. Sonraki çalıştırma bunu karşılaştırıyor ve "şu tablo N gündür
+ * hiç değişmedi" diyebiliyor. Bu, "veri güncel mi" sorusunun cevabı DEĞİL —
+ * o soru zaman sütunu olmadan cevaplanamıyor; ama "bu tablo donmuş mu"
+ * sorusunun cevabı, ki sessizce donmaktan korkulan tam olarak buydu.
+ *
+ * Betiğin "hiçbir şey yazmaz" ilkesinin tek istisnası burası ve yazdığı şey
+ * veri değil, kendi gözlem kaydı.
+ */
+const GOZLEM_TABLO = 'veri_gozlem';
+
+function gozlemHazirla(db) {
+  try {
+    d1(db, `CREATE TABLE IF NOT EXISTS ${GOZLEM_TABLO} (
+      tablo TEXT PRIMARY KEY, satir INTEGER, ozet TEXT,
+      ilk_gorulme INTEGER, son_degisim INTEGER)`);
+    const m = new Map();
+    for (const r of d1(db, `SELECT tablo, satir, ozet, son_degisim FROM ${GOZLEM_TABLO}`)) {
+      m.set(r.tablo, r);
+    }
+    return m;
+  } catch { return new Map(); }
+}
+
+/**
+ * Tablonun içerik parmak izi: satır sayısı + sayısal sütunların toplamı.
+ *
+ * Kriptografik özet değil, çünkü gereken tek şey DEĞİŞTİ Mİ sorusu. Sayısal
+ * toplam bir hücrenin bile değişmesinde oynuyor ve D1'de tek sorguyla
+ * hesaplanıyor; satırları çekip istemcide özetlemek 4,8 milyon satırlık
+ * tablolarda taşınabilir değil.
+ */
+function icerikOzeti(db, tablo) {
+  try {
+    const sut = d1(db, `PRAGMA table_info("${tablo}")`)
+      .filter((r) => /INT|REAL|NUM|DOUBLE|FLOAT/i.test(String(r.type || '')))
+      .map((r) => r.name)
+      .filter((a) => a.toLowerCase() !== 'id')
+      .slice(0, 12);
+    const toplam = sut.length
+      ? sut.map((s) => `COALESCE(SUM("${s}"),0)`).join(" || '|' || ")
+      : "''";
+    const r = d1(db, `SELECT COUNT(*) n, ${toplam} ozet FROM "${tablo}"`);
+    return { satir: Number(r[0]?.n ?? 0), ozet: String(r[0]?.ozet ?? '') };
+  } catch { return null; }
+}
+
 const tablolar = new Map();
 for (const [uc, tbl] of ucTablo) {
   if (!proUc.has(uc) && !basicUc.has(uc)) continue;
@@ -232,6 +304,12 @@ for (const [uc, tbl] of ucTablo) {
   k.uclar.push(uc);
 }
 
+const gozlemler = new Map([
+  [DB_BASIC, gozlemHazirla(DB_BASIC)],
+  ['tarpovizyon-dunya', gozlemHazirla('tarpovizyon-dunya')],
+]);
+const gozlemYazilacak = new Map([[DB_BASIC, []], ['tarpovizyon-dunya', []]]);
+
 const satirlar = [];
 for (const [tbl, k] of [...tablolar].sort()) {
   const db = k.db === 'DUNYA' ? 'tarpovizyon-dunya' : DB_BASIC;
@@ -241,18 +319,54 @@ for (const [tbl, k] of [...tablolar].sort()) {
     : elleYazan.has(tbl) ? [...elleYazan.get(tbl)].join(', ')
       : '—';
   const damga = damgalar.get(`${db}|${tbl}`);
+
+  /* Zamansız VERİ tablosu (referans sözlüğü değil) → içerik gözlemi. */
+  let degismeyenGun = null;
+  if (donem == null && !damga && !REFERANS.has(tbl)) {
+    const simdi = icerikOzeti(db, tbl);
+    if (simdi) {
+      const onceki = gozlemler.get(db).get(tbl);
+      const ayni = onceki && onceki.ozet === simdi.ozet && Number(onceki.satir) === simdi.satir;
+      const sonDegisim = ayni ? Number(onceki.son_degisim) : Date.now();
+      degismeyenGun = ayni
+        ? Math.round((Date.now() - Number(onceki.son_degisim)) / 864e5)
+        : 0;
+      gozlemYazilacak.get(db).push({ tablo: tbl, ...simdi, sonDegisim });
+    }
+  }
+
   satirlar.push({
     tablo: tbl,
     okuyan: k.pro && k.basic ? 'İKİSİ' : k.pro ? 'Pro' : 'Basic',
     besleyen,
-    donem: donem ?? (damga ? `yaz.${new Date(damga).toISOString().slice(0, 7)}` : 'SESSİZ'),
+    donem: donem ?? (damga ? `yaz.${new Date(damga).toISOString().slice(0, 7)}`
+      : REFERANS.has(tbl) ? 'referans'
+        : degismeyenGun == null ? 'SESSİZ'
+          : degismeyenGun === 0 ? 'değişti' : `${degismeyenGun}g sabit`),
     gecikme,
     /* Dönemsiz tabloda gecikme yerine yazma yaşı — eşikle karşılaştırılmıyor,
        yalnız raporlanıyor; yazma tazeliği içerik tazeliğini kanıtlamaz. */
     yazmaAyi: donem == null && damga
       ? Math.round((Date.now() - damga) / (30 * 864e5)) : null,
-    sessiz: donem == null && !damga,
+    referans: REFERANS.has(tbl),
+    degismeyenGun,
+    sessiz: donem == null && !damga && !REFERANS.has(tbl) && degismeyenGun == null,
   });
+}
+
+/* Gözlemleri yaz — bir sonraki çalıştırma karşılaştırabilsin diye. */
+for (const [db, kayitlar] of gozlemYazilacak) {
+  if (!kayitlar.length) continue;
+  try {
+    const simdi = Date.now();
+    const degerler = kayitlar.map((g) => `('${g.tablo}', ${g.satir}, `
+      + `'${String(g.ozet).replace(/'/g, "''")}', ${simdi}, ${g.sonDegisim})`).join(',\n  ');
+    d1(db, `INSERT INTO ${GOZLEM_TABLO} (tablo, satir, ozet, ilk_gorulme, son_degisim)
+      VALUES\n  ${degerler}
+      ON CONFLICT(tablo) DO UPDATE SET
+        satir = excluded.satir, ozet = excluded.ozet,
+        son_degisim = excluded.son_degisim`);
+  } catch (e) { console.error(`gözlem yazılamadı (${db}): ${e.message}`); }
 }
 
 /*
@@ -319,11 +433,17 @@ const kaynakYetismis = (s) =>
 const bayat = satirlar.filter((s) => s.gecikme != null
   && s.gecikme > esik(s.tablo, s.donem) && !kaynakYetismis(s));
 
+/** Zamansız veri tablosunda "donmuş" sayılma eşiği (gün). */
+const SABIT_ESIK_GUN = 120;
+
 const yaz = (s) => {
-  const bayrak = s.sessiz ? 'SESSİZ'
-    : s.gecikme == null ? ' yazma'
-      : kaynakYetismis(s) ? ' kaynk'
-        : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
+  const bayrak = s.referans ? ' refrn'
+    : s.sessiz ? 'SESSİZ'
+      : s.degismeyenGun != null
+        ? (s.degismeyenGun > SABIT_ESIK_GUN ? ' DONUK' : '  ok  ')
+        : s.gecikme == null ? ' yazma'
+          : kaynakYetismis(s) ? ' kaynk'
+            : s.gecikme > esik(s.tablo, s.donem) ? ' BAYAT' : '  ok  ';
   console.log(`${bayrak} ${s.tablo.padEnd(38)} ${s.okuyan.padEnd(6)} ${String(s.donem).padEnd(13)} ${s.besleyen}`);
 };
 
@@ -338,12 +458,29 @@ if (!YALNIZ_BAYAT) {
   bayat.forEach(yaz);
 }
 
+const izlenen = satirlar.filter((s) => s.degismeyenGun != null);
+if (izlenen.length) {
+  const yeni = izlenen.filter((s) => s.degismeyenGun === 0).length;
+  console.log(`\n${izlenen.length} zamansız tablo İÇERİK GÖZLEMİYLE izleniyor`
+    + ` (zaman sütunu yok, damga yok — donup donmadıkları satır sayısı ve`
+    + ` sayısal toplamla ölçülüyor).`);
+  if (yeni) console.log(`  ${yeni} tanesi bu çalıştırmada ilk kez kaydedildi ya da değişti.`);
+  const donuk = izlenen.filter((s) => s.degismeyenGun > SABIT_ESIK_GUN);
+  if (donuk.length) {
+    console.log(`  ${donuk.length} tablo ${SABIT_ESIK_GUN} günden uzun süredir DEĞİŞMEDİ:`);
+    for (const s of donuk) console.log(`    ${s.tablo} (${s.degismeyenGun} gün)`);
+  }
+}
+
+const referanslar = satirlar.filter((s) => s.referans);
+if (referanslar.length) {
+  console.log(`\n${referanslar.length} referans sözlüğü denetim dışı (havza/il/ilçe eşlemesi,`
+    + ` coğrafi işaret kaydı — zaman boyutu yok ve olmamalı).`);
+}
+
 const sessizler = satirlar.filter((s) => s.sessiz);
 if (sessizler.length) {
-  console.log(`\n${sessizler.length} tablo DENETLENEMİYOR (zaman sütunu da yazma damgası da yok):`);
-  console.log(`  ${sessizler.map((s) => s.tablo).join(', ')}`);
-  console.log('  Bunlar sessizce donabilir. Çözüm: tabloya dönem sütunu eklemek');
-  console.log('  ya da yazan yolu veri_damga\'ya bağlamak.');
+  console.log(`\n${sessizler.length} tablo HÂLÂ ölçülemiyor: ${sessizler.map((s) => s.tablo).join(', ')}`);
 }
 
 if (olcumEski.length) {
