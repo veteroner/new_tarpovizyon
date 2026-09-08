@@ -20,6 +20,10 @@ export const YEAR_KEYS = [
  * duruyordu. Artık tek yerden geliyor: YEAR_KEYS'e dönem eklemek yeter.
  */
 export const SON_DONEM = YEAR_KEYS[YEAR_KEYS.length - 1];
+/** Başlıklarda gösterilecek hâli: "2024/25". Kart başlıklarına dönem ELLE
+ *  yazılıyordu ("İthalat Bağımlılığı Sıralaması (2023/24)") ve veri
+ *  tazelenince başlık eski dönemde kalıp tabloyu güncelsiz gösteriyordu. */
+export const SON_DONEM_ETIKET = SON_DONEM.replace('y', '');
 export const YEAR_COLS_SQL = YEAR_KEYS.map(k => `\`${k}\``).join(', ');
 
 /*

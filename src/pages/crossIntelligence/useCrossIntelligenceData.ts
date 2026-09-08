@@ -17,6 +17,8 @@ export const YEAR_COLS = [
 export const YEAR_LABELS = YEAR_COLS.map(c => c.replace('y', '').split('/')[0]);
 /** Serinin son dönemi — sabit 'y2023/24' yazmak yerine (bkz. useProductBalanceData). */
 export const SON_DONEM = YEAR_COLS[YEAR_COLS.length - 1];
+/** Başlıklarda gösterilecek hâli: "2024/25". */
+export const SON_DONEM_ETIKET = SON_DONEM.replace('y', '');
 /** Sondan bir önceki — yıllık karşılaştırmalar için. */
 export const ONCEKI_DONEM = YEAR_COLS[YEAR_COLS.length - 2];
 

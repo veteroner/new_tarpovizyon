@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
-import { useCrossIntelligenceData } from './crossIntelligence/useCrossIntelligenceData';
+import { useCrossIntelligenceData, SON_DONEM_ETIKET } from './crossIntelligence/useCrossIntelligenceData';
 import type { ScatterPoint } from './crossIntelligence/useCrossIntelligenceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN } from '../utils/chartTicks';
@@ -192,7 +192,7 @@ export default function CrossIntelligencePage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
           <Crosshair className="w-4 h-4 text-blue-600" />
-          Üretim vs Yeterlilik Derecesi — Tüm Ürünler (2023/24)
+          Üretim vs Yeterlilik Derecesi — Tüm Ürünler ({SON_DONEM_ETIKET})
         </h3>
         <ChartInsightButton title="Üretim vs Yeterlilik Derecesi" description="Tüm ürünler için üretim ve yeterlilik karşılaştırması" data={scatterData} context={{ section: 'Çapraz Zeka' }} compact />
         </div>
@@ -241,7 +241,7 @@ export default function CrossIntelligencePage() {
       <div className="rounded-xl border p-5 shadow-sm" style={{ background: 'var(--bg-card)' }}>
         <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
           <BarChart3 className="w-4 h-4 text-red-600" />
-          Gıda Güvenliği Risk Sıralaması — En Düşük Yeterlilik (2023/24)
+          Gıda Güvenliği Risk Sıralaması — En Düşük Yeterlilik ({SON_DONEM_ETIKET})
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

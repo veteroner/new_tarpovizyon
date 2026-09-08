@@ -9,7 +9,7 @@ import {
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
-import { useProductBalanceData, YEAR_DONEM, YEAR_DONEM_KISA, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
+import { useProductBalanceData, YEAR_DONEM, YEAR_DONEM_KISA, YEAR_KEYS, SON_DONEM_ETIKET, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
@@ -419,7 +419,7 @@ export default function ProductBalancePage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', marginBottom: 0 }}>
               <AlertTriangle size={16} className="text-red-500" />
-              İthalat Bağımlılığı Sıralaması (2023/24)
+              İthalat Bağımlılığı Sıralaması ({SON_DONEM_ETIKET})
             </h3>
             <ChartInsightButton title="İthalat Bağımlılığı Sıralaması" description="İthalat bağımlılığı sıralaması" data={importRanking} context={{ section: 'Ürün Dengesi' }} compact />
             </div>
@@ -457,7 +457,10 @@ export default function ProductBalancePage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={v => v.toFixed(0)} tick={{ fontSize: 10 }} width={46} domain={LINE_Y_DOMAIN} />
-                <Tooltip formatter={(v: number) => [v.toFixed(1) + ' Kg', '']} />
+                {/* İkinci eleman BOŞ STRING'di: ipucu sekiz seriyi de ": 34.7 Kg"
+                    diye ad olmadan sıralıyordu, yani hangi sayının hangi ürüne
+                    ait olduğu okunamıyordu. İkinci eleman serinin adı olmalı. */}
+                <Tooltip formatter={(v: number, ad) => [v.toFixed(1) + ' Kg', String(ad)]} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 {perCapitaProducts.map((p, i) => (
                   <Area key={p} type="monotone" dataKey={p}
