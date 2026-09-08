@@ -318,7 +318,10 @@ export default function AnimalTradeTab() {
           </BarChart>
         </ResponsiveContainer>
         <p style={{ marginTop: 8, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center' }}>
-          Sınıflandırma heuristiği: ürün adında "canlı" / "damızlık" / "diri" geçenler canlı, diğerleri işlenmiş kabul edilir.
+          {/* Eski hâli sınıflandırmanın KURALINI yazıyordu ("ürün adında
+              canlı/damızlık/diri geçenler…"). Okuyucunun bilmesi gereken tek
+              şey ayrımın gümrük koduna değil ürün adına dayandığı. */}
+          Ürün adına göre ayrıldı — resmî gümrük sınıflandırması değil.
         </p>
       </ChartCard>
 

@@ -50,11 +50,12 @@ export function MakroOlcekSection() {
         />
       </div>
 
-      <p className="mo-not">
-        Aşağıdaki sayılar <strong>tahmin değil</strong>. Her ürün için geçmişte
-        düşüş yılını ne izlediği ölçüldü — kaç kez ve ortalama ne kadar.
-        Örüntüsü zayıf olanlar da listede, öyle yazıyor.
-      </p>
+      {/*
+        * "Aşağıdaki sayılar tahmin değil…" paragrafı kaldırıldı: hemen
+        * yukarıdaki kartın kendi `uyarı` alanı zaten "Bu bir tahmin değil,
+        * geçmiş tekrarlama örüntüsü" diyor. Aynı uyarıyı iki kez yazmak
+        * ikisini de zayıflatıyor. Yöntemin ayrıntısı makroOlcek.ts'te.
+        */}
 
       <div className="mo-tablo-sar">
         <table className="mo-tablo">

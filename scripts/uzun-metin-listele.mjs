@@ -40,11 +40,31 @@ for (const yol of hedefler) {
   try { await p.goto('http://localhost:5178' + yol, { waitUntil: 'networkidle2', timeout: 45000 }); } catch {}
   await new Promise(r => setTimeout(r, 3500));
   const bloklar = await p.evaluate(() => {
+    /*
+     * KART BAZINDA ölçüm. İlk sürüm tek metin düğümüne bakıyordu ve iki
+     * paragraflık bir açıklama kartını iki ayrı "kısa" blok gibi sayıyordu;
+     * asıl yük kartın TOPLAMI. Ayrıca eşik 160'tan 110'a indi — 120 karakterlik
+     * bir yöntem paragrafı da fazladan.
+     */
+    /*
+     * YALNIZ PARAGRAF öğeleri. Kart/bölüm kaplarını taramak, KPI ızgaralarının
+     * birleşik metnini ("5 yıllık BBO%-1,4Yıllık bileşik büyümeVerimlilik…")
+     * uzun paragraf sanıp raporu gürültüye boğuyordu; o metinler ekranda
+     * ayrı ayrı küçük sayı kartları olarak duruyor, kimse onları okumuyor.
+     */
+    const nesirMi = (t) => {
+      // Düzyazı ölçütü: en az 12 kelime ve harf oranı yüksek. KPI birleşimleri
+      // rakam/işaret yoğun olduğu için bu eşiği geçmiyor.
+      const kelime = t.split(/\s+/).filter((w) => /[a-zçğıöşü]{3,}/i.test(w));
+      const harf = (t.match(/[a-zçğıöşüA-ZÇĞİÖŞÜ ]/g) || []).length / t.length;
+      return kelime.length >= 12 && harf > 0.82;
+    };
     const out = [];
-    for (const e of document.querySelectorAll('p, li, div')) {
-      if (e.children.length > 0) continue;
-      const t = (e.textContent || '').trim();
-      if (t.length >= 160) out.push(t.slice(0, 110));
+    for (const e of document.querySelectorAll('p, li, figcaption, blockquote')) {
+      if (e.querySelector('p, li, div, table, svg')) continue;
+      const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+      if (t.length < 110 || !nesirMi(t)) continue;
+      out.push(t.slice(0, 120));
     }
     return out;
   });

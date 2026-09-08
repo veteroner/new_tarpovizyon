@@ -220,8 +220,11 @@ export default function PlantAnalysisCharts({
               return hasDecomposition ? (
                 <>
                   <p style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '2px', lineHeight: '1.4' }}>
-                    <strong>Alan Genişlemesi:</strong> Verim sabit, alan arttı • <strong>Verim Artışı:</strong> Alan sabit, verim arttı<br />
-                    <strong>Sinerjik Etki:</strong> Hem alan hem verim birlikte değiştiğinde oluşan ekstra etki (ΔAlan × ΔVerim)
+                    {/* Lejant KALIYOR — üç serinin adı ("Sinerjik Etki") kendiliğinden
+                        anlaşılmıyor. Kısalan tek şey formülün kendisi
+                        (ΔAlan × ΔVerim): okuyucunun serileri ayırt etmesi için
+                        hesabın nasıl yapıldığını bilmesi gerekmiyor. */}
+                    <strong>Alan Genişlemesi:</strong> verim sabit, alan arttı • <strong>Verim Artışı:</strong> alan sabit, verim arttı • <strong>Sinerjik:</strong> ikisi birlikte
                   </p>
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={yieldTrendData.slice(1)}>

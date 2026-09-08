@@ -105,8 +105,8 @@ export function BakliyatKaynakUlkeler({ yil }: { yil: number }) {
       title={`Bakliyat İthalatı — Kaynak Ülkeler (${yil})`}
       action={<ChartInsightButton title="Bakliyat ithalat kaynakları" description="Mercimek, nohut, fasulye ithalatının ülke kırılımı" data={data ?? []} context={{ section: 'Bakliyat' }} compact />}
     >
+      {/* İlk cümle ("… ithalatının ülke dağılımı") kart başlığının tekrarıydı. */}
       <p style={NOT}>
-        Mercimek, nohut ve fasulye ithalatının ülke dağılımı (milyon $).
         Türkiye kırmızı mercimekte dünyanın en büyük alıcılarından; ürettiğinden
         fazlasını işleyip yeniden ihraç ediyor.
       </p>
@@ -141,10 +141,11 @@ export function YagliTohumBagimlilik() {
       span={2}
       action={<ChartInsightButton title="Yağlı tohum dış ticareti" description="Ayçiçeği, soya, kanola, susam" data={veri} context={{ section: 'Yağlı Tohumlar' }} compact />}
     >
+      {/* Başlığın tekrarı ve "iki seri aynı eksende çünkü aynı birimde" notu
+          çıkarıldı — ikincisi grafik kararının gerekçesi, okuyucunun sorusu değil. */}
       <p style={NOT}>
-        Ayçiçeği, soya, kanola ve susamın dış ticareti. Türkiye'nin ham yağ
-        açığı bu grupta: yerli üretim iç talebi karşılamıyor ve fark ithalatla
-        kapanıyor. İki seri aynı eksende çünkü aynı birimde.
+        Türkiye&apos;nin ham yağ açığı bu grupta: yerli üretim iç talebi
+        karşılamıyor, fark ithalatla kapanıyor.
       </p>
       <Bekleyen yukleniyor={isLoading} bosMu={!veri.length}>
         <ResponsiveContainer width="100%" height={280}>
@@ -178,11 +179,13 @@ export function PamukAcigi() {
       span={2}
       action={<ChartInsightButton title="Pamuk dış ticareti" description="Pamuk ithalat ve ihracatı" data={veri} context={{ section: 'Lif Bitkileri' }} compact />}
     >
+      {/* Son cümle bir DEĞİŞİKLİK GÜNLÜĞÜYDÜ: "burada eskiden kaynağı
+          doğrulanamayan bir lif kalite endeksi duruyordu, yerine TÜİK dış
+          ticaret kaydı kondu". Doğru ve önemli — ama deponun kaydı, ekranın
+          değil. Sayfayı açan kişi burada ne OLMADIĞINI bilmek zorunda değil. */}
       <p style={NOT}>
         Türkiye dünyanın en büyük pamuk ithalatçılarından; tekstil sanayii yerli
-        üretimin kat kat üstünde lif tüketiyor. Bu bölümde eskiden kaynağı
-        doğrulanamayan bir "lif kalite endeksi" duruyordu — yerine TÜİK'in dış
-        ticaret kaydı kondu.
+        üretimin kat kat üstünde lif tüketiyor.
       </p>
       <Bekleyen yukleniyor={isLoading} bosMu={!veri.length}>
         <ResponsiveContainer width="100%" height={280}>

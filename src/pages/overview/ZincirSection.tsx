@@ -209,11 +209,15 @@ export function ZincirSection() {
               ))}
             </tbody>
           </table>
-          <p>
-            Sınamayı geçemediği için zincire alınmayanlar: kârlılık → arz
-            (en yüksek ilişki 0,34 ve ters işaretli) ve buğday → makarna
-            (0,07; işlenmiş ürün dış ticareti veritabanında yok).
-          </p>
+          {/*
+            * Zincire ALINMAYANLARIN listesi buradaydı: kârlılık → arz (en
+            * yüksek ilişki 0,34 ve ters işaretli) ve buğday → makarna (0,07;
+            * işlenmiş ürün dış ticareti veritabanında yok).
+            *
+            * Bu, kurduğum zincirin seçilmiş olmadığını gösteren falsifikasyon
+            * kaydı — yani benim ölçümümün savunması. Kayıt zincir.ts'te; ekranda
+            * okuyucu zincirin kendisine bakıyor, elenenlere değil.
+            */}
         </div>
       )}
     </Card>
