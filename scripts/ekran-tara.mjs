@@ -75,10 +75,11 @@ console.log(`${hedefler.length} rota taranacak → ${TABAN}`);
  */
 const OLC = () => {
   const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  const kotu = []; let n;
+  const kotu = []; let n; let sayilanDugum = 0;
   while ((n = w.nextNode())) {
     const s = n.textContent.trim();
     if (s.length > 40 || !/\d/.test(s)) continue;
+    sayilanDugum += 1;
     if (!(/,\d{3,}/.test(s) || /\.\d{4,}/.test(s))) continue;
     // |v| < 1 olan oranlarda 3 ondalık hane kasıtlı.
     const sayi = Number(s.replace(/\./g, '').replace(',', '.'));
@@ -89,7 +90,7 @@ const OLC = () => {
       kutu: p ? p.outerHTML.slice(0, 160) : '',
     });
   }
-  return kotu;
+  return { kotu, sayilanDugum };
 };
 
 /*
@@ -112,12 +113,14 @@ const sayfa = await tarayici.newPage();
 await sayfa.setViewport({ width: 1440, height: 2400 });
 
 const bulgular = [];
+let toplamDugum = 0;
 for (const [i, yol] of hedefler.entries()) {
   try {
     await sayfa.goto(TABAN + yol, { waitUntil: 'networkidle2', timeout: 45000 });
   } catch { /* networkidle gelmese de çizilmiş olabilir; ölçmeye devam */ }
   await new Promise((r) => setTimeout(r, BEKLE));
-  const kotu = await sayfa.evaluate(OLC);
+  const { kotu, sayilanDugum } = await sayfa.evaluate(OLC);
+  toplamDugum += sayilanDugum;
   process.stdout.write(`\r  ${i + 1}/${hedefler.length} ${yol.padEnd(44)}`);
   if (kotu.length) bulgular.push({ yol, kotu });
 }
@@ -126,8 +129,21 @@ await tarayici.close();
 
 /* ── Rapor ───────────────────────────────────────────────────────────────── */
 
+/*
+ * Önizleme sunucusu düşükken bu betik her sayfayı boş yükler, bakacak sayı
+ * bulamaz ve "biçimsiz sayı yok" der — ölçmediği halde temiz raporlar.
+ * Kardeş betikte (bos-grafik-tara.mjs) bu tam olarak yaşandı. O yüzden
+ * "hiçbir şey bulamadım" başarı değil, hata.
+ */
+if (toplamDugum === 0) {
+  console.error(`\nHATA: ${hedefler.length} rotada TEK sayı bulunamadı.`);
+  console.error(`Önizleme sunucusu ${TABAN} adresinde ayakta mı?`);
+  console.error('  npx vite build && npx vite preview --port 5178 --strictPort');
+  process.exit(2);
+}
+
 if (!bulgular.length) {
-  console.log(`\n${hedefler.length} rotada biçimsiz sayı yok.`);
+  console.log(`\n${hedefler.length} rotada ${toplamDugum} sayı ölçüldü, biçimsiz yok.`);
   process.exit(0);
 }
 

@@ -77,6 +77,25 @@ export function useProductBalanceData() {
   // kullanıyor, her ürün seçiminde yeniden sorgu atılmıyor.
   const tumSatirlarRef = useRef<Row[]>([]);
 
+  /*
+   * ─── TEK EFFECT: TÜRETMELER VERİ GELDİKTEN SONRA ────────────────────────────
+   * Burada İKİ ayrı effect vardı: birincisi tabloyu `await` ile çekip
+   * `tumSatirlarRef`e yazıyor, ikincisi (bağımlılığı `[]`) o ref'ten ısı
+   * haritasını, ithalat sıralamasını ve kişi başı tüketimi türetiyordu.
+   *
+   * React mount'ta effect'leri sırayla çalıştırıyor ama birincisi `await`e
+   * girdiği anda kontrol geri dönüyor ve ikincisi hemen çalışıyor — ref o an
+   * hâlâ boş. Bağımlılık `[]` olduğu için ikinci effect bir daha da
+   * çalışmıyordu, yani üç türetme KALICI olarak boş kalıyordu.
+   *
+   * Ekranda görünen tek belirti "Kişi Başı Tüketim Trendleri"nin bomboş
+   * çizilmesiydi: `perCapitaChartData.length > 0` koruması işe yaramıyor,
+   * çünkü `YEAR_LABELS.map` ürün alanı olmasa da 10 satır döndürüyor. Isı
+   * haritası ve ithalat sıralaması ise `length > 0` korumasıyla hiç render
+   * edilmiyordu — kullanıcı iki bölümün var olduğunu bile görmüyordu.
+   *
+   * Türetmeler artık verinin geldiği yerde, `tumSatirlar` üzerinden.
+   */
   useEffect(() => {
     (async () => {
       // Tablo küçük: tek okumayla çekilip fasıl/ürün süzmeleri istemcide.
@@ -87,12 +106,8 @@ export function useProductBalanceData() {
         .sort((a, b) => a.localeCompare(b, 'tr'));
       setProducts(list);
       if (list.length > 0) setSelectedProduct(list.find((p: string) => p.includes('Buğday (toplam)')) || list[0]);
-    })();
-  }, []);
 
-  useEffect(() => {
-    (async () => {
-      const fasilListesi = (fasil: string) => tumSatirlarRef.current
+      const fasilListesi = (fasil: string) => tumSatirlar
         .filter((r) => String(r['fasıl'] ?? '') === fasil)
         .sort((a, b) => urunAdi(a).localeCompare(urunAdi(b), 'tr'));
 

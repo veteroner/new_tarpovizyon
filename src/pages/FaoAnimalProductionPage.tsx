@@ -49,7 +49,7 @@ interface CountryDataItem {
   [key: string]: string | number;
   name: string;
   value: number;
-  share: string;
+  share: number;
   fill: string;
 }
 
@@ -131,7 +131,11 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
         setCountryData(countryRes.data.map((item, index: number) => ({
           name: translateCountry(String(item['area'] || '')),
           value: Number(item['toplam']) || 0,
-          share: sayi(((Number(item['toplam']) || 0) / total * 100), 1),
+  /* Grafiğe giden sayı HAM: `sayi()` görüntü için Türkçe biçimli METİN
+     üretiyor ("32,5") ve Recharts onu sayıya çeviremediği için pay şeridi
+     bomboş çiziliyordu — eksenler vardı, çizgi yoktu. Biçimlendirme artık
+     yalnız gösterildiği yerde. */
+          share: (Number(item['toplam']) || 0) / total * 100,
           fill: colors[index % colors.length]
         } as CountryDataItem)));
       }
@@ -416,7 +420,7 @@ export default function FaoAnimalProductionPage({ config }: { config: FaoPageCon
                 <div className={`table-rank ${index < 3 ? 'green' : ''}`}>{index + 1}</div>
                 <div className="table-info">
                   <div className="table-name">{country.name}</div>
-                  <div className="table-subtext">Pay: %{country.share}</div>
+                  <div className="table-subtext">Pay: %{sayi(country.share, 1)}</div>
                 </div>
                 <div className="table-value green">{formatValue(country.value)}</div>
               </div>
