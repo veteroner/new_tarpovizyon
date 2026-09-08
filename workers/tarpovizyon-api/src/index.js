@@ -597,6 +597,42 @@ const YAZMA_ORIGIN = new Set([
   'http://localhost:5173',
 ]);
 
+/*
+ * Kimlik uçları için CORS.
+ *
+ * Yazma ucunun dar listesinden AYRI, çünkü giriş mobil uygulamadan da
+ * yapılacak: Capacitor `capacitor://localhost` ya da `http://localhost`
+ * kaynağından istek atıyor ve bunlar panel adreslerinin listesinde yok.
+ *
+ * Tanınmayan kaynakta `*` DÖNMÜYOR — `Authorization` başlığı taşıyan bir uçta
+ * joker kaynak, herhangi bir sitenin ziyaretçinin jetonuyla istek denemesine
+ * kapı açardı. Tanınmayan kaynak yalnızca `Origin` başlıksız (uygulama içi,
+ * tarayıcı dışı) isteklerde geçerli sayılıyor.
+ */
+const AUTH_ORIGIN = new Set([
+  'https://tarpovizyon.com',
+  'https://www.tarpovizyon.com',
+  'https://pro.tarpovizyon.com',
+  'https://panel.tarpovizyon.com',
+  'capacitor://localhost',
+  'http://localhost',
+  'http://localhost:5173',
+  'http://localhost:5177',
+  'http://localhost:5178',
+]);
+
+function authCors(request) {
+  const origin = request.headers.get('Origin') ?? '';
+  const izinli = AUTH_ORIGIN.has(origin);
+  return {
+    ...(izinli ? { 'Access-Control-Allow-Origin': origin } : {}),
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  };
+}
+
 function yazmaCors(request) {
   const origin = request.headers.get('Origin') ?? '';
   if (!YAZMA_ORIGIN.has(origin)) return null;
@@ -674,6 +710,7 @@ import { handleAi } from './ai.js';
 import { handleSayfaBul } from './sayfaBul.js';
 import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
 import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
+import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -703,6 +740,47 @@ export default {
      */
     if (slug === 'piyasa') return handlePiyasa(request, env, ctx);
     if (slug === 'piyasa/gecmis') return handlePiyasaGecmis(request, env, ctx);
+
+    /*
+     * ── Kimlik ────────────────────────────────────────────────────────────
+     * Genel okuma yolundan ÖNCE ve kendi CORS'uyla: `CORS_HEADERS` yalnız
+     * GET'e izin veriyor ve `Authorization` başlığını kabul etmiyor, oysa bu
+     * uçlar POST alıyor ve jeton taşıyor. Genel yola düşerlerse tarayıcı ön
+     * kontrolü başarısız olur.
+     *
+     * `yazmaCors` DEĞİL ayrı bir liste: yönetim ucunun dar listesi panel
+     * adreslerini tanıyor, oysa girişin mobil uygulamadan da (Capacitor
+     * kaynağı) çalışması gerekiyor.
+     */
+    if (slug.startsWith('auth/')) {
+      const cors = authCors(request);
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      const isleyici = {
+        'auth/kod-iste': handleKodIste,
+        'auth/kod-dogrula': handleKodDogrula,
+        'auth/ben': handleBen,
+        'auth/cikis': handleCikis,
+      }[slug];
+      if (!isleyici) return new Response(null, { status: 404, headers: cors });
+      /* `ben` GET, diğerleri POST. Yanlış yöntemi sessizce kabul etmek,
+         ileride CSRF yüzeyine dönüşebilecek bir gevşeklik. */
+      const beklenen = slug === 'auth/ben' ? 'GET' : 'POST';
+      if (request.method !== beklenen) {
+        return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
+          { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
+      }
+      let sonuc;
+      try {
+        sonuc = await isleyici(request, env);
+      } catch (e) {
+        console.error('auth hatası', slug, e?.message);
+        sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };
+      }
+      return new Response(JSON.stringify(sonuc.body), {
+        status: sonuc.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors },
+      });
+    }
 
     // ── Yönetim uçları ──────────────────────────────────────────────────
     // Yazma ucu dar CORS ile korunuyor; okuma/şema uçları katalog bilgisi

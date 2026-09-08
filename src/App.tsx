@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { basicAlanAdi } from './utils/surum';
+import { OturumSaglayici } from './auth/OturumSaglayici';
+import { YolKapisi } from './auth/ProKapisi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DataShell, { KabuksuzMasaustu } from './components/DataShell';
 import { GirisEkrani } from './components/GirisEkrani';
@@ -202,6 +204,13 @@ function AppContent() {
           * çevrildi — kullanıcı yalnızca açtığı sayfanın kodunu indiriyor.
           */}
         <Suspense fallback={<div className="loading"><div className="loading-spinner" /><p>Yükleniyor...</p></div>}>
+        {/*
+          * Pro kapısı BURADA, tek satırda: 64 Pro rotasını tek tek sarmak hem
+          * tekrar hem de her yeni rotada unutulabilecek bir adım olurdu.
+          * `YolKapisi` yola bakıp ya kapıyı ya içeriği veriyor; para duvarı
+          * kapalıyken (bugünkü durum) hiçbir şey yapmıyor.
+          */}
+        <YolKapisi>
         <Routes>
           {/* Mobil Uygulama Rotaları */}
           <Route path="/m" element={<MobileLayout />}>
@@ -390,6 +399,7 @@ function AppContent() {
           {/* Kabuk dışındaki bilinmeyen adresler. */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </YolKapisi>
         </Suspense>
       </main>
     </>
@@ -399,9 +409,13 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <AppContent />
-      </BrowserRouter>
+      {/* Oturum ROUTER'IN DIŞINDA: kimlik yola bağlı değil, uygulama boyunca
+          tek. İçeride olsaydı her yol değişiminde yeniden kurulurdu. */}
+      <OturumSaglayici>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <AppContent />
+        </BrowserRouter>
+      </OturumSaglayici>
     </QueryClientProvider>
   );
 }

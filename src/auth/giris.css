@@ -1,0 +1,133 @@
+/**
+ * Giriş ekranı.
+ *
+ * Uygulamanın kendi değişkenlerini (--bg-card, --text-primary …) kullanıyor;
+ * kendi renk paleti tanımlamıyor ki koyu/açık tema geçişinde giriş ekranı
+ * uygulamanın geri kalanından ayrı düşmesin.
+ */
+
+.giris-sar {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.giris-kart {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, rgba(0, 0, 0, .08));
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .06);
+}
+
+.giris-rozet {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent, #16a34a) 12%, transparent);
+  color: var(--accent, #16a34a);
+  margin-bottom: 14px;
+}
+
+.giris-baslik {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #1d1d1f);
+  margin: 0 0 6px;
+}
+
+.giris-alt {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #6e6e73);
+  margin: 0 0 18px;
+}
+
+.giris-form { display: flex; flex-direction: column; gap: 8px; }
+
+.giris-etiket {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6e6e73);
+}
+
+.giris-alan {
+  /* 16px ALTINA İNMEMELİ: iOS Safari daha küçük yazı tipli bir alana odaklanınca
+     sayfayı otomatik yakınlaştırıyor ve kullanıcı düzeni kaybediyor. */
+  font-size: 16px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(0, 0, 0, .14));
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #1d1d1f);
+  width: 100%;
+}
+
+.giris-alan:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+/* Kod alanı: haneler ayrık okunsun, tabular rakam kaymayı engellesin. */
+.giris-kod {
+  letter-spacing: 0.42em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.giris-hata {
+  font-size: 0.82rem;
+  color: var(--danger, #dc2626);
+  margin: 2px 0 0;
+}
+
+.giris-dugme {
+  margin-top: 8px;
+  /* 44px: dokunma hedefi alt sınırı (Apple HIG). */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent, #16a34a);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.giris-dugme:disabled { opacity: .55; cursor: default; }
+
+.giris-geri {
+  margin-top: 2px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  color: var(--text-secondary, #6e6e73);
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.giris-donen { animation: giris-don 1s linear infinite; }
+
+@keyframes giris-don { to { transform: rotate(360deg); } }
+
+/* Dönen simge yalnız bir bekleme göstergesi; hareket hassasiyeti olan
+   kullanıcıda durdurulunca bilgi kaybı olmuyor. */
+@media (prefers-reduced-motion: reduce) {
+  .giris-donen { animation: none; }
+}
