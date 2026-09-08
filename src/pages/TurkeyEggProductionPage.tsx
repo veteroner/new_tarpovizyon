@@ -26,9 +26,6 @@ export default function TurkeyEggProductionPage() {
     econEndDate,
     setEconEndDate,
     worldRanking,
-    eggPrices,
-    eggPriceDate,
-    eggPriceError,
     activeTuikTab,
     setActiveTuikTab,
     tuikData,
@@ -87,9 +84,6 @@ export default function TurkeyEggProductionPage() {
         latest={latest}
         yoy={yoy}
         peak={peak}
-        eggPrices={eggPrices}
-        eggPriceDate={eggPriceDate}
-        eggPriceError={eggPriceError}
         worldRanking={worldRanking}
       />
 

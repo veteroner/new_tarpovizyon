@@ -211,6 +211,25 @@
 .ui-prose p:last-child { margin-bottom: 0; }
 .ui-prose b { color: var(--text-primary); font-weight: 600; }
 
+/*
+ * Tek satırlık kaynak dipnotu.
+ *
+ * `ui-prose` ile yazılmış "bu sayı nereden geliyor" kartlarının yerini alıyor.
+ * O kartlar yöntemin NASIL doğrulandığını anlatıyordu — hangi sınama
+ * yapıldı, hangi üründe kaç birim fark çıktı. Bu bilgi kodun yorumuna ait:
+ * sayfayı açan kişi ürünün durumuna bakmaya geldi, ölçümün savunmasını
+ * okumaya değil.
+ *
+ * Ama verinin NE OLDUĞU okuyucunun hakkı: il toplamı mı resmi ülke rakamı mı,
+ * hangi ürün veri setinde yok. O yüzden blok silinmiyor, tek satıra iniyor.
+ */
+.ui-dipnot {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
 /* ─── Mobil ──────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   .ui-chart-card { padding: 14px; }

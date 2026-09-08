@@ -112,14 +112,17 @@ export function RontgenSection() {
         </div>
       </div>
 
-      <p className="rg-not">
-        Girdiden çıktıya bütün zincir taranıyor: gübre ve yem fiyatından
-        üretici kârlılığına, hayvan varlığından yeterlilik derecesine ve gıda
-        enflasyonuna. Her satır veriden hesaplanıyor — bir kural, ölçülen bir
-        sayı ve kanıt sayfası. Eşikler ölçünün kendi anlamından geliyor:
-        kârlılıkta sıfır, yeterlilikte bire denk gelen nokta, makasta girdinin
-        çıktıyı geçtiği yer.
-      </p>
+      {/*
+        * Burada altı satırlık bir yöntem paragrafı vardı: neyin tarandığı, her
+        * satırın bir kural + ölçülen sayı + kanıt sayfası olduğu, eşiklerin
+        * ölçünün kendi anlamından geldiği (kârlılıkta sıfır, yeterlilikte bire
+        * denk gelen nokta, makasta girdinin çıktıyı geçtiği yer).
+        *
+        * Hepsi doğru ve hepsi rontgen.ts'te zaten yazılı. Ekranda ise
+        * okuyucuya "bu listeye neden güvenmelisin"i anlatıyordu — oysa listenin
+        * kendisi zaten satır satır sayıyı ve kanıtı gösteriyor. Açıklamanın
+        * yerini gösterdiği şeyin alması, açıklamadan iyi.
+        */}
 
       {gruplar.map(({ k, liste }) => (
         <section key={k} className="rg-grup">

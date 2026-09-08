@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchEggPrices } from '../../services/api';
 import { fetchRows, fetchAgg, latestYear, num, type Row } from '../../services/d1';
 
 const R_KUMES = 'tuik/hayvancilik-kumeshayvanciligi';
@@ -26,9 +25,6 @@ export function useEggProductionData() {
   const [econStartDate, setEconStartDate] = useState<string>('');
   const [econEndDate, setEconEndDate] = useState<string>('');
   const [worldRanking, setWorldRanking] = useState<{ world: number; eu: number } | null>(null);
-  const [eggPrices, setEggPrices] = useState<Partial<Record<string, number>>>({});
-  const [eggPriceDate, setEggPriceDate] = useState<string | null>(null);
-  const [eggPriceError, setEggPriceError] = useState<string | null>(null);
 
   const [activeTuikTab, setActiveTuikTab] = useState<TuikTab>('overview');
   const [tuikData, setTuikData] = useState<TuikEggData[]>([]);
@@ -306,38 +302,12 @@ export function useEggProductionData() {
     loadData();
   }, [loadData]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const loadEggPrices = async () => {
-      try {
-        console.log('Fetching egg prices...');
-        const res = await fetchEggPrices();
-        console.log('Egg prices response:', res);
-
-        if (!cancelled) {
-          if (res.prices && Object.keys(res.prices).length > 0) {
-            setEggPrices(res.prices);
-            setEggPriceError(null);
-          } else {
-            console.warn('No prices returned from API');
-            setEggPriceError('Fiyatlar yüklenemedi');
-          }
-          if (res.date) setEggPriceDate(res.date);
-        }
-      } catch (error) {
-        console.error('Egg prices fetch error:', error);
-        if (!cancelled) setEggPriceError('API hatası');
-      }
-    };
-
-    loadEggPrices();
-    const intervalId = window.setInterval(loadEggPrices, 5 * 60 * 1000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(intervalId);
-    };
-  }, []);
+  /*
+   * Yumurta fiyatı çekimi KALDIRILDI (kart da kaldırıldı, bkz. EggKpiCards).
+   * Kaynak Basmakçı Tavukçuluk'tu ve veri artık gelmiyor; bu effect beş
+   * dakikada bir başarısız istek atıp kartı "Fiyatlar yüklenemedi" yazan boş
+   * bir kutuda tutuyordu. Beslemesi çözülürse geri gelir.
+   */
 
   const latest = useMemo(() => {
     for (let i = series.length - 1; i >= 0; i--) {
@@ -374,9 +344,6 @@ export function useEggProductionData() {
     econEndDate,
     setEconEndDate,
     worldRanking,
-    eggPrices,
-    eggPriceDate,
-    eggPriceError,
     activeTuikTab,
     setActiveTuikTab,
     tuikData,

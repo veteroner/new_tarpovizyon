@@ -98,11 +98,17 @@ export function MakroOlcekSection() {
         </table>
       </div>
 
+      {/*
+        * Dört satırlık açıklama tek cümleye indi. Ölçüm duruyor: dünya toplamı
+        * ülke üretimlerinden çok daha durgun oynuyor (buğdayda tipik yıllık
+        * değişim %2, mısırda %2,3) çünkü bir ülkedeki kötü hasadı başka
+        * ülkedeki iyi hasat kapatıyor — bu yüzden dünya sütunundaki bir hareket
+        * tek ülkeninkinden çok daha anlamlı. Okuyucunun tabloyu doğru okuması
+        * için gereken bu sonuç; ona götüren muhakeme makroOlcek.ts'te.
+        */}
       <p className="mo-not mo-kucuk">
-        Dünya toplamı Türkiye’den çok daha durgun oynuyor (buğdayda tipik yıllık
-        değişim %2) — bir ülkedeki kötü hasadı başka ülkedeki iyi hasat
-        kapatıyor. Dünya toplamının kendisi hareket ettiyse bu, tek bir ülkenin
-        değil küresel arzın olayıdır.
+        Dünya toplamı tek tek ülkelerden çok daha durgun oynar; oradaki bir
+        hareket küresel arzın olayıdır.
       </p>
     </Card>
   );

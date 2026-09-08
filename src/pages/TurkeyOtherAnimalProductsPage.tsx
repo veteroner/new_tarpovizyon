@@ -81,25 +81,21 @@ function TurkiyeOzeti({ seriler }: { seriler: UrunSerisi[] }) {
         })}
       </div>
 
-      <ChartCard
-        title={`${sonYil} rakamları nereden geliyor`}
-        icon={<MapPin size={18} aria-hidden="true" />}
-      >
-        <div className="ui-prose">
-          <p>
-            TÜİK bu tabloda Türkiye satırını <b>{sonYil}</b> için henüz doldurmadı — ülke
-            satırındaki bütün ürünlerde {sonYil} değeri sıfır. İl satırları ise dolu.
-            Buradaki toplamlar <b>80 il + İstanbul&apos;un ilçeleri</b> toplanarak kuruldu;
-            İstanbul il düzeyinde tabloda hiç yok, yalnızca ilçe satırlarında var.
-          </p>
-          <p>
-            Bu toplamın doğruluğu 2024&apos;te sınandı: aynı yöntem TÜİK&apos;in kendi ülke
-            satırını altı üründe de birebir üretiyor (tiftikte 339 yerine 338, yuvarlama
-            farkı). Yani gösterilen {sonYil} rakamları tahmin değil, TÜİK&apos;in kendi il
-            verisinin toplamı.
-          </p>
-        </div>
-      </ChartCard>
+      {/*
+        * Burada iki paragraflık bir "nereden geliyor" kartı vardı: TÜİK'in ülke
+        * satırını doldurmadığını, toplamın 80 il + İstanbul'un ilçelerinden
+        * kurulduğunu ve YÖNTEMİN 2024'te sınandığını anlatıyordu — aynı toplama
+        * TÜİK'in kendi ülke satırını altı üründe de birebir üretiyor (tiftikte
+        * 339 yerine 338, yuvarlama farkı).
+        *
+        * O sınama gerçek ve bu yüzden rakamlar tahmin değil; ama sayfayı açan
+        * kişi ürünün durumuna bakmaya geldi, ölçümün savunmasını okumaya değil.
+        * Doğrulamanın kaydı burada, ekranda kalan tek şey verinin ne olduğu.
+        */}
+      <p className="ui-dipnot">
+        <MapPin size={13} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 4 }} />
+        {sonYil} · TÜİK il verilerinin toplamı — ülke satırı bu yıl için henüz boş.
+      </p>
     </>
   );
 }
@@ -515,20 +511,21 @@ function DunyadaTurkiye() {
       <div className="chart-grid">
         {FAO_URUNLER.map((u) => <DunyaKarti key={u.desen} {...u} />)}
       </div>
-      <ChartCard title="Bu sıralama neyi kanıtlar, neyi kanıtlamaz" icon={<Globe2 size={18} aria-hidden="true" />}>
-        <div className="ui-prose">
-          <p>
-            FAO&apos;nun Türkiye rakamları TÜİK&apos;ten geliyor: 2024 için yapağı 84.270,
-            balmumu 3.316, ipek kozası 85 ton — üçü de TÜİK&apos;in ülke satırıyla aynı.
-            Yani bu tablo TÜİK verisinin <b>bağımsız bir doğrulaması değil</b>; yalnızca
-            aynı rakamın diğer ülkelerin yanına konmuş hâli.
-          </p>
-          <p>
-            Tiftik ve keçi kılı FAO&apos;nun bu veri setinde ayrı ürün olarak yok, o yüzden
-            burada karşılaştırılamıyor.
-          </p>
-        </div>
-      </ChartCard>
+      {/*
+        * Eskiden "Bu sıralama neyi kanıtlar, neyi kanıtlamaz" başlıklı iki
+        * paragraf vardı. Ölçüm doğru: FAO'nun Türkiye rakamları TÜİK'ten
+        * geliyor — 2024 için yapağı 84.270, balmumu 3.316, ipek kozası 85 ton,
+        * üçü de TÜİK'in ülke satırıyla birebir. Yani bu tablo TÜİK verisinin
+        * bağımsız doğrulaması DEĞİL, aynı rakamın diğer ülkelerin yanına
+        * konmuş hâli — sıralamayı "dünya bizi doğruladı" diye okumak yanlış.
+        *
+        * Bu, benim ölçüm notum; okuyucunun ekranda ihtiyaç duyduğu tek şey
+        * hangi ürünün bu tabloda karşılaştırılamadığı.
+        */}
+      <p className="ui-dipnot">
+        <Globe2 size={13} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 4 }} />
+        FAO&apos;nun Türkiye verisi TÜİK kaynaklı · tiftik ve keçi kılı bu veri setinde ayrı ürün değil.
+      </p>
     </>
   );
 }
