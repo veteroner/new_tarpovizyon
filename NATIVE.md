@@ -108,3 +108,70 @@ Sync şunu yazıyor:
 
 Push bildirimlerinin arka planda çalışması için gereken bir ayar; sesli
 sohbetle ilgisi yok ve bu turda dokunulmadı.
+
+## 3. iOS push: paket kimliği tuzağı ve App Group
+
+**Belirti:** OneSignal panelinde gönderim `DeviceTokenNotForTopic` ile
+başarısız. APNs'te *topic = paket kimliği*; bu hata tek bir şey demek —
+token'ı basan uygulamanın kimliği, gönderimde kullanılan kimlikten farklı.
+
+**Sebep (2026-08-14 → 2026-09-01 penceresi):** `capacitor.config.ts`'teki
+`appId` `com.tarpovizyon.app` (Android'in kimliği) ve `cap add ios` bu değeri
+Xcode projesine yazıyor. OneSignal'in eklendiği 14 Ağustos ile kimliğin
+düzeltildiği 1 Eylül (`4ef185d`) arasında üretilen her iOS yapısı
+`com.tarpovizyon.app` ile imzalandı. OneSignal paneli ise `com.tarpovizyon.mobile`
+diyor → o pencerede oluşan iOS abonelikleri **kalıcı olarak ölü**. Panelde
+düzeltilecek bir şey yok; cihazın doğru kimlikli yapıyı kurup yeni abonelik
+oluşturması gerekiyor.
+
+iOS'ta paket kimliği değişince **ayrı bir uygulama** olur: eski yapı telefonda
+kendi ikonuyla durmaya, OneSignal'e yoklama göndermeye ve her gönderimde bu
+hatayı üretmeye devam eder. Test cihazlarından eski `.app` yapısını silin.
+
+`cap sync` kimliği bozmuyor; **`cap add ios` bozuyor.** Platform yeniden
+eklenirse `PRODUCT_BUNDLE_IDENTIFIER` (Debug + Release, iki yer)
+`com.tarpovizyon.mobile` olarak elle geri konmalı.
+
+### App Group
+
+`App/App.entitlements` içinde:
+
+```
+com.apple.security.application-groups → group.com.tarpovizyon.mobile.onesignal
+```
+
+OneSignal SDK'sı kullanıcı/abonelik durumunu bu paylaşılan alanda tutuyor ve
+adı `group.<paket-kimliği>.onesignal` kalıbından kendisi üretiyor. Yetki yokken
+her açılışta `CFPrefsPlistSource ... Couldn't read values` basıyordu. Teslimatı
+engellemiyor ama onaylı teslim (Confirmed receipt) ve rozet sayacı çalışmıyor,
+Notification Service Extension de eklenemiyor. **Paket kimliği değişirse bu
+değer de değişmeli.**
+
+### Teşhis: röntgen logu
+
+`src/mobile/capacitor/push.ts` her açılışta şunu basıyor:
+
+```
+[OneSignal] RÖNTGEN {"izin":true,"optedIn":true,"abonelikId":"…","token":"… (64 hane)"}
+```
+
+Xcode konsolu Cordova köprüsünün yalnızca gidiş yönünü gösterdiği için
+("To Native Cordova -> OneSignalPush getPushSubscriptionToken"), init'in
+çalıştığını görmek token üretildiğini göstermez. Okunuşu:
+
+- `token` VAR + `abonelikId` VAR → yapı sağlam.
+- `abonelikId` yok ama token var → kayıt turu henüz bitmemiş olabilir;
+  `ABONELİK DEĞİŞTİ` / `KULLANICI DEĞİŞTİ` satırlarını bekleyin. Hiç gelmiyorsa
+  kayıt bloke.
+- `token` yok, `izin` false → yeni paket kimliği iOS için yeni uygulama,
+  bildirim izni sıfırdan isteniyor ve verilmemiş.
+
+`optedIn: true` tek başına bir şey kanıtlamaz; eklentinin kendi tip dosyası
+"abonelik kimliği ve token'ın varlığını hesaba katmaz" diye yazıyor.
+
+## 4. Bu klonda `build` değil `build:netlify`
+
+`tarpol rasyon mobil/` kaynak klasörü bu klonda yok; `public/rasyon` ise git'te
+kayıtlı ve Vite onu `dist/`e kopyalıyor. `build:rasyon:embed` artık klasör
+yoksa sessizce atlıyor, yani `npm run cap:build` çalışıyor. Doğrudan
+`npm run build:netlify` de aynı çıktıyı verir.

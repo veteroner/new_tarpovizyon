@@ -4,5 +4,26 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<!--
+	  OneSignal iOS SDK'sı kullanıcı ve abonelik durumunu bu App Group'un
+	  paylaşılan NSUserDefaults alanında tutuyor; ad kalıbını kendisi
+	  üretiyor: group.<paket-kimliği>.onesignal. Yetki tanımlı olmadığında
+	  sistem her açılışta okumayı reddediyordu:
+
+	    Couldn't read values in CFPrefsPlistSource
+	    (Domain: group.com.tarpovizyon.mobile.onesignal ...)
+
+	  Teslimatı engellemiyordu (token ve abonelik kimliği yine geliyor) ama
+	  onaylı teslim (Confirmed receipt) ve rozet sayacı bu alana yazamadığı
+	  için çalışmıyordu; Notification Service Extension eklenecekse de
+	  uzantı ile uygulamanın ortak zemini burası — onsuz eklenemez.
+
+	  Paket kimliği değişirse bu değer de değişmeli (bkz. com.tarpovizyon.app
+	  → com.tarpovizyon.mobile geçişi).
+	-->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.tarpovizyon.mobile.onesignal</string>
+	</array>
 </dict>
 </plist>

@@ -1,4 +1,8 @@
-import OneSignal, { type NotificationClickEvent } from 'onesignal-cordova-plugin';
+import OneSignal, {
+  type NotificationClickEvent,
+  type PushSubscriptionChangedState,
+  type UserChangedState,
+} from 'onesignal-cordova-plugin';
 import { isPlatform } from '../utils/platform';
 
 /**
@@ -76,9 +80,79 @@ export async function initPush(): Promise<void> {
      * Ayarlar'a atmak agresif; reddi reddediş olarak bırakıyoruz.
      */
     await OneSignal.Notifications.requestPermission(false);
+
+    push_gozlemcileri();
+    await push_rontgen();
   } catch (e) {
     // Push kurulumu, uygulamanın geri kalanını ASLA düşürmemeli.
     console.error('[OneSignal] init hatası:', e);
+  }
+}
+
+/*
+ * ─── RÖNTGEN ────────────────────────────────────────────────────────────────
+ * Xcode konsolu Cordova köprüsünün YALNIZCA gidiş yönünü basıyor
+ * ("To Native Cordova -> OneSignalPush getPushSubscriptionToken"); dönen değer
+ * görünmüyor. Yani init'in çalıştığını görmek, TOKEN ÜRETİLDİĞİNİ göstermiyor —
+ * ikisi ayrı sorular ve panelde `DeviceTokenNotForTopic` görürken ayırt etmek
+ * şart. Bu blok cevabı konsola yazıyor.
+ *
+ * Yalnızca gözlem yapıyor, hiçbir şeyi değiştirmiyor; hata verse bile push
+ * kurulumunu etkilemesin diye kendi try/catch'inde.
+ */
+/*
+ * İlk röntgen, OneSignal'in SUNUCUYA kayıt turu bitmeden okuyor: token yerelde
+ * hazır olsa bile abonelik kimliği o anda hâlâ boş olabiliyor (SDK'nın
+ * "null OneSignal ID" uyarısı da bu ana ait). Kimliğin GELİP GELMEDİĞİ,
+ * kaydın başarılı olup olmadığının asıl ölçüsü — o yüzden tek seferlik
+ * okuma yetmez, değişimi dinlemek gerekiyor.
+ */
+function push_gozlemcileri(): void {
+  try {
+    OneSignal.User.pushSubscription.addEventListener('change', (e: PushSubscriptionChangedState) => {
+      const y = e.current;
+      console.log('[OneSignal] ABONELİK DEĞİŞTİ', JSON.stringify({
+        abonelikId: y.id ?? '(YOK)',
+        token: y.token ? `${y.token.slice(0, 8)}… (${y.token.length} hane)` : '(YOK)',
+        optedIn: y.optedIn,
+      }));
+    });
+
+    OneSignal.User.addEventListener('change', (e: UserChangedState) => {
+      console.log('[OneSignal] KULLANICI DEĞİŞTİ', JSON.stringify({
+        onesignalId: e.current.onesignalId ?? '(YOK)',
+      }));
+    });
+  } catch (e) {
+    console.warn('[OneSignal] Gözlemciler bağlanamadı:', e);
+  }
+}
+
+async function push_rontgen(): Promise<void> {
+  try {
+    const [izin, id, token, optedIn] = await Promise.all([
+      OneSignal.Notifications.getPermissionAsync(),
+      OneSignal.User.pushSubscription.getIdAsync(),
+      OneSignal.User.pushSubscription.getTokenAsync(),
+      OneSignal.User.pushSubscription.getOptedInAsync(),
+    ]);
+
+    console.log('[OneSignal] RÖNTGEN', JSON.stringify({
+      izin,
+      optedIn,
+      abonelikId: id ?? '(YOK)',
+      // Token'ın tamamı gerekmiyor; VAR/YOK ile uzunluğu teşhis için yeterli.
+      token: token ? `${token.slice(0, 8)}… (${token.length} hane)` : '(YOK)',
+    }));
+
+    if (!token) {
+      console.warn(
+        '[OneSignal] APNs token YOK. Sebep: izin verilmemiş, aygıt kaydı ' +
+        'tamamlanmamış ya da yapı push yetkisi (aps-environment) olmadan imzalanmış.',
+      );
+    }
+  } catch (e) {
+    console.warn('[OneSignal] Röntgen okunamadı:', e);
   }
 }
 
