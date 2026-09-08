@@ -9,8 +9,17 @@ const urunAdi = (r: Row) => String(r.urun ?? '').trim();
 /* ─── Year columns ─── */
 export const YEAR_KEYS = [
   'y2014/15','y2015/16','y2016/17','y2017/18','y2018/19',
-  'y2019/20','y2020/21','y2021/22','y2022/23','y2023/24',
+  'y2019/20','y2020/21','y2021/22','y2022/23','y2023/24','y2024/25',
 ];
+/**
+ * Serinin SON dönemi.
+ *
+ * Aşağıdaki türetmeler (ithalat bağımlılığı, arz haritası) eskiden 'y2023/24'
+ * sabitini yazıyordu. Yeni bir dönem eklendiğinde o satırlar sessizce eski
+ * dönemde kalıyor, tablo tazelenmiş görünürken sıralamalar bir yıl geride
+ * duruyordu. Artık tek yerden geliyor: YEAR_KEYS'e dönem eklemek yeter.
+ */
+export const SON_DONEM = YEAR_KEYS[YEAR_KEYS.length - 1];
 export const YEAR_COLS_SQL = YEAR_KEYS.map(k => `\`${k}\``).join(', ');
 
 /*
@@ -131,10 +140,10 @@ export function useProductBalanceData() {
       const pcRes = { data: fasilListesi('Kişi başına tüketim') };
       // Eskiden iki alt sorgunun JOIN'iydi; eşleştirme istemcide.
       const arzHaritasi = new Map(fasilListesi('Arz= Kullanım')
-        .map((r) => [urunAdi(r), num(r['y2023/24'])] as const));
+        .map((r) => [urunAdi(r), num(r[SON_DONEM])] as const));
       const impDepRes = { data: fasilListesi('İthalat')
         .map((r) => {
-          const imp = num(r['y2023/24']);
+          const imp = num(r[SON_DONEM]);
           const arz = arzHaritasi.get(urunAdi(r));
           if (arz === undefined || imp <= 0) return null;
           return { urun: urunAdi(r), ratio: arz > 0 ? (imp / arz) * 100 : 0 };

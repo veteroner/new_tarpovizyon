@@ -12,9 +12,13 @@ const urunAdi = (r: Row) => String(r.urun ?? '').trim();
 
 export const YEAR_COLS = [
   'y2015/16', 'y2016/17', 'y2017/18', 'y2018/19', 'y2019/20',
-  'y2020/21', 'y2021/22', 'y2022/23', 'y2023/24',
+  'y2020/21', 'y2021/22', 'y2022/23', 'y2023/24', 'y2024/25',
 ];
 export const YEAR_LABELS = YEAR_COLS.map(c => c.replace('y', '').split('/')[0]);
+/** Serinin son dönemi — sabit 'y2023/24' yazmak yerine (bkz. useProductBalanceData). */
+export const SON_DONEM = YEAR_COLS[YEAR_COLS.length - 1];
+/** Sondan bir önceki — yıllık karşılaştırmalar için. */
+export const ONCEKI_DONEM = YEAR_COLS[YEAR_COLS.length - 2];
 
 
 export const CROSS_PRODUCTS = [
@@ -184,11 +188,11 @@ export function useCrossIntelligenceData() {
       const fasilListesi = (fasil: string) => dengeSatirlari
         .filter((r) => String(r['fasıl'] ?? '') === fasil);
       const allSuff = { data: fasilListesi('Yeterlilik derecesi')
-        .filter((r) => num(r['y2023/24']) > 0)
-        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) })) };
+        .filter((r) => num(r[SON_DONEM]) > 0)
+        .map((r) => ({ urun: urunAdi(r), val: num(r[SON_DONEM]) })) };
       const allProd2 = { data: fasilListesi('Üretim')
-        .filter((r) => num(r['y2023/24']) > 0)
-        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) })) };
+        .filter((r) => num(r[SON_DONEM]) > 0)
+        .map((r) => ({ urun: urunAdi(r), val: num(r[SON_DONEM]) })) };
 
 
       const suffMap: Record<string, number> = {};
@@ -203,15 +207,15 @@ export function useCrossIntelligenceData() {
       setScatterData(scatter.sort((a, b) => b.x - a.x).slice(0, 30));
 
       const fsTable = { data: fasilListesi('Yeterlilik derecesi')
-        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) }))
+        .map((r) => ({ urun: urunAdi(r), val: num(r[SON_DONEM]) }))
         .sort((a, b) => a.val - b.val) };
       const fsCons = { data: fasilListesi('Kişi başına tüketim')
-        .map((r) => ({ urun: urunAdi(r), val: num(r['y2023/24']) }))
+        .map((r) => ({ urun: urunAdi(r), val: num(r[SON_DONEM]) }))
         .sort((a, b) => a.urun.localeCompare(b.urun, 'tr')) };
       const fsImp = { data: fasilListesi('İthalat')
-        .map((r) => ({ urun: urunAdi(r), imp: num(r['y2023/24']), imp_prev: num(r['y2022/23']) })) };
+        .map((r) => ({ urun: urunAdi(r), imp: num(r[SON_DONEM]), imp_prev: num(r[ONCEKI_DONEM]) })) };
       const fsProd = { data: fasilListesi('Üretim')
-        .map((r) => ({ urun: urunAdi(r), prod: num(r['y2023/24']) })) };
+        .map((r) => ({ urun: urunAdi(r), prod: num(r[SON_DONEM]) })) };
 
       const consMap: Record<string, number> = {};
       for (const r of (fsCons.data || [])) consMap[String(r.urun).trim()] = Number(r.val) || 0;

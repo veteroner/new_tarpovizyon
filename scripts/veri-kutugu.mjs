@@ -122,8 +122,15 @@ function zamanSutunu(db, tablo) {
       const bul = adlar.find((a) => a.toLowerCase() === aday);
       if (bul) return bul;
     }
-    // Geniş biçim: y2025 / "2025" gibi yıl sütunları
-    const yilSut = adlar.filter((a) => /^y?(19|20)\d\d$/.test(a)).sort();
+    /*
+     * Geniş biçim: "y2025" / "2025" ya da PAZARLAMA YILI "y2024/25".
+     * Sondaki "/25" desene alınmadığı için `tuik_urundenge` "SESSİZ"
+     * raporlanıyordu — 25 yıllık yıl sütunu olmasına rağmen denetim onu hiç
+     * ölçemiyor, tablo sessizce bir dönem geride kalabiliyordu. (Kaldı da:
+     * TÜİK 2024/25'i Mart 2026'da yayımladı, tablo Eylül'e kadar 2023/24'te
+     * durdu ve bunu denetim değil kullanıcı fark etti.)
+     */
+    const yilSut = adlar.filter((a) => /^y?(19|20)\d\d(\/\d\d)?$/.test(a)).sort();
     if (yilSut.length) return { genis: yilSut };
     return null;
   } catch { return null; }
@@ -137,7 +144,16 @@ function sonDonem(db, tablo) {
       // Geniş biçim: DOLU olan en son yıl sütunu
       for (const s of [...z.genis].reverse()) {
         const r = d1(db, `SELECT COUNT(*) n FROM "${tablo}" WHERE "${s}" IS NOT NULL AND "${s}"<>0`);
-        if (Number(r[0]?.n) > 0) return s.replace(/^y/, '');
+        if (Number(r[0]?.n) > 0) {
+          /*
+           * Pazarlama yılında BİTİŞ yılı esas alınıyor: "2024/25" dönemi
+           * Haziran 2025'te kapanıyor, yani tazeliği 2025 üzerinden ölçülmeli.
+           * Başlangıç yılını almak tabloyu bir yıl daha eski gösterip yanlış
+           * alarm üretiyordu.
+           */
+          const [ilk, son] = s.replace(/^y/, '').split('/');
+          return son ? String(Number(ilk) + 1) : ilk.slice(0, 4);
+        }
       }
       return null;
     }
