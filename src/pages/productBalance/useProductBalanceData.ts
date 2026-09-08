@@ -12,7 +12,23 @@ export const YEAR_KEYS = [
   'y2019/20','y2020/21','y2021/22','y2022/23','y2023/24',
 ];
 export const YEAR_COLS_SQL = YEAR_KEYS.map(k => `\`${k}\``).join(', ');
+
+/*
+ * ─── İKİ AYRI ETİKET: BİRİ ANAHTAR, BİRİ GÖSTERİM ───────────────────────────
+ * Bu tablonun dönemleri TAKVİM YILI DEĞİL, pazarlama yılı: `y2023/24` Temmuz
+ * 2023 – Haziran 2024 arasını kapsıyor. Ekranda yalnız "2023" yazıyordu ve bu
+ * yanıltıyordu — okuyucu takvim yılı sanıyor, hasadı bir yıl kaydırıyor.
+ *
+ * `YEAR_LABELS` düz yıl olarak KALIYOR çünkü eşleştirme anahtarı: fiyat
+ * endeksi yılıyla birleştirmede kullanılıyor (crossIntelligence'ta priceMap).
+ * Gösterim için ayrı diziler var — geniş tabloda tam, dar ısı haritasında
+ * kısa hâli, çünkü on tane "2014/15" yan yana sığmıyor.
+ */
 export const YEAR_LABELS = YEAR_KEYS.map(k => k.replace('y','').split('/')[0]);
+/** Gösterim: "2023/24" — geniş tablolar için. */
+export const YEAR_DONEM = YEAR_KEYS.map(k => k.replace('y',''));
+/** Gösterim: "23/24" — dar sütunlar (ısı haritası, grafik ekseni) için. */
+export const YEAR_DONEM_KISA = YEAR_KEYS.map(k => k.replace('y','').slice(2));
 
 /* ─── Helpers ─── */
 export const fmt = (v: number | null | undefined, decimals = 0): string => {
@@ -204,7 +220,7 @@ export function useProductBalanceData() {
 
   const yearlyTrend = useMemo(() => {
     if (!detail['Üretim']) return [];
-    return YEAR_LABELS.map((lbl, i) => ({
+    return YEAR_DONEM_KISA.map((lbl, i) => ({
       year: lbl,
       Üretim: detail['Üretim']?.values[i] ?? 0,
       İthalat: detail['İthalat']?.values[i] ?? 0,
@@ -246,7 +262,7 @@ export function useProductBalanceData() {
       .filter(p => p.values[latestIdx] > 5)
       .sort((a, b) => b.values[latestIdx] - a.values[latestIdx])
       .slice(0, 8);
-    return YEAR_LABELS.map((lbl, i) => {
+    return YEAR_DONEM_KISA.map((lbl, i) => {
       const entry: Record<string, string | number> = { year: lbl };
       topProducts.forEach(p => { entry[p.urun] = p.values[i]; });
       return entry;

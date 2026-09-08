@@ -9,7 +9,7 @@ import {
 import { Loading } from '../components/Loading';
 import { ErrorState } from '../components/ErrorState';
 import { FlowSankeyCard } from '../components/FlowSankeyCard';
-import { useProductBalanceData, YEAR_LABELS, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
+import { useProductBalanceData, YEAR_DONEM, YEAR_DONEM_KISA, YEAR_KEYS, PRODUCT_GROUPS, HEATMAP_COLORS, getHeatColor, fmt, pct, GREEN, GREEN_LIGHT, BLUE, RED, ORANGE } from './productBalance/useProductBalanceData';
 import { ChartInsightButton } from '../components/ChartInsightButton';
 import { compactValue, LINE_Y_DOMAIN } from '../utils/chartTicks';
 import { SplitAxisChart } from '../components/ui/SplitAxisChart';
@@ -321,7 +321,9 @@ export default function ProductBalancePage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th className="text-left py-2 px-2 font-medium sticky left-0" style={{ background: 'var(--bg-card)', color: 'var(--text-primary)' }}>Fasıl</th>
                   <th className="text-left py-2 px-1" style={{ color: 'var(--text-secondary)' }}>Birim</th>
-                  {YEAR_LABELS.map(y => (
+                  {/* Pazarlama yılı: "2023/24" — yalnız "2023" yazmak takvim
+                      yılı izlenimi verip hasadı bir yıl kaydırıyordu. */}
+                  {YEAR_DONEM.map(y => (
                     <th key={y} className="text-right py-2 px-2" style={{ color: 'var(--text-primary)' }}>{y}</th>
                   ))}
                   <th className="text-right py-2 px-2" style={{ color: 'var(--text-primary)' }}>Δ%</th>
@@ -376,7 +378,8 @@ export default function ProductBalancePage() {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 <th className="text-left py-1 px-2 sticky left-0" style={{ background: 'var(--bg-card)', color: 'var(--text-primary)' }}>Ürün</th>
-                {YEAR_LABELS.map(y => (
+                {/* Dar sütun: "23/24". On tane "2023/24" yan yana sığmıyor. */}
+                {YEAR_DONEM_KISA.map(y => (
                   <th key={y} className="text-center py-1 px-1" style={{ color: 'var(--text-secondary)' }}>{y}</th>
                 ))}
               </tr>
