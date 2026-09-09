@@ -711,6 +711,7 @@ import { handleSayfaBul } from './sayfaBul.js';
 import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
 import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
 import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.js';
+import { yetkiDenetimi } from './yetki.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -817,6 +818,21 @@ export default {
      * bedeli olmayan bir şey için cezalandırmak olurdu.
      */
     if (request.method === 'GET') {
+      /*
+       * ─── YETKİ, ÖNBELLEKTEN ÖNCE ────────────────────────────────────────
+       * Sıra kritik: önbellek denetimden önce gelseydi, korumalı bir ucun ilk
+       * (yetkili) yanıtı kenarda saklanır ve sonraki YETKİSİZ istekler o
+       * saklanan yanıtı alırdı — kapı ilk isteği geçiren biri için herkese
+       * açılırdı. Denetim burada olduğu için önbellek yalnız izin verilmiş
+       * isteklere hizmet ediyor.
+       *
+       * Duvar kapalıyken (bugünkü durum) bu satır hiçbir şey yapmıyor ve
+       * ölçülebilir bir maliyeti yok: liste bir Set, arama sabit zamanlı ve
+       * D1'e ancak korumalı bir uçta dokunuluyor.
+       */
+      const engel = await yetkiDenetimi(request, env, slug);
+      if (engel) return json(engel.body, engel.status);
+
       const onbellek = caches.default;
 
       /*

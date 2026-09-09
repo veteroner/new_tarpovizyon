@@ -24,16 +24,29 @@ export const PARA_DUVARI_AKTIF = false;
 /**
  * Kapı açıldığında bile ÜCRETSİZ kalacak Pro yolları.
  *
- * Vitrin mantığı: kullanıcı ödemeden önce ürünün ne yaptığını görmeli.
- * Genel bakış sayfası Röntgen'i taşıyor ve ürünün en ayırt edici parçası o;
- * kapalı bir kapının arkasında durursa satın alma kararı verilecek hiçbir
- * kanıt kalmıyor.
+ * ─── GENEL BAKIŞ NEDEN VİTRİN DEĞİL ─────────────────────────────────────────
+ * İlk karar Genel Bakış'ı vitrin yapmaktı: Röntgen'i taşıyor ve ürünün en
+ * ayırt edici parçası o, kapalı kapı arkasında durursa satın alma kararı
+ * verilecek kanıt kalmıyordu.
+ *
+ * Ölçüm o kararı çürüttü. Sayfa 13 uç okuyor ve DÖRDÜ korumalı listede:
+ * `bitkisel/uretim-detay`, `tr/kisi-basi-uretim-tuketim`, `tuik/fiyatendex`,
+ * `tuik/urundenge`. Yani sayfayı vitrin yapmanın iki yolu vardı ve ikisi de
+ * kötüydü:
+ *   · o dört ucu da açmak → ürün dengesi ve fiyat endeksi sayfaları da
+ *     fiilen ücretsiz olurdu, kapı delinirdi
+ *   · uçları kapalı tutmak → vitrinin yarısı boş çizilirdi, yani satış aracı
+ *     ürünü bozuk gösterirdi
+ *
+ * Doğru çözüm sayfayı zorlamak değil, vitrini AYRI YAZMAK: yalnız ücretsiz
+ * uçlardan beslenen bir tanıtım sayfası (Faz 2). O gelene kadar burada
+ * yalnız abonelik sayfası var — yani kapı açılırsa Pro tümüyle kapalı olur.
+ * Eksik bir vitrin, bozuk bir vitrinden iyidir.
  *
  * Liste ÖNEK eşleşmesiyle çalışıyor, tam eşleşmeyle değil: alt sekmeler
  * (`?bolum=`) ve ileride eklenecek alt yollar da vitrinde kalsın.
  */
 export const VITRIN_YOLLARI = [
-  '/tarpovizyon/turkey/overview',
   '/tarpovizyon/abonelik',
 ];
 

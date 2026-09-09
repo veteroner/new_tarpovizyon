@@ -8,6 +8,8 @@
 //   fetchRows  — tablo okuma  : /api/<rota>?<filtre>=<değer>&limit=
 //   fetchAgg   — toplama      : /api/agg/<rota>?groupBy=…&sum=…&f_<sütun>=…
 
+import { jetonOku } from '../auth/oturum';
+
 const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
   ?? 'https://tarpovizyon-api.veteroner.workers.dev';
 
@@ -76,7 +78,17 @@ export const damgaSurumuAl = (): number => damgaSurum;
 export const damgalariAl = (): Map<string, number> => DAMGALAR;
 
 async function getJson(url: string): Promise<{ data?: Row[]; error?: string; count?: number }> {
-  const res = await fetch(url);
+  /*
+   * Oturum jetonu VARSA gönderiliyor, zorunlu değil.
+   *
+   * Uçların çoğu ücretsiz ve jeton beklemiyor; Pro'ya özel olanlar ise
+   * jetonsuz istekte 401/402 dönüyor (workers/.../yetki.js). Jetonu koşulsuz
+   * eklemek yerine varsa eklemek, ücretsiz uçların önbelleğini bozmuyor —
+   * `Authorization` başlığı taşıyan istek kenar önbelleğinde ayrı bir anahtar
+   * olurdu ve Basic kullanıcısı gereksiz yere D1'e inerdi.
+   */
+  const jeton = jetonOku();
+  const res = await fetch(url, jeton ? { headers: { Authorization: `Bearer ${jeton}` } } : undefined);
   const damga = Number(res.headers.get('X-Veri-Damga'));
   const tablo = res.headers.get('X-Veri-Tablo');
   if (tablo && Number.isFinite(damga) && damga > 0 && DAMGALAR.get(tablo) !== damga) {
