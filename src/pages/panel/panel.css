@@ -1,0 +1,175 @@
+/**
+ * Yönetim paneli kabuğu.
+ *
+ * Uygulamanın kendi değişkenlerini kullanıyor; panel ayrı bir görsel dünya
+ * değil, aynı uygulamanın bir bölümü.
+ */
+
+.panel {
+  padding: 20px 16px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.panel-bas { margin-bottom: 14px; }
+
+.panel-baslik {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #1d1d1f);
+  margin: 0 0 4px;
+}
+
+.panel-alt {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6e6e73);
+  margin: 0;
+}
+
+/*
+ * Sekme çubuğu. Dar ekranda yatay kaydırılıyor — sarmalamak yerine kaydırmak,
+ * dört sekmenin sırasını ve tek satırlık yüksekliğini koruyor.
+ */
+.panel-sekmeler {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, .1));
+  margin-bottom: 18px;
+  /* Kaydırma çubuğu sekmeleri kesmesin. */
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+
+.panel-sekmeler::-webkit-scrollbar { display: none; }
+
+.panel-sekme {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  /* 44px dokunma hedefi alt sınırı. */
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-secondary, #6e6e73);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.panel-sekme:hover { color: var(--text-primary, #1d1d1f); }
+
+.panel-sekme-aktif {
+  color: var(--accent, #16a34a);
+  border-bottom-color: var(--accent, #16a34a);
+  font-weight: 600;
+}
+
+.panel-sekme:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: -2px;
+}
+
+/* ─── Sekme içi ortak öğeler (fiyatlandırma / aboneler) ───────────────────── */
+
+.panel-kart {
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, rgba(0, 0, 0, .08));
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.panel-kart-baslik {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary, #1d1d1f);
+  margin: 0 0 12px;
+}
+
+.panel-not {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #6e6e73);
+  margin: 0;
+}
+
+.panel-satir {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.panel-alan { display: flex; flex-direction: column; gap: 5px; min-width: 150px; }
+
+.panel-etiket {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6e6e73);
+}
+
+.panel-girdi {
+  /* 16px altına inmemeli: iOS Safari küçük yazılı alana odaklanınca
+     sayfayı otomatik yakınlaştırıyor. */
+  font-size: 16px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--border, rgba(0, 0, 0, .14));
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #1d1d1f);
+}
+
+.panel-dugme {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--accent, #16a34a);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel-dugme:disabled { opacity: .5; cursor: default; }
+
+.panel-tablo { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+
+.panel-tablo th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary, #6e6e73);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, .1));
+  white-space: nowrap;
+}
+
+.panel-tablo td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, .06));
+  color: var(--text-primary, #1d1d1f);
+}
+
+/* Sayı sütunları hizalansın diye tabular rakam. */
+.panel-tablo .panel-sayi { text-align: right; font-variant-numeric: tabular-nums; }
+
+.panel-rozet {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.panel-rozet-aktif { background: rgba(22, 163, 74, .12); color: #16a34a; }
+.panel-rozet-deneme { background: rgba(37, 99, 235, .12); color: #2563eb; }
+.panel-rozet-bitti { background: rgba(220, 38, 38, .1); color: #dc2626; }
+
+@media (max-width: 767px) {
+  .panel { padding: 14px 12px 32px; }
+  .panel-sekme { padding: 0 11px; font-size: 0.84rem; }
+}

@@ -62,8 +62,7 @@ const FiberCropPage = lazy(() => import('./pages/FiberCropPage'));
 const LandUsePage = lazy(() => import('./pages/LandUsePage'));
 const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const VeriYuklePage = lazy(() => import('./pages/VeriYuklePage'));
-const VeriGirisiPage = lazy(() => import('./pages/VeriGirisiPage'));
+const PanelKabugu = lazy(() => import('./pages/panel/PanelKabugu'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -387,10 +386,15 @@ function AppContent() {
             <Route path="/tarpovizyon/turkey/basin-production" element={<BasinProductionPage />} />
             <Route path="/tarpovizyon/turkey/geographical-indication" element={<GeographicalIndicationsPage />} />
 
-            {/* Elle veri yükleme (TÜİK API'sinde olmayan seriler için). */}
-            <Route path="/tarpovizyon/veri-yukle" element={<VeriYuklePage />} />
-            {/* Rehberli sektör fiyat girişi — ızgaranın yanında, onun yerine değil. */}
-            <Route path="/tarpovizyon/veri-girisi" element={<VeriGirisiPage />} />
+            {/*
+              * Yönetim paneli — veri girişi, fiyatlandırma ve abonelik tek
+              * kabukta. İki eski yol YÖNLENDİRMEYE dönüştü: yer imleri ve
+              * dışarıdan verilmiş bağlantılar bozulmasın diye siliniyor değil,
+              * ilgili sekmeye taşınıyorlar.
+              */}
+            <Route path="/tarpovizyon/panel" element={<PanelKabugu />} />
+            <Route path="/tarpovizyon/veri-yukle" element={<Navigate to="/tarpovizyon/panel?sekme=veri" replace />} />
+            <Route path="/tarpovizyon/veri-girisi" element={<Navigate to="/tarpovizyon/panel?sekme=sektor" replace />} />
 
             {/* Bilinmeyen /tarpovizyon adresleri: kabuk içinde kalsın, boş ekran olmasın. */}
             <Route path="*" element={<NotFoundPage />} />
