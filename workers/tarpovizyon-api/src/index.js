@@ -595,6 +595,11 @@ const YAZMA_ORIGIN = new Set([
   'https://tarpovizyon.com',
   'http://localhost:5177',
   'http://localhost:5173',
+  /* Üretim önizlemesi (`vite preview`). Doğrulama betikleri panelin yönetim
+     uçlarına buradan gidiyor; listede olmadığı için tarayıcı ön kontrolü
+     düşüyor ve panel "işlem tamamlanamadı" diyordu — yetki değil CORS
+     sorunuydu, ama ekranda ikisi aynı görünüyor. */
+  'http://localhost:5178',
 ]);
 
 /*
@@ -712,6 +717,7 @@ import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
 import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
 import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.js';
 import { yetkiDenetimi } from './yetki.js';
+import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -796,6 +802,49 @@ export default {
         headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors },
       });
     }
+    /*
+     * ── Ayarlar ve abone yönetimi ─────────────────────────────────────────
+     * `ayar` OKUMASI açık: abonelik sayfası fiyatı giriş yapmamış ziyaretçiye
+     * de göstermeli, yoksa kimse ne ödeyeceğini bilmeden karar veremez.
+     * Yazma ve abone listesi `admin/` altında ve yetki istiyor.
+     *
+     * Abone listesi kişisel veri (e-posta) döndürdüğü için `no-store`: ne
+     * tarayıcıda ne kenarda saklanıyor. Genel okuma yolunun önbelleğine
+     * düşmesin diye de buradan, ondan ÖNCE dönüyor.
+     */
+    if (slug === 'ayar' && request.method === 'GET') {
+      const { status, body } = await handleAyarOku(env);
+      return json(body, status);
+    }
+    if (slug === 'admin/ayar' || slug === 'admin/aboneler' || slug === 'admin/abonelik') {
+      const cors = yazmaCors(request);
+      if (!cors) return new Response(null, { status: 403 });
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      const isleyici = slug === 'admin/ayar' ? handleAyarYaz
+        : slug === 'admin/aboneler' ? handleAboneler
+          : handleAbonelikDegistir;
+      const beklenen = slug === 'admin/aboneler' ? 'GET' : 'POST';
+      if (request.method !== beklenen) {
+        return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
+          { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
+      }
+      let sonuc;
+      try {
+        sonuc = await isleyici(request, env);
+      } catch (e) {
+        console.error('yönetim hatası', slug, e?.message);
+        sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };
+      }
+      return new Response(JSON.stringify(sonuc.body), {
+        status: sonuc.status,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          ...cors,
+        },
+      });
+    }
+
     if (slug === 'admin/catalog') {
       return json(await handleCatalog(env, ROUTES, TABLO_SAYFALARI));
     }

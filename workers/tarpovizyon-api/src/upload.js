@@ -106,7 +106,10 @@ function deger(tur, ham) {
  * yeterli — o zaman yalnızca TOTP kalır. İkisi de tanımsızsa uç TAMAMEN
  * KAPALI (fail-closed), eskisi gibi.
  */
-async function yetkili(request, env) {
+/* DIŞA AÇIK: yeni yönetim uçları (yonetim.js) da bu denetimi kullanıyor.
+   Kopyalamak yerine paylaşmak şart — iki ayrı yetki mantığı zamanla
+   birbirinden ayrı düşer ve biri gevşek kalır. */
+export async function yetkili(request, env) {
   const sabit = env.ADMIN_KEY ?? '';
   if (sabit && (request.headers.get('x-admin-key') ?? '') === sabit) return true;
 
