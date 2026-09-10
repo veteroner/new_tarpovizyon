@@ -52,9 +52,24 @@ export async function handleAyarOku(env) {
   await semaHazirla(env);
   const r = await env.DB.prepare('SELECT anahtar, deger FROM ayar').all();
   const cikti = {};
+  const hepsi = {};
   for (const s of r.results ?? []) {
+    hepsi[s.anahtar] = s.deger;
     if (ACIK_AYARLAR.has(s.anahtar)) cikti[s.anahtar] = s.deger;
   }
+
+  /*
+   * Ödeme kurulmuş mu — TÜRETİLMİŞ bilgi, plan kodlarının kendisi DEĞİL.
+   * Sayfa "ödemeye geç" düğmesini gösterip göstermeyeceğini bilmek zorunda;
+   * ama plan referans kodları iyzico hesabına ait iç bilgi ve dışarı
+   * çıkmamalı. O yüzden yalnız "var mı yok mu" dönüyor.
+   *
+   * Bu bayrak ABONELİK AÇMIYOR: ödeme akışı kapalıyken bile sunucu
+   * `plan_tanimsiz` döndürmeye devam ediyor, yani "hazır" görünen bir arayüz
+   * gerçek bir abonelik üretemez.
+   */
+  cikti.odeme_hazir = (hepsi.iyzico_plan_aylik || hepsi.iyzico_plan_yillik) ? '1' : '0';
+
   return { status: 200, body: cikti };
 }
 

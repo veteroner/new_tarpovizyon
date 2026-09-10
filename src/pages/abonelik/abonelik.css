@@ -105,6 +105,15 @@
 .ab-dugme:disabled { opacity: .5; cursor: default; }
 
 .ab-hata { font-size: 0.83rem; color: var(--danger, #dc2626); margin: 4px 0 0; }
+
+/* Kurulum sürüyor bilgisi — HATA DEĞİL, o yüzden kırmızı değil nötr. */
+.ab-bilgi {
+  font-size: 0.85rem; line-height: 1.55;
+  color: var(--text-secondary, #6e6e73);
+  background: var(--bg-primary, #f7f7f8);
+  border: 1px solid var(--border, rgba(0,0,0,.08));
+  border-radius: 10px; padding: 12px 13px; margin: 4px 0 0;
+}
 .ab-not { font-size: 0.76rem; color: var(--text-secondary, #6e6e73); margin: 8px 0 0; line-height: 1.5; }
 
 .ab-donen { animation: ab-don 1s linear infinite; }

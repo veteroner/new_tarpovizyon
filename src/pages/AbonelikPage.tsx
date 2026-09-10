@@ -74,6 +74,19 @@ export default function AbonelikPage() {
   const tutar = plan === 'yillik' ? yillik : aylik;
   const indirim = aylik > 0 && yillik > 0 ? Math.round((1 - yillik / (aylik * 12)) * 100) : null;
   const fiyatVar = Number.isFinite(tutar) && tutar > 0;
+  /*
+   * TANITIM MODU: iyzico plan kodları henüz tanımlı değil. Sayfa tam
+   * görünüyor (planlar, fiyatlar, indirim) ama ödeme akışı açılmıyor.
+   *
+   * Bunu bir HATA olarak göstermek yanlış olurdu — ortada bozulan bir şey
+   * yok, kurulum henüz tamamlanmadı. Ama "ödemeye geç" düğmesini çalışır
+   * göstermek de yanlış: tıklayan kullanıcı sunucudan hata alırdı.
+   *
+   * Sunucu bu durumda ZATEN `plan_tanimsiz` dönüyor; yani buradaki bayrak
+   * bir güvenlik önlemi değil, arayüzün dürüst davranması. Bayrağı elle
+   * '1' yapan biri bile abonelik açamaz.
+   */
+  const odemeHazir = ayarlar.odeme_hazir === '1';
 
   const odeme = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,6 +180,14 @@ export default function AbonelikPage() {
           </p>
         )}
 
+        {fiyatVar && !odemeHazir && (
+          <p className="ab-bilgi">
+            Çevrimiçi ödeme kurulumu sürüyor. Abonelik açmak için bizimle
+            iletişime geçebilirsiniz.
+          </p>
+        )}
+
+        {odemeHazir && (
         <form className="ab-form" onSubmit={odeme}>
           <div className="ab-satir">
             <label className="ab-alan">
@@ -217,6 +238,7 @@ export default function AbonelikPage() {
           </p>
           <p className="ab-not" style={{ opacity: .75 }}>{kullanici?.eposta}</p>
         </form>
+        )}
 
         {/* iyzico formu buraya yerleşiyor. */}
         <div ref={formKutusu} className="ab-iyzico" />

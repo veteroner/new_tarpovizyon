@@ -118,6 +118,9 @@ export type Ayarlar = {
   fiyat_aylik?: string;
   fiyat_yillik?: string;
   deneme_gun?: string;
+  /** '1' → iyzico plan kodları tanımlı, ödeme akışı açık. Plan kodlarının
+   *  kendisi DIŞARI ÇIKMIYOR; bu yalnız türetilmiş bir bayrak. */
+  odeme_hazir?: string;
 };
 
 /** Okuma yetkisiz — abonelik sayfası da bunu kullanacak. */
