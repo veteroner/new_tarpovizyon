@@ -50,5 +50,28 @@ export const VITRIN_YOLLARI = [
   '/tarpovizyon/abonelik',
 ];
 
+/**
+ * Para duvarından MUAF yönetim yolları.
+ *
+ * Bunlar vitrin değil — kimseye gösterilmiyorlar. Muaf olmalarının sebebi
+ * KENDİ KORUMALARININ OLMASI: yönetim uçları TOTP + yönetici anahtarı
+ * istiyor (`x-admin-otp`, `x-admin-key`) ve o koruma abonelikten bağımsız.
+ *
+ * Muafiyet olmasaydı duvar açıldığı anda YÖNETİCİ KENDİ PANELİNE GİREMEZDİ:
+ * yolları `/tarpovizyon/` altında olduğu için kapı onlara da abonelik sorar,
+ * oysa yöneticinin abonesi olması gerekmiyor — hatta hiç giriş yapmamış
+ * olabilir, paneli TOTP ile açıyor. Duvar açılmadan önce fark edildi.
+ *
+ * Ekstra bir güvenlik açığı DEĞİL: bu sayfaların verisi zaten yönetim
+ * uçlarından geliyor ve o uçlar anahtar olmadan hiçbir şey döndürmüyor.
+ * Kapıyı kaldırmak yalnızca boş bir formun görünmesini sağlıyor.
+ */
+export const YONETIM_YOLLARI = [
+  '/tarpovizyon/veri-yukle',
+  '/tarpovizyon/veri-girisi',
+  '/tarpovizyon/panel',
+];
+
 export const vitrinMi = (yol: string): boolean =>
-  VITRIN_YOLLARI.some((v) => yol === v || yol.startsWith(`${v}/`));
+  [...VITRIN_YOLLARI, ...YONETIM_YOLLARI]
+    .some((v) => yol === v || yol.startsWith(`${v}/`));
