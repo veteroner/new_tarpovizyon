@@ -41,34 +41,74 @@ export const APP_OZEL_TR = '8db826a9-59f2-4a33-a91e-88ca417dddf9';
 /** Çekimde kullanılan uygulama. */
 export const APP = APP_GENEL_TR;
 
+/** Tek bir oturum açma denemesi. Başarısızsa tarayıcıyı KAPATIP hata atar. */
+async function birOturum({ gorunur }) {
+  const tarayici = await chromium.launch({ headless: !gorunur });
+  try {
+    const baglam = await tarayici.newContext({
+      locale: 'tr-TR',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+        + '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    });
+    const sayfa = await baglam.newPage();
+
+    await sayfa.goto(MASHUP, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+
+    // qlik.js RequireJS ile yükleniyor; hazır olana kadar bekle.
+    await sayfa.waitForFunction(() => typeof window.require === 'function', { timeout: 60_000 });
+    await sayfa.evaluate(() => new Promise((res, rej) => {
+      const t = setTimeout(() => rej(new Error('js/qlik 60 sn içinde yüklenmedi')), 60_000);
+      window.require(['js/qlik'], (q) => { clearTimeout(t); window.__qlik = q; res(); });
+    }));
+
+    return {
+      sayfa,
+      async kapat() { await tarayici.close(); },
+      /** Sayfa içinde çalıştırır; `window.__qlik` hazır. */
+      calis: (fn, arg) => sayfa.evaluate(fn, arg),
+    };
+  } catch (x) {
+    /*
+     * Başarısız denemede tarayıcıyı kapatmak ŞART. Eskiden hata doğrudan
+     * yukarı atılıyordu ve tek deneme olduğu için süreç zaten ölüyordu; tekrar
+     * denemeye başlayınca kapatılmayan her Chromium bellekte kalırdı.
+     */
+    await tarayici.close().catch(() => {});
+    throw x;
+  }
+}
+
 /**
  * Tarayıcıyı açar, mashup'ı yükler ve Qlik API'sini hazır hale getirir.
  * Dönen `calis(fn, ...args)` verilen işlevi SAYFA İÇİNDE çalıştırır.
+ *
+ * ─── NEDEN TEKRAR DENİYOR ───────────────────────────────────────────────────
+ * 10 Eylül 2026'da bu iş bir kez kırıldı: `window.require` beklenirken zaman
+ * aşımı. Kod ve TÜİK tarafı sağlamdı — aynı sayfa aynı gün elle açıldığında
+ * sorunsuz yükleniyordu; TÜİK o an runner'a yanıt vermemişti. Tek denemede bu,
+ * gerçek bir arıza gibi e-posta üretiyor.
+ *
+ * ÜSTÜNÜ ÖRTMÜYOR: her başarısız deneme günlüğe yazılıyor ve üçü de
+ * tükenirse iş yine HATA ile bitiyor. TÜİK uygulamayı gerçekten değiştirirse
+ * bunu görmeye devam ediyoruz — yalnız tek seferlik aksama sessizce
+ * atlatılıyor.
  */
-export async function qlikOturum({ gorunur = false } = {}) {
-  const tarayici = await chromium.launch({ headless: !gorunur });
-  const baglam = await tarayici.newContext({
-    locale: 'tr-TR',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-      + '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-  });
-  const sayfa = await baglam.newPage();
-
-  await sayfa.goto(MASHUP, { waitUntil: 'domcontentloaded', timeout: 90_000 });
-
-  // qlik.js RequireJS ile yükleniyor; hazır olana kadar bekle.
-  await sayfa.waitForFunction(() => typeof window.require === 'function', { timeout: 60_000 });
-  await sayfa.evaluate(() => new Promise((res, rej) => {
-    const t = setTimeout(() => rej(new Error('js/qlik 60 sn içinde yüklenmedi')), 60_000);
-    window.require(['js/qlik'], (q) => { clearTimeout(t); window.__qlik = q; res(); });
-  }));
-
-  return {
-    sayfa,
-    async kapat() { await tarayici.close(); },
-    /** Sayfa içinde çalıştırır; `window.__qlik` hazır. */
-    calis: (fn, arg) => sayfa.evaluate(fn, arg),
-  };
+export async function qlikOturum({ gorunur = false, deneme = 3 } = {}) {
+  let sonHata;
+  for (let i = 1; i <= deneme; i++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await birOturum({ gorunur });
+    } catch (x) {
+      sonHata = x;
+      const sebep = String(x?.message ?? x).split('\n')[0];
+      console.warn(`[qlik] oturum denemesi ${i}/${deneme} başarısız: ${sebep}`);
+      // Artan bekleme: anlık bir aksama ikinci denemede çoktan geçmiş olur.
+      // eslint-disable-next-line no-await-in-loop
+      if (i < deneme) await new Promise((r) => { setTimeout(r, i * 15_000); });
+    }
+  }
+  throw sonHata;
 }
 
 /**

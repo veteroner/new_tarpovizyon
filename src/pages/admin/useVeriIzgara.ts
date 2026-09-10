@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { fetchRows } from '../../services/d1';
+import { panelJetonuOku } from '../panel/yonetimApi';
 
 const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
   ?? 'https://tarpovizyon-api.veteroner.workers.dev';
-
-const ANAHTAR_DEPO = 'tarpovizyon_admin_key';
 
 /** Izgaraya bir seferde çekilen satır sayısı. */
 export const PENCERE = 300;
@@ -41,11 +40,16 @@ export function useVeriIzgara() {
   const [satirlar, setSatirlar] = useState<IzgaraSatir[]>([]);
   const [ilkHal, setIlkHal] = useState<Map<number, Record<string, unknown>>>(new Map());
   /*
-   * Tek seferlik kod: SAKLANMIYOR. Sabit anahtar (localStorage'daki) Worker'da
-   * `ADMIN_KEY` silinene kadar yedek olarak duruyor; ikisinden biri yeterli.
+   * ─── YETKİ ARTIK BURADA SORULMUYOR ────────────────────────────────────────
+   * Bu ekran her kayıtta ayrıca tek seferlik kod istiyordu. Panelin kendisi
+   * TOTP kapısının arkasına alındığında bu ikinci soru anlamsızlaştı: aynı
+   * sırdan üretilen kod, aynı oturum içinde ikinci kez soruluyordu. Sunucuda
+   * `ADMIN_KEY` de silindiği için sabit anahtar yedeği zaten ölüydü.
+   *
+   * Yetki artık panel oturumu jetonuyla taşınıyor (`x-panel-oturum`) —
+   * `yetkili()` sunucuda onu ilk sırada deniyor. Koruma ZAYIFLAMADI, tek
+   * yere toplandı: jeton yoksa ya da süresi dolmuşsa kayıt 401 döner.
    */
-  const [otp, setOtp] = useState('');
-  const [anahtar, setAnahtar] = useState(() => localStorage.getItem(ANAHTAR_DEPO) ?? '');
   const [yukleniyor, setYukleniyor] = useState(false);
   const [durum, setDurum] = useState<{ tip: 'bos' | 'ok' | 'hata'; mesaj: string }>(
     { tip: 'bos', mesaj: '' });
@@ -56,12 +60,6 @@ export function useVeriIzgara() {
       .then((r) => r.json())
       .then((d) => setTablolar(d.tablolar ?? []))
       .catch(() => setDurum({ tip: 'hata', mesaj: 'Tablo listesi alınamadı.' }));
-  }, []);
-
-  const anahtarKaydet = useCallback((v: string) => {
-    setAnahtar(v);
-    if (v) localStorage.setItem(ANAHTAR_DEPO, v);
-    else localStorage.removeItem(ANAHTAR_DEPO);
   }, []);
 
   const tabloSec = useCallback(async (tablo: string) => {
@@ -202,7 +200,7 @@ export function useVeriIzgara() {
 
   const kaydet = useCallback(async () => {
     const { guncellenecek, eklenecek } = degisiklikler;
-    if ((!otp && !anahtar) || (!guncellenecek.length && !eklenecek.length)) return;
+    if (!guncellenecek.length && !eklenecek.length) return;
     setYukleniyor(true);
     setDurum({ tip: 'bos', mesaj: 'Kaydediliyor…' });
     try {
@@ -221,8 +219,7 @@ export function useVeriIzgara() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(otp ? { 'x-admin-otp': otp } : {}),
-            ...(anahtar ? { 'x-admin-key': anahtar } : {}),
+            'x-panel-oturum': panelJetonuOku(),
           },
           body: JSON.stringify({ tablo: seciliTablo, ...p }),
         });
@@ -237,13 +234,11 @@ export function useVeriIzgara() {
     } finally {
       setYukleniyor(false);
     }
-  }, [degisiklikler, otp, anahtar, seciliTablo, tabloSec]);
+  }, [degisiklikler, seciliTablo, tabloSec]);
 
   return {
     tablolar, seciliTablo, tabloSec,
     sutunlar, yazilabilirSutunlar, satirlar,
-    otp, setOtp,
-    anahtar, anahtarKaydet,
     hucreDegistir, hucreDegisti, satirEkle, satirSil, dosyaAktar,
     degisiklikler, kaydet, yukleniyor, durum,
   };

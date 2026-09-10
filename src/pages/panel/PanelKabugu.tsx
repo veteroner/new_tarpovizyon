@@ -1,8 +1,8 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Database, Coins, Tag, Users, LogOut } from 'lucide-react';
 import { PanelKapisi } from './PanelKapisi';
-import { panelCikis, panelAcikMi } from './yonetimApi';
+import { panelCikis, panelGecerliMi } from './yonetimApi';
 import './panel.css';
 
 const VeriYuklePage = lazy(() => import('../VeriYuklePage'));
@@ -48,12 +48,20 @@ type SekmeId = typeof SEKMELER[number]['id'];
 
 export default function PanelKabugu() {
   /*
-   * KAPI EN DIŞTA. Panel oturumu yoksa başlık, sekme adları ve form yapısı
-   * dahil HİÇBİR ŞEY çizilmiyor — daha önce bunların hepsi kimlik sorulmadan
-   * görünüyordu ve panelin varlığını, hangi tabloların yönetildiğini dışarıya
-   * sızdırıyordu.
+   * KAPI EN DIŞTA ve kararı SUNUCU veriyor.
+   *
+   * Üç durum var ve üçü de gerekli:
+   *   'soruluyor' → hiçbir şey çizilmiyor. Kapıyı göstermek de yanlış olurdu:
+   *                 geçerli oturumu olan kullanıcı her açılışta bir an giriş
+   *                 ekranı görürdü.
+   *   'acik'      → kabuk.
+   *   'kapali'    → kapı.
+   *
+   * Önceki hali yerel bir dizeye bakıyordu; uydurma bir değer yazan biri
+   * sekme adlarını ve panelin yapısını görebiliyordu. Artık jeton sunucuya
+   * doğrulatılıyor (`admin/panel-ben`).
    */
-  const [acik, setAcik] = useState(panelAcikMi);
+  const [durum, setDurum] = useState<'soruluyor' | 'acik' | 'kapali'>('soruluyor');
   const [params, setParams] = useSearchParams();
   const istenen = params.get('sekme') as SekmeId | null;
   const sekme: SekmeId = SEKMELER.some((s) => s.id === istenen) ? istenen! : 'veri';
@@ -66,11 +74,18 @@ export default function PanelKabugu() {
     setParams(y);
   };
 
-  if (!acik) return <PanelKapisi acildi={() => setAcik(true)} />;
+  useEffect(() => {
+    let iptal = false;
+    void panelGecerliMi().then((g) => { if (!iptal) setDurum(g ? 'acik' : 'kapali'); });
+    return () => { iptal = true; };
+  }, []);
+
+  if (durum === 'soruluyor') return null;
+  if (durum === 'kapali') return <PanelKapisi acildi={() => setDurum('acik')} />;
 
   const cikis = async () => {
     await panelCikis();
-    setAcik(false);
+    setDurum('kapali');
   };
 
   return (

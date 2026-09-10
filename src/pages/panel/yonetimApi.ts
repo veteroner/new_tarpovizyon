@@ -80,8 +80,33 @@ export async function panelCikis(): Promise<void> {
   panelJetonuYaz('');
 }
 
-/** Panel oturumu var mı — kabuk kapıyı gösterip göstermeyeceğine bununla karar veriyor. */
-export const panelAcikMi = (): boolean => Boolean(panelJetonuOku());
+/**
+ * Panel oturumu SUNUCUDA geçerli mi.
+ *
+ * ─── NEDEN YEREL KONTROL YETMİYORDU ─────────────────────────────────────────
+ * Önceki hali `Boolean(panelJetonuOku())` idi: localStorage'da herhangi bir
+ * dize varsa kabuk açılıyordu. Uydurma bir değer yazan biri veriye erişemiyordu
+ * (uçlar 401 döndürüyor) ama panelin VARLIĞINI, dört sekmenin adını ve hangi
+ * işlemlerin bulunduğunu görebiliyordu — kapıyı kurma sebebinin tam tersi.
+ * Ölçüldü: `tamamen-uydurma-bir-dize` ile canlıda kabuk çizildi.
+ *
+ * Ayrıca süresi dolmuş jeton da yerelde "var" görünüyordu; kullanıcı paneli
+ * açık sanıp her isteğinde 401 alıyordu.
+ *
+ * Jeton yoksa AĞA HİÇ ÇIKILMIYOR: sonuç belli, istek israf.
+ */
+export async function panelGecerliMi(): Promise<boolean> {
+  if (!panelJetonuOku()) return false;
+  try {
+    await cagir('admin/panel-ben');
+    return true;
+  } catch {
+    /* Geçersiz ya da süresi dolmuş — yerel kalıntıyı da temizle ki bir daha
+       sorulmasın. */
+    panelJetonuYaz('');
+    return false;
+  }
+}
 
 export const panelHatasi = (e: unknown): string => {
   const x = e as { kod?: string; http?: number; ek?: { dakika?: number; totpKurulu?: boolean } };

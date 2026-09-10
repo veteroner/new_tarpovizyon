@@ -719,7 +719,7 @@ import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.
 import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
-import { handlePanelGiris, handlePanelCikis } from './panelGiris.js';
+import { handlePanelGiris, handlePanelCikis, panelOturumuGecerli } from './panelGiris.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -865,17 +865,33 @@ export default {
       const { status, body } = await handleAyarOku(env);
       return json(body, status);
     }
-    if (slug === 'admin/panel-giris' || slug === 'admin/panel-cikis') {
+    if (slug === 'admin/panel-giris' || slug === 'admin/panel-cikis' || slug === 'admin/panel-ben') {
       const cors = yazmaCors(request);
       if (!cors) return new Response(null, { status: 403 });
       if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
-      if (request.method !== 'POST') {
+      /*
+       * `panel-ben` OKUMA: panel kabuğu çizilmeden önce jetonun HÂLÂ geçerli
+       * olduğunu sunucuya soruyor. Daha önce istemci yalnız localStorage'da bir
+       * dize var mı diye bakıyordu; uydurma bir değer yazan biri, veriye
+       * erişemese de sekme adlarını ve panelin yapısını görebiliyordu.
+       *
+       * Yanıt bilerek YALIN: yalnız 200/401. Süre, kaynak ya da jetonun kendisi
+       * dönmüyor — kabuğun çizilip çizilmeyeceği dışında bir bilgiye ihtiyaç yok.
+       */
+      const benMi = slug === 'admin/panel-ben';
+      if (benMi ? request.method !== 'GET' : request.method !== 'POST') {
         return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
           { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
       }
       let sonuc;
       try {
-        sonuc = await (slug === 'admin/panel-giris' ? handlePanelGiris : handlePanelCikis)(request, env);
+        if (benMi) {
+          sonuc = await panelOturumuGecerli(request, env)
+            ? { status: 200, body: { gecerli: true } }
+            : { status: 401, body: { gecerli: false } };
+        } else {
+          sonuc = await (slug === 'admin/panel-giris' ? handlePanelGiris : handlePanelCikis)(request, env);
+        }
       } catch (e) {
         console.error('panel giriş hatası', e?.message);
         sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };

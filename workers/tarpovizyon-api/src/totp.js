@@ -39,6 +39,27 @@ function base32Coz(s) {
   return new Uint8Array(cikti);
 }
 
+/**
+ * Sır hangi biçimde yazılmış — teşhis için KABA bir tahmin.
+ *
+ * "Geçersiz karakter var" tek başına yetmiyordu: asıl soru, sırrın yanlışlıkla
+ * hex mi yoksa base64 olarak mı üretildiği. `openssl rand -base32` macOS'un
+ * LibreSSL'inde yok; komut hata verince `-hex` ya da `-base64`e düşmek kolay
+ * ve ikisi de sessizce çalışmayan bir sır bırakıyor.
+ *
+ * KARAKTERLERİN KENDİSİ DÖNMÜYOR, yalnız hangi kümeye ait oldukları. Zaten bu
+ * dal çalıştığında sır tanım gereği kullanılamaz durumda — korunacak bir gizlilik
+ * kalmamış oluyor; teşhis için gereken de sırrın değeri değil, biçimi.
+ */
+function bicimTahmini(s) {
+  const t = String(s ?? '').replace(/[\s-]/g, '').replace(/=+$/, '');
+  if (!t) return 'boş';
+  if (/^[0-9a-fA-F]+$/.test(t)) return 'hex görünüyor (openssl rand -hex?)';
+  if (/[+/]/.test(t) || /[a-z]/.test(t)) return 'base64 görünüyor (openssl rand -base64?)';
+  if (/[0189]/.test(t)) return '0/1/8/9 içeriyor — base32 alfabesinde yok';
+  return 'tanınmayan biçim';
+}
+
 /** Verilen zaman adımı için 6 haneli kod. */
 async function kodUret(secretBaytlar, adim) {
   // Sayaç 8 baytlık big-endian.
@@ -83,10 +104,29 @@ export async function totpDogrula(secretBase32, kod, pencere = 1) {
   let baytlar;
   try {
     baytlar = base32Coz(secretBase32);
-  } catch {
+  } catch (x) {
+    /*
+     * ÇÖZÜLEMEYEN SIR ≠ YANLIŞ KOD.
+     *
+     * Bu dal sessizce `false` döndürüyordu; dışarıdan bakınca "yanlış kod
+     * girdiniz" ile "sır hiç kurulamamış" birbirinin aynısı görünüyordu.
+     * Bir kurulum hatası, kullanıcı hatası kılığında saatlerce aranabilir —
+     * bir kez arandı da. Günlüğe düşen bu satır ayrımı ilk denemede
+     * görünür kılıyor.
+     *
+     * SIRRIN KENDİSİ YAZILMIYOR: yalnız uzunluğu ve hangi karakterin
+     * reddedildiği. Worker günlükleri sırrı saklamak için uygun bir yer
+     * değil; teşhis için gereken de sır değil, biçimi.
+     */
+    console.warn('[totp] ADMIN_TOTP_SECRET çözülemedi:', x.message,
+      `— uzunluk ${String(secretBase32 ?? '').length}, ${bicimTahmini(secretBase32)}.`,
+      'Beklenen: base32 (A–Z, 2–7).');
     return false;
   }
-  if (baytlar.length === 0) return false;
+  if (baytlar.length === 0) {
+    console.warn('[totp] ADMIN_TOTP_SECRET boş — kod hiçbir zaman doğrulanamaz.');
+    return false;
+  }
 
   const simdikiAdim = Math.floor(Date.now() / 1000 / 30);
   for (let d = -pencere; d <= pencere; d++) {
