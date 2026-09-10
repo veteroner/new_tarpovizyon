@@ -718,6 +718,7 @@ import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
 import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.js';
 import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
+import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -812,6 +813,53 @@ export default {
      * tarayıcıda ne kenarda saklanıyor. Genel okuma yolunun önbelleğine
      * düşmesin diye de buradan, ondan ÖNCE dönüyor.
      */
+    /*
+     * ── Ödeme ─────────────────────────────────────────────────────────────
+     * Webhook AYRI ele alınıyor: iyzico sunucudan sunucuya çağırıyor, yani
+     * `Origin` başlığı YOK. `yazmaCors` kullanılsaydı 403 dönerdi ve
+     * bildirimler sessizce düşerdi — abonelik yenilemeleri hiç işlenmezdi.
+     * Korumasız değil: imza doğrulaması `handleOdemeWebhook` içinde ve
+     * imzasız gövde hiçbir şey değiştirmiyor.
+     */
+    if (slug === 'odeme/webhook') {
+      if (request.method !== 'POST') return json({ hata: 'yontem_hatali' }, 405);
+      let sonuc;
+      try {
+        sonuc = await handleOdemeWebhook(request, env);
+      } catch (e) {
+        console.error('webhook hatası', e?.message);
+        /* Yine 200: iyzico 2xx almazsa saatlerce tekrar dener ve bizim
+           tarafımızdaki bir hata tekrar fırtınasına dönüşür. */
+        sonuc = { status: 200, body: { alindi: false, sebep: 'sunucu_hatasi' } };
+      }
+      return json(sonuc.body, sonuc.status);
+    }
+
+    if (slug === 'odeme/baslat' || slug === 'odeme/dogrula') {
+      const cors = authCors(request);
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
+          { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
+      }
+      const isleyici = slug === 'odeme/baslat' ? handleOdemeBaslat : handleOdemeDogrula;
+      let sonuc;
+      try {
+        sonuc = await isleyici(request, env);
+      } catch (e) {
+        console.error('ödeme hatası', slug, e?.message);
+        sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };
+      }
+      return new Response(JSON.stringify(sonuc.body), {
+        status: sonuc.status,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          ...cors,
+        },
+      });
+    }
+
     if (slug === 'ayar' && request.method === 'GET') {
       const { status, body } = await handleAyarOku(env);
       return json(body, status);

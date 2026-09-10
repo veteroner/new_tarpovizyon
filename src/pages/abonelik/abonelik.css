@@ -1,0 +1,120 @@
+/**
+ * Abonelik sayfası.
+ *
+ * Uygulamanın kendi renk değişkenlerini kullanıyor — ödeme sayfası ayrı bir
+ * görsel dünya değil; tanıdık görünmesi güven için de önemli.
+ */
+
+.ab-sar { display: flex; justify-content: center; padding: 26px 16px 48px; }
+
+.ab-kart {
+  width: 100%;
+  max-width: 460px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, rgba(0, 0, 0, .08));
+  border-radius: 16px;
+  padding: 26px 22px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 10px 28px rgba(0, 0, 0, .06);
+}
+
+.ab-orta { text-align: center; }
+
+.ab-rozet {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: grid; place-items: center; margin-bottom: 12px;
+  background: color-mix(in srgb, var(--accent, #16a34a) 12%, transparent);
+  color: var(--accent, #16a34a);
+}
+.ab-orta .ab-rozet { margin: 0 auto 12px; }
+.ab-rozet-ok { background: rgba(22, 163, 74, .12); color: #16a34a; }
+.ab-rozet-hata { background: rgba(220, 38, 38, .1); color: #dc2626; }
+
+.ab-baslik { font-size: 1.3rem; font-weight: 700; color: var(--text-primary, #1d1d1f); margin: 0 0 6px; }
+.ab-alt { font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary, #6e6e73); margin: 0 0 16px; }
+
+.ab-durum {
+  font-size: 0.82rem; color: var(--text-secondary, #6e6e73);
+  background: var(--bg-primary, #f7f7f8);
+  border-radius: 9px; padding: 9px 11px; margin: 0 0 16px;
+}
+
+/* ── Plan seçimi ─────────────────────────────────────────────────────────── */
+
+.ab-planlar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+
+.ab-plan {
+  display: flex; flex-direction: column; gap: 3px; align-items: flex-start;
+  /* 44px dokunma hedefi alt sınırı fazlasıyla aşılıyor. */
+  padding: 13px 14px;
+  border: 1.5px solid var(--border, rgba(0, 0, 0, .12));
+  border-radius: 12px;
+  background: var(--bg-primary, #fff);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ab-plan-secili {
+  border-color: var(--accent, #16a34a);
+  background: color-mix(in srgb, var(--accent, #16a34a) 6%, transparent);
+}
+
+.ab-plan:focus-visible { outline: 2px solid var(--accent, #16a34a); outline-offset: 1px; }
+
+.ab-plan-ad { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary, #6e6e73); }
+.ab-plan-tutar {
+  font-size: 1.18rem; font-weight: 700; color: var(--text-primary, #1d1d1f);
+  font-variant-numeric: tabular-nums;
+}
+.ab-plan-birim { font-size: 0.78rem; font-weight: 500; color: var(--text-secondary, #6e6e73); }
+.ab-plan-indirim {
+  font-size: 0.72rem; font-weight: 600; color: var(--accent, #16a34a);
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+
+.ab-form { display: flex; flex-direction: column; gap: 11px; }
+.ab-satir { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.ab-alan { display: flex; flex-direction: column; gap: 5px; }
+.ab-etiket { font-size: 0.76rem; font-weight: 600; color: var(--text-secondary, #6e6e73); }
+.ab-istege-bagli { font-weight: 400; opacity: .8; }
+
+.ab-girdi {
+  /* 16px altına inmemeli: iOS Safari küçük yazılı alanda sayfayı
+     otomatik yakınlaştırıyor ve kullanıcı düzeni kaybediyor. */
+  font-size: 16px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--border, rgba(0, 0, 0, .14));
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #1d1d1f);
+  width: 100%;
+}
+
+.ab-girdi:focus-visible {
+  outline: 2px solid var(--accent, #16a34a); outline-offset: 1px; border-color: transparent;
+}
+
+.ab-dugme {
+  margin-top: 6px; min-height: 46px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; border-radius: 10px;
+  background: var(--accent, #16a34a); color: #fff;
+  font-size: 0.96rem; font-weight: 600; cursor: pointer;
+  text-decoration: none;
+}
+.ab-dugme:disabled { opacity: .5; cursor: default; }
+
+.ab-hata { font-size: 0.83rem; color: var(--danger, #dc2626); margin: 4px 0 0; }
+.ab-not { font-size: 0.76rem; color: var(--text-secondary, #6e6e73); margin: 8px 0 0; line-height: 1.5; }
+
+.ab-donen { animation: ab-don 1s linear infinite; }
+@keyframes ab-don { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ab-donen { animation: none; } }
+
+/* iyzico formu geldiğinde kendi yüksekliğini alıyor. */
+.ab-iyzico:not(:empty) { margin-top: 18px; }
+
+@media (max-width: 480px) {
+  .ab-satir { grid-template-columns: 1fr; }
+  .ab-planlar { grid-template-columns: 1fr; }
+}

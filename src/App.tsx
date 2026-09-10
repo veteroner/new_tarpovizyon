@@ -63,6 +63,7 @@ const LandUsePage = lazy(() => import('./pages/LandUsePage'));
 const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PanelKabugu = lazy(() => import('./pages/panel/PanelKabugu'));
+const AbonelikPage = lazy(() => import('./pages/AbonelikPage'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -393,6 +394,9 @@ function AppContent() {
               * ilgili sekmeye taşınıyorlar.
               */}
             <Route path="/tarpovizyon/panel" element={<PanelKabugu />} />
+            {/* Vitrin listesinde: para duvarı açıksa da erişilebilir olmalı —
+                ödeme sayfası kapının arkasında kalırsa kimse ödeyemez. */}
+            <Route path="/tarpovizyon/abonelik" element={<AbonelikPage />} />
             <Route path="/tarpovizyon/veri-yukle" element={<Navigate to="/tarpovizyon/panel?sekme=veri" replace />} />
             <Route path="/tarpovizyon/veri-girisi" element={<Navigate to="/tarpovizyon/panel?sekme=sektor" replace />} />
 
