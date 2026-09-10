@@ -27,6 +27,7 @@
  */
 
 import { totpDogrula } from './totp.js';
+import { panelOturumuGecerli } from './panelGiris.js';
 import { bildirEllaYazim } from './bildirim.js';
 import { damgala } from './damga.js';
 
@@ -110,6 +111,14 @@ function deger(tur, ham) {
    Kopyalamak yerine paylaşmak şart — iki ayrı yetki mantığı zamanla
    birbirinden ayrı düşer ve biri gevşek kalır. */
 export async function yetkili(request, env) {
+  /*
+   * PANEL OTURUMU önce denenir. Panel artık TOTP ile girilen kısa ömürlü bir
+   * jeton veriyor (panelGiris.js); bu, `localStorage`'da kalıcı duran sabit
+   * anahtardan daha dar bir yüzey — sızarsa sekiz saat sonra kendiliğinden
+   * ölüyor.
+   */
+  if (await panelOturumuGecerli(request, env)) return true;
+
   const sabit = env.ADMIN_KEY ?? '';
   if (sabit && (request.headers.get('x-admin-key') ?? '') === sabit) return true;
 

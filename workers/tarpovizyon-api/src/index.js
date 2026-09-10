@@ -644,7 +644,7 @@ function yazmaCors(request) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key, x-admin-otp',
+    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key, x-admin-otp, x-panel-oturum',
     'Vary': 'Origin',
   };
 }
@@ -719,6 +719,7 @@ import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.
 import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
+import { handlePanelGiris, handlePanelCikis } from './panelGiris.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -864,6 +865,31 @@ export default {
       const { status, body } = await handleAyarOku(env);
       return json(body, status);
     }
+    if (slug === 'admin/panel-giris' || slug === 'admin/panel-cikis') {
+      const cors = yazmaCors(request);
+      if (!cors) return new Response(null, { status: 403 });
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
+          { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
+      }
+      let sonuc;
+      try {
+        sonuc = await (slug === 'admin/panel-giris' ? handlePanelGiris : handlePanelCikis)(request, env);
+      } catch (e) {
+        console.error('panel giriş hatası', e?.message);
+        sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };
+      }
+      return new Response(JSON.stringify(sonuc.body), {
+        status: sonuc.status,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          ...cors,
+        },
+      });
+    }
+
     if (slug === 'admin/ayar' || slug === 'admin/aboneler' || slug === 'admin/abonelik') {
       const cors = yazmaCors(request);
       if (!cors) return new Response(null, { status: 403 });

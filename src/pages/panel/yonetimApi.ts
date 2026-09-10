@@ -16,6 +16,9 @@ const API_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefi
   ?? 'https://tarpovizyon-api.veteroner.workers.dev';
 
 const ANAHTAR_DEPO = 'tarpovizyon_admin_key';
+/* Panel oturumu — TOTP ile alınan kısa ömürlü jeton (8 saat). Sabit
+   anahtardan farkı: sızarsa kendiliğinden ölüyor. */
+const PANEL_DEPO = 'tarpovizyon_panel_oturum';
 const OTP_DEPO = 'tarpovizyon_admin_otp';
 
 export function anahtarOku(): string {
@@ -39,15 +42,60 @@ export const otpYaz = (v: string): void => {
   } catch { /* yoksay */ }
 };
 
+export function panelJetonuOku(): string {
+  try { return localStorage.getItem(PANEL_DEPO) ?? ''; } catch { return ''; }
+}
+
+export function panelJetonuYaz(v: string): void {
+  try {
+    if (v) localStorage.setItem(PANEL_DEPO, v); else localStorage.removeItem(PANEL_DEPO);
+  } catch { /* yoksay */ }
+}
+
 function basliklar(): Record<string, string> {
+  const panel = panelJetonuOku();
   const anahtar = anahtarOku();
   const otp = otpOku();
   return {
     'Content-Type': 'application/json',
+    /* Panel jetonu ÖNCE: sunucu da onu ilk deniyor. Diğer ikisi TOTP
+       kurulana kadar duran geçiş yolları. */
+    ...(panel ? { 'x-panel-oturum': panel } : {}),
     ...(anahtar ? { 'x-admin-key': anahtar } : {}),
     ...(otp ? { 'x-admin-otp': otp } : {}),
   };
 }
+
+/* ── Panel girişi ────────────────────────────────────────────────────────── */
+
+export async function panelGiris(g: { kod?: string; anahtar?: string }): Promise<void> {
+  const s = await cagir<{ jeton: string }>('admin/panel-giris', {
+    method: 'POST', body: JSON.stringify(g),
+  });
+  panelJetonuYaz(s.jeton);
+}
+
+export async function panelCikis(): Promise<void> {
+  try { await cagir('admin/panel-cikis', { method: 'POST' }); } catch { /* yerelden yine sil */ }
+  panelJetonuYaz('');
+}
+
+/** Panel oturumu var mı — kabuk kapıyı gösterip göstermeyeceğine bununla karar veriyor. */
+export const panelAcikMi = (): boolean => Boolean(panelJetonuOku());
+
+export const panelHatasi = (e: unknown): string => {
+  const x = e as { kod?: string; http?: number; ek?: { dakika?: number; totpKurulu?: boolean } };
+  if (x?.kod === 'cok_fazla_deneme') {
+    return `Çok fazla hatalı deneme. ${x.ek?.dakika ?? 10} dakika sonra tekrar deneyin.`;
+  }
+  if (x?.kod === 'gecersiz' || x?.http === 401) {
+    return x.ek?.totpKurulu === false
+      ? 'Kod doğrulanamadı. Doğrulama uygulaması henüz kurulmamış olabilir — anahtar ile girin.'
+      : 'Kod geçersiz.';
+  }
+  if (x?.http === 403) return 'Bu adresten yönetim isteği kabul edilmiyor.';
+  return 'Giriş yapılamadı. Lütfen tekrar deneyin.';
+};
 
 async function cagir<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
   const y = await fetch(`${API_TABAN}/api/${yol}`, {
@@ -56,7 +104,10 @@ async function cagir<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
   });
   const govde = await y.json().catch(() => ({}));
   if (!y.ok) {
-    throw Object.assign(new Error(govde?.hata ?? 'hata'), { kod: govde?.hata, http: y.status });
+    /* Gövde de taşınıyor: hata mesajını yararlı kılan ayrıntılar orada
+       (`totpKurulu`, `dakika`, `alanlar`). */
+    throw Object.assign(new Error(govde?.hata ?? 'hata'),
+      { kod: govde?.hata, http: y.status, ek: govde });
   }
   return govde as T;
 }

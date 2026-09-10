@@ -1,6 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Database, Coins, Tag, Users } from 'lucide-react';
+import { Database, Coins, Tag, Users, LogOut } from 'lucide-react';
+import { PanelKapisi } from './PanelKapisi';
+import { panelCikis, panelAcikMi } from './yonetimApi';
 import './panel.css';
 
 const VeriYuklePage = lazy(() => import('../VeriYuklePage'));
@@ -45,6 +47,13 @@ const SEKMELER = [
 type SekmeId = typeof SEKMELER[number]['id'];
 
 export default function PanelKabugu() {
+  /*
+   * KAPI EN DIŞTA. Panel oturumu yoksa başlık, sekme adları ve form yapısı
+   * dahil HİÇBİR ŞEY çizilmiyor — daha önce bunların hepsi kimlik sorulmadan
+   * görünüyordu ve panelin varlığını, hangi tabloların yönetildiğini dışarıya
+   * sızdırıyordu.
+   */
+  const [acik, setAcik] = useState(panelAcikMi);
   const [params, setParams] = useSearchParams();
   const istenen = params.get('sekme') as SekmeId | null;
   const sekme: SekmeId = SEKMELER.some((s) => s.id === istenen) ? istenen! : 'veri';
@@ -57,13 +66,27 @@ export default function PanelKabugu() {
     setParams(y);
   };
 
+  if (!acik) return <PanelKapisi acildi={() => setAcik(true)} />;
+
+  const cikis = async () => {
+    await panelCikis();
+    setAcik(false);
+  };
+
   return (
     <div className="panel">
       <header className="panel-bas">
-        <h1 className="panel-baslik">Yönetim Paneli</h1>
-        <p className="panel-alt">
-          Veri girişi, fiyatlandırma ve abonelik yönetimi
-        </p>
+        <div className="panel-bas-satir">
+          <div>
+            <h1 className="panel-baslik">Yönetim Paneli</h1>
+            <p className="panel-alt">
+              Veri girişi, fiyatlandırma ve abonelik yönetimi
+            </p>
+          </div>
+          <button type="button" className="panel-cikis" onClick={() => void cikis()}>
+            <LogOut size={14} aria-hidden="true" /> Çıkış
+          </button>
+        </div>
       </header>
 
       <nav className="panel-sekmeler" aria-label="Panel bölümleri">
