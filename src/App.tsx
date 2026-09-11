@@ -29,6 +29,7 @@ import MobileSettingsPage from './mobile/pages/MobileSettingsPage';
  */
 import MobilePrivacyPolicyPage from './mobile/pages/MobilePrivacyPolicyPage';
 import MobileTermsPage from './mobile/pages/MobileTermsPage';
+import MobileGirisPage from './mobile/pages/MobileGirisPage';
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const BolumPage = lazy(() => import('./pages/BolumPage'));
 const TradePage = lazy(() => import('./pages/TradePage').then(m => ({ default: m.TradePage })));
@@ -225,6 +226,8 @@ function AppContent() {
             <Route path="market/:sembol" element={<MobileCommodityPage />} />
             <Route path="ai" element={<MobileAIPage />} />
             <Route path="settings" element={<MobileSettingsPage />} />
+            {/* Hesap girişi — Ayarlar'daki "Giriş yap" satırından. */}
+            <Route path="giris" element={<MobileGirisPage />} />
             <Route path="gizlilik" element={<MobilePrivacyPolicyPage />} />
             <Route path="sartlar" element={<MobileTermsPage />} />
           </Route>
