@@ -38,3 +38,19 @@
   .pro-kopru { padding: 0 9px; }
   .pro-kopru span { display: none; }
 }
+
+/*
+ * "Giriş" — aynı ölçüler, vurgusuz. Pro köprüsü abonenin aradığı yol ve
+ * vurgulu; giriş düğmesi yalnızca bir yol işareti, dikkat çekmesi gerekmiyor.
+ */
+.pro-kopru--sade {
+  border-color: var(--border, rgba(0, 0, 0, .14));
+  background: none;
+  color: var(--text-secondary, #6e6e73);
+  font-weight: 500;
+}
+
+.pro-kopru--sade:hover {
+  background: color-mix(in oklab, currentColor 8%, transparent);
+  color: var(--text-primary, #1d1d1f);
+}

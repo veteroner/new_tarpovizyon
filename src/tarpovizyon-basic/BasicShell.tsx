@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { NAV_GROUPS } from './pages';
 import { BasicArama } from './BasicArama';
-import { ProKopru } from '../auth/ProKopru';
+import { ProKopru, WebGirisDugmesi } from '../auth/ProKopru';
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
 import { VitrinFooter } from '../components/vitrin/VitrinFooter';
 import type { Section } from './types';
@@ -139,9 +139,18 @@ export function BasicShell() {
         }
         arama={
           <>
-            {/* Abone www'de Pro'sunu bulamıyordu — köprü kendi koşullarını
-                kendi denetliyor, burada koşul yazılmıyor. */}
+            {/*
+              * Hesap öğeleri. İkisi de KENDİ koşullarını kendi denetliyor
+              * (platform, alan adı, oturum) — burada koşul yazılmıyor, yoksa
+              * kural iki yere dağılırdı.
+              *
+              * Aynı anda en fazla biri çiziliyor: girişsizken "Giriş",
+              * girişli ve abone ise "Pro'ya geç". Abone olmayan girişli
+              * kullanıcıda ikisi de yok — Basic ücretsiz, yapacak bir şey
+              * kalmıyor.
+              */}
             <ProKopru />
+            <WebGirisDugmesi />
             <BasicArama />
             <button
               className="tvb-menu-toggle"
