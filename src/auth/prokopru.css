@@ -1,0 +1,40 @@
+/*
+ * "Pro'ya geç" köprüsü.
+ *
+ * Vurgulu ama bağırmayan bir bağlantı: abonenin ARADIĞI yol bu, ona bir satış
+ * düğmesi gibi davranmak yersiz olurdu. Başlık çubuğundaki arama ve menü
+ * düğmesiyle aynı yükseklikte duruyor.
+ */
+
+.pro-kopru {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* 44px dokunma hedefinin altına inmiyor — başlık çubuğu mobilde de bu. */
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent, #16a34a) 35%, transparent);
+  background: color-mix(in oklab, var(--accent, #16a34a) 10%, transparent);
+  color: var(--accent, #16a34a);
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.pro-kopru:hover {
+  background: color-mix(in oklab, var(--accent, #16a34a) 18%, transparent);
+}
+
+.pro-kopru:focus-visible {
+  outline: 2px solid var(--accent, #16a34a);
+  outline-offset: 2px;
+}
+
+/* Dar ekranda yazı düşüyor, ikon kalıyor: başlık çubuğunda arama ve menü
+   düğmesiyle birlikte üç öğe 360px'e sığmıyordu. */
+@media (max-width: 480px) {
+  .pro-kopru { padding: 0 9px; }
+  .pro-kopru span { display: none; }
+}

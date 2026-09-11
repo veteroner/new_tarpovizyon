@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { NAV_GROUPS } from './pages';
 import { BasicArama } from './BasicArama';
+import { ProKopru } from '../auth/ProKopru';
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
 import { VitrinFooter } from '../components/vitrin/VitrinFooter';
 import type { Section } from './types';
@@ -138,6 +139,9 @@ export function BasicShell() {
         }
         arama={
           <>
+            {/* Abone www'de Pro'sunu bulamıyordu — köprü kendi koşullarını
+                kendi denetliyor, burada koşul yazılmıyor. */}
+            <ProKopru />
             <BasicArama />
             <button
               className="tvb-menu-toggle"
