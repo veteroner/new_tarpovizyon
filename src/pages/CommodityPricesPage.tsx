@@ -12,7 +12,8 @@ import { ChartInsightButton } from '../components/ChartInsightButton';
 import { LINE_Y_DOMAIN, VALUE_HEADROOM, compactValue } from '../utils/chartTicks';
 import {
   TrendingDown, TrendingUp, Wheat, Bean, Factory, Coffee, Beef, Milk, Zap,
-  TreePine, FlaskConical, Drumstick, Gem, Banknote, Package, type LucideIcon,
+  TreePine, FlaskConical, Drumstick, Gem, Banknote, Package, AlertTriangle,
+  type LucideIcon,
 } from 'lucide-react';
 import { eksenTick } from '../utils/sayiBicim';
 
@@ -558,6 +559,24 @@ export default function CommodityPricesPage() {
     return () => clearInterval(interval);
   }, [loadPrices]);
 
+  /*
+   * ─── UZUN SÜREN YÜKLEME İŞARETİ ───────────────────────────────────────────
+   * İlk yükleme ÖLÇÜLDÜ: ~20 saniye. Kaynak (api.php) 45 sembolü Yahoo'dan tek
+   * tek çekiyor, yani yavaşlık kusur değil işin doğası. Ama o 20 saniyede
+   * ekranda yalnızca dönen bir çark vardı ve kullanıcıya çalıştığını söyleyen
+   * hiçbir şey yoktu — donmuş görünüyordu. (Bu sayfayı "hata durumu yok" diye
+   * raporlamamın sebebi de buydu: 6 saniyede bakıp yorumlamıştım.)
+   *
+   * Zaman aşımı DÜŞÜRÜLMEDİ: 30 saniye, meşru ama yavaş bir yüklemeyi
+   * kesmemek için gerekli. Değişen tek şey kullanıcının ne gördüğü.
+   */
+  const [yavas, setYavas] = useState(false);
+  useEffect(() => {
+    if (!loading) { setYavas(false); return undefined; }
+    const t = setTimeout(() => setYavas(true), 6000);
+    return () => clearTimeout(t);
+  }, [loading]);
+
   const loadChart = useCallback(async (symbol: string, range: string) => {
     setChartLoading(true);
     try {
@@ -696,7 +715,15 @@ export default function CommodityPricesPage() {
       {/* ===== Yahoo Finance Tab ===== */}
       {activeTab === 'yahoo' && (
         loading && !commodities.length ? (
-          <div className="loading"><div className="loading-spinner"></div><p>Emtia fiyatları yükleniyor...</p></div>
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>Emtia fiyatları yükleniyor…</p>
+            {yavas && (
+              <p style={{ fontSize: '0.82rem', opacity: .75, maxWidth: 380, margin: '6px auto 0' }}>
+                45 sembol borsadan tek tek çekiliyor; bu genelde 15–25 saniye sürüyor.
+              </p>
+            )}
+          </div>
         ) : error && !commodities.length ? (
         <div className="text-center py-12 text-red-400">
           <p className="text-lg">❌ {error}</p>
@@ -704,6 +731,55 @@ export default function CommodityPricesPage() {
         </div>
       ) : (
         <>
+          {/*
+            * ─── BAYAT VERİ UYARISI ───────────────────────────────────────────
+            * Yukarıdaki hata dalının koşulu `error && !commodities.length`:
+            * yani veri BİR KEZ geldikten sonra oluşan hatalar hiç
+            * gösterilmiyordu. Otomatik tazeleme 5 dakikada bir çalışıyor, yani
+            * kaynak susmaya başladığında ekranda canlı görünen ama saatler
+            * öncesine ait fiyatlar kalıyordu.
+            *
+            * Fiyat sayfasında bu sessizlik, boş sayfadan daha zararlı: boş
+            * sayfa "veri yok" der, bayat sayfa yanlış bir "şu an" iddiası
+            * kurar. Kullanıcı bu sayıya bakıp karar veriyor.
+            *
+            * Uyarı ENGELLEYİCİ DEĞİL: eldeki veri hâlâ değerli, üstünü
+            * kapatmak yanlış olurdu. Şerit hem sorunu hem verinin yaşını
+            * söylüyor ve yeniden denemeyi sunuyor.
+            */}
+          {error && (
+            <div
+              role="status"
+              className="mb-4 px-4 py-3 rounded-lg text-sm"
+              style={{
+                background: 'rgba(245, 158, 11, .12)',
+                border: '1px solid rgba(245, 158, 11, .35)',
+                color: 'var(--text-primary, #1d1d1f)',
+                display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10,
+              }}
+            >
+              <AlertTriangle size={16} aria-hidden="true" style={{ color: '#b45309', flexShrink: 0 }} />
+              <span>
+                <b>Fiyatlar güncellenemedi.</b>{' '}
+                Aşağıdaki değerler {lastUpdate ? <>son başarılı güncellemeye ({lastUpdate}) ait</> : 'önceki güncellemeye ait'};
+                şu anki piyasa durumunu göstermiyor olabilir.
+              </span>
+              <button
+                type="button"
+                onClick={loadPrices}
+                disabled={loading}
+                className="px-3 py-1 rounded-md"
+                style={{
+                  marginLeft: 'auto', border: '1px solid rgba(245,158,11,.5)',
+                  background: 'none', color: '#b45309', fontWeight: 600,
+                  cursor: loading ? 'wait' : 'pointer', whiteSpace: 'nowrap',
+                }}
+              >
+                {loading ? 'Deneniyor…' : 'Tekrar dene'}
+              </button>
+            </div>
+          )}
+
           {/* KPI Summary */}
           <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
             <div className="kpi-card">
