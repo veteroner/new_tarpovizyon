@@ -397,9 +397,34 @@ function AppContent() {
               * ilgili sekmeye taşınıyorlar.
               */}
             <Route path="/tarpovizyon/panel" element={<PanelKabugu />} />
-            {/* Vitrin listesinde: para duvarı açıksa da erişilebilir olmalı —
-                ödeme sayfası kapının arkasında kalırsa kimse ödeyemez. */}
-            <Route path="/tarpovizyon/abonelik" element={<AbonelikPage />} />
+            {/*
+              * Vitrin listesinde: para duvarı açıksa da erişilebilir olmalı —
+              * ödeme sayfası kapının arkasında kalırsa kimse ödeyemez.
+              *
+              * AMA MAĞAZA DERLEMESİNDE HAYIR. Sayfa fiyat gösteriyor ve iyzico
+              * ödeme formunu açıyor; App Store 3.1.1 uygulama içinde içerik
+              * açan satışı StoreKit'e bağlıyor, bu sayfanın uygulamada
+              * görünmesi tek başına ret sebebi.
+              *
+              * Karar BURADA, rota düzeyinde: sayfa lazy yükleniyor, yani
+              * yönlendirme sayfanın parçası hiç indirilmeden gerçekleşiyor.
+              * Sayfanın içine koymak, kancalardan önce koşullu bir `return`
+              * gerektirirdi (React kancalar kuralı) ya da parçayı boşuna
+              * indirirdi.
+              *
+              * Rotayı silmek de yanlış olurdu: aynı derleme webi de sunuyor ve
+              * orada bu sayfa gerekli. Bu yüzden karar derleme anında değil
+              * çalışma anında — `utils/surum.ts` ile aynı gerekçe.
+              *
+              * Hedef Hesap bölümü: uygulamada yapılabilecek şey satın almak
+              * değil, var olan abonelikle giriş yapmak.
+              */}
+            <Route
+              path="/tarpovizyon/abonelik"
+              element={isPlatform('capacitor')
+                ? <Navigate to="/m/settings" replace />
+                : <AbonelikPage />}
+            />
             <Route path="/tarpovizyon/veri-yukle" element={<Navigate to="/tarpovizyon/panel?sekme=veri" replace />} />
             <Route path="/tarpovizyon/veri-girisi" element={<Navigate to="/tarpovizyon/panel?sekme=sektor" replace />} />
 

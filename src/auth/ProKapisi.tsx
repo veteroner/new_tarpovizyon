@@ -4,6 +4,7 @@ import { Lock, Sparkles } from 'lucide-react';
 import { useOturum } from './useOturum';
 import { OturumGirisi } from './OturumGirisi';
 import { PARA_DUVARI_AKTIF, vitrinMi } from './kapiAyari';
+import { isPlatform } from '../mobile/utils/platform';
 import './giris.css';
 
 /**
@@ -77,9 +78,31 @@ function YukseltmeEkrani({ sonDurum }: { sonDurum: string }) {
           tamamı ücretsiz kalmaya devam ediyor.
         </p>
 
-        <Link className="giris-dugme" to="/tarpovizyon/abonelik" style={{ textDecoration: 'none' }}>
-          <Sparkles size={16} aria-hidden="true" /> Pro'ya geç
-        </Link>
+        {/*
+          * ─── MAĞAZA DERLEMESİNDE SATIN ALMA ÇAĞRISI YOK ───────────────────
+          * Burada koşulsuz bir "Pro'ya geç" düğmesi vardı ve `/tarpovizyon/
+          * abonelik`e gidiyordu — yani fiyatların ve ödeme akışının olduğu
+          * sayfaya. App Store 3.1.1 uygulama içinde içerik açan satışı
+          * StoreKit'e bağlıyor; iyzico'ya götüren bir düğme ret sebebi.
+          *
+          * Şimdilik zararsızdı çünkü bu ekran yalnız para duvarı açıkken
+          * çiziliyor ve duvar kapalı. Ama duvarın açıldığı gün uygulamada
+          * satın alma çağrısı görünür hale gelirdi — o yüzden duvardan ÖNCE
+          * kapatılıyor.
+          *
+          * Uygulamada eylem çağrısı değil DURUM cümlesi var: fiyat yok, düğme
+          * yok, dış bağlantı yok. Webde düğme aynen duruyor.
+          */}
+        {isPlatform('capacitor') ? (
+          <p className="giris-alt" style={{ margin: '4px 0 14px' }}>
+            Aboneliğiniz varsa <b>Ayarlar → Hesap</b> bölümünden giriş yaptığınızda
+            bu bölümler açılır.
+          </p>
+        ) : (
+          <Link className="giris-dugme" to="/tarpovizyon/abonelik" style={{ textDecoration: 'none' }}>
+            <Sparkles size={16} aria-hidden="true" /> Pro'ya geç
+          </Link>
+        )}
 
         <Link
           className="giris-geri"
