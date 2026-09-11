@@ -44,15 +44,15 @@ const useModDeposu = create<ModDeposu>((set) => ({
 export function useMod(): {
   /** Ekranda geçerli olan mod — yetki süzgecinden geçmiş. */
   mod: Mod;
-  /** Anahtar gösterilsin mi (yalnız yetkili kullanıcıya). */
-  anahtarGorunur: boolean;
+  /** Hesabın Pro hakkı var mı (deneme de sayılır). */
+  proErisimi: boolean;
   ayarla: (m: Mod) => void;
 } {
   const { tercih, ayarla } = useModDeposu();
   const { proErisimi } = useOturum();
   return {
     mod: etkinMod(tercih, proErisimi),
-    anahtarGorunur: proErisimi,
+    proErisimi,
     ayarla,
   };
 }

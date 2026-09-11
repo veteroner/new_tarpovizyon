@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { BASIC_MENU, visibleMenu, type MenuCategory, type MenuItem } from '../../components/nav/menu';
 import { basicAlanAdi } from '../../utils/surum';
 import { isPlatform } from '../utils/platform';
+import { useMod } from '../hooks/useMod';
 import { ara as aramaYap } from '../../components/nav/arama';
 import { useModelArama } from '../../components/nav/modelArama';
 import { MikrofonDugmesi } from '../../components/ses/MikrofonDugmesi';
@@ -52,7 +53,30 @@ export default function MobileExplorePage() {
    * Pro menüsü kapsamlı (Türkiye/Dünya); mobilde kapsam seçici olmadığı için
    * Türkiye alınıyor — mobil ana sayfa da Türkiye verisiyle açılıyor.
    */
-  const proGizli = isPlatform('capacitor') || basicAlanAdi();
+  /*
+   * ─── ÖLÇÜT: ALAN ADI + MOD, "YETKİ" DEĞİL ─────────────────────────────────
+   * Eski hali `isPlatform('capacitor') || basicAlanAdi()` idi: mağaza
+   * derlemesinde Pro tümüyle gizliydi, çünkü Pro'nun kupon koduyla geleceği
+   * varsayılıyordu. Abonelik kurulduktan sonra o gerekçe geçersiz.
+   *
+   * Ölçütü doğrudan "aboneliği var mı" yapmak CAZİP ama YANLIŞ olurdu: para
+   * duvarı şu an KAPALI (`PARA_DUVARI_AKTIF = false`), yani
+   * pro.tarpovizyon.com'a giren anonim ziyaretçi Pro'yu bugün görebiliyor ve
+   * kullanabiliyor. Menüyü yetkiye bağlamak, duvarı arayüz tarafından fiilen
+   * açmak olurdu — hem karar verilmemiş bir şeyi yapmak, hem de vitrin sayfası
+   * henüz yazılmadığı için tanıtım yolunu tümüyle kapatmak.
+   *
+   * Üç kural yan yana duruyor:
+   *   · `basicAlanAdi()` → www/apex'te Pro saklı. DEĞİŞMİYOR; yayındaki
+   *     Basic'in yerini Pro'nun almasına yol açan hata buydu.
+   *   · uygulamada → modu kullanıcı seçiyor. Yetkisi yoksa `etkinMod` zaten
+   *     'basic' döndürüyor, yani abonesi olmayan bugünküyle AYNI şeyi görüyor.
+   *   · webde yetkili kullanıcı → seçtiği mod uygulanıyor; yetkisiz ziyaretçi
+   *     bugünkü davranışı koruyor.
+   */
+  const { mod, proErisimi } = useMod();
+  const uygulama = isPlatform('capacitor');
+  const proGizli = basicAlanAdi() || (mod !== 'pro' && (uygulama || proErisimi));
   const menu: MenuCategory[] = useMemo(
     () => (proGizli ? BASIC_MENU : [...visibleMenu('turkey', true), ...BASIC_MENU]),
     [proGizli],

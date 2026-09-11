@@ -9,6 +9,7 @@ import { NavBar, ListGroup, ListRow, Segmented } from '../components/ui/IosList'
 import { SesSecici } from '../../components/ses/SesSecici';
 import { useOturum } from '../../auth/useOturum';
 import { useMod } from '../hooks/useMod';
+import { modAnahtariGorunur } from '../../auth/mod';
 
 /**
  * Ayarlar.
@@ -61,7 +62,8 @@ function abonelikMetni(durum: string, kalanGun: number | null): string {
 export default function MobileSettingsPage() {
   const navigate = useNavigate();
   const { durum, kullanici, abonelik, proErisimi, cikis } = useOturum();
-  const { mod, anahtarGorunur, ayarla: modAyarla } = useMod();
+  const { mod, proErisimi: modYetkisi, ayarla: modAyarla } = useMod();
+  const anahtarGorunur = modAnahtariGorunur(modYetkisi);
   const [surum, setSurum] = useState('2.0.0');
   const [yapi, setYapi] = useState('7');
 
