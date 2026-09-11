@@ -87,10 +87,30 @@ export async function benKimim(): Promise<Durum | null> {
   if (!jetonOku()) return null;
   try {
     return await cagir<Durum>('auth/ben');
-  } catch {
-    /* 401 → jeton ölmüş; saklamaya devam etmek her açılışta boş bir istek
-       demek olurdu. Sessizce temizleniyor. */
-    jetonYaz(null);
+  } catch (x) {
+    /*
+     * JETON YALNIZCA 401'DE SİLİNİR.
+     *
+     * Burada koşulsuz bir `catch` vardı ve her hatada jetonu siliyordu.
+     * Yorumu "401 → jeton ölmüş" diyordu ama kod ayrım yapmıyordu: ağ
+     * kesintisi, 5xx, CORS reddi — hepsi kullanıcıyı sessizce çıkarıyordu.
+     *
+     * Webde bu nadiren görünüyordu; mobilde ciddi. `benKimim()` HER AÇILIŞTA
+     * çalışıyor ve telefon sürekli bağlantı kaybediyor — kapsama alanı dışında
+     * uygulamayı açan kullanıcı hesabından atılır ve geri dönmek için yeni bir
+     * e-posta kodu istemek zorunda kalırdı. Kimlik bilgisini ağ koşullarına
+     * bağlamak yanlış.
+     *
+     * 401 dışında jeton KORUNUYOR. Bu açılışta `null` dönüyor, yani bağlam
+     * `girissiz` oluyor ve Pro erişimi verilmiyor — sağlayıcının belgelenmiş
+     * duruşu bu: karar verilemiyorsa güvenli taraf erişimi vermemek. Ama
+     * kimlik bilgisi YOK EDİLMİYOR; bağlantı gelince kendiliğinden düzeliyor.
+     *
+     * 403 de dışarıda: o "jeton ölmüş" değil "bu adresten kabul edilmiyor"
+     * demek (CORS/origin). Onda jetonu silmek, yapılandırma hatasını
+     * kullanıcının oturumuyla cezalandırmak olurdu.
+     */
+    if ((x as { http?: number }).http === 401) jetonYaz(null);
     return null;
   }
 }

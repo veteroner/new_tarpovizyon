@@ -5,9 +5,10 @@ import {
   User, Sparkles, LogOut,
 } from 'lucide-react';
 import { getAppInfo } from '../capacitor/app';
-import { NavBar, ListGroup, ListRow } from '../components/ui/IosList';
+import { NavBar, ListGroup, ListRow, Segmented } from '../components/ui/IosList';
 import { SesSecici } from '../../components/ses/SesSecici';
 import { useOturum } from '../../auth/useOturum';
+import { useMod } from '../hooks/useMod';
 
 /**
  * Ayarlar.
@@ -60,6 +61,7 @@ function abonelikMetni(durum: string, kalanGun: number | null): string {
 export default function MobileSettingsPage() {
   const navigate = useNavigate();
   const { durum, kullanici, abonelik, proErisimi, cikis } = useOturum();
+  const { mod, anahtarGorunur, ayarla: modAyarla } = useMod();
   const [surum, setSurum] = useState('2.0.0');
   const [yapi, setYapi] = useState('7');
 
@@ -149,6 +151,40 @@ export default function MobileSettingsPage() {
               showChevron={false}
             />
           </ListGroup>
+        )}
+
+        {/*
+          * Mod anahtarı — YALNIZCA yetkili kullanıcıya.
+          *
+          * Yetkisi olmayana göstermek, açılmayacak bir kapıyı göstermek olurdu:
+          * 'pro'yu seçse de `etkinMod` onu 'basic'e düşürür, yani anahtar
+          * hiçbir şey yapmıyor gibi görünürdü.
+          *
+          * Hesap grubunun HEMEN ALTINDA: hangi dünyayı gördüğü, aboneliğinin
+          * doğrudan sonucu. Ayarların başka bir yerinde durursa iki bilgi
+          * arasındaki bağ kopar.
+          */}
+        {anahtarGorunur && (
+          <ListGroup header="Görünüm">
+            <div style={{ padding: '10px 14px' }}>
+              <Segmented
+                label="Görünüm modu"
+                options={[
+                  { id: 'pro' as const, label: 'Pro' },
+                  { id: 'basic' as const, label: 'Ücretsiz' },
+                ]}
+                value={mod}
+                onChange={modAyarla}
+              />
+            </div>
+          </ListGroup>
+        )}
+        {anahtarGorunur && (
+          <p className="ios-footnote">
+            {mod === 'pro'
+              ? 'Keşfet listesinde Pro bölümleri de görünüyor.'
+              : 'Yalnızca ücretsiz bölümler listeleniyor. Aboneliğiniz etkin kalmaya devam ediyor.'}
+          </p>
         )}
 
         {/*
