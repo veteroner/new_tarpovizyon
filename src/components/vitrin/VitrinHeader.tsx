@@ -1,4 +1,5 @@
 import { GRUPLAR } from './vitrinGruplar';
+import { proSurumu } from '../../utils/surum';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X, TrendingUp, Sparkles } from 'lucide-react';
@@ -66,6 +67,28 @@ export function VitrinHeader({
             className="tv-logo h-7 w-auto"
           />
         </button>
+
+        {/*
+          * PRO ROZETİ — yalnız pro.tarpovizyon.com'da.
+          *
+          * Veri sayfaları kendi üst şeridinde "TarpoVizyon PRO" yazıyordu ama
+          * vitrin sayfaları (`/tarpovizyon/pro`, `/giris`, `/piyasa`,
+          * `/asistan`) yalnız logoyu gösteriyordu. Aynı alan adında gezen
+          * kullanıcı sayfadan sayfaya geçerken hangi sürümde olduğunu
+          * kaybediyordu.
+          *
+          * `proSurumu()` çalışma anında bakıyor: aynı derleme www'yi de
+          * sunuyor ve orada bu rozet ÇIKMAMALI.
+          */}
+        {proSurumu() && (
+          <span
+            className="shrink-0 rounded-full border border-[var(--tv-vurgu,#16a34a)]/35
+                       bg-[var(--tv-vurgu,#16a34a)]/10 px-2 py-0.5 text-[11px] font-bold
+                       tracking-wide text-[var(--tv-vurgu,#16a34a)]"
+          >
+            PRO
+          </span>
+        )}
 
         {merkez}
 
