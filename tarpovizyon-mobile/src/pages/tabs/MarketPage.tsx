@@ -15,7 +15,8 @@ import { formatMoney } from '../../services/api';
  */
 
 const API_BASE = 'https://dersbende.com';
-const API_KEY = 'dashboard_secret_key_2024';
+// Kullanılmayan eski kopya. Anahtar KALDIRILDI.
+const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? '';
 
 interface LiveMarket {
   name: string;

@@ -102,7 +102,8 @@ app.get('/api.php', async (req, res) => {
         const { action, api_key, sql } = req.query;
         
         // Validate API key
-        if (api_key !== 'dashboard_secret_key_2024') {
+        // Beklenen anahtar ortam değişkeninden; koda gömülü bırakmak depoya sır sokar.
+        if (!process.env.DASHBOARD_API_KEY || api_key !== process.env.DASHBOARD_API_KEY) {
             return res.status(401).json({ success: false, error: 'Invalid API key' });
         }
         

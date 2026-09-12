@@ -5,7 +5,8 @@
  * Fallback olarak lokal cevaplar sağlar.
  */
 
-const AI_API_URL = 'https://dersbende.com/api.php?action=ai_chat&api_key=dashboard_secret_key_2024';
+// Kullanılmayan eski kopya. Anahtar KALDIRILDI.
+const AI_API_URL = `https://dersbende.com/api.php?action=ai_chat&api_key=${(import.meta.env.VITE_API_KEY as string | undefined) ?? ''}`;
 const TIMEOUT = 30000;
 
 export interface AIResponse {

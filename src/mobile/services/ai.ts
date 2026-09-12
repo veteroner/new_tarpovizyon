@@ -4,7 +4,7 @@
  * ─── NEDEN YENİDEN YAZILDI ──────────────────────────────────────────────────
  * Eski hâlinde üç ayrı kopukluk vardı ve üçü birbirini gizliyordu:
  *
- *   1. Adres `dersbende.com/api.php?...&api_key=dashboard_secret_key_2024`
+ *   1. Adres `dersbende.com/api.php?...&api_key=<gizli>`
  *      idi — ÜÇÜNCÜ TARAF BİR SUNUCU ve ANAHTAR İSTEMCİ KODUNDA. Uygulama
  *      paketini açan herkes anahtarı okuyabiliyordu.
  *   2. İstek başarılı olsa bile yanıt ATILIYORDU: kod `data.answer` okuyordu,

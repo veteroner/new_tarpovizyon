@@ -1,4 +1,16 @@
-const API_KEY = 'dashboard_secret_key_2024';
+/*
+ * ANAHTAR KODA GÖMÜLÜ DEĞİL.
+ *
+ * Burada gerçek bir anahtar yazılıydı ve depoya bakan herkes görüyordu. O
+ * anahtar api.php'de serbest SQL açıyordu (action=execute → $pdo->exec).
+ * Artık ortam değişkeninden okunuyor; yoksa betik sessizce yanlış davranmak
+ * yerine DURUYOR.
+ */
+const API_KEY = process.env.API_KEY || '';
+if (!API_KEY) {
+  console.error('API_KEY ortam degiskeni gerekli (DASHBOARD_ADMIN_KEY degeri).');
+  process.exit(1);
+}
 const BASE = 'https://dersbende.com';
 
 async function q(sql) {

@@ -10,7 +10,8 @@ import axios from 'axios';
  */
 
 const API_BASE = 'https://dersbende.com';
-const API_KEY = 'dashboard_secret_key_2024';
+// Kullanılmayan eski kopya. Anahtar KALDIRILDI.
+const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? '';
 
 type Category = 'all' | 'Tahıllar' | 'Yağlı Tohumlar' | 'Tropikal' | 'Endüstriyel' | 'Hayvancılık' | 'Süt Ürünleri' | 'Enerji';
 
