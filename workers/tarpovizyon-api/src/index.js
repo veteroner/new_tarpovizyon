@@ -720,8 +720,30 @@ import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
 import { handlePanelGiris, handlePanelCikis, panelOturumuGecerli } from './panelGiris.js';
+import { emtiaTurunuCalistir } from './emtiaCek.js';
 
 export default {
+  /*
+   * ─── ZAMANLANMIŞ İŞ: EMTİA FİYATI TURU ────────────────────────────────────
+   * Fiyatlar istek anında Yahoo'dan çekiliyordu ve soğuk önbellekte sayfa
+   * 18,8 saniye bekliyordu (ölçüldü). Artık tur takvimle çalışıyor, `/api/piyasa`
+   * yalnız D1'den okuyor.
+   *
+   * Hata YUTULMUYOR ama yukarı da atılmıyor: bir turun düşmesi sonraki turu
+   * engellememeli ve eldeki fiyatlar D1'de zaten duruyor. Günlüğe yazmak,
+   * `wrangler tail` ile görülebilmesi için yeterli.
+   */
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => {
+      try {
+        const sonuc = await emtiaTurunuCalistir(env);
+        console.log(`[emtia] tur bitti — yazılan ${sonuc.yazilan}, hata ${sonuc.hata}`);
+      } catch (e) {
+        console.error('[emtia] tur başarısız:', e?.message ?? String(e));
+      }
+    })());
+  },
+
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const slug = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');

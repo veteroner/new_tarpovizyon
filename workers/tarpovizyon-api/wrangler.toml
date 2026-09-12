@@ -47,3 +47,13 @@ database_id = "86c5e73d-ad8a-45ec-b4e9-1c9c2b890709"
 binding = "DUNYA"
 database_name = "tarpovizyon-dunya"
 database_id = "e022515c-86ea-4f18-808a-0ea9ca3c79b3"
+
+# ─── Emtia fiyatı turu ──────────────────────────────────────────────────────
+# Fiyatlar istek anında çekiliyordu: 45 sembol tek tek Yahoo'dan alınıyor ve
+# soğuk önbellekte sayfa 18,8 saniye bekliyordu. Artık takvimle yazılıyor,
+# istemciler D1'den okuyor.
+#
+# Beş dakika: Yahoo verisi zaten 15 dakika gecikmeli yayımlıyor, daha sık
+# istemek tazelik kazandırmıyor ama hız sınırını (429 ölçüldü) zorluyor.
+[triggers]
+crons = ["*/5 * * * *"]

@@ -131,18 +131,65 @@ const anahtarYok = () => jsonYanit(
   JSON.stringify({ error: 'Kaynak anahtarı tanımlı değil (DERSBENDE_KEY)' }), 503,
 );
 
-/** `/api/piyasa` — tüm emtia fiyatları. */
-export function handlePiyasa(request, env, ctx) {
+/**
+ * `/api/piyasa` — tüm emtia fiyatları, D1'den.
+ *
+ * ─── ARTIK İSTEK ANINDA ÇEKİLMİYOR ──────────────────────────────────────────
+ * Bu uç kaynağa gidip 45 sembolü tek tek Yahoo'dan çektiriyordu; soğuk
+ * önbellekte sayfa 18,8 saniye bekliyordu (ölçüldü). Fiyatları zamanlanmış iş
+ * yazıyor (`emtiaCek.js`), burası yalnız okuyor — her ziyaretçi için
+ * milisaniye.
+ *
+ * Yanıt biçimi BİREBİR aynı bırakıldı (`success`/`commodities`/`updated`/
+ * `source` ve sembol alanları). Web ve mobil istemciler bu biçimi
+ * ayrıştırıyor; değiştirmek ikisini birden kırardı ve mağaza sürümü
+ * beklemek gerekirdi.
+ *
+ * `updated` artık VERİNİN yaşı: en son hangi turun yazdığı. Eskiden kaynağın
+ * kendi damgasıydı ve bir şey ters gittiğinde sabit kalıyordu.
+ */
+export async function handlePiyasa(request, env, ctx) {
   if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
-  const anahtar = env?.DERSBENDE_KEY;
-  if (!anahtar) return anahtarYok();
-  const url = new URL(request.url);
-  return kenardanVer(
-    `${url.origin}/__onbellek/piyasa`,
-    `${KAYNAK}?action=commodity_prices&api_key=${encodeURIComponent(anahtar)}`,
-    FIYAT_TTL_SN,
-    ctx,
-  );
+
+  const r = await env.DB.prepare(`
+    SELECT t.sembol, t.ad, t.kategori, t.birim,
+           f.fiyat, f.para_birimi, f.degisim, f.degisim_yuzde, f.borsa,
+           f.kaynak_zaman, f.guncelleme
+      FROM emtia_tanim t
+      LEFT JOIN emtia_fiyat f ON f.sembol = t.sembol
+     ORDER BY t.sira`).all();
+
+  const satirlar = r.results ?? [];
+  /* Fiyatı henüz yazılmamış sembol listeye GİRMİYOR: adı olan ama değeri
+     olmayan bir satır, ekranda boş bir kart olarak çizilirdi. */
+  const dolu = satirlar.filter((s) => s.fiyat != null);
+
+  const enYeni = dolu.reduce((m, s) => Math.max(m, Number(s.guncelleme ?? 0)), 0);
+  const govde = {
+    success: true,
+    commodities: dolu.map((s) => ({
+      symbol: s.sembol,
+      name: s.ad,
+      category: s.kategori,
+      unit: s.birim,
+      price: s.fiyat,
+      currency: s.para_birimi,
+      change: s.degisim,
+      changePct: s.degisim_yuzde,
+      exchange: s.borsa,
+      time: s.kaynak_zaman,
+    })),
+    source: 'Yahoo Finance v8 chart (D1)',
+    updated: enYeni ? new Date(enYeni * 1000).toISOString().replace('T', ' ').slice(0, 19) : null,
+  };
+
+  /*
+   * Kenar önbelleği KISA: D1 okuması zaten hızlı, uzun TTL yalnız tazeliği
+   * geciktirirdi. Yine de sıfır değil — aynı anda gelen isteklerin hepsi D1'e
+   * gitmesin.
+   */
+  void ctx;
+  return jsonYanit(JSON.stringify(govde), 200, { 'Cache-Control': 'public, max-age=60' });
 }
 
 /** `/api/piyasa/gecmis?sembol=ZW=F&aralik=6mo` — tarih serisi. */
