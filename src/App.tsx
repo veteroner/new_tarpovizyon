@@ -65,6 +65,7 @@ const LivestockStocksPage = lazy(() => import('./pages/LivestockStocksPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PanelKabugu = lazy(() => import('./pages/panel/PanelKabugu'));
 const AbonelikPage = lazy(() => import('./pages/AbonelikPage'));
+const ProVitrinPage = lazy(() => import('./pages/ProVitrinPage'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -143,7 +144,15 @@ function AppContent() {
    * Piyasa ve Asistan KENDİ başlıklarını (VitrinHeader) çiziyor; global
    * Header burada da çizilirse iki başlık üst üste biner.
    */
-  const isVitrinAraciPage = location.pathname.startsWith('/piyasa') || location.pathname === '/asistan';
+  /*
+   * `/tarpovizyon/pro` da burada: Pro vitrini kendi `VitrinHeader`'ını
+   * çiziyor. Listeye alınmazsa veri kabuğu da sarar ve iki başlık üst üste
+   * biner — bu projede bir kez yaşanmış bir hata (koyu TARPOL şeridi ile
+   * TarpoVizyon PRO şeridi aynı ekranda çizilmişti).
+   */
+  const isVitrinAraciPage = location.pathname.startsWith('/piyasa')
+    || location.pathname === '/asistan'
+    || location.pathname === '/tarpovizyon/pro';
 
   /*
    * ─── KABUK KARARI ROTA AĞACIYLA AYNI OLMALI ─────────────────────────────
@@ -242,6 +251,18 @@ function AppContent() {
           <Route path="/piyasa" element={<GirisEkrani masaustu={<PiyasaPage />} mobilYol="/m/market" />} />
           <Route path="/piyasa/:sembol" element={<PiyasaDetayPage />} />
           <Route path="/asistan" element={<GirisEkrani masaustu={<AsistanPage />} mobilYol="/m/ai" />} />
+          {/*
+            * Pro vitrini — VERİ KABUĞUNUN DIŞINDA.
+            *
+            * Sayfa kendi `VitrinHeader`'ını çiziyor. İlk denemede `/tarpovizyon/`
+            * rotalarının arasına konmuştu, yani `<Route element={<DataShell />}>`
+            * içine; sonuç ölçüldü — iki <header> üst üste (tarpo-topbar + vitrin
+            * başlığı) ve üç <main>. Piyasa ve Asistan da aynı sebeple burada.
+            *
+            * Para duvarı açıkken erişilebilir kalıyor (VITRIN_YOLLARI) ve yalnız
+            * ücretsiz uçlardan besleniyor, yani kapıdan bir şey sızmıyor.
+            */}
+          <Route path="/tarpovizyon/pro" element={<ProVitrinPage />} />
           
           {/*
             * Çiftçi araçları.

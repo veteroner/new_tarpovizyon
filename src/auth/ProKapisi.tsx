@@ -99,9 +99,19 @@ function YukseltmeEkrani({ sonDurum }: { sonDurum: string }) {
             bu bölümler açılır.
           </p>
         ) : (
-          <Link className="giris-dugme" to="/tarpovizyon/abonelik" style={{ textDecoration: 'none' }}>
-            <Sparkles size={16} aria-hidden="true" /> Pro'ya geç
-          </Link>
+          <>
+            <Link className="giris-dugme" to="/tarpovizyon/abonelik" style={{ textDecoration: 'none' }}>
+              <Sparkles size={16} aria-hidden="true" /> Pro'ya geç
+            </Link>
+            {/*
+              * Vitrine giden yol: kapıya çarpan kullanıcı fiyatı görmeden ne
+              * satın aldığını da göremiyordu. Vitrin yalnız ücretsiz uçlardan
+              * besleniyor, yani duvar açıkken de tam çiziliyor.
+              */}
+            <Link className="giris-geri" to="/tarpovizyon/pro" style={{ textDecoration: 'none' }}>
+              Pro'da neler var?
+            </Link>
+          </>
         )}
 
         <Link

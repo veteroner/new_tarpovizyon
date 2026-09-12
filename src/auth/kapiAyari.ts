@@ -48,6 +48,13 @@ export const PARA_DUVARI_AKTIF = false;
  */
 export const VITRIN_YOLLARI = [
   '/tarpovizyon/abonelik',
+  /*
+   * Pro vitrini. Duvar açıldığında Pro'nun tamamı kapanıyor ve satın alma
+   * kararı verilecek kanıt kalmıyordu; bu sayfa o boşluğu dolduruyor.
+   * Yalnız ücretsiz uçlardan besleniyor (106 ucun 69'u korumasız), o yüzden
+   * vitrinde tutmak kapıyı delmiyor.
+   */
+  '/tarpovizyon/pro',
 ];
 
 /**
