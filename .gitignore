@@ -58,3 +58,7 @@ teknova rasyon mobil/
 .tuik-bitkisel-onbellek/
 # TÜİK Veri Portalı indirmeleri (XLS + üretilen SQL) — türetilebilir, depoda durmamalı
 .tuik-indirme/
+
+# Wrangler yerel gizli değerleri — ASLA depoya girmemeli.
+.dev.vars
+.dev.vars.*

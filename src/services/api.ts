@@ -6,9 +6,26 @@ import { fetchAgg, num, type Row } from './d1';
 // netlify.toml'daki /api.php redirect'inden geçip kendi Netlify Function'ımıza
 // düşsün.
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-// api.php'nin uygulama anahtarı. Depoda sabit yazılıydı; ortam değişkeni
-// tanımlıysa o kullanılıyor. Kalan tek kullanım emtia fiyatları / AI sohbet.
-const API_KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? 'dashboard_secret_key_2024';
+
+/*
+ * Worker tabanı — emtia uçları buradan geçiyor.
+ *
+ * `d1.ts` ile AYNI varsayılan: iki ayrı adres tutmak, birini taşıyıp diğerini
+ * unutmanın kolay olduğu bir tekrar olurdu.
+ */
+const WORKER_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
+  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+
+/*
+ * ─── api.php ANAHTARI ARTIK İSTEMCİDE YOK ───────────────────────────────────
+ * Burada `API_KEY` sabiti vardı ve derlenmiş JS'e giriyordu — yani herkese
+ * açıktı. Ölçüldü: o anahtarla `api.php?action=execute` serbest SQL
+ * çalıştırıyor ($pdo->exec), yani UPDATE/DELETE/DROP dahil.
+ *
+ * Emtia uçları Worker'a taşındı; anahtar orada secret. Geriye kalan tek
+ * api.php kullanımı AI sohbet ve o da Netlify Function'a yönleniyor
+ * (netlify.toml), yani anahtar istemiyor.
+ */
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -177,7 +194,21 @@ export async function fetchCommodityPrices(): Promise<CommodityResult> {
     if (commodityCache && now - commodityCacheAt < COMMODITY_CACHE_MS) {
       return commodityCache;
     }
-    const url = `${API_BASE}/api.php?action=commodity_prices&api_key=${API_KEY}`;
+    /*
+     * ─── WORKER ÜZERİNDEN ─────────────────────────────────────────────────
+     * Eskiden `/api.php?...&api_key=${API_KEY}` doğrudan çağrılıyordu ve o
+     * anahtar herkese açık JS paketinde gidiyordu. Ölçüldü: aynı anahtar
+     * kaynak sistemde `action=execute` ile serbest SQL açıyor.
+     *
+     * Artık istek Worker'a gidiyor; anahtar orada secret olarak duruyor ve
+     * hiçbir tarayıcıya inmiyor. Mobil uygulama bu ucu zaten kullanıyordu —
+     * yeni bir yol açılmıyor, web de aynı yola geçiyor.
+     *
+     * Yanıt biçimi AYNI: Worker kaynağın gövdesini olduğu gibi geçiriyor,
+     * üstüne kenar önbelleği koyuyor. Bu yüzden aşağıdaki ayrıştırma
+     * değişmedi.
+     */
+    const url = `${WORKER_TABAN}/api/piyasa`;
     const response = await axios.get(url, { timeout: 30000 });
     const data = response.data as CommodityResult;
     if (data && data.success && data.commodities && data.commodities.length > 0) {
@@ -200,9 +231,18 @@ export interface ChartResult {
   error?: string;
 }
 
-export async function fetchCommodityChart(symbol: string, range = '1mo', interval = '1d'): Promise<ChartResult> {
+/*
+ * `interval` parametresi KALDIRILDI.
+ *
+ * Adımı artık Worker aralığa göre kendisi seçiyor (`ARALIK_ADIM`): günlük
+ * adımla `1d` aralığı tek nokta, `5y` aralığı 1250 nokta döndürüyordu —
+ * ikisi de kullanılamaz. Kararı tek yerde toplamak, istemcinin kaynağa
+ * denetlenmemiş bir değer geçirmesini de önlüyor.
+ */
+export async function fetchCommodityChart(symbol: string, range = '1mo'): Promise<ChartResult> {
   try {
-    const url = `${API_BASE}/api.php?action=commodity_chart&api_key=${API_KEY}&symbol=${encodeURIComponent(symbol)}&range=${range}&interval=${interval}`;
+    const url = `${WORKER_TABAN}/api/piyasa/gecmis`
+      + `?sembol=${encodeURIComponent(symbol)}&aralik=${encodeURIComponent(range)}`;
     const response = await axios.get(url, { timeout: 15000 });
     return response.data as ChartResult;
   } catch {
@@ -225,7 +265,16 @@ const CHART_JSON_HINT = '[Grafik gerekiyorsa cevabına ```chart-json {type,data,
 
 export async function fetchAIChat(message: string, chartHint = true): Promise<AIChatResult> {
   try {
-    const url = `${API_BASE}/api.php?action=ai_chat&api_key=${API_KEY}`;
+    /*
+     * `api_key` KALDIRILDI. Bu adres netlify.toml'da kendi Function'ımıza
+     * yönleniyor (`query = { action = "ai_chat" }`) ve o Function anahtarı hiç
+     * okumuyor — sağlayıcı anahtarları kendi env'inde. Yani parametre yalnızca
+     * gizli olması gereken bir değeri istemci paketine taşıyordu.
+     *
+     * Yönlendirme `action` üzerinden eşleştiği için parametreyi düşürmek
+     * eşleşmeyi bozmuyor.
+     */
+    const url = `${API_BASE}/api.php?action=ai_chat`;
     const payload = chartHint ? CHART_JSON_HINT + message : message;
     const response = await axios.post(url, { message: payload }, { timeout: 60000 });
     return response.data as AIChatResult;
