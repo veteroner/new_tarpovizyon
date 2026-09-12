@@ -17,24 +17,16 @@
  * Geçmiş serisi daha uzun saklanabilir: günlük kapanışlardan oluşuyor, gün
  * içinde yalnız son nokta oynuyor.
  *
- * ─── KAYNAK ANAHTARI ARTIK SECRET ───────────────────────────────────────────
- * `api_key` bir dönem istemci paketinde açıkta duruyordu, sonra buraya taşındı
- * ama KODA GÖMÜLÜ kaldı — yani depoya bakan herkes görüyordu. Ölçüldü: o
- * anahtar `api.php`'de `action=execute` ile serbest SQL açıyor
- * (`$pdo->exec($sql)`), yani UPDATE/DELETE/DROP dahil.
+ * ─── DERSBENDE BAĞIMLILIĞI KALKTI ───────────────────────────────────────────
+ * Bu dosya bir dönem `dersbende.com/api.php`'yi vekil olarak kullanıyordu ve
+ * onun anahtarını taşıyordu. İki uç da artık Cloudflare'de: fiyat listesi
+ * D1'den (cron yazıyor), tarih serisi doğrudan Yahoo'dan.
  *
- * Artık `env.DERSBENDE_KEY` secret'ından okunuyor. Kod tabanında değer yok.
- *
- * ─── İZOLASYON KURALI ───────────────────────────────────────────────────────
- * `api.php` duruyor (ileride gerekebilir) ama artık ona YALNIZCA bu Worker
- * erişiyor. Hiçbir tarayıcı ve hiçbir mağaza paketi anahtar taşımıyor; web ve
- * mobil istemciler bu uçları çağırıyor, kaynağı bilmiyorlar.
- *
- * Anahtar yoksa uç 503 dönüyor — anahtarsız istek `api.php`'den 401 alır ve
- * bu, "kaynak bozuk" gibi görünen anlamsız bir hataya dönüşürdü.
+ * Kazanç yalnız bağımsızlık değil. api.php'nin anahtarı, sürümü ya da ayakta
+ * olup olmadığı artık uygulamayı hiç etkilemiyor — `gecmis` ucu bugün tam
+ * olarak o yüzden 500 vermişti.
  */
 
-const KAYNAK = 'https://dersbende.com/api.php';
 
 /** Anlık fiyatlar: kaynak 15 dk gecikmeli, 10 dk saklamak tazeliği bozmuyor. */
 const FIYAT_TTL_SN = 600;
@@ -55,15 +47,13 @@ const GECMIS_TTL_SN = 1800;
  * istemciden almak yerine burada sabitlemek, kaynağa gidecek değerin
  * denetlenmiş kalmasını da sağlıyor.
  */
-const ARALIK_ADIM = {
-  '1d': '5m',
-  '5d': '30m',
-  '1mo': '1d',
-  '3mo': '1d',
-  '6mo': '1d',
-  '1y': '1wk',
-  '5y': '1wk',
-  max: '1mo',
+const ARALIK_GUN = {
+  '1mo': 31,
+  '3mo': 93,
+  '6mo': 186,
+  '1y': 366,
+  '5y': 1830,
+  max: 3660,
 };
 
 /*
@@ -83,53 +73,6 @@ const jsonYanit = (govde, durum, ekBaslik = {}) =>
     headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, ...ekBaslik },
   });
 
-/**
- * Kaynağa gidip yanıtı kenarda saklar.
- *
- * Önbellek anahtarı olarak İSTEĞİN KENDİSİ değil, sabit bir URL kullanılıyor:
- * istemci istekleri farklı başlıklar taşıyabiliyor ve her varyant ayrı bir
- * önbellek girdisi açardı — aynı veri için onlarca kopya.
- */
-async function kenardanVer(onbellekAnahtari, kaynakUrl, ttl, ctx) {
-  const onbellek = caches.default;
-  const anahtarIstek = new Request(onbellekAnahtari, { method: 'GET' });
-
-  const hazir = await onbellek.match(anahtarIstek);
-  if (hazir) {
-    const kopya = new Response(hazir.body, hazir);
-    kopya.headers.set('X-Onbellek', 'HIT');
-    Object.entries(CORS).forEach(([k, v]) => kopya.headers.set(k, v));
-    return kopya;
-  }
-
-  const kaynakYanit = await fetch(kaynakUrl, {
-    headers: { Accept: 'application/json' },
-    // Cloudflare'ın kendi fetch önbelleği: kaynağa gidişi de azaltıyor.
-    cf: { cacheTtl: ttl, cacheEverything: true },
-  });
-
-  const govde = await kaynakYanit.text();
-
-  /*
-   * Yalnızca BAŞARILI yanıt saklanıyor. Hatayı saklamak, kaynaktaki geçici
-   * bir arızayı TTL boyunca kalıcı hâle getirirdi.
-   */
-  if (!kaynakYanit.ok) {
-    return jsonYanit(govde, kaynakYanit.status);
-  }
-
-  const yanit = jsonYanit(govde, 200, {
-    'Cache-Control': `public, max-age=${ttl}`,
-    'X-Onbellek': 'MISS',
-  });
-  ctx?.waitUntil?.(onbellek.put(anahtarIstek, yanit.clone()));
-  return yanit;
-}
-
-/** Anahtar yoksa uç kapalı — sebebi açıkça söylüyor, 401'i taklit etmiyor. */
-const anahtarYok = () => jsonYanit(
-  JSON.stringify({ error: 'Kaynak anahtarı tanımlı değil (DERSBENDE_KEY)' }), 503,
-);
 
 /**
  * `/api/piyasa` — tüm emtia fiyatları, D1'den.
@@ -192,36 +135,52 @@ export async function handlePiyasa(request, env, ctx) {
   return jsonYanit(JSON.stringify(govde), 200, { 'Cache-Control': 'public, max-age=60' });
 }
 
-/** `/api/piyasa/gecmis?sembol=ZW=F&aralik=6mo` — tarih serisi. */
-export function handlePiyasaGecmis(request, env, ctx) {
+/**
+ * `/api/piyasa/gecmis?sembol=ZW=F&aralik=6mo` — tarih serisi, D1'den.
+ *
+ * ─── NEDEN İSTEK ANINDA YAHOO'YA GİDİLMİYOR ─────────────────────────────────
+ * Bu uç önce dersbende.com/api.php'yi vekil kullanıyordu, sonra doğrudan
+ * Yahoo'ya çevrildi. İkisi de tutmadı:
+ *
+ *   · api.php → bugün 500 verdi (bağlantı switch'ten önce kuruluyor, MySQL
+ *     kimliği eksikti) ve zaten bağımlılıktan kurtulmak istiyorduk.
+ *   · doğrudan Yahoo → Cloudflare çıkışına **429 Too Many Requests**. Ölçüldü:
+ *     20, 40 ve 60 saniye aralıklarla tek istek bile 429; aynı anda yerel
+ *     makineden 200. Sınır IP itibarına bağlı, beklemekle geçmiyor.
+ *
+ * Ama ZAMANLANMIŞ çekim çalışıyor — fiyat turu 45/45 yazmaya devam ediyor.
+ * Fark sıklıkta. O yüzden seri de D1'e alındı ve bu uç yalnız okuyor.
+ *
+ * ─── GÜN İÇİ ARALIKLAR YOK ──────────────────────────────────────────────────
+ * 1G ve 5G kaldırıldı: günlük kapanıştan 5 dakikalık grafik çıkmaz ve isteğe
+ * bağlı çağrı 429 alıyor. Çalışmayan bir düğme göstermek, hiç göstermemekten
+ * kötü.
+ */
+export async function handlePiyasaGecmis(request, env, ctx) {
   if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
-  const anahtar = env?.DERSBENDE_KEY;
-  if (!anahtar) return anahtarYok();
   const url = new URL(request.url);
   const sembol = url.searchParams.get('sembol') ?? '';
   const aralik = url.searchParams.get('aralik') ?? '6mo';
 
-  /*
-   * Girdi doğrulaması: bu değerler kaynağa giden URL'e giriyor. Serbest
-   * bırakmak, Worker'ı istenen her adrese istek atan açık bir vekile
-   * çevirirdi.
-   */
+  /* Girdi doğrulaması sorguya giriyor; serbest bırakmak sembol alanını
+     kullanıcı denetimli bir filtreye çevirirdi. */
   if (!sembol || sembol.length > 24 || !/^[A-Za-z0-9=^.\-]+$/.test(sembol)) {
     return jsonYanit(JSON.stringify({ error: 'Geçersiz sembol' }), 400);
   }
-  const adim = ARALIK_ADIM[aralik];
-  if (!adim) {
+  const gun = ARALIK_GUN[aralik];
+  if (!gun) {
     return jsonYanit(JSON.stringify({ error: 'Geçersiz aralık' }), 400);
   }
 
-  const onbellekAnahtari = `${url.origin}/__onbellek/piyasa-gecmis/${encodeURIComponent(sembol)}/${aralik}`;
-  const kaynak = `${KAYNAK}?action=commodity_chart&api_key=${encodeURIComponent(anahtar)}`
-    + `&symbol=${encodeURIComponent(sembol)}&range=${aralik}&interval=${adim}`;
+  const esik = Math.floor(Date.now() / 1000) - gun * 86400;
+  const r = await env.DB.prepare(
+    'SELECT t, c FROM emtia_gecmis WHERE sembol = ? AND t >= ? ORDER BY t',
+  ).bind(sembol, esik).all();
 
-  /*
-   * Gün içi aralıklar (1d/5d) daha KISA saklanıyor: 30 dakikalık bir önbellek,
-   * 5 dakikalık adımla çizilen grafiği anlamsız kılardı.
-   */
-  const ttl = (aralik === '1d' || aralik === '5d') ? 300 : GECMIS_TTL_SN;
-  return kenardanVer(onbellekAnahtari, kaynak, ttl, ctx);
+  void ctx;
+  return jsonYanit(
+    JSON.stringify({ success: true, symbol: sembol, range: aralik, data: r.results ?? [] }),
+    200,
+    { 'Cache-Control': `public, max-age=${GECMIS_TTL_SN}` },
+  );
 }

@@ -720,7 +720,7 @@ import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
 import { handlePanelGiris, handlePanelCikis, panelOturumuGecerli } from './panelGiris.js';
-import { emtiaTurunuCalistir } from './emtiaCek.js';
+import { emtiaTurunuCalistir, emtiaGecmisiCalistir } from './emtiaCek.js';
 
 export default {
   /*
@@ -735,9 +735,24 @@ export default {
    */
   async scheduled(event, env, ctx) {
     ctx.waitUntil((async () => {
+      /*
+       * İKİ AYRI TAKVİM, TEK GİRİŞ. Cloudflare bütün cron'ları aynı
+       * `scheduled` çağrısına gönderiyor; hangisinin tetiklediği
+       * `event.cron` ile ayrılıyor.
+       *
+       * Fiyat 5 dakikada bir, tarih serisi GÜNDE BİR: günlük kapanış günde bir
+       * değişiyor ve 45 sembol × 5 yıllık seri her beş dakikada bir çekilirse
+       * Yahoo'nun hız sınırına takılır — o sınırın gerçek olduğu ölçüldü (429).
+       */
+      const gunluk = event?.cron === '20 3 * * *';
       try {
-        const sonuc = await emtiaTurunuCalistir(env);
-        console.log(`[emtia] tur bitti — yazılan ${sonuc.yazilan}, hata ${sonuc.hata}`);
+        if (gunluk) {
+          const g = await emtiaGecmisiCalistir(env);
+          console.log(`[emtia-gecmis] ${g.sembol} sembol, ${g.nokta} nokta, hata ${g.hata ?? 0}`);
+        } else {
+          const sonuc = await emtiaTurunuCalistir(env);
+          console.log(`[emtia] tur bitti — yazılan ${sonuc.yazilan}, hata ${sonuc.hata}`);
+        }
       } catch (e) {
         console.error('[emtia] tur başarısız:', e?.message ?? String(e));
       }

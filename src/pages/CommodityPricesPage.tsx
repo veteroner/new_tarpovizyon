@@ -60,9 +60,17 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Döviz': 'from-teal-500 to-cyan-600',
 };
 
+/*
+ * ─── GÜN İÇİ ARALIKLAR (1G / 5G) KALDIRILDI ─────────────────────────────────
+ * Seri artık D1'den geliyor ve orada GÜNLÜK kapanış duruyor; günlük veriden
+ * 5 dakikalık grafik çıkmaz. İsteğe bağlı Yahoo çağrısı ise Cloudflare
+ * çıkışından 429 alıyor (ölçüldü: 20/40/60 sn arayla tek istek bile 429,
+ * aynı anda yerelden 200 — sınır IP itibarına bağlı).
+ *
+ * Çalışmayan bir düğme bırakmak, hiç göstermemekten kötü: kullanıcı tıklar,
+ * grafik boş gelir ve sebebini anlamaz.
+ */
 const RANGE_OPTIONS = [
-  { value: '1d', label: '1G' },
-  { value: '5d', label: '5G' },
   { value: '1mo', label: '1A' },
   { value: '3mo', label: '3A' },
   { value: '6mo', label: '6A' },

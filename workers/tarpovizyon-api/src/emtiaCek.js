@@ -137,3 +137,75 @@ export async function emtiaTurunuCalistir(env) {
   }
   return { yazilan: basarili.length, hata: hatalar.length };
 }
+
+/**
+ * Tarih serisini çeker ve `emtia_gecmis`'e yazar.
+ *
+ * ─── NEDEN BU DA TAKVİME BAĞLANDI ───────────────────────────────────────────
+ * `/api/piyasa/gecmis` bir dönem isteğe bağlı olarak Yahoo'ya gidiyordu.
+ * Ölçüldü: Yahoo Cloudflare çıkışına **429 Too Many Requests** veriyor —
+ * aynı anda benim makinemden 200 dönerken. Yani sınır IP itibarına bağlı.
+ *
+ * Ama ZAMANLANMIŞ çekim çalışıyor: fiyat turu beşerli gruplarla gidiyor ve
+ * 45/45 yazmaya devam ediyor. Fark sıklıkta — kullanıcı tıkladıkça gitmek
+ * sınırı deviriyor, takvimle seyrek gitmek devirmiyor.
+ *
+ * O yüzden seri de D1'e alındı. Günlük kapanışlar zaten günde bir değişiyor;
+ * tıklama anında çekmenin hiçbir tazelik kazancı yoktu.
+ *
+ * ─── NEDEN 5 YIL, HAFTALIK DEĞİL GÜNLÜK ─────────────────────────────────────
+ * Tek bir seri saklanıyor ve tüm aralıklar ondan DİLİMLENİYOR. Haftalık adım
+ * saklasaydık 1 aylık grafik dört noktaya düşerdi. Günlük adımda 5 yıl ≈ 1250
+ * nokta × 45 sembol ≈ 56 bin satır — D1 için küçük.
+ */
+export async function emtiaGecmisiCalistir(env) {
+  const tanimlar = await env.DB.prepare('SELECT sembol FROM emtia_tanim ORDER BY sira').all();
+  const semboller = (tanimlar.results ?? []).map((s) => s.sembol);
+  if (!semboller.length) return { sembol: 0, nokta: 0 };
+
+  let yazilanSembol = 0;
+  let yazilanNokta = 0;
+  const hatalar = [];
+
+  for (let i = 0; i < semboller.length; i += GRUP) {
+    const dilim = semboller.slice(i, i + GRUP);
+    const sonuclar = await Promise.allSettled(dilim.map(async (sembol) => {
+      const url = `${YAHOO}${encodeURIComponent(sembol)}?interval=1d&range=5y`;
+      const y = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
+      if (!y.ok) throw new Error(`HTTP ${y.status}`);
+      const j = await y.json();
+      const r = j?.chart?.result?.[0];
+      const zamanlar = r?.timestamp ?? [];
+      const kapanislar = r?.indicators?.quote?.[0]?.close ?? [];
+      const noktalar = [];
+      for (let k = 0; k < zamanlar.length; k++) {
+        const c = kapanislar[k];
+        if (c != null) noktalar.push({ t: zamanlar[k], c: Math.round(c * 100) / 100 });
+      }
+      if (!noktalar.length) throw new Error('nokta yok');
+      return { sembol, noktalar };
+    }));
+
+    for (const s of sonuclar) {
+      if (s.status !== 'fulfilled') { hatalar.push(String(s.reason?.message ?? s.reason).slice(0, 40)); continue; }
+      const { sembol, noktalar } = s.value;
+      /*
+       * D1 batch'i parçalara bölünüyor: 1250 ifadeyi tek batch'te göndermek
+       * sınırları zorluyor. Eski noktalar SİLİNMİYOR, üzerine yazılıyor —
+       * kaynak geçmişi revize ederse düzeltme kendiliğinden geliyor.
+       */
+      const PARCA = 200;
+      for (let k = 0; k < noktalar.length; k += PARCA) {
+        await env.DB.batch(noktalar.slice(k, k + PARCA).map((n) => env.DB.prepare(
+          `INSERT INTO emtia_gecmis (sembol, t, c) VALUES (?, ?, ?)
+           ON CONFLICT(sembol, t) DO UPDATE SET c = excluded.c`,
+        ).bind(sembol, n.t, n.c)));
+      }
+      yazilanSembol += 1;
+      yazilanNokta += noktalar.length;
+    }
+  }
+
+  if (hatalar.length) console.warn(`[emtia-gecmis] ${hatalar.length} sembol alınamadı:`, hatalar.slice(0, 4).join(', '));
+  return { sembol: yazilanSembol, nokta: yazilanNokta, hata: hatalar.length };
+}

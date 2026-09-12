@@ -56,4 +56,5 @@ database_id = "e022515c-86ea-4f18-808a-0ea9ca3c79b3"
 # Beş dakika: Yahoo verisi zaten 15 dakika gecikmeli yayımlıyor, daha sık
 # istemek tazelik kazandırmıyor ama hız sınırını (429 ölçüldü) zorluyor.
 [triggers]
-crons = ["*/5 * * * *"]
+# Fiyat her 5 dk; tarih serisi günde bir (gece 03:20 UTC).
+crons = ["*/5 * * * *", "20 3 * * *"]
