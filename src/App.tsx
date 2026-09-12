@@ -66,6 +66,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PanelKabugu = lazy(() => import('./pages/panel/PanelKabugu'));
 const AbonelikPage = lazy(() => import('./pages/AbonelikPage'));
 const ProVitrinPage = lazy(() => import('./pages/ProVitrinPage'));
+const WebGirisPage = lazy(() => import('./pages/WebGirisPage'));
 const AgriculturalEmploymentPage = lazy(() => import('./pages/AgriculturalEmploymentPage'));
 const FertilizerPage = lazy(() => import('./pages/FertilizerPage'));
 const PesticidePage = lazy(() => import('./pages/PesticidePage'));
@@ -152,7 +153,8 @@ function AppContent() {
    */
   const isVitrinAraciPage = location.pathname.startsWith('/piyasa')
     || location.pathname === '/asistan'
-    || location.pathname === '/tarpovizyon/pro';
+    || location.pathname === '/tarpovizyon/pro'
+    || location.pathname === '/giris';
 
   /*
    * ─── KABUK KARARI ROTA AĞACIYLA AYNI OLMALI ─────────────────────────────
@@ -263,6 +265,14 @@ function AppContent() {
             * ücretsiz uçlardan besleniyor, yani kapıdan bir şey sızmıyor.
             */}
           <Route path="/tarpovizyon/pro" element={<ProVitrinPage />} />
+          {/*
+            * Web giriş ekranı — kabuk dışında ve `/tarpovizyon/` ALTINDA DEĞİL.
+            * Duvar `/tarpovizyon/*` yollarını kapatıyor; girişi oraya koymak
+            * kapı döngüsü riski taşırdı (kapı girişi göstermek ister, giriş
+            * kapının arkasında kalır). Üst düzey yol bu soruyu ortadan
+            * kaldırıyor.
+            */}
+          <Route path="/giris" element={<WebGirisPage />} />
           
           {/*
             * Çiftçi araçları.

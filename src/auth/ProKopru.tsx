@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Sparkles, User } from 'lucide-react';
 import { useOturum } from './useOturum';
 import { basicAlanAdi, PRO_ALAN_ADI } from '../utils/surum';
@@ -82,16 +82,20 @@ export function ProKopru() {
  * Bu düğme o zinciri kapatıyor: www'de giriş yapılabiliyor, giriş yapıldıktan
  * sonra köprü kendiliğinden çıkıyor.
  *
- * ─── BİLİNEN PÜRÜZ ──────────────────────────────────────────────────────────
- * `/m/giris` mobil kabuğun içinde: masaüstünde giriş kartı düzgün çiziliyor
- * (ölçüldü, 380px) ama altında telefon sekme çubuğu görünüyor. İşlevsel,
- * kozmetik olarak yersiz. Web'e özel bir giriş rotası açmak daha doğru olurdu
- * ama `/tarpovizyon/` altına koymak para duvarı açıldığında kapı-döngüsü
- * riski taşıyor (giriş sayfasının kendisi kapının arkasında kalır), o yüzden
- * ayrı bir karar olarak bırakıldı.
+ * ─── HEDEF `/giris`, `/m/giris` DEĞİL ───────────────────────────────────────
+ * Önce `/m/giris`e gidiyordu ve o rota MOBİL kabuğun içinde: masaüstünde
+ * giriş kartı düzgün çiziliyordu ama altında telefon sekme çubuğu duruyordu.
+ *
+ * Web'e kendi rotası verildi. `/tarpovizyon/` ALTINA konmadı: duvar o yolları
+ * kapatıyor ve girişi oraya koymak kapı döngüsü riski demek — kapı giriş
+ * ekranını göstermek ister, giriş sayfası kapının arkasında kalır.
+ *
+ * Bulunduğu sayfa `?donus=` ile taşınıyor: giriş bittikten sonra kullanıcıyı
+ * baktığı yere geri göndermek, onu ana sayfaya atmaktan iyi.
  */
 export function WebGirisDugmesi() {
   const { durum } = useOturum();
+  const { pathname, search } = useLocation();
 
   if (!webBasicAlaninda()) return null;
   /* Girişliyken gösterilmiyor: yetkiliyse `ProKopru` çıkıyor, yetkisizse
@@ -100,7 +104,11 @@ export function WebGirisDugmesi() {
   if (durum !== 'girissiz') return null;
 
   return (
-    <Link className="pro-kopru pro-kopru--sade" to="/m/giris" aria-label="Hesabınıza giriş yapın">
+    <Link
+      className="pro-kopru pro-kopru--sade"
+      to={`/giris?donus=${encodeURIComponent(pathname + search)}`}
+      aria-label="Hesabınıza giriş yapın"
+    >
       <User size={14} aria-hidden="true" />
       <span>Giriş</span>
     </Link>
