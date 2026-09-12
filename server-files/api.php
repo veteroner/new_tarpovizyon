@@ -400,27 +400,81 @@ switch($action) {
         echo json_encode($stats);
         break;
     
+    /*
+     * ─── 'execute' KALDIRILDI ────────────────────────────────────────────────
+     * Bu uç SELECT olmayan HER ŞEYİ $pdo->exec($sql) ile çalıştırıyordu:
+     * DROP, TRUNCATE, ALTER, DELETE — hepsi. Tek bir anahtarın sızması
+     * veritabanının tamamını kaybetmek demekti.
+     *
+     * Ölçüldü: tek kullanıcısı scripts/prophet_forecaster.py ve onun ihtiyacı
+     * serbest SQL DEĞİL, tek bir tabloda üç işlem: kur, veri_tipi'ne göre
+     * temizle, satır ekle. Aşağıdaki dar uçlar tam olarak onu yapıyor.
+     *
+     * Geriye dönük çağrı gelirse sessizce başarısız olmasın diye açık hata
+     * dönüyor — betik "işlem oldu" sanıp veriyi eksik bırakmasın.
+     */
     case 'execute':
-        $sql = $_GET['sql'] ?? $_POST['sql'] ?? '';
-        
-        if (empty($sql)) {
-            echo json_encode(['error' => 'SQL query required']);
-            exit;
-        }
-        
-        if (preg_match('/^\s*SELECT/i', $sql)) {
-            echo json_encode(['error' => 'Use query action for SELECT']);
-            exit;
-        }
-        
+        http_response_code(410);
+        echo json_encode([
+            'error' => "'execute' kaldırıldı. Dar uçları kullanın: tahmin_kur, tahmin_temizle, batch_insert.",
+        ]);
+        break;
+
+    /*
+     * Tahmin tablosunu kurar. DDL KODDA SABİT — dışarıdan şema alınmıyor.
+     * Eskiden bu, prophet'in gönderdiği serbest CREATE ifadesiyle yapılıyordu.
+     */
+    case 'tahmin_kur':
         try {
-            $affected = $pdo->exec($sql);
-            echo json_encode(['success' => true, 'affected_rows' => $affected]);
+            $pdo->exec("CREATE TABLE IF NOT EXISTS fao_tahmin_sonuclari (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                urunad VARCHAR(255) NOT NULL,
+                ulkead VARCHAR(255) NOT NULL,
+                veri_tipi VARCHAR(50) NOT NULL,
+                tahmin_yil INT NOT NULL,
+                tahmin_deger DOUBLE NOT NULL,
+                alt_sinir DOUBLE NOT NULL,
+                ust_sinir DOUBLE NOT NULL,
+                trend VARCHAR(30) NOT NULL,
+                r2_cv FLOAT DEFAULT NULL,
+                mae_cv FLOAT DEFAULT NULL,
+                mape_cv FLOAT DEFAULT NULL,
+                model_tarihi DATETIME NOT NULL,
+                INDEX idx_ulke_urun (ulkead, urunad),
+                INDEX idx_veri_tipi (veri_tipi),
+                INDEX idx_tahmin_yil (tahmin_yil)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+            echo json_encode(['success' => true]);
         } catch(PDOException $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
         break;
-    
+
+    /*
+     * Bir veri tipinin eski tahminlerini siler. Tablo adı sabit, değer hazır
+     * ifadeyle bağlanıyor.
+     *
+     * Eski hali prophet'te şöyleydi:
+     *   DELETE FROM fao_tahmin_sonuclari WHERE veri_tipi = '{veri_tipi}'
+     * yani değer doğrudan SQL'e yazılıyordu. Değer kendi kodundan geliyordu
+     * ama kalıp yanlıştı; burada bağlanarak kapanıyor.
+     */
+    case 'tahmin_temizle':
+        $veriTipi = $_POST['veri_tipi'] ?? $_GET['veri_tipi'] ?? '';
+        if ($veriTipi === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'veri_tipi gerekli']);
+            break;
+        }
+        try {
+            $stmt = $pdo->prepare('DELETE FROM fao_tahmin_sonuclari WHERE veri_tipi = ?');
+            $stmt->execute([$veriTipi]);
+            echo json_encode(['success' => true, 'affected_rows' => $stmt->rowCount()]);
+        } catch(PDOException $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+
     case 'batch_insert':
         $table = $_POST['table'] ?? '';
         $dataJson = $_POST['data'] ?? '';
@@ -435,13 +489,47 @@ switch($action) {
             echo json_encode(['error' => 'Invalid JSON data']);
             exit;
         }
-        
+
+        /*
+         * ─── TABLO VE SÜTUN ADLARI BEYAZ LİSTEDEN ────────────────────────────
+         * Değerler hazır ifadeyle bağlanıyordu (doğru) ama tablo ve sütun
+         * adları doğrudan ters tırnak arasına yazılıyordu. İçinde ters tırnak
+         * geçen bir ad o tırnaktan kaçıp SQL'e karışabilirdi — hazır ifade
+         * bunu engellemiyor, çünkü kaçan kısım sorgunun kendisi.
+         *
+         * Tek gerçek kullanıcı prophet ve tek hedefi fao_tahmin_sonuclari.
+         * Yeni bir tablo gerekirse buraya AÇIKÇA eklenir; bu, "hangi tablolara
+         * dışarıdan yazılabiliyor" sorusunun tek ve okunabilir cevabı olmasını
+         * sağlıyor.
+         */
+        $IZINLI_TABLOLAR = [
+            'fao_tahmin_sonuclari' => [
+                'urunad', 'ulkead', 'veri_tipi', 'tahmin_yil', 'tahmin_deger',
+                'alt_sinir', 'ust_sinir', 'trend', 'r2_cv', 'mae_cv', 'mape_cv',
+                'model_tarihi',
+            ],
+        ];
+
+        if (!isset($IZINLI_TABLOLAR[$table])) {
+            http_response_code(403);
+            echo json_encode(['error' => "Bu tabloya toplu ekleme kapalı: {$table}"]);
+            break;
+        }
+        $izinliSutunlar = $IZINLI_TABLOLAR[$table];
+
         try {
             $pdo->beginTransaction();
             $inserted = 0;
-            
+
             foreach ($data as $row) {
                 $columns = array_keys($row);
+                $bilinmeyen = array_diff($columns, $izinliSutunlar);
+                if ($bilinmeyen) {
+                    $pdo->rollBack();
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Bilinmeyen sütun: ' . implode(', ', $bilinmeyen)]);
+                    break 2;
+                }
                 $placeholders = array_fill(0, count($columns), '?');
                 $sql = "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES (" . implode(', ', $placeholders) . ")";
                 $stmt = $pdo->prepare($sql);

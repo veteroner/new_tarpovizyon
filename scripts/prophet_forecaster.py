@@ -85,17 +85,35 @@ def api_query(sql: str) -> list:
     return data.get("data", [])
 
 
-def api_execute(sql: str):
-    """API üzerinden DDL/DML çalıştır (CREATE, DELETE, vb.)."""
+def api_tahmin_kur():
+    """Tahmin tablosunu kurar.
+
+    Eskiden bu, `action=execute` ile serbest bir CREATE TABLE ifadesi
+    gonderiyordu. O uc SELECT olmayan her seyi calistiriyordu (DROP dahil) ve
+    anahtari sizan biri veritabanini silebilirdi. Sema artik sunucuda sabit.
+    """
+    r = requests.post(f"{API_URL}?action=tahmin_kur&api_key={API_KEY}", timeout=60)
+    r.raise_for_status()
+    data = r.json()
+    if "error" in data:
+        raise RuntimeError(f"API tahmin_kur hatasi: {data['error']}")
+    return data
+
+
+def api_tahmin_temizle(veri_tipi: str):
+    """Bir veri tipinin eski tahminlerini siler.
+
+    Deger artik SQL'e yazilmiyor, sunucuda hazir ifadeyle baglaniyor.
+    """
     r = requests.post(
-        f"{API_URL}?action=execute&api_key={API_KEY}",
-        data={"sql": sql},
+        f"{API_URL}?action=tahmin_temizle&api_key={API_KEY}",
+        data={"veri_tipi": veri_tipi},
         timeout=60,
     )
     r.raise_for_status()
     data = r.json()
     if "error" in data:
-        raise RuntimeError(f"API execute hatası: {data['error']}")
+        raise RuntimeError(f"API tahmin_temizle hatasi: {data['error']}")
     return data
 
 
@@ -115,31 +133,12 @@ def api_batch_insert(table: str, rows: list):
 
 def create_results_table():
     """fao_tahmin_sonuclari tablosunu oluştur (yoksa)."""
-    api_execute("""
-        CREATE TABLE IF NOT EXISTS fao_tahmin_sonuclari (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            urunad VARCHAR(255) NOT NULL,
-            ulkead VARCHAR(255) NOT NULL,
-            veri_tipi VARCHAR(50) NOT NULL COMMENT 'birincil / islenmis / canlihayvan',
-            tahmin_yil INT NOT NULL,
-            tahmin_deger DOUBLE NOT NULL,
-            alt_sinir DOUBLE NOT NULL COMMENT '80% CI lower',
-            ust_sinir DOUBLE NOT NULL COMMENT '80% CI upper',
-            trend VARCHAR(30) NOT NULL COMMENT 'UP / DOWN / STABLE / ACCELERATING',
-            r2_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated R2',
-            mae_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated MAE',
-            mape_cv FLOAT DEFAULT NULL COMMENT 'Cross-validated MAPE',
-            model_tarihi DATETIME NOT NULL,
-            INDEX idx_ulke_urun (ulkead, urunad),
-            INDEX idx_veri_tipi (veri_tipi),
-            INDEX idx_tahmin_yil (tahmin_yil)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
-    """)
+    api_tahmin_kur()
 
 
 def clear_old_results(veri_tipi: str):
     """Eski sonuçları temizle (yeni batch öncesi)."""
-    api_execute(f"DELETE FROM fao_tahmin_sonuclari WHERE veri_tipi = '{veri_tipi}'")
+    api_tahmin_temizle(veri_tipi)
 
 
 def fetch_series(table: str, veri_tipi: str) -> pd.DataFrame:
