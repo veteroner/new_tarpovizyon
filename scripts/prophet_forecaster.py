@@ -12,7 +12,7 @@ Kullanım:
 
 Parametreler (ortam değişkenleri):
   API_URL     (varsayılan: https://dersbende.com/api.php)
-  API_KEY     (varsayılan: REDACTED_DASHBOARD_KEY)
+  API_KEY     (zorunlu — DASHBOARD_ADMIN_KEY)
   MIN_TON     (varsayılan: 1000)   — minimum toplam üretim filtresi
   HORIZON     (varsayılan: 3)      — kaç yıl ileri tahmin
 """
@@ -37,7 +37,13 @@ logging.getLogger("prophet").setLevel(logging.WARNING)
 
 # ─── Yapılandırma ─────────────────────────────────────────────────────────────
 API_URL = os.environ.get("API_URL", "https://dersbende.com/api.php")
-API_KEY = os.environ.get("API_KEY", "REDACTED_DASHBOARD_KEY")
+API_KEY = os.environ.get("API_KEY", "")
+if not API_KEY:
+    # Gömülü varsayılan KALDIRILDI. Eski hali depoda duran gerçek bir anahtardı
+    # ve o anahtar `action=execute` ile serbest SQL açıyordu; depoya bakan
+    # herkes veritabanına yazabiliyordu. Artık anahtar dışarıdan geliyor ve
+    # yokluğunda betik sessizce yanlış davranmak yerine DURUYOR.
+    sys.exit("API_KEY ortam degiskeni gerekli (DASHBOARD_ADMIN_KEY degeri).")
 MIN_TON = int(os.environ.get("MIN_TON", "1000"))
 HORIZON = int(os.environ.get("HORIZON", "3"))
 BATCH_SIZE = 500  # API batch insert limiti

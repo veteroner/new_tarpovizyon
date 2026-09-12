@@ -13,12 +13,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// API Key kontrolü
+// ─── YETKİ İKİ KADEMELİ ─────────────────────────────────────────────────────
+//
+// SORUN: tek bir paylaşılan anahtar hem tarayıcıya iniyor hem de serbest SQL
+// açıyordu. `DASHBOARD_API_KEY` istemci paketinde (herkese açık JS) taşınıyor;
+// aynı anahtar `action=execute` ile `$pdo->exec($sql)` çalıştırıyordu. Yani
+// siteyi açan herkes veritabanında UPDATE/DELETE/DROP yapabiliyordu.
+// Ölçüldü: `?action=query&api_key=<paketteki anahtar>&sql=SELECT 1` → 200.
+//
+// ÇÖZÜM: anahtar başına YETKİ. Tarayıcıya inen anahtar yalnız okuma uçlarını
+// açıyor; SQL ve yazma uçları ayrı bir anahtar istiyor ve o anahtar hiçbir
+// tarayıcı paketine girmiyor (yalnız sunucu tarafı betikler ve Worker).
+//
+// Beyaz liste, kara liste DEĞİL: yeni bir action eklendiğinde varsayılan
+// davranış YÖNETİCİ yetkisi istemek olmalı. Kara listede unutulan bir action
+// kendiliğinden herkese açılırdı.
+$ADMIN_KEY = getenv('DASHBOARD_ADMIN_KEY') ?: '';
+
+// İstemcinin (tarayıcı/mobil) çağırdığı, veritabanına YAZMAYAN uçlar.
+$PUBLIC_ACTIONS = [
+    'commodity_prices', 'commodity_chart', 'get_announcements',
+    'egg_prices', 'forecasts', 'forecast_stats', 'tts', 'ai_chat',
+];
+
 $headers = getallheaders();
 $providedKey = $headers['X-API-Key'] ?? $_GET['api_key'] ?? '';
+// Varsayılan aşağıdaki dağıtıcıyla AYNI olmalı ($action = ... ?? 'tables').
+// Ayrı varsayılan kullanmak, yetki kararının dağıtıcının çalıştıracağı
+// action'dan farklı bir değere bakması demek olurdu.
+// Not: parametresiz istek 'tables' sayılıyor ve o yönetici yetkisi istiyor —
+// eskiden genel anahtarla tüm tablo listesi alınabiliyordu.
+$requestedAction = $_GET['action'] ?? $_POST['action'] ?? 'tables';
 
-if ($providedKey !== $API_KEY) {
+$isPublicAction = in_array($requestedAction, $PUBLIC_ACTIONS, true);
+// Yönetici anahtarı her şeyi açıyor; genel anahtar yalnız beyaz listeyi.
+$isAdmin  = $ADMIN_KEY !== '' && hash_equals($ADMIN_KEY, $providedKey);
+$isPublic = $API_KEY !== '' && hash_equals($API_KEY, $providedKey) && $isPublicAction;
+
+if (!$isAdmin && !$isPublic) {
     http_response_code(401);
+    // Sebep AYRIMI YAPILMIYOR: "anahtar doğru ama bu uç için yetersiz" demek,
+    // saldırganın elindeki anahtarın geçerli olduğunu doğrulamak olurdu.
     echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
