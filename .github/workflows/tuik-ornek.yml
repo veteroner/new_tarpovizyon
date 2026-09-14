@@ -1,0 +1,32 @@
+name: TÜİK veri seti örnekle
+
+# "Bu akışın boyutları ve kodları ne?" sorusunu DSD ayrıştırmadan, verinin
+# kendisine bakarak cevaplıyor. Yalnız elle çalışıyor ve hiçbir şey yazmıyor.
+#
+# Anahtar burada secret olarak duruyor; yerelde çalıştırmak için elle vermek
+# gerekiyor.
+
+on:
+  workflow_dispatch:
+    inputs:
+      akislar:
+        description: 'Akış kimlikleri (boşlukla ayrılmış)'
+        type: string
+        required: true
+
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Örnekle
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+          # Girdi `run:` satırına METİN olarak yapıştırılmasın diye env'den
+          # geçiyor — tırnak ya da `$(...)` içeren bir değer kabukta çalışırdı.
+          AKISLAR: ${{ inputs.akislar }}
+        run: node scripts/tuik-ornek.mjs $AKISLAR
