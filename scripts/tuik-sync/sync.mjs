@@ -90,7 +90,23 @@ async function getToken() {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/*
+ * Aynı akış birden çok veri seti tanımı tarafından kullanılabiliyor (dış
+ * ticaret endekslerinde her akıştan iki sütun çıkıyor: toplam ve gıda).
+ * Önbelleksiz her tanım kendi indirmesini yapardı — aynı megabaytlar iki kez.
+ * Süreç ömrü boyunca saklamak güvenli: iş her çalışmada sıfırdan başlıyor.
+ */
+const indirmeOnbellek = new Map();
+
 async function fetchDataset(ds) {
+  const anahtar = `${ds.flow},${ds.version}`;
+  if (indirmeOnbellek.has(anahtar)) return indirmeOnbellek.get(anahtar);
+  const p = fetchDatasetHam(ds);
+  indirmeOnbellek.set(anahtar, p);
+  return p;
+}
+
+async function fetchDatasetHam(ds) {
   let lastError;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {

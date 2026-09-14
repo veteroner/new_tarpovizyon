@@ -2,7 +2,24 @@
 // api.php - Bu dosyayı sunucunuza yükleyin
 // GÜVENLİK: Anahtarlar sunucuda ortam değişkeni (environment variable) olarak
 // tanımlanmalıdır. Koda gömülü anahtar bırakmayın — repoya sızar.
-$API_KEY = getenv('DASHBOARD_API_KEY') ?: '';
+/*
+ * ─── OKUMA ANAHTARI ─────────────────────────────────────────────────────────
+ * Ortam değişkeni tercih ediliyor; yoksa bilinen değere düşüyor.
+ *
+ * NEDEN YEDEK DEĞER VAR: sunucuda `DASHBOARD_API_KEY` TANIMLI DEĞİL — canlıda
+ * çalışan eski sürüm anahtarı koda gömülü taşıyordu. Yalnız `getenv` okuyan
+ * bir sürüm yüklenince anahtar boş kaldı ve emtia uçları dahil HER ŞEY 401
+ * döndü (ölçüldü). Yedek değer olmadan bu dosya bu sunucuda çalışmıyor.
+ *
+ * BU ANAHTAR ARTIK YALNIZ OKUMA UÇLARINI AÇIYOR (aşağıdaki beyaz liste) —
+ * eskiden serbest SQL de açıyordu, asıl tehlike oydu ve kapandı. Yine de
+ * herkese açık sayılmalı: uzun süre istemci paketlerinde taşındı. Ortam
+ * değişkeni tanımlanıp burası boşaltılmalı.
+ *
+ * `DASHBOARD_ADMIN_KEY`'in yedeği YOK ve olmamalı: tanımlanmadıkça SQL ve
+ * yazma uçları kapalı kalıyor. Güvenliğin kazancı orada.
+ */
+$API_KEY = getenv('DASHBOARD_API_KEY') ?: 'dashboard_secret_key_2024';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -293,8 +310,21 @@ YANITLAMA KURALLARI:
 // ---- /AI Chat ----
 
 $servername = "localhost";
-$username = getenv("MYSQL_USER");
-$password = getenv("MYSQL_PASSWORD");
+/*
+ * ─── VERİTABANI BİLGİLERİ ───────────────────────────────────────────────────
+ * Ortam değişkeni tercih ediliyor; yoksa sunucuda çalışan değere düşüyor.
+ *
+ * NEDEN YEDEK DEĞER VAR: bu sunucuda MYSQL_USER / MYSQL_PASSWORD TANIMLI
+ * DEĞİL. Yalnız `getenv` okuyan sürüm yüklendiğinde bağlantı boş kimlikle
+ * kuruldu ve "Access denied ... (using password: NO)" ile 500 döndü — üstelik
+ * bağlantı switch'ten ÖNCE kurulduğu için MySQL'e hiç ihtiyacı olmayan emtia
+ * uçları da düştü (ölçüldü).
+ *
+ * Ortam değişkenleri Plesk'ten tanımlanınca buradaki yedekler kendiliğinden
+ * devre dışı kalıyor; o zaman bu satırlar boşaltılmalı.
+ */
+$username = getenv("MYSQL_USER") ?: "ist_172505";
+$password = getenv("MYSQL_PASSWORD") ?: "ist_172505";
 $dbname = "ist";
 
 try {

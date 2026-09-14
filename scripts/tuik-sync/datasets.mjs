@@ -541,4 +541,80 @@ export const DATASETS = [
       '03_00_42_07_05': 'Kara midye (denizde avlanılan), canlı, taze veya soğutulmuş (çiftlikte yetiştirilenler hariç)',
     },
   },
+
+  /*
+   * ─── DIŞ TİCARET ENDEKSLERİ ───────────────────────────────────────────────
+   * `disTicaretEndeksleri()` ile üretiliyor; tanım dosyanın sonunda.
+   */
+  ...disTicaretEndeksleri(),
 ];
+
+/*
+ * ─── DIŞ TİCARET ENDEKSLERİ (2015=100) ──────────────────────────────────────
+ * Beş seri × iki kapsam = on veri seti tanımı. Elle yazmak yerine üretiliyor:
+ * on blok arasında tek fark üç alan, ve kopyala-yapıştır sırasında bir
+ * sütunun yanlış akışa bağlanması gözle fark edilmezdi.
+ *
+ * ─── NEDEN KAPSAM BAŞINA AYRI TANIM ─────────────────────────────────────────
+ * `wide` yazıcısı TEK bir ürün boyutundan sütunlara eşliyor. Toplam ve gıda
+ * satırları farklı boyutlarda duruyor, o yüzden aynı tanıma sığmıyorlar:
+ *
+ *   toplam → SITC_REV4_205 = _Z  VE  DTE_SEKTOR_KODLARI = T
+ *   gıda   → SITC_REV4_205 = 0   (bu kodda sektör boyutu tek değerli)
+ *
+ * ─── `_Z` TOPLAM DEĞİL ──────────────────────────────────────────────────────
+ * ÖLÇÜLDÜ: yalnız `SITC_REV4_205=_Z` süzgeciyle dönem başına DÖRT satır
+ * geliyor (sektör 0_1 / 2_4 / 5_8 / T). `wide` yazıcısı dönem başına tek değer
+ * tuttuğu için hangisinin yazılacağı CSV sırasına kalırdı — hata vermeyen,
+ * grafikte de makul görünen bir yanlış. `DTE_SEKTOR_KODLARI=T` eklenince 355
+ * dönem / 355 satır, yinelenme yok.
+ *
+ * ─── GEÇMİŞ NEDEN 2020'DE BAŞLIYOR ──────────────────────────────────────────
+ * Seri 1997-01'e kadar gidiyor; 355 dönem × 10 tanım = ilk turda ~3.500 ayrı
+ * D1 yazması demekti ve `applyWrites` bunları TEK TEK uyguluyor. Günlük işin
+ * bütçesi 15 dakika — ilk tur o bütçeyi aşar, üstelik aynı işin içindeki
+ * diğer veri setlerini de tehlikeye atardı. 2020-01 sınırı ilk turu ~800
+ * yazmaya indiriyor; sonraki turlar zaten yalnız değişen dönemi yazıyor.
+ *
+ * Sınır veriyi budamıyor, yalnız ne kadarının tutulduğunu söylüyor: 6,5 yıllık
+ * aylık seri bu ekranlarda çizilen her aralığı karşılıyor. Daha geriye
+ * gerekirse sınır gevşetilip iş bir kez elle çalıştırılabilir.
+ */
+function disTicaretEndeksleri() {
+  /** [akış, toplam sütunu] — gıda sütunu `gida_` önekiyle türetiliyor. */
+  const SERILER = [
+    ['DF_IHRACAT_BIRIM_DEGER_V1', 'ihracat_bde'],
+    ['DF_ITHALAT_BIRIM_DEGER_ENDEKSI_V1', 'ithalat_bde'],
+    ['DF_IHRACAT_MIKTAR_ENDEKS_V1', 'ihracat_me'],
+    ['DF_ITHALAT_MIKTAR_ENDEKS_V1', 'ithalat_me'],
+    ['DF_DIS_TICARET_HADLERI_V1', 'dis_ticaret_haddi'],
+  ];
+
+  const ortak = {
+    kind: 'wide',
+    version: '1.0',
+    table: 'dis_ticaret_endeks',
+    periodColumn: 'tarih',
+    decimals: 2,
+    minPeriod: '2020-01',
+  };
+
+  return SERILER.flatMap(([flow, kolon]) => [
+    {
+      ...ortak,
+      name: `Dış ticaret endeksi — ${kolon} (Türkiye toplamı)`,
+      flow,
+      productDim: 'DTE_SEKTOR_KODLARI',
+      filter: { FREQ: 'M', SITC_REV4_205: '_Z' },
+      columns: { [kolon]: 'T' },
+    },
+    {
+      ...ortak,
+      name: `Dış ticaret endeksi — ${kolon} (gıda ve canlı hayvanlar)`,
+      flow,
+      productDim: 'SITC_REV4_205',
+      filter: { FREQ: 'M' },
+      columns: { [`gida_${kolon}`]: '0' },
+    },
+  ]);
+}

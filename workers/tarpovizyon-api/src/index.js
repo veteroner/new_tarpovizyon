@@ -49,6 +49,9 @@ const ROUTES = {
   'makro/veriler': { table: 'makro_veriler', filters: [], order: 'id ASC' },
   'makro/tarim-gsyh': { table: 'makro_tarim_gsyh', filters: [], order: 'yil ASC' },
   'makro/tarim-disticaret': { table: 'makro_tarim_disticaret', filters: [], order: 'yil ASC' },
+  // Dış ticaret endeksleri (2015=100). Aylık, 2020-01'den beri; toplam ve gıda
+  // (SITC 0) kapsamları aynı satırda. Bkz. migrations/0004.
+  'makro/dis-ticaret-endeks': { table: 'dis_ticaret_endeks', filters: [], order: 'tarih ASC', maxLimit: 1000 },
   'makro/ufe-aylik': { table: 'ufe_aylik', filters: [], order: 'yil ASC, ay ASC' },
   'makro/ufe-alt-grup-snapshot': { table: 'ufe_alt_grup_snapshot', filters: [], order: 'id ASC' },
   'makro/ufe-detay-snapshot': { table: 'ufe_detay_snapshot', filters: [], order: 'id ASC' },
