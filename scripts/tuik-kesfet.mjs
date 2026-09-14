@@ -48,27 +48,40 @@ const token = await (async () => {
 })();
 
 /*
- * ─── BİRDEN ÇOK VARYANT DENENİYOR ───────────────────────────────────────────
- * İlk deneme `Accept: application/vnd.sdmx.structure+json;version=1.0` ile
- * HTTP 500 döndü. SDMX uçları sürüm ve `references`/`detail` parametrelerine
- * göre farklı davranıyor ve TÜİK'in hangi bileşimi kabul ettiği belgeli değil.
+ * ─── `Accept-Language` ŞART ─────────────────────────────────────────────────
+ * İlk sürüm bu başlığı BİLEREK göndermiyordu ve üç varyant da HTTP 500 döndü.
+ * Sebebi ölçülmeden tahmin edilmişti; çalışan iki betik (`tuik-sync/sync.mjs`
+ * ve `tufe-sdmx-yukle.mjs`) başlığı gönderiyor ve ikisinin de yorumunda aynı
+ * cümle var: başlıksız istekte servis `500 languageTag1` veriyor. curl
+ * kendiliğinden gönderdiği için elde çalışıyormuş gibi görünüyor, Node/undici
+ * göndermiyor — yani hata yalnız kodda ortaya çıkıyor.
  *
- * Anahtar yalnız CI'da olduğu için her deneme bir tur demek; o yüzden
- * varyantlar TEK turda sırayla deneniyor ve hangisinin çalıştığı yazdırılıyor.
- * Sonraki sefer doğrudan o kullanılır.
+ * ─── VARYANTLAR ─────────────────────────────────────────────────────────────
+ * Anahtar yalnız CI'da olduğu için her deneme bir tur demek; varyantlar TEK
+ * turda sırayla deneniyor. ZAMAN AŞIMI zorunlu: bir önceki turda bir varyant
+ * 4,5 dakika yanıtsız asılı kaldı ve iş iptal edildi, yani sonraki varyantlar
+ * hiç denenemedi.
  */
 const VARYANTLAR = [
   { url: `${DATAFLOW_URL}?references=none&detail=allstubs`, accept: 'application/vnd.sdmx.structure+json;version=1.0' },
-  { url: DATAFLOW_URL, accept: 'application/vnd.sdmx.structure+json;version=2.0.0' },
-  { url: DATAFLOW_URL, accept: 'application/json' },
-  { url: `${DATAFLOW_URL}?format=sdmx-json`, accept: '*/*' },
+  { url: DATAFLOW_URL, accept: 'application/vnd.sdmx.structure+json;version=1.0' },
   { url: DATAFLOW_URL, accept: 'application/vnd.sdmx.structure+xml;version=2.1' },
+  { url: DATAFLOW_URL, accept: 'application/json' },
 ];
 
 let r = null;
 let kullanilan = null;
 for (const v of VARYANTLAR) {
-  const y = await fetch(v.url, { headers: { Authorization: `Bearer ${token}`, Accept: v.accept } });
+  let y;
+  try {
+    y = await fetch(v.url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: v.accept, 'Accept-Language': 'tr' },
+      signal: AbortSignal.timeout(45_000),
+    });
+  } catch (e) {
+    console.log(`  deneme: HATA (${e.name})  accept=${v.accept}`);
+    continue;
+  }
   console.log(`  deneme: ${y.status}  accept=${v.accept}  ${v.url.replace(DATAFLOW_URL, '…')}`);
   if (y.ok) { r = y; kullanilan = v; break; }
 }
