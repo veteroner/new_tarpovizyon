@@ -37,9 +37,20 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Playwright ve Chromium
+      # SÜRÜMLER SABİT. Bu iş bir gün şu hatayla düştü:
+      #     npm error notarget No matching version found for wrangler@4.131.2
+      # Sürüm vardı; npm kayıt defterinde yayılma yarışıydı — "latest" yeni
+      # sürümü gösterirken paket her aynada henüz yoktu. Sabitlenmemiş bir
+      # araç, depoda hiçbir şey değişmese de boru hattını kırabiliyor (ve yeni
+      # bir sürümün davranış değişikliği de habersiz gelir).
+      #
+      # wrangler burada kuruluyor ki `npx` (scripts/tuik-disticaret/d1.mjs)
+      # indirmeden yerel kurulumu kullansın. Sürüm `package.json`'daki
+      # devDependency ile AYNI olmalı.
+      - name: Playwright ve wrangler (sabit sürüm)
         run: |
-          npm install --no-save --no-audit --no-fund --legacy-peer-deps playwright
+          npm install --no-save --no-audit --no-fund --legacy-peer-deps \
+            playwright@1.63.0 wrangler@4.131.2
           npx playwright install --with-deps chromium
 
       # Önce doğrulama: SABİT bir referans dönemi (2025-05) yeniden çekip

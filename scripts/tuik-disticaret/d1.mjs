@@ -5,6 +5,22 @@
  * zaten yerelde/CI'da tanımlı ve `--json` çıktısı yeterli. wrangler önüne
  * bilgilendirme satırları basıyor, bu yüzden JSON dizisinin başlangıcını
  * arıyoruz.
+ *
+ * ─── SÜRÜM NEDEN SABİT ──────────────────────────────────────────────────────
+ * Çağrı `npx wrangler` idi, yani her CI turunda "latest" çözülüyordu. Bir gün
+ * iş şu hatayla düştü:
+ *
+ *     npm error notarget No matching version found for wrangler@4.131.2
+ *
+ * Sürüm aslında VARDI — npm kayıt defterindeki yayılma yarışıydı: dist-tag
+ * `latest` yeni sürümü gösteriyor ama paket her aynada henüz yok. Yeniden
+ * çalıştırınca geçti. Yani bu bir talihsizlik değil yapısal açık: sabitlenmemiş
+ * bir CLI, kendi deposunda hiçbir şey değişmese de boru hattını kırabiliyor —
+ * üstelik yeni bir wrangler sürümünün davranış değişikliği de habersiz gelir.
+ *
+ * Sürüm ayrıca `package.json`'da devDependency: `npm install` yapılmış bir
+ * ağaçta npx kurulu olanı kullanıyor, indirme hiç olmuyor. İKİSİ AYNI DEĞERDE
+ * TUTULMALI.
  */
 
 import { execFile } from 'node:child_process';
@@ -14,6 +30,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const calistir = promisify(execFile);
+
+/** Sabit sürüm — `package.json` devDependencies ile aynı olmalı. */
+export const WRANGLER = 'wrangler@4.131.2';
+
+/** `npx` argümanları: `--yes` sorusuz, sürüm sabit. */
+const NPX = ['--yes', WRANGLER];
 
 export const VT = 'tarpovizyon-basic';
 
@@ -32,7 +54,7 @@ function ayikla(cikti) {
 export async function sorgu(sql) {
   const { stdout } = await calistir(
     'npx',
-    ['wrangler', 'd1', 'execute', VT, '--remote', '--json', '--command', sql],
+    [...NPX, 'd1', 'execute', VT, '--remote', '--json', '--command', sql],
     { cwd: KOK, maxBuffer: 256 * 1024 * 1024 },
   );
   return ayikla(stdout)[0].results ?? [];
@@ -48,7 +70,7 @@ export async function dosyaCalistir(sqlMetni) {
   try {
     const { stdout } = await calistir(
       'npx',
-      ['wrangler', 'd1', 'execute', VT, '--remote', '--json', '--file', yol],
+      [...NPX, 'd1', 'execute', VT, '--remote', '--json', '--file', yol],
       { cwd: KOK, maxBuffer: 256 * 1024 * 1024 },
     );
     return ayikla(stdout);
