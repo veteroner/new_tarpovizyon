@@ -13,6 +13,11 @@ on:
         description: 'Akış kimlikleri (boşlukla ayrılmış)'
         type: string
         required: true
+      ekler:
+        description: 'Ek argümanlar (ör. --filtre FREQ=M,SITC_REV4_205=_Z --son 6)'
+        type: string
+        required: false
+        default: ''
 
 jobs:
   ornek:
@@ -29,4 +34,5 @@ jobs:
           # Girdi `run:` satırına METİN olarak yapıştırılmasın diye env'den
           # geçiyor — tırnak ya da `$(...)` içeren bir değer kabukta çalışırdı.
           AKISLAR: ${{ inputs.akislar }}
-        run: node scripts/tuik-ornek.mjs $AKISLAR
+          EKLER: ${{ inputs.ekler }}
+        run: node scripts/tuik-ornek.mjs $AKISLAR $EKLER

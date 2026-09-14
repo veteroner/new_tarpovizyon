@@ -15,8 +15,15 @@
  * Betik hiçbir şey YAZMIYOR. `tuik-kesfet.mjs` "var mı" sorusunu, bu betik
  * "nasıl" sorusunu cevaplıyor.
  *
+ * ─── SÜZGEÇ NEDEN GEREKLİ ───────────────────────────────────────────────────
+ * Ayrık değerleri görmek boyutları söylüyor ama birlikte NASIL davrandıklarını
+ * söylemiyor. `datasets.mjs`'teki `wide` yazıcı bir dönemi bir sütuna
+ * eşliyor; aynı dönem+kod için birden çok satır dönerse sonuncusu diğerlerini
+ * sessizce eziyor. `--filtre` ile daraltıp satır sayısını saymak bunu ölçüyor.
+ *
  * Kullanım:
- *   TUIK_API_KEY=... node scripts/tuik-ornek.mjs DF_IHRACAT_BIRIM_DEGER_V1 ...
+ *   TUIK_API_KEY=... node scripts/tuik-ornek.mjs DF_IHRACAT_BIRIM_DEGER_V1
+ *   TUIK_API_KEY=... node scripts/tuik-ornek.mjs DF_... --filtre FREQ=M,SITC_REV4_205=_Z --son 6
  */
 
 const TOKEN_URL = 'https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token';
@@ -29,7 +36,27 @@ if (!anahtar) {
   process.exit(2);
 }
 
-const akislar = process.argv.slice(2).filter(Boolean);
+const argv = process.argv.slice(2).filter(Boolean);
+
+/** `--filtre A=1,B=2` → { A: '1', B: '2' } */
+const filtre = {};
+const fi = argv.indexOf('--filtre');
+if (fi >= 0) {
+  for (const p of (argv[fi + 1] ?? '').split(',').filter(Boolean)) {
+    const [k, ...v] = p.split('=');
+    filtre[k.trim()] = v.join('=').trim();
+  }
+  argv.splice(fi, 2);
+}
+
+const si = argv.indexOf('--son');
+let sonN = 3;
+if (si >= 0) {
+  sonN = Number(argv[si + 1]) || 3;
+  argv.splice(si, 2);
+}
+
+const akislar = argv.filter((a) => !a.startsWith('--'));
 if (!akislar.length) {
   console.error('En az bir akış kimliği verin.');
   process.exit(2);
@@ -96,7 +123,25 @@ for (const flow of akislar) {
   }
 
   const basliklar = csvBol(satirlar[0]).map((s) => s.trim());
-  const veri = satirlar.slice(1).map(csvBol);
+  let veri = satirlar.slice(1).map(csvBol);
+
+  const filtreAnahtar = Object.keys(filtre);
+  if (filtreAnahtar.length) {
+    const eksik = filtreAnahtar.filter((k) => !basliklar.includes(k));
+    if (eksik.length) {
+      /* Olmayan bir sütuna süzgeç uygulamak sessizce HER satırı elerdi ve
+         çıktı "veri yok" gibi okunurdu — o yüzden açıkça söyleniyor. */
+      console.log(`  UYARI: süzgeçteki sütun(lar) yok: ${eksik.join(', ')}`);
+    }
+    const once = veri.length;
+    veri = veri.filter((r) => filtreAnahtar.every((k) => {
+      const i = basliklar.indexOf(k);
+      return i >= 0 && (r[i] ?? '').trim() === filtre[k];
+    }));
+    console.log(`  süzgeç: ${JSON.stringify(filtre)} → ${once} satırdan ${veri.length}`);
+    if (!veri.length) { hata++; continue; }
+  }
+
   console.log(`  satır: ${veri.length}`);
   console.log(`  sütun: ${basliklar.join(' | ')}\n`);
 
@@ -112,8 +157,27 @@ for (const flow of akislar) {
     }
   });
 
-  console.log('\n  --- son 3 satır ---');
-  for (const r of veri.slice(-3)) console.log(`  ${r.join(' | ')}`);
+  /*
+   * DÖNEM YİNELENMESİ — `wide` yazıcısı için hayati. O yazıcı dönem başına
+   * tek değer tutuyor; aynı dönem birden çok satırla gelirse sonuncusu
+   * diğerlerini eziyor ve hangisinin kazandığı CSV sırasına kalıyor.
+   */
+  const dIdx = basliklar.indexOf('TIME_PERIOD');
+  if (dIdx >= 0) {
+    const sayac = new Map();
+    for (const r of veri) {
+      const d = (r[dIdx] ?? '').trim();
+      sayac.set(d, (sayac.get(d) ?? 0) + 1);
+    }
+    const yinelenen = [...sayac].filter(([, n]) => n > 1);
+    console.log(`\n  dönem yinelenmesi: ${yinelenen.length ? `VAR (${yinelenen.length} dönem, ör. ${yinelenen[0][0]}×${yinelenen[0][1]})` : 'yok'}`);
+  }
+
+  const vIdx = basliklar.indexOf('OBS_VALUE');
+  console.log(`\n  --- son ${sonN} satır ---`);
+  for (const r of veri.slice(-sonN)) {
+    console.log(dIdx >= 0 && vIdx >= 0 ? `  ${r[dIdx]} = ${r[vIdx]}` : `  ${r.join(' | ')}`);
+  }
 }
 
 /* Hiçbir akış okunamadıysa sessizce başarılı bitmiyor: bu betiğin çıktısına
