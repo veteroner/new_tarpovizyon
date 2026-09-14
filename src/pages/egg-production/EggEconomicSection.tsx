@@ -7,6 +7,48 @@ import { SplitAxisChart } from '../../components/ui/SplitAxisChart';
 import { BarChart3, Wallet, Wheat } from 'lucide-react';
 import { eksenTick } from '../../utils/sayiBicim';
 
+/**
+ * Serinin SONUNDA kaç dönem, bir öncekiyle birebir aynı geliyor?
+ *
+ * ─── NEDEN GEREKLİ ──────────────────────────────────────────────────────────
+ * Yumurta maliyet-fiyat kaynağı güncellenmeyi bıraktığında tabloya yeni ay
+ * satırları yine ekleniyor — ama değerler bir öncekinden KOPYALANMIŞ oluyor.
+ * Kartlar en son satırı alıp üstüne o ayın damgasını basınca ekran, olmayan
+ * bir güncelliği iddia ediyor: ölçüldü, 2026-05'ten beri değişmeyen sayılar
+ * "2026-08" damgasıyla gösteriliyordu.
+ *
+ * Sayıyı değiştirmiyoruz — satırda ne varsa o. Değişen yalnız TARİH: değerin
+ * gerçekten en son ne zaman hareket ettiği yazılıyor.
+ *
+ * `economicData` YENİDEN ESKİYE sıralı (hook `reverse()` ediyor).
+ */
+const OLCULEN_ALANLAR = [
+  'yumurta_maliyet_tl_kg',
+  'yumurta_uretici_fiyati_tl_kg',
+  'yumurtaci_tavuk_yemi_tl_kg',
+  'tuketici_fiyati_tl',
+  'karlilik',
+  'parite_yumurta_yem_paritesi',
+] as const;
+
+/*
+ * Karşılaştırma TOLERANSLI. Katı eşitlik bir gürültüyü değişim sanıyordu:
+ * maliyet 2026-05'te `3.2473046511627905`, sonraki aylarda `3.247304651`
+ * olarak saklanmış — aynı sayı, farklı hassasiyet. Katı eşitlikle şerit
+ * "2026-06'dan beri" diyordu, doğrusu 2026-05.
+ */
+const ayniMi = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+
+function sonHareketliDonem(veri: EggEconomicData[]): { donem: string; donmusAy: number } {
+  if (!veri.length) return { donem: '', donmusAy: 0 };
+  let i = 0;
+  while (
+    i + 1 < veri.length
+    && OLCULEN_ALANLAR.every((a) => ayniMi(veri[i][a], veri[i + 1][a]))
+  ) i++;
+  return { donem: veri[i].tarih, donmusAy: i };
+}
+
 interface EggEconomicSectionProps {
   economicData: EggEconomicData[];
   econStartDate: string;
@@ -22,6 +64,9 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
     if (!econStartDate || !econEndDate) return true;
     return d.tarih >= econStartDate && d.tarih <= econEndDate;
   });
+
+  /* Kartlardaki damga: satırın kendi ayı değil, değerin son hareket ettiği ay. */
+  const { donem: gecerliDonem, donmusAy } = sonHareketliDonem(filteredData);
 
   return (
     <>
@@ -71,6 +116,27 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
         </div>
       </div>
 
+      {/*
+        * Kaynak durduğunda SESSİZ KALMIYORUZ. Kopyalanmış satırları hiç
+        * göstermemek de bir seçenekti; grafiğin sonunu budamak yerine durumu
+        * söylemek tercih edildi — seri kesintisiz kalıyor, okuyucu son
+        * noktaların taşınmış olduğunu biliyor.
+        */}
+      {donmusAy > 0 && (
+        <div
+          role="status"
+          style={{
+            marginBottom: '20px', padding: '10px 14px', borderRadius: '10px',
+            border: '1px solid #f59e0b', background: 'rgba(245, 158, 11, .08)',
+            fontSize: '0.85rem', color: 'var(--text-primary)',
+          }}
+        >
+          Maliyet–fiyat kaynağı <strong>{gecerliDonem}</strong> tarihinden beri
+          güncellenmedi. Sonraki {donmusAy} ay tabloya bir önceki değer
+          kopyalanarak eklendi; kartlar son gerçek dönemi gösteriyor.
+        </div>
+      )}
+
       {/* Ekonomik KPI Kartları */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
@@ -79,7 +145,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <div style={{ fontSize: '1.5rem' }}><Wallet size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#10b981' }}>{filteredData[0]?.yumurta_uretici_fiyati_tl_kg.toFixed(2)} ₺/kg</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{gecerliDonem}</div>
         </div>
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -87,7 +153,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <div style={{ fontSize: '1.5rem' }}></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#2563eb' }}>{filteredData[0]?.tuketici_fiyati_tl.toFixed(2)} ₺/adet</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{gecerliDonem}</div>
         </div>
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -97,7 +163,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: filteredData[0]?.karlilik >= 0 ? '#22c55e' : '#ef4444' }}>
             {yuzde(filteredData[0]?.karlilik, 2)}
           </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{gecerliDonem}</div>
         </div>
         <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -105,7 +171,7 @@ export function EggEconomicSection({ economicData, econStartDate, setEconStartDa
             <div style={{ fontSize: '1.5rem' }}><Wheat size={22} aria-hidden="true" /></div>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#f59e0b' }}>{filteredData[0]?.parite_yumurta_yem_paritesi.toFixed(2)}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{filteredData[0]?.tarih}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>{gecerliDonem}</div>
         </div>
       </div>
 
