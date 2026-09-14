@@ -47,19 +47,51 @@ const token = await (async () => {
   return b.access_token;
 })();
 
-const r = await fetch(DATAFLOW_URL, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.sdmx.structure+json;version=1.0',
-    /*
-     * `Accept-Language` VERİLMİYOR. Bu uçta dil başlığı göndermek bazı
-     * yanıtları boş döndürüyor — bu projede bir kez yaşandı.
-     */
-  },
-});
-if (!r.ok) {
-  console.error(`Akış listesi alınamadı (HTTP ${r.status})`);
+/*
+ * ─── BİRDEN ÇOK VARYANT DENENİYOR ───────────────────────────────────────────
+ * İlk deneme `Accept: application/vnd.sdmx.structure+json;version=1.0` ile
+ * HTTP 500 döndü. SDMX uçları sürüm ve `references`/`detail` parametrelerine
+ * göre farklı davranıyor ve TÜİK'in hangi bileşimi kabul ettiği belgeli değil.
+ *
+ * Anahtar yalnız CI'da olduğu için her deneme bir tur demek; o yüzden
+ * varyantlar TEK turda sırayla deneniyor ve hangisinin çalıştığı yazdırılıyor.
+ * Sonraki sefer doğrudan o kullanılır.
+ */
+const VARYANTLAR = [
+  { url: `${DATAFLOW_URL}?references=none&detail=allstubs`, accept: 'application/vnd.sdmx.structure+json;version=1.0' },
+  { url: DATAFLOW_URL, accept: 'application/vnd.sdmx.structure+json;version=2.0.0' },
+  { url: DATAFLOW_URL, accept: 'application/json' },
+  { url: `${DATAFLOW_URL}?format=sdmx-json`, accept: '*/*' },
+  { url: DATAFLOW_URL, accept: 'application/vnd.sdmx.structure+xml;version=2.1' },
+];
+
+let r = null;
+let kullanilan = null;
+for (const v of VARYANTLAR) {
+  const y = await fetch(v.url, { headers: { Authorization: `Bearer ${token}`, Accept: v.accept } });
+  console.log(`  deneme: ${y.status}  accept=${v.accept}  ${v.url.replace(DATAFLOW_URL, '…')}`);
+  if (y.ok) { r = y; kullanilan = v; break; }
+}
+if (!r) {
+  console.error('Hiçbir varyant çalışmadı — uç biçimi değişmiş olabilir.');
   process.exit(1);
+}
+console.log(`\nÇALIŞAN: accept=${kullanilan.accept}\n`);
+
+const icerikTipi = r.headers.get('content-type') ?? '';
+if (icerikTipi.includes('xml')) {
+  /* XML döndüyse akış kimliklerini kaba biçimde ayıklıyoruz — yalnız keşif
+     için, ayrıştırıcı kurmaya değmez. */
+  const metin = await r.text();
+  const idler = [...metin.matchAll(/<(?:str:)?Dataflow[^>]*\sid="([^"]+)"/g)].map((m) => m[1]);
+  const adlar = [...metin.matchAll(/<(?:com:)?Name[^>]*>([^<]+)<\//g)].map((m) => m[1]);
+  console.log(`Toplam akış (XML): ${idler.length}`);
+  const ar = normalle(arananHam).split(/\s+/).filter(Boolean);
+  idler.forEach((id, i) => {
+    const metin2 = normalle(`${id} ${adlar[i] ?? ''}`);
+    if (!ar.length || ar.every((k) => metin2.includes(k))) console.log(`  ${id}\n      ${adlar[i] ?? ''}`);
+  });
+  process.exit(0);
 }
 
 const govde = await r.json();
