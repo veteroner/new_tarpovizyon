@@ -586,8 +586,17 @@ export const DATASETS = [
     codeColumn: 'urun',
     yearColumn: 'yil',
     toplamColumn: 'TOPLAM',
-    /* Kaynak üç ondalık veriyor (1.904.042,374); tablo REAL tutuyor. */
-    decimals: 3,
+    /*
+     * ONDALIK YOK — tablonun mevcut düzeni bu ve kardeş tablo
+     * (`kanatli_uretimleri`) da `decimals: 0` kullanıyor.
+     *
+     * Ölçüldü: 3 ondalıkla kuru çalıştırma 157 (kod,yıl) çiftini güncelliyordu,
+     * çünkü 1.860.594 ile 1.860.594,391 "farklı" sayılıyordu. Yani 2010'dan
+     * beri her hücre, yalnız sahte bir hassasiyet eklemek için yeniden
+     * yazılacaktı. Sıfır ondalıkla yalnız gerçekten eksik/değişmiş hücreler
+     * yazılıyor.
+     */
+    decimals: 0,
     codeMap: {
       1: 'Tavuk Yumurtası',
       2: 'Kesilen Tavuk',
