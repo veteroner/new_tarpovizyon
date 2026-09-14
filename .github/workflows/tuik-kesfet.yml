@@ -1,0 +1,30 @@
+name: TÜİK veri akışı ara
+
+# "Şu veri TÜİK'te var mı" sorusunu TAHMİNLE değil ölçümle cevaplamak için.
+# Yalnız elle çalışıyor ve hiçbir şey yazmıyor — veri boru hattına dokunmuyor.
+#
+# Anahtar burada secret olarak duruyor; yerelde çalıştırmak için elle vermek
+# gerekiyor.
+
+on:
+  workflow_dispatch:
+    inputs:
+      arama:
+        description: 'Aranacak kelimeler (boş bırakılırsa tüm liste)'
+        type: string
+        required: false
+        default: ''
+
+jobs:
+  ara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Akışları ara
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+        run: node scripts/tuik-kesfet.mjs "${{ inputs.arama }}"
