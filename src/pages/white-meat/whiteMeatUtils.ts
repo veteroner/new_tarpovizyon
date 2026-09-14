@@ -8,17 +8,6 @@ export type YearPoint = {
 
 export type TuikTab = 'overview' | 'production' | 'hatch' | 'projection';
 
-export type PoultryEconomicData = {
-  tarih: string;
-  etlik_pilic_maliyet_tl_kg: number;
-  uretici_fiyati_tl_kg: number;
-  etlik_pilic_yemi_tl_kg: number;
-  tuketici_fiyati_tl_kg: number;
-  karlilik: number;
-  uretici_fiyati_maliyet_farki_tl_kg: number;
-  parite_etlik_pilic_yem_paritesi: number;
-};
-
 export type TuikChickenData = {
   year: string;
   slaughtered: number;
@@ -50,11 +39,6 @@ export type PoultryTradeData = {
 export type WhiteMeatData = {
   loading: boolean;
   series: YearPoint[];
-  economicData: PoultryEconomicData[];
-  econStartDate: string;
-  setEconStartDate: (v: string) => void;
-  econEndDate: string;
-  setEconEndDate: (v: string) => void;
   worldRanking: { world: number; eu: number } | null;
   provincialPoultry: RegionTotal[];
   /** İl verisinin yılı — TÜİK API'sinde olmadığı için tazelenemiyor, başlıkta gösteriliyor. */

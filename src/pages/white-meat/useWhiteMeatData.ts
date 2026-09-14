@@ -11,7 +11,6 @@ import type { RegionTotal } from '../../components/TurkeyHeatMap';
 import type {
   YearPoint,
   TuikTab,
-  PoultryEconomicData,
   TuikChickenData,
   MonthlyData,
   TuikTurkeyMeatData,
@@ -23,9 +22,6 @@ import type {
 export function useWhiteMeatData(): WhiteMeatData {
   const [loading, setLoading] = useState(true);
   const [series, setSeries] = useState<YearPoint[]>([]);
-  const [economicData, setEconomicData] = useState<PoultryEconomicData[]>([]);
-  const [econStartDate, setEconStartDate] = useState<string>('');
-  const [econEndDate, setEconEndDate] = useState<string>('');
   const [worldRanking, setWorldRanking] = useState<{ world: number; eu: number } | null>(null);
   const [provincialPoultry, setProvincialPoultry] = useState<RegionTotal[]>([]);
   /* Harita verisinin yılı — başlıkta gösteriliyor ki güncel sanılmasın. */
@@ -78,40 +74,20 @@ export function useWhiteMeatData(): WhiteMeatData {
 
       setSeries(points);
 
-      // Ekonomik göstergeleri yükle
-      try {
-        /*
-         * ─── DONMUŞ İKİZDEN ÇIKILDI ───────────────────────────────────────
-         * `oner/kanatli-eti-maliyeti-fiyati` hiçbir senkron işinin YAZMADIĞI
-         * kopyaydı, 2026-02'de donmuştu. Günlük iş `kanatli_eti_maliyet_fiyat`
-         * tablosunu besliyor; orası 2026-08'de. Altı ay fark.
-         *
-         * Sütun adları farklı; çıktı şekli AYNI bırakıldı.
-         */
-        const economicRes = { data: (await fetchRows('kanatli/maliyet-fiyat'))
-          .slice(-60).reverse()
-          .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
-        if (economicRes.data && economicRes.data.length > 0) {
-          const mapped = economicRes.data.map((item) => ({
-            tarih: String(item['tarih'] || ''),
-            etlik_pilic_maliyet_tl_kg: Number(item['maliyet_tl_kg']) || 0,
-            uretici_fiyati_tl_kg: Number(item['uretici_fiyati_tl_kg']) || 0,
-            etlik_pilic_yemi_tl_kg: Number(item['yem_fiyati_tl_kg']) || 0,
-            tuketici_fiyati_tl_kg: Number(item['tuketici_fiyati_tl_kg']) || 0,
-            karlilik: Number(item['karlilik']) || 0,
-            uretici_fiyati_maliyet_farki_tl_kg: Number(item['fiyat_maliyet_farki_tl_kg']) || 0,
-            parite_etlik_pilic_yem_paritesi: Number(item['yem_paritesi']) || 0,
-          }));
-          setEconomicData(mapped);
-          if (mapped.length > 0) {
-            setEconEndDate(mapped[0].tarih);
-            setEconStartDate(mapped[Math.min(11, mapped.length - 1)].tarih);
-          }
-        }
-      } catch (economicError) {
-        console.warn('Kanatlı eti ekonomik göstergeleri yüklenemedi:', economicError);
-        setEconomicData([]);
-      }
+      /*
+       * ─── KANATLI ETİ MALİYET–FİYAT KALDIRILDI ─────────────────────────
+       * `kanatli_eti_maliyet_fiyat` OTOMATİK BESLENMİYOR. Kaynak durduktan
+       * sonra da yeni ay satırları giriyor ama değerler bir öncekinden
+       * kopyalanıyor: ölçüldü, maliyet 88,93 TL/kg ve kârlılık -%17,22
+       * 2026-04'ten beri hiç hareket etmemiş, buna rağmen 2026-08 satırı
+       * vardı. Yumurtada da aynısı vardı; ikisi aynı kaynaktan besleniyor.
+       *
+       * Sayfanın geri kalanı TÜİK'ten günlük tazeleniyor. Donmuş bir seriyi
+       * onun yanında göstermek, ikisinin aynı tazelikte olduğunu söylüyordu.
+       *
+       * Tablo ve `kanatli/maliyet-fiyat` ucu DURUYOR — kaynak yeniden
+       * beslenirse bölüm geri getirilebilir.
+       */
 
       // Dünya Sıralaması
       try {
@@ -477,9 +453,6 @@ export function useWhiteMeatData(): WhiteMeatData {
   return {
     loading,
     series,
-    economicData,
-    econStartDate, setEconStartDate,
-    econEndDate, setEconEndDate,
     worldRanking,
     provincialPoultry,
     provincialYear,

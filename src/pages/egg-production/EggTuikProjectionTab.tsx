@@ -19,10 +19,17 @@ import { Bird, Egg, Sparkles, TrendingUp } from 'lucide-react';
 interface EggTuikProjectionTabProps {
   tuikData: TuikEggData[];
   monthlyEgg: MonthlyEggData[];
-  monthlyLayer: MonthlyEggData[];
+  /** Aylık gerçekleşme serisinin yılı. */
+  monthlyYil: number | null;
 }
 
-export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: EggTuikProjectionTabProps) {
+export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyYil }: EggTuikProjectionTabProps) {
+  /*
+   * Gerçekleşme yılı ARTIK SABİT DEĞİL: aylık seri bülten tablosundan
+   * geliyor ve içinde bulunulan yılı da kapsıyor. '2025 Gerçek' yazmak,
+   * 2026 verisi çizilirken doğrudan yanlış olurdu.
+   */
+  const gercekAd = monthlyYil ? `${monthlyYil} Gerçek` : 'Gerçekleşen';
   const firstYear = tuikData[tuikData.length - 1];
   const lastYear = tuikData[0];
   const years = tuikData.length - 1;
@@ -50,16 +57,37 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
   const projection2026Egg = monthNames.map((month, idx) => ({
     month,
     actual2025: monthlyEgg[idx]?.value || 0,
-    projected2026: (baseEgg2026 * 1000 / 12) * (1 + eggMonthlyGrowth * idx),
+    /*
+     * BİRİM: BİN ADET — `eggProduction` zaten bin adet cinsinden.
+     * Eskiden 1.000 ile ÇARPILIYORDU, yani projeksiyon adede çevriliyordu;
+     * gerçekleşme serisi ise bin adette kalıyordu. İki çubuk 1.000 kat farklı
+     * ölçekteydi: gerçekleşme çubukları grafikte görünmüyordu ve özet satırı
+     * "20,9 milyar bin adet" (= 20,9 trilyon yumurta) yazıyordu.
+     */
+    projected2026: (baseEgg2026 / 12) * (1 + eggMonthlyGrowth * idx),
   }));
 
+  /*
+   * Yumurtacı tavuk grafiğinde GERÇEKLEŞME SERİSİ YOK. Eskiden `monthlyLayer`
+   * çiziliyordu ama o dizi her zaman boştu (kaynak tabloda 'Yumurtacı Tavuk
+   * Sayısı' diye bir ürün yok — 15 ürün adı ölçüldü), yani grafikte sıfır
+   * yükseklikte bir "gerçek" serisi duruyordu. Olmayan veriyi sıfır olarak
+   * çizmek, "o ay tavuk yoktu" demektir.
+   */
   const projection2026Layer = monthNames.map((month, idx) => ({
     month,
-    actual2025: monthlyLayer[idx]?.value || 0,
-    projected2026: (baseLayer2026 * 1000 / 12) * (1 + layerMonthlyGrowth * idx),
+    /*
+     * Tavuk sayısı bir STOK (o ay mevcut sürü), akış değil. 12'ye bölmek
+     * "ayda 1/12 tavuk" demekti; üstelik 1.000 ile de çarpılıyordu ve özet
+     * satırı 10,7 MİLYAR yumurtacı tavuk yazıyordu (Türkiye ~122 milyon).
+     * Aylık değer sürünün kendisi; özet ise onların ortalaması.
+     */
+    projected2026: baseLayer2026 * (1 + layerMonthlyGrowth * idx),
   }));
 
+  const gerceklesenToplam = monthlyEgg.reduce((sum, m) => sum + m.value, 0);
   const totalProjected2026Egg = projection2026Egg.reduce((sum, m) => sum + m.projected2026, 0);
+  /** Sürü büyüklüğünün yıl ortalaması — toplamı anlamsız olurdu. */
   const totalProjected2026Layer = projection2026Layer.reduce((sum, m) => sum + m.projected2026, 0) / 12;
 
   return (
@@ -71,7 +99,7 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
             <span className="kpi-title">2026 YUMURTA TAHMİNİ</span>
             <div className="kpi-icon orange"><Egg size={18} aria-hidden="true" /></div>
           </div>
-          <div className="kpi-value">{formatShort(totalProjected2026Egg)} adet</div>
+          <div className="kpi-value">{formatShort(totalProjected2026Egg)} bin adet</div>
           <div className="kpi-subtitle">Yıllık toplam projeksiyon</div>
         </div>
 
@@ -113,26 +141,35 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <YAxis
                 tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                 tickFormatter={(v) => formatShort(v)}
-                label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                label={{ value: 'Yumurta (bin adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
               <Tooltip
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => [
-                  value.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' adet',
-                  name === 'actual2025' ? '2025 Gerçek' : '2026 Projeksiyon',
+                  value.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' bin adet',
+                  name === 'actual2025' ? gercekAd : '2026 Projeksiyon',
                 ]}
               />
               <Legend />
-              <Bar dataKey="actual2025" name="2025 Gerçek" fill="#94a3b8" opacity={0.6} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="actual2025" name={gercekAd} fill="#94a3b8" opacity={0.6} radius={[4, 4, 0, 0]} />
               <Bar dataKey="projected2026" name="2026 Projeksiyon" fill="#f59e0b" opacity={0.9} radius={[4, 4, 0, 0]} />
               <Line type="monotone" dataKey="projected2026" stroke="#dc2626" strokeWidth={2} dot={false} />
             </ComposedChart>
           </ResponsiveContainer>
           <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            <strong>2025 Toplam:</strong> {monthlyEgg.reduce((sum, m) => sum + m.value, 0).toLocaleString('tr-TR')} adet
+            <strong>{gercekAd} ({monthlyEgg.length} ay):</strong> {gerceklesenToplam.toLocaleString('tr-TR')} bin adet
             {' | '}
-            <strong>2026 Tahmin:</strong> {totalProjected2026Egg.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
-            {' | '}
-            <strong>Artış:</strong> {yuzde(((totalProjected2026Egg - monthlyEgg.reduce((sum, m) => sum + m.value, 0)) / monthlyEgg.reduce((sum, m) => sum + m.value, 0) * 100), 2)}
+            <strong>2026 Tahmin:</strong> {totalProjected2026Egg.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} bin adet
+            {/*
+              * ARTIŞ ORANI YALNIZ TAM YILDA. Gerçekleşme serisi içinde
+              * bulunulan yılı da kapsıyor; 7 aylık toplamı 12 aylık
+              * projeksiyona bölmek "%-42 düşüş" gibi uydurma bir sayı üretirdi.
+              */}
+            {monthlyEgg.length === 12 && (
+              <>
+                {' | '}
+                <strong>Artış:</strong> {yuzde(((totalProjected2026Egg - gerceklesenToplam) / gerceklesenToplam * 100), 2)}
+              </>
+            )}
           </div>
         </ChartCard>
       </div>
@@ -156,20 +193,17 @@ export function EggTuikProjectionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
                   label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                 <Tooltip
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value: number) => [
                     value.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' adet',
-                    name === 'actual2025' ? '2025 Gerçek' : '2026 Projeksiyon',
+                    '2026 Projeksiyon',
                   ]}
                 />
                 <Legend />
-                <Bar dataKey="actual2025" name="2025 Gerçek" fill="#94a3b8" opacity={0.6} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="projected2026" name="2026 Projeksiyon" fill="#10b981" opacity={0.9} radius={[4, 4, 0, 0]} />
                 <Line type="monotone" dataKey="projected2026" stroke="#dc2626" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
             <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              <strong>2025 Ortalama:</strong> {(monthlyLayer.reduce((sum, m) => sum + m.value, 0) / 12).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
-              {' | '}
               <strong>2026 Tahmin:</strong> {totalProjected2026Layer.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
               {' | '}
               <strong>Artış:</strong> {yuzde((layerGrowthRate * 100), 2)}

@@ -19,10 +19,13 @@ import { LINE_Y_DOMAIN } from '../../utils/chartTicks';
 interface EggTuikProductionTabProps {
   tuikData: TuikEggData[];
   monthlyEgg: MonthlyEggData[];
-  monthlyLayer: MonthlyEggData[];
+  /** Aylık serinin yılı; başlıklara sabit yazılamaz. */
+  monthlyYil: number | null;
 }
 
-export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: EggTuikProductionTabProps) {
+export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyYil }: EggTuikProductionTabProps) {
+  /* Yıl bilinmeden başlık yazılmıyor — 'undefined' yazmaktansa hiç yazma. */
+  const yilEki = monthlyYil ? ` (${monthlyYil})` : '';
   return (
     <>
       {/* Üretim Trendleri */}
@@ -98,11 +101,11 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
       {monthlyEgg.length > 0 && (
         <>
           <div style={{ marginTop: '40px', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>2025 Aylık Dağılım</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>Aylık Dağılım{yilEki}</h3>
           </div>
 
           <div className="chart-grid">
-            <ChartCard title="Aylık Yumurta Üretimi (2025)" action={<ChartInsightButton title="Aylık Yumurta Üretimi (2025)" description="2025 aylık yumurta üretimi" data={monthlyEgg} context={{ year: 2025 }} compact />}>
+            <ChartCard title={`Aylık Yumurta Üretimi${yilEki}`} action={<ChartInsightButton title={`Aylık Yumurta Üretimi${yilEki}`} description="Aylık yumurta üretimi" data={monthlyEgg} context={{ year: monthlyYil }} compact />}>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={monthlyEgg}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -110,10 +113,10 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
                   <YAxis
                     tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                     tickFormatter={(v) => formatShort(v)}
-                    label={{ value: 'Yumurta (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
+                    label={{ value: 'Yumurta (bin adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                    formatter={(value: number) => [value.toLocaleString('tr-TR') + ' adet', 'Üretim']}
+                    formatter={(value: number) => [value.toLocaleString('tr-TR') + ' bin adet', 'Üretim']}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {monthlyEgg.map((_, index) => (
@@ -125,32 +128,10 @@ export function EggTuikProductionTab({ tuikData, monthlyEgg, monthlyLayer }: Egg
               <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 <strong>En yüksek üretim:</strong> {monthlyEgg.reduce((max, m) => m.value > max.value ? m : max, monthlyEgg[0]).month}
                 <br />
-                <strong>Toplam (2025):</strong> {monthlyEgg.reduce((sum, m) => sum + m.value, 0).toLocaleString('tr-TR')} adet
+                <strong>Toplam{yilEki}:</strong> {monthlyEgg.reduce((sum, m) => sum + m.value, 0).toLocaleString('tr-TR')} bin adet
               </div>
             </ChartCard>
 
-            {monthlyLayer.length > 0 && (
-              <ChartCard title="Aylık Yumurtacı Tavuk Sayısı (2025)" action={<ChartInsightButton title="Aylık Yumurtacı Tavuk Sayısı (2025)" description="2025 aylık yumurtacı tavuk sayısı" data={monthlyLayer} context={{ year: 2025 }} compact />}>
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={monthlyLayer}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} angle={-45} textAnchor="end" height={80} interval="preserveStartEnd" minTickGap={16} />
-                    <YAxis
-                      tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
-                      tickFormatter={(v) => formatShort(v)}
-                      label={{ value: 'Tavuk Sayısı (adet)', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }} width={58} />
-                    <Tooltip
-                      contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                      formatter={(value: number) => [value.toLocaleString('tr-TR') + ' adet', 'Tavuk']}
-                    />
-                    <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-                <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  <strong>Ortalama:</strong> {(monthlyLayer.reduce((sum, m) => sum + m.value, 0) / monthlyLayer.length).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} adet
-                </div>
-              </ChartCard>
-            )}
           </div>
         </>
       )}

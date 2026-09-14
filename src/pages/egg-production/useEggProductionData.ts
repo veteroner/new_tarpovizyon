@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchRows, fetchAgg, latestYear, num, type Row } from '../../services/d1';
 
 const R_KUMES = 'tuik/hayvancilik-kumeshayvanciligi';
+/* Aylık bülten serisi — TÜİK SDMX'ten günlük işle tazeleniyor. */
+const R_AYLIK = 'kanatli/uretimleri';
 const R_FAO_HAY = 'fao/uretim-hayvansal-birincil';
 const FAO_YUMURTA = 'Hen eggs in shell, fresh';
 // FAO ülke adları İngilizce; AB-27 listesi de İngilizce olmalı.
@@ -25,13 +27,14 @@ export function useEggProductionData() {
   const [activeTuikTab, setActiveTuikTab] = useState<TuikTab>('overview');
   const [tuikData, setTuikData] = useState<TuikEggData[]>([]);
   const [monthlyEgg, setMonthlyEgg] = useState<MonthlyEggData[]>([]);
-  const [monthlyLayer, setMonthlyLayer] = useState<MonthlyEggData[]>([]);
+  /* Aylık grafiğin yılı — başlıklara SABİT yazılamaz, her yıl değişiyor. */
+  const [monthlyYil, setMonthlyYil] = useState<number | null>(null);
   const [eggTradeData, setEggTradeData] = useState<EggTradeData[]>([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [data, kumesTum] = await Promise.all([
+      const [data, kumesTum, aylikTum] = await Promise.all([
         /*
          * Donmuş ikizden çıkıldı. `o_toplam_uretim_veri`'nin son satırı
          * BOZUKTU (aşağıdaki yoruma bakınız: 2025 yumurta 14,6 Mr, gerçeği
@@ -40,6 +43,7 @@ export function useEggProductionData() {
          */
         fetchRows('tr/hayvansal-urun-uretimi'),
         fetchRows(R_KUMES, { limit: 2000 }),
+        fetchRows(R_AYLIK, { limit: 500 }),
       ]);
 
       const points = data
@@ -177,33 +181,48 @@ export function useEggProductionData() {
           setTuikData(tuikDataArray);
         }
 
-        // Aylık dağılım - NULL olmayan en son yıl için
-        // TOPLAM'ı boş olan yıl (henüz dolmamış) elenir.
-        const doluYumurtaYillari = kumesTum
-          .filter((r) => r.urun === 'Tavuk Yumurtası' && r.TOPLAM != null && num(r.TOPLAM) > 1000)
-          .map((r) => Number(r.yil));
-        const latestYear = String(doluYumurtaYillari.length ? Math.max(...doluYumurtaYillari) : 2025);
+        /*
+         * ─── AYLIK DAĞILIM ARTIK BÜLTEN TABLOSUNDAN ───────────────────────
+         * Önce `tuik_hayvancilik_kumeshayvanciligi` okunuyordu: yıl satırı +
+         * Ocak..Aralık sütunları olan bir tablo. İki sorunu vardı.
+         *
+         * 1) O tabloya 2026'nın YALNIZCA Ocak'ı girmiş; Şubat–Temmuz boş ve
+         *    hiçbir iş oraya yazmıyor (günlük `tuik-hayvancilik-yukle.mjs`
+         *    üç tabloyu besliyor, bunu değil). Ölçüldü.
+         * 2) Kural "TOPLAM'ı dolu en son yıl" olduğu için, içinde bulunulan
+         *    yıl hep eleniyordu — sayfa 2026 verisi D1'de dururken 2025'in
+         *    dağılımını gösteriyordu.
+         *
+         * `kanatli_uretimleri` ise TÜİK SDMX'ten günlük tazeleniyor ve
+         * 2026-07'de. Son YILIN elindeki ayları gösteriyoruz: yıl bitmemiş
+         * olabilir, eksik ay hiç çizilmiyor (sıfır çizmek "o ay üretim yok"
+         * demek olurdu).
+         *
+         * `monthlyLayer` KALDIRILDI: eski kod `urun === 'Yumurtacı Tavuk
+         * Sayısı'` arıyordu ama tabloda öyle bir ürün YOK (15 ürün adı
+         * ölçüldü). Yani o dizi her zaman boştu ve bağlı grafik hiç
+         * çizilmiyordu.
+         */
+        const AY_ADLARI = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+          'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
-        const monthlyRes = { data: kumesTum.filter((r) =>
-          String(r.yil) === latestYear
-          && ['Tavuk Yumurtası', 'Yumurtacı Tavuk Sayısı'].includes(String(r.urun ?? ''))) };
+        const aylikDolu = aylikTum
+          .map((r) => ({
+            yil: Number(String(r.tarih ?? '').slice(0, 4)),
+            ay: Number(String(r.tarih ?? '').slice(5, 7)),
+            deger: num(r.tavuk_yumurtasi_bin_adet),
+          }))
+          .filter((r) => r.yil > 0 && r.ay >= 1 && r.ay <= 12 && r.deger > 0);
 
-        if (monthlyRes.data && monthlyRes.data.length > 0) {
-          const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-
-          monthlyRes.data.forEach((row: Record<string, string | number>) => {
-            const urun = String(row.urun);
-            const monthlyValues = months.map((month) => ({
-              month,
-              value: Number(String(row[month] || '0').replace(/\./g, '')) || 0,
-            }));
-
-            if (urun === 'Tavuk Yumurtası') {
-              setMonthlyEgg(monthlyValues);
-            } else if (urun === 'Yumurtacı Tavuk Sayısı') {
-              setMonthlyLayer(monthlyValues);
-            }
-          });
+        if (aylikDolu.length > 0) {
+          const sonYil = Math.max(...aylikDolu.map((r) => r.yil));
+          setMonthlyYil(sonYil);
+          setMonthlyEgg(
+            aylikDolu
+              .filter((r) => r.yil === sonYil)
+              .sort((a, b) => a.ay - b.ay)
+              .map((r) => ({ month: AY_ADLARI[r.ay - 1], value: r.deger })),
+          );
         }
       } catch (tuikError) {
         console.warn('TÜİK yumurta verileri yüklenemedi:', tuikError);
@@ -316,7 +335,7 @@ export function useEggProductionData() {
     setActiveTuikTab,
     tuikData,
     monthlyEgg,
-    monthlyLayer,
+    monthlyYil,
     eggTradeData,
     latest,
     prev,

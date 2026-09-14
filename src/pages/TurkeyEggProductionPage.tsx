@@ -24,7 +24,7 @@ export default function TurkeyEggProductionPage() {
     setActiveTuikTab,
     tuikData,
     monthlyEgg,
-    monthlyLayer,
+    monthlyYil,
     eggTradeData,
     latest,
     yoy,
@@ -70,7 +70,7 @@ export default function TurkeyEggProductionPage() {
     <div className="page-container">
       <div className="page-header">
         <h1 className="page-title">Türkiye Yumurta Üretim Analizi </h1>
-        <p className="page-subtitle">Yıllık üretim trendleri, ekonomik göstergeler ve TÜİK verileri</p>
+        <p className="page-subtitle">Yıllık üretim trendleri, aylık TÜİK bülten verileri ve dış ticaret</p>
       </div>
 
       {/* KPI Cards */}
@@ -138,11 +138,11 @@ export default function TurkeyEggProductionPage() {
           {/* Tab Content */}
           {activeTuikTab === 'overview' && <EggTuikOverviewTab tuikData={tuikData} />}
           {activeTuikTab === 'production' && (
-            <EggTuikProductionTab tuikData={tuikData} monthlyEgg={monthlyEgg} monthlyLayer={monthlyLayer} />
+            <EggTuikProductionTab tuikData={tuikData} monthlyEgg={monthlyEgg} monthlyYil={monthlyYil} />
           )}
           {activeTuikTab === 'yield' && <EggTuikYieldTab tuikData={tuikData} />}
           {activeTuikTab === 'projection' && (
-            <EggTuikProjectionTab tuikData={tuikData} monthlyEgg={monthlyEgg} monthlyLayer={monthlyLayer} />
+            <EggTuikProjectionTab tuikData={tuikData} monthlyEgg={monthlyEgg} monthlyYil={monthlyYil} />
           )}
         </>
       )}

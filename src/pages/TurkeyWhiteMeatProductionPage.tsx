@@ -3,7 +3,6 @@ import SectionTabs from '../components/SectionTabs';
 import { useSectionTab, type SectionTab } from '../components/bolumSekmeleri';
 import WhiteMeatHeroSection from './white-meat/WhiteMeatHeroSection';
 import WhiteMeatMapSection from './white-meat/WhiteMeatMapSection';
-import WhiteMeatEconomicsSection from './white-meat/WhiteMeatEconomicsSection';
 import WhiteMeatTuikSection from './white-meat/WhiteMeatTuikSection';
 import WhiteMeatTurkeyMeatSection from './white-meat/WhiteMeatTurkeyMeatSection';
 import WhiteMeatQuailSection from './white-meat/WhiteMeatQuailSection';
@@ -14,7 +13,6 @@ import WhiteMeatComparisonSection from './white-meat/WhiteMeatComparisonSection'
  * geri kalanı sekmelerde.
  */
 const BOLUMLER: SectionTab[] = [
-  { id: 'ekonomi', label: 'Ekonomi' },
   { id: 'tavuk', label: 'Tavuk (TÜİK)' },
   { id: 'hindi', label: 'Hindi' },
   { id: 'bildircin', label: 'Bıldırcın' },
@@ -56,16 +54,6 @@ export default function TurkeyWhiteMeatProductionPage() {
       />
 
       <SectionTabs tabs={BOLUMLER} />
-
-      {active === 'ekonomi' && data.economicData.length > 0 && (
-        <WhiteMeatEconomicsSection
-          economicData={data.economicData}
-          econStartDate={data.econStartDate}
-          setEconStartDate={data.setEconStartDate}
-          econEndDate={data.econEndDate}
-          setEconEndDate={data.setEconEndDate}
-        />
-      )}
 
       {active === 'tavuk' && data.tuikData.length > 0 && (
         <WhiteMeatTuikSection
