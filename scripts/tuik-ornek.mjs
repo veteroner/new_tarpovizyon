@@ -174,9 +174,22 @@ for (const flow of akislar) {
   }
 
   const vIdx = basliklar.indexOf('OBS_VALUE');
+
+  /*
+   * Kuyruk satırlarında DEĞİŞEN boyutlar da yazılıyor. Yalnız dönem ve değer
+   * basmak, süzgeç bir boyutu sabitlemediğinde hangi satırın hangi koda ait
+   * olduğunu gizliyordu — kod→ürün eşlemesi tam olarak bu yüzden gerekiyor.
+   */
+  const degisenler = basliklar
+    .map((b, i) => ({ b, i }))
+    .filter(({ b, i }) => b !== 'TIME_PERIOD' && b !== 'OBS_VALUE'
+      && new Set(veri.map((r) => (r[i] ?? '').trim())).size > 1);
+
   console.log(`\n  --- son ${sonN} satır ---`);
   for (const r of veri.slice(-sonN)) {
-    console.log(dIdx >= 0 && vIdx >= 0 ? `  ${r[dIdx]} = ${r[vIdx]}` : `  ${r.join(' | ')}`);
+    if (dIdx < 0 || vIdx < 0) { console.log(`  ${r.join(' | ')}`); continue; }
+    const ek = degisenler.map(({ b, i }) => `${b}=${(r[i] ?? '').trim()}`).join('  ');
+    console.log(`  ${r[dIdx]}${ek ? `  ${ek}` : ''} = ${r[vIdx]}`);
   }
 }
 
