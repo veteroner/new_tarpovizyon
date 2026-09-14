@@ -14,16 +14,12 @@ import {
   type TuikTab,
   type TuikEggData,
   type MonthlyEggData,
-  type EggEconomicData,
   type EggTradeData,
 } from './eggProductionTypes';
 
 export function useEggProductionData() {
   const [loading, setLoading] = useState(true);
   const [series, setSeries] = useState<YearPoint[]>([]);
-  const [economicData, setEconomicData] = useState<EggEconomicData[]>([]);
-  const [econStartDate, setEconStartDate] = useState<string>('');
-  const [econEndDate, setEconEndDate] = useState<string>('');
   const [worldRanking, setWorldRanking] = useState<{ world: number; eu: number } | null>(null);
 
   const [activeTuikTab, setActiveTuikTab] = useState<TuikTab>('overview');
@@ -79,43 +75,20 @@ export function useEggProductionData() {
 
       setSeries(points);
 
-      // Ekonomik göstergeleri yükle
-      try {
-        /*
-         * ─── DONMUŞ İKİZDEN ÇIKILDI ───────────────────────────────────────
-         * Önce `oner/yumurta-maliyeti-fiyati` okunuyordu: MySQL'den bir kez
-         * alınmış, hiçbir senkron işinin YAZMADIĞI donmuş kopya. Son verisi
-         * 2026-02'de kalmıştı; günlük iş `yumurta_maliyet_fiyat` tablosunu
-         * besliyor ve orası 2026-08'de. Yani ekran ALTI AY geride çalışıyordu.
-         *
-         * Sütun adları iki tabloda farklı; aşağıdaki eşleme onları çeviriyor.
-         * Çıktı şekli AYNI bırakıldı — grafikler ve alt bileşenler
-         * değişmeden çalışmaya devam ediyor.
-         */
-        const economicRes = { data: (await fetchRows('yumurta/maliyet-fiyat'))
-          .slice(-60).reverse()
-          .map((r): Row => ({ ...r, tarih: String(r.tarih ?? '').slice(0, 7) })) };
-        if (economicRes.data && economicRes.data.length > 0) {
-          const mapped = economicRes.data.map((item: Record<string, string | number>) => ({
-            tarih: String(item['tarih'] || ''),
-            yumurta_maliyet_tl_kg: Number(item['maliyet_tl_kg']) || 0,
-            yumurta_uretici_fiyati_tl_kg: Number(item['uretici_fiyati_tl_kg']) || 0,
-            yumurtaci_tavuk_yemi_tl_kg: Number(item['yem_fiyati_tl_kg']) || 0,
-            tuketici_fiyati_tl: Number(item['tuketici_fiyati_tl']) || 0,
-            karlilik: Number(item['karlilik']) || 0,
-            uretici_fiyati_maliyet_farki_tl_kg: Number(item['uretici_fiyati_maliyet_farki_tl_kg']) || 0,
-            parite_yumurta_yem_paritesi: Number(item['yem_paritesi']) || 0,
-          }));
-          setEconomicData(mapped);
-          if (mapped.length > 0) {
-            setEconEndDate(mapped[0].tarih);
-            setEconStartDate(mapped[Math.min(11, mapped.length - 1)].tarih);
-          }
-        }
-      } catch (economicError) {
-        console.warn('Yumurta ekonomik göstergeleri yüklenemedi:', economicError);
-        setEconomicData([]);
-      }
+      /*
+       * ─── YUMURTA MALİYET–FİYAT KALDIRILDI ─────────────────────────────
+       * `yumurta_maliyet_fiyat` OTOMATİK BESLENMİYOR. Kaynak durduktan sonra
+       * da tabloya yeni ay satırları giriyor ama değerler bir öncekinden
+       * kopyalanıyor: ölçüldü, üretici fiyatı / kârlılık / parite 2026-05'ten
+       * beri hiç hareket etmemiş, buna rağmen 2026-08 satırı vardı.
+       *
+       * Sayfanın geri kalanı (TÜİK kümes hayvancılığı üretimi) günlük işle
+       * tazeleniyor ve gerçekten güncel. Donmuş bir seriyi onun yanında
+       * göstermek, okuyucuya ikisinin aynı tazelikte olduğunu söylüyordu.
+       *
+       * Tablo ve `yumurta/maliyet-fiyat` ucu DURUYOR — kaynak yeniden
+       * beslenmeye başlarsa bölüm geri getirilebilir.
+       */
 
       // TÜİK Yumurta Üretim Verileri
       try {
@@ -338,11 +311,6 @@ export function useEggProductionData() {
   return {
     loading,
     series,
-    economicData,
-    econStartDate,
-    setEconStartDate,
-    econEndDate,
-    setEconEndDate,
     worldRanking,
     activeTuikTab,
     setActiveTuikTab,

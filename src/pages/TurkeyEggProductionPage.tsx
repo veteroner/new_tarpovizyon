@@ -6,7 +6,6 @@ import { useEggProductionData } from './egg-production/useEggProductionData';
 import { EggKpiCards } from './egg-production/EggKpiCards';
 import { EggIntelligencePanel } from './egg-production/EggIntelligencePanel';
 import { EggTrendChart } from './egg-production/EggTrendChart';
-import { EggEconomicSection } from './egg-production/EggEconomicSection';
 import { EggTuikOverviewTab } from './egg-production/EggTuikOverviewTab';
 import { EggTuikProductionTab } from './egg-production/EggTuikProductionTab';
 import { EggTuikYieldTab } from './egg-production/EggTuikYieldTab';
@@ -20,11 +19,6 @@ export default function TurkeyEggProductionPage() {
   const {
     loading,
     series,
-    economicData,
-    econStartDate,
-    setEconStartDate,
-    econEndDate,
-    setEconEndDate,
     worldRanking,
     activeTuikTab,
     setActiveTuikTab,
@@ -92,15 +86,6 @@ export default function TurkeyEggProductionPage() {
 
       {/* Trend Chart */}
       <EggTrendChart series={series} />
-
-      {/* Economic Section */}
-      <EggEconomicSection
-        economicData={economicData}
-        econStartDate={econStartDate}
-        setEconStartDate={setEconStartDate}
-        econEndDate={econEndDate}
-        setEconEndDate={setEconEndDate}
-      />
 
       {/* TÜİK Section */}
       {tuikData.length > 0 && (

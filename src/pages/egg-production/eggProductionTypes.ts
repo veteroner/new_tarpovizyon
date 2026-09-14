@@ -21,17 +21,6 @@ export type MonthlyEggData = {
   value: number;
 };
 
-export type EggEconomicData = {
-  tarih: string;
-  yumurta_maliyet_tl_kg: number;
-  yumurta_uretici_fiyati_tl_kg: number;
-  yumurtaci_tavuk_yemi_tl_kg: number;
-  tuketici_fiyati_tl: number;
-  karlilik: number;
-  uretici_fiyati_maliyet_farki_tl_kg: number;
-  parite_yumurta_yem_paritesi: number;
-};
-
 export function parseTrNumber(input: unknown): number {
   const raw = String(input ?? '').trim();
   if (!raw) return 0;
