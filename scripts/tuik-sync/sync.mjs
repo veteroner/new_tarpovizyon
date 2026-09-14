@@ -435,11 +435,20 @@ async function syncMonthCols(ds) {
   }
   if (!gelen.size) throw new Error(`${ds.flow}: eşleşen madde kodu yok.`);
 
+  /*
+   * `endeks` AYIRACI İSTEĞE BAĞLI. Bu yazıcı tek bir tablo için yazılmıştı
+   * (`tuik_fiyatendex`), orada aynı tabloda iki endeks ailesi duruyor ve
+   * ayrılmaları gerekiyor. Kümes hayvancılığı tablosunda öyle bir sütun yok;
+   * koşulu koşulsuz eklemek sorguyu "no such column: endeks" ile düşürürdü.
+   */
+  const ayirac = ds.endeks !== undefined;
   const aySutun = AY_SUTUN.map((a) => `"${a}"`).join(',');
+  const toplamSec = ds.toplamColumn ? `, "${ds.toplamColumn}"` : '';
   const mevcut = new Map();
   for (const r of await d1(
-    `SELECT ${ds.codeColumn}, ${ds.yearColumn}, ${aySutun} FROM ${ds.table} WHERE endeks = ?`,
-    [ds.endeks],
+    `SELECT ${ds.codeColumn}, ${ds.yearColumn}, ${aySutun}${toplamSec} FROM ${ds.table}`
+    + (ayirac ? ' WHERE endeks = ?' : ''),
+    ayirac ? [ds.endeks] : undefined,
   )) {
     mevcut.set(`${r[ds.codeColumn]}|${r[ds.yearColumn]}`, r);
   }
@@ -459,13 +468,32 @@ async function syncMonthCols(ds) {
       setler.push(`"${sutun}" = ?`);
       params.push(deger);
     }
+    /*
+     * ─── TOPLAM YALNIZ TAM YILDA VE YALNIZ BOŞSA ──────────────────────────
+     * Yıllık grafikler `TOPLAM` sütununa bakıyor; dolu olmayan yıl eleniyor.
+     * Kimse oraya yazmazsa yıl bittiğinde sayfa bir önceki yılda donar — bu
+     * tabloda tam olarak bu olmuştu.
+     *
+     * İki koşul birden: (a) 12 ayın 12'si gelmiş olmalı — eksik aylarla
+     * hesaplanan bir toplam, yıl tamammış gibi görünüp grafiği yanlış çizer;
+     * (b) sütun BOŞ olmalı — TÜİK'in yayımladığı yıllık toplam aylarınkinden
+     * yuvarlamayla ayrılabiliyor ve onu kendi hesabımızla ezmek veriyi
+     * bozmak olurdu.
+     */
+    if (ds.toplamColumn && Object.keys(aylar).length === 12
+        && (prev[ds.toplamColumn] === null || prev[ds.toplamColumn] === undefined)) {
+      setler.push(`"${ds.toplamColumn}" = ?`);
+      params.push(Object.values(aylar).reduce((t, v) => t + v, 0));
+    }
+
     if (!setler.length) continue;
     const [kod, yil] = anahtar.split('|');
     updated++;
     writes.push({
       sql: `UPDATE ${ds.table} SET ${setler.join(', ')} `
-        + `WHERE endeks = ? AND ${ds.codeColumn} = ? AND ${ds.yearColumn} = ?`,
-      params: [...params, ds.endeks, kod, Number(yil)],
+        + (ayirac ? 'WHERE endeks = ? AND ' : 'WHERE ')
+        + `${ds.codeColumn} = ? AND ${ds.yearColumn} = ?`,
+      params: [...params, ...(ayirac ? [ds.endeks] : []), kod, Number(yil)],
     });
   }
 

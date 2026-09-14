@@ -546,6 +546,62 @@ export const DATASETS = [
    * ─── DIŞ TİCARET ENDEKSLERİ ───────────────────────────────────────────────
    * `disTicaretEndeksleri()` ile üretiliyor; tanım dosyanın sonunda.
    */
+  /*
+   * ─── KÜMES HAYVANCILIĞI: AY SÜTUNLU TABLO ─────────────────────────────────
+   * `kanatli_uretimleri` ile AYNI akıştan besleniyor ama başka bir tabloya
+   * yazıyor. Neden iki tablo: bu tablo yıl satırı + Ocak..Aralık sütunlarından
+   * oluşuyor ve yıllık TÜİK grafiklerini besliyor; diğeri uzun biçimde,
+   * aylık seriyi besliyor. İkisini birleştirmek ekranların tamamını
+   * değiştirmek demekti.
+   *
+   * ─── NEDEN EKLENDİ ────────────────────────────────────────────────────────
+   * Bu tabloya hiçbir iş yazmıyordu. 2026'nın yalnızca Ocak'ı vardı; günlük
+   * `tuik-hayvancilik-yukle.mjs` üç başka tabloyu besliyor, bunu değil.
+   * Ölçüldü: Şubat–Temmuz 2026 boştu, oysa aynı veri D1'de duruyordu.
+   *
+   * ─── EŞLEME `urunkod` İLE DEĞİL, ÜRÜN ADIYLA ──────────────────────────────
+   * Tabloda bir `urunkod` sütunu var ama GÜVENİLMEZ: kod 1 hem "Tavuk
+   * Yumurtası" hem "Kesilen Tavuk" satırlarına verilmiş ve kod 2 hiç yok.
+   * Ona göre yazmak iki ürünü birbirine karıştırırdı.
+   *
+   * Kodlar TAHMİN EDİLMEDİ, ölçüldü: 2025-12'de akıştan gelen dokuz dolu
+   * değerin dokuzu da tablodaki "Aralık" sütunuyla birebir tuttu
+   * (ör. kod 1 → 1.860.594, kod 2 → 136.487, kod 3 → 253.993).
+   * Boş gelen kodlar (4, 5, 12, 13) TÜİK'te gizli: `CONF_STATUS=C`.
+   *
+   * Adlar D1'DEKİ HÂLİYLE yazılıyor — yazım hataları dahil ("civivi",
+   * "Yumurtaı"). Düzeltmek eşleşmeyi bozar; ad burada bir anahtar.
+   *
+   * Bıldırcın kodları (10, 11, 14, 15) akışta hiç geçmiyor; tablodaki
+   * satırları olduğu gibi kalıyor.
+   */
+  {
+    kind: 'monthCols',
+    name: 'Kümes hayvancılığı (ay sütunlu tablo)',
+    flow: 'DF_KUMES_HAYVANCILIK_URUN_V1',
+    version: '1.0',
+    filter: { FREQ: 'M' },
+    table: 'tuik_hayvancilik_kumeshayvanciligi',
+    codeDim: 'KUMES_HY_URUN',
+    codeColumn: 'urun',
+    yearColumn: 'yil',
+    toplamColumn: 'TOPLAM',
+    /* Kaynak üç ondalık veriyor (1.904.042,374); tablo REAL tutuyor. */
+    decimals: 3,
+    codeMap: {
+      1: 'Tavuk Yumurtası',
+      2: 'Kesilen Tavuk',
+      3: 'Tavuk Eti',
+      4: 'Kesilen Hindi',
+      5: 'Hindi Eti',
+      6: 'Etlik Piliç (Broiler) civivi Üretimi İçin Kuluçkaya Basılan Yumurta',
+      7: 'Üretilen Broiler civivi',
+      8: 'Yumurtaı Tavuk civivi Üretimi İçin Kuluçkaya Basılan Yumurta',
+      9: 'Üretilen Yumurtacı Tavuk civivi',
+      12: 'Hindi civivi Üretimi İçin Kuluçkaya Basılan Yumurta',
+      13: 'Üretilen Hindi civivi',
+    },
+  },
   ...disTicaretEndeksleri(),
 ];
 
