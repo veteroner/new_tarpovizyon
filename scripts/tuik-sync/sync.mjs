@@ -39,7 +39,7 @@ const D1_URL = () =>
   `https://api.cloudflare.com/client/v4/accounts/${requireEnv('CLOUDFLARE_ACCOUNT_ID')}` +
   `/d1/database/${requireEnv('CLOUDFLARE_D1_DATABASE_ID')}/query`;
 
-async function d1(sql, params) {
+async function d1Ham(sql, params) {
   const res = await fetch(D1_URL(), {
     method: 'POST',
     headers: {
@@ -52,7 +52,11 @@ async function d1(sql, params) {
   if (!res.ok || !body?.success) {
     throw new Error(`D1 hatası (HTTP ${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
   }
-  return body.result[0].results;
+  return body.result[0];
+}
+
+async function d1(sql, params) {
+  return (await d1Ham(sql, params)).results;
 }
 
 // ─── TÜİK ────────────────────────────────────────────────────────────────────
@@ -213,10 +217,47 @@ const donemIfade = (ds) =>
 /** INSERT'e yazılacak dönem değeri. */
 const donemDegeri = (ds, p) => (yillikMi(ds) ? Number(p) : `${p}-01 00:00:00`);
 
-/** Yazma işlemlerini sırayla uygular (günlük fark tipik olarak birkaç satır). */
+/*
+ * UPDATE'in WHERE'ine giden dönem değeri — INSERT'inkiyle AYNI DEĞİL.
+ *
+ * ─── SESSİZ HATA ────────────────────────────────────────────────────────────
+ * WHERE `substr(tarih,1,7) = ?` biçiminde ve buraya `donemDegeri` veriliyordu,
+ * yani `'2026-07'` ile `'2026-07-01 00:00:00'` karşılaştırılıyordu. Hiçbir
+ * satır eşleşmiyor: UPDATE 0 satır etkiliyor, SQL hata vermiyor, iş de
+ * "~79 güncellendi" yazıyordu — çünkü sayaç NİYETİ sayıyor, sonucu değil.
+ *
+ * Sonuç: aylık `wide` tablolarında (süt, kanatlı, dış ticaret endeksleri)
+ * YALNIZCA yeni dönemler yazılabiliyordu. TÜİK'in mevcut bir ayı revize
+ * etmesi hiç yansımıyordu. D1'de ölçülerek doğrulandı:
+ *     substr(tarih,1,7)='2026-07-01 00:00:00' → 0 satır
+ *     substr(tarih,1,7)='2026-07'             → 1 satır
+ */
+const donemParametresi = (ds, p) => (yillikMi(ds) ? Number(p) : p);
+
+/**
+ * Yazma işlemlerini sırayla uygular (günlük fark tipik olarak birkaç satır).
+ *
+ * ─── ETKİSİZ YAZMA HATADIR ──────────────────────────────────────────────────
+ * Bu adım bir kez sessizce hiçbir şey yapmadı: UPDATE'in WHERE'i hiçbir satıra
+ * uymuyordu, SQL hata vermiyordu ve iş yine de "~79 güncellendi" yazıyordu.
+ * Sayaç niyeti sayıyordu, sonucu değil.
+ *
+ * Artık D1'in bildirdiği `meta.changes` okunuyor: bir UPDATE 0 satır
+ * etkilediyse yazma başarılı SAYILMIYOR. Ölçülen şey niyet değil etki.
+ */
 async function applyWrites(writes) {
   if (DRY_RUN) return;
-  for (const w of writes) await d1(w.sql, w.params);
+  const etkisiz = [];
+  for (const w of writes) {
+    const sonuc = await d1Ham(w.sql, w.params);
+    if (sonuc?.meta?.changes === 0) etkisiz.push(w.sql.slice(0, 90));
+  }
+  if (etkisiz.length) {
+    throw new Error(
+      `${etkisiz.length}/${writes.length} yazma hiçbir satırı etkilemedi — `
+      + `WHERE koşulu tutmuyor olabilir. Örnek: ${etkisiz[0]}`,
+    );
+  }
 }
 
 // ─── Geniş tablolar ─────────────────────────────────────────────────────────
@@ -270,7 +311,7 @@ async function syncWide(ds) {
       updated++;
       writes.push({
         sql: `UPDATE ${ds.table} SET ${cols.map((c) => `${c}=?`).join(',')} WHERE ${donemIfade(ds)}=?`,
-        params: [...next, donemDegeri(ds, period)],
+        params: [...next, donemParametresi(ds, period)],
       });
     } else {
       inserted++;
