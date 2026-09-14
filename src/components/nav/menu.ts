@@ -170,6 +170,7 @@ export const MENU: MenuCategory[] = [
       { label: 'Ürün Radar', turkey: '/tarpovizyon/turkey/trade?tab=product' },
       { label: 'Ülke Radar', turkey: '/tarpovizyon/turkey/trade?tab=country' },
       { label: 'Ticaret İçgörüleri', turkey: '/tarpovizyon/turkey/trade?tab=intelligence' },
+      { label: 'Fiyat ve Hacim Endeksleri', turkey: '/tarpovizyon/turkey/trade?tab=endeks' },
     ],
   },
   {

@@ -97,7 +97,23 @@ export default function MobileDataShell({ basliksiz }: { basliksiz?: boolean } =
   }, []);
   const bolumluMu = bolumler.some((b) => b.ad);
 
-  const aktifYol = kardesler.find((k) => k.yol.split('?')[0] === pathname)?.yol;
+  /*
+   * ─── AKTİF SAYFA SORGU DİZESİYLE BULUNUYOR ────────────────────────────────
+   * Eşleşme `k.yol.split('?')[0] === pathname` ile yapılıyordu, yani sorgu
+   * dizesi atılıyordu. Dış Ticaret'in ALTI menü öğesi de aynı yola çıkıyor
+   * (`/tarpovizyon/turkey/trade?tab=...`); `find` her zaman ilkini —
+   * "Genel Bakış"ı — döndürüyordu. Hangi sekme açık olursa olsun seçicide
+   * "Genel Bakış" yazıyordu (üretim derlemesinde görüldü).
+   *
+   * Doğru öğeyi `locate()` zaten bulup başlığa basıyor; burada onu yeniden
+   * aramak yerine aynı sonucu kullanıyoruz — iki ayrı eşleştirme mantığı
+   * olması hatanın kendisiydi.
+   *
+   * Yine de listede var mı diye bakılıyor: `kardesler` masaüstüne özel
+   * öğeleri eliyor ve listede olmayan bir değer `select`'i boş gösterirdi.
+   */
+  const bulunanYol = yer ? itemPath(yer.item, yer.kapsam ?? 'turkey') : undefined;
+  const aktifYol = kardesler.find((k) => k.yol === bulunanYol)?.yol;
 
   return (
     <div className="ios-app">

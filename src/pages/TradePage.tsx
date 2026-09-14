@@ -6,8 +6,9 @@ import AnimalTradeTab from './trade/AnimalTradeTab';
 import ProductIntelligenceTab from './trade/ProductIntelligenceTab';
 import CountryIntelligenceTab from './trade/CountryIntelligenceTab';
 import TradeIntelligenceTab from './trade/TradeIntelligenceTab';
+import TradeIndexTab from './trade/TradeIndexTab';
 
-type TabId = 'overview' | 'plant' | 'animal' | 'product' | 'country' | 'intelligence';
+type TabId = 'overview' | 'plant' | 'animal' | 'product' | 'country' | 'intelligence' | 'endeks';
 
 export function TradePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,7 @@ export function TradePage() {
       {activeTab === 'product' && <ProductIntelligenceTab />}
       {activeTab === 'country' && <CountryIntelligenceTab />}
       {activeTab === 'intelligence' && <TradeIntelligenceTab />}
+      {activeTab === 'endeks' && <TradeIndexTab />}
     </div>
   );
 }
