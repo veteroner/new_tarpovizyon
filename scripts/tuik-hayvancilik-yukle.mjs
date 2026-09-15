@@ -41,6 +41,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as XLSX from 'xlsx';
+import { d1Dene, D1_ZAMAN_ASIMI } from './lib/d1-dene.mjs';
 
 const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const YAZ = process.argv.includes('--yaz');
@@ -290,23 +291,28 @@ const REST = process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_
 
 async function d1(sql) {
   if (REST) {
-    const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}` +
-      `/d1/database/${process.env.CLOUDFLARE_D1_DATABASE_ID}/query`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-          'Content-Type': 'application/json',
+    return d1Dene(sql, async () => {
+      const res = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}` +
+        `/d1/database/${process.env.CLOUDFLARE_D1_DATABASE_ID}/query`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sql }),
+          signal: AbortSignal.timeout(D1_ZAMAN_ASIMI),
         },
-        body: JSON.stringify({ sql }),
-      },
-    );
-    const body = await res.json().catch(() => null);
-    if (!res.ok || !body?.success) {
-      throw new Error(`D1 hatası (HTTP ${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
-    }
-    return body.result[0].results ?? [];
+      );
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.success) {
+        const e = new Error(`D1 hatası (HTTP ${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
+        e.durum = res.status;
+        throw e;
+      }
+      return body.result[0].results ?? [];
+    });
   }
   let stdout;
   try {

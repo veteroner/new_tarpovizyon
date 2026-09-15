@@ -28,6 +28,7 @@
 
 import * as XLSX from 'xlsx';
 import { damgaSql } from './lib/damga.mjs';
+import { d1Dene, D1_ZAMAN_ASIMI } from './lib/d1-dene.mjs';
 
 const SAYFA = 'https://www.fao.org/worldfoodsituation/foodpricesindex/en/';
 const API = process.env.TARPOVIZYON_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
@@ -175,16 +176,23 @@ const restIleYaz = Boolean(process.env.CLOUDFLARE_API_TOKEN
 async function d1Rest(sql) {
   const url = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}`
     + `/d1/database/${process.env.CLOUDFLARE_D1_DATABASE_ID}/query`;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ sql }),
+  await d1Dene(sql, async () => {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sql }),
+      signal: AbortSignal.timeout(D1_ZAMAN_ASIMI),
+    });
+    const b = await r.json().catch(() => null);
+    if (!r.ok || !b?.success) {
+      const e = new Error(`D1 hatası (HTTP ${r.status}): ${JSON.stringify(b?.errors ?? b)}`);
+      e.durum = r.status;
+      throw e;
+    }
   });
-  const b = await r.json().catch(() => null);
-  if (!r.ok || !b?.success) throw new Error(`D1 hatası (HTTP ${r.status}): ${JSON.stringify(b?.errors ?? b)}`);
 }
 
 const { execFileSync } = await import('node:child_process');
