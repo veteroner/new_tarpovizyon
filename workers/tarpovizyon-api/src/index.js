@@ -577,7 +577,22 @@ const CORS_HEADERS = {
      JS'ten okutmuyor (özel başlıklar varsayılan olarak gizli). */
   'Access-Control-Expose-Headers': 'X-Veri-Damga, X-Veri-Tablo',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  /*
+   * `Authorization` ŞART. Para duvarı açılınca Pro sayfaları okuma isteklerine
+   * oturum jetonunu `Authorization: Bearer` olarak eklemeye başladı; bu başlık
+   * isteği "basit" olmaktan çıkarıyor ve tarayıcı önce OPTIONS soruyor. Burada
+   * yalnız `Content-Type` varken ön kontrol reddedildi ve GİRİŞ YAPMIŞ herkeste
+   * Genel Bakış dahil Pro sayfaları "Veriler yükleniyor…"da kaldı (16 Eylül 2026).
+   *
+   * `x-panel-oturum`: panelde oturum açıkken `ayarOku()` aynı yardımcı başlıkları
+   * gönderiyor; public `ayar` okuması da bu yüzden düşüyordu.
+   *
+   * `*` köken ile `Authorization` birlikte geçerli: kimlik çerezle değil başlıkla
+   * taşınıyor, `credentials: include` yok.
+   */
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-panel-oturum',
+  /* Ön kontrol her istekte tekrarlanmasın — sayfa başına onlarca uç çağrılıyor. */
+  'Access-Control-Max-Age': '86400',
 };
 
 /*
@@ -719,7 +734,7 @@ import { handleSayfaBul } from './sayfaBul.js';
 import { handlePiyasa, handlePiyasaGecmis } from './piyasa.js';
 import { damgaHaritasi, slugTablosu, damgaSec } from './damga.js';
 import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.js';
-import { yetkiDenetimi } from './yetki.js';
+import { yetkiDenetimi, KORUMALI_UCLAR } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
 import { handleKuponKullan, handleKuponlar, handleKuponYaz } from './kupon.js';
@@ -1068,7 +1083,9 @@ export default {
       const anahtar = new Request(anahtarUrl.toString(), request);
 
       const hazir = await onbellek.match(anahtar);
-      if (hazir) return istemciyeGore(hazir, damga, tablo);
+      /* Kişiye özel yanıt: korumalı uç ya da oturum jetonuyla gelen istek. */
+      const ozel = KORUMALI_UCLAR.has(slug) || request.headers.has('Authorization');
+      if (hazir) return istemciyeGore(hazir, damga, tablo, ozel);
 
       if (await okumaSiniriAsildi(request, env)) {
         return json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, 429);
@@ -1089,7 +1106,7 @@ export default {
         saklanacak.headers.set('Cache-Control', `public, max-age=${ONBELLEK_SN}`);
         ctx?.waitUntil?.(onbellek.put(anahtar, saklanacak));
 
-        return istemciyeGore(new Response(govde, { status: yanit.status, headers: baslik }), damga, tablo);
+        return istemciyeGore(new Response(govde, { status: yanit.status, headers: baslik }), damga, tablo, ozel);
       }
       return yanit;
     }
@@ -1132,9 +1149,17 @@ const ISTEMCI_SN = 60;
  * dönüyordu — ölçüldü, dağıtımdan sonra sayfa hiç damga görmedi. Bu
  * fonksiyon hem ıska hem isabet yolundan geçiyor.
  */
-function istemciyeGore(yanit, damga, tablo) {
+function istemciyeGore(yanit, damga, tablo, ozel = false) {
   const doner = new Response(yanit.body, yanit);
-  doner.headers.set('Cache-Control', `public, max-age=${ISTEMCI_SN}`);
+  /*
+   * ─── KORUMALI YANIT PAYLAŞILAN ÖNBELLEĞE GİRMEMELİ ──────────────────────
+   * API artık Netlify üzerinden de geçiyor (`/_w/*` — bazı ağlar *.workers.dev
+   * adlarını SNI'ye bakarak kesiyor). `public` bir yanıtı ara vekil saklayabilir:
+   * giriş yapmış bir abonenin Pro yanıtı aynı URL'yi isteyen anonim ziyaretçiye
+   * dönebilirdi. `private` yalnız tarayıcının kendi önbelleğine izin veriyor.
+   */
+  doner.headers.set('Cache-Control', `${ozel ? 'private' : 'public'}, max-age=${ISTEMCI_SN}`);
+  if (ozel) doner.headers.set('Vary', 'Authorization');
   if (damga) {
     doner.headers.set('X-Veri-Damga', String(damga));
     doner.headers.set('X-Veri-Tablo', tablo ?? '');

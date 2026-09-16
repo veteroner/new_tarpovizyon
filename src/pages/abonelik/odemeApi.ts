@@ -7,9 +7,9 @@
  */
 
 import { jetonOku } from '../../auth/oturum';
+import { apiTaban } from '../../utils/apiTaban';
 
-const API_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_TABAN = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 async function cagir<T>(yol: string, govde: unknown): Promise<T> {
   const jeton = jetonOku();

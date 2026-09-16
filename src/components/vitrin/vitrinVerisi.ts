@@ -20,7 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * çünkü dönem etiketi de onlarla birlikte gelir.
  */
 
-const API = 'https://tarpovizyon-api.veteroner.workers.dev';
+const API = apiTaban();
 
 export type Kart = {
   id: string;
@@ -51,6 +51,7 @@ export type Bolum = {
 };
 
 import { surumYolu } from '../../utils/surum';
+import { apiTaban } from '../../utils/apiTaban';
 
 const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 

@@ -1,3 +1,4 @@
+import { apiTaban } from '../../utils/apiTaban';
 /**
  * Yahoo Finance Commodity Service
  *
@@ -102,8 +103,7 @@ export const COMMODITY_META: Record<string, {
  * saklıyor (fiyat 10 dk, geçmiş 30 dk) — ilk ziyaretçi bekliyor, sonrakiler
  * anında alıyor. Kaynak anahtarı da istemci paketinden çıkmış oldu.
  */
-const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 const BACKEND_COMMODITY_URL = `${API_BASE}/api/piyasa`;
 

@@ -7,6 +7,7 @@ import { VeriKarti } from '../components/vitrin/VeriKarti';
 import { useVitrinVerisi, type Kart } from '../components/vitrin/vitrinVerisi';
 import { isPlatform } from '../mobile/utils/platform';
 import { ayarOku, type Ayarlar } from './panel/yonetimApi';
+import { apiTaban } from '../utils/apiTaban';
 
 /**
  * Pro vitrini — `/tarpovizyon/pro`
@@ -38,7 +39,7 @@ import { ayarOku, type Ayarlar } from './panel/yonetimApi';
  * Kârlılık/parite kartları kullanıcı isteğiyle kaldırıldı (Eylül 2026).
  */
 
-const API = 'https://tarpovizyon-api.veteroner.workers.dev';
+const API = apiTaban();
 
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];

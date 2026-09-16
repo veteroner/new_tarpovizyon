@@ -1,3 +1,4 @@
+import { apiTaban } from '../../utils/apiTaban';
 /**
  * Panel → yönetim uçları.
  *
@@ -12,8 +13,7 @@
  * değişmeden çalışır.
  */
 
-const API_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_TABAN = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 const ANAHTAR_DEPO = 'tarpovizyon_admin_key';
 /* Panel oturumu — TOTP ile alınan kısa ömürlü jeton (8 saat). Sabit

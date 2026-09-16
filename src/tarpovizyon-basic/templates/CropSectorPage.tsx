@@ -3,6 +3,7 @@ import { KpiCard } from '../charts/KpiCard';
 import { formatNumber } from '../charts/kpiBicim';
 import { YearlyChart } from '../charts/YearlyChart';
 import { TradeTrendSection } from '../charts/TradeTrendSection';
+import { apiTaban } from '../../utils/apiTaban';
 
 export type CropSectorPageConfig = {
   title: string;
@@ -17,7 +18,7 @@ export type CropSectorPageConfig = {
   productionLabel?: string;
 };
 
-const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 type YearRow = { yil: number; deger: number };
 /** `birim` yalnızca Verim'de dolu: ağaç meyvelerinde Kg/Ağaç, tarlada Kg/Dekar. */

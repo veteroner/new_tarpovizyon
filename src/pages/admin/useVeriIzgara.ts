@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { fetchRows } from '../../services/d1';
 import { panelJetonuOku } from '../panel/yonetimApi';
+import { apiTaban } from '../../utils/apiTaban';
 
-const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 /** Izgaraya bir seferde çekilen satır sayısı. */
 export const PENCERE = 300;
