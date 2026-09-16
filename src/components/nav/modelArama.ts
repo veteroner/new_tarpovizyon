@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MenuItem } from './menu';
+import { apiTaban } from '../../utils/apiTaban';
 
 /**
  * Model destekli sayfa bulma — yerel arama boş dönerse devreye giren katman.
@@ -30,8 +31,7 @@ import type { MenuItem } from './menu';
  * üzerinden `/api.php` yönlendirmesi hiç çalışmıyor. Uygulama zaten bütün
  * verisini bu Worker'dan çekiyor, yani gömülü adrese de gerek kalmıyor.
  */
-const UC = `${(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev'}/api/sayfa-bul`;
+const UC = `${apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)}/api/sayfa-bul`;
 
 /** Bundan kısa sorgu modele gitmiyor: iki harf herkesin yolunun üstünde. */
 const EN_AZ_HARF = 3;

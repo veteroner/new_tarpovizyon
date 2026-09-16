@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { fetchAgg, num, type Row } from './d1';
+import { apiTaban } from '../utils/apiTaban';
 
 // Veri artık Cloudflare D1'den (services/d1.ts) geliyor; burada kalan tek
 // api.php kullanımı AI sohbet ucu. Aynı orijin ('') kullanılıyor ki istek
@@ -13,8 +14,7 @@ const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
  * `d1.ts` ile AYNI varsayılan: iki ayrı adres tutmak, birini taşıyıp diğerini
  * unutmanın kolay olduğu bir tekrar olurdu.
  */
-const WORKER_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const WORKER_TABAN = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 /*
  * ─── api.php ANAHTARI ARTIK İSTEMCİDE YOK ───────────────────────────────────

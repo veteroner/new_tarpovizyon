@@ -1,3 +1,4 @@
+import { apiTaban } from '../../utils/apiTaban';
 /**
  * TarpoVizyon AI istemcisi.
  *
@@ -23,8 +24,7 @@
  * en kötüsü hatayı saklar. Arıza durumunda dürüst bir hata mesajı veriliyor.
  */
 
-const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 const AI_URL = `${API_BASE}/api/ai`;
 

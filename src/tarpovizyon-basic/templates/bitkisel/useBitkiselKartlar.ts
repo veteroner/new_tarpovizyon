@@ -1,5 +1,6 @@
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { BITKISEL_KARTLAR, type BitkiselKart } from './kartlar';
+import { apiTaban } from '../../../utils/apiTaban';
 
 /**
  * Bitkisel kartların veri kaynağı: `bitkisel/uretim-detay-yillik`.
@@ -10,8 +11,7 @@ import { BITKISEL_KARTLAR, type BitkiselKart } from './kartlar';
  * eşleştirmiyor.
  */
 
-const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 export type YilDeger = { yil: number; deger: number; urun_sayisi?: number };
 

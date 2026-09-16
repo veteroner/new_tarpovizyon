@@ -9,9 +9,9 @@
 //   fetchAgg   — toplama      : /api/agg/<rota>?groupBy=…&sum=…&f_<sütun>=…
 
 import { jetonOku } from '../auth/oturum';
+import { apiTaban } from '../utils/apiTaban';
 
-const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 export type Row = Record<string, string | number | null>;
 

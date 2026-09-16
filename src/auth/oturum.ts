@@ -1,3 +1,4 @@
+import { apiTaban } from '../utils/apiTaban';
 /**
  * Oturum — jeton saklama ve kimlik uçlarına çağrı.
  *
@@ -18,8 +19,7 @@
  * tek bir yerden okumayı sağlıyor.
  */
 
-const API_TABAN = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_TABAN = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 const JETON_ANAHTAR = 'tarpovizyon_oturum';
 

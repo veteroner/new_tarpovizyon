@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SEKTOR_FORMLARI, type SektorFormu } from './admin/sektorFormlari';
 import { panelJetonuOku } from './panel/yonetimApi';
+import { apiTaban } from '../utils/apiTaban';
 
 /**
  * Sektör fiyatları — rehberli veri girişi.
@@ -20,8 +21,7 @@ import { panelJetonuOku } from './panel/yonetimApi';
  * formülünü de yazıyor. Yanlış hesaplama ihtimali ortadan kalkıyor.
  */
 
-const API_BASE = (import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined)
-  ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];

@@ -5,8 +5,9 @@ import { KpiCard } from '../charts/KpiCard';
 import { formatNumber } from '../charts/kpiBicim';
 import { WorldChoroplethMap } from '../charts/WorldChoroplethMap';
 import { RankedTable } from '../charts/RankedTable';
+import { apiTaban } from '../../utils/apiTaban';
 
-const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
 function aggregateByCountry(rows: Row[], valueField: string, quantityField: string) {

@@ -5,11 +5,12 @@ import { formatNumber } from '../charts/kpiBicim';
 import { YearlyChart } from './YearlyChart';
 import { RankedTable } from './RankedTable';
 import { useYearRangeFilter } from './DateRangeFilter';
+import { apiTaban } from '../../utils/apiTaban';
 
 type TradeRow = { yil: number; ihracat_deger: number; ithalat_deger: number; ihracat_miktar?: number; ithalat_miktar?: number };
 type ProductRow = { ana_urun: string; ihracat_deger: number; ithalat_deger: number; ihracat_miktar?: number; ithalat_miktar?: number; miktar_birim?: string };
 
-const API_BASE = import.meta.env.VITE_TARPOVIZYON_BASIC_API ?? 'https://tarpovizyon-api.veteroner.workers.dev';
+const API_BASE = apiTaban(import.meta.env.VITE_TARPOVIZYON_BASIC_API as string | undefined);
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 
 async function fetchTrend(modul: 'hayvansal' | 'bitkisel', urunler: string[]): Promise<{ rows: TradeRow[]; unit: string | null }> {

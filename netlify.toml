@@ -30,6 +30,19 @@
   status = 200
   force = true
 
+# ─── WORKER API VEKİLİ ────────────────────────────────────────────────────
+# Bazı ağlar *.workers.dev adlarını SNI'ye bakarak kesiyor: aynı Cloudflare
+# IP'sine "example.com" adıyla TLS kuruluyor, "tarpovizyon-api.veteroner.
+# workers.dev" adıyla WRONG_VERSION_NUMBER dönüyor (16 Eylül 2026, ölçüldü).
+# Tarayıcı artık workers.dev'e hiç bağlanmıyor; isteği Netlify yapıyor.
+# Uygulama taraf: src/utils/apiTaban.ts. Korumalı yanıtlar worker'da
+# `Cache-Control: private` — vekil önbelleğine girmiyor.
+[[redirects]]
+  from = "/_w/*"
+  to = "https://tarpovizyon-api.veteroner.workers.dev/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/egg-prices"
   to = "https://basmakcitavukculuk.com/"
