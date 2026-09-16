@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { basicAlanAdi } from './utils/surum';
+import { basicAlanAdi, proSurumu } from './utils/surum';
 import { OturumSaglayici } from './auth/OturumSaglayici';
 import { YolKapisi } from './auth/ProKapisi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -243,8 +243,38 @@ function AppContent() {
             <Route path="sartlar" element={<MobileTermsPage />} />
           </Route>
 
-          {/* Ana Program Seçimi — Capacitor'da mobil ana sayfaya yönlendir */}
-          <Route path="/" element={<GirisEkrani masaustu={<ProgramSelectionPage />} mobilYol="/m" />} />
+          {/*
+            * Ana sayfa — Capacitor'da mobil ana sayfaya yönlendirilir.
+            *
+            * ─── PRO ALAN ADINDA VİTRİN ÇİZİLİYOR ─────────────────────────────
+            * Kök sayfa iki alan adında da AYNI bileşendi; yalnız bağlantılar ve
+            * menü çalışma anında değişiyordu. Sonuç ölçüldü: pro.tarpovizyon.com
+            * kökünde bölüm başlıkları hâlâ BASIC'in taksonomisiydi
+            * (Makro Veriler · Hayvancılık · Bitkisel Üretim · Bölgesel Veriler)
+            * oysa Pro menüsü başka bir kırılım kullanıyor (Genel Bakış · Fiyat
+            * ve Ekonomi · … · İl Bazında). Yani Pro'nun kök sayfası Pro'nun
+            * kendi bölümlerini anlatmıyordu.
+            *
+            * Üstelik Pro için yazılmış asıl vitrin `/tarpovizyon/pro`'daydı ve
+            * oraya kimse düşmüyordu. Para duvarı açıldıktan sonra bu kozmetik
+            * bir ayrıntı değil: duvara çarpan ziyaretçinin gördüğü ilk sayfa
+            * satın alma kararını veren sayfa.
+            *
+            * Karar ÇALIŞMA ANINDA ve ana bilgisayar adına bakılarak veriliyor —
+            * derleme anında sabitlemek, aynı paketi sunan www'yi de Pro'ya
+            * çevirirdi (bu depoda bir kez yaşandı). `proSurumu()` yalnız
+            * pro.tarpovizyon.com'da true; www, yerel geliştirme, önizleme
+            * adresleri ve Capacitor derlemesi eskisi gibi kalıyor.
+            */}
+          <Route
+            path="/"
+            element={(
+              <GirisEkrani
+                masaustu={proSurumu() ? <ProVitrinPage /> : <ProgramSelectionPage />}
+                mobilYol="/m"
+              />
+            )}
+          />
           {/*
             * Piyasa ve Asistan MOBİLDE VARDI, WEBDE YOKTU. İkisi de mobil
             * servis katmanını aynen kullanıyor; dar ekranda mobil eşdeğerine
