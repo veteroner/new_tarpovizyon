@@ -4,7 +4,7 @@ import { Sparkles, ArrowRight, Globe2, Wheat, Beef, Ship, MapPin, Leaf, Wrench, 
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
 import { VitrinFooter } from '../components/vitrin/VitrinFooter';
 import { VeriKarti } from '../components/vitrin/VeriKarti';
-import type { Kart } from '../components/vitrin/vitrinVerisi';
+import { useVitrinVerisi, type Kart } from '../components/vitrin/vitrinVerisi';
 import { isPlatform } from '../mobile/utils/platform';
 import { ayarOku, type Ayarlar } from './panel/yonetimApi';
 
@@ -27,19 +27,15 @@ import { ayarOku, type Ayarlar } from './panel/yonetimApi';
  * çizilebiliyor), 8 kategori, iki kapsam. Abartmak, ürünü ilk açtığında
  * kullanıcının güvenini kaybettirir.
  *
- * ─── KARTLAR: ÜRETİCİYE KALAN PAY ───────────────────────────────────────────
- * Pro'nun ayırt edici sorusu "ne oldu" değil "neden": fiyat ile maliyet
- * arasındaki makas ve yemin ürünü ne kadar satın aldığı (parite). Kartlar bu
- * yüzden kârlılık ve pariteyi, çiğ süt ve kırmızı et için yan yana veriyor.
+ * ─── KARTLAR ────────────────────────────────────────────────────────────────
+ * Üç bölüm, Pro'nun kendi bölüm adlarıyla: Fiyat ve Ekonomi, Hayvansal Üretim,
+ * Bitkisel Üretim. Kart verisi Basic vitriniyle AYNI yükleyiciden
+ * (`useVitrinVerisi`) geliyor — o uçlar tanımı gereği ücretsiz, yani duvar
+ * açıkken de tam çiziliyor. Yalnız dış ticaret haddi kartı burada ayrıca
+ * çekiliyor (`makro/dis-ticaret-endeks`, korumalı listede değil).
  *
- * Her kartın altında DÖNEM yazıyor ("Eyl 2026"): bu bir "şu an" iddiası değil,
- * tarihi belli bir ölçüm. Eskiden maliyet–fiyat tablolarından hiç sayı
- * gösterilmiyordu çünkü son iki dönem birebir kopyaydı ve kârlılık sütunu 14
- * ay donmuştu; Eylül 2026'da ikisi de düzeltildi ve maliyet artık panelde
- * girdilerden hesaplanıyor.
- *
- * Kanatlı ve yumurta BİLEREK yok: o tabloların maliyet kaynağı kesildi, son
- * dönemleri taşıma (bkz. hafıza notu "kanatlı fiyat-maliyet kaynağı yok").
+ * Gıda enflasyonu kartı bilerek yok: aynı sayı sayfanın üstünde duruyor.
+ * Kârlılık/parite kartları kullanıcı isteğiyle kaldırıldı (Eylül 2026).
  */
 
 const API = 'https://tarpovizyon-api.veteroner.workers.dev';
@@ -59,54 +55,17 @@ const KATEGORILER = [
 ];
 
 type TufeSatir = { yil: number; ay: number; tufe: number | null; gida_alkolsuz: number | null };
-type SutSatir = {
-  tarih: string; uretim_maliyeti_tl_lt: number | null; usk_tavsiye_fiyat_tl_lt: number | null;
-  karlilik: number | null; sut_yem_paritesi: number | null;
-};
-type EtSatir = {
-  tarih: string; karlilik: number | null; karkas_paritesi: number | null;
-  kuzu_karkas_fiyati_tl_kg: number | null;
-};
+type TicaretSatir = { tarih: string; gida_dis_ticaret_haddi: number | null };
 
 const AY_KISA = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-/** Kıvılcım çizgisi için son 24 ay. */
-const SERI_AY = 24;
-
-/**
- * Tablodan kart üretir: son dolu değer + dönemi + son 24 ayın serisi.
- * Değer yoksa kart HİÇ üretilmiyor — boş bir "—" kartı, olmayan veriyi varmış
- * gibi gösterirdi.
- */
-function kartUret<T extends { tarih: string }>(
-  satirlar: T[], alan: keyof T,
-  o: { id: string; etiket: string; birim: string; yol: string; yuzde?: boolean; basamak?: number },
-): Kart | null {
-  const dolu = [...satirlar]
-    .sort((a, b) => String(a.tarih).localeCompare(String(b.tarih)))
-    .filter((r) => typeof r[alan] === 'number' && Number.isFinite(r[alan] as number));
-  const son = dolu.at(-1);
-  if (!son) return null;
-  const m = String(son.tarih).match(/^(\d{4})-(\d{2})/);
-  const deger = son[alan] as number;
-  return {
-    id: o.id,
-    etiket: o.etiket,
-    deger: o.basamak != null ? Number(deger.toFixed(o.basamak)) : deger,
-    birim: o.birim,
-    alt: m ? `${AY_KISA[Number(m[2]) - 1]} ${m[1]}` : '',
-    seri: dolu.slice(-SERI_AY).map((r) => r[alan] as number),
-    yol: o.yol,
-    yuzde: o.yuzde,
-  };
-}
 
 const sayi = (v: number | null | undefined, basamak = 1) =>
   (v == null ? '—' : v.toLocaleString('tr-TR', { minimumFractionDigits: basamak, maximumFractionDigits: basamak }));
 
 export default function ProVitrinPage() {
   const [tufe, setTufe] = useState<TufeSatir[]>([]);
-  const [sut, setSut] = useState<SutSatir[]>([]);
-  const [et, setEt] = useState<EtSatir[]>([]);
+  const [ticaret, setTicaret] = useState<TicaretSatir[]>([]);
+  const { bolumler } = useVitrinVerisi();
   const [ayarlar, setAyarlar] = useState<Ayarlar>({});
 
   useEffect(() => {
@@ -117,17 +76,15 @@ export default function ProVitrinPage() {
        * aralarında bağımlılık yok. Biri düşerse diğerleri çiziliyor —
        * `allSettled`, çünkü fiyat okunamazsa grafik yine gösterilmeli.
        */
-      const [t, s, e, a] = await Promise.allSettled([
+      const [t, d, a] = await Promise.allSettled([
         fetch(`${API}/api/makro/tufe-aylik?limit=500`).then((r) => r.json()),
-        fetch(`${API}/api/cig-sut/ekonomik-gostergeler?limit=500`).then((r) => r.json()),
         /* Korumalı listede DEĞİL — duvar açıkken de anonim ziyaretçiye çiziliyor. */
-        fetch(`${API}/api/kirmizi-et/ekonomik-gostergeler?limit=500`).then((r) => r.json()),
+        fetch(`${API}/api/makro/dis-ticaret-endeks?limit=1000`).then((r) => r.json()),
         ayarOku(),
       ]);
       if (iptal) return;
       if (t.status === 'fulfilled') setTufe((t.value?.data ?? []) as TufeSatir[]);
-      if (s.status === 'fulfilled') setSut((s.value?.data ?? []) as SutSatir[]);
-      if (e.status === 'fulfilled') setEt((e.value?.data ?? []) as EtSatir[]);
+      if (d.status === 'fulfilled') setTicaret((d.value?.data ?? []) as TicaretSatir[]);
       if (a.status === 'fulfilled') setAyarlar(a.value);
     })();
     return () => { iptal = true; };
@@ -141,26 +98,37 @@ export default function ProVitrinPage() {
     return { ...son, donem: `${AYLAR[son.ay - 1]} ${son.yil}` };
   }, [tufe]);
 
-  /** İki alan, her birinde üç kart. Değeri olmayan kart düşüyor. */
-  const kartGruplari = useMemo(() => [
-    {
-      ad: 'Çiğ süt', renk: 'var(--tv-d3)',
-      kartlar: [
-        kartUret(sut, 'karlilik', { id: 'sut-kar', etiket: 'Üretici kârlılığı', birim: '', yol: '/tarpovizyon/turkey/milk', yuzde: true }),
-        kartUret(sut, 'sut_yem_paritesi', { id: 'sut-par', etiket: 'Süt / yem paritesi', birim: 'kg yem / lt', yol: '/tarpovizyon/turkey/milk', basamak: 2 }),
-        kartUret(sut, 'uretim_maliyeti_tl_lt', { id: 'sut-mal', etiket: 'Üretim maliyeti', birim: '₺/lt', yol: '/tarpovizyon/turkey/milk', basamak: 2 }),
-      ],
-    },
-    {
-      ad: 'Kırmızı et', renk: 'var(--tv-d2)',
-      kartlar: [
-        kartUret(et, 'karlilik', { id: 'et-kar', etiket: 'Besici kârlılığı', birim: '', yol: '/tarpovizyon/turkey/red-meat', yuzde: true }),
-        kartUret(et, 'karkas_paritesi', { id: 'et-par', etiket: 'Karkas / yem paritesi', birim: 'kg yem / kg', yol: '/tarpovizyon/turkey/red-meat', basamak: 1 }),
-        kartUret(et, 'kuzu_karkas_fiyati_tl_kg', { id: 'et-kuzu', etiket: 'Kuzu karkas fiyatı', birim: '₺/kg', yol: '/tarpovizyon/turkey/red-meat', basamak: 2 }),
-      ],
-    },
-  ].map((g) => ({ ...g, kartlar: g.kartlar.filter((k): k is Kart => k !== null) }))
-    .filter((g) => g.kartlar.length > 0), [sut, et]);
+  /** Gıda dış ticaret haddi — ihracat birim değeri ÷ ithalat birim değeri, 2015=100. */
+  const ticaretKarti = useMemo<Kart | null>(() => {
+    const dolu = [...ticaret]
+      .filter((r) => typeof r.gida_dis_ticaret_haddi === 'number')
+      .sort((x, y) => String(x.tarih).localeCompare(String(y.tarih)));
+    const son = dolu.at(-1);
+    if (!son) return null;
+    const m = String(son.tarih).match(/^(\d{4})-(\d{2})/);
+    return {
+      id: 'ticaret-haddi', etiket: 'Gıda dış ticaret haddi',
+      deger: son.gida_dis_ticaret_haddi as number,
+      /* Genel biçimlendirici tam sayıya yuvarlıyor ("97"); endekste ondalık anlamlı. */
+      metin: (son.gida_dis_ticaret_haddi as number).toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      birim: '2015=100',
+      alt: m ? `${AY_KISA[Number(m[2]) - 1]} ${m[1]}` : '',
+      seri: dolu.slice(-36).map((r) => r.gida_dis_ticaret_haddi as number),
+      yol: '/tarpovizyon/turkey/trade',
+    };
+  }, [ticaret]);
+
+  /** Basic yükleyicisinin bölümleri, Pro adlarıyla. */
+  const kartGruplari = useMemo(() => {
+    const bul = (id: string) => bolumler.find((b) => b.id === id);
+    const makro = bul('makro'), hayvan = bul('hayvancilik'), bitki = bul('bitkisel');
+    return [
+      makro && { ad: 'Fiyat ve Ekonomi', renk: makro.renk,
+        kartlar: [...makro.kartlar.filter((k) => k.id !== 'gida'), ...(ticaretKarti ? [ticaretKarti] : [])] },
+      hayvan && { ad: 'Hayvansal Üretim', renk: hayvan.renk, kartlar: hayvan.kartlar },
+      bitki && { ad: 'Bitkisel Üretim', renk: bitki.renk, kartlar: bitki.kartlar },
+    ].filter((g): g is { ad: string; renk: string; kartlar: Kart[] } => Boolean(g && g.kartlar.length));
+  }, [bolumler, ticaretKarti]);
 
   const aylik = Number(ayarlar.fiyat_aylik);
   const yillik = Number(ayarlar.fiyat_yillik);
@@ -229,15 +197,15 @@ export default function ProVitrinPage() {
           </section>
         )}
 
-        {/* ─── Üreticiye kalan pay — kartlar ─────────────────────────────── */}
+        {/* ─── Rakamlarla tarım — kartlar ────────────────────────────────── */}
         {kartGruplari.length > 0 && (
           <section className="mb-12">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-xl font-bold text-[var(--tv-metin,#1d1d1f)]">
-                Üreticiye ne kalıyor
+                Rakamlarla tarım
               </h2>
               <span className="text-xs text-[var(--tv-metin-ikincil,#5b6159)]">
-                Ücretsiz veriden örnek · son {SERI_AY} ay
+                Canlı veri · ücretsiz bölümlerden
               </span>
             </div>
             <div className="space-y-6">
@@ -253,7 +221,7 @@ export default function ProVitrinPage() {
               ))}
             </div>
             <p className="mt-3 text-xs leading-relaxed text-[var(--tv-metin-ikincil,#5b6159)]">
-              Parite, bir birim ürünün kaç kg yem satın aldığıdır. Pro'da bunlar yem fiyatı ve döviz kuruyla birlikte okunuyor.
+              Dış ticaret haddi: gıda ihracatının birim değeri ÷ ithalatınki (2015=100); 100'ün altı, ithal edilen gıdanın göreli olarak pahalandığını gösterir.
             </p>
           </section>
         )}
