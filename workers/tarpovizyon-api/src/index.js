@@ -644,9 +644,22 @@ const AUTH_ORIGIN = new Set([
   'http://localhost:5178',
 ]);
 
+/*
+ * ─── NATIVE UYGULAMA KÖKENLERİ ───────────────────────────────────────────────
+ * Mağaza uygulamalarının WebView kökeni platforma ve ayara göre değişiyor:
+ * Android `androidScheme: 'https'` ile `https://localhost`, iOS ise
+ * `ios.scheme: 'TarpoVizyon'` ile `tarpovizyon://localhost`. Listede yalnız
+ * `capacitor://localhost` vardı — ikisi de eşleşmiyordu, yani uygulama içinden
+ * giriş/kupon/ödeme istekleri CORS'a takılıyordu (CapacitorHttp kapalı, fetch
+ * tarayıcı kurallarına tabi). Şema adı ayarla değişebildiği için tek tek
+ * yazmak yerine `<şema>://localhost` biçimi kabul ediliyor; bu köken yalnız
+ * cihazın kendi içinden gelebilir.
+ */
+const YEREL_UYGULAMA = /^[a-z][a-z0-9+.-]*:\/\/localhost(:\d+)?$/i;
+
 function authCors(request) {
   const origin = request.headers.get('Origin') ?? '';
-  const izinli = AUTH_ORIGIN.has(origin);
+  const izinli = AUTH_ORIGIN.has(origin) || YEREL_UYGULAMA.test(origin);
   return {
     ...(izinli ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
