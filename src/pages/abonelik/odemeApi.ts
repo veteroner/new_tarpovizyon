@@ -48,6 +48,25 @@ export type OdemeSonuc = {
 export const odemeDogrula = (token: string) =>
   cagir<OdemeSonuc>('odeme/dogrula', { token });
 
+/* ── Kupon ────────────────────────────────────────────────────────────────── */
+
+export const kuponKullan = (kod: string) =>
+  cagir<{ basarili: boolean; gun: number; bitis: number }>('kupon/kullan', { kod });
+
+export const kuponHatasi = (e: unknown): string => {
+  const x = e as { kod?: string; http?: number; ek?: { dakika?: number } };
+  if (x?.kod === 'giris_gerekli' || x?.http === 401) return 'Oturumunuz sona ermiş. Tekrar giriş yapın.';
+  if (x?.kod === 'kupon_zaten_kullanildi') return 'Bu kuponu daha önce kullandınız.';
+  if (x?.kod === 'kupon_tukendi') return 'Bu kuponun kullanım hakkı dolmuş.';
+  if (x?.kod === 'cok_fazla_deneme') {
+    return `Çok fazla hatalı deneme. ${x.ek?.dakika ?? 60} dakika sonra tekrar deneyin.`;
+  }
+  /* Geçersiz, kapatılmış ve süresi dolmuş kod AYNI mesajı alıyor — sunucu da
+     ayırmıyor, ayırmak geçerli kod aramayı kolaylaştırırdı. */
+  if (x?.kod === 'kupon_gecersiz') return 'Kupon kodu geçersiz.';
+  return 'Kupon kullanılamadı. Lütfen tekrar deneyin.';
+};
+
 export const odemeHatasi = (e: unknown): string => {
   const x = e as { kod?: string; http?: number; ek?: { alanlar?: string[]; mesaj?: string } };
   if (x?.kod === 'giris_gerekli' || x?.http === 401) return 'Oturumunuz sona ermiş. Tekrar giriş yapın.';

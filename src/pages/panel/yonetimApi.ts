@@ -179,6 +179,35 @@ export const abonelikDegistir = (kullaniciId: string, islem: 'uzat' | 'iptal', g
     body: JSON.stringify({ kullaniciId, islem, ...(gun ? { gun } : {}) }),
   });
 
+/* ── Kuponlar ────────────────────────────────────────────────────────────── */
+
+export type Kupon = {
+  kod: string;
+  gun: number;
+  azami: number;
+  kullanilan: number;
+  gecerlilik: number | null;
+  aciklama: string | null;
+  aktif: number;
+  olusma: number;
+  /** Sunucuda hesaplanıyor — `aktif` tek başına kontenjanı ve süreyi bilmiyor. */
+  durum: 'acik' | 'kapali' | 'tukendi' | 'suresi_doldu';
+};
+
+export const kuponlariOku = () => cagir<{ kuponlar: Kupon[] }>('admin/kuponlar');
+
+export const kuponOlustur = (g: {
+  kod?: string; gun: number; azami?: number; gecerlilikGun?: number; aciklama?: string;
+}) => cagir<{ kod: string; gun: number; azami: number }>('admin/kupon', {
+  method: 'POST', body: JSON.stringify({ islem: 'olustur', ...g }),
+});
+
+/** Kupon silinmiyor, kapatılıyor — kullanım kayıtları öksüz kalmasın. */
+export const kuponDurumu = (kod: string, ac: boolean) =>
+  cagir<{ kod: string; aktif: boolean }>('admin/kupon', {
+    method: 'POST', body: JSON.stringify({ islem: ac ? 'ac' : 'kapat', kod }),
+  });
+
 export const yonetimHatasi = (e: unknown): string => {
   const kod = (e as { kod?: string; http?: number })?.kod;
   const http = (e as { http?: number })?.http;
@@ -197,5 +226,9 @@ export const yonetimHatasi = (e: unknown): string => {
   if (http === 403) return 'Bu adresten yönetim isteği kabul edilmiyor.';
   if (kod === 'gecersiz_deger') return 'Girilen değer kabul edilebilir aralığın dışında.';
   if (kod === 'gecersiz_gun') return 'Gün sayısı 1–3650 arasında olmalı.';
+  if (kod === 'kod_zaten_var') return 'Bu kod zaten tanımlı. Var olan kuponun sayacını sıfırlamamak için üzerine yazılmıyor.';
+  if (kod === 'kod_kisa') return 'Kod en az 4 karakter olmalı.';
+  if (kod === 'gecersiz_azami') return 'Kullanım adedi 1–100000 arasında olmalı.';
+  if (kod === 'kupon_yok') return 'Kupon bulunamadı.';
   return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 };

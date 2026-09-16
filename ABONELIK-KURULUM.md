@@ -118,6 +118,33 @@ abonelikten sonra ekrandaki sayı ölçülmüş gerçeğe dönüyor. `deneme_gun
 panelden değiştirmek tahsilat tarihini **değiştirmez**; planı da güncellemek
 gerekir.
 
+## Kuponlar — iyzico kurulmadan da çalışır
+
+Kupon %100 bedava erişim veriyor: tahsilat yok, kart yok, iyzico yok. Bu yüzden
+yukarıdaki adımların HİÇBİRİ kupon için gerekli değil — `RESEND_KEY` dışında.
+O da kupon için değil, kullanıcının giriş yapabilmesi için: erişim bir hesaba
+yazılıyor, hesapsız kupon kullanılamaz.
+
+**Yönetici tarafı:** Panel → **Kuponlar**. Kod boş bırakılırsa üretiliyor
+(10 karakter, `0/O` ve `1/I/L` gibi karışan simgeler alfabede yok — kod elle
+yazılıyor). Alanlar: kaç **gün** Pro, **kaç kişi** kullanabilir, isteğe bağlı
+**son geçerlilik**, açıklama.
+
+**Kullanıcı tarafı:** `/tarpovizyon/abonelik` sayfasında, ödeme formunun
+altında. Ödeme alanına bağlı değil; `odeme_hazir` `0` iken bile görünür ve
+çalışır.
+
+**Kupon SİLİNMİYOR, kapatılıyor.** Silinseydi o kuponu kullanmış kişilerin
+erişiminin nereden geldiği cevapsız kalırdı. Kapatmak yalnız YENİ kullanımı
+durduruyor; verilmiş günler geri alınmıyor.
+
+**Süre mevcut bitişin ÜSTÜNE ekleniyor:** denemesi ya da aboneliği sürerken
+kupon kullanan kalan günlerini kaybetmiyor.
+
+`kupon/kullan` ucu bilerek korumalı uç listesinde DEĞİL: kuponu kullanacak
+kişinin henüz Pro erişimi yok, listede olsaydı duvar açıkken kendi kuponunu
+kullanamazdı.
+
 ## Mağaza kısıtı
 
 App Store 3.1.1 nedeniyle uygulamada fiyat, satın alma düğmesi ve dışa

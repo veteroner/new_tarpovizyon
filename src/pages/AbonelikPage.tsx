@@ -3,7 +3,7 @@ import { Sparkles, Check, Loader2, ShieldCheck } from 'lucide-react';
 import { useOturum } from '../auth/useOturum';
 import { OturumGirisi } from '../auth/OturumGirisi';
 import { ayarOku, type Ayarlar } from './panel/yonetimApi';
-import { odemeBaslat, odemeDogrula, odemeHatasi, type OdemeSonuc } from './abonelik/odemeApi';
+import { odemeBaslat, odemeDogrula, odemeHatasi, kuponKullan, kuponHatasi, type OdemeSonuc } from './abonelik/odemeApi';
 import './abonelik/abonelik.css';
 
 /**
@@ -40,6 +40,10 @@ export default function AbonelikPage() {
   const [bekliyor, setBekliyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [sonuc, setSonuc] = useState<OdemeSonuc | null>(null);
+  const [kupon, setKupon] = useState('');
+  const [kuponBekliyor, setKuponBekliyor] = useState(false);
+  const [kuponHata, setKuponHata] = useState<string | null>(null);
+  const [kuponSonuc, setKuponSonuc] = useState<{ gun: number; bitis: number } | null>(null);
   const formKutusu = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -102,6 +106,24 @@ export default function AbonelikPage() {
    */
   const denemeGun = Number(ayarlar.iyzico_deneme_gun ?? ayarlar.deneme_gun);
   const denemeVar = Number.isFinite(denemeGun) && denemeGun > 0;
+
+  /*
+   * Kupon ödeme akışından TAMAMEN ayrı: tahsilat yok, iyzico yok, kart yok.
+   * `tazele()` şart — erişim sunucuda açıldı, oturum özeti yenilenmezse
+   * kullanıcı hâlâ kilitli sayfalar görürdü.
+   */
+  const kuponGonder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setKuponHata(null); setKuponBekliyor(true);
+    try {
+      const s = await kuponKullan(kupon);
+      setKuponSonuc({ gun: s.gun, bitis: s.bitis });
+      setKupon('');
+      await tazele();
+    } catch (x) {
+      setKuponHata(kuponHatasi(x));
+    } finally { setKuponBekliyor(false); }
+  };
 
   const odeme = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,6 +316,49 @@ export default function AbonelikPage() {
           </p>
           <p className="ab-not" style={{ opacity: .75 }}>{kullanici?.eposta}</p>
         </form>
+        )}
+
+        {/*
+          * ─── KUPON ─────────────────────────────────────────────────────────
+          * Ödeme formunun DIŞINDA ve ondan bağımsız: kuponda tahsilat yok,
+          * bu yüzden ad/adres/TCKN de istenmiyor. Ayrıca `odemeHazir`
+          * koşuluna bağlı değil — iyzico kurulmadan önce de kupon dağıtılıp
+          * kullanılabilmeli.
+          *
+          * Bu sayfa Capacitor'da `/m/settings`'e yönlendiği için alan
+          * mağaza derlemesinde zaten görünmüyor.
+          */}
+        {kuponSonuc ? (
+          <p className="ab-bilgi" role="status">
+            <Check size={14} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 5 }} />
+            Kupon uygulandı: {kuponSonuc.gun} gün Pro erişimi eklendi
+            ({tarihYaz(kuponSonuc.bitis)} tarihine kadar).
+          </p>
+        ) : (
+          <form className="ab-kupon" onSubmit={kuponGonder}>
+            <label className="ab-alan">
+              <span className="ab-etiket">Kupon kodunuz varsa</span>
+              <div className="ab-kupon-satir">
+                <input
+                  className="ab-girdi ab-kupon-girdi"
+                  value={kupon}
+                  onChange={(e) => setKupon(e.target.value.toUpperCase())}
+                  placeholder="KODU GİRİN"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  aria-label="Kupon kodu"
+                />
+                <button className="ab-dugme ab-kupon-dugme" type="submit"
+                  disabled={kuponBekliyor || kupon.trim().length < 4}>
+                  {kuponBekliyor && <Loader2 size={14} aria-hidden="true" className="ab-donen" />}
+                  {kuponBekliyor ? 'Kontrol ediliyor…' : 'Kuponu kullan'}
+                </button>
+              </div>
+            </label>
+            {kuponHata && <p className="ab-hata" role="alert">{kuponHata}</p>}
+            <p className="ab-not">Kupon kullanıldığında ödeme alınmaz, kart bilgisi istenmez.</p>
+          </form>
         )}
 
         {/* iyzico formu buraya yerleşiyor. */}

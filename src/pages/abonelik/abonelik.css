@@ -116,6 +116,26 @@
 }
 .ab-not { font-size: 0.76rem; color: var(--text-secondary, #6e6e73); margin: 8px 0 0; line-height: 1.5; }
 
+/* Kupon — ödeme formundan ayrı, üstünde ince bir ayraç. */
+.ab-kupon {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color, #e5e5ea);
+}
+.ab-kupon-satir { display: flex; gap: 8px; align-items: stretch; }
+.ab-kupon-girdi {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.ab-kupon-dugme { flex: 0 0 auto; width: auto; margin: 0; padding: 0 16px; }
+@media (max-width: 420px) {
+  .ab-kupon-satir { flex-direction: column; }
+  .ab-kupon-dugme { width: 100%; }
+}
+
 /* Deneme koşulları — kart istenmeden önce ne zaman ne ödeneceği. */
 .ab-kosul {
   margin: 14px 0 0;
