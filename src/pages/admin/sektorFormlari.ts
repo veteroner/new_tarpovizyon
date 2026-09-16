@@ -21,6 +21,8 @@
  * artık burada tanımlı ve ekran onları KENDİ hesaplıyor — elle girilemiyorlar.
  */
 
+import { sutMaliyeti, karkasMaliyeti } from './maliyetModeli';
+
 export type Girdi = {
   alan: string;
   etiket: string;
@@ -60,6 +62,22 @@ const karlilik = (fiyat: number | null, maliyet: number | null): number | null =
   return f == null || maliyet == null || maliyet === 0 ? null : (f / maliyet) * 100;
 };
 
+/*
+ * ─── MODEL Mİ, KAYITLI MI ───────────────────────────────────────────────────
+ * Maliyet artık hesaplanan bir alan ama modelin girdileri (buzağı, arpa,
+ * kepek, küspe…) yalnız Eylül 2026'dan itibaren saklanıyor. Eski satırlarda bu
+ * girdiler yok, yani model `null` döner.
+ *
+ * Fark ve kârlılık o satırlarda KAYITLI maliyetle hesaplanmaya devam etmeli —
+ * yoksa "bozuk satırları bul" denetimi eski satırların kârlılığını hiç
+ * kontrol edemez hale gelirdi. Girdiler tamsa model kazanıyor: kayıtlı maliyet
+ * bayat olabilir (bir yem fiyatı sonradan düzeltildiyse), model olamaz.
+ */
+const sutMaliyetiVeyaKayitli = (g: Record<string, number | null>) =>
+  sutMaliyeti(g as Parameters<typeof sutMaliyeti>[0]) ?? g.uretim_maliyeti_tl_lt ?? null;
+const karkasMaliyetiVeyaKayitli = (g: Record<string, number | null>) =>
+  karkasMaliyeti(g as Parameters<typeof karkasMaliyeti>[0]) ?? g.dana_karkas_maliyet_tl_kg ?? null;
+
 export const SEKTOR_FORMLARI: SektorFormu[] = [
   {
     tablo: 'cig_sut_ekonomik_gostergeler',
@@ -68,14 +86,20 @@ export const SEKTOR_FORMLARI: SektorFormu[] = [
     donemAlani: 'tarih',
     girdiler: [
       { alan: 'usk_tavsiye_fiyat_tl_lt', etiket: 'USK tavsiye fiyatı', birim: '₺/lt', zorunlu: true },
-      { alan: 'uretim_maliyeti_tl_lt', etiket: 'Üretim maliyeti', birim: '₺/lt', zorunlu: true },
       { alan: 'sut_yemi_19hp', etiket: 'Süt yemi (%19 HP)', birim: '₺/kg', zorunlu: true },
-      { alan: 'misir_silaji', etiket: 'Mısır silajı', birim: '₺/kg' },
-      { alan: 'yonca', etiket: 'Yonca (kuru ot)', birim: '₺/kg' },
-      { alan: 'saman', etiket: 'Saman', birim: '₺/kg' },
+      { alan: 'misir_silaji', etiket: 'Mısır silajı', birim: '₺/kg', zorunlu: true },
+      { alan: 'yonca', etiket: 'Yonca (kuru ot)', birim: '₺/kg', zorunlu: true },
+      { alan: 'saman', etiket: 'Saman', birim: '₺/kg', zorunlu: true },
+      { alan: 'buzagi_fiyati_tl_bas', etiket: 'Buzağı fiyatı', birim: '₺/baş', zorunlu: true },
+      { alan: 'gubre_fiyati_tl_ton', etiket: 'Gübre fiyatı', birim: '₺/ton', zorunlu: true },
       { alan: 'litre_basina_destek_tl', etiket: 'Litre başına destek', birim: '₺' },
     ],
     turetilenler: [
+      {
+        alan: 'uretim_maliyeti_tl_lt', etiket: 'Üretim maliyeti', birim: '₺/lt',
+        formul: 'rasyon (9 kg yem + 18 kg silaj + 4 kg yonca + 4 kg saman) × %3 fire ÷ %63 yem payı − buzağı/gübre geliri, 20 lt/gün',
+        hesapla: (g) => sutMaliyeti(g as Parameters<typeof sutMaliyeti>[0]),
+      },
       {
         alan: 'sut_yem_paritesi', etiket: 'Süt/Yem paritesi',
         formul: 'USK fiyatı ÷ süt yemi',
@@ -92,20 +116,20 @@ export const SEKTOR_FORMLARI: SektorFormu[] = [
       {
         alan: 'fiyat_maliyet_farki_tl_lt', etiket: 'Fiyat − maliyet farkı', birim: '₺/lt',
         formul: 'USK fiyatı − üretim maliyeti',
-        hesapla: (g) => fark(g.usk_tavsiye_fiyat_tl_lt, g.uretim_maliyeti_tl_lt),
+        hesapla: (g) => fark(g.usk_tavsiye_fiyat_tl_lt, sutMaliyetiVeyaKayitli(g)),
       },
       {
         alan: 'fiyat_maliyet_farki_destek_dahil_tl_lt', etiket: 'Fark (destek dâhil)', birim: '₺/lt',
         formul: 'fark + destek',
         hesapla: (g) => {
-          const f = fark(g.usk_tavsiye_fiyat_tl_lt, g.uretim_maliyeti_tl_lt);
+          const f = fark(g.usk_tavsiye_fiyat_tl_lt, sutMaliyetiVeyaKayitli(g));
           return f == null ? null : f + (g.litre_basina_destek_tl ?? 0);
         },
       },
       {
         alan: 'karlilik', etiket: 'Kârlılık', birim: '%',
         formul: 'fark ÷ maliyet × 100',
-        hesapla: (g) => karlilik(g.usk_tavsiye_fiyat_tl_lt, g.uretim_maliyeti_tl_lt),
+        hesapla: (g) => karlilik(g.usk_tavsiye_fiyat_tl_lt, sutMaliyetiVeyaKayitli(g)),
       },
     ],
   },
@@ -116,14 +140,23 @@ export const SEKTOR_FORMLARI: SektorFormu[] = [
     donemAlani: 'tarih',
     girdiler: [
       { alan: 'dana_karkas_fiyati_tl_kg', etiket: 'Dana karkas fiyatı', birim: '₺/kg', zorunlu: true },
-      { alan: 'dana_karkas_maliyet_tl_kg', etiket: 'Dana karkas maliyeti', birim: '₺/kg', zorunlu: true },
-      { alan: 'besi_yemi_fiyati_tl_kg', etiket: 'Besi yemi fiyatı', birim: '₺/kg', zorunlu: true },
-      { alan: 'besilik_dana_fiyati_tl_kg', etiket: 'Besilik dana fiyatı', birim: '₺/kg' },
+      { alan: 'besilik_dana_fiyati_tl_kg', etiket: 'Besilik dana (canlı) fiyatı', birim: '₺/kg', zorunlu: true },
+      { alan: 'besi_yemi_fiyati_tl_kg', etiket: 'Besi yemi', birim: '₺/kg', zorunlu: true },
+      { alan: 'yemlik_arpa_tl_kg', etiket: 'Yemlik arpa', birim: '₺/kg', zorunlu: true },
+      { alan: 'bugday_kepegi_tl_kg', etiket: 'Buğday kepeği', birim: '₺/kg', zorunlu: true },
+      { alan: 'aycicegi_kuspesi_tl_kg', etiket: 'Ayçiçeği küspesi', birim: '₺/kg', zorunlu: true },
+      { alan: 'misir_silaji_tl_kg', etiket: 'Mısır silajı', birim: '₺/kg', zorunlu: true },
+      { alan: 'saman_tl_kg', etiket: 'Saman', birim: '₺/kg', zorunlu: true },
       { alan: 'kuzu_karkas_fiyati_tl_kg', etiket: 'Kuzu karkas fiyatı', birim: '₺/kg' },
       { alan: 'besilik_kucukbas_fiyati_tl_kg', etiket: 'Besilik küçükbaş fiyatı', birim: '₺/kg' },
       { alan: 'dolar_kuru_tl', etiket: 'Dolar kuru', birim: '₺' },
     ],
     turetilenler: [
+      {
+        alan: 'dana_karkas_maliyet_tl_kg', etiket: 'Dana karkas maliyeti', birim: '₺/kg',
+        formul: '(250 kg × canlı fiyat + 300 gün × günlük rasyon) × 1,08 ÷ (625 kg × %55 randıman × %95)',
+        hesapla: (g) => karkasMaliyeti(g as Parameters<typeof karkasMaliyeti>[0]),
+      },
       {
         alan: 'karkas_paritesi', etiket: 'Karkas paritesi',
         formul: 'dana karkas fiyatı ÷ besi yemi',
@@ -132,12 +165,12 @@ export const SEKTOR_FORMLARI: SektorFormu[] = [
       {
         alan: 'dana_karkas_fiyat_maliyet_farki_tl_kg', etiket: 'Fiyat − maliyet farkı', birim: '₺/kg',
         formul: 'karkas fiyatı − karkas maliyeti',
-        hesapla: (g) => fark(g.dana_karkas_fiyati_tl_kg, g.dana_karkas_maliyet_tl_kg),
+        hesapla: (g) => fark(g.dana_karkas_fiyati_tl_kg, karkasMaliyetiVeyaKayitli(g)),
       },
       {
         alan: 'karlilik', etiket: 'Kârlılık', birim: '%',
         formul: 'fark ÷ maliyet × 100',
-        hesapla: (g) => karlilik(g.dana_karkas_fiyati_tl_kg, g.dana_karkas_maliyet_tl_kg),
+        hesapla: (g) => karlilik(g.dana_karkas_fiyati_tl_kg, karkasMaliyetiVeyaKayitli(g)),
       },
     ],
   },
