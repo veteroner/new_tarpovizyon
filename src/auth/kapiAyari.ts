@@ -1,17 +1,28 @@
 /**
  * Para duvarının açık olup olmadığı — TEK ANAHTAR.
  *
- * ─── NEDEN VARSAYILAN KAPALI ────────────────────────────────────────────────
- * Kimlik altyapısı canlıda ama giriş kodu e-postası HENÜZ GÖNDERİLEMİYOR:
- * Worker'da `RESEND_KEY` secret'ı yok, o yüzden `/auth/kod-iste` 503 dönüyor.
- * Kapıyı bu haldeyken açmak, pro.tarpovizyon.com'a giren herkesi giriş
- * ekranında kilitlemek olurdu — kod isteyebilirler ama kod hiç gelmez.
+ * ─── AÇILDI (16 Eylül 2026) ─────────────────────────────────────────────────
+ * Ön koşul sağlandı: `RESEND_KEY` tanımlı ve giriş kodu e-postası çalışıyor
+ * (kanıt: e-postayla kayıt olmuş gerçek kullanıcı). Daha önce bayrak bu yüzden
+ * kapalıydı — kod gönderilemezken kapıyı açmak, gelen herkesi asla gelmeyecek
+ * bir kodu bekler halde giriş ekranında kilitlemek olurdu.
  *
- * Yani sıra şu ve tersi olamaz:
- *   1. `wrangler secret put RESEND_KEY` (bunu deponun sahibi yapar; anahtar
- *      hiçbir dosyaya yazılmaz)
- *   2. Gerçek bir adrese kod isteyip giriş yapıldığı DOĞRULANIR
- *   3. Ancak o zaman bu bayrak `true` olur
+ * ─── İSTEMCİ ÖNCE, SUNUCU HEMEN ARKASINDAN ──────────────────────────────────
+ * Bu bayrak yalnız ARAYÜZÜ kapatıyor; uçları `PARA_DUVARI` ortam değişkeni
+ * kapatıyor. İkisi arasındaki pencerede hangi sıranın seçildiği önemli:
+ *
+ *   · Sunucu önce → arayüz henüz kapı çizmiyor, sayfalar açılıyor ama uçlar
+ *     401 dönüyor: kullanıcı BOŞ sayfalar görüyor.
+ *   · İstemci önce → kapı çiziliyor, giriş ekranı görünüyor; uçlar kısa bir
+ *     süre daha açık kalıyor.
+ *
+ * İkincisi seçildi: bozuk bir ekran, birkaç dakika daha korumasız kalan bir
+ * uçtan kötüdür. Derleme yayına çıkar çıkmaz sunucu tarafı da açılmalı.
+ *
+ * ─── KAPATMAK GEREKİRSE ─────────────────────────────────────────────────────
+ * Bu bayrağı `false` yapmak arayüz kapısını kaldırır ama uçlar `PARA_DUVARI`
+ * tanımlı kaldığı sürece 401 dönmeye devam eder — yani tek başına geri alma
+ * değil. Geri almak için ikisi birden kapatılmalı, önce sunucu.
  *
  * ─── NEDEN ORTAM DEĞİŞKENİ DEĞİL ────────────────────────────────────────────
  * `VITE_` değişkeni derleme anında gömülüyor ve bu depoda daha önce tam da
@@ -19,7 +30,7 @@
  * özellik ölü gitti, webde çalıştığı için de fark edilmedi. Bayrağın kodda
  * durması, ne olduğunu okunabilir ve gözden geçirilebilir kılıyor.
  */
-export const PARA_DUVARI_AKTIF = false;
+export const PARA_DUVARI_AKTIF = true;
 
 /**
  * Kapı açıldığında bile ÜCRETSİZ kalacak Pro yolları.
