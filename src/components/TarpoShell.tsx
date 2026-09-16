@@ -108,11 +108,22 @@ export default function TarpoShell() {
           * Marka: logo + ad + Pro rozeti tek düğme. Eskiden burada "Programlar"
           * ve "TARPOL" diye İKİ ayrı düğme vardı; ikisi de yukarı çıkıyordu ve
           * hangisinin nereye gittiği belirsizdi. Tek düğme, tek hedef.
+          *
+          * ─── HEDEF SİTE KÖKÜ, KAPSAM GİRİŞİ DEĞİL ─────────────────────────
+          * Eskiden `/tarpovizyon/<kapsam>`'a gidiyordu ve veri platformuna
+          * girdikten sonra vitrine (site kökü) DÖNMENİN HİÇBİR YOLU yoktu —
+          * ölçüldü: veri sayfalarında köke giden bağlantı sayısı sıfır, marka
+          * da bağlantı değil düğmeydi. Kullanıcı adres çubuğunu elle
+          * düzenlemek zorunda kalıyordu.
+          *
+          * Logonun site köküne gitmesi zaten yerleşik beklenti. Kapsam giriş
+          * sayfası kaybolmuyor: konum izinin ilk segmenti ("Türkiye" /
+          * "Dünya") oraya götürüyor ve hemen altında duruyor.
           */}
         <button
           className="tarpo-marka"
-          onClick={() => navigate(`/tarpovizyon/${kapsam}`)}
-          title="Kapsam giriş sayfası"
+          onClick={() => navigate('/')}
+          title="Ana sayfa"
         >
           <span className="tarpo-marka-im" aria-hidden="true">T</span>
           <span className="tarpo-marka-ad">TarpoVizyon</span>
