@@ -23,7 +23,8 @@ type Alan = { anahtar: keyof Ayarlar; etiket: string; birim: string; ipucu: stri
 const ALANLAR: Alan[] = [
   { anahtar: 'fiyat_aylik', etiket: 'Aylık abonelik', birim: '₺', ipucu: 'Aylık ödemede alınacak tutar' },
   { anahtar: 'fiyat_yillik', etiket: 'Yıllık abonelik', birim: '₺', ipucu: 'Peşin yıllık ödemede alınacak tutar' },
-  { anahtar: 'deneme_gun', etiket: 'Ücretsiz deneme', birim: 'gün', ipucu: 'Yeni kullanıcıya verilen süre' },
+  { anahtar: 'deneme_gun', etiket: 'Ücretsiz deneme', birim: 'gün',
+    ipucu: 'YALNIZCA vitrinde gösterilir. Gerçek süre iyzico ödeme planındaki trialPeriodDays; ikisi aynı tutulmalı.' },
 ];
 
 export default function FiyatlandirmaSekmesi() {

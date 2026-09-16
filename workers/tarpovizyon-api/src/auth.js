@@ -38,7 +38,6 @@ const KOD_DENEME_SINIRI = 5;
 /** Aynı e-postaya iki kod arasında geçmesi gereken en kısa süre. */
 const KOD_ARALIK_SN = 60;
 const OTURUM_OMRU_GUN = 30;
-const DENEME_SURESI_GUN = 7;
 
 const simdi = () => Math.floor(Date.now() / 1000);
 
@@ -232,14 +231,20 @@ export async function handleKodDogrula(request, env) {
     kullanici = { id };
     yeni = true;
     /*
-     * Deneme İLK GİRİŞTE başlıyor, kayıtta değil — ikisi burada aynı an, ama
-     * ayrımı korumak önemli: ileride davetle hesap açılırsa denemenin
-     * kullanıcı gerçekten girdiğinde başlaması gerekiyor.
+     * ─── DENEME BURADA BAŞLAMIYOR ─────────────────────────────────────────
+     * Eskiden ilk girişte kartsız 7 günlük bir `deneme` satırı açılıyordu.
+     * Kaldırıldı: deneme artık iyzico'da, ödeme planındaki `trialPeriodDays`
+     * ile başlıyor ve kart çıkış formunda alınıyor (iyzico kartı 1 TL çekip
+     * iade ederek doğruluyor, deneme boyunca tahsilat yok). Süre bitince
+     * tahsilat kendiliğinden başlıyor.
+     *
+     * İkisi birlikte duramazdı: planda `trialPeriodDays` varken buradaki
+     * satır da kalsaydı kullanıcı önce kartsız 7 gün, sonra denemeyi
+     * başlatıp 7 gün daha alırdı.
+     *
+     * Yeni hesap artık aboneliksiz açılıyor; `kullaniciDurumu` bu hâli
+     * zaten 'yok' olarak modelliyor.
      */
-    await env.DB.prepare(
-      `INSERT INTO abonelik (kullanici_id, durum, baslangic, bitis, guncelleme)
-       VALUES (?, 'deneme', ?, ?, ?)`,
-    ).bind(kullanici.id, t, t + DENEME_SURESI_GUN * 86400, t).run();
   } else {
     await env.DB.prepare(
       'UPDATE kullanici SET son_giris = ? WHERE id = ?').bind(t, kullanici.id).run();

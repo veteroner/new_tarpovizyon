@@ -70,6 +70,18 @@ export async function handleAyarOku(env) {
    */
   cikti.odeme_hazir = (hepsi.iyzico_plan_aylik || hepsi.iyzico_plan_yillik) ? '1' : '0';
 
+  /*
+   * iyzico planında GÖRÜLEN deneme günü. `deneme_gun` panelden elle giriliyor
+   * ve gerçek süreyi belirlemiyor — süre iyzico'daki `trialPeriodDays`.
+   * İkisi ayrışırsa vitrin yanlış gün sayısı gösterirdi; bu alan dolduğunda
+   * arayüz onu tercih ediyor, yani ekrandaki sayı ölçülmüş gerçek oluyor.
+   * İlk denemeli ödeme tamamlandığında `odeme.js` yazıyor (o âna kadar boş).
+   *
+   * Gizli bir bilgi değil: deneme süresini zaten vitrinde yayımlıyoruz. Plan
+   * REFERANS KODLARI ise dışarı çıkmıyor, onlar iç bilgi.
+   */
+  if (hepsi.iyzico_deneme_gun) cikti.iyzico_deneme_gun = hepsi.iyzico_deneme_gun;
+
   return { status: 200, body: cikti };
 }
 
@@ -175,8 +187,21 @@ export async function handleAbonelikDegistir(request, env) {
 
   const t = simdi();
   const mevcut = await env.DB.prepare(
-    'SELECT durum, bitis FROM abonelik WHERE kullanici_id = ?').bind(kullaniciId).first();
-  if (!mevcut) return { status: 404, body: { hata: 'abonelik_yok' } };
+    'SELECT durum, baslangic, bitis FROM abonelik WHERE kullanici_id = ?').bind(kullaniciId).first();
+
+  /*
+   * ─── UZATMA SATIR YOKKEN DE ÇALIŞMALI ─────────────────────────────────────
+   * Eskiden burada `if (!mevcut) → 404` vardı ve sorun çıkarmıyordu: her yeni
+   * hesapta ilk girişte açılan kartsız deneme satırı vardı. O deneme
+   * kaldırılınca (abonelik artık iyzico'da başlıyor) yeni hesaplar
+   * aboneliksiz açılır oldu ve bu uç onlara 'abonelik_yok' demeye başladı —
+   * yani yöneticinin yeni bir kullanıcıya elle erişim vermesi imkânsızlaştı.
+   *
+   * İptal hâlâ satır istiyor: olmayan bir aboneliği iptal etmek anlamsız ve
+   * boş bir 'iptal' satırı yazmak, hiç abone olmamış kullanıcıyı ayrılmış
+   * gibi gösterirdi.
+   */
+  if (!mevcut && islem === 'iptal') return { status: 404, body: { hata: 'abonelik_yok' } };
 
   if (islem === 'iptal') {
     await env.DB.prepare(
@@ -191,11 +216,14 @@ export async function handleAbonelikDegistir(request, env) {
   }
   /* Uzatma MEVCUT BİTİŞTEN başlıyor, bugünden değil — süresi dolmamış bir
      aboneliği uzatmak kalan günleri yakmamalı. Süresi dolmuşsa bugünden. */
-  const taban = mevcut.bitis && Number(mevcut.bitis) > t ? Number(mevcut.bitis) : t;
+  const taban = mevcut?.bitis && Number(mevcut.bitis) > t ? Number(mevcut.bitis) : t;
   const yeniBitis = taban + ekle * 86400;
   await env.DB.prepare(
-    `UPDATE abonelik SET durum = 'aktif', bitis = ?, guncelleme = ? WHERE kullanici_id = ?`,
-  ).bind(yeniBitis, t, kullaniciId).run();
+    `INSERT INTO abonelik (kullanici_id, durum, baslangic, bitis, saglayici, guncelleme)
+     VALUES (?, 'aktif', ?, ?, 'elle', ?)
+     ON CONFLICT(kullanici_id) DO UPDATE SET
+       durum = 'aktif', bitis = excluded.bitis, guncelleme = excluded.guncelleme`,
+  ).bind(kullaniciId, mevcut ? (mevcut.baslangic ?? t) : t, yeniBitis, t).run();
 
   return { status: 200, body: { durum: 'aktif', bitis: yeniBitis } };
 }

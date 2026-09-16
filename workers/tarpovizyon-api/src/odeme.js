@@ -175,34 +175,92 @@ export async function handleOdemeDogrula(request, env) {
   const durum = String(d.subscriptionStatus ?? d.status ?? '').toUpperCase();
   const basarili = durum === 'ACTIVE' || durum === 'SUCCESS';
 
+  /*
+   * `deneme`, arayüzün doğru cümleyi kurabilmesi için: denemeli planda
+   * iyzico ACTIVE dönüyor ama tahsilat yapılmıyor, yani "ödemeniz alındı"
+   * demek yanlış olurdu.
+   */
+  let sonuc = null;
   if (basarili) {
-    await abonelikAktiflestir(env, oturum.kullaniciId, sahip.plan, d.referenceCode ?? null);
+    sonuc = await abonelikAktiflestir(env, oturum.kullaniciId, sahip.plan, d.referenceCode ?? null, d);
   }
 
-  return { status: 200, body: { basarili, durum, plan: sahip.plan } };
+  return {
+    status: 200,
+    body: {
+      basarili,
+      durum,
+      plan: sahip.plan,
+      deneme: sonuc?.durum === 'deneme',
+      bitis: sonuc?.bitis ?? null,
+    },
+  };
 }
 
 /**
  * Aboneliği aktifleştirir / uzatır.
  *
- * Uzatma MEVCUT BİTİŞTEN başlıyor: deneme süresi dolmadan ödeyen kullanıcı
- * kalan günlerini kaybetmemeli.
+ * Uzatma MEVCUT BİTİŞTEN başlıyor: süresi dolmadan ödeyen kullanıcı kalan
+ * günlerini kaybetmemeli.
+ *
+ * ─── DENEME İLE ÜCRETLİ NEDEN AYRI ──────────────────────────────────────────
+ * iyzico, denemeli bir planda aboneliği ACTIVE durumuyla başlatıyor ama
+ * HİÇBİR TAHSİLAT YAPMIYOR — kartı yalnızca 1 TL çekip iade ederek
+ * doğruluyor. Yani "ACTIVE geldi, demek ki ödendi" varsayımı yanlış.
+ *
+ * Ayrım yapılmasaydı: denemeyi başlatıp ertesi gün iptal eden kullanıcıya
+ * plan süresi kadar (30 ya da 365 gün) erişim yazılırdı. Denemede yalnızca
+ * denemenin kendi bitişi kadar hak veriliyor; ilk gerçek tahsilat
+ * `subscription.order.success` bildirimiyle geldiğinde süre uzatılıyor.
+ *
+ * Denemenin bitişi BİZDE HESAPLANMIYOR, iyzico'nun döndüğü `trialEndDate`
+ * (epoch ms) kullanılıyor — süre planda tanımlı, tek doğruluk kaynağı orası.
+ * Yerelde ikinci bir sayaç tutmak, planı değiştiren birinin haberi olmadan
+ * iki tarafı ayırırdı.
  */
-async function abonelikAktiflestir(env, kullaniciId, plan, referans) {
+async function abonelikAktiflestir(env, kullaniciId, plan, referans, iyziVeri = null) {
   const t = simdi();
-  const gun = plan === 'yillik' ? 365 : 30;
+
+  /* Deneme bitişi gelecekteyse abonelik denemede demektir. */
+  const denemeBitisMs = Number(iyziVeri?.trialEndDate ?? 0);
+  const denemeBitis = Number.isFinite(denemeBitisMs) && denemeBitisMs > 0
+    ? Math.floor(denemeBitisMs / 1000) : 0;
+  const denemede = denemeBitis > t;
+
   const mevcut = await env.DB.prepare(
     'SELECT bitis FROM abonelik WHERE kullanici_id = ?').bind(kullaniciId).first();
   const taban = mevcut?.bitis && Number(mevcut.bitis) > t ? Number(mevcut.bitis) : t;
 
+  const durum = denemede ? 'deneme' : 'aktif';
+  const bitis = denemede
+    ? Math.max(denemeBitis, taban)          // önceden hakkı varsa kısalmasın
+    : taban + (plan === 'yillik' ? 365 : 30) * 86400;
+
   await env.DB.prepare(
     `INSERT INTO abonelik (kullanici_id, durum, baslangic, bitis, saglayici, saglayici_ref, plan, guncelleme)
-     VALUES (?, 'aktif', ?, ?, 'iyzico', ?, ?, ?)
+     VALUES (?, ?, ?, ?, 'iyzico', ?, ?, ?)
      ON CONFLICT(kullanici_id) DO UPDATE SET
-       durum = 'aktif', bitis = excluded.bitis,
+       durum = excluded.durum, bitis = excluded.bitis,
        saglayici = 'iyzico', saglayici_ref = COALESCE(excluded.saglayici_ref, abonelik.saglayici_ref),
        plan = excluded.plan, guncelleme = excluded.guncelleme`,
-  ).bind(kullaniciId, t, taban + gun * 86400, referans, plan, t).run();
+  ).bind(kullaniciId, durum, t, bitis, referans, plan, t).run();
+
+  /*
+   * Planda tanımlı deneme gününü iyzico'dan GÖRDÜĞÜMÜZ gibi saklıyoruz.
+   * Vitrinde gösterilen `deneme_gun` yönetici panelinden elle giriliyor ve
+   * iyzico planıyla ayrışabilir; bu satır, yönetim ekranının gerçek değeri
+   * yan yana gösterebilmesi için. Ayarın kendisine DOKUNULMUYOR — sessizce
+   * üzerine yazmak, yöneticinin bilerek girdiği değeri kaybettirirdi.
+   */
+  const planDeneme = Number(iyziVeri?.trialDays ?? 0);
+  if (Number.isFinite(planDeneme) && planDeneme > 0) {
+    await env.DB.prepare(
+      `INSERT INTO ayar (anahtar, deger) VALUES ('iyzico_deneme_gun', ?)
+       ON CONFLICT(anahtar) DO UPDATE SET deger = excluded.deger`,
+    ).bind(String(planDeneme)).run().catch(() => {});
+  }
+
+  return { durum, bitis };
 }
 
 /**

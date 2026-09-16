@@ -3,7 +3,7 @@ import { Sparkles, Check, Loader2, ShieldCheck } from 'lucide-react';
 import { useOturum } from '../auth/useOturum';
 import { OturumGirisi } from '../auth/OturumGirisi';
 import { ayarOku, type Ayarlar } from './panel/yonetimApi';
-import { odemeBaslat, odemeDogrula, odemeHatasi } from './abonelik/odemeApi';
+import { odemeBaslat, odemeDogrula, odemeHatasi, kuponKullan, kuponHatasi, type OdemeSonuc } from './abonelik/odemeApi';
 import './abonelik/abonelik.css';
 
 /**
@@ -24,6 +24,14 @@ import './abonelik/abonelik.css';
 
 const AYLAR = { aylik: 'ay', yillik: 'yıl' } as const;
 
+const BICIM = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/** epoch saniye → "16 Ekim 2026" */
+const tarihYaz = (epochSn: number) => BICIM.format(new Date(epochSn * 1000));
+
+/** Bugünden `gun` gün sonrası — deneme bitişinin ÖN İZLEMESİ. */
+const gunSonra = (gun: number) => BICIM.format(new Date(Date.now() + gun * 86400_000));
+
 export default function AbonelikPage() {
   const { durum, kullanici, abonelik, tazele } = useOturum();
   const [ayarlar, setAyarlar] = useState<Ayarlar>({});
@@ -31,7 +39,11 @@ export default function AbonelikPage() {
   const [form, setForm] = useState({ ad: '', soyad: '', gsm: '', tckn: '', sehir: '', adres: '' });
   const [bekliyor, setBekliyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
-  const [sonuc, setSonuc] = useState<{ basarili: boolean; durum: string } | null>(null);
+  const [sonuc, setSonuc] = useState<OdemeSonuc | null>(null);
+  const [kupon, setKupon] = useState('');
+  const [kuponBekliyor, setKuponBekliyor] = useState(false);
+  const [kuponHata, setKuponHata] = useState<string | null>(null);
+  const [kuponSonuc, setKuponSonuc] = useState<{ gun: number; bitis: number } | null>(null);
   const formKutusu = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,6 +99,31 @@ export default function AbonelikPage() {
    * '1' yapan biri bile abonelik açamaz.
    */
   const odemeHazir = ayarlar.odeme_hazir === '1';
+  /*
+   * Deneme süresi iyzico'daki ödeme planında tanımlı; buradaki değer yalnızca
+   * ÖN GÖSTERİM için. Kesin tarih ödeme sonrası iyzico'dan geliyor
+   * (`sonuc.bitis`) ve başarı ekranında o yazılıyor.
+   */
+  const denemeGun = Number(ayarlar.iyzico_deneme_gun ?? ayarlar.deneme_gun);
+  const denemeVar = Number.isFinite(denemeGun) && denemeGun > 0;
+
+  /*
+   * Kupon ödeme akışından TAMAMEN ayrı: tahsilat yok, iyzico yok, kart yok.
+   * `tazele()` şart — erişim sunucuda açıldı, oturum özeti yenilenmezse
+   * kullanıcı hâlâ kilitli sayfalar görürdü.
+   */
+  const kuponGonder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setKuponHata(null); setKuponBekliyor(true);
+    try {
+      const s = await kuponKullan(kupon);
+      setKuponSonuc({ gun: s.gun, bitis: s.bitis });
+      setKupon('');
+      await tazele();
+    } catch (x) {
+      setKuponHata(kuponHatasi(x));
+    } finally { setKuponBekliyor(false); }
+  };
 
   const odeme = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,11 +157,23 @@ export default function AbonelikPage() {
           <div className={`ab-rozet ${sonuc.basarili ? 'ab-rozet-ok' : 'ab-rozet-hata'}`}>
             {sonuc.basarili ? <Check size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
           </div>
-          <h1 className="ab-baslik">{sonuc.basarili ? 'Aboneliğiniz başladı' : 'Ödeme tamamlanamadı'}</h1>
+          <h1 className="ab-baslik">
+            {!sonuc.basarili ? 'Ödeme tamamlanamadı'
+              : sonuc.deneme ? 'Ücretsiz denemeniz başladı' : 'Aboneliğiniz başladı'}
+          </h1>
+          {/*
+            * Denemede "ödemeniz alındı" demek YANLIŞ olurdu: iyzico kartı
+            * yalnızca doğruladı, tahsilat ilk yenilemede olacak. Kullanıcının
+            * ne zaman ücretlendirileceğini burada görmesi gerekiyor.
+            */}
           <p className="ab-alt">
-            {sonuc.basarili
-              ? 'Pro bölümlerinin tamamı açıldı. İyi çalışmalar.'
-              : `Ödeme onaylanmadı (${sonuc.durum || 'bilinmiyor'}). Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.`}
+            {!sonuc.basarili
+              ? `Ödeme onaylanmadı (${sonuc.durum || 'bilinmiyor'}). Kartınızdan çekim yapılmadıysa tekrar deneyebilirsiniz.`
+              : sonuc.deneme
+                ? `Pro bölümlerinin tamamı açıldı. Kartınızdan şu an ücret alınmadı;${
+                  sonuc.bitis ? ` ilk tahsilat ${tarihYaz(sonuc.bitis)} tarihinde yapılacak.` : ' ilk tahsilat deneme süresi sonunda yapılacak.'
+                } Öncesinde iptal ederseniz ücret alınmaz.`
+                : 'Pro bölümlerinin tamamı açıldı. İyi çalışmalar.'}
           </p>
           <a className="ab-dugme" href="/tarpovizyon/turkey/overview">Panele dön</a>
         </div>
@@ -226,9 +275,38 @@ export default function AbonelikPage() {
 
           {hata && <p className="ab-hata" role="alert">{hata}</p>}
 
+          {/*
+            * ─── NE ZAMAN NE ÖDENECEK ───────────────────────────────────────
+            * Kart deneme başlarken alınıyor ve iyzico onu 1 TL çekip iade
+            * ederek doğruluyor; tahsilat deneme bitiminde başlıyor. Kullanıcı
+            * kart bilgisini girmeden ÖNCE bunu görmeli — "ücretsiz deneme"
+            * yazıp kart istemek, tarihi ve tutarı söylemeden onay almak olur.
+            */}
+          {denemeVar && fiyatVar && (
+            <div className="ab-kosul">
+              <div className="ab-kosul-satir">
+                <span>Bugün ödeyeceğiniz</span>
+                <b>0 ₺</b>
+              </div>
+              <div className="ab-kosul-satir">
+                <span>{gunSonra(denemeGun)} tarihinde</span>
+                <b>{tutar.toLocaleString('tr-TR')} ₺/{AYLAR[plan]}</b>
+              </div>
+              <p className="ab-kosul-not">
+                Kartınız şimdi doğrulanır: 1 ₺ çekilip iade edilir, başka
+                ücret alınmaz. İade bankanıza göre birkaç gün içinde
+                ekstrenize yansır. {denemeGun} günlük deneme bitmeden iptal
+                ederseniz hiçbir ücret ödemezsiniz. Abonelik siz iptal edene
+                kadar {plan === 'yillik' ? 'yıllık' : 'aylık'} olarak
+                yenilenir.
+              </p>
+            </div>
+          )}
+
           <button className="ab-dugme" type="submit" disabled={bekliyor || !fiyatVar}>
             {bekliyor && <Loader2 size={15} aria-hidden="true" className="ab-donen" />}
-            {bekliyor ? 'Hazırlanıyor…' : 'Ödemeye geç'}
+            {bekliyor ? 'Hazırlanıyor…'
+              : denemeVar ? `${denemeGun} günlük ücretsiz denemeyi başlat` : 'Ödemeye geç'}
           </button>
 
           <p className="ab-not">
@@ -238,6 +316,49 @@ export default function AbonelikPage() {
           </p>
           <p className="ab-not" style={{ opacity: .75 }}>{kullanici?.eposta}</p>
         </form>
+        )}
+
+        {/*
+          * ─── KUPON ─────────────────────────────────────────────────────────
+          * Ödeme formunun DIŞINDA ve ondan bağımsız: kuponda tahsilat yok,
+          * bu yüzden ad/adres/TCKN de istenmiyor. Ayrıca `odemeHazir`
+          * koşuluna bağlı değil — iyzico kurulmadan önce de kupon dağıtılıp
+          * kullanılabilmeli.
+          *
+          * Bu sayfa Capacitor'da `/m/settings`'e yönlendiği için alan
+          * mağaza derlemesinde zaten görünmüyor.
+          */}
+        {kuponSonuc ? (
+          <p className="ab-bilgi" role="status">
+            <Check size={14} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 5 }} />
+            Kupon uygulandı: {kuponSonuc.gun} gün Pro erişimi eklendi
+            ({tarihYaz(kuponSonuc.bitis)} tarihine kadar).
+          </p>
+        ) : (
+          <form className="ab-kupon" onSubmit={kuponGonder}>
+            <label className="ab-alan">
+              <span className="ab-etiket">Kupon kodunuz varsa</span>
+              <div className="ab-kupon-satir">
+                <input
+                  className="ab-girdi ab-kupon-girdi"
+                  value={kupon}
+                  onChange={(e) => setKupon(e.target.value.toUpperCase())}
+                  placeholder="KODU GİRİN"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  aria-label="Kupon kodu"
+                />
+                <button className="ab-dugme ab-kupon-dugme" type="submit"
+                  disabled={kuponBekliyor || kupon.trim().length < 4}>
+                  {kuponBekliyor && <Loader2 size={14} aria-hidden="true" className="ab-donen" />}
+                  {kuponBekliyor ? 'Kontrol ediliyor…' : 'Kuponu kullan'}
+                </button>
+              </div>
+            </label>
+            {kuponHata && <p className="ab-hata" role="alert">{kuponHata}</p>}
+            <p className="ab-not">Kupon kullanıldığında ödeme alınmaz, kart bilgisi istenmez.</p>
+          </form>
         )}
 
         {/* iyzico formu buraya yerleşiyor. */}

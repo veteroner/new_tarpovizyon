@@ -722,6 +722,7 @@ import { handleKodIste, handleKodDogrula, handleBen, handleCikis } from './auth.
 import { yetkiDenetimi } from './yetki.js';
 import { handleAyarOku, handleAyarYaz, handleAboneler, handleAbonelikDegistir } from './yonetim.js';
 import { handleOdemeBaslat, handleOdemeDogrula, handleOdemeWebhook } from './odeme.js';
+import { handleKuponKullan, handleKuponlar, handleKuponYaz } from './kupon.js';
 import { handlePanelGiris, handlePanelCikis, panelOturumuGecerli } from './panelGiris.js';
 import { emtiaTurunuCalistir, emtiaGecmisiCalistir } from './emtiaCek.js';
 
@@ -901,6 +902,34 @@ export default {
       });
     }
 
+    /*
+     * Kupon kullanımı ödeme uçlarıyla aynı düzende: oturum jetonu taşıdığı
+     * için `authCors`, yanıt önbelleklenmiyor.
+     */
+    if (slug === 'kupon/kullan') {
+      const cors = authCors(request);
+      if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+      if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
+          { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
+      }
+      let sonuc;
+      try {
+        sonuc = await handleKuponKullan(request, env);
+      } catch (e) {
+        console.error('kupon hatası', e?.message);
+        sonuc = { status: 500, body: { hata: 'sunucu_hatasi' } };
+      }
+      return new Response(JSON.stringify(sonuc.body), {
+        status: sonuc.status,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          ...cors,
+        },
+      });
+    }
+
     if (slug === 'ayar' && request.method === 'GET') {
       const { status, body } = await handleAyarOku(env);
       return json(body, status);
@@ -946,14 +975,17 @@ export default {
       });
     }
 
-    if (slug === 'admin/ayar' || slug === 'admin/aboneler' || slug === 'admin/abonelik') {
+    if (slug === 'admin/ayar' || slug === 'admin/aboneler' || slug === 'admin/abonelik'
+      || slug === 'admin/kuponlar' || slug === 'admin/kupon') {
       const cors = yazmaCors(request);
       if (!cors) return new Response(null, { status: 403 });
       if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
       const isleyici = slug === 'admin/ayar' ? handleAyarYaz
         : slug === 'admin/aboneler' ? handleAboneler
-          : handleAbonelikDegistir;
-      const beklenen = slug === 'admin/aboneler' ? 'GET' : 'POST';
+          : slug === 'admin/kuponlar' ? handleKuponlar
+            : slug === 'admin/kupon' ? handleKuponYaz
+              : handleAbonelikDegistir;
+      const beklenen = (slug === 'admin/aboneler' || slug === 'admin/kuponlar') ? 'GET' : 'POST';
       if (request.method !== beklenen) {
         return new Response(JSON.stringify({ hata: 'yontem_hatali' }),
           { status: 405, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Database, Coins, Tag, Users, LogOut } from 'lucide-react';
+import { Database, Coins, Tag, Users, Ticket, LogOut } from 'lucide-react';
 import { PanelKapisi } from './PanelKapisi';
 import { panelCikis, panelGecerliMi } from './yonetimApi';
 import './panel.css';
@@ -9,6 +9,7 @@ const VeriYuklePage = lazy(() => import('../VeriYuklePage'));
 const VeriGirisiPage = lazy(() => import('../VeriGirisiPage'));
 const FiyatlandirmaSekmesi = lazy(() => import('./FiyatlandirmaSekmesi'));
 const AbonelerSekmesi = lazy(() => import('./AbonelerSekmesi'));
+const KuponlarSekmesi = lazy(() => import('./KuponlarSekmesi'));
 
 /**
  * Yönetim paneli — tek kabuk, sekmeli.
@@ -42,6 +43,7 @@ const SEKMELER = [
   { id: 'sektor', ad: 'Sektör Fiyatları', ikon: Coins },
   { id: 'fiyat', ad: 'Fiyatlandırma', ikon: Tag },
   { id: 'aboneler', ad: 'Aboneler', ikon: Users },
+  { id: 'kuponlar', ad: 'Kuponlar', ikon: Ticket },
 ] as const;
 
 type SekmeId = typeof SEKMELER[number]['id'];
@@ -125,6 +127,7 @@ export default function PanelKabugu() {
           {sekme === 'sektor' && <VeriGirisiPage />}
           {sekme === 'fiyat' && <FiyatlandirmaSekmesi />}
           {sekme === 'aboneler' && <AbonelerSekmesi />}
+          {sekme === 'kuponlar' && <KuponlarSekmesi />}
         </Suspense>
       </div>
     </div>

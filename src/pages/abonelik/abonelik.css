@@ -116,6 +116,50 @@
 }
 .ab-not { font-size: 0.76rem; color: var(--text-secondary, #6e6e73); margin: 8px 0 0; line-height: 1.5; }
 
+/* Kupon — ödeme formundan ayrı, üstünde ince bir ayraç. */
+.ab-kupon {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color, #e5e5ea);
+}
+.ab-kupon-satir { display: flex; gap: 8px; align-items: stretch; }
+.ab-kupon-girdi {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.ab-kupon-dugme { flex: 0 0 auto; width: auto; margin: 0; padding: 0 16px; }
+@media (max-width: 420px) {
+  .ab-kupon-satir { flex-direction: column; }
+  .ab-kupon-dugme { width: 100%; }
+}
+
+/* Deneme koşulları — kart istenmeden önce ne zaman ne ödeneceği. */
+.ab-kosul {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color, #e5e5ea);
+  border-radius: 10px;
+  background: var(--surface-subtle, rgba(0, 0, 0, .02));
+}
+.ab-kosul-satir {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.86rem;
+  padding: 3px 0;
+}
+.ab-kosul-satir b { font-variant-numeric: tabular-nums; }
+.ab-kosul-not {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #6e6e73);
+}
+
 .ab-donen { animation: ab-don 1s linear infinite; }
 @keyframes ab-don { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ab-donen { animation: none; } }

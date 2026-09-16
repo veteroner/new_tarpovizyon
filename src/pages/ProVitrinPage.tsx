@@ -112,7 +112,7 @@ export default function ProVitrinPage() {
 
   const aylik = Number(ayarlar.fiyat_aylik);
   const yillik = Number(ayarlar.fiyat_yillik);
-  const deneme = Number(ayarlar.deneme_gun);
+  const deneme = Number(ayarlar.iyzico_deneme_gun ?? ayarlar.deneme_gun);
   const fiyatVar = Number.isFinite(yillik) && yillik > 0;
   /* Satın alma yolu mağaza derlemesinde GİZLİ — App Store 3.1.1. */
   const satisGoster = !isPlatform('capacitor');
