@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
 import { Sparkles, ArrowRight, Globe2, Wheat, Beef, Ship, MapPin, Leaf, Wrench, Activity } from 'lucide-react';
 import { VitrinHeader } from '../components/vitrin/VitrinHeader';
 import { VitrinFooter } from '../components/vitrin/VitrinFooter';
+import { VeriKarti } from '../components/vitrin/VeriKarti';
+import type { Kart } from '../components/vitrin/vitrinVerisi';
 import { isPlatform } from '../mobile/utils/platform';
 import { ayarOku, type Ayarlar } from './panel/yonetimApi';
 
@@ -28,11 +27,19 @@ import { ayarOku, type Ayarlar } from './panel/yonetimApi';
  * çizilebiliyor), 8 kategori, iki kapsam. Abartmak, ürünü ilk açtığında
  * kullanıcının güvenini kaybettirir.
  *
- * ─── CANLI SAYI NEDEN ENFLASYONDAN ──────────────────────────────────────────
- * Başlıktaki sayı TÜFE/gıda serisinden: aylık yayımlanıyor ve gerçekten
- * hareket ediyor. Maliyet–fiyat tablolarından "şu an" cümlesi KURULMUYOR —
- * ölçüldü, son iki dönem birebir aynı, yani son satır taşınmış bir kopya.
- * Onları zaman serisi olarak göstermek dürüst; "bugün kâr şu" demek değil.
+ * ─── KARTLAR: ÜRETİCİYE KALAN PAY ───────────────────────────────────────────
+ * Pro'nun ayırt edici sorusu "ne oldu" değil "neden": fiyat ile maliyet
+ * arasındaki makas ve yemin ürünü ne kadar satın aldığı (parite). Kartlar bu
+ * yüzden kârlılık ve pariteyi, çiğ süt ve kırmızı et için yan yana veriyor.
+ *
+ * Her kartın altında DÖNEM yazıyor ("Eyl 2026"): bu bir "şu an" iddiası değil,
+ * tarihi belli bir ölçüm. Eskiden maliyet–fiyat tablolarından hiç sayı
+ * gösterilmiyordu çünkü son iki dönem birebir kopyaydı ve kârlılık sütunu 14
+ * ay donmuştu; Eylül 2026'da ikisi de düzeltildi ve maliyet artık panelde
+ * girdilerden hesaplanıyor.
+ *
+ * Kanatlı ve yumurta BİLEREK yok: o tabloların maliyet kaynağı kesildi, son
+ * dönemleri taşıma (bkz. hafıza notu "kanatlı fiyat-maliyet kaynağı yok").
  */
 
 const API = 'https://tarpovizyon-api.veteroner.workers.dev';
@@ -52,7 +59,46 @@ const KATEGORILER = [
 ];
 
 type TufeSatir = { yil: number; ay: number; tufe: number | null; gida_alkolsuz: number | null };
-type SutSatir = { tarih: string; uretim_maliyeti_tl_lt: number | null; usk_tavsiye_fiyat_tl_lt: number | null };
+type SutSatir = {
+  tarih: string; uretim_maliyeti_tl_lt: number | null; usk_tavsiye_fiyat_tl_lt: number | null;
+  karlilik: number | null; sut_yem_paritesi: number | null;
+};
+type EtSatir = {
+  tarih: string; karlilik: number | null; karkas_paritesi: number | null;
+  kuzu_karkas_fiyati_tl_kg: number | null;
+};
+
+const AY_KISA = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+/** Kıvılcım çizgisi için son 24 ay. */
+const SERI_AY = 24;
+
+/**
+ * Tablodan kart üretir: son dolu değer + dönemi + son 24 ayın serisi.
+ * Değer yoksa kart HİÇ üretilmiyor — boş bir "—" kartı, olmayan veriyi varmış
+ * gibi gösterirdi.
+ */
+function kartUret<T extends { tarih: string }>(
+  satirlar: T[], alan: keyof T,
+  o: { id: string; etiket: string; birim: string; yol: string; yuzde?: boolean; basamak?: number },
+): Kart | null {
+  const dolu = [...satirlar]
+    .sort((a, b) => String(a.tarih).localeCompare(String(b.tarih)))
+    .filter((r) => typeof r[alan] === 'number' && Number.isFinite(r[alan] as number));
+  const son = dolu.at(-1);
+  if (!son) return null;
+  const m = String(son.tarih).match(/^(\d{4})-(\d{2})/);
+  const deger = son[alan] as number;
+  return {
+    id: o.id,
+    etiket: o.etiket,
+    deger: o.basamak != null ? Number(deger.toFixed(o.basamak)) : deger,
+    birim: o.birim,
+    alt: m ? `${AY_KISA[Number(m[2]) - 1]} ${m[1]}` : '',
+    seri: dolu.slice(-SERI_AY).map((r) => r[alan] as number),
+    yol: o.yol,
+    yuzde: o.yuzde,
+  };
+}
 
 const sayi = (v: number | null | undefined, basamak = 1) =>
   (v == null ? '—' : v.toLocaleString('tr-TR', { minimumFractionDigits: basamak, maximumFractionDigits: basamak }));
@@ -60,6 +106,7 @@ const sayi = (v: number | null | undefined, basamak = 1) =>
 export default function ProVitrinPage() {
   const [tufe, setTufe] = useState<TufeSatir[]>([]);
   const [sut, setSut] = useState<SutSatir[]>([]);
+  const [et, setEt] = useState<EtSatir[]>([]);
   const [ayarlar, setAyarlar] = useState<Ayarlar>({});
 
   useEffect(() => {
@@ -70,14 +117,17 @@ export default function ProVitrinPage() {
        * aralarında bağımlılık yok. Biri düşerse diğerleri çiziliyor —
        * `allSettled`, çünkü fiyat okunamazsa grafik yine gösterilmeli.
        */
-      const [t, s, a] = await Promise.allSettled([
+      const [t, s, e, a] = await Promise.allSettled([
         fetch(`${API}/api/makro/tufe-aylik?limit=500`).then((r) => r.json()),
         fetch(`${API}/api/cig-sut/ekonomik-gostergeler?limit=500`).then((r) => r.json()),
+        /* Korumalı listede DEĞİL — duvar açıkken de anonim ziyaretçiye çiziliyor. */
+        fetch(`${API}/api/kirmizi-et/ekonomik-gostergeler?limit=500`).then((r) => r.json()),
         ayarOku(),
       ]);
       if (iptal) return;
       if (t.status === 'fulfilled') setTufe((t.value?.data ?? []) as TufeSatir[]);
       if (s.status === 'fulfilled') setSut((s.value?.data ?? []) as SutSatir[]);
+      if (e.status === 'fulfilled') setEt((e.value?.data ?? []) as EtSatir[]);
       if (a.status === 'fulfilled') setAyarlar(a.value);
     })();
     return () => { iptal = true; };
@@ -91,24 +141,26 @@ export default function ProVitrinPage() {
     return { ...son, donem: `${AYLAR[son.ay - 1]} ${son.yil}` };
   }, [tufe]);
 
-  /** Çiğ süt maliyet–fiyat serisi, son 48 ay. */
-  const sutSerisi = useMemo(() => [...sut]
-    .sort((a, b) => String(a.tarih).localeCompare(String(b.tarih)))
-    .slice(-48)
-    .map((r) => ({
-      donem: String(r.tarih).slice(0, 7),
-      maliyet: r.uretim_maliyeti_tl_lt == null ? null : Number(r.uretim_maliyeti_tl_lt.toFixed(2)),
-      fiyat: r.usk_tavsiye_fiyat_tl_lt == null ? null : Number(r.usk_tavsiye_fiyat_tl_lt.toFixed(2)),
-    })), [sut]);
-
-  /*
-   * Eksen üst sınırı YUVARLANIYOR. Ham çarpımı vermek eksende
-   * "27.500000000000004" gibi değerler basıyor (bu projede bir kez oldu).
-   */
-  const sutUst = useMemo(() => {
-    const en = Math.max(0, ...sutSerisi.flatMap((d) => [d.maliyet ?? 0, d.fiyat ?? 0]));
-    return en ? Math.ceil((en * 1.1) / 5) * 5 : 10;
-  }, [sutSerisi]);
+  /** İki alan, her birinde üç kart. Değeri olmayan kart düşüyor. */
+  const kartGruplari = useMemo(() => [
+    {
+      ad: 'Çiğ süt', renk: 'var(--tv-d3)',
+      kartlar: [
+        kartUret(sut, 'karlilik', { id: 'sut-kar', etiket: 'Üretici kârlılığı', birim: '', yol: '/tarpovizyon/turkey/milk', yuzde: true }),
+        kartUret(sut, 'sut_yem_paritesi', { id: 'sut-par', etiket: 'Süt / yem paritesi', birim: 'kg yem / lt', yol: '/tarpovizyon/turkey/milk', basamak: 2 }),
+        kartUret(sut, 'uretim_maliyeti_tl_lt', { id: 'sut-mal', etiket: 'Üretim maliyeti', birim: '₺/lt', yol: '/tarpovizyon/turkey/milk', basamak: 2 }),
+      ],
+    },
+    {
+      ad: 'Kırmızı et', renk: 'var(--tv-d2)',
+      kartlar: [
+        kartUret(et, 'karlilik', { id: 'et-kar', etiket: 'Besici kârlılığı', birim: '', yol: '/tarpovizyon/turkey/red-meat', yuzde: true }),
+        kartUret(et, 'karkas_paritesi', { id: 'et-par', etiket: 'Karkas / yem paritesi', birim: 'kg yem / kg', yol: '/tarpovizyon/turkey/red-meat', basamak: 1 }),
+        kartUret(et, 'kuzu_karkas_fiyati_tl_kg', { id: 'et-kuzu', etiket: 'Kuzu karkas fiyatı', birim: '₺/kg', yol: '/tarpovizyon/turkey/red-meat', basamak: 2 }),
+      ],
+    },
+  ].map((g) => ({ ...g, kartlar: g.kartlar.filter((k): k is Kart => k !== null) }))
+    .filter((g) => g.kartlar.length > 0), [sut, et]);
 
   const aylik = Number(ayarlar.fiyat_aylik);
   const yillik = Number(ayarlar.fiyat_yillik);
@@ -177,53 +229,34 @@ export default function ProVitrinPage() {
           </section>
         )}
 
-        {/* ─── Canlı örnek grafik ──────────────────────────────────────── */}
-        <section className="mb-12">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-xl font-bold text-[var(--tv-metin,#1d1d1f)]">
-              Çiğ süt: üretim maliyeti ve tavsiye fiyatı
-            </h2>
-            <span className="text-xs text-[var(--tv-metin-ikincil,#5b6159)]">
-              Ücretsiz veriden örnek · son 48 ay
-            </span>
-          </div>
-          <div className="rounded-2xl border border-[var(--tv-cizgi-ince,rgba(0,0,0,.1))] bg-[var(--tv-kart,#fff)] p-3 pt-5">
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer>
-                <LineChart data={sutSerisi} margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,.08)" vertical={false} />
-                  <XAxis
-                    dataKey="donem"
-                    tick={{ fontSize: 11 }}
-                    /* 48 etiket sığmıyor: altıda biri gösteriliyor. */
-                    interval={7}
-                    tickMargin={8}
-                  />
-                  <YAxis
-                    domain={[0, sutUst]}
-                    tick={{ fontSize: 11 }}
-                    tickFormatter={(v: number) => v.toLocaleString('tr-TR')}
-                    width={44}
-                  />
-                  <Tooltip
-                    formatter={(v: number, ad: string) => [`${sayi(v, 2)} ₺/L`, ad]}
-                    labelFormatter={(l: string) => l}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="maliyet" name="Üretim maliyeti"
-                    stroke="#b45309" strokeWidth={2} dot={false} connectNulls />
-                  <Line type="monotone" dataKey="fiyat" name="USK tavsiye fiyatı"
-                    stroke="#16a34a" strokeWidth={2} dot={false} connectNulls />
-                </LineChart>
-              </ResponsiveContainer>
+        {/* ─── Üreticiye kalan pay — kartlar ─────────────────────────────── */}
+        {kartGruplari.length > 0 && (
+          <section className="mb-12">
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-xl font-bold text-[var(--tv-metin,#1d1d1f)]">
+                Üreticiye ne kalıyor
+              </h2>
+              <span className="text-xs text-[var(--tv-metin-ikincil,#5b6159)]">
+                Ücretsiz veriden örnek · son {SERI_AY} ay
+              </span>
             </div>
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-[var(--tv-metin-ikincil,#5b6159)]">
-            İki çizginin arası üreticiye kalan payı gösteriyor. Pro'da bu, yem
-            fiyatı ve döviz kuru ile birlikte okunuyor; kırmızı et, beyaz et ve
-            yumurta için de aynı hesap var.
-          </p>
-        </section>
+            <div className="space-y-6">
+              {kartGruplari.map((g) => (
+                <div key={g.ad}>
+                  <div className="mb-2 text-[13px] font-medium uppercase tracking-[0.08em] text-[var(--tv-ikincil)]">
+                    {g.ad}
+                  </div>
+                  <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {g.kartlar.map((k) => <VeriKarti key={k.id} kart={k} renk={g.renk} />)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-[var(--tv-metin-ikincil,#5b6159)]">
+              Parite, bir birim ürünün kaç kg yem satın aldığıdır. Pro'da bunlar yem fiyatı ve döviz kuruyla birlikte okunuyor.
+            </p>
+          </section>
+        )}
 
         {/* ─── Kapsam ──────────────────────────────────────────────────── */}
         <section className="mb-12">
