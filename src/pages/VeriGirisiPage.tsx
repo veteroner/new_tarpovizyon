@@ -62,6 +62,8 @@ export default function VeriGirisiPage() {
   const [yukleniyor, setYukleniyor] = useState(false);
   const [durum, setDurum] = useState<{ tip: 'ok' | 'hata'; mesaj: string } | null>(null);
   const [girdiler, setGirdiler] = useState<Record<string, string>>({});
+  /** Girdilerin taşındığı dönem — ekranda "şuradan taşındı" demek için. */
+  const [tasinanDonem, setTasinanDonem] = useState<{ yil: number; ay: number } | null>(null);
   const [yil, setYil] = useState(new Date().getFullYear());
   const [ay, setAy] = useState(new Date().getMonth() + 1);
 
@@ -90,6 +92,31 @@ export default function VeriGirisiPage() {
           const sonraki = son.ay === 12 ? { yil: son.yil + 1, ay: 1 } : { yil: son.yil, ay: son.ay + 1 };
           setYil(sonraki.yil);
           setAy(sonraki.ay);
+        }
+        /*
+         * ─── GİRİLMEYEN FİYAT DEĞİŞMEMİŞTİR ─────────────────────────────────
+         * Girdiler son dönemin değerleriyle dolu geliyor: bir fiyat bu ay
+         * girilmediyse önceki aydaki değer geçerli sayılıyor (ör. canlı
+         * hayvan 450 ₺ ise yenisi yazılana kadar 450 ₺). Kullanıcı yalnız
+         * değişeni güncelliyor.
+         *
+         * Yalnız ÖLÇÜLEN girdiler taşınıyor, hesaplananlar değil. Eskiden
+         * satırın tamamı kopyalanıyordu ve kârlılık 14 ay aynı değerde
+         * kaldı; taşınan fiyattan maliyet ve oranlar her ay yeniden
+         * hesaplandığı için bu artık olamaz.
+         */
+        const sonSatir = d.at(-1);
+        const tanim = SEKTOR_FORMLARI.find((f) => f.tablo === formTablo);
+        if (sonSatir && tanim) {
+          const tasinan: Record<string, string> = {};
+          tanim.girdiler.forEach((x) => {
+            const v = sonSatir[x.alan];
+            if (v !== null && v !== undefined && v !== '') tasinan[x.alan] = String(v);
+          });
+          setGirdiler(tasinan);
+          setTasinanDonem(son);
+        } else {
+          setTasinanDonem(null);
         }
       })
       .catch(() => { if (!iptal) setDurum({ tip: 'hata', mesaj: 'Mevcut satırlar okunamadı.' }); });
@@ -265,6 +292,12 @@ export default function VeriGirisiPage() {
           <p style={{ color: '#f59e0b', fontSize: '0.85rem', marginTop: 0 }}>
             {donemMetni(yil, ay)} bu tabloda ZATEN VAR. Kaydedersen ikinci bir satır oluşur —
             düzeltme için ızgara ekranını kullan.
+          </p>
+        )}
+
+        {tasinanDonem && !ayniDonem && (
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 0 }}>
+            Değerler {donemMetni(tasinanDonem.yil, tasinanDonem.ay)} döneminden taşındı — yalnız değişenleri güncelle.
           </p>
         )}
 
