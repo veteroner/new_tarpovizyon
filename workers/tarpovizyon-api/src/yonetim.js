@@ -70,6 +70,18 @@ export async function handleAyarOku(env) {
    */
   cikti.odeme_hazir = (hepsi.iyzico_plan_aylik || hepsi.iyzico_plan_yillik) ? '1' : '0';
 
+  /*
+   * iyzico planında GÖRÜLEN deneme günü. `deneme_gun` panelden elle giriliyor
+   * ve gerçek süreyi belirlemiyor — süre iyzico'daki `trialPeriodDays`.
+   * İkisi ayrışırsa vitrin yanlış gün sayısı gösterirdi; bu alan dolduğunda
+   * arayüz onu tercih ediyor, yani ekrandaki sayı ölçülmüş gerçek oluyor.
+   * İlk denemeli ödeme tamamlandığında `odeme.js` yazıyor (o âna kadar boş).
+   *
+   * Gizli bir bilgi değil: deneme süresini zaten vitrinde yayımlıyoruz. Plan
+   * REFERANS KODLARI ise dışarı çıkmıyor, onlar iç bilgi.
+   */
+  if (hepsi.iyzico_deneme_gun) cikti.iyzico_deneme_gun = hepsi.iyzico_deneme_gun;
+
   return { status: 200, body: cikti };
 }
 

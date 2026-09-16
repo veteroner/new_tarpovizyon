@@ -35,8 +35,18 @@ export type OdemeBaslatSonuc = {
 export const odemeBaslat = (g: Record<string, unknown>) =>
   cagir<OdemeBaslatSonuc>('odeme/baslat', g);
 
+export type OdemeSonuc = {
+  basarili: boolean;
+  durum: string;
+  plan: string;
+  /** Denemeli planda iyzico ACTIVE döner ama tahsilat YAPILMAZ. */
+  deneme: boolean;
+  /** Erişimin bittiği an (epoch sn) — denemede ilk tahsilat tarihi. */
+  bitis: number | null;
+};
+
 export const odemeDogrula = (token: string) =>
-  cagir<{ basarili: boolean; durum: string; plan: string }>('odeme/dogrula', { token });
+  cagir<OdemeSonuc>('odeme/dogrula', { token });
 
 export const odemeHatasi = (e: unknown): string => {
   const x = e as { kod?: string; http?: number; ek?: { alanlar?: string[]; mesaj?: string } };
