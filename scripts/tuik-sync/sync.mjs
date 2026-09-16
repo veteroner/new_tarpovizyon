@@ -20,6 +20,7 @@
 import { DATASETS } from './datasets.mjs';
 import { bildirGerekiyorsa } from './bildirim.mjs';
 import { damgala } from '../lib/damga.mjs';
+import { d1Dene, D1_ZAMAN_ASIMI } from '../lib/d1-dene.mjs';
 
 const TOKEN_URL = 'https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token';
 const SDMX_BASE = 'https://nsiws.tuik.gov.tr/rest/data/TR,';
@@ -40,19 +41,24 @@ const D1_URL = () =>
   `/d1/database/${requireEnv('CLOUDFLARE_D1_DATABASE_ID')}/query`;
 
 async function d1Ham(sql, params) {
-  const res = await fetch(D1_URL(), {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${requireEnv('CLOUDFLARE_API_TOKEN')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(params === undefined ? { sql } : { sql, params }),
+  return d1Dene(sql, async () => {
+    const res = await fetch(D1_URL(), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${requireEnv('CLOUDFLARE_API_TOKEN')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params === undefined ? { sql } : { sql, params }),
+      signal: AbortSignal.timeout(D1_ZAMAN_ASIMI),
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body?.success) {
+      const e = new Error(`D1 hatası (HTTP ${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
+      e.durum = res.status; // yanıt alındı: yeniden deneme kararını bu belirler
+      throw e;
+    }
+    return body.result[0];
   });
-  const body = await res.json().catch(() => null);
-  if (!res.ok || !body?.success) {
-    throw new Error(`D1 hatası (HTTP ${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
-  }
-  return body.result[0];
 }
 
 async function d1(sql, params) {
