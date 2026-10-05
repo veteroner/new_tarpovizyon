@@ -29,8 +29,12 @@
  *
  * ─── KULLANIM ───────────────────────────────────────────────────────────────
  *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs               # yalnız rapor
- *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs --sql cikti.sql
+ *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs --sql cikti.sql [--beklenti b.json]
  *   npx wrangler d1 execute tarpovizyon-basic --remote --file cikti.sql
+ *   node scripts/d1-beklenti-dogrula.mjs b.json
+ *
+ * Günlük senkron (`.github/workflows/tuik-sync.yml`) bu üç adımı sırayla
+ * çalıştırıyor. Elle çalıştırmak hâlâ mümkün ama artık GEREKMİYOR.
  *
  * Anahtar ORTAM DEĞİŞKENİNDEN okunuyor, depoda tutulmuyor.
  *
@@ -48,6 +52,8 @@ import { damgaSql } from './lib/damga.mjs';
 
 const sqlBayrak = process.argv.indexOf('--sql');
 const SQL_YOL = sqlBayrak > -1 ? process.argv[sqlBayrak + 1] : null;
+const beklentiBayrak = process.argv.indexOf('--beklenti');
+const BEKLENTI_YOL = beklentiBayrak > -1 ? process.argv[beklentiBayrak + 1] : null;
 const DB = 'tarpovizyon-basic';
 const TABLO = 'tuik_fiyatendex';
 const AKIS = 'DF_TUFE_SDMX_TT01';
@@ -255,6 +261,37 @@ for (const [i, ad] of GRUP_ADLARI.entries()) {
    olduğunda tablo yeni ama önbellek eski kalıyor. */
 ifadeler.push(damgaSql([TABLO, 'tufe_aylik', 'tufe_yillik_snapshot', 'tufe_aylik_snapshot']));
 writeFileSync(SQL_YOL, ifadeler.join('\n'), 'utf8');
+
+/*
+ * ─── BEKLENTİ: YAZMANIN ETKİSİ ÖLÇÜLÜYOR ────────────────────────────────────
+ * wrangler bir dosyayı "başarıyla" çalıştırıp hiçbir satırı değiştirmemiş
+ * olabilir — WHERE tutmazsa UPDATE 0 satır etkiler ve hata vermez. Bu depoda
+ * tam olarak bu yaşandı: senkron aylarca "güncellendi" yazıp hiçbir şey
+ * yazmıyordu. O yüzden yazmadan sonra D1'e geri sorulacak değerler burada,
+ * kaynaktan, ayrı bir dosyaya çıkarılıyor; doğrulayıcı bunları karşılaştırıyor.
+ */
+if (BEKLENTI_YOL) {
+  const gidaAd = GRUP_ADLARI[1];
+  const beklenti = [
+    { aciklama: `tufe_aylik ${sonDonem} genel yıllık`,
+      sorgu: `SELECT tufe AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: yillikOran.get(0)?.get(sonDonem) },
+    { aciklama: `tufe_aylik ${sonDonem} gıda yıllık`,
+      sorgu: `SELECT gida_alkolsuz AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: yillikOran.get(1)?.get(sonDonem) },
+    { aciklama: `tufe_yillik_snapshot genel (${sonDonem})`,
+      sorgu: `SELECT yillik_degisim AS v FROM tufe_yillik_snapshot WHERE harcama_grubu=${tirnak(GRUP_ADLARI[0])}`,
+      deger: yillikOran.get(0)?.get(sonDonem) },
+    { aciklama: `tufe_aylik_snapshot gıda (${sonDonem})`,
+      sorgu: `SELECT aylik_degisim AS v FROM tufe_aylik_snapshot WHERE harcama_grubu=${tirnak(gidaAd)}`,
+      deger: aylikOran.get(1)?.get(sonDonem) },
+    { aciklama: `tufe_aylik ${sonDonem} satır sayısı (yinelenme yok)`,
+      sorgu: `SELECT COUNT(*) AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: 1 },
+  ].filter((b) => b.deger != null);
+  writeFileSync(BEKLENTI_YOL, JSON.stringify(beklenti, null, 2), 'utf8');
+  console.log(`${beklenti.length} beklenti → ${BEKLENTI_YOL}`);
+}
 console.log(`\nson dönem: ${sonYil}-${String(sonAy).padStart(2, '0')} `
   + `(genel yıllık ${yillikOran.get(0)?.get(sonDonem)}%, gıda ${yillikOran.get(1)?.get(sonDonem)}%)`);
 console.log(`${ifadeler.length - 1} ifade + damga → ${SQL_YOL}`);
