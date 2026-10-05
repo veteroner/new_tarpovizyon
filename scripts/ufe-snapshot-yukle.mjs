@@ -187,11 +187,43 @@ for (const r of satirlar) {
 
 const deger = (kod, [birim, degisim], donem) => seri.get(`${kod}|${birim}|${degisim}`)?.get(donem) ?? null;
 
-/** Kodların HEPSİNİN verilen ölçüde dolu olduğu en son dönem. */
+const ayKaydir = (donem, n) => {
+  const [y, a] = donem.split('-').map(Number);
+  const t = y * 12 + (a - 1) + n;
+  return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, '0')}`;
+};
+
+/*
+ * ─── HÜCRE SAĞLAM MI ────────────────────────────────────────────────────────
+ * TÜİK'in TÜFE akışında 2026-04 ve 2026-08 çöp geldi (beş ölçünün beşi aynı
+ * sayı); bu akışta da olabilir. Değer, endeks serisinden bağımsız olarak
+ * yeniden hesaplanıp karşılaştırılıyor:
+ *   yıllık(P) ≟ endeks(P)/endeks(P-12) − 1     aylık(P) ≟ endeks(P)/endeks(P-1) − 1
+ * Endeks yoksa sınanamıyor ve kabul ediliyor — ama değer olmadan değil.
+ */
+function gecerli(kod, [birim, degisim], donem) {
+  const v = deger(kod, [birim, degisim], donem);
+  if (v === null) return false;
+  const geri = { 4: 12, 2: 1 }[degisim];
+  if (!geri) return true;
+  const iP = deger(kod, ['IX', '1'], donem);
+  const iG = deger(kod, ['IX', '1'], ayKaydir(donem, -geri));
+  if (iP === null || iG === null || iG === 0) return true;
+  return Math.abs((iP / iG) * 100 - 100 - v) <= 0.15;
+}
+
+/** Kodların HEPSİNİN verilen ölçüde SAĞLAM olduğu en son dönem. */
 function ortakSonDonem(kodlar, olcu) {
-  const kumeler = kodlar.map((k) => new Set(seri.get(`${k}|${olcu[0]}|${olcu[1]}`)?.keys() ?? []));
-  const ortak = [...kumeler[0]].filter((d) => kumeler.every((s) => s.has(d))).sort();
-  return ortak.at(-1) ?? null;
+  const donemler = [...new Set(kodlar.flatMap((k) => [...(seri.get(`${k}|${olcu[0]}|${olcu[1]}`)?.keys() ?? [])]))].sort();
+  const sagMi = (d) => kodlar.every((k) => gecerli(k, olcu, d));
+  for (const d of donemler.reverse()) {
+    if (sagMi(d)) return d;
+    const kotu = kodlar.filter((k) => deger(k, olcu, d) !== null && !gecerli(k, olcu, d));
+    if (kotu.length) {
+      console.log(`::warning::Tarım-ÜFE ${d}: ${kotu.join(', ')} kodlarında değer endeksle tutmuyor — fotoğraf bu ayı atlıyor.`);
+    }
+  }
+  return null;
 }
 
 const altDonem = ortakSonDonem(Object.keys(ALT_GRUP), ALT_GRUP_OLCU.yillik_degisim);
