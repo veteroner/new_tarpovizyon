@@ -111,18 +111,36 @@ async function token() {
   return (await r.json()).access_token;
 }
 
-/* Accept-Language ŞART: başlıksız istekte uç `500 languageTag1` veriyor. */
-async function veri(tkn) {
-  const r = await fetch(`https://nsiws.tuik.gov.tr/rest/data/TR,${AKIS},1.0`, {
-    headers: {
-      Authorization: `Bearer ${tkn}`,
-      'Accept-Language': 'tr',
-      Accept: 'application/vnd.sdmx.data+csv;version=1.0.0',
-    },
-    signal: AbortSignal.timeout(120_000),
-  });
-  if (!r.ok) throw new Error(`veri: HTTP ${r.status}`);
-  return r.text();
+/*
+ * Accept-Language ŞART: başlıksız istekte uç `500 languageTag1` veriyor.
+ *
+ * ─── YENİDEN DENEME ─────────────────────────────────────────────────────────
+ * İlk sürüm tek deneme yapıyordu ve ilk kuru çalıştırmada 120 sn'de zaman
+ * aşımına uğradı — aynı akışı birkaç dakika önce `sync.mjs` sorunsuz okumuştu.
+ * TÜİK ucu ara ara yavaşlıyor; senkron bu yüzden 3 deneme yapıyor, burası da
+ * aynısını yapıyor. Token 300 sn yaşadığı için her denemede yenisi alınıyor.
+ */
+async function veri() {
+  let son;
+  for (let deneme = 1; deneme <= 3; deneme++) {
+    try {
+      const r = await fetch(`https://nsiws.tuik.gov.tr/rest/data/TR,${AKIS},1.0`, {
+        headers: {
+          Authorization: `Bearer ${await token()}`,
+          'Accept-Language': 'tr',
+          Accept: 'application/vnd.sdmx.data+csv;version=1.0.0',
+        },
+        signal: AbortSignal.timeout(180_000),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.text();
+    } catch (e) {
+      son = e;
+      console.error(`  deneme ${deneme}/3 başarısız: ${e.name === 'TimeoutError' ? 'zaman aşımı' : e.message}`);
+      if (deneme < 3) await new Promise((ok) => setTimeout(ok, deneme * 5000));
+    }
+  }
+  throw new Error(`${AKIS}: 3 deneme başarısız (${son?.message ?? son})`);
 }
 
 /* Tırnak bilen bölücü — boş alanlar ve tırnaklı etiketler sütun kaydırmasın. */
@@ -142,7 +160,7 @@ function satirBol(satir) {
   return alan;
 }
 
-const metin = await veri(await token());
+const metin = await veri();
 const [basSatir, ...govde] = metin.trim().split('\n').map((l) => l.replace(/\r$/, ''));
 const bas = satirBol(basSatir);
 const satirlar = govde.map((l) => Object.fromEntries(satirBol(l).map((v, i) => [bas[i], v])));
