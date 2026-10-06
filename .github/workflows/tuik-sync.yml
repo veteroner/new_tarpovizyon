@@ -20,7 +20,11 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 15'ten 30'a: TÜFE ve Tarım-ÜFE adımları (#22) eklenince gerçek koşu
+    # TÜİK hızlıyken 10,5–11,7 dk sürdü; TÜİK yavaşladığında Tarım-ÜFE adımı
+    # 3 deneme × 180 sn'ye kadar bekleyebiliyor (bir koşuda 195 sn sürdü).
+    # 15 dk sınırı aşılınca iş kesilir ve arkadaki adımlar HİÇ çalışmaz.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 
@@ -41,6 +45,57 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
         run: node scripts/tuik-sync/sync.mjs
 
+      # FAO Gıda Fiyat Endeksi — TÜİK'ten bağımsız kaynak, tam otomatik.
+      # Dosya adı her ay değişiyor (ffpi-data-YYYY-MM.xlsx), bağlantı FAO'nun
+      # endeks sayfasından keşfediliyor. TÜİK senkronu başarısız olsa bile bu
+      # çalışsın diye ayrı adım; `if: always()` ile bağımsız.
+      # ─── xlsx BURADA KURULUYOR ────────────────────────────────────────
+      # Bu iş akışı hiç `npm install` çalıştırmıyordu: `sync.mjs` dış paket
+      # kullanmadığı için sorun çıkmıyordu, ama `fao-fpi-sync.mjs` `xlsx`
+      # import ediyor ve adım ERR_MODULE_NOT_FOUND ile patlıyordu. TÜİK adımı
+      # geçtiği için hata sessiz kaldı — iş akışı kırmızıydı ama TÜİK verisi
+      # güncelleniyordu, kimse bakmadı.
+      #
+      # Tüm ağacı kurmuyoruz: `npm ci` hem yavaş hem de depodaki eslint peer
+      # çakışması yüzünden `--legacy-peer-deps` istiyor. Tek paket yeterli.
+      - name: FAO adımının bağımlılığı
+        if: always() && !inputs.dry_run
+        # `--legacy-peer-deps` ŞART: tek paket istense bile npm tüm ağacı
+        # çözüyor ve depodaki eslint 10 ↔ eslint-plugin-react-hooks 7
+        # çakışmasına takılıp ERESOLVE ile duruyor. Bayraksız ilk denemem
+        # tam da bu yüzden başarısız oldu (çalıştırma 33617166721).
+        run: npm install xlsx --no-save --no-audit --no-fund --legacy-peer-deps
+
+      - name: FAO gıda fiyat endeksini senkronla
+        if: always() && !inputs.dry_run
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+        run: node scripts/fao-fpi-sync.mjs --yaz
+
+      # Hayvancılık — ana sayfanın manşet kartları (hayvan varlığı, çiğ süt,
+      # kırmızı et). SDMX'te yok, bu yüzden ayrı bir adım: Veri Portalı'nın
+      # 13.79 temasından dört XLS indirip hesaplıyor.
+      #
+      # Yukarıdaki `xlsx` kurulumuna BAĞIMLI — bu adım ondan sonra gelmeli.
+      #
+      # Kaynak yılda bir güncelleniyor, senkron ise her gün çalışıyor: yeni
+      # yıl yoksa betik "üç tablo da güncel" deyip hiçbir şey yazmıyor.
+      # Doğrulama yılları tutmazsa sıfır satır yazıp 1 ile çıkıyor — iş akışı
+      # kırmızıya döner, sessizce yanlış veri yazmaz.
+      - name: Hayvancılık tablolarını senkronla
+        if: always() && !inputs.dry_run
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+        run: node scripts/tuik-hayvancilik-yukle.mjs --yaz
+
+      # ─── SIRA: YENİ ADIMLAR EN SONDA ────────────────────────────────────
+      # Bu blok önce FAO ve hayvancılık adımlarının ÖNÜNDEYDİ. TÜİK yavaş
+      # yanıt verip iş süre sınırına takılırsa, kesilen eski ve yıllardır
+      # çalışan adımlar oluyordu. Yavaşlayabilecek olan en sonda.
       # ─── TÜFE VE TARIM-ÜFE ALT KIRILIMLARI ──────────────────────────────
       # Bu altı tablo günlük senkronun DIŞINDAYDI:
       #   tufe_aylik, tufe_yillik_snapshot, tufe_aylik_snapshot,
@@ -116,50 +171,3 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: node scripts/d1-beklenti-dogrula.mjs "$RUNNER_TEMP/ufe-beklenti.json"
-
-      # FAO Gıda Fiyat Endeksi — TÜİK'ten bağımsız kaynak, tam otomatik.
-      # Dosya adı her ay değişiyor (ffpi-data-YYYY-MM.xlsx), bağlantı FAO'nun
-      # endeks sayfasından keşfediliyor. TÜİK senkronu başarısız olsa bile bu
-      # çalışsın diye ayrı adım; `if: always()` ile bağımsız.
-      # ─── xlsx BURADA KURULUYOR ────────────────────────────────────────
-      # Bu iş akışı hiç `npm install` çalıştırmıyordu: `sync.mjs` dış paket
-      # kullanmadığı için sorun çıkmıyordu, ama `fao-fpi-sync.mjs` `xlsx`
-      # import ediyor ve adım ERR_MODULE_NOT_FOUND ile patlıyordu. TÜİK adımı
-      # geçtiği için hata sessiz kaldı — iş akışı kırmızıydı ama TÜİK verisi
-      # güncelleniyordu, kimse bakmadı.
-      #
-      # Tüm ağacı kurmuyoruz: `npm ci` hem yavaş hem de depodaki eslint peer
-      # çakışması yüzünden `--legacy-peer-deps` istiyor. Tek paket yeterli.
-      - name: FAO adımının bağımlılığı
-        if: always() && !inputs.dry_run
-        # `--legacy-peer-deps` ŞART: tek paket istense bile npm tüm ağacı
-        # çözüyor ve depodaki eslint 10 ↔ eslint-plugin-react-hooks 7
-        # çakışmasına takılıp ERESOLVE ile duruyor. Bayraksız ilk denemem
-        # tam da bu yüzden başarısız oldu (çalıştırma 33617166721).
-        run: npm install xlsx --no-save --no-audit --no-fund --legacy-peer-deps
-
-      - name: FAO gıda fiyat endeksini senkronla
-        if: always() && !inputs.dry_run
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
-        run: node scripts/fao-fpi-sync.mjs --yaz
-
-      # Hayvancılık — ana sayfanın manşet kartları (hayvan varlığı, çiğ süt,
-      # kırmızı et). SDMX'te yok, bu yüzden ayrı bir adım: Veri Portalı'nın
-      # 13.79 temasından dört XLS indirip hesaplıyor.
-      #
-      # Yukarıdaki `xlsx` kurulumuna BAĞIMLI — bu adım ondan sonra gelmeli.
-      #
-      # Kaynak yılda bir güncelleniyor, senkron ise her gün çalışıyor: yeni
-      # yıl yoksa betik "üç tablo da güncel" deyip hiçbir şey yazmıyor.
-      # Doğrulama yılları tutmazsa sıfır satır yazıp 1 ile çıkıyor — iş akışı
-      # kırmızıya döner, sessizce yanlış veri yazmaz.
-      - name: Hayvancılık tablolarını senkronla
-        if: always() && !inputs.dry_run
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
-        run: node scripts/tuik-hayvancilik-yukle.mjs --yaz
