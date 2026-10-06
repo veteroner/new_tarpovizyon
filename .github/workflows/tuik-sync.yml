@@ -41,6 +41,82 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
         run: node scripts/tuik-sync/sync.mjs
 
+      # ─── TÜFE VE TARIM-ÜFE ALT KIRILIMLARI ──────────────────────────────
+      # Bu altı tablo günlük senkronun DIŞINDAYDI:
+      #   tufe_aylik, tufe_yillik_snapshot, tufe_aylik_snapshot,
+      #   tuik_fiyatendex (TUFE), ufe_alt_grup_snapshot, ufe_detay_snapshot
+      # TÜFE yükleyicisi vardı ama elle çalıştırılıyordu; Tarım-ÜFE
+      # fotoğraflarına hiç yazan yoktu. Sonuç (2026-10-05): TÜFE Eylül
+      # SDMX'te yayımlanmışken D1 Ağustos'ta, Tarım-ÜFE alt kırılımı ise
+      # trend Ağustos'tayken Mayıs'ta kalmıştı.
+      #
+      # Yükleyiciler SQL dosyası üretiyor ve wrangler onu uyguluyor: yerelde
+      # wrangler alt süreçten oturumuna erişemediği için bu düzen seçilmişti;
+      # CI'da API anahtarıyla aynı düzen sorunsuz çalışıyor (dış ticaret işi
+      # de böyle yazıyor).
+      #
+      # `if: always()` — TÜİK senkronu bir veri setinde düşerse TÜFE yine
+      # tazelensin. Ama SQL üretilemediyse D1 adımı ÇALIŞMAZ.
+      #
+      # TÜFE ve Tarım-ÜFE İKİ AYRI ZİNCİR: ilk sürümde aynı adımdaydılar ve
+      # Tarım-ÜFE akışı zaman aşımına uğrayınca TÜFE de yazılmıyordu — bir
+      # kaynağın yavaşlığı, hazır duran diğerini bekletiyordu.
+      #
+      # Doğrulama adımları yazmanın ETKİSİNİ ölçüyor, başarı mesajını değil:
+      # WHERE tutmayan bir UPDATE 0 satır etkiler ve hata vermez. Kaynaktaki
+      # değerler D1'e geri soruluyor; biri bile tutmazsa iş kırmızıya döner.
+      #
+      # wrangler sürümü sabit (package.json ile aynı) — "latest" çözmek bu
+      # depoda bir kez npm yayılma yarışına takılıp işi düşürmüştü.
+
+      # ── TÜFE ──
+      - name: TÜFE → SQL
+        id: tufe_sql
+        if: always()
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+        run: node scripts/tufe-sdmx-yukle.mjs --sql "$RUNNER_TEMP/tufe.sql" --beklenti "$RUNNER_TEMP/tufe-beklenti.json"
+
+      - name: TÜFE → D1
+        id: tufe_d1
+        if: always() && steps.tufe_sql.outcome == 'success' && !inputs.dry_run
+        working-directory: workers/tarpovizyon-api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.131.2 d1 execute tarpovizyon-basic --remote --file "$RUNNER_TEMP/tufe.sql" -y
+
+      - name: TÜFE — yazmayı doğrula
+        if: always() && steps.tufe_d1.outcome == 'success'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/d1-beklenti-dogrula.mjs "$RUNNER_TEMP/tufe-beklenti.json"
+
+      # ── Tarım-ÜFE alt kırılım fotoğrafları ──
+      - name: Tarım-ÜFE alt kırılım → SQL
+        id: ufe_sql
+        if: always()
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+        run: node scripts/ufe-snapshot-yukle.mjs --sql "$RUNNER_TEMP/ufe.sql" --beklenti "$RUNNER_TEMP/ufe-beklenti.json"
+
+      - name: Tarım-ÜFE alt kırılım → D1
+        id: ufe_d1
+        if: always() && steps.ufe_sql.outcome == 'success' && !inputs.dry_run
+        working-directory: workers/tarpovizyon-api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.131.2 d1 execute tarpovizyon-basic --remote --file "$RUNNER_TEMP/ufe.sql" -y
+
+      - name: Tarım-ÜFE alt kırılım — yazmayı doğrula
+        if: always() && steps.ufe_d1.outcome == 'success'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/d1-beklenti-dogrula.mjs "$RUNNER_TEMP/ufe-beklenti.json"
+
       # FAO Gıda Fiyat Endeksi — TÜİK'ten bağımsız kaynak, tam otomatik.
       # Dosya adı her ay değişiyor (ffpi-data-YYYY-MM.xlsx), bağlantı FAO'nun
       # endeks sayfasından keşfediliyor. TÜİK senkronu başarısız olsa bile bu

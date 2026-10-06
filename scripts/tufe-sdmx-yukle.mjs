@@ -29,8 +29,12 @@
  *
  * ─── KULLANIM ───────────────────────────────────────────────────────────────
  *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs               # yalnız rapor
- *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs --sql cikti.sql
+ *   TUIK_API_KEY=... node scripts/tufe-sdmx-yukle.mjs --sql cikti.sql [--beklenti b.json]
  *   npx wrangler d1 execute tarpovizyon-basic --remote --file cikti.sql
+ *   node scripts/d1-beklenti-dogrula.mjs b.json
+ *
+ * Günlük senkron (`.github/workflows/tuik-sync.yml`) bu üç adımı sırayla
+ * çalıştırıyor. Elle çalıştırmak hâlâ mümkün ama artık GEREKMİYOR.
  *
  * Anahtar ORTAM DEĞİŞKENİNDEN okunuyor, depoda tutulmuyor.
  *
@@ -48,6 +52,8 @@ import { damgaSql } from './lib/damga.mjs';
 
 const sqlBayrak = process.argv.indexOf('--sql');
 const SQL_YOL = sqlBayrak > -1 ? process.argv[sqlBayrak + 1] : null;
+const beklentiBayrak = process.argv.indexOf('--beklenti');
+const BEKLENTI_YOL = beklentiBayrak > -1 ? process.argv[beklentiBayrak + 1] : null;
 const DB = 'tarpovizyon-basic';
 const TABLO = 'tuik_fiyatendex';
 const AKIS = 'DF_TUFE_SDMX_TT01';
@@ -101,7 +107,121 @@ const csvAyristir = (metin) => {
 };
 
 const tkn = await token();
-const satirlar = csvAyristir(await veri(tkn));
+const hamSatirlar = csvAyristir(await veri(tkn));
+
+/*
+ * ─── KAYNAKTAKİ BOZUK AYLAR ─────────────────────────────────────────────────
+ * TÜİK'in bu akışında bazı aylar ÇÖP taşıyor. Ölçüldü (2026-10-05): 2026-04 ve
+ * 2026-08'de beş ölçünün beşi de (endeks, aylık, aralığa göre, yıllık, 12 aylık
+ * ort.) her grupta AYNI sayı — 4.028,47 ve 4.289,23. Bu betik onları kontrol
+ * etmeden yazdı ve sitede TÜFE "yıllık %4.289" gösterdi.
+ *
+ * Her hücre İKİ BAĞIMSIZ YOLDAN doğrulanıyor:
+ *   yıllık(P) ≟ endeks(P) / endeks(P-12) − 1
+ *   aylık(P)  ≟ endeks(P) / endeks(P-1)  − 1   (P-1 sağlamsa)
+ * Tutmuyorsa hücre bozuk.
+ *
+ * Bozuk ay, SONRAKİ sağlam aydan türetiliyor:
+ *   endeks(P) = endeks(P+1) / (1 + aylık(P+1))
+ * ve yıllık/aylık bu endeksten hesaplanıyor. Yöntem bilinen ayda sınandı:
+ * Ağustos 2026 için türetilen yıllık oran bültenle BİREBİR aynı (genel 31,51 ·
+ * gıda 33,79) ve gıda aylığı (0,22) bültenden gelen fotoğrafla aynı.
+ *
+ * Türetilemeyen bozuk hücre (sonraki ay yok ya da o da bozuk) HİÇ YAZILMIYOR —
+ * D1'deki değer korunuyor. Çöpü yazmaktansa eskiyi tutmak.
+ */
+const grupKodu = (s) => {
+  if (s.SINIFLAMA_DUZEYI === 'TUFE') return 0;
+  return /^\d{2}$/.test(s.COICOP_2018) ? Number(s.COICOP_2018) : null;
+};
+const ayKaydir = (donem, n) => {
+  const [y, a] = donem.split('-').map(Number);
+  const t = y * 12 + (a - 1) + n;
+  return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, '0')}`;
+};
+
+/** g → DEGISIM → dönem → değer (yalnız aylık, grup düzeyindeki satırlar). */
+const olcu = new Map();
+for (const s of hamSatirlar) {
+  if (s.FREQ !== 'M') continue;
+  const g = grupKodu(s);
+  const v = Number(s.OBS_VALUE);
+  if (g === null || s.OBS_VALUE === '' || !Number.isFinite(v)) continue;
+  if (!olcu.has(g)) olcu.set(g, new Map());
+  if (!olcu.get(g).has(s.DEGISIM)) olcu.get(g).set(s.DEGISIM, new Map());
+  olcu.get(g).get(s.DEGISIM).set(s.TIME_PERIOD, v);
+}
+
+const TOLERANS = 0.15; // yüzde puan — oranlar 2 ondalık yayımlanıyor
+const bozuk = new Set(); // "g|P"
+for (const [g, d] of olcu) {
+  const I = d.get('1') ?? new Map();
+  const y = d.get('4') ?? new Map();
+  for (const [P, iP] of I) {
+    const i12 = I.get(ayKaydir(P, -12));
+    if (i12 !== undefined && y.has(P) && Math.abs((iP / i12) * 100 - 100 - y.get(P)) > TOLERANS) {
+      bozuk.add(`${g}|${P}`);
+    }
+  }
+  /* Aylık sınama ikinci turda: önceki ay bozuksa bu ayı haksız yere suçlamasın. */
+  const m = d.get('2') ?? new Map();
+  for (const [P, iP] of I) {
+    const onceki = ayKaydir(P, -1);
+    if (bozuk.has(`${g}|${P}`) || bozuk.has(`${g}|${onceki}`)) continue;
+    const i1 = I.get(onceki);
+    if (i1 !== undefined && m.has(P) && Math.abs((iP / i1) * 100 - 100 - m.get(P)) > TOLERANS) {
+      bozuk.add(`${g}|${P}`);
+    }
+  }
+}
+
+/** Türetilen hücreler: "g|P" → { '1': endeks, '2': aylık, '4': yıllık } */
+const turetilen = new Map();
+const yuvarla = (v) => Math.round(v * 100) / 100;
+for (const anahtar of [...bozuk].sort()) {
+  const [gs, P] = anahtar.split('|');
+  const g = Number(gs);
+  const d = olcu.get(g);
+  const sonraki = ayKaydir(P, 1);
+  const iS = d.get('1')?.get(sonraki);
+  const mS = d.get('2')?.get(sonraki);
+  const i12 = d.get('1')?.get(ayKaydir(P, -12));
+  const i1 = d.get('1')?.get(ayKaydir(P, -1));
+  const sagla = (k) => !bozuk.has(`${g}|${k}`);
+  if (iS === undefined || mS === undefined || !sagla(sonraki)) continue;
+  const iP = iS / (1 + mS / 100);
+  const deger = { 1: yuvarla(iP) };
+  if (i12 !== undefined && sagla(ayKaydir(P, -12))) deger[4] = yuvarla((iP / i12) * 100 - 100);
+  if (i1 !== undefined && sagla(ayKaydir(P, -1))) deger[2] = yuvarla((iP / i1) * 100 - 100);
+  turetilen.set(anahtar, deger);
+}
+
+if (bozuk.size) {
+  const aylar = [...new Set([...bozuk].map((k) => k.split('|')[1]))].sort();
+  const turetilemeyen = [...bozuk].filter((k) => !turetilen.has(k));
+  console.log(`\nKAYNAKTA BOZUK HÜCRE: ${bozuk.size} (aylar: ${aylar.join(', ')})`);
+  console.log(`  türetildi: ${turetilen.size}  ·  türetilemedi (yazılmayacak): ${turetilemeyen.length}`);
+  for (const P of aylar) {
+    const tg = turetilen.get(`0|${P}`);
+    const tf = turetilen.get(`1|${P}`);
+    if (tg || tf) console.log(`  ${P} → genel yıllık ${tg?.[4] ?? '—'} · gıda yıllık ${tf?.[4] ?? '—'}`);
+  }
+  /* GitHub arayüzünde sarı uyarı olarak görünsün — loglarda kaybolmasın. */
+  console.log(`::warning::TÜİK TÜFE akışında ${aylar.join(', ')} bozuk geliyor; `
+    + `${turetilen.size} hücre komşu aydan türetildi, ${turetilemeyen.length} hücre yazılmadı.`);
+}
+
+/*
+ * Sonraki kod `satirlar`ı okuyor. Bozuk hücreler burada ya türetilmiş değerle
+ * değiştiriliyor ya da hiç geçmiyor — aşağıdaki hiçbir yazıcı çöpü göremiyor.
+ */
+const satirlar = hamSatirlar.flatMap((s) => {
+  const g = grupKodu(s);
+  if (s.FREQ !== 'M' || g === null || !bozuk.has(`${g}|${s.TIME_PERIOD}`)) return [s];
+  const t = turetilen.get(`${g}|${s.TIME_PERIOD}`);
+  const v = t?.[s.DEGISIM];
+  return v === undefined ? [] : [{ ...s, OBS_VALUE: String(v) }];
+});
 
 /*
  * Yalnızca aylık ENDEKS (DEGISIM=1).
@@ -255,6 +375,51 @@ for (const [i, ad] of GRUP_ADLARI.entries()) {
    olduğunda tablo yeni ama önbellek eski kalıyor. */
 ifadeler.push(damgaSql([TABLO, 'tufe_aylik', 'tufe_yillik_snapshot', 'tufe_aylik_snapshot']));
 writeFileSync(SQL_YOL, ifadeler.join('\n'), 'utf8');
+
+/*
+ * ─── BEKLENTİ: YAZMANIN ETKİSİ ÖLÇÜLÜYOR ────────────────────────────────────
+ * wrangler bir dosyayı "başarıyla" çalıştırıp hiçbir satırı değiştirmemiş
+ * olabilir — WHERE tutmazsa UPDATE 0 satır etkiler ve hata vermez. Bu depoda
+ * tam olarak bu yaşandı: senkron aylarca "güncellendi" yazıp hiçbir şey
+ * yazmıyordu. O yüzden yazmadan sonra D1'e geri sorulacak değerler burada,
+ * kaynaktan, ayrı bir dosyaya çıkarılıyor; doğrulayıcı bunları karşılaştırıyor.
+ */
+if (BEKLENTI_YOL) {
+  const gidaAd = GRUP_ADLARI[1];
+  const beklenti = [
+    { aciklama: `tufe_aylik ${sonDonem} genel yıllık`,
+      sorgu: `SELECT tufe AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: yillikOran.get(0)?.get(sonDonem) },
+    { aciklama: `tufe_aylik ${sonDonem} gıda yıllık`,
+      sorgu: `SELECT gida_alkolsuz AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: yillikOran.get(1)?.get(sonDonem) },
+    { aciklama: `tufe_yillik_snapshot genel (${sonDonem})`,
+      sorgu: `SELECT yillik_degisim AS v FROM tufe_yillik_snapshot WHERE harcama_grubu=${tirnak(GRUP_ADLARI[0])}`,
+      deger: yillikOran.get(0)?.get(sonDonem) },
+    { aciklama: `tufe_aylik_snapshot gıda (${sonDonem})`,
+      sorgu: `SELECT aylik_degisim AS v FROM tufe_aylik_snapshot WHERE harcama_grubu=${tirnak(gidaAd)}`,
+      deger: aylikOran.get(1)?.get(sonDonem) },
+    { aciklama: `tufe_aylik ${sonDonem} satır sayısı (yinelenme yok)`,
+      sorgu: `SELECT COUNT(*) AS v FROM tufe_aylik WHERE yil=${sonYil} AND ay=${sonAy}`,
+      deger: 1 },
+    /*
+     * MAKULLÜK — yalnız son ayı kontrol etmek yetmedi: 2026-10-05'teki koşu
+     * son ayı (Eylül) doğru yazdı ve 5/5 yeşil geçti, ama aynı dosya Nisan ve
+     * Ağustos'u 4.028 ve 4.289 olarak yazmıştı. Tüm serideki uç değer sayılıyor.
+     * Türkiye'de 2005'ten beri yıllık TÜFE %86'yı aşmadı; 200 cömert bir sınır.
+     */
+    { aciklama: 'tufe_aylik tüm seride |oran| ≤ 200 olmayan satır',
+      sorgu: 'SELECT COUNT(*) AS v FROM tufe_aylik WHERE ABS(tufe) > 200 OR ABS(gida_alkolsuz) > 200',
+      deger: 0 },
+    { aciklama: 'tuik_fiyatendex TUFE ana satırlarda (2025+) 1000 üstü endeks',
+      sorgu: `SELECT COUNT(*) AS v FROM ${TABLO} WHERE endeks='TUFE' AND yil >= 2025 `
+        + `AND id IN (SELECT MIN(id) FROM ${TABLO} WHERE endeks='TUFE' GROUP BY d1, yil) AND (`
+        + AYLAR.map((a) => `"${a}" > 1000`).join(' OR ') + ')',
+      deger: 0 },
+  ].filter((b) => b.deger != null);
+  writeFileSync(BEKLENTI_YOL, JSON.stringify(beklenti, null, 2), 'utf8');
+  console.log(`${beklenti.length} beklenti → ${BEKLENTI_YOL}`);
+}
 console.log(`\nson dönem: ${sonYil}-${String(sonAy).padStart(2, '0')} `
   + `(genel yıllık ${yillikOran.get(0)?.get(sonDonem)}%, gıda ${yillikOran.get(1)?.get(sonDonem)}%)`);
 console.log(`${ifadeler.length - 1} ifade + damga → ${SQL_YOL}`);
