@@ -445,21 +445,58 @@ async function syncMonthCols(ds) {
   const aySutun = AY_SUTUN.map((a) => `"${a}"`).join(',');
   const toplamSec = ds.toplamColumn ? `, "${ds.toplamColumn}"` : '';
   const mevcut = new Map();
+  /** kod → o kodun EN SON yılının satırı (yeni yıl satırının şablonu). */
+  const sonSatir = new Map();
+  const secim = ds.yeniYilEkle ? '*' : `${ds.codeColumn}, ${ds.yearColumn}, ${aySutun}${toplamSec}`;
   for (const r of await d1(
-    `SELECT ${ds.codeColumn}, ${ds.yearColumn}, ${aySutun}${toplamSec} FROM ${ds.table}`
-    + (ayirac ? ' WHERE endeks = ?' : ''),
+    `SELECT ${secim} FROM ${ds.table}` + (ayirac ? ' WHERE endeks = ?' : ''),
     ayirac ? [ds.endeks] : undefined,
   )) {
     mevcut.set(`${r[ds.codeColumn]}|${r[ds.yearColumn]}`, r);
+    const k = String(r[ds.codeColumn]);
+    if (!sonSatir.has(k) || Number(r[ds.yearColumn]) > Number(sonSatir.get(k)[ds.yearColumn])) sonSatir.set(k, r);
   }
 
   const writes = [];
   let updated = 0;
+  let inserted = 0;
   let atlanan = 0;
 
   for (const [anahtar, aylar] of gelen) {
     const prev = mevcut.get(anahtar);
-    if (!prev) { atlanan++; continue; }
+    if (!prev) {
+      /*
+       * ─── YENİ YIL SATIRI ────────────────────────────────────────────────
+       * Bu yazıcı yalnız VAR OLAN (kod, yıl) satırlarını güncelliyordu. Ay
+       * sütunlu tablolarda (yıl satırı + Ocak..Aralık) bu, her Ocak'ta yeni
+       * yılın satırı olmadığı için tablonun SESSİZCE donması demek: veri
+       * gelir, yazıcı "bilinmeyen (kod,yıl) atlandı" der, sayfa geçen yılda
+       * kalır. Kümes ve süt tablolarında 2026'nın Şubat–Temmuz'u tam olarak
+       * böyle boş kalmıştı.
+       *
+       * `yeniYilEkle` açık tablolarda satır, o kodun EN SON yılının satırından
+       * kopyalanıyor: ürün adı, birim, kod gibi sabit sütunlar oradan; yıl ve
+       * aylar kaynaktan. TOPLAM yazılmıyor — yıl henüz bitmedi; 12 ay tamam
+       * olunca yukarıdaki kural yazıyor.
+       *
+       * `tuik_fiyatendex` için KAPALI kalıyor: o tablo bilinçli olarak yalnız
+       * mevcut yılları güncelliyor (bkz. datasets.mjs).
+       */
+      const sablon = ds.yeniYilEkle ? sonSatir.get(anahtar.split('|')[0]) : null;
+      if (!sablon) { atlanan++; continue; }
+      const [, yilStr] = anahtar.split('|');
+      const atla = new Set(['id', ds.yearColumn, ...AY_SUTUN, ...(ds.toplamColumn ? [ds.toplamColumn] : [])]);
+      const sabit = Object.keys(sablon).filter((c) => !atla.has(c));
+      const ayKeys = Object.keys(aylar).map(Number);
+      const cols = [...sabit, ds.yearColumn, ...ayKeys.map((m) => AY_SUTUN[m - 1])];
+      inserted++;
+      writes.push({
+        sql: `INSERT INTO ${ds.table} (${cols.map((c) => `"${c}"`).join(', ')}) `
+          + `VALUES (${cols.map(() => '?').join(', ')})`,
+        params: [...sabit.map((c) => sablon[c]), Number(yilStr), ...ayKeys.map((m) => aylar[m])],
+      });
+      continue;
+    }
     const setler = [];
     const params = [];
     for (const [ay, deger] of Object.entries(aylar)) {
@@ -500,7 +537,7 @@ async function syncMonthCols(ds) {
   await applyWrites(writes);
   const donemler = rows.map((r) => r.TIME_PERIOD).filter(isMonth).sort();
   return {
-    dataset: ds.name, status: 'ok', inserted: 0, updated,
+    dataset: ds.name, status: 'ok', inserted, updated,
     latestPeriod: donemler.at(-1) ?? null,
     message: atlanan ? `${atlanan} bilinmeyen (kod,yıl) atlandı` : null,
   };
