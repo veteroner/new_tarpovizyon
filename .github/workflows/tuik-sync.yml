@@ -92,6 +92,28 @@ jobs:
           CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
         run: node scripts/tuik-hayvancilik-yukle.mjs --yaz
 
+      # Hayvansal ürün ÖZETİ (`tr_hayvansal_urun_uretimi`) — sekiz sayfanın
+      # okuduğu yıllık özet. Süt, kırmızı et, yumurta ve kanatlı sütunları
+      # yukarıdaki adımların yazdığı tabloların ELLE girilmiş kopyasıydı ve
+      # TÜİK revizyonları hiç yansımıyordu (süt 2023: 43.025 ton eksik).
+      # Bu adımdan SONRA gelmeli: kaynakları hayvancılık ve senkron adımları
+      # tazeliyor. Yalnız var olan yılları yazıyor (bal elle; betik açıklaması).
+      - name: Hayvansal ürün özetini türet
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          # `&& '' ||` kalıbı GitHub ifadelerinde çalışmaz ('' yanlış sayılır);
+          # kuru çalıştırma bayrağı kabukta ayrılıyor.
+          KURU: ${{ inputs.dry_run && '1' || '0' }}
+        run: |
+          if [ "$KURU" = "1" ]; then
+            node scripts/hayvansal-ozet-turet.mjs
+          else
+            node scripts/hayvansal-ozet-turet.mjs --yaz
+          fi
+
       # ─── SIRA: YENİ ADIMLAR EN SONDA ────────────────────────────────────
       # Bu blok önce FAO ve hayvancılık adımlarının ÖNÜNDEYDİ. TÜİK yavaş
       # yanıt verip iş süre sınırına takılırsa, kesilen eski ve yıllardır

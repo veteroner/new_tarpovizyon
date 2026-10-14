@@ -586,6 +586,8 @@ export const DATASETS = [
     codeColumn: 'urun',
     yearColumn: 'yil',
     toplamColumn: 'TOPLAM',
+    /* Ocak'ta yeni yılın satırı yok; açık değilse tablo her yıl başında donar. */
+    yeniYilEkle: true,
     /*
      * ONDALIK YOK — tablonun mevcut düzeni bu ve kardeş tablo
      * (`kanatli_uretimleri`) da `decimals: 0` kullanıyor.
@@ -610,6 +612,37 @@ export const DATASETS = [
       12: 'Hindi civivi Üretimi İçin Kuluçkaya Basılan Yumurta',
       13: 'Üretilen Hindi civivi',
     },
+  },
+  /*
+   * ─── SÜT VE SÜT ÜRÜNLERİ: AY SÜTUNLU TABLO ────────────────────────────────
+   * Kümes tablosunun ikizi: `sut_urunleri_uretimi` ile AYNI akıştan, başka
+   * biçimde. Süt sayfasının "TÜİK Süt ve Süt Ürünleri" bölümü bunu okuyor.
+   *
+   * Bu tabloya hiçbir iş yazmıyordu (2026-10-14'te ölçüldü): 2026'da yalnız
+   * Ocak doluydu ve Şubat–Aralık NULL değil 0 olarak duruyordu; kardeş tablo
+   * Ağustos 2026'daydı. Ocak bile revize edilmemişti (945.256 — kaynak 945.689).
+   *
+   * Eşleme ÖLÇÜLDÜ: 2025-12'de 11 değerin 11'i tablonun "Aralık" sütunuyla
+   * birebir tuttu ve TÜİK kodu tablodaki `urunkod` ile AYNI (1, 5, 6, 7, 9..15).
+   * Kümesteki gibi kod çakışması yok; o yüzden anahtar `urunkod`.
+   *
+   * `decimals: 0` — tamamlanmış yıllar tam sayı tutuluyor; ondalıkla her
+   * hücre sahte bir hassasiyet farkı yüzünden yeniden yazılırdı (kümeste
+   * ölçüldü: 157 → 9).
+   */
+  {
+    kind: 'monthCols',
+    name: 'Süt ve süt ürünleri (ay sütunlu tablo)',
+    flow: 'DF_SUT_URUNLERI_AYLIK_V2',
+    version: '1.0',
+    filter: { FREQ: 'M' },
+    table: 'tuik_hayavancilik_sutvesuturunleri',
+    codeDim: 'SUT_URUN_AYLIK',
+    codeColumn: 'urunkod',
+    yearColumn: 'yil',
+    toplamColumn: 'TOPLAM',
+    yeniYilEkle: true,
+    decimals: 0,
   },
   ...disTicaretEndeksleri(),
 ];

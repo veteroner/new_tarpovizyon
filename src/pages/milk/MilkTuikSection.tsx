@@ -338,12 +338,19 @@ export default function MilkTuikSection({
               <tbody>
                 {tuikSelectedData.slice().reverse().map((row, idx) => {
                   const prevRow = tuikSelectedData.find(d => d.yil === row.yil - 1);
-                  const change = prevRow && prevRow.toplam > 0 ? ((row.toplam - prevRow.toplam) / prevRow.toplam) * 100 : null;
+                  /*
+                   * İçinde bulunulan yılın TOPLAM'ı boş: yıl bitmedi. Eskiden
+                   * boş toplam 0 sayılıyor ve tablo "2026 · 0 · −%100" yazıyordu —
+                   * üretim durmuş gibi. Toplamı olmayan yılda toplam ve değişim
+                   * gösterilmiyor; aylar yine görünüyor.
+                   */
+                  const change = row.toplam > 0 && prevRow && prevRow.toplam > 0
+                    ? ((row.toplam - prevRow.toplam) / prevRow.toplam) * 100 : null;
                   return (
                     <tr key={row.yil} style={{ borderBottom: '1px solid var(--border)', background: idx % 2 === 0 ? 'transparent' : 'var(--bg-card)' }}>
                       <td style={{ padding: '8px 12px', fontWeight: '700', color: 'var(--text-primary)' }}>{row.yil}</td>
                       <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '700', color: 'var(--text-primary)' }}>
-                        {new Intl.NumberFormat('tr-TR').format(row.toplam)}
+                        {row.toplam > 0 ? new Intl.NumberFormat('tr-TR').format(row.toplam) : '—'}
                       </td>
                       {row.aylar.map((val, mi) => (
                         <td key={mi} style={{ padding: '8px 8px', textAlign: 'right', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>

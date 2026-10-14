@@ -12,6 +12,23 @@ export function MakroOzetPage({ config }: { config: MakroOzetPageConfig }) {
 
   const v = veriler?.[0];
   const gsyhData = (gsyh ?? []).map((r) => ({ yil: r.yil, toplam: r.toplam_gsyh_milyar_usd, tarim: r.tarim_gsyh_milyar_usd }));
+
+  /*
+   * ─── GSYH PAYI OTOMATİK TABLODAN ────────────────────────────────────────────
+   * Pay `makro_veriler` adlı tek satırlık bir tablodan okunuyordu ve %5,6
+   * yazıyordu: TÜİK'in revizyondan ÖNCEKİ 2024 değeri. Aynı sayfanın aşağıdaki
+   * grafiği `makro_tarim_gsyh`'yi okuyor — o tablo günlük senkronla SDMX'ten
+   * tazeleniyor ve 2024 için %5,82 diyor. Aynı ekranda iki ayrı rakam vardı.
+   *
+   * Pay artık o serinin son yılından hesaplanıyor. İhracat ve istihdam payının
+   * otomatik kaynağı yok; onlar `makro_veriler`'den okunmaya devam ediyor.
+   */
+  const sonGsyh = gsyhData
+    .filter((d) => Number(d.toplam) > 0 && Number(d.tarim) > 0)
+    .sort((a, b) => Number(a.yil) - Number(b.yil))
+    .at(-1);
+  const gsyhPay = sonGsyh ? (Number(sonGsyh.tarim) / Number(sonGsyh.toplam)) * 100 : Number(v?.gsyh_pay);
+  const gsyhEtiket = sonGsyh ? `TARIMIN GSYH'DEKİ PAYI (${sonGsyh.yil})` : "TARIMIN GSYH'DEKİ PAYI";
   const ticaretData = (ticaret ?? []).map((r) => ({ yil: r.yil, ihracat: r.ihracat_milyar_usd, ithalat: r.ithalat_milyar_usd }));
 
   return (
@@ -23,7 +40,7 @@ export function MakroOzetPage({ config }: { config: MakroOzetPageConfig }) {
           renk de bu yüzden yargısız. */}
       {v && (
         <div className="tvb-oran-liste">
-          <OranCubugu label="TARIMIN GSYH'DEKİ PAYI" deger={Number(v.gsyh_pay)} olcekEtiketleri={['%0', '%100']} neutral />
+          <OranCubugu label={gsyhEtiket} deger={Number(gsyhPay.toFixed(2))} olcekEtiketleri={['%0', '%100']} neutral />
           <OranCubugu label="TARIMIN İHRACATTAKİ PAYI" deger={Number(v.ihracat_pay)} olcekEtiketleri={['%0', '%100']} neutral />
           <OranCubugu label="TARIMIN İSTİHDAMDAKİ PAYI" deger={Number(v.istihdam_pay)} olcekEtiketleri={['%0', '%100']} neutral />
         </div>
